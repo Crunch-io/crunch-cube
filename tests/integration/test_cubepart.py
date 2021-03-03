@@ -39,6 +39,12 @@ class Describe_Slice(object):
         assert slice_.inserted_row_idxs == ()
         assert slice_.is_empty is False
         assert slice_.name == "v4"
+        with pytest.raises(ValueError) as e:
+            slice_.means
+        assert (
+            str(e.value)
+            == "`.means` is undefined for a cube-result without a means measure"
+        )
         assert pytest.approx(slice_.population_counts) == [
             [3000.333, 1200.133],
             [3000.333, 1800.200],
@@ -62,6 +68,12 @@ class Describe_Slice(object):
         assert slice_.rows_dimension_type == DT.CAT
         assert slice_.rows_margin.tolist() == [7, 8]
         assert slice_.shape == (2, 2)
+        with pytest.raises(ValueError) as e:
+            slice_.sum
+        assert (
+            str(e.value)
+            == "`.sum` is undefined for a cube-result without a sum measure"
+        )
         assert slice_.table_margin == 15
         assert slice_.table_name is None
         assert pytest.approx(slice_.table_percentages) == [
@@ -74,19 +86,6 @@ class Describe_Slice(object):
         ]
         assert slice_.unweighted_counts.tolist() == [[5, 2], [5, 3]]
         assert slice_.variable_name == "v7"
-        # A cube without means or sum available in the response throws an exception.
-        with pytest.raises(ValueError) as e:
-            slice_.means
-        assert (
-            str(e.value)
-            == "`.means` is undefined for a cube-result without a means measure"
-        )
-        with pytest.raises(ValueError) as e:
-            slice_.sum
-        assert (
-            str(e.value)
-            == "`.sum` is undefined for a cube-result without a sum measure"
-        )
 
     def it_provides_values_for_cat_hs_mt_x_cat_hs_mt(self):
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, population=1000).partitions[0]
@@ -331,25 +330,15 @@ class Describe_Slice(object):
     def it_provides_values_for_mean_cat_x_cat_hs(self):
         slice_ = Cube(CR.MEANS_CAT_X_CAT_HS).partitions[0]
 
-        np.testing.assert_array_almost_equal(
-            slice_.means,
-            np.array([[24.43935757, 37.32122746, np.nan, 55.48571956, 73.02427659]]),
-        )
-        np.testing.assert_array_almost_equal(slice_.rows_margin, np.array([1500.0]))
-        np.testing.assert_array_almost_equal(
-            slice_.columns_margin, np.array([189, 395, 584, 606, 310])
-        )
-
-    def but_it_has_no_counts_because_there_is_no_cube_count_measure(self):
-        slice_ = Cube(CR.MEANS_CAT_X_CAT_HS).partitions[0]
-
         # This fixture has both cube_counts and cube_means measure, for this reason
         # both measures are available at cubepart level.
-        assert slice_.counts == pytest.approx(np.array([[189, 395, 584, 606, 310]]))
         assert slice_.means == pytest.approx(
-            np.array([[24.43935757, 37.32122746, np.nan, 55.48571956, 73.02427659]]),
+            np.array([[24.4393575, 37.3212274, np.nan, 55.4857195, 73.0242765]]),
             nan_ok=True,
         )
+        assert slice_.counts == pytest.approx(np.array([[189, 395, 584, 606, 310]]))
+        assert slice_.rows_margin.tolist() == [1500.0]
+        assert slice_.columns_margin.tolist() == [189, 395, 584, 606, 310]
 
     def it_provides_values_for_mr_x_cat_hs(self):
         slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
@@ -850,11 +839,6 @@ class Describe_Strand(object):
         assert str(e.value) == (
             "`.means` is undefined for a cube-result without a means measure"
         )
-        with pytest.raises(ValueError) as e:
-            strand.sum
-        assert str(e.value) == (
-            "`.sum` is undefined for a cube-result without a sum measure"
-        )
         assert strand.min_base_size_mask.tolist() == [False, False]
         assert strand.name == "v7"
         assert strand.ndim == 1
@@ -872,6 +856,11 @@ class Describe_Strand(object):
         assert strand.scale_std_dev == pytest.approx(0.9428090)
         assert strand.scale_std_err == pytest.approx(0.2434322)
         assert strand.shape == (2,)
+        with pytest.raises(ValueError) as e:
+            strand.sum
+        assert str(e.value) == (
+            "`.sum` is undefined for a cube-result without a sum measure"
+        )
         assert strand.table_base_range.tolist() == [15, 15]
         assert strand.table_margin_range.tolist() == [15, 15]
         assert strand.table_name == "v7: C"
@@ -908,17 +897,7 @@ class Describe_Strand(object):
         assert strand.shape == (4,)
         assert strand.table_base_range.tolist() == [1628, 1628]
         # --- means cube that also has counts has a table-margin ---
-        assert strand.table_margin_range == pytest.approx(
-            [16029.22309748, 16029.22309748]
-        )
-
-    def it_provides_table_margin_range_for_univariate_cat_means_and_counts(self):
-        """The cube_mean and cube_count measures can appear together."""
-        strand = Cube(CR.CAT_MEANS_AND_COUNTS).partitions[0]
-
-        # for a cube with numeric measure like mean, table margin are calculated on the
-        # counts and not on the means.
-        assert strand.table_margin_range == pytest.approx([16029.223097, 16029.223097])
+        assert strand.table_margin_range == pytest.approx([1500.961, 1500.961])
 
     def it_provides_values_for_univariate_datetime(self):
         strand = Cube(CR.DATE, population=9001).partitions[0]
@@ -1096,6 +1075,25 @@ class Describe_Strand(object):
     def it_knows_when_it_is_empty(self):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]
         assert strand.is_empty is True
+
+    def it_provides_sum_measure_for_CAT(self):
+        strand = Cube(CR.CAT_SUM).partitions[0]
+
+        assert strand.sum == pytest.approx([88.0, 77.0])
+        assert strand.table_base_range.tolist() == [5, 5]
+
+    def it_provides_sum_measure_for_MR(self):
+        strand = Cube(CR.MR_SUM).partitions[0]
+
+        assert strand.sum == pytest.approx([3.0, 2.0, 2.0])
+        assert strand.table_base_range.tolist() == [3, 3]
+
+    def it_provides_sum_and_mean_measure_for_CAT(self):
+        strand = Cube(CR.NUMERIC_MEASURES_X_CAT).partitions[0]
+
+        assert strand.counts == pytest.approx([3, 2])
+        assert strand.means == pytest.approx([2.66666667, 3.5])
+        assert strand.sum == pytest.approx([8, 7])
 
 
 class Describe_Nub(object):

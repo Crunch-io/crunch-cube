@@ -41,9 +41,9 @@ class DescribeCubeSet(object):
         ),
     )
     def it_knows_whether_it_can_show_pairwise(
-        self, request, cubes_dimtypes, expected_value, _cubes_prop_
+        self, request, cubes_dimtypes, expected_value, cubes_prop_
     ):
-        _cubes_prop_.return_value = tuple(
+        cubes_prop_.return_value = tuple(
             instance_mock(
                 request, Cube, dimension_types=cube_dimtypes, ndim=len(cube_dimtypes)
             )
@@ -55,9 +55,9 @@ class DescribeCubeSet(object):
 
         assert can_show_pairwise is expected_value
 
-    def it_knows_its_description(self, _cubes_prop_, cube_):
+    def it_knows_its_description(self, cubes_prop_, cube_):
         cube_.description = "Are you male or female?"
-        _cubes_prop_.return_value = (cube_,)
+        cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
         description = cube_set.description
@@ -68,10 +68,10 @@ class DescribeCubeSet(object):
         ("first_cube_has_w_counts", "expected_value"), ((True, True), (False, False))
     )
     def it_knows_whether_it_has_weighted_counts(
-        self, first_cube_has_w_counts, expected_value, _cubes_prop_, cube_
+        self, first_cube_has_w_counts, expected_value, cubes_prop_, cube_
     ):
         cube_.has_weighted_counts = first_cube_has_w_counts
-        _cubes_prop_.return_value = (cube_,)
+        cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
         has_weighted_counts = cube_set.has_weighted_counts
@@ -79,12 +79,10 @@ class DescribeCubeSet(object):
         assert has_weighted_counts == expected_value
 
     @pytest.mark.parametrize(("ncubes", "expected_value"), ((2, True), (1, False)))
-    def it_knows_when_it_is_ca_as_0th(
-        self, ncubes, expected_value, _cubes_prop_, cube_
-    ):
+    def it_knows_when_it_is_ca_as_0th(self, ncubes, expected_value, cubes_prop_, cube_):
         cubes_ = (cube_,) * ncubes
         cubes_[0].dimension_types = (DT.CA_SUBVAR,) * ncubes
-        _cubes_prop_.return_value = cubes_
+        cubes_prop_.return_value = cubes_
         cube_set = CubeSet(cubes_, None, None, None)
 
         is_ca_as_0th = cube_set.is_ca_as_0th
@@ -95,19 +93,19 @@ class DescribeCubeSet(object):
         ("first_cube_missing_count", "expected_value"), ((34, 34), (0, 0))
     )
     def it_knows_its_missing_count(
-        self, first_cube_missing_count, expected_value, _cubes_prop_, cube_
+        self, first_cube_missing_count, expected_value, cubes_prop_, cube_
     ):
         cube_.missing = first_cube_missing_count
-        _cubes_prop_.return_value = (cube_,)
+        cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
         missing_count = cube_set.missing_count
 
         assert missing_count == expected_value
 
-    def it_knows_its_name(self, _cubes_prop_, cube_):
+    def it_knows_its_name(self, cubes_prop_, cube_):
         cube_.name = "Beverage"
-        _cubes_prop_.return_value = (cube_,)
+        cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
         name = cube_set.name
@@ -125,10 +123,10 @@ class DescribeCubeSet(object):
         ),
     )
     def it_provides_access_to_the_partition_sets(
-        self, cube_partitions, expected_value, _cubes_prop_, cube_
+        self, cube_partitions, expected_value, cubes_prop_, cube_
     ):
         cube_.partitions = cube_partitions
-        _cubes_prop_.return_value = (cube_,)
+        cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
         partition_sets = cube_set.partition_sets
@@ -140,10 +138,10 @@ class DescribeCubeSet(object):
         ((1.0, 1.0), (0.54, 0.54), (np.nan, np.nan)),
     )
     def it_has_proper_population_fraction(
-        self, population_fraction, expected_value, cube_, _cubes_prop_
+        self, population_fraction, expected_value, cube_, cubes_prop_
     ):
         cube_.population_fraction = population_fraction
-        _cubes_prop_.return_value = (cube_,)
+        cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
         cubeset_population_fraction = cube_set.population_fraction
@@ -163,7 +161,7 @@ class DescribeCubeSet(object):
             min_base=10,
         )
 
-        cubes = cube_set._cubes
+        cubes = cube_set.cubes
 
         assert Cube_.call_args_list == [
             call(
@@ -204,7 +202,7 @@ class DescribeCubeSet(object):
             min_base=10,
         )
 
-        cubes = cube_set._cubes
+        cubes = cube_set.cubes
 
         assert Cube_.call_args_list == [
             call(
@@ -255,32 +253,23 @@ class DescribeCubeSet(object):
         assert Cube_.call_args_list == ([call({"cube": 0})] if is_multi_cube else [])
         assert is_numeric_mean == expected_value
 
-    def it_knows_its_valid_counts_summary_to_help(self, _cubes_prop_, cube_):
+    def it_knows_its_valid_counts_summary_to_help(self, cubes_prop_, cube_):
         cube_.valid_counts_summary = np.array([1, 2, 3])
-        _cubes_prop_.return_value = (cube_,)
+        cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
         valid_counts_summary = cube_set.valid_counts_summary
 
         np.testing.assert_array_equal(valid_counts_summary, [1, 2, 3])
 
-    def it_knows_its_n_reposnes_to_help(self, _cubes_prop_, cube_):
+    def it_knows_its_n_reposnes_to_help(self, cubes_prop_, cube_):
         cube_.n_responses = 6
-        _cubes_prop_.return_value = (cube_,)
+        cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
         n_responses = cube_set.n_responses
 
         assert n_responses == 6
-
-    def it_is_subscriptable(self, _cubes_prop_, cube_):
-        cube_.description = "Hello"
-        _cubes_prop_.return_value = (cube_,)
-        cube_set = CubeSet(None, None, None, None)
-
-        first_cube = cube_set[0]
-
-        assert first_cube.description == "Hello"
 
     # fixture components ---------------------------------------------
 
@@ -293,8 +282,8 @@ class DescribeCubeSet(object):
         return instance_mock(request, Cube)
 
     @pytest.fixture
-    def _cubes_prop_(self, request):
-        return property_mock(request, CubeSet, "_cubes")
+    def cubes_prop_(self, request):
+        return property_mock(request, CubeSet, "cubes")
 
     @pytest.fixture
     def _is_multi_cube_prop_(self, request):

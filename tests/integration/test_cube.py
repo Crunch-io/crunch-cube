@@ -159,9 +159,7 @@ class DescribeIntegrated_Measures(object):
         assert missing_count == 3
 
     def it_provides_the_means_missing_count_when_sum_are_available(self):
-        measures = _Measures(CR.SUM_CAT_X_MR, None)
-        missing_count = measures.missing_count
-        assert missing_count == 1
+        assert _Measures(CR.SUM_CAT_X_MR, None).missing_count == 1
 
     def but_provides_the_general_missing_count_otherwise(self):
         measures = _Measures(CR.CAT_X_CAT, None)
@@ -262,34 +260,6 @@ class DescribeIntegrated_MeanMeasure(object):
                 [34.20408163, 43.2745098, 41.2, np.nan, 35.26086957],
             ],
         )
-
-    def it_knows_if_it_has_means(self):
-        slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
-        assert slice_.means.any()
-
-
-class DescribeIntegrated_SumMeasure(object):
-    def it_provides_sum_measure_for_CAT(self):
-        cube = Cube(CR.CAT_SUM)
-        partition = cube.partitions[0]
-
-        np.testing.assert_array_equal(partition.sum, [88.0, 77.0])
-        np.testing.assert_array_equal(partition.table_base_range, [5, 5])
-
-    def it_provides_sum_measure_for_MR(self):
-        cube = Cube(CR.MR_SUM)
-        partition = cube.partitions[0]
-
-        np.testing.assert_array_almost_equal(partition.sum, [3.0, 2.0, 2.0])
-        np.testing.assert_array_almost_equal(partition.table_base_range, [3, 3])
-
-    def it_provides_sum_and_mean_measure_for_CAT(self):
-        cube = Cube(CR.NUMERIC_MEASURES_X_CAT)
-        partition = cube.partitions[0]
-
-        np.testing.assert_array_almost_equal(partition.means, [2.66666667, 3.5])
-        np.testing.assert_array_almost_equal(partition.sum, [8, 7])
-        np.testing.assert_array_almost_equal(partition.counts, [3, 2])
 
 
 class DescribeIntegrated_UnweightedCountMeasure(object):

@@ -82,4 +82,4 @@ class MEASURE(enum.Enum):
     Z_SCORE = "z_score"
 
 
-QUANTITY_OF_INTEREST_MEASURES = {MEASURE.SUM.value, MEASURE.MEAN.value}
+NUMERIC_MEASURES = {MEASURE.SUM.value, MEASURE.MEAN.value}

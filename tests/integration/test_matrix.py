@@ -984,15 +984,14 @@ class DescribeAssembler(object):
 
     def it_computes_means_cat_x_cat_columns_margin(self):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
-        np.testing.assert_almost_equal(
-            slice_.columns_margin, np.array([431, 494, 294, 1219, 433])
-        )
+
+        assert slice_.columns_margin.tolist() == [431, 494, 294, 1219, 433]
 
     def it_computes_cat_x_mr_columns_margin(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
-        np.testing.assert_almost_equal(
-            slice_.columns_margin,
-            np.array([31.631521, 70.7307341, 125.7591135, 366.8883914, 376.7656406]),
+
+        assert slice_.columns_margin == pytest.approx(
+            [31.63152, 70.730734, 125.759113, 366.888391, 376.765640]
         )
 
     def it_computes_mr_x_cat_columns_margin(self):
@@ -1046,10 +1045,8 @@ class DescribeAssembler(object):
 
     def it_computes_means_cat_x_cat_rows_margin(self):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
-        np.testing.assert_almost_equal(
-            slice_.rows_margin,
-            np.array([55, 126, 613, 710, 310, 400, 148]),
-        )
+
+        assert slice_.rows_margin.tolist() == [55, 126, 613, 710, 310, 400, 148]
 
     def it_computes_cat_x_mr_rows_margin(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
@@ -1488,11 +1485,15 @@ class DescribeAssembler(object):
 
     def it_computes_sum_cat_x_mr(self):
         slice_ = Cube(CR.SUM_CAT_X_MR).partitions[0]
-        np.testing.assert_almost_equal(slice_.sum, [[3.0, 2.0, 2.0], [0.0, 0.0, 0.0]])
+
+        assert slice_.sum == pytest.approx(np.array([[3.0, 2.0, 2.0], [0.0, 0.0, 0.0]]))
 
     def it_computes_sum_mr_x_cat(self):
         slice_ = Cube(CR.SUM_MR_X_CAT).partitions[0]
-        np.testing.assert_almost_equal(slice_.sum, [[3.0, 0.0], [2.0, 0.0], [2.0, 0.0]])
+
+        assert slice_.sum == pytest.approx(
+            np.array([[3.0, 0.0], [2.0, 0.0], [2.0, 0.0]])
+        )
 
 
 class Describe_BaseOrderHelper(object):

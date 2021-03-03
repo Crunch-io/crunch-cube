@@ -10,10 +10,10 @@ from cr.cube.cube import Cube
 from ..fixtures import NA
 
 
-class TestNumericArrays(object):
+class DescribeNumericArrays(object):
     """Test-suite for numeric-array behaviors."""
 
-    def test_num_arr_means_scale_measures(self):
+    def it_provides_means_scale_measures(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_SCALE_MEASURES).partitions[0]
 
         np.testing.assert_array_almost_equal(
@@ -31,7 +31,7 @@ class TestNumericArrays(object):
             slice_.rows_scale_median, [3.0, 3.0, 3.0, 3.0]
         )
 
-    def test_num_arr_means_grouped_by_cat(self):
+    def it_provides_means_for_num_array_grouped_by_cat(self):
         """Test means on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT).partitions[0]
 
@@ -46,7 +46,7 @@ class TestNumericArrays(object):
         )
         np.testing.assert_almost_equal(slice_.columns_base, [[3, 2], [3, 1], [1, 1]])
 
-    def test_num_arr_means_grouped_by_date(self):
+    def it_provides_means_for_num_array_grouped_by_date(self):
         """Test means on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_DATE).partitions[0]
 
@@ -61,7 +61,7 @@ class TestNumericArrays(object):
         )
         np.testing.assert_almost_equal(slice_.columns_base, [[10, 9], [8, 10], [9, 10]])
 
-    def test_num_arr_means_grouped_by_cat_weighted(self):
+    def it_provides_means_for_num_array_grouped_by_cat_weighted(self):
         """Test means on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_WEIGHTED).partitions[0]
 
@@ -77,7 +77,7 @@ class TestNumericArrays(object):
         )
         np.testing.assert_almost_equal(slice_.columns_base, [[3, 2], [3, 1], [1, 1]])
 
-    def test_num_arr_means_x_mr(self):
+    def it_provides_means_for_num_array_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_X_MR).partitions[0]
 
         np.testing.assert_almost_equal(
@@ -95,7 +95,7 @@ class TestNumericArrays(object):
             slice_.columns_base, [[38, 14, 6, 18, 38], [38, 14, 6, 18, 38]]
         )
 
-    def test_num_arr_means_no_grouping(self):
+    def it_provides_means_for_numeric_array_with_no_grouping(self):
         """Test means on no-dimensions measure of numeric array."""
         strand = Cube(NA.NUM_ARR_MEANS_NO_GROUPING).partitions[0]
 
@@ -104,7 +104,7 @@ class TestNumericArrays(object):
         assert strand.unweighted_bases.tolist() == [6, 6]
         assert strand.table_base_range.tolist() == [6, 6]
 
-    def test_num_arr_sum_grouped_by_cat(self):
+    def it_provides_sum_for_num_array_grouped_by_cat(self):
         """Test sum on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
 

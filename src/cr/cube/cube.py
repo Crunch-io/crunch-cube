@@ -14,10 +14,7 @@ import numpy as np
 
 from cr.cube.cubepart import CubePartition
 from cr.cube.dimension import AllDimensions
-from cr.cube.enums import (
-    DIMENSION_TYPE as DT,
-    QUANTITY_OF_INTEREST_MEASURES as QOI_MEASURES,
-)
+from cr.cube.enums import DIMENSION_TYPE as DT, NUMERIC_MEASURES
 from cr.cube.util import lazyproperty
 
 np.seterr(divide="ignore", invalid="ignore")
@@ -47,30 +44,51 @@ class CubeSet(object):
         self._population = population
         self._min_base = min_base
 
-    def __getitem__(self, index):
-        return self._cubes[index]
-
     @lazyproperty
     def can_show_pairwise(self):
         """True if all 2D cubes in a multi-cube set can provide pairwise comparison."""
-        if len(self._cubes) < 2:
+        if len(self.cubes) < 2:
             return False
 
         return all(
             all(dt in DT.ALLOWED_PAIRWISE_TYPES for dt in cube.dimension_types[-2:])
             and cube.ndim >= 2
-            for cube in self._cubes[1:]
+            for cube in self.cubes[1:]
         )
+
+    @lazyproperty
+    def cubes(self):
+        """Sequence of Cube objects containing data for this analysis."""
+
+        def iter_cubes():
+            """Generate a Cube object for each of cube_responses.
+
+            0D cube-responses and 1D second-and-later cubes are "inflated" to add their
+            missing row dimension.
+            """
+            for idx, cube_response in enumerate(self._cube_responses):
+                cube = Cube(
+                    cube_response,
+                    cube_idx=idx if self._is_multi_cube else None,
+                    transforms=self._transforms_dicts[idx],
+                    population=self._population,
+                    mask_size=self._min_base,
+                )
+                # --- numeric-measures cubes require inflation to restore their
+                # --- rows-dimension, others don't
+                yield cube.inflate() if self._is_numeric_measure else cube
+
+        return tuple(iter_cubes())
 
     @lazyproperty
     def description(self):
         """str description of first cube in this set."""
-        return self._cubes[0].description
+        return self.cubes[0].description
 
     @lazyproperty
     def has_weighted_counts(self):
         """True if cube-responses include a weighted-count measure."""
-        return self._cubes[0].has_weighted_counts
+        return self.cubes[0].has_weighted_counts
 
     @lazyproperty
     def is_ca_as_0th(self):
@@ -83,19 +101,19 @@ class CubeSet(object):
         if not self._is_multi_cube:
             return False
         # ---the rest depends on the row-var cube---
-        cube = self._cubes[0]
+        cube = self.cubes[0]
         # ---True if row-var cube is CA---
         return cube.dimension_types[0] == DT.CA_SUBVAR
 
     @lazyproperty
     def missing_count(self):
         """The number of missing values from first cube in this set."""
-        return self._cubes[0].missing
+        return self.cubes[0].missing
 
     @lazyproperty
     def name(self):
         """str name of first cube in this set."""
-        return self._cubes[0].name
+        return self.cubes[0].name
 
     @lazyproperty
     def partition_sets(self):
@@ -120,7 +138,7 @@ class CubeSet(object):
         a _Strand and the rest being _Slice objects. Multiple partition sets only arise
         for a tabbook in the CA-as-0th case.
         """
-        return tuple(zip(*(cube.partitions for cube in self._cubes)))
+        return tuple(zip(*(cube.partitions for cube in self.cubes)))
 
     @lazyproperty
     def population_fraction(self):
@@ -131,41 +149,17 @@ class CubeSet(object):
         if the unfiltered count is zero, which would otherwise result in
         a divide-by-zero error.
         """
-        return self._cubes[0].population_fraction
+        return self.cubes[0].population_fraction
 
     @lazyproperty
     def n_responses(self):
         """Total number of responses considered from first cube in this set."""
-        return self._cubes[0].n_responses
+        return self.cubes[0].n_responses
 
     @lazyproperty
     def valid_counts_summary(self):
         """The valid count summary values from first cube in this set."""
-        return self._cubes[0].valid_counts_summary
-
-    @lazyproperty
-    def _cubes(self):
-        """Sequence of Cube objects containing data for this analysis."""
-
-        def iter_cubes():
-            """Generate a Cube object for each of cube_responses.
-
-            0D cube-responses and 1D second-and-later cubes are "inflated" to add their
-            missing row dimension.
-            """
-            for idx, cube_response in enumerate(self._cube_responses):
-                cube = Cube(
-                    cube_response,
-                    cube_idx=idx if self._is_multi_cube else None,
-                    transforms=self._transforms_dicts[idx],
-                    population=self._population,
-                    mask_size=self._min_base,
-                )
-                # --- numeric-measures cubes require inflation to restore their
-                # --- rows-dimension, others don't
-                yield cube.inflate() if self._is_numeric_measure else cube
-
-        return tuple(iter_cubes())
+        return self.cubes[0].valid_counts_summary
 
     @lazyproperty
     def _is_multi_cube(self):
@@ -235,8 +229,10 @@ class Cube(object):
 
     @lazyproperty
     def available_measures(self):
-        """Tuple of available measures in the cube response."""
-        return tuple(self._cube_response.get("result", {}).get("measures", {}).keys())
+        """frozenset of available measures in the cube response."""
+        return frozenset(
+            self._cube_response.get("result", {}).get("measures", {}).keys()
+        )
 
     @lazyproperty
     def counts(self):
@@ -284,11 +280,11 @@ class Cube(object):
         """
         cube_dict = self._cube_dict
         dimensions = cube_dict["result"]["dimensions"]
-        default = "-".join(self._numeric_measures)
+        default_name = "-".join(self._numeric_measures)
         # --- The default value in case of numeric variable is the combination of all
         # --- the measures expressed in the cube response.
-        alias = self._numeric_measure_references.get("alias", default)
-        name = self._numeric_measure_references.get("name", default)
+        alias = self._numeric_measure_references.get("alias", default_name)
+        name = self._numeric_measure_references.get("name", default_name)
         rows_dimension = {
             "references": {"alias": alias, "name": name},
             "type": {
@@ -312,12 +308,10 @@ class Cube(object):
 
     @lazyproperty
     def means(self):
-        """float64 ndarray of the cube_means if the measure exists."""
-        if self._measures.means:
-            return self._measures.means.raw_cube_array[self._valid_idxs].astype(
-                np.float64
-            )
-        return None
+        """Optional float64 ndarray of the cube_means if the measure exists."""
+        if self._measures.means is None:
+            return None
+        return self._measures.means.raw_cube_array[self._valid_idxs].astype(np.float64)
 
     @lazyproperty
     def missing(self):
@@ -374,12 +368,10 @@ class Cube(object):
 
     @lazyproperty
     def sum(self):
-        """float64 ndarray of the cube_means if the measure exists."""
-        if self._measures.sum:
-            return self._measures.sum.raw_cube_array[self._valid_idxs].astype(
-                np.float64
-            )
-        return None
+        """Optional float64 ndarray of the cube_sum if the measure exists."""
+        if self._measures.sum is None:
+            return None
+        return self._measures.sum.raw_cube_array[self._valid_idxs].astype(np.float64)
 
     @lazyproperty
     def title(self):
@@ -513,7 +505,7 @@ class Cube(object):
         Basically the numeric measures are the intersection between all the measures
         within the cube response and the defined QUANTITY_OF_INTEREST_MEASURES.
         """
-        return list(set(self.available_measures).intersection(QOI_MEASURES))
+        return list(self.available_measures.intersection(NUMERIC_MEASURES))
 
     @lazyproperty
     def _measure(self):
@@ -829,14 +821,16 @@ class _SumMeasure(_BaseMeasure):
 
     @lazyproperty
     def _flat_values(self):
-        """Return tuple of mean values as found in cube response.
-        Mean data may include missing items represented by a dict like
+        """1D float64 ndarray of sum values as found in cube response.
+        Sum data may include missing items represented by a dict like
         {'?': -1} in the cube response. These are replaced by np.nan in the
         returned value.
         """
-        return tuple(
-            np.nan if type(x) is dict else x
-            for x in self._cube_dict["result"]["measures"]["sum"]["data"]
+        return np.array(
+            [
+                np.nan if type(x) is dict else x
+                for x in self._cube_dict["result"]["measures"]["sum"]["data"]
+            ]
         )
 
 
