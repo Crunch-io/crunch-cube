@@ -109,6 +109,13 @@ class _BaseCubeMeans(_BaseCubeMeasure):
             dimensions, cube.means[cls._slice_idx_expr(cube, slice_idx)]
         )
 
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of cube means."""
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `.means`" % type(self).__name__
+        )
+
 
 class _CatXCatCubeMeans(_BaseCubeMeans):
     """Means cube-measure for a slice with no MR dimensions."""
@@ -181,6 +188,13 @@ class _BaseCubeSums(_BaseCubeMeasure):
                 "`.sum` is undefined for a cube-result without a sum measure"
             )
         return CubeSumsCls(dimensions, cube.sum[cls._slice_idx_expr(cube, slice_idx)])
+
+    @lazyproperty
+    def sum(self):
+        """2D np.float64 ndarray of cube sum."""
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `.sum`" % type(self).__name__
+        )
 
 
 class _CatXCatCubeSums(_BaseCubeSums):

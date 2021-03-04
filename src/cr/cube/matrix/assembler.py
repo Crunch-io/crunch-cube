@@ -103,7 +103,7 @@ class Assembler(object):
         # --- an MR_X slice produces a 2D column-base (each cell has its own N) ---
         columns_base = self._cube_result_matrix.columns_base
         rows_dim_type = self._rows_dimension.dimension_type
-        if rows_dim_type in (DT.MR_SUBVAR, DT.NUM_ARRAY) and columns_base.ndim > 1:
+        if rows_dim_type in (DT.MR_SUBVAR, DT.NUM_ARRAY):
             return self._assemble_matrix(
                 SumSubtotals.blocks(columns_base, self._dimensions)
             )
