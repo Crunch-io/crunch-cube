@@ -24,6 +24,16 @@ class CubeMeasures(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def means(self):
+        """_BaseCubeMeans subclass object for this cube-result."""
+        return _BaseCubeMeans.factory(self._cube, self._dimensions, self._slice_idx)
+
+    @lazyproperty
+    def sum(self):
+        """_BaseCubeSums subclass object for this cube-result."""
+        return _BaseCubeSums.factory(self._cube, self._dimensions, self._slice_idx)
+
+    @lazyproperty
     def unweighted_cube_counts(self):
         """_BaseUnweightedCubeCounts subclass object for this cube-result."""
         return _BaseUnweightedCubeCounts.factory(
@@ -66,6 +76,150 @@ class _BaseCubeMeasure(object):
         # --- for other 3D cubes we just select the 2D "table" portion associated with
         # --- the `slice_idx`-th table dimension element.
         return np.s_[slice_idx]
+
+
+# === MEANS ===
+class _BaseCubeMeans(_BaseCubeMeasure):
+    """Base class for mean cube-measure variants."""
+
+    def __init__(self, dimensions, means):
+        super(_BaseCubeMeans, self).__init__(dimensions)
+        self._means = means
+
+    @classmethod
+    def factory(cls, cube, dimensions, slice_idx):
+        """Return _BaseCubeMeans subclass instance appropriate to `cube`."""
+        dimension_types = cube.dimension_types[-2:]
+        CubeMeansCls = (
+            _MrXMrCubeMeans
+            if dimension_types == (DT.MR, DT.MR)
+            else _MrXCatCubeMeans
+            if dimension_types[0] == DT.MR
+            else _CatXMrCubeMeans
+            if dimension_types[1] == DT.MR
+            else _CatXCatCubeMeans
+        )
+        if cube.means is None:
+            raise ValueError(
+                "`.means` is undefined for a cube-result without a means measure"
+            )
+        return CubeMeansCls(
+            dimensions, cube.means[cls._slice_idx_expr(cube, slice_idx)]
+        )
+
+
+class _CatXCatCubeMeans(_BaseCubeMeans):
+    """Means cube-measure for a slice with no MR dimensions."""
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of means for each valid matrix cell."""
+        return self._means
+
+
+class _CatXMrCubeMeans(_BaseCubeMeans):
+    """Means cube-measure for a NOT_MR_X_MR slice.
+
+    Note that the rows-dimensions need not actually be CAT.
+    """
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of means for each valid matrix cell."""
+        return self._means[:, :, 0]
+
+
+class _MrXCatCubeMeans(_BaseCubeMeans):
+    """Means cube-measure for an MR_X_NOT_MR slice.
+
+    Note that the columns-dimension need not actually be CAT.
+    """
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of means for each valid matrix cell."""
+        return self._means[:, 0, :]
+
+
+class _MrXMrCubeMeans(_BaseCubeMeans):
+    """Means cube-measure for an MR_X_MR slice."""
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of means for each valid matrix cell."""
+        # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
+        return self._means[:, 0, :, 0]
+
+
+# === SUMS ===
+class _BaseCubeSums(_BaseCubeMeasure):
+    """Base class for sum cube-measure variants."""
+
+    def __init__(self, dimensions, sums):
+        super(_BaseCubeSums, self).__init__(dimensions)
+        self._sums = sums
+
+    @classmethod
+    def factory(cls, cube, dimensions, slice_idx):
+        """Return _BaseCubeSums subclass instance appropriate to `cube`."""
+        dimension_types = cube.dimension_types[-2:]
+        CubeSumsCls = (
+            _MrXMrCubeSums
+            if dimension_types == (DT.MR, DT.MR)
+            else _MrXCatCubeSums
+            if dimension_types[0] == DT.MR
+            else _CatXMrCubeSums
+            if dimension_types[1] == DT.MR
+            else _CatXCatCubeSums
+        )
+        if cube.sum is None:
+            raise ValueError(
+                "`.sum` is undefined for a cube-result without a sum measure"
+            )
+        return CubeSumsCls(dimensions, cube.sum[cls._slice_idx_expr(cube, slice_idx)])
+
+
+class _CatXCatCubeSums(_BaseCubeSums):
+    """Sum cube-measure for a slice with no MR dimensions."""
+
+    @lazyproperty
+    def sum(self):
+        """2D np.float64 ndarray of sum for each valid matrix cell."""
+        return self._sums
+
+
+class _CatXMrCubeSums(_BaseCubeSums):
+    """Sum cube-measure for a NOT_MR_X_MR slice.
+
+    Note that the rows-dimensions need not actually be CAT.
+    """
+
+    @lazyproperty
+    def sum(self):
+        """2D np.float64 ndarray of sum for each valid matrix cell."""
+        return self._sums[:, :, 0]
+
+
+class _MrXCatCubeSums(_BaseCubeSums):
+    """Sum cube-measure for an MR_X_NOT_MR slice.
+
+    Note that the columns-dimension need not actually be CAT.
+    """
+
+    @lazyproperty
+    def sum(self):
+        """2D np.float64 ndarray of sum for each valid matrix cell."""
+        return self._sums[:, 0, :]
+
+
+class _MrXMrCubeSums(_BaseCubeSums):
+    """Sum cube-measure for an MR_X_MR slice."""
+
+    @lazyproperty
+    def sum(self):
+        """2D np.float64 ndarray of sum for each valid matrix cell."""
+        # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
+        return self._sums[:, 0, :, 0]
 
 
 # === UNWEIGHTED COUNTS ===
@@ -1036,15 +1190,6 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
         return np.sum(self._unweighted_counts, axis=0)
 
     @lazyproperty
-    def means(self):
-        """2D np.float64 ndarray of mean for each valid matrix cell."""
-        if self._means is None:
-            raise ValueError(
-                "`.means` is undefined for a cube-result without a means measure"
-            )
-        return self._means
-
-    @lazyproperty
     def rows_base(self):
         """1D ndarray of np.float64 unweighted-N for each matrix row."""
         return np.sum(self.unweighted_counts, axis=1)
@@ -1062,15 +1207,6 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
         counts for each row.
         """
         return np.sum(self._unweighted_counts, axis=1)
-
-    @lazyproperty
-    def sum(self):
-        """2D np.float64 ndarray of sum for each valid matrix cell."""
-        if self._sum is None:
-            raise ValueError(
-                "`.sum` is undefined for a cube-result without a sum measure"
-            )
-        return self._sum
 
     @lazyproperty
     def table_base(self):
@@ -1221,15 +1357,6 @@ class _CatXMrMatrix(_CatXCatMatrix):
         return np.sum(self._unweighted_counts, axis=(0, 2))
 
     @lazyproperty
-    def means(self):
-        """2D np.float64 ndarray of mean for each valid matrix cell."""
-        if self._means is None:
-            raise ValueError(
-                "`.means` is undefined for a cube-result without a means measure"
-            )
-        return self._means[:, :, 0]
-
-    @lazyproperty
     def rows_base(self):
         """2D np.float64 ndarray of row-wise unweighted-N for this matrix.
 
@@ -1259,15 +1386,6 @@ class _CatXMrMatrix(_CatXCatMatrix):
         dimension.
         """
         return np.sum(self._unweighted_counts, axis=(1, 2))
-
-    @lazyproperty
-    def sum(self):
-        """2D np.float64 ndarray of mean for each valid matrix cell."""
-        if self._sum is None:
-            raise ValueError(
-                "`.sum` is undefined for a cube-result without a sum measure"
-            )
-        return self._sum[:, :, 0]
 
     @lazyproperty
     def table_base(self):
@@ -1408,15 +1526,6 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
         return np.sum(self._unweighted_counts, axis=(0, 1))
 
     @lazyproperty
-    def means(self):
-        """2D np.float64 ndarray of mean for each valid matrix cell."""
-        if self._means is None:
-            raise ValueError(
-                "`.means` is undefined for a cube-result without a means measure"
-            )
-        return self._means[:, 0, :]
-
-    @lazyproperty
     def rows_base(self):
         """1D ndarray of np.float64 unweighted-N for each matrix row.
 
@@ -1440,15 +1549,6 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
         dimension.
         """
         return np.sum(self._unweighted_counts, axis=(1, 2))
-
-    @lazyproperty
-    def sum(self):
-        """2D np.float64 ndarray of sum for each valid matrix cell."""
-        if self._sum is None:
-            raise ValueError(
-                "`.sum` is undefined for a cube-result without a sum measure"
-            )
-        return self._sum[:, 0, :]
 
     @lazyproperty
     def table_base(self):

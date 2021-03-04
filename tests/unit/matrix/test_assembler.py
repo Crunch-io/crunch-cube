@@ -248,51 +248,19 @@ class DescribeAssembler(object):
         _row_order_prop_.return_value = [0, 1, -2, 2, -1, 3]
         assert Assembler(None, None, None).inserted_row_idxs == (2, 4)
 
-    def it_knows_the_means(
-        self,
-        request,
-        cube_,
-        _cube_result_matrix_prop_,
-        dimensions_,
-        NanSubtotals_,
-        _assemble_matrix_,
-    ):
-        cube_result_matrix_ = instance_mock(
-            request, _CatXCatMatrix, means=[[1, 2], [3, 4]]
+    def it_knows_the_means(self, request, dimensions_):
+        property_mock(
+            request, Assembler, "means", return_value=np.array([1.2, 1.34, 3.3])
         )
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        NanSubtotals_.blocks.return_value = [[[3], [2]], [[4], [1]]]
-        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6]]
-        assembler = Assembler(cube_, dimensions_, None)
+        assembler = Assembler(None, dimensions_, None)
 
-        means = assembler.means
+        assert assembler.means == pytest.approx([1.2, 1.34, 3.3])
 
-        NanSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
-        _assemble_matrix_.assert_called_once_with(assembler, [[[3], [2]], [[4], [1]]])
-        assert means == [[1, 2, 3], [4, 5, 6]]
+    def it_knows_the_sum(self, request, dimensions_):
+        property_mock(request, Assembler, "sum", return_value=np.array([4, 5, 6]))
+        assembler = Assembler(None, dimensions_, None)
 
-    def it_knows_the_sum(
-        self,
-        request,
-        cube_,
-        _cube_result_matrix_prop_,
-        dimensions_,
-        NanSubtotals_,
-        _assemble_matrix_,
-    ):
-        cube_result_matrix_ = instance_mock(
-            request, _CatXCatMatrix, sum=[[1, 2], [3, 4]]
-        )
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        NanSubtotals_.blocks.return_value = [[[3], [2]], [[4], [1]]]
-        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6]]
-        assembler = Assembler(cube_, dimensions_, None)
-
-        sum = assembler.sum
-
-        NanSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
-        _assemble_matrix_.assert_called_once_with(assembler, [[[3], [2]], [[4], [1]]])
-        assert sum == [[1, 2, 3], [4, 5, 6]]
+        assert assembler.sum == pytest.approx([4, 5, 6])
 
     def it_knows_the_pvalues(self, request):
         property_mock(

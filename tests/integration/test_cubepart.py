@@ -340,6 +340,23 @@ class Describe_Slice(object):
         assert slice_.rows_margin.tolist() == [1500.0]
         assert slice_.columns_margin.tolist() == [189, 395, 584, 606, 310]
 
+    def it_provides_values_for_mr_x_mr_means(self):
+        slice_ = Cube(CR.MR_X_MR_MEANS).partitions[0]
+
+        assert slice_.counts == pytest.approx(
+            np.array([[3, 2, 0], [2, 4, 0], [0, 0, 0]])
+        )
+        assert slice_.means == pytest.approx(
+            np.array(
+                [
+                    [np.nan, np.nan, np.nan],
+                    [np.nan, 2.187795, np.nan],
+                    [np.nan, np.nan, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+
     def it_provides_values_for_mr_x_cat_hs(self):
         slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
 
@@ -806,6 +823,20 @@ class Describe_Slice(object):
         slice_ = Cube(CR.MR_X_MR_SELECTED_CATEGORIES).partitions[0]
 
         assert slice_.selected_category_labels == ("Very Favorable",)
+
+    def it_provides_sum_measure_for_mr_x_mr(self):
+        slice_ = Cube(CR.MR_X_MR_SUM).partitions[0]
+
+        assert slice_.sum == pytest.approx(
+            np.array(
+                [
+                    [np.nan, np.nan, np.nan],
+                    [np.nan, 2.0, np.nan],
+                    [np.nan, np.nan, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
 
 
 class Describe_Strand(object):

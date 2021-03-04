@@ -7,7 +7,7 @@ from __future__ import division
 import numpy as np
 
 from cr.cube.matrix.cubemeasure import CubeMeasures
-from cr.cube.matrix.subtotals import SumDiffSubtotals, SumSubtotals
+from cr.cube.matrix.subtotals import SumDiffSubtotals, SumSubtotals, NanSubtotals
 from cr.cube.util import lazyproperty
 
 
@@ -46,6 +46,11 @@ class SecondOrderMeasures(object):
         return self._cube_measures.unweighted_cube_counts.columns_pruning_base
 
     @lazyproperty
+    def means(self):
+        """1D np.float ndarray of means for each matrix row."""
+        return _Mean(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def row_proportions(self):
         """_RowProportions measure object for this cube-result."""
         return _RowProportions(self._dimensions, self, self._cube_measures)
@@ -64,6 +69,11 @@ class SecondOrderMeasures(object):
     def rows_pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix row."""
         return self._cube_measures.unweighted_cube_counts.rows_pruning_base
+
+    @lazyproperty
+    def sum(self):
+        """1D np.float ndarray of sum for each matrix row."""
+        return _Sum(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def table_unweighted_bases(self):
@@ -138,6 +148,10 @@ class _BaseSecondOrderMeasure(object):
         )
 
     @lazyproperty
+    def _means(self):
+        return self._cube_measures.means
+
+    @lazyproperty
     def _subtotal_columns(self):
         """2D np.float64 ndarray of inserted column proportions denominator value.
 
@@ -156,6 +170,10 @@ class _BaseSecondOrderMeasure(object):
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `._subtotal_rows`" % type(self).__name__
         )
+
+    @lazyproperty
+    def _sum(self):
+        return self._cube_measures.sum
 
     @lazyproperty
     def _unweighted_cube_counts(self):
@@ -352,6 +370,15 @@ class _ColumnWeightedBases(_BaseSecondOrderMeasure):
         )
 
 
+class _Mean(_BaseSecondOrderMeasure):
+    """Provides the mean measure for a matrix."""
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure."""
+        return NanSubtotals.blocks(self._means.means, self._dimensions)
+
+
 class _RowProportions(_BaseSecondOrderMeasure):
     """Provides the row-proportions measure for a matrix.
 
@@ -522,6 +549,15 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
         # --- axis. This wouldn't work on MR-rows but there can be no subtotals on an
         # --- MR dimension (MR_X slice) so that case never arises.
         return SumSubtotals.subtotal_rows(self._base_values, self._dimensions)
+
+
+class _Sum(_BaseSecondOrderMeasure):
+    """Provides the sum measure for a matrix."""
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure."""
+        return NanSubtotals.blocks(self._sum.sum, self._dimensions)
 
 
 class _TableUnweightedBases(_BaseSecondOrderMeasure):

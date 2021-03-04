@@ -1282,38 +1282,6 @@ class Describe_CatXCatMatrix(object):
             np.array([[0.0, 0.0622222, 0.1155556], [0.16, 0.1955556, 0.2222222]]),
         )
 
-    def it_knows_its_means(self):
-        cube_means = np.array([[2, 3, 1], [5, 6, 4]])
-        matrix = _CatXCatMatrix(None, None, None, means=cube_means)
-
-        assert matrix.means.tolist() == [[2, 3, 1], [5, 6, 4]]
-
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(self):
-        matrix = _CatXCatMatrix(None, None, None, means=None)
-        with pytest.raises(ValueError) as e:
-            matrix.means
-
-        assert (
-            str(e.value)
-            == "`.means` is undefined for a cube-result without a means measure"
-        )
-
-    def it_knows_its_sum(self):
-        cube_sum = np.array([[4, 3, 1], [5, 9, 4]])
-        matrix = _CatXCatMatrix(None, None, None, sum=cube_sum)
-
-        assert matrix.sum.tolist() == [[4, 3, 1], [5, 9, 4]]
-
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(self):
-        matrix = _CatXCatMatrix(None, None, None, sum=None)
-        with pytest.raises(ValueError) as e:
-            matrix.sum
-
-        assert (
-            str(e.value)
-            == "`.sum` is undefined for a cube-result without a sum measure"
-        )
-
 
 class Describe_CatXMrMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXMrMatrix` object."""
@@ -1471,40 +1439,6 @@ class Describe_CatXMrMatrix(object):
         np.testing.assert_almost_equal(
             _CatXMrMatrix(None, weighted_cube_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0826446, 0.1155556], [0.244898, 0.231405, 0.2222222]]),
-        )
-
-    def it_knows_its_means(self):
-        means = np.array([[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]])
-        np.testing.assert_equal(
-            _CatXMrMatrix(None, None, None, means=means).means,
-            np.array([[1, 2, 3], [5, 6, 7]]),
-        )
-
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(self):
-        matrix = _CatXMrMatrix(None, None, None, means=None)
-        with pytest.raises(ValueError) as e:
-            matrix.means
-
-        assert (
-            str(e.value)
-            == "`.means` is undefined for a cube-result without a means measure"
-        )
-
-    def it_knows_its_sum(self):
-        sum = np.array([[[4, 6], [2, 5], [1, 4]], [[5, 3], [9, 2], [7, 1]]])
-        np.testing.assert_equal(
-            _CatXMrMatrix(None, None, None, sum=sum).sum,
-            np.array([[4, 2, 1], [5, 9, 7]]),
-        )
-
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(self):
-        matrix = _CatXMrMatrix(None, None, None, sum=None)
-        with pytest.raises(ValueError) as e:
-            matrix.sum
-
-        assert (
-            str(e.value)
-            == "`.sum` is undefined for a cube-result without a sum measure"
         )
 
 
@@ -1718,40 +1652,6 @@ class Describe_MrXCatMatrix(object):
         np.testing.assert_almost_equal(
             _MrXCatMatrix(None, weighted_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0622222, 0.1155556], [0.1038062, 0.118416, 0.1322568]]),
-        )
-
-    def it_knows_its_means(self):
-        means = np.arange(24).reshape((3, 2, 4))
-        np.testing.assert_equal(
-            _MrXCatMatrix(None, None, None, means=means).means,
-            np.array([[0, 1, 2, 3], [8, 9, 10, 11], [16, 17, 18, 19]]),
-        )
-
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(self):
-        matrix = _MrXCatMatrix(None, None, None, means=None)
-        with pytest.raises(ValueError) as e:
-            matrix.means
-
-        assert (
-            str(e.value)
-            == "`.means` is undefined for a cube-result without a means measure"
-        )
-
-    def it_knows_its_sum(self):
-        sum = np.arange(24).reshape((3, 2, 4))
-        np.testing.assert_equal(
-            _MrXCatMatrix(None, None, None, sum=sum).sum,
-            np.array([[0, 1, 2, 3], [8, 9, 10, 11], [16, 17, 18, 19]]),
-        )
-
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(self):
-        matrix = _MrXCatMatrix(None, None, None, sum=None)
-        with pytest.raises(ValueError) as e:
-            matrix.sum
-
-        assert (
-            str(e.value)
-            == "`.sum` is undefined for a cube-result without a sum measure"
         )
 
 

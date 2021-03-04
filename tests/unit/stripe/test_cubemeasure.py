@@ -10,7 +10,7 @@ from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.stripe.cubemeasure import (
     _BaseCubeMeans,
-    _BaseCubeSum,
+    _BaseCubeSums,
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
     _CatCubeMeans,
@@ -48,14 +48,14 @@ class DescribeCubeMeasures(object):
     def it_provides_access_to_the_cube_sum_object(
         self, request, cube_, rows_dimension_
     ):
-        cube_sum_ = instance_mock(request, _BaseCubeSum)
-        _BaseCubeSum_ = class_mock(request, "cr.cube.stripe.cubemeasure._BaseCubeSum")
-        _BaseCubeSum_.factory.return_value = cube_sum_
+        cube_sum_ = instance_mock(request, _BaseCubeSums)
+        _BaseCubeSums_ = class_mock(request, "cr.cube.stripe.cubemeasure._BaseCubeSums")
+        _BaseCubeSums_.factory.return_value = cube_sum_
         cube_measures = CubeMeasures(cube_, rows_dimension_, None, None)
 
         cube_sum = cube_measures.cube_sum
 
-        _BaseCubeSum_.factory.assert_called_once_with(cube_, rows_dimension_)
+        _BaseCubeSums_.factory.assert_called_once_with(cube_, rows_dimension_)
         assert cube_sum is cube_sum_
 
     def it_provides_access_to_the_unweighted_cube_counts_object(
@@ -175,8 +175,8 @@ class Describe_MrCubeMeans(object):
 # === SUM ===
 
 
-class Describe_BaseCubeSum(object):
-    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeSum`."""
+class Describe_BaseCubeSums(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeSums`."""
 
     @pytest.mark.parametrize(
         "rows_dimension_type, CubeSumCls, sum",
@@ -199,7 +199,7 @@ class Describe_BaseCubeSum(object):
             return_value=cube_sum_,
         )
 
-        cube_sum = _BaseCubeSum.factory(cube_, rows_dimension_)
+        cube_sum = _BaseCubeSums.factory(cube_, rows_dimension_)
 
         CubeSumCls_.assert_called_once_with(rows_dimension_, sum)
         assert cube_sum is cube_sum_

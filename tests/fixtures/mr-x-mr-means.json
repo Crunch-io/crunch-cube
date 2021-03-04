@@ -1,0 +1,795 @@
+{
+  "query": {
+    "measures": {
+      "count": {
+        "function": "cube_count",
+        "args": []
+      },
+      "mean": {
+        "function": "cube_mean",
+        "args": [
+          {
+            "variable": "https://alpha.crunch.io/api/datasets/582e54b9691b4f1893f2830a076f2adc/variables/4mSyJJJr7OiwwqO2VPuXfM000002/"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "function": "dimension",
+        "args": [
+          {
+            "function": "as_selected",
+            "args": [
+              {
+                "variable": "https://alpha.crunch.io/api/datasets/582e54b9691b4f1893f2830a076f2adc/variables/4mSyJJJr7OiwwqO2VPuXfM00000d/"
+              }
+            ]
+          },
+          {
+            "value": "subvariables"
+          }
+        ]
+      },
+      {
+        "function": "as_selected",
+        "args": [
+          {
+            "variable": "https://alpha.crunch.io/api/datasets/582e54b9691b4f1893f2830a076f2adc/variables/4mSyJJJr7OiwwqO2VPuXfM00000d/"
+          }
+        ]
+      },
+      {
+        "function": "dimension",
+        "args": [
+          {
+            "function": "as_selected",
+            "args": [
+              {
+                "variable": "https://alpha.crunch.io/api/datasets/582e54b9691b4f1893f2830a076f2adc/variables/4mSyJJJr7OiwwqO2VPuXfM00000d/"
+              }
+            ]
+          },
+          {
+            "value": "subvariables"
+          }
+        ]
+      },
+      {
+        "function": "as_selected",
+        "args": [
+          {
+            "variable": "https://alpha.crunch.io/api/datasets/582e54b9691b4f1893f2830a076f2adc/variables/4mSyJJJr7OiwwqO2VPuXfM00000d/"
+          }
+        ]
+      }
+    ]
+  },
+  "result": {
+    "dimensions": [
+      {
+        "references": {
+          "subreferences": [
+            {
+              "alias": "bool1",
+              "name": "Response #1",
+              "description": "bool1"
+            },
+            {
+              "alias": "bool2",
+              "name": "Response #2",
+              "description": "bool2"
+            },
+            {
+              "alias": "bool3",
+              "name": "Response #3",
+              "description": "bool3"
+            }
+          ],
+          "uniform_basis": false,
+          "description": "My multiple response set",
+          "name": "mymrset",
+          "alias": "mymrset"
+        },
+        "derived": true,
+        "type": {
+          "subtype": {
+            "class": "variable"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "bool1",
+                  "name": "Response #1",
+                  "description": "bool1"
+                },
+                "id": "0004"
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "bool2",
+                  "name": "Response #2",
+                  "description": "bool2"
+                },
+                "id": "0005"
+              },
+              "missing": false
+            },
+            {
+              "id": 3,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "bool3",
+                  "name": "Response #3",
+                  "description": "bool3"
+                },
+                "id": "0006"
+              },
+              "missing": false
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "derived": true,
+        "references": {
+          "subreferences": [
+            {
+              "alias": "bool1",
+              "name": "Response #1",
+              "description": "bool1"
+            },
+            {
+              "alias": "bool2",
+              "name": "Response #2",
+              "description": "bool2"
+            },
+            {
+              "alias": "bool3",
+              "name": "Response #3",
+              "description": "bool3"
+            }
+          ],
+          "uniform_basis": false,
+          "alias": "mymrset",
+          "description": "My multiple response set",
+          "name": "mymrset"
+        },
+        "type": {
+          "ordinal": false,
+          "subvariables": [
+            "0004",
+            "0005",
+            "0006"
+          ],
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "selected": true,
+              "id": 1,
+              "missing": false,
+              "name": "Selected"
+            },
+            {
+              "numeric_value": 0,
+              "missing": false,
+              "id": 0,
+              "name": "Other"
+            },
+            {
+              "numeric_value": null,
+              "missing": true,
+              "id": -1,
+              "name": "No Data"
+            }
+          ]
+        }
+      },
+      {
+        "references": {
+          "subreferences": [
+            {
+              "alias": "bool1",
+              "name": "Response #1",
+              "description": "bool1"
+            },
+            {
+              "alias": "bool2",
+              "name": "Response #2",
+              "description": "bool2"
+            },
+            {
+              "alias": "bool3",
+              "name": "Response #3",
+              "description": "bool3"
+            }
+          ],
+          "uniform_basis": false,
+          "description": "My multiple response set",
+          "name": "mymrset",
+          "alias": "mymrset"
+        },
+        "derived": true,
+        "type": {
+          "subtype": {
+            "class": "variable"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "bool1",
+                  "name": "Response #1",
+                  "description": "bool1"
+                },
+                "id": "0004"
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "bool2",
+                  "name": "Response #2",
+                  "description": "bool2"
+                },
+                "id": "0005"
+              },
+              "missing": false
+            },
+            {
+              "id": 3,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "bool3",
+                  "name": "Response #3",
+                  "description": "bool3"
+                },
+                "id": "0006"
+              },
+              "missing": false
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "derived": true,
+        "references": {
+          "subreferences": [
+            {
+              "alias": "bool1",
+              "name": "Response #1",
+              "description": "bool1"
+            },
+            {
+              "alias": "bool2",
+              "name": "Response #2",
+              "description": "bool2"
+            },
+            {
+              "alias": "bool3",
+              "name": "Response #3",
+              "description": "bool3"
+            }
+          ],
+          "uniform_basis": false,
+          "alias": "mymrset",
+          "description": "My multiple response set",
+          "name": "mymrset"
+        },
+        "type": {
+          "ordinal": false,
+          "subvariables": [
+            "0004",
+            "0005",
+            "0006"
+          ],
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "selected": true,
+              "id": 1,
+              "missing": false,
+              "name": "Selected"
+            },
+            {
+              "numeric_value": 0,
+              "missing": false,
+              "id": 0,
+              "name": "Other"
+            },
+            {
+              "numeric_value": null,
+              "missing": true,
+              "id": -1,
+              "name": "No Data"
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 0,
+    "measures": {
+      "count": {
+        "data": [
+          3,
+          0,
+          0,
+          2,
+          1,
+          0,
+          0,
+          3,
+          0,
+          0,
+          2,
+          0,
+          1,
+          1,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          2,
+          1,
+          1,
+          4,
+          0,
+          0,
+          0,
+          4,
+          0,
+          1,
+          1,
+          0,
+          0,
+          2,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          2,
+          1,
+          4,
+          2,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {},
+          "derived": true,
+          "type": {
+            "integer": true,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          1.234,
+          {
+            "?": -8
+          },
+          1.234,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          1.234,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          3.14159,
+          3.14159,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          3.14159,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          1.234,
+          3.14159,
+          2.187795,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          2.187795,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          1.234,
+          3.14159,
+          2.187795,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          2.187795,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 4,
+        "metadata": {
+          "references": {
+            "alias": "z",
+            "format": {
+              "data": {
+                "digits": 2
+              },
+              "summary": {
+                "digits": 2
+              }
+            },
+            "description": "Numeric variable with missing value range",
+            "name": "z"
+          },
+          "derived": true,
+          "type": {
+            "integer": true,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "class": "numeric"
+          }
+        }
+      }
+    },
+    "n": 6,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 6,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 6,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 6,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 6,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 6,
+      "weighted_n": 6
+    },
+    "filtered": {
+      "unweighted_n": 6,
+      "weighted_n": 6
+    },
+    "counts": [
+      3,
+      0,
+      0,
+      2,
+      1,
+      0,
+      0,
+      3,
+      0,
+      0,
+      2,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      2,
+      1,
+      1,
+      4,
+      0,
+      0,
+      0,
+      4,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      3,
+      2,
+      1,
+      4,
+      2,
+      0,
+      0,
+      6,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "element": "crunch:cube"
+  }
+}

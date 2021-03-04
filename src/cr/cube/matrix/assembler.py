@@ -166,9 +166,7 @@ class Assembler(object):
 
         Raises `ValueError` if the cube-result does not include a means cube-measure.
         """
-        return self._assemble_matrix(
-            NanSubtotals.blocks(self._cube_result_matrix.means, self._dimensions)
-        )
+        return self._assemble_matrix(self._measures.means.blocks)
 
     @lazyproperty
     def pvalues(self):
@@ -267,11 +265,10 @@ class Assembler(object):
     @lazyproperty
     def sum(self):
         """2D optional np.float64 ndarray of sum for each cell.
+
         Raises `ValueError` if the cube-result does not include a sum cube-measure.
         """
-        return self._assemble_matrix(
-            NanSubtotals.blocks(self._cube_result_matrix.sum, self._dimensions)
-        )
+        return self._assemble_matrix(self._measures.sum.blocks)
 
     @lazyproperty
     def table_base(self):

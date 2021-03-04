@@ -31,7 +31,7 @@ class CubeMeasures(object):
     @lazyproperty
     def cube_sum(self):
         """_BaseCubeMeans subclass object for this stripe."""
-        return _BaseCubeSum.factory(self._cube, self._rows_dimension)
+        return _BaseCubeSums.factory(self._cube, self._rows_dimension)
 
     @lazyproperty
     def unweighted_cube_counts(self):
@@ -114,11 +114,11 @@ class _MrCubeMeans(_BaseCubeMeans):
 # === SUM ===
 
 
-class _BaseCubeSum(_BaseCubeMeasure):
-    """Base class for means cube-measure variants."""
+class _BaseCubeSums(_BaseCubeMeasure):
+    """Base class for sum cube-measure variants."""
 
     def __init__(self, rows_dimension, sum):
-        super(_BaseCubeSum, self).__init__(rows_dimension)
+        super(_BaseCubeSums, self).__init__(rows_dimension)
         self._sum = sum
 
     @classmethod
@@ -136,7 +136,7 @@ class _BaseCubeSum(_BaseCubeMeasure):
         )  # pragma: no cover
 
 
-class _CatCubeSum(_BaseCubeSum):
+class _CatCubeSum(_BaseCubeSums):
     """Means cube-measure for a non-MR stripe."""
 
     @lazyproperty
@@ -149,7 +149,7 @@ class _CatCubeSum(_BaseCubeSum):
         return self._sum
 
 
-class _MrCubeSum(_BaseCubeSum):
+class _MrCubeSum(_BaseCubeSums):
     """Means cube-measure for an MR stripe.
     Its `.means` is a 2D ndarray with axes (rows, sel/not).
     """
@@ -278,23 +278,16 @@ class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
 
 class _NumArrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
-    """Unweighted-counts cube-measure for a non-MR stripe."""
+    """Unweighted-counts cube-measure for a numeric array stripe."""
 
     @lazyproperty
     def bases(self):
-        """1D np.int64 ndarray of table-proportion denonimator (base) for each row.
-
-        Each row in a CAT stripe has the same base (the table-base).
-        """
+        """1D np.int64 ndarray of table-proportion denonimator for each cell."""
         return self._unweighted_counts
 
     @lazyproperty
     def pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row.
-
-        Because this matrix has no MR dimension, this is simply the unweighted count for
-        each row.
-        """
+        """1D np.int64 ndarray of unweighted-N for each matrix row."""
         return self._unweighted_counts
 
     @lazyproperty
