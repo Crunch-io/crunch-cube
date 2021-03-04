@@ -668,6 +668,7 @@ class _Measures(object):
     @lazyproperty
     def sum(self):
         """_SumMeasure object providing access to cube sum values.
+
         None when the cube response does not contain a sum measure.
         """
         sum_measure_dict = (
@@ -822,6 +823,7 @@ class _SumMeasure(_BaseMeasure):
     @lazyproperty
     def _flat_values(self):
         """1D float64 ndarray of sum values as found in cube response.
+
         Sum data may include missing items represented by a dict like
         {'?': -1} in the cube response. These are replaced by np.nan in the
         returned value.
