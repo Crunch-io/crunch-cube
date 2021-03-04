@@ -14,7 +14,7 @@ from cr.cube.cube import (
     _UnweightedCountMeasure,
     _WeightedCountMeasure,
 )
-from cr.cube.dimension import _ApparentDimensions
+from cr.cube.dimension import _ApparentDimensions, AllDimensions
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR, NA  # ---mnemonic: CR = 'cube-response'---
@@ -156,7 +156,10 @@ class DescribeIntegrated_Measures(object):
 
     def it_provides_access_to_the_mean_measure(self):
         cube_dict = CR.CAT_X_CAT_MEAN_WGTD
-        measures = _Measures(cube_dict, None)
+        measures = _Measures(
+            cube_dict, 
+            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+        )
 
         means = measures.means
 
@@ -171,7 +174,11 @@ class DescribeIntegrated_Measures(object):
         assert means is None
 
     def it_provides_the_means_missing_count_when_means_are_available(self):
-        measures = _Measures(CR.CAT_X_CAT_MEAN_WGTD, None)
+        cube_dict = CR.CAT_X_CAT_MEAN_WGTD
+        measures = _Measures(
+            cube_dict, 
+            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+        )
         missing_count = measures.missing_count
         assert missing_count == 3
 

@@ -9,7 +9,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import copy
 import json
-
 import numpy as np
 
 from cr.cube.cubepart import CubePartition
@@ -598,23 +597,21 @@ class _Measures(object):
 
     @lazyproperty
     def means(self):
-        """_MeanMeasure object providing access to means values.
-
-        None when the cube response does not contain a mean measure.
+        """Optional _MeanMeasure object providing access to means values.
+        
+        Will be None if no means are available on the counts.
         """
-        mean_measure_dict = (
-            self._cube_dict.get("result", {}).get("measures", {}).get("mean")
-        )
+        mean = _MeanMeasure(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
         return (
-            _MeanMeasure(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
-            if mean_measure_dict
-            else None
+            None 
+            if mean.raw_cube_array is None
+            else mean
         )
 
     @lazyproperty
     def missing_count(self):
         """numeric representing count of missing rows in cube response."""
-        if self.means:
+        if self.means is not None:
             return self.means.missing_count
         return self._cube_dict["result"].get("missing", 0)
 
@@ -687,7 +684,6 @@ class _Measures(object):
             )
         )
 
-
 class _BaseMeasure(object):
     """Base class for measure objects."""
 
@@ -698,13 +694,16 @@ class _BaseMeasure(object):
 
     @lazyproperty
     def raw_cube_array(self):
-        """Return read-only ndarray of measure values from cube-response.
+        """Optional read-only ndarray of measure values from cube-response.
 
         The shape of the ndarray mirrors the shape of the (raw) cube
         response. Specifically, it includes values for missing elements, any
-        MR_CAT dimensions, and any prunable rows and columns.
+        MR_CAT dimensions, and any prunable rows and columns. Returns None
+        if the measure is not available in cube.
         """
-        raw_cube_array = self._flat_values.flatten().reshape(self._shape)
+        if self._flat_values is None:
+            return None
+        raw_cube_array = self._flat_values.reshape(self._shape)
         # ---must be read-only to avoid hard-to-find bugs---
         raw_cube_array.flags.writeable = False
         return raw_cube_array
@@ -756,24 +755,30 @@ class _BaseMeasure(object):
             )
         return shape
 
-
 class _MeanMeasure(_BaseMeasure):
     """Statistical mean values from a cube-response."""
 
     @lazyproperty
     def missing_count(self):
-        """numeric representing count of missing rows reflected in response."""
-        return self._cube_dict["result"]["measures"]["mean"].get("n_missing", 0)
+        """Optional numeric representing count of missing rows in response."""
+        return  (
+            None
+            if self._result is None
+            else self._result.get("n_missing", 0)
+        )
 
     @lazyproperty
     def _flat_values(self):
-        """np.ndarray of np.float64 mean values as found in cube response.
+        """Optional 1D np.ndarray of np.float64 mean values as found in cube response.
 
         Mean data may include missing items represented by a dict like
         {'?': -1} in the cube response. These are replaced by np.nan in the
-        returned value.
+        returned value. In the case of numeric arrays, we can have list of lists.
+        Returns None if means are not available on the cube.
         """
-
+        if self._result is None:
+            return None
+        
         def dict_to_nan_recursive(x):
             if type(x) is dict:
                 return np.nan
@@ -785,10 +790,14 @@ class _MeanMeasure(_BaseMeasure):
         return np.array(
             tuple(
                 dict_to_nan_recursive(x)
-                for x in self._cube_dict["result"]["measures"]["mean"]["data"]
+                for x in self._result["data"]
             ),
             dtype=np.float64,
-        )
+        ).flatten()
+
+    @lazyproperty
+    def _result(self):
+        return self._cube_dict.get("result", {}).get("measures", {}).get("mean")
 
 
 class _UnweightedCountMeasure(_BaseMeasure):
@@ -819,7 +828,7 @@ class _WeightedCountMeasure(_BaseMeasure):
 
     @lazyproperty
     def _flat_values(self):
-        """np.ndarray of np.float64  numeric counts after weighting."""
+        """np.ndarray of np.float64 numeric counts after weighting."""
         return np.array(
             self._cube_dict["result"]["measures"]["count"]["data"], dtype=np.float64
         )
