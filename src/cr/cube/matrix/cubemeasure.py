@@ -79,6 +79,8 @@ class _BaseCubeMeasure(object):
 
 
 # === MEANS ===
+
+
 class _BaseCubeMeans(_BaseCubeMeasure):
     """Base class for mean cube-measure variants."""
 
@@ -152,6 +154,8 @@ class _MrXMrCubeMeans(_BaseCubeMeans):
 
 
 # === SUMS ===
+
+
 class _BaseCubeSums(_BaseCubeMeasure):
     """Base class for sum cube-measure variants."""
 

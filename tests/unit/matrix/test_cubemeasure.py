@@ -9,20 +9,30 @@ from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _ValidElements
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import (
+    _BaseCubeMeans,
     _BaseCubeMeasure,
+    _BaseCubeSums,
     BaseCubeResultMatrix,
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
+    _CatXCatCubeMeans,
+    _CatXCatCubeSums,
     _CatXCatMatrix,
     _CatXCatUnweightedCubeCounts,
     _CatXCatWeightedCubeCounts,
+    _CatXMrCubeMeans,
+    _CatXMrCubeSums,
     _CatXMrMatrix,
     _CatXMrUnweightedCubeCounts,
     _CatXMrWeightedCubeCounts,
     CubeMeasures,
+    _MrXCatCubeMeans,
+    _MrXCatCubeSums,
     _MrXCatMatrix,
     _MrXCatUnweightedCubeCounts,
     _MrXCatWeightedCubeCounts,
+    _MrXMrCubeMeans,
+    _MrXMrCubeSums,
     _MrXMrMatrix,
     _MrXMrUnweightedCubeCounts,
     _MrXMrWeightedCubeCounts,
@@ -95,6 +105,358 @@ class Describe_BaseCubeMeasure(object):
         measure = _BaseCubeMeasure(None)
 
         assert measure._slice_idx_expr(cube_, slice_idx=3) == expected_value
+
+
+# === MEANS ===
+
+
+class Describe_BaseCubeMeans(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMeans`."""
+
+    @pytest.mark.parametrize(
+        "dimension_types, CubeMeansCls",
+        (
+            ((DT.MR, DT.MR), _MrXMrCubeMeans),
+            ((DT.MR, DT.CAT), _MrXCatCubeMeans),
+            ((DT.CAT, DT.MR), _CatXMrCubeMeans),
+            ((DT.CAT, DT.CAT), _CatXCatCubeMeans),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_cube_means_objects(
+        self, request, dimension_types, CubeMeansCls
+    ):
+        cube_ = instance_mock(request, Cube)
+        dimensions_ = (
+            instance_mock(request, Dimension),
+            instance_mock(request, Dimension),
+        )
+        cube_means_ = instance_mock(request, CubeMeansCls)
+        CubeMeanCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % CubeMeansCls.__name__,
+            return_value=cube_means_,
+        )
+        _slice_idx_expr_ = method_mock(
+            request,
+            _BaseCubeMeans,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
+        )
+        cube_.dimension_types = dimension_types
+        cube_.means = [[1, 2], [3, 4]]
+
+        cube_means = _BaseCubeMeans.factory(cube_, dimensions_, slice_idx=7)
+
+        _slice_idx_expr_.assert_called_once_with(cube_, 7)
+        CubeMeanCls_.assert_called_once_with(dimensions_, [3, 4])
+        assert cube_means is cube_means_
+
+
+class Describe_CatXCatCubeMeans(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeMeans`."""
+
+    def it_knows_its_means(self, request):
+        property_mock(
+            request,
+            _CatXCatCubeMeans,
+            "means",
+            return_value=np.array([[1.1, 2.3, 3.3], [3.4, 1.5, 1.6]]),
+        )
+        cube_means = _CatXCatCubeMeans(None, None)
+
+        assert cube_means.means.tolist() == [
+            [1.1, 2.3, 3.3],
+            [3.4, 1.5, 1.6],
+        ]
+
+
+class Describe_CatXMrCubeMeans(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeMeans`."""
+
+    def it_knows_its_means(self, raw_means):
+        cube_means = _CatXMrCubeMeans(None, raw_means)
+
+        assert cube_means.means.tolist() == [
+            [1.1, 2.2, 3.2],
+            [4.3, 5.1, 6.1],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_means(self):
+        """(2, 3, 2) np.float64 ndarray of means as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1.1, 6.1],  # -- col 0 --
+                    [2.2, 5.2],  # -- col 1 --
+                    [3.2, 4.2],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4.3, 3.1],  # -- col 0 --
+                    [5.1, 2.1],  # -- col 1 --
+                    [6.1, 1.1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXCatCubeMeans(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeMeans`."""
+
+    def it_knows_its_means(self, raw_means):
+        cube_means = _MrXCatCubeMeans(None, raw_means)
+
+        assert cube_means.means.tolist() == [
+            [1.1, 6.1],
+            [4.3, 3.1],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_means(self):
+        """(2, 3, 2) np.int float64 of means as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1.1, 6.1],  # -- col 0 --
+                    [2.2, 5.2],  # -- col 1 --
+                    [3.2, 4.2],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4.3, 3.1],  # -- col 0 --
+                    [5.1, 2.1],  # -- col 1 --
+                    [6.1, 1.1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXMrCubeMeans(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeMeans`."""
+
+    def it_knows_its_means(self, raw_means):
+        cube_means = _MrXMrCubeMeans(None, raw_means)
+
+        assert cube_means.means.tolist() == [
+            [0.1, 0.1],
+            [0.4, 0.5],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_means(self):
+        """(2, 2, 2, 2) np.float64 ndarray of means as from Cube."""
+        return np.array(
+            # -- axes are (rows, sel/not, cols, sel/not) --
+            [
+                [  # -- row 0 -------------
+                    # --sel/not--
+                    [  # -- selected ------
+                        [0.1, 0.8],  # -- col 0
+                        [0.1, 0.7],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [0.2, 0.6],  # -- col 0
+                        [0.3, 0.5],  # -- col 1
+                    ],
+                ],
+                [  # -- row 1 -------------
+                    [  # -- selected ------
+                        [0.4, 0.4],  # -- col 0
+                        [0.5, 0.3],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [0.6, 0.2],  # -- col 0
+                        [0.7, 0.1],  # -- col 1
+                    ],
+                ],
+            ]
+        )
+
+
+# === SUM ===
+
+
+class Describe_BaseCubeSum(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeSum`."""
+
+    @pytest.mark.parametrize(
+        "dimension_types, CubeSumCls",
+        (
+            ((DT.MR, DT.MR), _MrXMrCubeSums),
+            ((DT.MR, DT.CAT), _MrXCatCubeSums),
+            ((DT.CAT, DT.MR), _CatXMrCubeSums),
+            ((DT.CAT, DT.CAT), _CatXCatCubeSums),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_cube_sum_objects(
+        self, request, dimension_types, CubeSumCls
+    ):
+        cube_ = instance_mock(request, Cube)
+        dimensions_ = (
+            instance_mock(request, Dimension),
+            instance_mock(request, Dimension),
+        )
+        cube_sums_ = instance_mock(request, CubeSumCls)
+        CubeSumCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % CubeSumCls.__name__,
+            return_value=cube_sums_,
+        )
+        _slice_idx_expr_ = method_mock(
+            request,
+            _BaseCubeSums,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
+        )
+        cube_.dimension_types = dimension_types
+        cube_.sum = [[1, 2], [3, 4]]
+
+        cube_sums = _BaseCubeSums.factory(cube_, dimensions_, slice_idx=7)
+
+        _slice_idx_expr_.assert_called_once_with(cube_, 7)
+        CubeSumCls_.assert_called_once_with(dimensions_, [3, 4])
+        assert cube_sums is cube_sums_
+
+
+class Describe_CatXCatCubeSums(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeSums`."""
+
+    def it_knows_its_sum(self, request):
+        property_mock(
+            request,
+            _CatXCatCubeSums,
+            "sum",
+            return_value=np.array([[1.1, 2.3, 3.3], [3.4, 1.5, 1.6]]),
+        )
+        cube_sum = _CatXCatCubeSums(None, None)
+
+        assert cube_sum.sum.tolist() == [
+            [1.1, 2.3, 3.3],
+            [3.4, 1.5, 1.6],
+        ]
+
+
+class Describe_CatXMrCubeSum(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeSums`."""
+
+    def it_knows_its_sum(self, raw_sums):
+        cube_sum = _CatXMrCubeSums(None, raw_sums)
+
+        assert cube_sum.sum.tolist() == [
+            [1.1, 2.2, 3.2],
+            [4.3, 5.1, 6.1],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_sums(self):
+        """(2, 3, 2) np.float64 ndarray of sums as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1.1, 6.1],  # -- col 0 --
+                    [2.2, 5.2],  # -- col 1 --
+                    [3.2, 4.2],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4.3, 3.1],  # -- col 0 --
+                    [5.1, 2.1],  # -- col 1 --
+                    [6.1, 1.1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXCatCubeSum(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeSums`."""
+
+    def it_knows_its_sum(self, raw_sums):
+        cube_sum = _MrXCatCubeSums(None, raw_sums)
+
+        assert cube_sum.sum.tolist() == [
+            [1.1, 6.1],
+            [4.3, 3.1],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_sums(self):
+        """(2, 3, 2) np.int float64 of sums as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1.1, 6.1],  # -- col 0 --
+                    [2.2, 5.2],  # -- col 1 --
+                    [3.2, 4.2],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4.3, 3.1],  # -- col 0 --
+                    [5.1, 2.1],  # -- col 1 --
+                    [6.1, 1.1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXMrCubeSum(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeSums`."""
+
+    def it_knows_its_sums(self, raw_sums):
+        cube_sum = _MrXMrCubeSums(None, raw_sums)
+
+        assert cube_sum.sum.tolist() == [
+            [0.1, 0.1],
+            [0.4, 0.5],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_sums(self):
+        """(2, 2, 2, 2) np.float64 ndarray of sums as from Cube."""
+        return np.array(
+            # -- axes are (rows, sel/not, cols, sel/not) --
+            [
+                [  # -- row 0 -------------
+                    # --sel/not--
+                    [  # -- selected ------
+                        [0.1, 0.8],  # -- col 0
+                        [0.1, 0.7],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [0.2, 0.6],  # -- col 0
+                        [0.3, 0.5],  # -- col 1
+                    ],
+                ],
+                [  # -- row 1 -------------
+                    [  # -- selected ------
+                        [0.4, 0.4],  # -- col 0
+                        [0.5, 0.3],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [0.6, 0.2],  # -- col 0
+                        [0.7, 0.1],  # -- col 1
+                    ],
+                ],
+            ]
+        )
 
 
 # === UNWEIGHTED COUNTS ===
