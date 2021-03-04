@@ -790,16 +790,9 @@ class _WeightedCountMeasure(_BaseMeasure):
     @lazyproperty
     def _flat_values(self):
         """Optional 1D np.ndarray of np.float64 numeric counts after weighting."""
-        if self._result is None:
-            return None
-
         unweighted_counts = self._cube_dict["result"]["counts"]
-        weighted_counts = self._result["data"]
+        weighted_counts = self._cube_dict["result"]["measures"]["count"]["data"]
         if unweighted_counts == weighted_counts:
             return None
 
         return np.array(weighted_counts, dtype=np.float64)
-
-    @lazyproperty
-    def _result(self):
-        return self._cube_dict.get("result", {}).get("measures", {}).get("count")
