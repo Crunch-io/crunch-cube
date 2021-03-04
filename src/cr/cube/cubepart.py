@@ -494,7 +494,6 @@ class _Slice(CubePartition):
                 for i in range(counts.shape[1])
             ]
         )
-        assert scale_median.dtype == np.float64
         return scale_median
 
     @lazyproperty
@@ -878,7 +877,6 @@ class _Slice(CubePartition):
                 for i in range(counts.shape[0])
             ]
         )
-        assert scale_median.dtype == np.float64
         return scale_median
 
     @lazyproperty

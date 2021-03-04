@@ -67,7 +67,7 @@ class SumSubtotals(_BaseSubtotals):
         subtotals = self._row_subtotals
 
         if len(subtotals) == 0:
-            return np.array([], dtype=np.float64)
+            return np.array([])
 
         return np.array([self._subtotal_value(subtotal) for subtotal in subtotals])
 

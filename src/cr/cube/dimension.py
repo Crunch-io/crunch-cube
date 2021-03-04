@@ -945,7 +945,7 @@ class _Subtotal(object):
                 for idx, vector in enumerate(self._valid_elements)
                 if vector.element_id in addend_ids
             ),
-            dtype=int,
+            dtype=int,  # force int so it can be used as index even if empty
         )
 
     @lazyproperty
@@ -979,12 +979,11 @@ class _Subtotal(object):
         Suitable for directly indexing a numpy array object (such as base values or
         margin) to extract the addend values for this subtotal.
         """
-        subtrahend_ids = self.subtrahend_ids
         return np.fromiter(
             (
                 idx
                 for idx, vector in enumerate(self._valid_elements)
-                if vector.element_id in subtrahend_ids
+                if vector.element_id in self.subtrahend_ids
             ),
-            dtype=int,
+            dtype=int,  # force int so it can be used as index even if empty
         )

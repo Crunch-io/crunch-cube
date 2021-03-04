@@ -68,7 +68,6 @@ class _BaseSubtotals(object):
                 for row_subtotal in self._row_subtotals
                 for column_subtotal in self._column_subtotals
             ],
-            dtype=np.float64,
         ).reshape(len(self._row_subtotals), len(self._column_subtotals))
 
     @lazyproperty
@@ -103,7 +102,7 @@ class _BaseSubtotals(object):
         subtotals = self._column_subtotals
 
         if len(subtotals) == 0:
-            return np.empty((self._nrows, 0), dtype=np.float64)
+            return np.empty((self._nrows, 0))
 
         return np.hstack(
             [
@@ -124,7 +123,7 @@ class _BaseSubtotals(object):
         subtotals = self._row_subtotals
 
         if len(subtotals) == 0:
-            return np.empty((0, self._ncols), dtype=np.float64)
+            return np.empty((0, self._ncols))
 
         return np.vstack(
             [self._subtotal_row(subtotal) for subtotal in self._row_subtotals]
@@ -151,7 +150,11 @@ class NanSubtotals(_BaseSubtotals):
 
 
 class SumSubtotals(_BaseSubtotals):
-    """Subtotal "blocks" created by np.sum() on addends and subtrahends, primarily bases."""
+    """Subtotal "blocks" created by np.sum() on addends and subtrahends.
+
+    Used when calculating bases, for example, which are additive even across
+    subtrahends.
+    """
 
     @classmethod
     def intersections(cls, base_values, dimensions):

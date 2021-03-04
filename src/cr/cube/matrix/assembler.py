@@ -464,13 +464,13 @@ class Assembler(object):
         """Return 1D ndarray of `base_vector` with inserted `subtotals`, in `order`.
 
         Each subtotal value is the result of applying np.sum to the addends and
-        subtrahends extracted from `base_vector` according the the `addend_idxs`
+        subtrahends extracted from `base_vector` according to the `addend_idxs`
         and `subtrahend_idxs` property of each subtotal in `subtotals`. The returned
         array is arranged by `order`, including possibly removing hidden or pruned
         values.
         """
-        # TODO: This works for "sum" and "diff" subtotals, which is all that it needs so far,
-        # but a fuller solution will probably get the subtotal values from a
+        # TODO: This works for "sum" and "diff" subtotals, which is all that it needs
+        # so far, but a fuller solution will probably get the subtotal values from a
         # _BaseSubtotals subclass.
         vector_subtotals = np.array(
             [

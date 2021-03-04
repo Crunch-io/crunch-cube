@@ -767,7 +767,7 @@ class _MeanMeasure(_BaseMeasure):
 
     @lazyproperty
     def _flat_values(self):
-        """Return tuple of mean values as found in cube response.
+        """np.ndarray of np.float64 mean values as found in cube response.
 
         Mean data may include missing items represented by a dict like
         {'?': -1} in the cube response. These are replaced by np.nan in the
@@ -796,9 +796,9 @@ class _UnweightedCountMeasure(_BaseMeasure):
 
     @lazyproperty
     def _flat_values(self):
-        """np.ndarray of np.float64 counts before weighting or None, if unavailable.
+        """np.ndarray of np.float64 counts before weighting.
 
-        Use floats to avoid int overflow bugs and so we can use nan.
+        Use np.float64s to avoid int overflow bugs and so we can use nan.
         """
         result = self._cube_dict["result"]
 
@@ -807,10 +807,11 @@ class _UnweightedCountMeasure(_BaseMeasure):
         # ---Under this circumstances the numeric array measures will contain the
         # ---mean measure and a valid count measure for the unweighted counts.
         valid_counts = result["measures"].get("valid_count_unweighted", {}).get("data")
-        if valid_counts:
-            return np.array(valid_counts, dtype=np.float64)
-
-        return np.array(result["counts"], dtype=np.float64)
+        return (
+            np.array(valid_counts, dtype=np.float64)
+            if valid_counts
+            else np.array(result["counts"], dtype=np.float64)
+        )
 
 
 class _WeightedCountMeasure(_BaseMeasure):
@@ -818,7 +819,7 @@ class _WeightedCountMeasure(_BaseMeasure):
 
     @lazyproperty
     def _flat_values(self):
-        """tuple of numeric counts after weighting."""
+        """np.ndarray of np.float64  numeric counts after weighting."""
         return np.array(
             self._cube_dict["result"]["measures"]["count"]["data"], dtype=np.float64
         )
