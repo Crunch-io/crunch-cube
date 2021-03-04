@@ -77,7 +77,7 @@ class DescribeCubeSet(object):
     def it_knows_whether_it_has_weighted_counts(
         self, first_cube_has_w_counts, expected_value, _cubes_prop_, cube_
     ):
-        cube_.is_weighted = first_cube_has_w_counts
+        cube_.has_weighted_counts = first_cube_has_w_counts
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 

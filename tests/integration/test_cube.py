@@ -36,7 +36,7 @@ class DescribeIntegratedCube(object):
         assert cube.dimension_types == (DT.CAT, DT.CAT)
         assert isinstance(cube.dimensions, _ApparentDimensions)
         assert cube.has_means is False
-        assert cube.is_weighted is False
+        assert cube.has_weighted_counts is False
         assert cube.missing == 5
         assert cube.name == "v4"
         assert cube.ndim == 2
@@ -131,33 +131,10 @@ class DescribeIntegratedCube(object):
 class DescribeIntegrated_Measures(object):
     """Integration-tests that exercise the `cr.cube.cube._Measures` object."""
 
-    @pytest.mark.parametrize(
-        "cube_response, expected_value",
-        (
-            # ---has {'query': {'weight': url}}---
-            (CR.ADMIT_X_GENDER_WEIGHTED, True),
-            # ---has {'weight_var': weight_name_str}---
-            (CR.CAT_X_CAT_X_CAT_WGTD, True),
-            # ---unweighted_counts == measure_count_data---
-            (CR.ADMIT_X_DEPT_UNWEIGHTED, False),
-            # ---has {'weight_var': weight_name_str} and no {'query':{'weight': val}}---
-            (CR.CAT_X_CAT_X_CAT_WGTD_NO_QUERY_WEIGHT, True),
-            # ---has {'query': {'weight_utl': url}}---
-            ({"weight_url": "https://y"}, True),
-        ),
-    )
-    def it_knows_when_its_measures_are_weighted(self, cube_response, expected_value):
-        cube_dict = cube_response.get("value", cube_response)
-        measures = _Measures(cube_dict, None)
-
-        is_weighted = measures.is_weighted
-
-        assert is_weighted == expected_value
-
     def it_provides_access_to_the_mean_measure(self):
         cube_dict = CR.CAT_X_CAT_MEAN_WGTD
         measures = _Measures(
-            cube_dict, 
+            cube_dict,
             AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
         )
 
@@ -176,7 +153,7 @@ class DescribeIntegrated_Measures(object):
     def it_provides_the_means_missing_count_when_means_are_available(self):
         cube_dict = CR.CAT_X_CAT_MEAN_WGTD
         measures = _Measures(
-            cube_dict, 
+            cube_dict,
             AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
         )
         missing_count = measures.missing_count
@@ -218,11 +195,14 @@ class DescribeIntegrated_Measures(object):
             # ---weighted case---
             (CR.CAT_X_CAT_WGTD, "_WeightedCountMeasure"),
             # ---unweighted case---
-            (CR.CAT_X_CAT, "_UnweightedCountMeasure"),
+            (CR.CAT_X_CAT, "NoneType"),
         ),
     )
     def it_provides_access_to_wgtd_count_measure(self, cube_dict, expected_type_name):
-        measures = _Measures(cube_dict, None)
+        measures = _Measures(
+            cube_dict,
+            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+        )
 
         weighted_counts = measures.weighted_counts
 
