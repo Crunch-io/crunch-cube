@@ -617,7 +617,7 @@ class _Measures(object):
         """numeric representing count of missing rows in cube response."""
         if self.means is not None:
             return self.means.missing_count
-        if self.sums:
+        if self.sums is not None:
             return self.sums.missing_count
         return self._cube_dict["result"].get("missing", 0)
 
@@ -667,14 +667,8 @@ class _Measures(object):
 
         None when the cube response does not contain a sum measure.
         """
-        sums_measure_dict = (
-            self._cube_dict.get("result", {}).get("measures", {}).get("sum")
-        )
-        return (
-            _SumMeasure(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
-            if sums_measure_dict
-            else None
-        )
+        sums = _SumMeasure(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
+        return None if sums.raw_cube_array is None else sums
 
     @lazyproperty
     def unweighted_counts(self):
@@ -784,22 +778,12 @@ class _MeanMeasure(_BaseMeasure):
 
         Mean data may include missing items represented by a dict like
         {'?': -1} in the cube response. These are replaced by np.nan in the
-        returned value. In the case of numeric arrays, we can have list of lists.
-        Returns None if means are not available on the cube.
+        returned value.
         """
         if self._result is None:
             return None
-
-        def dict_to_nan_recursive(x):
-            if type(x) is dict:
-                return np.nan
-            elif type(x) is list:
-                return [dict_to_nan_recursive(y) for y in x]
-            else:
-                return x
-
         return np.array(
-            tuple(dict_to_nan_recursive(x) for x in self._result["data"]),
+            tuple(np.nan if type(x) is dict else x for x in self._result["data"]),
             dtype=np.float64,
         ).flatten()
 
@@ -818,18 +802,23 @@ class _SumMeasure(_BaseMeasure):
 
     @lazyproperty
     def _flat_values(self):
-        """1D float64 ndarray of sum values as found in cube response.
+        """Optional 1D float64 ndarray of sum values as found in cube response.
 
         Sum data may include missing items represented by a dict like
         {'?': -1} in the cube response. These are replaced by np.nan in the
         returned value.
         """
+        if self._result is None:
+            return None
+
         return np.array(
-            [
-                np.nan if type(x) is dict else x
-                for x in self._cube_dict["result"]["measures"]["sum"]["data"]
-            ]
-        )
+            tuple(np.nan if type(x) is dict else x for x in self._result["data"]),
+            dtype=np.float64,
+        ).flatten()
+
+    @lazyproperty
+    def _result(self):
+        return self._cube_dict.get("result", {}).get("measures", {}).get("sum")
 
 
 class _UnweightedCountMeasure(_BaseMeasure):

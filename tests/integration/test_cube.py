@@ -159,7 +159,13 @@ class DescribeIntegrated_Measures(object):
         assert missing_count == 3
 
     def it_provides_the_means_missing_count_when_sum_are_available(self):
-        assert _Measures(CR.SUM_CAT_X_MR, None).missing_count == 1
+        cube_dict = CR.SUM_CAT_X_MR
+        measures = _Measures(
+            cube_dict,
+            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+        )
+        missing_count = measures.missing_count
+        assert missing_count == 1
 
     def but_provides_the_general_missing_count_otherwise(self):
         measures = _Measures(CR.CAT_X_CAT, None)
