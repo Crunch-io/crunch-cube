@@ -299,6 +299,12 @@ class Describe_Slice(object):
 
         assert _Slice(None, None, None, None, None).rows_margin == [[1, 2], [3, 4]]
 
+    def it_knows_the_row_proportion(self, _assembler_prop_, assembler_):
+        _assembler_prop_.return_value = assembler_
+        assembler_.row_proportions = [[1, 2], [3, 4]]
+
+        assert _Slice(None, None, None, None, None).row_proportions == [[1, 2], [3, 4]]
+
     def it_knows_the_scale_means_column(
         self, request, _columns_dimension_numeric_values_prop_
     ):
@@ -532,7 +538,7 @@ class Describe_Nub(object):
     """Unit test suite for `cr.cube.cubepart._Nub` object."""
 
     @pytest.mark.parametrize(
-        "unweighted_count, expected_value", ((None, True), (45.4, False))
+        "unweighted_count, expected_value", ((float("NaN"), True), (45.4, False))
     )
     def it_knows_when_it_is_empty(self, request, unweighted_count, expected_value):
         property_mock(request, _Nub, "unweighted_count", return_value=unweighted_count)

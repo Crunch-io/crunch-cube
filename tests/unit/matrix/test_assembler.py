@@ -416,20 +416,20 @@ class DescribeAssembler(object):
         dimensions_,
         _cube_result_matrix_prop_,
         cube_result_matrix_,
-        SumSubtotals_,
+        SumDiffSubtotals_,
         _assemble_matrix_,
     ):
         _columns_dimension_prop_.return_value = dimensions_[1]
         dimensions_[1].dimension_type = DT.MR_SUBVAR
         cube_result_matrix_.rows_margin = [[1, 2], [3, 4]]
         _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        SumDiffSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
         assembler = Assembler(None, dimensions_, None)
 
         rows_margin = assembler.rows_margin
 
-        SumSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
+        SumDiffSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert rows_margin == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
@@ -735,8 +735,17 @@ class DescribeAssembler(object):
     def it_can_assemble_a_vector(self, request):
         base_vector = np.array([1, 2, 3, 4])
         subtotals_ = tuple(
-            instance_mock(request, _Subtotal, addend_idxs=np.array(addend_idxs))
-            for addend_idxs in ((0, 1), (1, 2), (2, 3))
+            instance_mock(
+                request,
+                _Subtotal,
+                addend_idxs=np.array(addend_idxs, dtype=int),
+                subtrahend_idxs=np.array(subtrahend_idxs, dtype=int),
+            )
+            for addend_idxs, subtrahend_idxs in (
+                ((0, 1), ()),
+                ((1, 2), ()),
+                ((2, 3), ()),
+            )
         )
         order = np.array([-3, 1, 0, -2, 3, 2, -1])
         assembler = Assembler(None, None, None)
@@ -932,6 +941,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def subtotals_(self, request):
         return instance_mock(request, _Subtotals)
+
+    @pytest.fixture
+    def SumDiffSubtotals_(self, request):
+        return class_mock(request, "cr.cube.matrix.assembler.SumDiffSubtotals")
 
     @pytest.fixture
     def SumSubtotals_(self, request):

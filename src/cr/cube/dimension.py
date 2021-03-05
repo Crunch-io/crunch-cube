@@ -945,7 +945,7 @@ class _Subtotal(object):
                 for idx, vector in enumerate(self._valid_elements)
                 if vector.element_id in addend_ids
             ),
-            dtype=int,
+            dtype=int,  # force int so it can be used as index even if empty
         )
 
     @lazyproperty
@@ -958,3 +958,32 @@ class _Subtotal(object):
         """str display name for this subtotal, suitable for use as label."""
         name = self._subtotal_dict.get("name")
         return name if name else ""
+
+    @lazyproperty
+    def subtrahend_ids(self):
+        """tuple of int ids of elements of negative part of the subtotal.
+
+        Any element id not present in the dimension or present but
+        representing missing data is excluded.
+        """
+        return tuple(
+            arg
+            for arg in self._subtotal_dict.get("kwargs", {}).get("negative", [])
+            if arg in self._valid_elements.element_ids
+        )
+
+    @lazyproperty
+    def subtrahend_idxs(self):
+        """ndarray of int base-element offsets contributing to the negative part of subtotal.
+
+        Suitable for directly indexing a numpy array object (such as base values or
+        margin) to extract the addend values for this subtotal.
+        """
+        return np.fromiter(
+            (
+                idx
+                for idx, vector in enumerate(self._valid_elements)
+                if vector.element_id in self.subtrahend_ids
+            ),
+            dtype=int,  # force int so it can be used as index even if empty
+        )

@@ -55,7 +55,11 @@ class NanSubtotals(_BaseSubtotals):
 
 
 class SumSubtotals(_BaseSubtotals):
-    """Subtotals created by np.sum() on addends, primarily counts."""
+    """Subtotals created by np.sum() on addends, primarily bases.
+
+    This sums together both addends AND subtrahends because some measures such as
+    bases are additive even across subtrahends of subtotals.
+    """
 
     @lazyproperty
     def _subtotal_values(self):
@@ -63,19 +67,31 @@ class SumSubtotals(_BaseSubtotals):
         subtotals = self._row_subtotals
 
         if len(subtotals) == 0:
-            return np.array([], dtype=self._dtype)
+            return np.array([])
 
         return np.array([self._subtotal_value(subtotal) for subtotal in subtotals])
 
-    @lazyproperty
-    def _dtype(self):
-        """Numpy data-type for result arrays, used when array is empty.
+    def _subtotal_value(self, subtotal):
+        """Return scalar value of `subtotal` row."""
+        base_values = self._base_values
 
-        Otherwise, an empty array can "pollute" the dtype of the measure array,
-        generally changing int to float because the default dtype is float.
-        """
-        return self._base_values.dtype
+        addend_sum = np.sum(base_values[subtotal.addend_idxs])
+        subtrahend_sum = np.sum(base_values[subtotal.subtrahend_idxs])
+
+        return addend_sum + subtrahend_sum
+
+
+class SumDiffSubtotals(SumSubtotals):
+    """Subtotals created by np.sum() on addends, primarily bases.
+
+    This sums together addends and SUBTRACTS subtrahends.
+    """
 
     def _subtotal_value(self, subtotal):
         """Return scalar value of `subtotal` row."""
-        return np.sum(self._base_values[subtotal.addend_idxs])
+        base_values = self._base_values
+
+        addend_sum = np.sum(base_values[subtotal.addend_idxs])
+        subtrahend_sum = np.sum(base_values[subtotal.subtrahend_idxs])
+
+        return addend_sum - subtrahend_sum

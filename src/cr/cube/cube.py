@@ -9,7 +9,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import copy
 import json
-
 import numpy as np
 
 from cr.cube.cubepart import CubePartition
@@ -69,7 +68,7 @@ class CubeSet(object):
     @lazyproperty
     def has_weighted_counts(self):
         """True if cube-responses include a weighted-count measure."""
-        return self._cubes[0].is_weighted
+        return self._cubes[0].has_weighted_counts
 
     @lazyproperty
     def is_ca_as_0th(self):
@@ -238,7 +237,7 @@ class Cube(object):
 
     @lazyproperty
     def counts_with_missings(self):
-        return self._measure(self.is_weighted).raw_cube_array
+        return self._measure.raw_cube_array
 
     @lazyproperty
     def cube_index(self):
@@ -300,9 +299,9 @@ class Cube(object):
         )
 
     @lazyproperty
-    def is_weighted(self):
-        """True if cube response contains weighted data."""
-        return self._measures.is_weighted
+    def has_weighted_counts(self):
+        """True if cube response has weighted count data."""
+        return self._measures.weighted_counts is not None
 
     @lazyproperty
     def missing(self):
@@ -381,7 +380,7 @@ class Cube(object):
     @lazyproperty
     def valid_counts(self):
         """ndarray of valid counts, valid elements only."""
-        valid_counts = self._measure(self.is_weighted).valid_counts
+        valid_counts = self._measure.valid_counts
         if valid_counts.any():
             return valid_counts[self._valid_idxs]
         return np.empty(0)
@@ -473,22 +472,19 @@ class Cube(object):
         metadata = cube_measures.get("mean", {}).get("metadata", {})
         return metadata.get("type", {}).get("subvariables", [])
 
-    def _measure(self, weighted):
+    @lazyproperty
+    def _measure(self):
         """_BaseMeasure subclass representing primary measure for this cube.
 
         If the cube response includes a means measure, the return value is
         means. Otherwise it is counts, with the choice between weighted or
-        unweighted determined by *weighted*.
-
-        Note that weighted counts are provided on an "as-available" basis.
-        When *weighted* is True and the cube response is not weighted,
-        unweighted counts are returned.
+        unweighted determined by whether the cube has weighted counts.
         """
         return (
             self._measures.means
             if self._measures.means is not None
             else self._measures.weighted_counts
-            if weighted
+            if self._measures.weighted_counts is not None
             else self._measures.unweighted_counts
         )
 
@@ -552,7 +548,7 @@ class Cube(object):
         )
 
         def _reshape_idxs(valid_indices):
-            if self._measure(self.is_weighted).requires_array_transposition:
+            if self._measure.requires_array_transposition:
                 if len(self._all_dimensions) == 3:
                     # ---In case of 3D array and a numeric array is involved we have to
                     # ---change the order of the valid idxs, from [0,1,2] to [1,2,0].
@@ -577,44 +573,18 @@ class _Measures(object):
         self._cube_idx_arg = cube_idx_arg
 
     @lazyproperty
-    def is_weighted(self):
-        """True if weights have been applied to the measure(s) for this cube.
-
-        Unweighted counts are available for all cubes. Weighting applies to
-        any other measures provided by the cube.
-        """
-        cube_dict = self._cube_dict
-        if cube_dict.get("query", {}).get("weight") is not None:
-            return True
-        if cube_dict.get("weight_var") is not None:
-            return True
-        if cube_dict.get("weight_url") is not None:
-            return True
-        unweighted_counts = cube_dict["result"]["counts"]
-        count_data = cube_dict["result"]["measures"].get("count", {}).get("data")
-        if unweighted_counts != count_data:
-            return True
-        return False
-
-    @lazyproperty
     def means(self):
-        """_MeanMeasure object providing access to means values.
+        """Optional _MeanMeasure object providing access to means values.
 
-        None when the cube response does not contain a mean measure.
+        Will be None if no means are available on the counts.
         """
-        mean_measure_dict = (
-            self._cube_dict.get("result", {}).get("measures", {}).get("mean")
-        )
-        return (
-            _MeanMeasure(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
-            if mean_measure_dict
-            else None
-        )
+        mean = _MeanMeasure(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
+        return None if mean.raw_cube_array is None else mean
 
     @lazyproperty
     def missing_count(self):
         """numeric representing count of missing rows in cube response."""
-        if self.means:
+        if self.means is not None:
             return self.means.missing_count
         return self._cube_dict["result"].get("missing", 0)
 
@@ -671,21 +641,14 @@ class _Measures(object):
 
     @lazyproperty
     def weighted_counts(self):
-        """_WeightedCountMeasure object for this cube.
+        """Optional _WeightedCountMeasure object for this cube.
 
-        This object provides access to weighted counts for this cube, if
-        available. If the cube response is not weighted, the
-        _UnweightedCountMeasure object for this cube is returned.
+        Can be None when the cube is unweighted.
         """
-        return (
-            _WeightedCountMeasure(
-                self._cube_dict, self._all_dimensions, self._cube_idx_arg
-            )
-            if self.is_weighted
-            else _UnweightedCountMeasure(
-                self._cube_dict, self._all_dimensions, self._cube_idx_arg
-            )
+        weighted_counts = _WeightedCountMeasure(
+            self._cube_dict, self._all_dimensions, self._cube_idx_arg
         )
+        return weighted_counts if weighted_counts.raw_cube_array is not None else None
 
 
 class _BaseMeasure(object):
@@ -698,13 +661,16 @@ class _BaseMeasure(object):
 
     @lazyproperty
     def raw_cube_array(self):
-        """Return read-only ndarray of measure values from cube-response.
+        """Optional read-only ndarray of measure values from cube-response.
 
         The shape of the ndarray mirrors the shape of the (raw) cube
         response. Specifically, it includes values for missing elements, any
-        MR_CAT dimensions, and any prunable rows and columns.
+        MR_CAT dimensions, and any prunable rows and columns. Returns None
+        if the measure is not available in cube.
         """
-        raw_cube_array = np.array(self._flat_values).flatten().reshape(self._shape)
+        if self._flat_values is None:
+            return None
+        raw_cube_array = self._flat_values.reshape(self._shape)
         # ---must be read-only to avoid hard-to-find bugs---
         raw_cube_array.flags.writeable = False
         return raw_cube_array
@@ -735,7 +701,7 @@ class _BaseMeasure(object):
 
     @lazyproperty
     def _flat_values(self):  # pragma: no cover
-        """Return tuple of mean values as found in cube response.
+        """Return ndarray of np.float64 values as found in cube response.
 
         This property must be implemented by each subclass.
         """
@@ -762,21 +728,37 @@ class _MeanMeasure(_BaseMeasure):
 
     @lazyproperty
     def missing_count(self):
-        """numeric representing count of missing rows reflected in response."""
-        return self._cube_dict["result"]["measures"]["mean"].get("n_missing", 0)
+        """Optional numeric representing count of missing rows in response."""
+        return None if self._result is None else self._result.get("n_missing", 0)
 
     @lazyproperty
     def _flat_values(self):
-        """Return tuple of mean values as found in cube response.
+        """Optional 1D np.ndarray of np.float64 mean values as found in cube response.
 
         Mean data may include missing items represented by a dict like
         {'?': -1} in the cube response. These are replaced by np.nan in the
-        returned value.
+        returned value. In the case of numeric arrays, we can have list of lists.
+        Returns None if means are not available on the cube.
         """
-        return tuple(
-            np.nan if type(x) is dict else x
-            for x in self._cube_dict["result"]["measures"]["mean"]["data"]
-        )
+        if self._result is None:
+            return None
+
+        def dict_to_nan_recursive(x):
+            if type(x) is dict:
+                return np.nan
+            elif type(x) is list:
+                return [dict_to_nan_recursive(y) for y in x]
+            else:
+                return x
+
+        return np.array(
+            tuple(dict_to_nan_recursive(x) for x in self._result["data"]),
+            dtype=np.float64,
+        ).flatten()
+
+    @lazyproperty
+    def _result(self):
+        return self._cube_dict.get("result", {}).get("measures", {}).get("mean")
 
 
 class _UnweightedCountMeasure(_BaseMeasure):
@@ -784,20 +766,22 @@ class _UnweightedCountMeasure(_BaseMeasure):
 
     @lazyproperty
     def _flat_values(self):
-        """tuple of int counts before weighting."""
-        if (
-            self._cube_dict["result"]["measures"]
-            .get("valid_count_unweighted", {})
-            .get("data")
-        ):
-            # ---If valid_count are expressed in the cube dict, returns its data.
-            # ---This condition can happen in case of numeric array cube response.
-            # ---Under this circumstances the numeric array measures will contain the
-            # ---mean measure and a valid count measure for the unweighted counts.
-            return tuple(
-                self._cube_dict["result"]["measures"]["valid_count_unweighted"]["data"]
-            )
-        return tuple(self._cube_dict["result"]["counts"])
+        """1D np.ndarray of np.float64 counts before weighting.
+
+        Use np.float64s to avoid int overflow bugs and so we can use nan.
+        """
+        result = self._cube_dict["result"]
+
+        # ---If valid_count are expressed in the cube dict, returns its data.
+        # ---This condition can happen in case of numeric array cube response.
+        # ---Under this circumstances the numeric array measures will contain the
+        # ---mean measure and a valid count measure for the unweighted counts.
+        valid_counts = result["measures"].get("valid_count_unweighted", {}).get("data")
+        return (
+            np.array(valid_counts, dtype=np.float64)
+            if valid_counts
+            else np.array(result["counts"], dtype=np.float64)
+        )
 
 
 class _WeightedCountMeasure(_BaseMeasure):
@@ -805,5 +789,10 @@ class _WeightedCountMeasure(_BaseMeasure):
 
     @lazyproperty
     def _flat_values(self):
-        """tuple of numeric counts after weighting."""
-        return tuple(self._cube_dict["result"]["measures"]["count"]["data"])
+        """Optional 1D np.ndarray of np.float64 numeric counts after weighting."""
+        unweighted_counts = self._cube_dict["result"]["counts"]
+        weighted_counts = self._cube_dict["result"]["measures"]["count"]["data"]
+        if unweighted_counts == weighted_counts:
+            return None
+
+        return np.array(weighted_counts, dtype=np.float64)

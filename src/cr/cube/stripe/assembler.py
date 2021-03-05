@@ -136,7 +136,7 @@ class StripeAssembler(object):
 
     @lazyproperty
     def table_base_range(self):
-        """[min, max] np.int64 ndarray range of (total) unweighted-N for this stripe.
+        """[min, max] np.float64 ndarray range of (total) unweighted-N for this stripe.
 
         A non-MR stripe will have a single base, represented by min and max being the
         same value. Each row of an MR stripe has a distinct base, which is reduced to a
@@ -171,12 +171,12 @@ class StripeAssembler(object):
 
     @lazyproperty
     def unweighted_bases(self):
-        """1D np.int64 ndarray of (unweighted) table-proportion denominator per row."""
+        """1D np.float64 ndarray of (unweighted) table-proportion denominator per row."""
         return self._assemble_vector(self._measures.unweighted_bases.blocks)
 
     @lazyproperty
     def unweighted_counts(self):
-        """1D np.int64 ndarray of unweighted count for each row of stripe."""
+        """1D np.float64 ndarray of unweighted count for each row of stripe."""
         return self._assemble_vector(self._measures.unweighted_counts.blocks)
 
     @lazyproperty

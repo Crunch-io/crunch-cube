@@ -1242,6 +1242,61 @@ class Describe_Subtotal(object):
     def it_knows_the_subtotal_label(self, subtotal_dict, expected_value):
         assert _Subtotal(subtotal_dict, None, None).label == expected_value
 
+    @pytest.mark.parametrize(
+        "subtotal_dict, element_ids, expected_value",
+        (
+            ({}, {}, ()),
+            ({"kwargs": {"negative": [1]}}, {1}, (1,)),
+            ({"kwargs": {"negative": [1, 2, 3]}}, {1, 2, 3}, (1, 2, 3)),
+            ({"kwargs": {"negative": [1, 2, 3]}}, {1, 3}, (1, 3)),
+            ({"kwargs": {"negative": [3, 2]}}, {1, 2, 3}, (3, 2)),
+            ({"kwargs": {"negative": []}}, {1, 2, 3}, ()),
+            ({"kwargs": {"negative": [1, 2, 3]}}, {}, ()),
+        ),
+    )
+    def it_provides_access_to_the_subtrahend_element_ids(
+        self, subtotal_dict, element_ids, expected_value, valid_elements_
+    ):
+        valid_elements_.element_ids = element_ids
+        subtotal = _Subtotal(subtotal_dict, valid_elements_, None)
+
+        assert subtotal.subtrahend_ids == expected_value
+
+    @pytest.mark.parametrize(
+        "subtotal_dict, subtrahend_ids, expected_value",
+        (
+            ({"kwargs": {"negative": []}}, (), []),
+            ({"kwargs": {"negative": [1, 2]}}, (1, 2), [0, 1]),
+            ({"kwargs": {"negative": [0, 2]}}, (1, 2), [0, 1]),
+            ({"kwargs": {"negative": [3, 4]}}, (3, 4), [2, 3]),
+            ({"kwargs": {"negative": [4, 99]}}, (4, 99), [3, 4]),
+        ),
+    )
+    def it_knows_the_subtrahend_idxs(
+        self,
+        subtrahend_ids_,
+        all_elements_,
+        valid_elements_,
+        subtotal_dict,
+        subtrahend_ids,
+        expected_value,
+    ):
+        subtrahend_ids_.return_value = subtrahend_ids
+        elements_ = (
+            _Element({"id": 1}, None, None),
+            _Element({"id": 2}, None, None),
+            _Element({"id": 3}, None, None),
+            _Element({"id": 4}, None, None),
+            _Element({"id": 99}, None, None),
+        )
+        all_elements_.__iter__.return_value = iter(elements_)
+        valid_elements = _ValidElements(all_elements_, None)
+        subtotal = _Subtotal(subtotal_dict, valid_elements, None)
+
+        subtrahend_idxs = subtotal.subtrahend_idxs
+
+        np.testing.assert_array_almost_equal(subtrahend_idxs, expected_value)
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -1251,6 +1306,10 @@ class Describe_Subtotal(object):
     @pytest.fixture
     def all_elements_(self, request):
         return instance_mock(request, _AllElements)
+
+    @pytest.fixture
+    def subtrahend_ids_(self, request):
+        return property_mock(request, _Subtotal, "subtrahend_ids")
 
     @pytest.fixture
     def valid_elements_(self, request):

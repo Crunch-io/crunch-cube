@@ -99,61 +99,61 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
 
     @lazyproperty
     def column_bases(self):
-        """2D np.int64 ndarray of column-wise unweighted-N for each matrix cell."""
+        """2D np.float64 ndarray of column-wise unweighted-N for each matrix cell."""
         return np.broadcast_to(self.columns_base, self.unweighted_counts.shape)
 
     @lazyproperty
     def columns_base(self):
-        """1D or 2D np.int64 ndarray of unweighted column-proportion denominator."""
+        """1D or 2D np.float64 ndarray of unweighted column-proportion denominator."""
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `.columns_base`" % type(self).__name__
         )
 
     @lazyproperty
     def columns_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix column."""
+        """1D np.float64 ndarray of unweighted-N for each matrix column."""
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `.columns_pruning_base`" % type(self).__name__
         )
 
     @lazyproperty
     def row_bases(self):
-        """2D np.int64 ndarray of unweighted row-proportion denominator per cell."""
+        """2D np.float64 ndarray of unweighted row-proportion denominator per cell."""
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `.row_bases`" % type(self).__name__
         )
 
     @lazyproperty
     def rows_base(self):
-        """1D or 2D np.int64 ndarray of unweighted row-proportion denominator."""
+        """1D or 2D np.float64 ndarray of unweighted row-proportion denominator."""
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `.rows_base`" % type(self).__name__
         )
 
     @lazyproperty
     def rows_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row."""
+        """1D np.float64 ndarray of unweighted-N for each matrix row."""
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `.rows_pruning_base`" % type(self).__name__
         )
 
     @lazyproperty
     def table_base(self):
-        """Scalar, 1D, or 2D np.int64 ndarray of unweighted table proportion denom."""
+        """Scalar, 1D, or 2D np.float64 ndarray of unweighted table proportion denom."""
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `.table_base`" % type(self).__name__
         )
 
     @lazyproperty
     def table_bases(self):
-        """2D np.int64 ndarray of unweighted table-proportion denominator per cell."""
+        """2D np.float64 ndarray of unweighted table-proportion denominator per cell."""
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `.table_bases`" % type(self).__name__
         )
 
     @lazyproperty
     def unweighted_counts(self):
-        """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of unweighted-count for each valid matrix cell.
 
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
@@ -167,12 +167,12 @@ class _CatXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def columns_base(self):
-        """1D ndarray of np.int64 unweighted-N for each matrix column."""
+        """1D ndarray of np.float64 unweighted-N for each matrix column."""
         return np.sum(self.unweighted_counts, axis=0)
 
     @lazyproperty
     def columns_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix column.
+        """1D np.float64 ndarray of unweighted-N for each matrix column.
 
         Because this matrix has no MR dimension, this is simply the sum of unweighted
         counts for each column.
@@ -181,17 +181,17 @@ class _CatXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def row_bases(self):
-        """2D np.int64 ndarray of unweighted row-proportion denominator per cell."""
+        """2D np.float64 ndarray of unweighted row-proportion denominator per cell."""
         return np.broadcast_to(self.rows_base[:, None], self._unweighted_counts.shape)
 
     @lazyproperty
     def rows_base(self):
-        """1D ndarray of np.int64 unweighted-N for each matrix row."""
+        """1D ndarray of np.float64 unweighted-N for each matrix row."""
         return np.sum(self.unweighted_counts, axis=1)
 
     @lazyproperty
     def rows_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row.
+        """1D np.float64 ndarray of unweighted-N for each matrix row.
 
         Because this matrix has no MR dimension, this is simply the sum of unweighted
         counts for each row.
@@ -200,7 +200,7 @@ class _CatXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def table_base(self):
-        """np.int64 count of actual respondents who answered both questions.
+        """np.float64 count of actual respondents who answered both questions.
 
         Each dimension of a CAT_X_CAT matrix represents a categorical question. Only
         responses that include answers to both those questions appear as entries in the
@@ -212,12 +212,12 @@ class _CatXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def table_bases(self):
-        """2D np.int64 ndarray of table-proportion denominator for each matrix cell."""
+        """2D np.float64 ndarray of table-proportion denominator for each matrix cell."""
         return np.broadcast_to(self.table_base, self._unweighted_counts.shape)
 
     @lazyproperty
     def unweighted_counts(self):
-        """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of unweighted-count for each valid matrix cell.
 
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
@@ -233,12 +233,12 @@ class _CatXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def columns_base(self):
-        """2D ndarray of np.int64 unweighted-N for each matrix column."""
+        """2D ndarray of np.float64 unweighted-N for each matrix column."""
         return np.sum(self.unweighted_counts, axis=0)
 
     @lazyproperty
     def columns_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix column.
+        """1D np.float64 ndarray of unweighted-N for each matrix column.
 
         These values include both the selected and unselected counts of the MR columns
         dimension.
@@ -247,13 +247,13 @@ class _CatXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def row_bases(self):
-        """2D np.int64 ndarray of unweighted row-proportion denominator per cell."""
+        """2D np.float64 ndarray of unweighted row-proportion denominator per cell."""
         # --- in the CAT_X_MR case, rows_base is already the right (2D) value ---
         return self.rows_base
 
     @lazyproperty
     def rows_base(self):
-        """2D np.int64 ndarray of row-wise unweighted-N for this matrix.
+        """2D np.float64 ndarray of row-wise unweighted-N for this matrix.
 
         An X_MR matrix has a distinct row-base for each cell. This is because not all
         responses (subvars) are necessarily presented to each respondent. The
@@ -265,7 +265,7 @@ class _CatXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def rows_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row.
+        """1D np.float64 ndarray of unweighted-N for each matrix row.
 
         These values include both the selected and unselected counts of the MR columns
         dimension.
@@ -274,7 +274,7 @@ class _CatXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def table_base(self):
-        """1D np.int64 unweighted-N for each column of table.
+        """1D np.float64 unweighted-N for each column of table.
 
         Because the matrix is X_MR, each column (MR-subvar) has a distinct base.
         """
@@ -285,12 +285,12 @@ class _CatXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def table_bases(self):
-        """2D np.int64 ndarray of unweighted table-proportion denominator per cell."""
+        """2D np.float64 ndarray of unweighted table-proportion denominator per cell."""
         return np.broadcast_to(self.table_base, self.unweighted_counts.shape)
 
     @lazyproperty
     def unweighted_counts(self):
-        """2D np.int64 ndarray of unweighted-count for each valid matrix cell."""
+        """2D np.float64 ndarray of unweighted-count for each valid matrix cell."""
         return self._unweighted_counts[:, :, 0]
 
 
@@ -303,7 +303,7 @@ class _MrXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def columns_base(self):
-        """2D np.int64 ndarray of unweighted-N for this matrix.
+        """2D np.float64 ndarray of unweighted-N for this matrix.
 
         An MR_X matrix has a distinct column-base for each cell. This is because not all
         responses (subvars) are necessarily presented to each respondent. The
@@ -314,7 +314,7 @@ class _MrXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def columns_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix column.
+        """1D np.float64 ndarray of unweighted-N for each matrix column.
 
         These values include both the selected and unselected counts of the MR rows
         dimension.
@@ -323,19 +323,19 @@ class _MrXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def row_bases(self):
-        """2D np.int64 ndarray of unweighted row-proportion denominator per cell."""
+        """2D np.float64 ndarray of unweighted row-proportion denominator per cell."""
         return np.broadcast_to(self.rows_base[:, None], self.unweighted_counts.shape)
 
     @lazyproperty
     def rows_base(self):
-        """1D ndarray of np.int64 unweighted-N for each matrix row."""
+        """1D ndarray of np.float64 unweighted-N for each matrix row."""
         # --- only row-selecteds contribute ([:, 0, :]), sum is across columns (axis=1
         # --- after rows sel/not axis is collapsed), rows are retained.
         return np.sum(self._unweighted_counts[:, 0, :], axis=1)
 
     @lazyproperty
     def rows_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row.
+        """1D np.float64 ndarray of unweighted-N for each matrix row.
 
         These values include both the selected and unselected counts of the MR rows
         dimension.
@@ -344,7 +344,7 @@ class _MrXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def table_base(self):
-        """1D np.int64 ndarray (column) of unweighted-N for each row of matrix.
+        """1D np.float64 ndarray (column) of unweighted-N for each row of matrix.
 
         Since the rows-dimension is MR, each row has a distinct base, since not all of
         the multiple responses were necessarily offered to all respondents. The base for
@@ -354,12 +354,12 @@ class _MrXCatUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def table_bases(self):
-        """2D np.int64 ndarray of table-proportion denominator for each matrix cell."""
+        """2D np.float64 ndarray of table-proportion denominator for each matrix cell."""
         return np.broadcast_to(self.table_base[:, None], self.unweighted_counts.shape)
 
     @lazyproperty
     def unweighted_counts(self):
-        """2D np.int64 ndarray of unweighted-count for each valid matrix cell."""
+        """2D np.float64 ndarray of unweighted-count for each valid matrix cell."""
         return self._unweighted_counts[:, 0, :]
 
 
@@ -371,7 +371,7 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def columns_base(self):
-        """2D np.int64 ndarray of unweighted-N for this matrix.
+        """2D np.float64 ndarray of unweighted-N for this matrix.
 
         An MR_X_MR matrix has a distinct column-base for each cell. This is because not
         all responses (subvars) are necessarily presented to each respondent. The
@@ -382,7 +382,7 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def columns_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix column.
+        """1D np.float64 ndarray of unweighted-N for each matrix column.
 
         This includes both selected and unselected counts for the row MR but only
         column-selecteds contribute.
@@ -391,13 +391,13 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def row_bases(self):
-        """2D np.int64 ndarray of unweighted row-proportion denominator per cell."""
+        """2D np.float64 ndarray of unweighted row-proportion denominator per cell."""
         # --- in the MR_X_MR case, rows-base is already the 2D row-unweighted-bases ---
         return self.rows_base
 
     @lazyproperty
     def rows_base(self):
-        """2D np.int64 ndarray of unweighted-N for this matrix.
+        """2D np.float64 ndarray of unweighted-N for this matrix.
 
         An MR_X matrix has a distinct row-base for each cell, the sum of sel-sel and
         sel-not for each cell
@@ -409,7 +409,7 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def rows_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row.
+        """1D np.float64 ndarray of unweighted-N for each matrix row.
 
         This includes both selected and unselected counts for the column MR, but only
         selecteds are considered for the rows dimension.
@@ -418,7 +418,7 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def table_base(self):
-        """2D np.int64 ndarray of distinct unweighted N for each cell of matrix.
+        """2D np.float64 ndarray of distinct unweighted N for each cell of matrix.
 
         Because the matrix is MR_X_MR, each cell corresponds to a 2x2 sub-table
         (selected/not on each axis), each of which has its own distinct table-base.
@@ -432,13 +432,13 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
 
     @lazyproperty
     def table_bases(self):
-        """2D np.int64 ndarray of table-proportion denominator for each matrix cell."""
+        """2D np.float64 ndarray of table-proportion denominator for each matrix cell."""
         # --- in the MR_X_MR case, table-base is already the 2D table-bases.
         return self.table_base
 
     @lazyproperty
     def unweighted_counts(self):
-        """2D np.int64 ndarray of unweighted-count for each valid matrix cell."""
+        """2D np.float64 ndarray of unweighted-count for each valid matrix cell."""
         # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
         return self._unweighted_counts[:, 0, :, 0]
 
@@ -478,7 +478,7 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
 
     @lazyproperty
     def columns_margin(self):
-        """1D ndarray of np.float/int64 weighted-N for each matrix column."""
+        """1D ndarray of np.float64 weighted-N for each matrix column."""
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `.columns_margin`" % type(self).__name__
         )
@@ -518,7 +518,10 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
 
     @lazyproperty
     def weighted_counts(self):
-        """2D np.int64 ndarray of weighted-count for each valid matrix cell."""
+        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
+
+        If cube is unweighted, this is the same as unweighted_counts.
+        """
         raise NotImplementedError(  # pragma: no cover
             "`%s` must implement `.weighted_counts`" % type(self).__name__
         )
@@ -529,7 +532,7 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def columns_margin(self):
-        """1D ndarray of np.float64 (or np.int64) weighted N for each matrix column."""
+        """1D ndarray of np.float64 weighted N for each matrix column."""
         return np.sum(self._weighted_counts, axis=0)
 
     @lazyproperty
@@ -539,10 +542,7 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def rows_margin(self):
-        """1D np.float/int64 ndarray of weighted-N for each matrix row.
-
-        Values are `np.int64` when the source cube-result is not weighted.
-        """
+        """1D np.float64 ndarray of weighted-N for each matrix row."""
         return np.sum(self._weighted_counts, axis=1)
 
     @lazyproperty
@@ -552,21 +552,19 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def table_margin(self):
-        """Scalar np.float/int64 weighted-N for overall table.
+        """Scalar np.float64 weighted-N for overall table.
 
         This is the weighted count of respondents who provided a valid response to
         both questions. Because both dimensions are CAT, the table-margin value is the
-        same for all cells of the matrix. Value is np.int64 when source cube-result is
-        unweighted.
+        same for all cells of the matrix.
         """
         return np.sum(self._weighted_counts)
 
     @lazyproperty
     def weighted_counts(self):
-        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
 
-        The cell values are np.int64 when the cube-result has no weight, in which case
-        these values are the same as the unweighted-counts.
+        If cube is unweighted, this is the same as unweighted_counts.
         """
         return self._weighted_counts
 
@@ -580,7 +578,7 @@ class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def columns_margin(self):
-        """1D ndarray of np.float/int64 weighted N for each matrix column."""
+        """1D ndarray of np.float64 weighted N for each matrix column."""
         # --- only selected counts contribute to the columns margin, which is summed
         # --- across the rows (axis 0).
         return np.sum(self._weighted_counts[:, :, 0], axis=0)
@@ -613,7 +611,7 @@ class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def table_margin(self):
-        """1D np.float/int64 ndarray of weighted-N for each column of matrix.
+        """1D np.float64 ndarray of weighted-N for each column of matrix.
 
         Because the matrix is X_MR, each column has a distinct table margin.
         """
@@ -623,10 +621,9 @@ class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def weighted_counts(self):
-        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
 
-        The cell values are np.int64 when the cube-result has no weight, in which case
-        these values are the same as the unweighted-counts.
+        If cube is unweighted, this is the same as unweighted_counts.
         """
         return self._weighted_counts[:, :, 0]
 
@@ -656,10 +653,7 @@ class _MrXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def rows_margin(self):
-        """1D np.float/int64 ndarray of weighted-N for each matrix row.
-
-        Values are `np.int64` when the source cube-result is not weighted.
-        """
+        """1D np.float64 ndarray of weighted-N for each matrix row."""
         return np.sum(self.weighted_counts, axis=1)
 
     @lazyproperty
@@ -669,20 +663,21 @@ class _MrXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def table_margin(self):
-        """1D np.float/int64 ndarray of weighted-N for each row of matrix.
+        """1D np.float64 ndarray of weighted-N for each row of matrix.
 
         Since the rows-dimension is MR, each row has a distinct table margin, since not
         all of the multiple responses were necessarily offered to all respondents. The
         table-margin for each row indicates the weighted number of respondents who were
         offered that option.
-
-        The values are np.int64 when the source cube-result is unweighted.
         """
         return np.sum(self._weighted_counts, axis=(1, 2))
 
     @lazyproperty
     def weighted_counts(self):
-        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell."""
+        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
+
+        If cube is unweighted, this is the same as unweighted_counts.
+        """
         return self._weighted_counts[:, 0, :]
 
 
@@ -732,7 +727,7 @@ class _MrXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def table_margin(self):
-        """2D np.float/int64 ndarray of weighted-N for each cell of matrix.
+        """2D np.float64 ndarray of weighted-N for each cell of matrix.
 
         Because the matrix is MR_X_MR, each cell corresponds to a 2x2 sub-table
         (selected/not on each axis), each of which has its own distinct table-margin.
@@ -745,11 +740,10 @@ class _MrXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def weighted_counts(self):
-        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
 
-        The cell values are np.int64 when the cube-result has no weight, in which case
-        these values are the same as the unweighted-counts. Only *selected* counts
-        contribute to these values.
+        If cube is unweighted, this is the same as unweighted_counts. Only *selected*
+        counts contribute to these values.
         """
         return self._weighted_counts[:, 0, :, 0]
 
@@ -803,7 +797,7 @@ class BaseCubeResultMatrix(object):
 
     @lazyproperty
     def columns_base(self):
-        """1D/2D np.int64 ndarray of unweighted-N for each matrix column/cell."""
+        """1D/2D np.float64 ndarray of unweighted-N for each matrix column/cell."""
         raise NotImplementedError(
             "`%s` must implement `.columns_base`" % type(self).__name__
         )  # pragma: no cover
@@ -822,14 +816,14 @@ class BaseCubeResultMatrix(object):
 
     @lazyproperty
     def columns_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix column."""
+        """1D np.float64 ndarray of unweighted-N for each matrix column."""
         raise NotImplementedError(
             "`%s` must implement `.columns_pruning_base`" % type(self).__name__
         )  # pragma: no cover
 
     @lazyproperty
     def rows_base(self):
-        """1D/2D np.int64 ndarray of unweighted-N for each matrix row/cell."""
+        """1D/2D np.float64 ndarray of unweighted-N for each matrix row/cell."""
         raise NotImplementedError(
             "`%s` must implement `.rows_base`" % type(self).__name__
         )  # pragma: no cover
@@ -841,21 +835,21 @@ class BaseCubeResultMatrix(object):
 
     @lazyproperty
     def rows_margin(self):
-        """1D/2D np.int64 ndarray of weighted-N for each matrix row/cell."""
+        """1D/2D np.float64 ndarray of weighted-N for each matrix row/cell."""
         raise NotImplementedError(
             "`%s` must implement `.rows_margin`" % type(self).__name__
         )  # pragma: no cover
 
     @lazyproperty
     def rows_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row."""
+        """1D np.float64 ndarray of unweighted-N for each matrix row."""
         raise NotImplementedError(
             "`%s` must implement `.rows_pruning_base`" % type(self).__name__
         )  # pragma: no cover
 
     @lazyproperty
     def table_base(self):
-        """Scalar, 1D, or 2D ndarray of np.int64 unweighted-N for this slice.
+        """Scalar, 1D, or 2D ndarray of np.float64 unweighted-N for this slice.
 
         This value has four distinct forms, depending on the subclass.
         """
@@ -865,7 +859,7 @@ class BaseCubeResultMatrix(object):
 
     @lazyproperty
     def table_margin(self):
-        """np.float/int64 scalar or a 1D or 2D np.float/int64 ndarray table margin.
+        """np.float64 scalar or a 1D or 2D np.float64 ndarray table margin.
 
         The table margin is the overall sample size of the matrix. This is the weighted
         count of respondents who were asked both questions and provided a valid response
@@ -889,17 +883,16 @@ class BaseCubeResultMatrix(object):
 
     @lazyproperty
     def unweighted_counts(self):
-        """2D np.int64 ndarray of unweighted-count for each valid matrix cell."""
+        """2D np.float64 ndarray of unweighted-count for each valid matrix cell."""
         raise NotImplementedError(
             "`%s` must implement `.unweighted_counts" % type(self).__name__
         )  # pragma: no cover
 
     @lazyproperty
     def weighted_counts(self):
-        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
 
-        The cell values are np.int64 when the cube-result has no weight, in which case
-        these values are the same as the unweighted-counts.
+        If cube is unweighted, this is the same as unweighted_counts.
         """
         raise NotImplementedError(
             "`%s` must implement `.weighted_counts`" % type(self).__name__
@@ -1046,17 +1039,17 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
 
     @lazyproperty
     def columns_base(self):
-        """1D ndarray of np.int64 unweighted-N for each matrix column."""
+        """1D ndarray of np.float64 unweighted-N for each matrix column."""
         return np.sum(self.unweighted_counts, axis=0)
 
     @lazyproperty
     def columns_margin(self):
-        """1D ndarray of np.float64 (or np.int64) weighted N for each matrix column."""
+        """1D ndarray of np.float64 weighted N for each matrix column."""
         return np.sum(self.weighted_counts, axis=0)
 
     @lazyproperty
     def columns_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix column.
+        """1D np.float64 ndarray of unweighted-N for each matrix column.
 
         Because this matrix has no MR dimension, this is simply the sum of unweighted
         counts for each column.
@@ -1065,20 +1058,17 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
 
     @lazyproperty
     def rows_base(self):
-        """1D ndarray of np.int64 unweighted-N for each matrix row."""
+        """1D ndarray of np.float64 unweighted-N for each matrix row."""
         return np.sum(self.unweighted_counts, axis=1)
 
     @lazyproperty
     def rows_margin(self):
-        """1D np.float/int64 ndarray of weighted-N for each matrix row.
-
-        Values are `np.int64` when the source cube-result is not weighted.
-        """
+        """1D np.float64 ndarray of weighted-N for each matrix row."""
         return np.sum(self._weighted_counts, axis=1)
 
     @lazyproperty
     def rows_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row.
+        """1D np.float64 ndarray of unweighted-N for each matrix row.
 
         Because this matrix has no MR dimension, this is simply the sum of unweighted
         counts for each row.
@@ -1087,7 +1077,7 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
 
     @lazyproperty
     def table_base(self):
-        """np.int64 count of actual respondents who answered both questions.
+        """np.float64 count of actual respondents who answered both questions.
 
         Each dimension of a CAT_X_CAT matrix represents a categorical question. Only
         responses that include answers to both those questions appear as entries in the
@@ -1098,12 +1088,11 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
 
     @lazyproperty
     def table_margin(self):
-        """Scalar np.float/int64 weighted-N for overall table.
+        """Scalar np.float64 weighted-N for overall table.
 
         This is the weighted count of respondents who provided a valid response to
         both questions. Because both dimensions are CAT, the table-margin value is the
-        same for all cells of the matrix. Value is np.int64 when source cube-result is
-        unweighted.
+        same for all cells of the matrix.
         """
         return np.sum(self._weighted_counts)
 
@@ -1117,7 +1106,7 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
 
     @lazyproperty
     def unweighted_counts(self):
-        """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of unweighted-count for each valid matrix cell.
 
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
@@ -1125,10 +1114,9 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
 
     @lazyproperty
     def weighted_counts(self):
-        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
 
-        The cell values are np.int64 when the cube-result has no weight, in which case
-        these values are the same as the unweighted-counts.
+        If cube is unweighted, this is the same as unweighted_counts.
         """
         return self._weighted_counts
 
@@ -1202,7 +1190,8 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
 class _CatXMrMatrix(_CatXCatMatrix):
     """Represents a CAT x MR slice.
 
-    Its `._counts` is a 3D ndarray with axes (rows, cols, selected/not), like:
+    Its `._counts` is a 3D ndarray of np.float64 with axes (rows, cols, selected/not),
+    like:
 
         [[[1002.52343241 1247.791605  ]
           [ 765.95079804 1484.36423937]
@@ -1223,14 +1212,11 @@ class _CatXMrMatrix(_CatXCatMatrix):
          [[   9.83166357   25.9551254 ]
           [   8.23140253   27.55538645]
           [  22.214956     13.57183298]]]
-
-    Each value is np.float64 if the cube-result is weighted (as in this example), or
-    np.int64 if unweighted.
     """
 
     @lazyproperty
     def columns_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix column.
+        """1D np.float64 ndarray of unweighted-N for each matrix column.
 
         These values include both the selected and unselected counts of the MR columns
         dimension.
@@ -1239,7 +1225,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def rows_base(self):
-        """2D np.int64 ndarray of row-wise unweighted-N for this matrix.
+        """2D np.float64 ndarray of row-wise unweighted-N for this matrix.
 
         An X_MR matrix has a distinct row-base for each cell. This is because not all
         responses (subvars) are necessarily presented to each respondent. The
@@ -1261,7 +1247,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def rows_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row.
+        """1D np.float64 ndarray of unweighted-N for each matrix row.
 
         These values include both the selected and unselected counts of the MR columns
         dimension.
@@ -1270,7 +1256,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def table_base(self):
-        """1D np.int64 unweighted N for each column of matrix.
+        """1D np.float64 unweighted N for each column of matrix.
 
         Because the matrix is X_MR, each column has a distinct table base.
         """
@@ -1280,7 +1266,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def table_margin(self):
-        """1D np.float/int64 ndarray of weighted-N for each column of matrix.
+        """1D np.float64 ndarray of weighted-N for each column of matrix.
 
         Because the matrix is X_MR, each column has a distinct table margin.
         """
@@ -1290,7 +1276,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def unweighted_counts(self):
-        """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of unweighted-count for each valid matrix cell.
 
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
@@ -1298,11 +1284,11 @@ class _CatXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def weighted_counts(self):
-        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
 
         A valid matrix cell is one whose row and column elements are both non-missing.
-        The cell values are np.int64 when the cube-result has no weight, in which case
-        these values are the same as the unweighted-counts.
+        If the cube-result has no weight, these values are the same as the
+        unweighted-counts.
         """
         return self._weighted_counts[:, :, 0]
 
@@ -1360,7 +1346,7 @@ class _CatXMrMatrix(_CatXCatMatrix):
 class _MrXCatMatrix(BaseCubeResultMatrix):
     """Represents an MR_X_CAT slice.
 
-    Its `._counts` is a 3D ndarray with axes (rows, sel/not, cols), like:
+    Its `._counts` is a 3D ndarray of np.float64 with axes (rows, sel/not, cols), like:
 
         [[[ 39  44  24  35]
           [389 447 266 394]]
@@ -1373,14 +1359,11 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
 
          [[  0   0   0   0]
           [428 491 290 429]]]
-
-    Each value is np.float64, or np.int64 if the cube-result is unweighted (as in this
-    example).
     """
 
     @lazyproperty
     def columns_base(self):
-        """2D np.int64 ndarray of unweighted-N for this matrix.
+        """2D np.float64 ndarray of unweighted-N for this matrix.
 
         An MR_X matrix has a distinct column-base for each cell. This is because not all
         responses (subvars) are necessarily presented to each respondent. The
@@ -1402,7 +1385,7 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
 
     @lazyproperty
     def columns_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix column.
+        """1D np.float64 ndarray of unweighted-N for each matrix column.
 
         These values include both the selected and unselected counts of the MR rows
         dimension.
@@ -1411,7 +1394,7 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
 
     @lazyproperty
     def rows_base(self):
-        """1D ndarray of np.int64 unweighted-N for each matrix row.
+        """1D ndarray of np.float64 unweighted-N for each matrix row.
 
         Only selected values contribute to the rows-base.
         """
@@ -1419,16 +1402,15 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
 
     @lazyproperty
     def rows_margin(self):
-        """1D np.float/int64 ndarray of weighted-N for each matrix row.
+        """1D np.float64 ndarray of weighted-N for each matrix row.
 
-        Values are `np.int64` when the source cube-result is not weighted. Only selected
-        values contribute to the rows-margin.
+        Only selected values contribute to the rows-margin.
         """
         return np.sum(self._weighted_counts[:, 0, :], axis=1)
 
     @lazyproperty
     def rows_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row.
+        """1D np.float64 ndarray of unweighted-N for each matrix row.
 
         These values include both the selected and unselected counts of the MR rows
         dimension.
@@ -1437,7 +1419,7 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
 
     @lazyproperty
     def table_base(self):
-        """1D np.int64 ndarray of unweighted N for each row of matrix.
+        """1D np.float64 ndarray of unweighted N for each row of matrix.
 
         Since the rows-dimension is MR, each row has a distinct base, since not all of
         the multiple responses were necessarily offered to all respondents. The base for
@@ -1447,14 +1429,12 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
 
     @lazyproperty
     def table_margin(self):
-        """1D np.float/int64 ndarray of weighted-N for each row of matrix.
+        """1D np.float64 ndarray of weighted-N for each row of matrix.
 
         Since the rows-dimension is MR, each row has a distinct table margin, since not
         all of the multiple responses were necessarily offered to all respondents. The
         table-margin for each row indicates the weighted number of respondents who were
         offered that option.
-
-        The values are np.int64 when the source cube-result is unweighted.
         """
         return np.sum(self._weighted_counts, axis=(1, 2))
 
@@ -1468,7 +1448,7 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
 
     @lazyproperty
     def unweighted_counts(self):
-        """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of unweighted-count for each valid matrix cell.
 
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
@@ -1476,11 +1456,11 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
 
     @lazyproperty
     def weighted_counts(self):
-        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
 
         A valid matrix cell is one whose row and column elements are both non-missing.
-        The cell values are np.int64 when the cube-result has no weight, in which case
-        these values are the same as the unweighted-counts.
+        When the cube-result has no weight, in which case these values are the same as
+        the unweighted-counts.
         """
         return self._weighted_counts[:, 0, :]
 
@@ -1586,7 +1566,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def columns_base(self):
-        """2D np.int64 ndarray of unweighted-N for this matrix.
+        """2D np.float64 ndarray of unweighted-N for this matrix.
 
         An MR_X_MR matrix has a distinct column-base for each cell. This is because not
         all responses (subvars) are necessarily presented to each respondent. The
@@ -1608,7 +1588,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def columns_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix column.
+        """1D np.float64 ndarray of unweighted-N for each matrix column.
 
         Because both dimensions of this matrix are MR, this includes both selected and
         unselected counts, but only for the row MR; only selecteds are considered for
@@ -1618,7 +1598,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def rows_base(self):
-        """2D np.int64 ndarray of unweighted-N for this matrix.
+        """2D np.float64 ndarray of unweighted-N for this matrix.
 
         An MR_X matrix has a distinct row-base for each cell, the sum of sel-sel and
         sel-not for each cell
@@ -1638,7 +1618,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def rows_pruning_base(self):
-        """1D np.int64 ndarray of unweighted-N for each matrix row.
+        """1D np.float64 ndarray of unweighted-N for each matrix row.
 
         Because both dimensions of this matrix are MR, this includes both selected and
         unselected counts, but only for the column MR; only selecteds are considered for
@@ -1648,7 +1628,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def table_base(self):
-        """2D np.int64 ndarray of distinct unweighted N for each cell of matrix.
+        """2D np.float64 ndarray of distinct unweighted N for each cell of matrix.
 
         Because the matrix is MR_X_MR, each cell corresponds to a 2x2 sub-table
         (selected/not on each axis), each of which has its own distinct table-base.
@@ -1662,7 +1642,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def table_margin(self):
-        """2D np.float/int64 ndarray of weighted N for each cell of matrix.
+        """2D np.float64 ndarray of weighted N for each cell of matrix.
 
         Because the matrix is MR_X_MR, each cell corresponds to a 2x2 sub-table
         (selected/not on each axis), each of which has its own distinct table-margin.
@@ -1675,7 +1655,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def unweighted_counts(self):
-        """2D np.int64 ndarray of unweighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of unweighted-count for each valid matrix cell.
 
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
@@ -1683,11 +1663,10 @@ class _MrXMrMatrix(_CatXCatMatrix):
 
     @lazyproperty
     def weighted_counts(self):
-        """2D np.float/int64 ndarray of weighted-count for each valid matrix cell.
+        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
 
-        The cell values are np.int64 when the cube-result has no weight, in which case
-        these values are the same as the unweighted-counts. Only *selected* counts
-        contribute to these values.
+        When the cube-result has no weight, these values are the same as the
+        unweighted-counts. Only *selected* counts contribute to these values.
         """
         return self._weighted_counts[:, 0, :, 0]
 
@@ -1811,7 +1790,7 @@ class _NumArrayXCatMeansMatrix(_CatXCatMeansMatrix):
 
     @lazyproperty
     def columns_base(self):
-        """2D np.int64 ndarray of unweighted-N for this matrix.
+        """2D np.float64 ndarray of unweighted-N for this matrix.
 
         In this case the columns base correspond to the unweighted counts that for the
         numeric arrays cases corresponds to the valid counts measure result.
@@ -1824,7 +1803,7 @@ class _NumArrayXMrMeansMatrix(_CatXMrMeansMatrix):
 
     @lazyproperty
     def columns_base(self):
-        """2D np.int64 ndarray of unweighted-N for this matrix.
+        """2D np.float64 ndarray of unweighted-N for this matrix.
 
         A NUM_ARR_X_MR matrix has a distinct column-base for each cell. In this case
         the column base is the unweighted counts sliced for all the subvar on the NUM
