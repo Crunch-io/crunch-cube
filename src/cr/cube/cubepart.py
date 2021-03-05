@@ -1572,6 +1572,8 @@ class _Nub(CubePartition):
 
     @lazyproperty
     def is_empty(self):
+        if self.unweighted_count <= 0:
+            return True
         return math.isnan(self.unweighted_count)
 
     @lazyproperty
