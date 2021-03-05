@@ -48,9 +48,9 @@ class StripeMeasures(object):
         return _ScaledCounts(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
-    def sum(self):
-        """_Sum measure object for this stripe."""
-        return _Sum(self._rows_dimension, self, self._cube_measures)
+    def sums(self):
+        """_Sums measure object for this stripe."""
+        return _Sums(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
     def table_proportion_stddevs(self):
@@ -310,7 +310,7 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         return self._weighted_cube_counts.weighted_counts[self._has_numeric_value]
 
 
-class _Sum(_BaseSecondOrderMeasure):
+class _Sums(_BaseSecondOrderMeasure):
     """Provides the sum measure for a stripe.
 
     Relies on the presence of a sum cube-measure in the cube-result.
@@ -319,7 +319,7 @@ class _Sum(_BaseSecondOrderMeasure):
     @lazyproperty
     def base_values(self):
         """1D np.float64 ndarray of sum for each row."""
-        return self._cube_measures.cube_sum.sum
+        return self._cube_measures.cube_sum.sums
 
     @lazyproperty
     def subtotal_values(self):

@@ -263,12 +263,12 @@ class Assembler(object):
         )
 
     @lazyproperty
-    def sum(self):
+    def sums(self):
         """2D optional np.float64 ndarray of sum for each cell.
 
         Raises `ValueError` if the cube-result does not include a sum cube-measure.
         """
-        return self._assemble_matrix(self._measures.sum.blocks)
+        return self._assemble_matrix(self._measures.sums.blocks)
 
     @lazyproperty
     def table_base(self):

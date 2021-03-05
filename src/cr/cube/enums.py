@@ -82,4 +82,4 @@ class MEASURE(enum.Enum):
     Z_SCORE = "z_score"
 
 
-NUMERIC_MEASURES = {MEASURE.SUM.value, MEASURE.MEAN.value}
+NUMERIC_MEASURES = frozenset((MEASURE.SUM, MEASURE.MEAN))

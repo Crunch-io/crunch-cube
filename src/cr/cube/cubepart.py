@@ -919,13 +919,14 @@ class _Slice(CubePartition):
         return self._columns_dimension._dimension_dict
 
     @lazyproperty
-    def sum(self):
+    def sums(self):
         """2D optional np.float64 ndarray of sum value for each table cell.
+
         Cell value is `np.nan` for each cell corresponding to an inserted subtotal
         (sum of addend cells cannot simply be added to get the sum of the subtotal).
         Raises `ValueError` if the cube-result does not include a sum cube-measure.
         """
-        return self._assembler.sum
+        return self._assembler.sums
 
     @lazyproperty
     def summary_pairwise_indices(self):
@@ -1409,12 +1410,13 @@ class _Strand(CubePartition):
         return self._rows_dimension._dimension_dict
 
     @lazyproperty
-    def sum(self):
+    def sums(self):
         """1D np.float64 ndarray of sum for each row of strand.
+
         Raises ValueError when accessed on a cube-result that does not contain a sum
         cube-measure.
         """
-        return self._assembler.sum
+        return self._assembler.sums
 
     @lazyproperty
     def table_base_range(self):

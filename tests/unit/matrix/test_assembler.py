@@ -257,10 +257,10 @@ class DescribeAssembler(object):
         assert assembler.means == pytest.approx([1.2, 1.34, 3.3])
 
     def it_knows_the_sum(self, request, dimensions_):
-        property_mock(request, Assembler, "sum", return_value=np.array([4, 5, 6]))
+        property_mock(request, Assembler, "sums", return_value=np.array([4, 5, 6]))
         assembler = Assembler(None, dimensions_, None)
 
-        assert assembler.sum == pytest.approx([4, 5, 6])
+        assert assembler.sums == pytest.approx([4, 5, 6])
 
     def it_knows_the_pvalues(self, request):
         property_mock(

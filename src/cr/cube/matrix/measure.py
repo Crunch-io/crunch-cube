@@ -47,8 +47,8 @@ class SecondOrderMeasures(object):
 
     @lazyproperty
     def means(self):
-        """1D np.float ndarray of means for each matrix row."""
-        return _Mean(self._dimensions, self, self._cube_measures)
+        """_Means measure object for this cube-result"""
+        return _Means(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def row_proportions(self):
@@ -71,9 +71,9 @@ class SecondOrderMeasures(object):
         return self._cube_measures.unweighted_cube_counts.rows_pruning_base
 
     @lazyproperty
-    def sum(self):
-        """1D np.float ndarray of sum for each matrix row."""
-        return _Sum(self._dimensions, self, self._cube_measures)
+    def sums(self):
+        """_Sums measure object for this cube-result"""
+        return _Sums(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def table_unweighted_bases(self):
@@ -148,10 +148,6 @@ class _BaseSecondOrderMeasure(object):
         )
 
     @lazyproperty
-    def _means(self):
-        return self._cube_measures.means
-
-    @lazyproperty
     def _subtotal_columns(self):
         """2D np.float64 ndarray of inserted column proportions denominator value.
 
@@ -170,10 +166,6 @@ class _BaseSecondOrderMeasure(object):
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `._subtotal_rows`" % type(self).__name__
         )
-
-    @lazyproperty
-    def _sum(self):
-        return self._cube_measures.sum
 
     @lazyproperty
     def _unweighted_cube_counts(self):
@@ -370,13 +362,15 @@ class _ColumnWeightedBases(_BaseSecondOrderMeasure):
         )
 
 
-class _Mean(_BaseSecondOrderMeasure):
+class _Means(_BaseSecondOrderMeasure):
     """Provides the mean measure for a matrix."""
 
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        return NanSubtotals.blocks(self._means.means, self._dimensions)
+        return NanSubtotals.blocks(
+            self._cube_measures.cube_means.means, self._dimensions
+        )
 
 
 class _RowProportions(_BaseSecondOrderMeasure):
@@ -551,13 +545,13 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
         return SumSubtotals.subtotal_rows(self._base_values, self._dimensions)
 
 
-class _Sum(_BaseSecondOrderMeasure):
+class _Sums(_BaseSecondOrderMeasure):
     """Provides the sum measure for a matrix."""
 
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        return NanSubtotals.blocks(self._sum.sum, self._dimensions)
+        return NanSubtotals.blocks(self._cube_measures.cube_sum.sums, self._dimensions)
 
 
 class _TableUnweightedBases(_BaseSecondOrderMeasure):

@@ -173,9 +173,10 @@ class CubeSet(object):
 
     @lazyproperty
     def _is_numeric_measure(self):
-        """True when CubeSet is special-case "numeric-mean" case requiring inflation.
+        """True when CubeSet is special-case "numeric-measure" case requiring inflation.
 
-        When a numeric variable appears as the rows-dimension in a multitable analysis,
+        When a numeric variable with `mean`, `sum` or `std_dev` summary statistic
+        expressed in its view, appears as the rows-dimension in a multitable analysis,
         its cube-result has been "reduced" to the mean-value of those numerics. This is
         in contrast to being "bucketized" into an arbitrary set of numeric-range
         categories like 0-5, 5-10, etc. In the process, as an artifact of the ZZ9 query
@@ -377,11 +378,11 @@ class Cube(object):
         return self._measures.population_fraction
 
     @lazyproperty
-    def sum(self):
+    def sums(self):
         """Optional float64 ndarray of the cube_sum if the measure exists."""
-        if self._measures.sum is None:
+        if self._measures.sums is None:
             return None
-        return self._measures.sum.raw_cube_array[self._valid_idxs].astype(np.float64)
+        return self._measures.sums.raw_cube_array[self._valid_idxs].astype(np.float64)
 
     @lazyproperty
     def title(self):
@@ -515,7 +516,8 @@ class Cube(object):
         Basically the numeric measures are the intersection between all the measures
         within the cube response and the defined QUANTITY_OF_INTEREST_MEASURES.
         """
-        return list(self.available_measures.intersection(NUMERIC_MEASURES))
+        numeric_measures = [measure.value for measure in NUMERIC_MEASURES]
+        return list(self.available_measures.intersection(numeric_measures))
 
     @lazyproperty
     def _measures(self):
@@ -615,8 +617,8 @@ class _Measures(object):
         """numeric representing count of missing rows in cube response."""
         if self.means is not None:
             return self.means.missing_count
-        if self.sum:
-            return self.sum.missing_count
+        if self.sums:
+            return self.sums.missing_count
         return self._cube_dict["result"].get("missing", 0)
 
     @lazyproperty
@@ -660,17 +662,17 @@ class _Measures(object):
             return 1.0
 
     @lazyproperty
-    def sum(self):
+    def sums(self):
         """_SumMeasure object providing access to cube sum values.
 
         None when the cube response does not contain a sum measure.
         """
-        sum_measure_dict = (
+        sums_measure_dict = (
             self._cube_dict.get("result", {}).get("measures", {}).get("sum")
         )
         return (
             _SumMeasure(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
-            if sum_measure_dict
+            if sums_measure_dict
             else None
         )
 

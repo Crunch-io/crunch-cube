@@ -24,12 +24,12 @@ class CubeMeasures(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
-    def means(self):
+    def cube_means(self):
         """_BaseCubeMeans subclass object for this cube-result."""
         return _BaseCubeMeans.factory(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
-    def sum(self):
+    def cube_sum(self):
         """_BaseCubeSums subclass object for this cube-result."""
         return _BaseCubeSums.factory(self._cube, self._dimensions, self._slice_idx)
 
@@ -102,9 +102,7 @@ class _BaseCubeMeans(_BaseCubeMeasure):
             else _CatXCatCubeMeans
         )
         if cube.means is None:
-            raise ValueError(
-                "`.means` is undefined for a cube-result without a means measure"
-            )
+            raise ValueError("cube-result does not contain cube-means measure")
         return CubeMeansCls(
             dimensions, cube.means[cls._slice_idx_expr(cube, slice_idx)]
         )
@@ -113,7 +111,7 @@ class _BaseCubeMeans(_BaseCubeMeasure):
     def means(self):
         """2D np.float64 ndarray of cube means."""
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `.means`" % type(self).__name__
+            "`%s` must implement `.means`" % type(self).__name__
         )
 
 
@@ -183,58 +181,56 @@ class _BaseCubeSums(_BaseCubeMeasure):
             if dimension_types[1] == DT.MR
             else _CatXCatCubeSums
         )
-        if cube.sum is None:
-            raise ValueError(
-                "`.sum` is undefined for a cube-result without a sum measure"
-            )
-        return CubeSumsCls(dimensions, cube.sum[cls._slice_idx_expr(cube, slice_idx)])
+        if cube.sums is None:
+            raise ValueError("cube-result does not contain cube-sum measure")
+        return CubeSumsCls(dimensions, cube.sums[cls._slice_idx_expr(cube, slice_idx)])
 
     @lazyproperty
-    def sum(self):
+    def sums(self):
         """2D np.float64 ndarray of cube sum."""
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `.sum`" % type(self).__name__
+            "`%s` must implement `.sum`" % type(self).__name__
         )
 
 
 class _CatXCatCubeSums(_BaseCubeSums):
-    """Sum cube-measure for a slice with no MR dimensions."""
+    """Sums cube-measure for a slice with no MR dimensions."""
 
     @lazyproperty
-    def sum(self):
+    def sums(self):
         """2D np.float64 ndarray of sum for each valid matrix cell."""
         return self._sums
 
 
 class _CatXMrCubeSums(_BaseCubeSums):
-    """Sum cube-measure for a NOT_MR_X_MR slice.
+    """Sums cube-measure for a NOT_MR_X_MR slice.
 
     Note that the rows-dimensions need not actually be CAT.
     """
 
     @lazyproperty
-    def sum(self):
+    def sums(self):
         """2D np.float64 ndarray of sum for each valid matrix cell."""
         return self._sums[:, :, 0]
 
 
 class _MrXCatCubeSums(_BaseCubeSums):
-    """Sum cube-measure for an MR_X_NOT_MR slice.
+    """Sums cube-measure for an MR_X_NOT_MR slice.
 
     Note that the columns-dimension need not actually be CAT.
     """
 
     @lazyproperty
-    def sum(self):
+    def sums(self):
         """2D np.float64 ndarray of sum for each valid matrix cell."""
         return self._sums[:, 0, :]
 
 
 class _MrXMrCubeSums(_BaseCubeSums):
-    """Sum cube-measure for an MR_X_MR slice."""
+    """Sums cube-measure for an MR_X_MR slice."""
 
     @lazyproperty
-    def sum(self):
+    def sums(self):
         """2D np.float64 ndarray of sum for each valid matrix cell."""
         # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
         return self._sums[:, 0, :, 0]
@@ -927,20 +923,12 @@ class BaseCubeResultMatrix(object):
     """Base class for all cube-result matrix (2D second-order analyzer) objects."""
 
     def __init__(
-        self,
-        dimensions,
-        weighted_counts,
-        unweighted_counts,
-        counts_with_missings=None,
-        means=None,
-        sum=None,
+        self, dimensions, weighted_counts, unweighted_counts, counts_with_missings=None
     ):
         self._dimensions = dimensions
         self._weighted_counts = weighted_counts
         self._unweighted_counts = unweighted_counts
         self._counts_with_missings = counts_with_missings
-        self._means = means
-        self._sum = sum
 
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
@@ -1151,8 +1139,6 @@ class BaseCubeResultMatrix(object):
             cube.counts[i],
             cube.unweighted_counts[i],
             cube.counts_with_missings[i],
-            cube.means[i] if cube.means is not None else None,
-            cube.sum[i] if cube.sum is not None else None,
         )
 
     @lazyproperty

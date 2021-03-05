@@ -320,7 +320,7 @@ class Describe_BaseCubeSum(object):
             autospec=False,
         )
         cube_.dimension_types = dimension_types
-        cube_.sum = [[1, 2], [3, 4]]
+        cube_.sums = [[1, 2], [3, 4]]
 
         cube_sums = _BaseCubeSums.factory(cube_, dimensions_, slice_idx=7)
 
@@ -336,12 +336,12 @@ class Describe_CatXCatCubeSums(object):
         property_mock(
             request,
             _CatXCatCubeSums,
-            "sum",
+            "sums",
             return_value=np.array([[1.1, 2.3, 3.3], [3.4, 1.5, 1.6]]),
         )
         cube_sum = _CatXCatCubeSums(None, None)
 
-        assert cube_sum.sum.tolist() == [
+        assert cube_sum.sums.tolist() == [
             [1.1, 2.3, 3.3],
             [3.4, 1.5, 1.6],
         ]
@@ -353,7 +353,7 @@ class Describe_CatXMrCubeSum(object):
     def it_knows_its_sum(self, raw_sums):
         cube_sum = _CatXMrCubeSums(None, raw_sums)
 
-        assert cube_sum.sum.tolist() == [
+        assert cube_sum.sums.tolist() == [
             [1.1, 2.2, 3.2],
             [4.3, 5.1, 6.1],
         ]
@@ -387,7 +387,7 @@ class Describe_MrXCatCubeSum(object):
     def it_knows_its_sum(self, raw_sums):
         cube_sum = _MrXCatCubeSums(None, raw_sums)
 
-        assert cube_sum.sum.tolist() == [
+        assert cube_sum.sums.tolist() == [
             [1.1, 6.1],
             [4.3, 3.1],
         ]
@@ -421,7 +421,7 @@ class Describe_MrXMrCubeSum(object):
     def it_knows_its_sums(self, raw_sums):
         cube_sum = _MrXMrCubeSums(None, raw_sums)
 
-        assert cube_sum.sum.tolist() == [
+        assert cube_sum.sums.tolist() == [
             [0.1, 0.1],
             [0.4, 0.5],
         ]
@@ -1451,7 +1451,7 @@ class DescribeBaseCubeResultMatrix(object):
         sliced_counts = BaseCubeResultMatrix._sliced_counts(cube_, slice_idx=23)
 
         _regular_matrix_counts_slice.assert_called_once_with(cube_, 23)
-        counts, unweighted, with_missing, means, sum = sliced_counts
+        counts, unweighted, with_missing = sliced_counts
         assert counts.tolist() == expected
         assert unweighted.tolist() == expected
 

@@ -30,7 +30,7 @@ class CubeMeasures(object):
 
     @lazyproperty
     def cube_sum(self):
-        """_BaseCubeMeans subclass object for this stripe."""
+        """_BaseCubeSum subclass object for this stripe."""
         return _BaseCubeSums.factory(self._cube, self._rows_dimension)
 
     @lazyproperty
@@ -68,11 +68,12 @@ class _BaseCubeMeans(_BaseCubeMeasure):
     @classmethod
     def factory(cls, cube, rows_dimension):
         """Return _BaseCubeMeans subclass instance appropriate to `cube`."""
-        means = cube.means
+        if cube.means is None:
+            raise ValueError("cube-result does not contain cube-means measure")
         MeansCls = (
             _MrCubeMeans if rows_dimension.dimension_type == DT.MR else _CatCubeMeans
         )
-        return MeansCls(rows_dimension, means)
+        return MeansCls(rows_dimension, cube.means)
 
     @lazyproperty
     def means(self):
@@ -88,10 +89,6 @@ class _CatCubeMeans(_BaseCubeMeans):
     @lazyproperty
     def means(self):
         """1D np.float64 ndarray of mean for each stripe row."""
-        if self._means is None:
-            raise ValueError(
-                "`.means` is undefined for a cube-result without a means measure"
-            )
         return self._means
 
 
@@ -104,10 +101,6 @@ class _MrCubeMeans(_BaseCubeMeans):
     @lazyproperty
     def means(self):
         """1D np.float64 ndarray of mean for each stripe row."""
-        if self._means is None:
-            raise ValueError(
-                "`.means` is undefined for a cube-result without a means measure"
-            )
         return self._means[:, 0]
 
 
@@ -117,51 +110,44 @@ class _MrCubeMeans(_BaseCubeMeans):
 class _BaseCubeSums(_BaseCubeMeasure):
     """Base class for sum cube-measure variants."""
 
-    def __init__(self, rows_dimension, sum):
+    def __init__(self, rows_dimension, sums):
         super(_BaseCubeSums, self).__init__(rows_dimension)
-        self._sum = sum
+        self._sums = sums
 
     @classmethod
     def factory(cls, cube, rows_dimension):
         """Return _BaseCubeSum subclass instance appropriate to `cube`."""
-        sum = cube.sum
-        SumCls = _MrCubeSum if rows_dimension.dimension_type == DT.MR else _CatCubeSum
-        return SumCls(rows_dimension, sum)
+        if cube.sums is None:
+            raise ValueError("cube-result does not contain cube-sum measure")
+        SumCls = _MrCubeSums if rows_dimension.dimension_type == DT.MR else _CatCubeSums
+        return SumCls(rows_dimension, cube.sums)
 
     @lazyproperty
-    def sum(self):
+    def sums(self):
         """1D np.float64 ndarray of sum for each stripe row."""
         raise NotImplementedError(
             "`%s` must implement `.sum`" % type(self).__name__
         )  # pragma: no cover
 
 
-class _CatCubeSum(_BaseCubeSums):
+class _CatCubeSums(_BaseCubeSums):
     """Means cube-measure for a non-MR stripe."""
 
     @lazyproperty
-    def sum(self):
-        """1D np.float64 ndarray of mean for each stripe row."""
-        if self._sum is None:
-            raise ValueError(
-                "`.sum` is undefined for a cube-result without a sum measure"
-            )
-        return self._sum
+    def sums(self):
+        """1D np.float64 ndarray of sum for each stripe row."""
+        return self._sums
 
 
-class _MrCubeSum(_BaseCubeSums):
+class _MrCubeSums(_BaseCubeSums):
     """Means cube-measure for an MR stripe.
     Its `.means` is a 2D ndarray with axes (rows, sel/not).
     """
 
     @lazyproperty
-    def sum(self):
-        """1D np.float64 ndarray of mean for each stripe row."""
-        if self._sum is None:
-            raise ValueError(
-                "`.sum` is undefined for a cube-result without a sum measure"
-            )
-        return self._sum[:, 0]
+    def sums(self):
+        """1D np.float64 ndarray of sum for each stripe row."""
+        return self._sums[:, 0]
 
 
 # === UNWEIGHTED COUNTS ===

@@ -1486,12 +1486,14 @@ class DescribeAssembler(object):
     def it_computes_sum_cat_x_mr(self):
         slice_ = Cube(CR.SUM_CAT_X_MR).partitions[0]
 
-        assert slice_.sum == pytest.approx(np.array([[3.0, 2.0, 2.0], [0.0, 0.0, 0.0]]))
+        assert slice_.sums == pytest.approx(
+            np.array([[3.0, 2.0, 2.0], [0.0, 0.0, 0.0]])
+        )
 
     def it_computes_sum_mr_x_cat(self):
         slice_ = Cube(CR.SUM_MR_X_CAT).partitions[0]
 
-        assert slice_.sum == pytest.approx(
+        assert slice_.sums == pytest.approx(
             np.array([[3.0, 0.0], [2.0, 0.0], [2.0, 0.0]])
         )
 

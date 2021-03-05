@@ -109,7 +109,7 @@ class DescribeNumericArrays(object):
         slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
 
         np.testing.assert_almost_equal(
-            slice_.sum,
+            slice_.sums,
             [
                 #  --------Gender------------
                 # M    F

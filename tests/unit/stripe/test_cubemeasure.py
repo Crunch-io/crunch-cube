@@ -14,12 +14,12 @@ from cr.cube.stripe.cubemeasure import (
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
     _CatCubeMeans,
-    _CatCubeSum,
+    _CatCubeSums,
     _CatUnweightedCubeCounts,
     _CatWeightedCubeCounts,
     CubeMeasures,
     _MrCubeMeans,
-    _MrCubeSum,
+    _MrCubeSums,
     _MrUnweightedCubeCounts,
     _MrWeightedCubeCounts,
 )
@@ -116,7 +116,7 @@ class Describe_BaseCubeMeans(object):
             (DT.MR, _MrCubeMeans, [[1, 6], [2, 5], [3, 4]]),
         ),
     )
-    def it_provides_a_factory_for_constructing_unweighted_cube_count_objects(
+    def it_provides_a_factory_for_constructing_cube_means_objects(
         self, request, rows_dimension_type, CubeMeansCls, means
     ):
         cube_ = instance_mock(request, Cube, means=means)
@@ -143,15 +143,15 @@ class Describe_CatCubeMeans(object):
         cube_means = _CatCubeMeans(None, np.array([1.1, 2.2, 3.3]))
         assert cube_means.means == pytest.approx([1.1, 2.2, 3.3])
 
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(self):
-        cube_means = _CatCubeMeans(None, means=None)
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(
+        self, request
+    ):
+        cube_ = instance_mock(request, Cube)
+        cube_.means = None
         with pytest.raises(ValueError) as e:
-            cube_means.means
+            _CatCubeMeans(None, None).factory(cube_, None)
 
-        assert (
-            str(e.value)
-            == "`.means` is undefined for a cube-result without a means measure"
-        )
+        assert str(e.value) == "cube-result does not contain cube-means measure"
 
 
 class Describe_MrCubeMeans(object):
@@ -161,15 +161,15 @@ class Describe_MrCubeMeans(object):
         cube_means = _MrCubeMeans(None, np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
         assert cube_means.means == pytest.approx([1.1, 3.3, 5.5])
 
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(self):
-        cube_means = _MrCubeMeans(None, means=None)
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(
+        self, request
+    ):
+        cube_ = instance_mock(request, Cube)
+        cube_.means = None
         with pytest.raises(ValueError) as e:
-            cube_means.means
+            _CatCubeMeans(None, None).factory(cube_, None)
 
-        assert (
-            str(e.value)
-            == "`.means` is undefined for a cube-result without a means measure"
-        )
+        assert str(e.value) == "cube-result does not contain cube-means measure"
 
 
 # === SUM ===
@@ -179,66 +179,66 @@ class Describe_BaseCubeSums(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeSums`."""
 
     @pytest.mark.parametrize(
-        "rows_dimension_type, CubeSumCls, sum",
+        "rows_dimension_type, CubeSumCls, sums",
         (
-            (DT.CAT, _CatCubeSum, [1, 2, 3]),
-            (DT.MR, _MrCubeSum, [[1, 6], [2, 5], [3, 4]]),
+            (DT.CAT, _CatCubeSums, [1, 2, 3]),
+            (DT.MR, _MrCubeSums, [[1, 6], [2, 5], [3, 4]]),
         ),
     )
-    def it_provides_a_factory_for_constructing_unweighted_cube_count_objects(
-        self, request, rows_dimension_type, CubeSumCls, sum
+    def it_provides_a_factory_for_constructing_cube_sums_objects(
+        self, request, rows_dimension_type, CubeSumCls, sums
     ):
-        cube_ = instance_mock(request, Cube, sum=sum)
+        cube_ = instance_mock(request, Cube, sums=sums)
         rows_dimension_ = instance_mock(
             request, Dimension, dimension_type=rows_dimension_type
         )
-        cube_sum_ = instance_mock(request, CubeSumCls)
+        cube_sums_ = instance_mock(request, CubeSumCls)
         CubeSumCls_ = class_mock(
             request,
             "cr.cube.stripe.cubemeasure.%s" % CubeSumCls.__name__,
-            return_value=cube_sum_,
+            return_value=cube_sums_,
         )
 
-        cube_sum = _BaseCubeSums.factory(cube_, rows_dimension_)
+        cube_sums = _BaseCubeSums.factory(cube_, rows_dimension_)
 
-        CubeSumCls_.assert_called_once_with(rows_dimension_, sum)
-        assert cube_sum is cube_sum_
+        CubeSumCls_.assert_called_once_with(rows_dimension_, sums)
+        assert cube_sums is cube_sums_
 
 
-class Describe_CatCubeSum(object):
+class Describe_CatCubeSums(object):
     """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeSum`."""
 
     def it_knows_its_sum(self):
-        cube_sum = _CatCubeSum(None, np.array([1, 2, 3]))
-        assert cube_sum.sum == pytest.approx([1, 2, 3])
+        cube_sum = _CatCubeSums(None, np.array([1, 2, 3]))
+        assert cube_sum.sums == pytest.approx([1, 2, 3])
 
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(self):
-        cube_sum = _CatCubeSum(None, sum=None)
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sums(
+        self, request
+    ):
+        cube_ = instance_mock(request, Cube)
+        cube_.sums = None
         with pytest.raises(ValueError) as e:
-            cube_sum.sum
+            _CatCubeSums(None, None).factory(cube_, None)
 
-        assert (
-            str(e.value)
-            == "`.sum` is undefined for a cube-result without a sum measure"
-        )
+        assert str(e.value) == "cube-result does not contain cube-sum measure"
 
 
-class Describe_MrCubeSum(object):
+class Describe_MrCubeSums(object):
     """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeSum`."""
 
     def it_knows_its_sum(self):
-        cube_sum = _MrCubeSum(None, np.array([[1, 2], [3, 4], [5, 6]]))
-        assert cube_sum.sum == pytest.approx([1, 3, 5])
+        cube_sum = _MrCubeSums(None, np.array([[1, 2], [3, 4], [5, 6]]))
+        assert cube_sum.sums == pytest.approx([1, 3, 5])
 
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(self):
-        cube_sum = _MrCubeSum(None, sum=None)
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(
+        self, request
+    ):
+        cube_ = instance_mock(request, Cube)
+        cube_.sums = None
         with pytest.raises(ValueError) as e:
-            cube_sum.sum
+            _CatCubeSums(None, None).factory(cube_, None)
 
-        assert (
-            str(e.value)
-            == "`.sum` is undefined for a cube-result without a sum measure"
-        )
+        assert str(e.value) == "cube-result does not contain cube-sum measure"
 
 
 # === UNWEIGHTED COUNTS ===
