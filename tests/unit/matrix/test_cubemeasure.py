@@ -152,6 +152,22 @@ class Describe_BaseCubeMeans(object):
         CubeMeanCls_.assert_called_once_with(dimensions_, [3, 4])
         assert cube_means is cube_means_
 
+    def but_it_raises_a_value_error_when_cube_result_does_not_contain_mean_measure(
+        self, cube_
+    ):
+        cube_.means = None
+
+        with pytest.raises(ValueError) as e:
+            _BaseCubeMeans.factory(cube_, None, None)
+
+        assert str(e.value) == "cube-result does not contain cube-means measure"
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
 
 class Describe_CatXCatCubeMeans(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeMeans`."""
@@ -299,9 +315,8 @@ class Describe_BaseCubeSum(object):
         ),
     )
     def it_provides_a_factory_for_constructing_cube_sum_objects(
-        self, request, dimension_types, CubeSumCls
+        self, request, dimension_types, CubeSumCls, cube_
     ):
-        cube_ = instance_mock(request, Cube)
         dimensions_ = (
             instance_mock(request, Dimension),
             instance_mock(request, Dimension),
@@ -327,6 +342,22 @@ class Describe_BaseCubeSum(object):
         _slice_idx_expr_.assert_called_once_with(cube_, 7)
         CubeSumCls_.assert_called_once_with(dimensions_, [3, 4])
         assert cube_sums is cube_sums_
+
+    def but_it_raises_a_value_error_when_cube_result_does_not_contain_sum_measure(
+        self, cube_
+    ):
+        cube_.sums = None
+
+        with pytest.raises(ValueError) as e:
+            _BaseCubeSums.factory(cube_, None, None)
+
+        assert str(e.value) == "cube-result does not contain cube-sum measure"
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
 
 
 class Describe_CatXCatCubeSums(object):

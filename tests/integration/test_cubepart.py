@@ -41,7 +41,10 @@ class Describe_Slice(object):
         assert slice_.name == "v4"
         with pytest.raises(ValueError) as e:
             slice_.means
-        assert str(e.value) == "cube-result does not contain cube-means measure"
+        assert (
+            str(e.value)
+            == "`.means` is undefined for a cube-result without a mean measure"
+        )
         assert pytest.approx(slice_.population_counts) == [
             [3000.333, 1200.133],
             [3000.333, 1800.200],
@@ -67,7 +70,10 @@ class Describe_Slice(object):
         assert slice_.shape == (2, 2)
         with pytest.raises(ValueError) as e:
             slice_.sums
-        assert str(e.value) == "cube-result does not contain cube-sum measure"
+        assert (
+            str(e.value)
+            == "`.sums` is undefined for a cube-result without a sum measure"
+        )
         assert slice_.table_margin == 15
         assert slice_.table_name is None
         assert pytest.approx(slice_.table_percentages) == [
@@ -861,7 +867,9 @@ class Describe_Strand(object):
         assert strand.is_empty is False
         with pytest.raises(ValueError) as e:
             strand.means
-        assert str(e.value) == ("cube-result does not contain cube-means measure")
+        assert str(e.value) == (
+            "`.means` is undefined for a cube-result without a mean measure"
+        )
         assert strand.min_base_size_mask.tolist() == [False, False]
         assert strand.name == "v7"
         assert strand.ndim == 1
@@ -881,7 +889,9 @@ class Describe_Strand(object):
         assert strand.shape == (2,)
         with pytest.raises(ValueError) as e:
             strand.sums
-        assert str(e.value) == ("cube-result does not contain cube-sum measure")
+        assert str(e.value) == (
+            "`.sums` is undefined for a cube-result without a sum measure"
+        )
         assert strand.table_base_range.tolist() == [15, 15]
         assert strand.table_margin_range.tolist() == [15, 15]
         assert strand.table_name == "v7: C"

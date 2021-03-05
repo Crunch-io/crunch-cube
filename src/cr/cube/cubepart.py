@@ -557,7 +557,12 @@ class _Slice(CubePartition):
 
         Raises `ValueError` if the cube-result does not include a means cube-measure.
         """
-        return self._assembler.means
+        try:
+            return self._assembler.means
+        except ValueError:
+            raise ValueError(
+                "`.means` is undefined for a cube-result without a mean measure"
+            )
 
     @lazyproperty
     def min_base_size_mask(self):
@@ -926,7 +931,12 @@ class _Slice(CubePartition):
         (sum of addend cells cannot simply be added to get the sum of the subtotal).
         Raises `ValueError` if the cube-result does not include a sum cube-measure.
         """
-        return self._assembler.sums
+        try:
+            return self._assembler.sums
+        except ValueError:
+            raise ValueError(
+                "`.sums` is undefined for a cube-result without a sum measure"
+            )
 
     @lazyproperty
     def summary_pairwise_indices(self):
@@ -1259,7 +1269,12 @@ class _Strand(CubePartition):
         Raises ValueError when accessed on a cube-result that does not contain a means
         cube-measure.
         """
-        return self._assembler.means
+        try:
+            return self._assembler.means
+        except ValueError:
+            raise ValueError(
+                "`.means` is undefined for a cube-result without a mean measure"
+            )
 
     @lazyproperty
     def min_base_size_mask(self):
@@ -1416,7 +1431,12 @@ class _Strand(CubePartition):
         Raises ValueError when accessed on a cube-result that does not contain a sum
         cube-measure.
         """
-        return self._assembler.sums
+        try:
+            return self._assembler.sums
+        except ValueError:
+            raise ValueError(
+                "`.sums` is undefined for a cube-result without a sum measure"
+            )
 
     @lazyproperty
     def table_base_range(self):
