@@ -240,7 +240,12 @@ class Cube(object):
 
     @lazyproperty
     def counts_with_missings(self):
-        return self._measure.raw_cube_array
+        """ndarray of weighted or unweighted cube counts."""
+        return (
+            self._measures.weighted_counts.raw_cube_array
+            if self.has_weighted_counts
+            else self._measures.unweighted_counts.raw_cube_array
+        )
 
     @lazyproperty
     def cube_index(self):
@@ -397,7 +402,7 @@ class Cube(object):
     @lazyproperty
     def valid_counts(self):
         """ndarray of valid counts, valid elements only."""
-        valid_counts = self._measure.valid_counts
+        valid_counts = self._base_measure.valid_counts
         if valid_counts.any():
             return valid_counts[self._valid_idxs]
         return np.empty(0)
@@ -507,21 +512,21 @@ class Cube(object):
         """
         return list(self.available_measures.intersection(NUMERIC_MEASURES))
 
-    @lazyproperty
-    def _measure(self):
-        """_BaseMeasure subclass representing primary measure for this cube.
-
-        If the cube response includes a means measure, the return value is
-        means. Otherwise it is counts, with the choice between weighted or
-        unweighted determined by whether the cube has weighted counts.
-        """
-        return (
-            self._measures.means
-            if self._measures.means is not None
-            else self._measures.weighted_counts
-            if self._measures.weighted_counts is not None
-            else self._measures.unweighted_counts
-        )
+    # @lazyproperty
+    # def _measure(self):
+    #     """_BaseMeasure subclass representing primary measure for this cube.
+    #
+    #     If the cube response includes a means measure, the return value is
+    #     means. Otherwise it is counts, with the choice between weighted or
+    #     unweighted determined by whether the cube has weighted counts.
+    #     """
+    #     return (
+    #         self._measures.means
+    #         if self._measures.means is not None
+    #         else self._measures.weighted_counts
+    #         if self._measures.weighted_counts is not None
+    #         else self._measures.unweighted_counts
+    #     )
 
     @lazyproperty
     def _measures(self):
@@ -583,7 +588,7 @@ class Cube(object):
         )
 
         def _reshape_idxs(valid_indices):
-            if self._measure.requires_array_transposition:
+            if self._base_measure.requires_array_transposition:
                 if len(self._all_dimensions) == 3:
                     # ---In case of 3D array and a numeric array is involved we have to
                     # ---change the order of the valid idxs, from [0,1,2] to [1,2,0].
@@ -851,10 +856,9 @@ class _UnweightedCountMeasure(_BaseMeasure):
         # ---This condition can happen in case of numeric array cube response.
         # ---Under this circumstances the numeric array measures will contain the
         # ---mean measure and a valid count measure for the unweighted counts.
-        valid_counts = result["measures"].get("valid_count_unweighted", {}).get("data")
         return (
-            np.array(valid_counts, dtype=np.float64)
-            if valid_counts
+            np.array(self.valid_counts.flatten(), dtype=np.float64)
+            if self.valid_counts.size > 0
             else np.array(result["counts"], dtype=np.float64)
         )
 
@@ -865,9 +869,13 @@ class _WeightedCountMeasure(_BaseMeasure):
     @lazyproperty
     def _flat_values(self):
         """Optional 1D np.ndarray of np.float64 numeric counts after weighting."""
+        if self.valid_counts.size > 0:
+            return np.array(self.valid_counts.flatten(), dtype=np.float64)
         unweighted_counts = self._cube_dict["result"]["counts"]
-        weighted_counts = self._cube_dict["result"]["measures"]["count"]["data"]
-        if unweighted_counts == weighted_counts:
+        weighted_counts = (
+            self._cube_dict["result"]["measures"].get("count", {}).get("data")
+        )
+        if unweighted_counts == weighted_counts or weighted_counts is None:
             return None
 
         return np.array(weighted_counts, dtype=np.float64)
