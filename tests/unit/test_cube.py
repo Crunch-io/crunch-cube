@@ -24,6 +24,13 @@ from ..unitutil import call, class_mock, instance_mock, property_mock
 class DescribeCubeSet(object):
     """Unit-test suite for `cr.cube.cube.CubeSet` object."""
 
+    def it_knows_its_availabe_measures(self, cube_, _cubes_prop_):
+        cube_.available_measures = {"mean", "sum"}
+        _cubes_prop_.return_value = (cube_,)
+        cube_set = CubeSet(None, None, None, None)
+
+        assert cube_set.available_measures == {"mean", "sum"}
+
     @pytest.mark.parametrize(
         ("cubes_dimtypes", "expected_value"),
         (

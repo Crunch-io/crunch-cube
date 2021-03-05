@@ -45,6 +45,11 @@ class CubeSet(object):
         self._min_base = min_base
 
     @lazyproperty
+    def available_measures(self):
+        """frozenset of available measures of the first cube in this set."""
+        return self._cubes[0].available_measures
+
+    @lazyproperty
     def can_show_pairwise(self):
         """True if all 2D cubes in a multi-cube set can provide pairwise comparison."""
         if len(self._cubes) < 2:
