@@ -82,4 +82,13 @@ class MEASURE(enum.Enum):
     Z_SCORE = "z_score"
 
 
-NUMERIC_MEASURES = frozenset((MEASURE.SUM, MEASURE.MEAN))
+class CUBE_MEASURE(enum.Enum):
+    """Enumerated values representing cube measures."""
+
+    COUNT = "count"
+    MEAN = "mean"
+    SUM = "sum"
+    VALID_COUNT_UNWEIGHTED = "valid_count_unweighted"
+
+
+NUMERIC_MEASURES = frozenset((CUBE_MEASURE.SUM, CUBE_MEASURE.MEAN))

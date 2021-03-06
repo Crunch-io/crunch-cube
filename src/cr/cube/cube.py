@@ -14,7 +14,7 @@ import numpy as np
 
 from cr.cube.cubepart import CubePartition
 from cr.cube.dimension import AllDimensions
-from cr.cube.enums import DIMENSION_TYPE as DT, NUMERIC_MEASURES
+from cr.cube.enums import DIMENSION_TYPE as DT, NUMERIC_MEASURES, CUBE_MEASURE
 from cr.cube.util import lazyproperty
 
 np.seterr(divide="ignore", invalid="ignore")
@@ -235,10 +235,9 @@ class Cube(object):
 
     @lazyproperty
     def available_measures(self):
-        """frozenset of available measures in the cube response."""
-        return frozenset(
-            self._cube_response.get("result", {}).get("measures", {}).keys()
-        )
+        """frozenset of available CUBE_MEASURE members in the cube response."""
+        cube_measures = self._cube_response.get("result", {}).get("measures", {}).keys()
+        return frozenset(CUBE_MEASURE(m) for m in cube_measures)
 
     @lazyproperty
     def counts(self):
@@ -291,13 +290,13 @@ class Cube(object):
         """
         cube_dict = self._cube_dict
         dimensions = cube_dict["result"]["dimensions"]
-        default_name = "-".join(self._numeric_measures)
+        default_name = "-".join([m.value for m in self._available_numeric_measures])
         # --- The default value in case of numeric variable is the combination of all
         # --- the measures expressed in the cube response.
         alias = self._numeric_measure_references.get("alias", default_name)
         name = self._numeric_measure_references.get("name", default_name)
         rows_dimension = {
-            "references": {"alias": alias, "name": name},
+            "references": {"alias": alias, "name": name.title()},
             "type": {
                 "categories": [{"id": 1, "name": name.title()}],
                 "class": "categorical",
@@ -436,6 +435,15 @@ class Cube(object):
         return AllDimensions(dimension_dicts=self._cube_dict["result"]["dimensions"])
 
     @lazyproperty
+    def _available_numeric_measures(self):
+        """tuple of available numeric measures expressed in the cube_response.
+
+        Basically the numeric measures are the intersection between all the measures
+        within the cube response and the defined NUMERIC_MEASURES.
+        """
+        return tuple(self.available_measures.intersection(NUMERIC_MEASURES))
+
+    @lazyproperty
     def _base_measure(self):
         """_BaseMeasure object for this cube."""
         return _BaseMeasure(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
@@ -491,33 +499,27 @@ class Cube(object):
 
     @lazyproperty
     def _numeric_measure_references(self):
-        """Dict of numeric measure references, tipically for numeric means or sum."""
-        if not self._numeric_measures:
+        """Dict of numeric measure references, typically for numeric measures."""
+        if not self._available_numeric_measures:
             return {}
         cube_response = self._cube_response
         cube_measures = cube_response.get("result", {}).get("measures", {})
-        metadata = cube_measures.get(self._numeric_measures[0], {}).get("metadata", {})
+        metadata = cube_measures.get(self._available_numeric_measures[0].value, {}).get(
+            "metadata", {}
+        )
         return metadata.get("references", {})
 
     @lazyproperty
     def _numeric_measure_subvariables(self):
         """List of mean subvariables, tipically for numeric arrays."""
-        if not self._numeric_measures:
+        if not self._available_numeric_measures:
             return []
         cube_response = self._cube_response
         cube_measures = cube_response.get("result", {}).get("measures", {})
-        metadata = cube_measures.get(self._numeric_measures[0], {}).get("metadata", {})
+        metadata = cube_measures.get(self._available_numeric_measures[0].value, {}).get(
+            "metadata", {}
+        )
         return metadata.get("type", {}).get("subvariables", [])
-
-    @lazyproperty
-    def _numeric_measures(self):
-        """List of numeric measures expressed in the cube_response.
-
-        Basically the numeric measures are the intersection between all the measures
-        within the cube response and the defined QUANTITY_OF_INTEREST_MEASURES.
-        """
-        numeric_measures = [measure.value for measure in NUMERIC_MEASURES]
-        return list(self.available_measures.intersection(numeric_measures))
 
     @lazyproperty
     def _measures(self):
