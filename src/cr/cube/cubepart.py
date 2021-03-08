@@ -927,8 +927,6 @@ class _Slice(CubePartition):
     def sums(self):
         """2D optional np.float64 ndarray of sum value for each table cell.
 
-        Cell value is `np.nan` for each cell corresponding to an inserted subtotal
-        (sum of addend cells cannot simply be added to get the sum of the subtotal).
         Raises `ValueError` if the cube-result does not include a sum cube-measure.
         """
         try:

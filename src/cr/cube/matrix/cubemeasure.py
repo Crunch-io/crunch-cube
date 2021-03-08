@@ -90,7 +90,12 @@ class _BaseCubeMeans(_BaseCubeMeasure):
 
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
-        """Return _BaseCubeMeans subclass instance appropriate to `cube`."""
+        """Return _BaseCubeMeans subclass instance appropriate to `cube`.
+
+        Raises `ValueError` if the cube-result does not include a cube-means measure.
+        """
+        if cube.means is None:
+            raise ValueError("cube-result does not contain cube-means measure")
         dimension_types = cube.dimension_types[-2:]
         CubeMeansCls = (
             _MrXMrCubeMeans
@@ -101,8 +106,6 @@ class _BaseCubeMeans(_BaseCubeMeasure):
             if dimension_types[1] == DT.MR
             else _CatXCatCubeMeans
         )
-        if cube.means is None:
-            raise ValueError("cube-result does not contain cube-means measure")
         return CubeMeansCls(
             dimensions, cube.means[cls._slice_idx_expr(cube, slice_idx)]
         )
@@ -170,7 +173,12 @@ class _BaseCubeSums(_BaseCubeMeasure):
 
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
-        """Return _BaseCubeSums subclass instance appropriate to `cube`."""
+        """Return _BaseCubeSums subclass instance appropriate to `cube`.
+
+        Raises `ValueError` if the cube-result does not include a cube-sum measure.
+        """
+        if cube.sums is None:
+            raise ValueError("cube-result does not contain cube-sum measure")
         dimension_types = cube.dimension_types[-2:]
         CubeSumsCls = (
             _MrXMrCubeSums
@@ -181,8 +189,6 @@ class _BaseCubeSums(_BaseCubeMeasure):
             if dimension_types[1] == DT.MR
             else _CatXCatCubeSums
         )
-        if cube.sums is None:
-            raise ValueError("cube-result does not contain cube-sum measure")
         return CubeSumsCls(dimensions, cube.sums[cls._slice_idx_expr(cube, slice_idx)])
 
     @lazyproperty

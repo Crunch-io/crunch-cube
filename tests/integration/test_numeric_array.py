@@ -119,3 +119,25 @@ class DescribeNumericArrays(object):
             ],
         )
         np.testing.assert_almost_equal(slice_.columns_base, [[3, 2], [3, 2], [3, 2]])
+
+    def it_provides_sum_for_num_array_grouped_by_cat_hs(self):
+        slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT_HS).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.sums,
+            [
+                #  --------Gender------------
+                # M    F   M+F
+                [4.0, 3.0, 7.0],  # S1 (Ticket Sold)
+                [3.0, 0.0, 3.0],  # S2 (Ticket Sold)
+                [2.0, 3.0, 5.0],  # S3 (Ticket Sold)
+            ],
+        )
+        np.testing.assert_almost_equal(
+            slice_.columns_base,
+            [
+                [3, 2, 5],
+                [3, 2, 5],
+                [3, 2, 5],
+            ],
+        )

@@ -551,19 +551,19 @@ class _Sums(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        return NanSubtotals.blocks(self._cube_measures.cube_sum.sums, self._dimensions)
+        return SumSubtotals.blocks(self._cube_measures.cube_sum.sums, self._dimensions)
 
 
 class _TableUnweightedBases(_BaseSecondOrderMeasure):
     """Provides the table-unweighted-bases measure for a matrix.
 
-    table-unweighted-bases is a 2D np.float64 ndarray of the denominator, or "base" of the
-    unweighted table-proportion for each matrix cell.
+    table-unweighted-bases is a 2D np.float64 ndarray of the denominator, or "base" of
+    the unweighted table-proportion for each matrix cell.
     """
 
     @lazyproperty
     def _base_values(self):
-        """2D np.float64 ndarray of unweighted table-proportion denominator for each cell.
+        """2D float64 ndarray of unweighted table-proportion denominator for each cell.
 
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
