@@ -939,7 +939,20 @@ class BaseCubeResultMatrix(object):
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
         """Return a base-matrix object of appropriate type for `cube`."""
-        MatrixCls = cls._regular_matrix_class(cube.dimension_types[-2:])
+        dimension_types = cube.dimension_types[-2:]
+        MatrixCls = (
+            _NumArrayXMrMatrix
+            if dimension_types == (DT.NUM_ARRAY, DT.MR)
+            else _NumArrayXCatMatrix
+            if dimension_types[0] == DT.NUM_ARRAY
+            else _MrXMrMatrix
+            if dimension_types == (DT.MR, DT.MR)
+            else _MrXCatMatrix
+            if dimension_types[0] == DT.MR
+            else _CatXMrMatrix
+            if dimension_types[1] == DT.MR
+            else _CatXCatMatrix
+        )
         return MatrixCls(dimensions, *cls._sliced_counts(cube, slice_idx))
 
     @lazyproperty
@@ -1096,24 +1109,7 @@ class BaseCubeResultMatrix(object):
         return (counts - expected_counts) / np.sqrt(variance)
 
     @staticmethod
-    def _regular_matrix_class(dimension_types):
-        """Return BaseCubeResultMatrix subclass appropriate to `dimension_types`."""
-        return (
-            _NumArrayXMrMatrix
-            if dimension_types == (DT.NUM_ARRAY, DT.MR)
-            else _NumArrayXCatMatrix
-            if dimension_types[0] == DT.NUM_ARRAY
-            else _MrXMrMatrix
-            if dimension_types == (DT.MR, DT.MR)
-            else _MrXCatMatrix
-            if dimension_types[0] == DT.MR
-            else _CatXMrMatrix
-            if dimension_types[1] == DT.MR
-            else _CatXCatMatrix
-        )
-
-    @staticmethod
-    def _regular_matrix_slice(cube, slice_idx):
+    def _cube_slice_expression(cube, slice_idx):
         """return `np.s_` object with correct slicing for the cube type."""
         if cube.ndim <= 2:
             return np.s_[:]
@@ -1140,11 +1136,11 @@ class BaseCubeResultMatrix(object):
         need to extract only the selected counts, since we're "just" dealing with the
         tabulation.
         """
-        i = cls._regular_matrix_slice(cube, slice_idx)
+        slice_expr = cls._cube_slice_expression(cube, slice_idx)
         return (
-            cube.counts[i],
-            cube.unweighted_counts[i],
-            cube.counts_with_missings[i],
+            cube.counts[slice_expr],
+            cube.unweighted_counts[slice_expr],
+            cube.counts_with_missings[slice_expr],
         )
 
     @lazyproperty

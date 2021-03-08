@@ -316,7 +316,7 @@ class Cube(object):
     @lazyproperty
     def has_weighted_counts(self):
         """True if cube response has weighted count data."""
-        return self._measures.weighted_counts is not None
+        return self.weighted_counts is not None
 
     @lazyproperty
     def means(self):
@@ -400,9 +400,12 @@ class Cube(object):
         """ndarray of unweighted counts, valid elements only.
 
         Unweighted counts are drawn from the `result.counts` field of the cube result.
-        These counts are always present, even when the measure is `mean` and there are
+        These counts are always present, even when the measure is numeric and there are
         no count measures. These counts are always unweighted, regardless of whether the
         cube is "weighted".
+
+        In case of presence of valid counts in the cube response the counts are replaced
+        with the valid counts measure.
         """
         unweighted_counts = (
             self._measures.valid_counts
@@ -422,6 +425,24 @@ class Cube(object):
                 self._measures.valid_counts.raw_cube_array[self._valid_idxs], axis=axis
             )
         return None
+
+    @lazyproperty
+    def weighted_counts(self):
+        """ndarray of weighted counts, valid elements only.
+
+        In case of presence of valid counts in the cube response the weighted counts
+        are replaced with the valid counts measure.
+        """
+        weighted_counts = (
+            self._measures.valid_counts
+            if self._measures.valid_counts is not None
+            else self._measures.weighted_counts
+        )
+        return (
+            weighted_counts.raw_cube_array[self._valid_idxs]
+            if self._measures.weighted_counts is not None
+            else None
+        )
 
     @lazyproperty
     def _all_dimensions(self):
@@ -572,6 +593,7 @@ class Cube(object):
 
     @lazyproperty
     def _valid_idxs(self):
+        """Tuple of int64 ndarrays of the valid elements idx for each dimension."""
         valid_idxs = np.ix_(
             *tuple(d.valid_elements.element_idxs for d in self._all_dimensions)
         )

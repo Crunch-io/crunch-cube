@@ -87,8 +87,9 @@ class CUBE_MEASURE(enum.Enum):
 
     COUNT = "count"
     MEAN = "mean"
+    STDDEV = "stddev"
     SUM = "sum"
     VALID_COUNT_UNWEIGHTED = "valid_count_unweighted"
 
 
-NUMERIC_MEASURES = frozenset((CUBE_MEASURE.SUM, CUBE_MEASURE.MEAN))
+NUMERIC_MEASURES = frozenset((CUBE_MEASURE.SUM, CUBE_MEASURE.MEAN, CUBE_MEASURE.STDDEV))

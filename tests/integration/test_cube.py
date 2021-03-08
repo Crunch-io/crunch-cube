@@ -27,9 +27,9 @@ class DescribeIntegratedCube(object):
         cube = Cube(CR.CAT_X_CAT)
 
         assert cube.__repr__() == "Cube(name='v4', dimension_types='CAT x CAT')"
-        np.testing.assert_equal(cube.counts, [[5, 2], [5, 3]])
-        np.testing.assert_equal(
-            cube.counts_with_missings, [[5, 3, 2, 0], [5, 2, 3, 0], [0, 0, 0, 0]]
+        assert cube.counts == pytest.approx(np.array([[5, 2], [5, 3]]))
+        assert cube.counts_with_missings == pytest.approx(
+            np.array([[5, 3, 2, 0], [5, 2, 3, 0], [0, 0, 0, 0]])
         )
         assert cube.cube_index == 0
         assert cube.description == "Pet Owners"
@@ -41,7 +41,8 @@ class DescribeIntegratedCube(object):
         assert cube.ndim == 2
         assert cube.population_fraction == 1.0
         assert cube.title == "Pony Owners"
-        np.testing.assert_equal(cube.unweighted_counts, [[5, 2], [5, 3]])
+        assert cube.unweighted_counts == pytest.approx(np.array([[5, 2], [5, 3]]))
+        assert cube.weighted_counts is None
 
     @pytest.mark.parametrize(
         "cube_response, expected_dim_types",
