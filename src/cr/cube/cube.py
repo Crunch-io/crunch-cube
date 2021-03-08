@@ -14,7 +14,7 @@ import numpy as np
 
 from cr.cube.cubepart import CubePartition
 from cr.cube.dimension import AllDimensions
-from cr.cube.enums import DIMENSION_TYPE as DT, NUMERIC_MEASURES, CUBE_MEASURE
+from cr.cube.enums import CUBE_MEASURE, DIMENSION_TYPE as DT, NUMERIC_MEASURES
 from cr.cube.util import lazyproperty
 
 np.seterr(divide="ignore", invalid="ignore")
@@ -245,7 +245,11 @@ class Cube(object):
 
     @lazyproperty
     def counts_with_missings(self):
-        """ndarray of weighted, unweighted or valid cube counts."""
+        """ndarray of weighted, unweighted or valid counts including missing values.
+
+        The difference from .counts is that this property includes value for missing
+        categories.
+        """
         return (
             self._measures.valid_counts.raw_cube_array
             if self._measures.valid_counts is not None
@@ -296,11 +300,11 @@ class Cube(object):
         # --- The default value in case of numeric variable is the combination of all
         # --- the measures expressed in the cube response.
         alias = self._numeric_measure_references.get("alias", default_name)
-        name = self._numeric_measure_references.get("name", default_name)
+        name = self._numeric_measure_references.get("name", default_name).title()
         rows_dimension = {
-            "references": {"alias": alias, "name": name.title()},
+            "references": {"alias": alias, "name": name},
             "type": {
-                "categories": [{"id": 1, "name": name.title()}],
+                "categories": [{"id": 1, "name": name}],
                 "class": "categorical",
             },
         }
@@ -416,15 +420,15 @@ class Cube(object):
 
     @lazyproperty
     def valid_counts_summary(self):
-        """ndarray of summary valid counts"""
-        if self._measures.valid_counts:
-            # --- In case of ndim >= 2 the sum should be done on the second axes to get
-            # --- the correct sequence of valid count (e.g. CA_SUBVAR).
-            axis = 1 if len(self._all_dimensions) >= 2 else 0
-            return np.sum(
-                self._measures.valid_counts.raw_cube_array[self._valid_idxs], axis=axis
-            )
-        return None
+        """Optional ndarray of summary valid counts"""
+        if not self._measures.valid_counts:
+            return None
+        # --- In case of ndim >= 2 the sum should be done on the second axes to get
+        # --- the correct sequence of valid count (e.g. CA_SUBVAR).
+        axis = 1 if len(self._all_dimensions) >= 2 else 0
+        return np.sum(
+            self._measures.valid_counts.raw_cube_array[self._valid_idxs], axis=axis
+        )
 
     @lazyproperty
     def weighted_counts(self):
@@ -515,6 +519,15 @@ class Cube(object):
         return self._cube_dict["result"].get("is_single_col_cube", False)
 
     @lazyproperty
+    def _measures(self):
+        """_Measures object for this cube.
+
+        Provides access to count based measures and numeric measures (e.g. mean, sum)
+        when available.
+        """
+        return _Measures(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
+
+    @lazyproperty
     def _numeric_measure_references(self):
         """Dict of numeric measure references, typically for numeric measures."""
         if not self._available_numeric_measures:
@@ -528,7 +541,7 @@ class Cube(object):
 
     @lazyproperty
     def _numeric_measure_subvariables(self):
-        """List of mean subvariables, tipically for numeric arrays."""
+        """List of mean subvariables, typically for numeric arrays."""
         if not self._available_numeric_measures:
             return []
         cube_response = self._cube_response
@@ -537,15 +550,6 @@ class Cube(object):
             "metadata", {}
         )
         return metadata.get("type", {}).get("subvariables", [])
-
-    @lazyproperty
-    def _measures(self):
-        """_Measures object for this cube.
-
-        Provides access to count based measures and numeric measures (e.g. mean, sum)
-        when available.
-        """
-        return _Measures(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
 
     @lazyproperty
     def _numeric_array_dimension(self):
@@ -581,6 +585,19 @@ class Cube(object):
         return rows_dimension
 
     @lazyproperty
+    def _requires_transposition(self):
+        """True if dimensions need transposition, False otherwise.
+
+        Transposition is needed when one of the dimension type is a NUM_ARRAY and the
+        dimensions are more than 1. This business rule needs to drive correctly tabbook
+        and deck exports when a numeric array dimension is expressed.
+        """
+        # NOTE: this is a temporary hack that should disappear when we introdice the
+        # dim-order feature.
+        dimension_types = [d.dimension_type for d in self._all_dimensions]
+        return len(self._all_dimensions) >= 2 and DT.NUM_ARRAY in dimension_types
+
+    @lazyproperty
     def _slice_idxs(self):
         """Iterable of contiguous int indicies for slices to be produced.
 
@@ -599,7 +616,7 @@ class Cube(object):
         )
 
         def _reshape_idxs(valid_indices):
-            if self._all_dimensions.require_transposition:
+            if self._requires_transposition:
                 if len(self._all_dimensions) == 3:
                     # ---In case of 3D array and a numeric array is involved we have to
                     # ---change the order of the valid idxs, from [0,1,2] to [1,2,0].
@@ -757,12 +774,25 @@ class _BaseMeasure(object):
         raise NotImplementedError("must be implemented by each subclass")
 
     @lazyproperty
+    def _requires_transposition(self):
+        """True if dimensions need transposition, False otherwise.
+
+        Transposition is needed when one of the dimension type is a NUM_ARRAY and the
+        dimensions are more than 1. This business rule needs to drive correctly tabbook
+        and deck exports when a numeric array dimension is expressed.
+        """
+        # NOTE: this is a temporary hack that should disappear when we introdice the
+        # dim-order feature.
+        dimension_types = [d.dimension_type for d in self._all_dimensions]
+        return len(self._all_dimensions) >= 2 and DT.NUM_ARRAY in dimension_types
+
+    @lazyproperty
     def _shape(self):
         """All dimensions shape (row, col)"""
         # NOTE: Inverting the shape cannot be enough in future when we'll have more than
         # 2 dimensions in the new dim_order option.
         shape = self._all_dimensions.shape
-        if self._all_dimensions.require_transposition:
+        if self._requires_transposition:
             return (
                 shape[-2:] + (shape[0],)
                 if len(self._all_dimensions) == 3
@@ -776,7 +806,7 @@ class _MeanMeasure(_BaseMeasure):
 
     @lazyproperty
     def missing_count(self):
-        """Optional numeric representing count of missing rows in response."""
+        """Numeric value representing count of missing rows in response."""
         return self._cube_dict["result"]["measures"]["mean"].get("n_missing", 0)
 
     @lazyproperty

@@ -12,6 +12,7 @@ from cr.cube.cube import (
     _ValidCountsMeasure,
 )
 from cr.cube.cubepart import _Slice, _Strand, _Nub
+from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
@@ -637,6 +638,26 @@ class DescribeCube(object):
         cube = Cube(None, cube_idx=cube_idx_arg)
 
         assert cube._cube_dict == expected_value
+
+    @pytest.mark.parametrize(
+        "dim_types, expected_value",
+        (
+            ((DT.CAT, DT.NUM_ARRAY), True),
+            ((DT.CAT, DT.CA_SUBVAR), False),
+            ((DT.NUM_ARRAY,), False),
+        ),
+    )
+    def it_knows_if_require_array_transposition(
+        self, request, dim_types, expected_value
+    ):
+        all_dimensions = tuple(
+            instance_mock(request, Dimension, name="dim-%d" % idx, dimension_type=dt)
+            for idx, dt in enumerate(dim_types)
+        )
+        _all_dimensions_prop = property_mock(request, Cube, "_all_dimensions")
+        _all_dimensions_prop.return_value = all_dimensions
+
+        assert Cube({}, all_dimensions)._requires_transposition is expected_value
 
     # fixture components ---------------------------------------------
 
