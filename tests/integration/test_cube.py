@@ -104,12 +104,7 @@ class DescribeIntegratedCube(object):
     def it_provides_valid_counts_for_NUM_ARRAY_GROUPED_BY_CAT(self):
         cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
 
-        np.testing.assert_array_equal(cube.valid_counts, [[3, 2], [3, 1], [1, 1]])
-
-    def and_it_returns_empty_array_if_valid_counts_are_not_available(self):
-        cube = Cube(CR.CAT_X_CAT)
-
-        np.testing.assert_array_equal(cube.valid_counts, [])
+        np.testing.assert_array_equal(cube.counts, [[3, 2], [3, 1], [1, 1]])
 
     def it_provides_valid_counts_summary_for_NUM_ARRAY_GROUPED_BY_CAT(self):
         cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)

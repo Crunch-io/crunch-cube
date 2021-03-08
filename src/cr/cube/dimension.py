@@ -58,6 +58,17 @@ class AllDimensions(_BaseDimensions):
         return _ApparentDimensions(all_dimensions=self._dimensions)
 
     @lazyproperty
+    def require_transposition(self):
+        """True if dimensions need transposition, False otherwise.
+
+        Transposition is needed when one of the dimension type is a NUM_ARRAY and the
+        dimensions are more than 1. This business rule needs to drive correctly tabbook
+        and deck exports when a numeric array dimension is expressed.
+        """
+        dimension_types = [d.dimension_type for d in self.apparent_dimensions]
+        return len(self.apparent_dimensions) >= 2 and DT.NUM_ARRAY in dimension_types
+
+    @lazyproperty
     def shape(self):
         """Tuple of int element count for each dimension.
 

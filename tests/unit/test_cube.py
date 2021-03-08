@@ -8,13 +8,10 @@ import numpy as np
 from cr.cube.cube import (
     Cube,
     CubeSet,
-    _BaseMeasure,
     _Measures,
-    _MeanMeasure,
-    _SumMeasure,
+    _ValidCountsMeasure,
 )
 from cr.cube.cubepart import _Slice, _Strand, _Nub
-from cr.cube.dimension import AllDimensions, Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
@@ -702,57 +699,13 @@ class DescribeMeasures(object):
         np.testing.assert_equal(population_fraction, expected_value)
 
 
-class Describe_BaseMeasure(object):
+class Describe_ValidCountsMeasure(object):
     @pytest.mark.parametrize(
-        "dim_types, expected_value",
-        (
-            ((DT.CAT, DT.NUM_ARRAY), True),
-            ((DT.CAT, DT.CA_SUBVAR), False),
-            ((DT.NUM_ARRAY,), False),
-        ),
+        "valid_counts, expected_value",
+        (({"valid_count_unweighted": {"data": [3, 2, 1]}}, [3, 2, 1]), ({}, None)),
     )
-    def it_knows_if_require_array_transposition(
-        self, request, dim_types, expected_value
-    ):
-        all_dimensions = tuple(
-            instance_mock(request, Dimension, name="dim-%d" % idx, dimension_type=dt)
-            for idx, dt in enumerate(dim_types)
-        )
+    def it_knows_its_flat_values(self, valid_counts, expected_value):
+        cube_dict = {"result": {"measures": valid_counts}}
+        valid_counts = _ValidCountsMeasure(cube_dict, None)
 
-        assert (
-            _BaseMeasure({}, all_dimensions, None).requires_array_transposition
-            is expected_value
-        )
-
-    @pytest.mark.parametrize(
-        "NumericMeasureCls, valid_counts_u, cube_idx_arg, expected_value",
-        (
-            (_MeanMeasure, [], None, []),
-            (_MeanMeasure, [[3, 2, 1], [2, 2, 0]], None, [[3, 2, 1], [2, 2, 0]]),
-            (_MeanMeasure, [[3, 2, 1], [2, 2, 0]], 1, [[3, 2, 1], [2, 2, 0]]),
-            (_SumMeasure, [], None, []),
-            (_SumMeasure, [[3, 2, 1], [2, 2, 0]], None, [[3, 2, 1], [2, 2, 0]]),
-            (_SumMeasure, [[3, 2, 1], [2, 2, 0]], 1, [[3, 2, 1], [2, 2, 0]]),
-        ),
-    )
-    def it_knows_its_valid_counts_to_help(
-        self,
-        request,
-        NumericMeasureCls,
-        valid_counts_u,
-        cube_idx_arg,
-        expected_value,
-    ):
-        _all_dimensions_ = instance_mock(request, AllDimensions)
-        _all_dimensions_.shape = (2, 3)
-        _numeric_measure = NumericMeasureCls(
-            {
-                "result": {
-                    "measures": {"valid_count_unweighted": {"data": valid_counts_u}}
-                }
-            },
-            _all_dimensions_,
-            cube_idx_arg,
-        )
-
-        np.testing.assert_array_equal(_numeric_measure.valid_counts, expected_value)
+        np.testing.assert_equal(valid_counts._flat_values, expected_value)

@@ -98,6 +98,25 @@ class DescribeAllDimensions(object):
         _DimensionFactory_.iter_dimensions.assert_called_once_with(dimension_dicts_)
         assert dimensions == dimensions_
 
+    @pytest.mark.parametrize(
+        "dim_types, expected_value",
+        (
+            ((DT.CAT, DT.NUM_ARRAY), True),
+            ((DT.CAT, DT.CA_SUBVAR), False),
+            ((DT.NUM_ARRAY,), False),
+        ),
+    )
+    def it_knows_if_requires_transposition(
+        self, request, _dimensions_prop_, dim_types, expected_value
+    ):
+        apparent_dimensions = tuple(
+            instance_mock(request, Dimension, name="dim-%d" % idx, dimension_type=dt)
+            for idx, dt in enumerate(dim_types)
+        )
+        _dimensions_prop_.return_value = apparent_dimensions
+
+        assert AllDimensions(None).require_transposition is expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
