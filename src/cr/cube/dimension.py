@@ -59,7 +59,7 @@ class AllDimensions(_BaseDimensions):
 
     @lazyproperty
     def dimension_order(self):
-        """Tuple of int representing of the dimension order.
+        """Tuple of int representing the dimension order.
 
         The dimension order depends on the presence of numeric array in the dimensions
         and the number of the cube dimensions. In case of 3 dimensions e.g.
@@ -72,7 +72,7 @@ class AllDimensions(_BaseDimensions):
         # concept. We should receive the actual order directly in the cube_response.
         # So, all this logic will be deleted.
         dimension_types = tuple(d.dimension_type for d in self._dimensions)
-        dim_order = tuple(idx for idx in range(len(self._dimensions)))
+        dim_order = tuple(range(len(self._dimensions)))
         if len(self._dimensions) >= 2 and DT.NUM_ARRAY in dimension_types:
             return (
                 dim_order[-2:] + (dim_order[0],)
