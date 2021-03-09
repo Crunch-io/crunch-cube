@@ -585,19 +585,6 @@ class Cube(object):
         return rows_dimension
 
     @lazyproperty
-    def _requires_transposition(self):
-        """True if dimensions need transposition, False otherwise.
-
-        Transposition is needed when one of the dimension type is a NUM_ARRAY and the
-        dimensions are more than 1. This business rule needs to drive correctly tabbook
-        and deck exports when a numeric array dimension is expressed.
-        """
-        # NOTE: this is a temporary hack that should disappear when we introdice the
-        # dim-order feature.
-        dimension_types = [d.dimension_type for d in self._all_dimensions]
-        return len(self._all_dimensions) >= 2 and DT.NUM_ARRAY in dimension_types
-
-    @lazyproperty
     def _slice_idxs(self):
         """Iterable of contiguous int indicies for slices to be produced.
 
@@ -614,22 +601,9 @@ class Cube(object):
         valid_idxs = np.ix_(
             *tuple(d.valid_elements.element_idxs for d in self._all_dimensions)
         )
-
-        def _reshape_idxs(valid_indices):
-            if self._requires_transposition:
-                if len(self._all_dimensions) == 3:
-                    # ---In case of 3D array and a numeric array is involved we have to
-                    # ---change the order of the valid idxs, from [0,1,2] to [1,2,0].
-                    # ---This way to reshape the valid index will be changed when the
-                    # ---dim_order option will be available within the cube dict.
-                    return valid_indices[1], valid_indices[2], valid_indices[0]
-                # ---NOTE FOR FUTURE: We'll need a way to tell to the cube which
-                # ---dimensions we want transposed and which not. So the ::-1 can be
-                # ---converted in something more robust.
-                return valid_indices[::-1]
-            return valid_indices
-
-        return _reshape_idxs(valid_idxs)
+        # The dimension dimension order can change in case of numeric array variable on
+        # the row, and so valid indices needs to be returned in an ordered way.
+        return tuple(valid_idxs[i] for i in self._all_dimensions.dimension_order)
 
 
 class _Measures(object):
@@ -760,7 +734,7 @@ class _BaseMeasure(object):
         """
         if self._flat_values is None:
             return None
-        raw_cube_array = self._flat_values.reshape(self._shape)
+        raw_cube_array = self._flat_values.reshape(self._all_dimensions.shape)
         # ---must be read-only to avoid hard-to-find bugs---
         raw_cube_array.flags.writeable = False
         return raw_cube_array
@@ -772,33 +746,6 @@ class _BaseMeasure(object):
         This property must be implemented by each subclass.
         """
         raise NotImplementedError("must be implemented by each subclass")
-
-    @lazyproperty
-    def _requires_transposition(self):
-        """True if dimensions need transposition, False otherwise.
-
-        Transposition is needed when one of the dimension type is a NUM_ARRAY and the
-        dimensions are more than 1. This business rule needs to drive correctly tabbook
-        and deck exports when a numeric array dimension is expressed.
-        """
-        # NOTE: this is a temporary hack that should disappear when we introdice the
-        # dim-order feature.
-        dimension_types = [d.dimension_type for d in self._all_dimensions]
-        return len(self._all_dimensions) >= 2 and DT.NUM_ARRAY in dimension_types
-
-    @lazyproperty
-    def _shape(self):
-        """All dimensions shape (row, col)"""
-        # NOTE: Inverting the shape cannot be enough in future when we'll have more than
-        # 2 dimensions in the new dim_order option.
-        shape = self._all_dimensions.shape
-        if self._requires_transposition:
-            return (
-                shape[-2:] + (shape[0],)
-                if len(self._all_dimensions) == 3
-                else shape[::-1]
-            )
-        return shape
 
 
 class _MeanMeasure(_BaseMeasure):

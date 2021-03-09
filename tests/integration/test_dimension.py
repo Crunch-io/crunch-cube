@@ -18,7 +18,7 @@ from cr.cube.dimension import (
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
-from ..unitutil import instance_mock
+from ..unitutil import instance_mock, property_mock
 
 
 class DescribeIntegratedAllDimensions(object):
@@ -52,6 +52,25 @@ class DescribeIntegratedAllDimensions(object):
         )
 
         assert apparent_dimension_types == (DT.CA, DT.CA_CAT, DT.MR)
+
+    @pytest.mark.parametrize(
+        "dim_types, expected_value",
+        (
+            ((DT.NUM_ARRAY, DT.CAT), (1, 0)),
+            ((DT.CAT, DT.CA_SUBVAR), (0, 1)),
+            ((DT.NUM_ARRAY, DT.MR_SUBVAR, DT.MR_CAT), (1, 2, 0)),
+            ((DT.NUM_ARRAY,), (0,)),
+        ),
+    )
+    def it_knows_if_its_dimensions_order(self, request, dim_types, expected_value):
+        _dimensions_ = tuple(
+            instance_mock(request, Dimension, name="dim-%d" % idx, dimension_type=dt)
+            for idx, dt in enumerate(dim_types)
+        )
+        _dimensions_prop_ = property_mock(request, AllDimensions, "_dimensions")
+        _dimensions_prop_.return_value = _dimensions_
+
+        assert AllDimensions(None).dimension_order == expected_value
 
 
 class DescribeIntegratedDimension(object):
