@@ -29,6 +29,11 @@ class CubeMeasures(object):
         return _BaseCubeMeans.factory(self._cube, self._rows_dimension)
 
     @lazyproperty
+    def cube_sum(self):
+        """_BaseCubeSum subclass object for this stripe."""
+        return _BaseCubeSums.factory(self._cube, self._rows_dimension)
+
+    @lazyproperty
     def unweighted_cube_counts(self):
         """_BaseUnweightedCubeCounts subclass object for this stripe."""
         return _BaseUnweightedCubeCounts.factory(
@@ -63,13 +68,12 @@ class _BaseCubeMeans(_BaseCubeMeasure):
     @classmethod
     def factory(cls, cube, rows_dimension):
         """Return _BaseCubeMeans subclass instance appropriate to `cube`."""
-        # --- TODO: note that `cube.counts` is improperly overloaded to return means
-        # --- when cube.has_means. This needs to be fixed.
-        means = cube.counts
+        if cube.means is None:
+            raise ValueError("cube-result does not contain cube-means measure")
         MeansCls = (
             _MrCubeMeans if rows_dimension.dimension_type == DT.MR else _CatCubeMeans
         )
-        return MeansCls(rows_dimension, means)
+        return MeansCls(rows_dimension, cube.means)
 
     @lazyproperty
     def means(self):
@@ -100,6 +104,52 @@ class _MrCubeMeans(_BaseCubeMeans):
         return self._means[:, 0]
 
 
+# === SUM ===
+
+
+class _BaseCubeSums(_BaseCubeMeasure):
+    """Base class for sum cube-measure variants."""
+
+    def __init__(self, rows_dimension, sums):
+        super(_BaseCubeSums, self).__init__(rows_dimension)
+        self._sums = sums
+
+    @classmethod
+    def factory(cls, cube, rows_dimension):
+        """Return _BaseCubeSum subclass instance appropriate to `cube`."""
+        if cube.sums is None:
+            raise ValueError("cube-result does not contain cube-sum measure")
+        SumCls = _MrCubeSums if rows_dimension.dimension_type == DT.MR else _CatCubeSums
+        return SumCls(rows_dimension, cube.sums)
+
+    @lazyproperty
+    def sums(self):
+        """1D np.float64 ndarray of sum for each stripe row."""
+        raise NotImplementedError(
+            "`%s` must implement `.sum`" % type(self).__name__
+        )  # pragma: no cover
+
+
+class _CatCubeSums(_BaseCubeSums):
+    """Means cube-measure for a non-MR stripe."""
+
+    @lazyproperty
+    def sums(self):
+        """1D np.float64 ndarray of sum for each stripe row."""
+        return self._sums
+
+
+class _MrCubeSums(_BaseCubeSums):
+    """Means cube-measure for an MR stripe.
+    Its `.means` is a 2D ndarray with axes (rows, sel/not).
+    """
+
+    @lazyproperty
+    def sums(self):
+        """1D np.float64 ndarray of sum for each stripe row."""
+        return self._sums[:, 0]
+
+
 # === UNWEIGHTED COUNTS ===
 
 
@@ -117,6 +167,9 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
             return _CatUnweightedCubeCounts(
                 rows_dimension, cube.unweighted_counts[slice_idx]
             )
+
+        if rows_dimension.dimension_type == DT.NUM_ARRAY:
+            return _NumArrUnweightedCubeCounts(rows_dimension, cube.unweighted_counts)
 
         if rows_dimension.dimension_type == DT.MR:
             return _MrUnweightedCubeCounts(rows_dimension, cube.unweighted_counts)
@@ -208,6 +261,25 @@ class _MrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     def unweighted_counts(self):
         """1D np.float64 ndarray of unweighted-count for each row of stripe."""
         return self._unweighted_counts[:, 0]
+
+
+class _NumArrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
+    """Unweighted-counts cube-measure for a numeric array stripe."""
+
+    @lazyproperty
+    def bases(self):
+        """1D np.int64 ndarray of table-proportion denonimator for each cell."""
+        return self._unweighted_counts
+
+    @lazyproperty
+    def pruning_base(self):
+        """1D np.int64 ndarray of unweighted-N for each matrix row."""
+        return self._unweighted_counts
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """1D np.int64 ndarray of unweighted-count for each row of stripe."""
+        return self._unweighted_counts
 
 
 # === WEIGHTED COUNTS ===

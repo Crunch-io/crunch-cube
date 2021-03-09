@@ -75,7 +75,21 @@ class MEASURE(enum.Enum):
     COL_INDEX = "col_index"
     COL_PERCENT = "col_percent"
     MEAN = "mean"
+    SUM = "sum"
     TABLE_STDERR = "table_stderr"
     UNWEIGHTED_COUNT = "count_unweighted"
     WEIGHTED_COUNT = "count_weighted"
     Z_SCORE = "z_score"
+
+
+class CUBE_MEASURE(enum.Enum):
+    """Enumerated values representing cube measures."""
+
+    COUNT = "count"
+    MEAN = "mean"
+    STDDEV = "stddev"
+    SUM = "sum"
+    VALID_COUNT_UNWEIGHTED = "valid_count_unweighted"
+
+
+NUMERIC_MEASURES = frozenset((CUBE_MEASURE.SUM, CUBE_MEASURE.MEAN, CUBE_MEASURE.STDDEV))

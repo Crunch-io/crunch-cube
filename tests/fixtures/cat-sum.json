@@ -1,0 +1,162 @@
+{
+  "query": {
+    "measures": {
+      "valid_count_unweighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "3a7cfcaf0d5349fe854057603f63b2f3"
+          }
+        ]
+      },
+      "sum": {
+        "function": "cube_sum",
+        "args": [
+          {
+            "variable": "3a7cfcaf0d5349fe854057603f63b2f3"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "variable": "03694f029f9a408cb56f7cadfe9e9b48"
+      }
+    ],
+    "weight": null
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "dimensions": [
+      {
+        "derived": false,
+        "references": {
+          "alias": "Gender",
+          "name": "Gender"
+        },
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": null,
+              "id": 1,
+              "name": "Male",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": 2,
+              "name": "Female",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": -1,
+              "name": "No Data",
+              "missing": true
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 0,
+    "measures": {
+      "valid_count_unweighted": {
+        "data": [
+          3,
+          2,
+          0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "name": "Movies",
+            "view": {
+              "summary_statistic": "sum"
+            }
+          },
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            }
+          }
+        }
+      },
+      "sum": {
+        "data": [
+          88,
+          77,
+          0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "name": "Movies",
+            "view": {
+              "summary_statistic": "sum"
+            }
+          },
+          "type": {
+            "integer": null,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            }
+          }
+        }
+      }
+    },
+    "n": 5,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 5,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 5,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 5,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 5,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 5,
+      "weighted_n": 5
+    },
+    "filtered": {
+      "unweighted_n": 5,
+      "weighted_n": 5
+    },
+    "counts": [
+      3,
+      2,
+      0
+    ],
+    "element": "crunch:cube"
+  }
+}

@@ -1,0 +1,190 @@
+{
+  "query": {
+    "measures": {
+      "valid_count_unweighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "6b1df04bb3644ec88998b638a1ff9968"
+          }
+        ]
+      },
+      "sum": {
+        "function": "cube_sum",
+        "args": [
+          {
+            "variable": "6b1df04bb3644ec88998b638a1ff9968"
+          }
+        ]
+      },
+      "mean": {
+        "function": "cube_mean",
+        "args": [
+          {
+            "variable": "6b1df04bb3644ec88998b638a1ff9968"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "variable": "8b1301ab6a254f34992e30f07d652775"
+      }
+    ],
+    "weight": null
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "dimensions": [
+      {
+        "derived": false,
+        "references": {
+          "alias": "Gender",
+          "name": "Gender"
+        },
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": null,
+              "id": 1,
+              "name": "Male",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": 2,
+              "name": "Female",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": -1,
+              "name": "No Data",
+              "missing": true
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 0,
+    "measures": {
+      "valid_count_unweighted": {
+        "data": [
+          3,
+          2,
+          0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "name": "Movies"
+          },
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            }
+          }
+        }
+      },
+      "sum": {
+        "data": [
+          8.0,
+          7.0,
+          0.0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "name": "Movies"
+          },
+          "type": {
+            "integer": null,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            }
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          2.6666666667,
+          3.5,
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "name": "Movies"
+          },
+          "type": {
+            "integer": true,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            }
+          }
+        }
+      }
+    },
+    "n": 5,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 5,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 5,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 5,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 5,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 5,
+      "weighted_n": 5
+    },
+    "filtered": {
+      "unweighted_n": 5,
+      "weighted_n": 5
+    },
+    "counts": [
+      3,
+      2,
+      0
+    ],
+    "element": "crunch:cube"
+  }
+}

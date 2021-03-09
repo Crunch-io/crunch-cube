@@ -24,6 +24,16 @@ class CubeMeasures(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def cube_means(self):
+        """_BaseCubeMeans subclass object for this cube-result."""
+        return _BaseCubeMeans.factory(self._cube, self._dimensions, self._slice_idx)
+
+    @lazyproperty
+    def cube_sum(self):
+        """_BaseCubeSums subclass object for this cube-result."""
+        return _BaseCubeSums.factory(self._cube, self._dimensions, self._slice_idx)
+
+    @lazyproperty
     def unweighted_cube_counts(self):
         """_BaseUnweightedCubeCounts subclass object for this cube-result."""
         return _BaseUnweightedCubeCounts.factory(
@@ -66,6 +76,170 @@ class _BaseCubeMeasure(object):
         # --- for other 3D cubes we just select the 2D "table" portion associated with
         # --- the `slice_idx`-th table dimension element.
         return np.s_[slice_idx]
+
+
+# === MEANS ===
+
+
+class _BaseCubeMeans(_BaseCubeMeasure):
+    """Base class for mean cube-measure variants."""
+
+    def __init__(self, dimensions, means):
+        super(_BaseCubeMeans, self).__init__(dimensions)
+        self._means = means
+
+    @classmethod
+    def factory(cls, cube, dimensions, slice_idx):
+        """Return _BaseCubeMeans subclass instance appropriate to `cube`.
+
+        Raises `ValueError` if the cube-result does not include a cube-means measure.
+        """
+        if cube.means is None:
+            raise ValueError("cube-result does not contain cube-means measure")
+        dimension_types = cube.dimension_types[-2:]
+        CubeMeansCls = (
+            _MrXMrCubeMeans
+            if dimension_types == (DT.MR, DT.MR)
+            else _MrXCatCubeMeans
+            if dimension_types[0] == DT.MR
+            else _CatXMrCubeMeans
+            if dimension_types[1] == DT.MR
+            else _CatXCatCubeMeans
+        )
+        return CubeMeansCls(
+            dimensions, cube.means[cls._slice_idx_expr(cube, slice_idx)]
+        )
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of cube means."""
+        raise NotImplementedError(  # pragma: no cover
+            "`%s` must implement `.means`" % type(self).__name__
+        )
+
+
+class _CatXCatCubeMeans(_BaseCubeMeans):
+    """Means cube-measure for a slice with no MR dimensions."""
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of means for each valid matrix cell."""
+        return self._means
+
+
+class _CatXMrCubeMeans(_BaseCubeMeans):
+    """Means cube-measure for a NOT_MR_X_MR slice.
+
+    Note that the rows-dimensions need not actually be CAT.
+    """
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of means for each valid matrix cell."""
+        return self._means[:, :, 0]
+
+
+class _MrXCatCubeMeans(_BaseCubeMeans):
+    """Means cube-measure for an MR_X_NOT_MR slice.
+
+    Note that the columns-dimension need not actually be CAT.
+    """
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of means for each valid matrix cell."""
+        return self._means[:, 0, :]
+
+
+class _MrXMrCubeMeans(_BaseCubeMeans):
+    """Means cube-measure for an MR_X_MR slice."""
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of means for each valid matrix cell."""
+        # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
+        return self._means[:, 0, :, 0]
+
+
+# === SUMS ===
+
+
+class _BaseCubeSums(_BaseCubeMeasure):
+    """Base class for sum cube-measure variants."""
+
+    def __init__(self, dimensions, sums):
+        super(_BaseCubeSums, self).__init__(dimensions)
+        self._sums = sums
+
+    @classmethod
+    def factory(cls, cube, dimensions, slice_idx):
+        """Return _BaseCubeSums subclass instance appropriate to `cube`.
+
+        Raises `ValueError` if the cube-result does not include a cube-sum measure.
+        """
+        if cube.sums is None:
+            raise ValueError("cube-result does not contain cube-sum measure")
+        dimension_types = cube.dimension_types[-2:]
+        CubeSumsCls = (
+            _MrXMrCubeSums
+            if dimension_types == (DT.MR, DT.MR)
+            else _MrXCatCubeSums
+            if dimension_types[0] == DT.MR
+            else _CatXMrCubeSums
+            if dimension_types[1] == DT.MR
+            else _CatXCatCubeSums
+        )
+        return CubeSumsCls(dimensions, cube.sums[cls._slice_idx_expr(cube, slice_idx)])
+
+    @lazyproperty
+    def sums(self):
+        """2D np.float64 ndarray of cube sum."""
+        raise NotImplementedError(  # pragma: no cover
+            "`%s` must implement `.sum`" % type(self).__name__
+        )
+
+
+class _CatXCatCubeSums(_BaseCubeSums):
+    """Sums cube-measure for a slice with no MR dimensions."""
+
+    @lazyproperty
+    def sums(self):
+        """2D np.float64 ndarray of sum for each valid matrix cell."""
+        return self._sums
+
+
+class _CatXMrCubeSums(_BaseCubeSums):
+    """Sums cube-measure for a NOT_MR_X_MR slice.
+
+    Note that the rows-dimensions need not actually be CAT.
+    """
+
+    @lazyproperty
+    def sums(self):
+        """2D np.float64 ndarray of sum for each valid matrix cell."""
+        return self._sums[:, :, 0]
+
+
+class _MrXCatCubeSums(_BaseCubeSums):
+    """Sums cube-measure for an MR_X_NOT_MR slice.
+
+    Note that the columns-dimension need not actually be CAT.
+    """
+
+    @lazyproperty
+    def sums(self):
+        """2D np.float64 ndarray of sum for each valid matrix cell."""
+        return self._sums[:, 0, :]
+
+
+class _MrXMrCubeSums(_BaseCubeSums):
+    """Sums cube-measure for an MR_X_MR slice."""
+
+    @lazyproperty
+    def sums(self):
+        """2D np.float64 ndarray of sum for each valid matrix cell."""
+        # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
+        return self._sums[:, 0, :, 0]
 
 
 # === UNWEIGHTED COUNTS ===
@@ -765,12 +939,21 @@ class BaseCubeResultMatrix(object):
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
         """Return a base-matrix object of appropriate type for `cube`."""
-        # --- means cube gets one of the means-matrix types ---
-        if cube.has_means:
-            return cls._means_matrix_factory(cube, dimensions, slice_idx)
-
-        # --- everything else gets a more conventional matrix ---
-        return cls._regular_matrix_factory(cube, dimensions, slice_idx)
+        dimension_types = cube.dimension_types[-2:]
+        MatrixCls = (
+            _NumArrayXMrMatrix
+            if dimension_types == (DT.NUM_ARRAY, DT.MR)
+            else _NumArrayXCatMatrix
+            if dimension_types[0] == DT.NUM_ARRAY
+            else _MrXMrMatrix
+            if dimension_types == (DT.MR, DT.MR)
+            else _MrXCatMatrix
+            if dimension_types[0] == DT.MR
+            else _CatXMrMatrix
+            if dimension_types[1] == DT.MR
+            else _CatXCatMatrix
+        )
+        return MatrixCls(dimensions, *cls._sliced_counts(cube, slice_idx))
 
     @lazyproperty
     def column_index(self):
@@ -925,50 +1108,8 @@ class BaseCubeResultMatrix(object):
         variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
         return (counts - expected_counts) / np.sqrt(variance)
 
-    @classmethod
-    def _means_matrix_factory(cls, cube, dimensions, slice_idx):
-        """ -> matrix object appropriate to means `cube`."""
-        dimension_types = cube.dimension_types[-2:]
-
-        if dimension_types == (DT.MR, DT.MR):
-            # --- this MEANS_MR_X_MR case hasn't arisen yet ---
-            raise NotImplementedError(
-                "MR x MR with means is not implemented"
-            )  # pragma: no cover
-
-        MatrixCls = (
-            _NumArrayXMrMeansMatrix
-            if dimension_types == (DT.NUM_ARRAY, DT.MR)
-            else _NumArrayXCatMeansMatrix
-            if dimension_types[0] == DT.NUM_ARRAY
-            else _MrXCatMeansMatrix
-            if dimension_types[0] == DT.MR
-            else _CatXMrMeansMatrix
-            if dimension_types[1] == DT.MR
-            else _CatXCatMeansMatrix
-        )
-        counts, unweighted_counts = (
-            (cube.counts[slice_idx], cube.unweighted_counts[slice_idx])
-            if cube.ndim == 3
-            else (cube.counts, cube.unweighted_counts)
-        )
-        return MatrixCls(dimensions, counts, unweighted_counts)
-
     @staticmethod
-    def _regular_matrix_class(dimension_types):
-        """Return BaseCubeResultMatrix subclass appropriate to `dimension_types`."""
-        return (
-            _MrXMrMatrix
-            if dimension_types == (DT.MR, DT.MR)
-            else _MrXCatMatrix
-            if dimension_types[0] == DT.MR
-            else _CatXMrMatrix
-            if dimension_types[1] == DT.MR
-            else _CatXCatMatrix
-        )
-
-    @staticmethod
-    def _regular_matrix_counts_slice(cube, slice_idx):
+    def _cube_slice_expression(cube, slice_idx):
         """return `np.s_` object with correct slicing for the cube type."""
         if cube.ndim <= 2:
             return np.s_[:]
@@ -983,12 +1124,6 @@ class BaseCubeResultMatrix(object):
         return np.s_[slice_idx]
 
     @classmethod
-    def _regular_matrix_factory(cls, cube, dimensions, slice_idx):
-        """ -> matrix object for non-means slice."""
-        MatrixCls = cls._regular_matrix_class(cube.dimension_types[-2:])
-        return MatrixCls(dimensions, *cls._sliced_counts(cube, slice_idx))
-
-    @classmethod
     def _sliced_counts(cls, cube, slice_idx):
         """Return tuple of cube counts, prepared for regular matrix construction.
 
@@ -1001,8 +1136,12 @@ class BaseCubeResultMatrix(object):
         need to extract only the selected counts, since we're "just" dealing with the
         tabulation.
         """
-        i = cls._regular_matrix_counts_slice(cube, slice_idx)
-        return (cube.counts[i], cube.unweighted_counts[i], cube.counts_with_missings[i])
+        slice_expr = cls._cube_slice_expression(cube, slice_idx)
+        return (
+            cube.counts[slice_expr],
+            cube.unweighted_counts[slice_expr],
+            cube.counts_with_missings[slice_expr],
+        )
 
     @lazyproperty
     def _valid_row_idxs(self):
@@ -1719,73 +1858,7 @@ class _MrXMrMatrix(_CatXCatMatrix):
         return p * (1 - p)
 
 
-# === LEGACY MEANS MATRIX OBJECTS ===
-
-
-class _CatXCatMeansMatrix(_CatXCatMatrix):
-    """CAT_X_CAT matrix for means measure.
-
-    A means matrix has an array of mean values instead of a `counts` array.
-    """
-
-    def __init__(self, dimensions, means, unweighted_counts):
-        super(_CatXCatMeansMatrix, self).__init__(dimensions, None, unweighted_counts)
-        self._means = means
-
-    @lazyproperty
-    def means(self):
-        """2D np.float64 ndarray of mean for each valid matrix cell."""
-        return self._means
-
-    @lazyproperty
-    def rows_margin(self):
-        """(nrows,) ndarray of np.nan. (A means matrix has no rows margin)."""
-        nrows = self._means.shape[0]
-        return np.full((nrows,), np.nan)
-
-    @lazyproperty
-    def weighted_counts(self):
-        """2D ndarray of np.nan for each valid matrix cell.
-
-        Weighted-counts have no meaning for a means matrix (although unweighted counts
-        do).
-        """
-        return np.full(self._means.shape, np.nan)
-
-
-class _CatXMrMeansMatrix(_CatXMrMatrix):
-    """Basis for CAT_X_MR slice having mean measure instead of counts."""
-
-    def __init__(self, dimensions, means, unweighted_counts):
-        counts = np.zeros(means.shape)
-        super(_CatXMrMeansMatrix, self).__init__(dimensions, counts, unweighted_counts)
-        self._means = means
-
-    @lazyproperty
-    def means(self):
-        """2D np.float64 ndarray of mean for each valid matrix cell."""
-        return self._means[:, :, 0]
-
-
-class _MrXCatMeansMatrix(_MrXCatMatrix):
-    """MR_X_CAT slice with means measure instead of counts.
-
-    Note that its (weighted) counts are all set to zero. A means slice still has
-    meaningful unweighted counts.
-    """
-
-    def __init__(self, dimensions, means, unweighted_counts):
-        counts = np.zeros(means.shape)
-        super(_MrXCatMeansMatrix, self).__init__(dimensions, counts, unweighted_counts)
-        self._means = means
-
-    @lazyproperty
-    def means(self):
-        """2D np.float64 ndarray of mean for each valid matrix cell."""
-        return self._means[:, 0, :]
-
-
-class _NumArrayXCatMeansMatrix(_CatXCatMeansMatrix):
+class _NumArrayXCatMatrix(_CatXCatMatrix):
     """NUM_ARR_X_CAT slice with means measure instead of counts."""
 
     @lazyproperty
@@ -1798,7 +1871,7 @@ class _NumArrayXCatMeansMatrix(_CatXCatMeansMatrix):
         return self._unweighted_counts
 
 
-class _NumArrayXMrMeansMatrix(_CatXMrMeansMatrix):
+class _NumArrayXMrMatrix(_CatXMrMatrix):
     """NUM_ARR_X_MR slice with means measure instead of counts."""
 
     @lazyproperty

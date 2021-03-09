@@ -538,7 +538,8 @@ class Describe_Nub(object):
     """Unit test suite for `cr.cube.cubepart._Nub` object."""
 
     @pytest.mark.parametrize(
-        "unweighted_count, expected_value", ((float("NaN"), True), (45.4, False))
+        "unweighted_count, expected_value",
+        ((float("NaN"), True), (45.4, False), (0.0, True)),
     )
     def it_knows_when_it_is_empty(self, request, unweighted_count, expected_value):
         property_mock(request, _Nub, "unweighted_count", return_value=unweighted_count)

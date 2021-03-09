@@ -103,7 +103,7 @@ class Assembler(object):
         # --- an MR_X slice produces a 2D column-base (each cell has its own N) ---
         columns_base = self._cube_result_matrix.columns_base
         rows_dim_type = self._rows_dimension.dimension_type
-        if rows_dim_type in (DT.MR_SUBVAR, DT.NUM_ARRAY) and columns_base.ndim > 1:
+        if rows_dim_type in (DT.MR_SUBVAR, DT.NUM_ARRAY):
             return self._assemble_matrix(
                 SumSubtotals.blocks(columns_base, self._dimensions)
             )
@@ -166,11 +166,7 @@ class Assembler(object):
 
         Raises `ValueError` if the cube-result does not include a means cube-measure.
         """
-        if not self._cube.has_means:
-            raise ValueError("cube-result does not include a means cube-measure")
-        return self._assemble_matrix(
-            NanSubtotals.blocks(self._cube_result_matrix.means, self._dimensions)
-        )
+        return self._assemble_matrix(self._measures.means.blocks)
 
     @lazyproperty
     def pvalues(self):
@@ -265,6 +261,14 @@ class Assembler(object):
         return self._assemble_vector(
             self._cube_result_matrix.rows_margin, self._row_subtotals, self._row_order
         )
+
+    @lazyproperty
+    def sums(self):
+        """2D optional np.float64 ndarray of sum for each cell.
+
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+        """
+        return self._assemble_matrix(self._measures.sums.blocks)
 
     @lazyproperty
     def table_base(self):

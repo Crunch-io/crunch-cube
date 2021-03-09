@@ -27,22 +27,22 @@ class DescribeIntegratedCube(object):
         cube = Cube(CR.CAT_X_CAT)
 
         assert cube.__repr__() == "Cube(name='v4', dimension_types='CAT x CAT')"
-        np.testing.assert_equal(cube.counts, [[5, 2], [5, 3]])
-        np.testing.assert_equal(
-            cube.counts_with_missings, [[5, 3, 2, 0], [5, 2, 3, 0], [0, 0, 0, 0]]
+        assert cube.counts == pytest.approx(np.array([[5, 2], [5, 3]]))
+        assert cube.counts_with_missings == pytest.approx(
+            np.array([[5, 3, 2, 0], [5, 2, 3, 0], [0, 0, 0, 0]])
         )
         assert cube.cube_index == 0
         assert cube.description == "Pet Owners"
         assert cube.dimension_types == (DT.CAT, DT.CAT)
         assert isinstance(cube.dimensions, _ApparentDimensions)
-        assert cube.has_means is False
         assert cube.has_weighted_counts is False
         assert cube.missing == 5
         assert cube.name == "v4"
         assert cube.ndim == 2
         assert cube.population_fraction == 1.0
         assert cube.title == "Pony Owners"
-        np.testing.assert_equal(cube.unweighted_counts, [[5, 2], [5, 3]])
+        assert cube.unweighted_counts == pytest.approx(np.array([[5, 2], [5, 3]]))
+        assert cube.weighted_counts is None
 
     @pytest.mark.parametrize(
         "cube_response, expected_dim_types",
@@ -105,12 +105,7 @@ class DescribeIntegratedCube(object):
     def it_provides_valid_counts_for_NUM_ARRAY_GROUPED_BY_CAT(self):
         cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
 
-        np.testing.assert_array_equal(cube.valid_counts, [[3, 2], [3, 1], [1, 1]])
-
-    def and_it_returns_empty_array_if_valid_counts_are_not_available(self):
-        cube = Cube(CR.CAT_X_CAT)
-
-        np.testing.assert_array_equal(cube.valid_counts, [])
+        assert cube.counts == pytest.approx(np.array([[3, 2], [3, 1], [1, 1]]))
 
     def it_provides_valid_counts_summary_for_NUM_ARRAY_GROUPED_BY_CAT(self):
         cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
@@ -158,6 +153,15 @@ class DescribeIntegrated_Measures(object):
         )
         missing_count = measures.missing_count
         assert missing_count == 3
+
+    def it_provides_the_means_missing_count_when_sum_are_available(self):
+        cube_dict = CR.SUM_CAT_X_MR
+        measures = _Measures(
+            cube_dict,
+            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+        )
+        missing_count = measures.missing_count
+        assert missing_count == 1
 
     def but_provides_the_general_missing_count_otherwise(self):
         measures = _Measures(CR.CAT_X_CAT, None)
@@ -258,10 +262,6 @@ class DescribeIntegrated_MeanMeasure(object):
                 [34.20408163, 43.2745098, 41.2, np.nan, 35.26086957],
             ],
         )
-
-    def it_knows_if_it_has_means(self):
-        slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
-        assert slice_.has_means
 
 
 class DescribeIntegrated_UnweightedCountMeasure(object):

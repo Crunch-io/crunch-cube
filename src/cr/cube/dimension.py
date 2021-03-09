@@ -58,6 +58,30 @@ class AllDimensions(_BaseDimensions):
         return _ApparentDimensions(all_dimensions=self._dimensions)
 
     @lazyproperty
+    def dimension_order(self):
+        """Tuple of int representing the dimension order.
+
+        The dimension order depends on the presence of numeric array in the dimensions
+        and the number of the cube dimensions. In case of 3 dimensions e.g.
+        NUM_ARR_X_MR_SUBVAR_X_MR_CAT the order should be (1,2,0) that is basically
+        swapping the MR (2 dimensions) with the NUM_ARRAY dimension. In case of 2
+        dimensions the dimension order correspond simpy to the reverse of the original
+        dimension order.
+        """
+        # NOTE: this is a temporary hack that goes away when we introduce the dim_order
+        # concept. We should receive the actual order directly in the cube_response.
+        # So, all this logic will be deleted.
+        dimension_types = tuple(d.dimension_type for d in self._dimensions)
+        dim_order = tuple(range(len(self._dimensions)))
+        if len(self._dimensions) >= 2 and DT.NUM_ARRAY in dimension_types:
+            return (
+                dim_order[-2:] + (dim_order[0],)
+                if len(self._dimensions) == 3
+                else dim_order[::-1]
+            )
+        return dim_order
+
+    @lazyproperty
     def shape(self):
         """Tuple of int element count for each dimension.
 
@@ -65,7 +89,8 @@ class AllDimensions(_BaseDimensions):
         cube response values (raw meaning including missing and prunable
         elements and any MR_CAT dimensions).
         """
-        return tuple(d.shape for d in self._dimensions)
+        dimensions = [self._dimensions[i] for i in self.dimension_order]
+        return tuple(d.shape for d in dimensions)
 
     @lazyproperty
     def _dimensions(self):

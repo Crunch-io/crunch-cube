@@ -9,23 +9,30 @@ from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _ValidElements
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import (
+    _BaseCubeMeans,
     _BaseCubeMeasure,
+    _BaseCubeSums,
     BaseCubeResultMatrix,
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
+    _CatXCatCubeMeans,
+    _CatXCatCubeSums,
     _CatXCatMatrix,
-    _CatXCatMeansMatrix,
     _CatXCatUnweightedCubeCounts,
     _CatXCatWeightedCubeCounts,
+    _CatXMrCubeMeans,
+    _CatXMrCubeSums,
     _CatXMrMatrix,
-    _CatXMrMeansMatrix,
     _CatXMrUnweightedCubeCounts,
     _CatXMrWeightedCubeCounts,
     CubeMeasures,
+    _MrXCatCubeMeans,
+    _MrXCatCubeSums,
     _MrXCatMatrix,
-    _MrXCatMeansMatrix,
     _MrXCatUnweightedCubeCounts,
     _MrXCatWeightedCubeCounts,
+    _MrXMrCubeMeans,
+    _MrXMrCubeSums,
     _MrXMrMatrix,
     _MrXMrUnweightedCubeCounts,
     _MrXMrWeightedCubeCounts,
@@ -98,6 +105,389 @@ class Describe_BaseCubeMeasure(object):
         measure = _BaseCubeMeasure(None)
 
         assert measure._slice_idx_expr(cube_, slice_idx=3) == expected_value
+
+
+# === MEANS ===
+
+
+class Describe_BaseCubeMeans(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMeans`."""
+
+    @pytest.mark.parametrize(
+        "dimension_types, CubeMeansCls",
+        (
+            ((DT.MR, DT.MR), _MrXMrCubeMeans),
+            ((DT.MR, DT.CAT), _MrXCatCubeMeans),
+            ((DT.CAT, DT.MR), _CatXMrCubeMeans),
+            ((DT.CAT, DT.CAT), _CatXCatCubeMeans),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_cube_means_objects(
+        self, request, dimension_types, CubeMeansCls
+    ):
+        cube_ = instance_mock(request, Cube)
+        dimensions_ = (
+            instance_mock(request, Dimension),
+            instance_mock(request, Dimension),
+        )
+        cube_means_ = instance_mock(request, CubeMeansCls)
+        CubeMeanCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % CubeMeansCls.__name__,
+            return_value=cube_means_,
+        )
+        _slice_idx_expr_ = method_mock(
+            request,
+            _BaseCubeMeans,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
+        )
+        cube_.dimension_types = dimension_types
+        cube_.means = [[1, 2], [3, 4]]
+
+        cube_means = _BaseCubeMeans.factory(cube_, dimensions_, slice_idx=7)
+
+        _slice_idx_expr_.assert_called_once_with(cube_, 7)
+        CubeMeanCls_.assert_called_once_with(dimensions_, [3, 4])
+        assert cube_means is cube_means_
+
+    def but_it_raises_a_value_error_when_cube_result_does_not_contain_mean_measure(
+        self, cube_
+    ):
+        cube_.means = None
+
+        with pytest.raises(ValueError) as e:
+            _BaseCubeMeans.factory(cube_, None, None)
+
+        assert str(e.value) == "cube-result does not contain cube-means measure"
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+
+class Describe_CatXCatCubeMeans(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeMeans`."""
+
+    def it_knows_its_means(self, request):
+        property_mock(
+            request,
+            _CatXCatCubeMeans,
+            "means",
+            return_value=np.array([[1.1, 2.3, 3.3], [3.4, 1.5, 1.6]]),
+        )
+        cube_means = _CatXCatCubeMeans(None, None)
+
+        assert cube_means.means.tolist() == [
+            [1.1, 2.3, 3.3],
+            [3.4, 1.5, 1.6],
+        ]
+
+
+class Describe_CatXMrCubeMeans(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeMeans`."""
+
+    def it_knows_its_means(self, raw_means):
+        cube_means = _CatXMrCubeMeans(None, raw_means)
+
+        assert cube_means.means.tolist() == [
+            [1.1, 2.2, 3.2],
+            [4.3, 5.1, 6.1],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_means(self):
+        """(2, 3, 2) np.float64 ndarray of means as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1.1, 6.1],  # -- col 0 --
+                    [2.2, 5.2],  # -- col 1 --
+                    [3.2, 4.2],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4.3, 3.1],  # -- col 0 --
+                    [5.1, 2.1],  # -- col 1 --
+                    [6.1, 1.1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXCatCubeMeans(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeMeans`."""
+
+    def it_knows_its_means(self, raw_means):
+        cube_means = _MrXCatCubeMeans(None, raw_means)
+
+        assert cube_means.means.tolist() == [
+            [1.1, 6.1],
+            [4.3, 3.1],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_means(self):
+        """(2, 3, 2) np.int float64 of means as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1.1, 6.1],  # -- col 0 --
+                    [2.2, 5.2],  # -- col 1 --
+                    [3.2, 4.2],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4.3, 3.1],  # -- col 0 --
+                    [5.1, 2.1],  # -- col 1 --
+                    [6.1, 1.1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXMrCubeMeans(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeMeans`."""
+
+    def it_knows_its_means(self, raw_means):
+        cube_means = _MrXMrCubeMeans(None, raw_means)
+
+        assert cube_means.means.tolist() == [
+            [0.1, 0.1],
+            [0.4, 0.5],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_means(self):
+        """(2, 2, 2, 2) np.float64 ndarray of means as from Cube."""
+        return np.array(
+            # -- axes are (rows, sel/not, cols, sel/not) --
+            [
+                [  # -- row 0 -------------
+                    # --sel/not--
+                    [  # -- selected ------
+                        [0.1, 0.8],  # -- col 0
+                        [0.1, 0.7],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [0.2, 0.6],  # -- col 0
+                        [0.3, 0.5],  # -- col 1
+                    ],
+                ],
+                [  # -- row 1 -------------
+                    [  # -- selected ------
+                        [0.4, 0.4],  # -- col 0
+                        [0.5, 0.3],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [0.6, 0.2],  # -- col 0
+                        [0.7, 0.1],  # -- col 1
+                    ],
+                ],
+            ]
+        )
+
+
+# === SUM ===
+
+
+class Describe_BaseCubeSum(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeSum`."""
+
+    @pytest.mark.parametrize(
+        "dimension_types, CubeSumCls",
+        (
+            ((DT.MR, DT.MR), _MrXMrCubeSums),
+            ((DT.MR, DT.CAT), _MrXCatCubeSums),
+            ((DT.CAT, DT.MR), _CatXMrCubeSums),
+            ((DT.CAT, DT.CAT), _CatXCatCubeSums),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_cube_sum_objects(
+        self, request, dimension_types, CubeSumCls, cube_
+    ):
+        dimensions_ = (
+            instance_mock(request, Dimension),
+            instance_mock(request, Dimension),
+        )
+        cube_sums_ = instance_mock(request, CubeSumCls)
+        CubeSumCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % CubeSumCls.__name__,
+            return_value=cube_sums_,
+        )
+        _slice_idx_expr_ = method_mock(
+            request,
+            _BaseCubeSums,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
+        )
+        cube_.dimension_types = dimension_types
+        cube_.sums = [[1, 2], [3, 4]]
+
+        cube_sums = _BaseCubeSums.factory(cube_, dimensions_, slice_idx=7)
+
+        _slice_idx_expr_.assert_called_once_with(cube_, 7)
+        CubeSumCls_.assert_called_once_with(dimensions_, [3, 4])
+        assert cube_sums is cube_sums_
+
+    def but_it_raises_a_value_error_when_cube_result_does_not_contain_sum_measure(
+        self, cube_
+    ):
+        cube_.sums = None
+
+        with pytest.raises(ValueError) as e:
+            _BaseCubeSums.factory(cube_, None, None)
+
+        assert str(e.value) == "cube-result does not contain cube-sum measure"
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+
+class Describe_CatXCatCubeSums(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeSums`."""
+
+    def it_knows_its_sum(self, request):
+        property_mock(
+            request,
+            _CatXCatCubeSums,
+            "sums",
+            return_value=np.array([[1.1, 2.3, 3.3], [3.4, 1.5, 1.6]]),
+        )
+        cube_sum = _CatXCatCubeSums(None, None)
+
+        assert cube_sum.sums.tolist() == [
+            [1.1, 2.3, 3.3],
+            [3.4, 1.5, 1.6],
+        ]
+
+
+class Describe_CatXMrCubeSum(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeSums`."""
+
+    def it_knows_its_sum(self, raw_sums):
+        cube_sum = _CatXMrCubeSums(None, raw_sums)
+
+        assert cube_sum.sums.tolist() == [
+            [1.1, 2.2, 3.2],
+            [4.3, 5.1, 6.1],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_sums(self):
+        """(2, 3, 2) np.float64 ndarray of sums as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1.1, 6.1],  # -- col 0 --
+                    [2.2, 5.2],  # -- col 1 --
+                    [3.2, 4.2],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4.3, 3.1],  # -- col 0 --
+                    [5.1, 2.1],  # -- col 1 --
+                    [6.1, 1.1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXCatCubeSum(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeSums`."""
+
+    def it_knows_its_sum(self, raw_sums):
+        cube_sum = _MrXCatCubeSums(None, raw_sums)
+
+        assert cube_sum.sums.tolist() == [
+            [1.1, 6.1],
+            [4.3, 3.1],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_sums(self):
+        """(2, 3, 2) np.int float64 of sums as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1.1, 6.1],  # -- col 0 --
+                    [2.2, 5.2],  # -- col 1 --
+                    [3.2, 4.2],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4.3, 3.1],  # -- col 0 --
+                    [5.1, 2.1],  # -- col 1 --
+                    [6.1, 1.1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXMrCubeSum(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeSums`."""
+
+    def it_knows_its_sums(self, raw_sums):
+        cube_sum = _MrXMrCubeSums(None, raw_sums)
+
+        assert cube_sum.sums.tolist() == [
+            [0.1, 0.1],
+            [0.4, 0.5],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_sums(self):
+        """(2, 2, 2, 2) np.float64 ndarray of sums as from Cube."""
+        return np.array(
+            # -- axes are (rows, sel/not, cols, sel/not) --
+            [
+                [  # -- row 0 -------------
+                    # --sel/not--
+                    [  # -- selected ------
+                        [0.1, 0.8],  # -- col 0
+                        [0.1, 0.7],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [0.2, 0.6],  # -- col 0
+                        [0.3, 0.5],  # -- col 1
+                    ],
+                ],
+                [  # -- row 1 -------------
+                    [  # -- selected ------
+                        [0.4, 0.4],  # -- col 0
+                        [0.5, 0.3],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [0.6, 0.2],  # -- col 0
+                        [0.7, 0.1],  # -- col 1
+                    ],
+                ],
+            ]
+        )
 
 
 # === UNWEIGHTED COUNTS ===
@@ -926,29 +1316,6 @@ class Describe_MrXMrWeightedCubeCounts(object):
 class DescribeBaseCubeResultMatrix(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure.BaseCubeResultMatrix` object."""
 
-    @pytest.mark.parametrize(
-        "has_means, factory_method_name",
-        ((True, "_means_matrix_factory"), (False, "_regular_matrix_factory")),
-    )
-    def it_calls_the_correct_factory_method_for_appropriate_matrix_type(
-        self, request, cube_, dimension_, has_means, factory_method_name
-    ):
-        cube_.has_means = has_means
-        cube_result_matrix_ = instance_mock(request, BaseCubeResultMatrix)
-        factory_method = method_mock(
-            request,
-            BaseCubeResultMatrix,
-            factory_method_name,
-            return_value=cube_result_matrix_,
-        )
-
-        cube_result_matrix = BaseCubeResultMatrix.factory(
-            cube_, (dimension_, dimension_), slice_idx=71
-        )
-
-        factory_method.assert_called_once_with(cube_, (dimension_, dimension_), 71)
-        assert cube_result_matrix is cube_result_matrix_
-
     def it_knows_its_column_proportions(self, request):
         property_mock(
             request,
@@ -1006,71 +1373,7 @@ class DescribeBaseCubeResultMatrix(object):
         assert residuals.tolist() == [[0, 0], [0, 0]]
 
     @pytest.mark.parametrize(
-        "dimension_types, matrix_class_name",
-        (
-            ((DT.MR, DT.CAT), "_MrXCatMeansMatrix"),
-            ((DT.CAT, DT.MR), "_CatXMrMeansMatrix"),
-            ((DT.CAT, DT.CAT), "_CatXCatMeansMatrix"),
-        ),
-    )
-    def it_can_construct_a_means_matrix_for_a_2D_slice_to_help(
-        self, request, cube_, dimension_types, dimension_, matrix_class_name
-    ):
-        cube_.dimension_types = dimension_types
-        cube_.ndim = 2
-        cube_.counts = [1, 2, 3, 4]
-        cube_.unweighted_counts = [5, 6, 7, 8]
-        MatrixCls_ = class_mock(
-            request, "cr.cube.matrix.cubemeasure.%s" % matrix_class_name
-        )
-
-        matrix = BaseCubeResultMatrix._means_matrix_factory(
-            cube_, (dimension_, dimension_), None
-        )
-
-        MatrixCls_.assert_called_once_with(
-            (dimension_, dimension_), [1, 2, 3, 4], [5, 6, 7, 8]
-        )
-        assert matrix is MatrixCls_.return_value
-
-    @pytest.mark.parametrize(
-        "dimension_types, matrix_class_name",
-        (
-            ((None, DT.MR, DT.CAT), "_MrXCatMeansMatrix"),
-            ((None, DT.CAT, DT.MR), "_CatXMrMeansMatrix"),
-            ((None, DT.CAT, DT.CAT), "_CatXCatMeansMatrix"),
-        ),
-    )
-    def and_it_can_construct_a_means_matrix_for_a_3D_slice_to_help(
-        self, request, cube_, dimension_types, dimension_, matrix_class_name
-    ):
-        cube_.dimension_types = dimension_types
-        cube_.ndim = 3
-        cube_.counts = [None, [1, 2, 3, 4], None]
-        cube_.unweighted_counts = [None, [5, 6, 7, 8], None]
-        MatrixCls_ = class_mock(
-            request, "cr.cube.matrix.cubemeasure.%s" % matrix_class_name
-        )
-
-        matrix = BaseCubeResultMatrix._means_matrix_factory(
-            cube_, (dimension_, dimension_), slice_idx=1
-        )
-
-        MatrixCls_.assert_called_once_with(
-            (dimension_, dimension_), [1, 2, 3, 4], [5, 6, 7, 8]
-        )
-        assert matrix is MatrixCls_.return_value
-
-    def but_it_raises_on_MEANS_MR_X_MR(self, cube_):
-        cube_.dimension_types = (DT.MR, DT.MR)
-
-        with pytest.raises(NotImplementedError) as e:
-            BaseCubeResultMatrix._means_matrix_factory(cube_, None, None)
-
-        assert str(e.value) == "MR x MR with means is not implemented"
-
-    @pytest.mark.parametrize(
-        "dimension_types, expected_value",
+        "dimension_types, MatrixCls",
         (
             ((DT.MR, DT.MR), _MrXMrMatrix),
             ((DT.MR, DT.CAT), _MrXCatMatrix),
@@ -1078,13 +1381,31 @@ class DescribeBaseCubeResultMatrix(object):
             ((DT.CAT, DT.CAT), _CatXCatMatrix),
         ),
     )
-    def it_knows_its_regular_matrix_class_to_help(
-        self, dimension_types, expected_value
+    def it_provides_a_factory_for_constructing_a_matrix_objects(
+        self, request, dimension_types, MatrixCls
     ):
-        assert (
-            BaseCubeResultMatrix._regular_matrix_class(dimension_types)
-            is expected_value
+        cube_ = instance_mock(request, Cube)
+        dimensions_ = (
+            instance_mock(request, Dimension),
+            instance_mock(request, Dimension),
         )
+        cube_.dimension_types = dimension_types
+        MatrixCls_ = class_mock(
+            request, "cr.cube.matrix.cubemeasure.%s" % MatrixCls.__name__
+        )
+
+        _sliced_counts = method_mock(
+            request,
+            BaseCubeResultMatrix,
+            "_sliced_counts",
+            return_value=([[1], [2]], [[3], [4]]),
+        )
+
+        matrix = BaseCubeResultMatrix.factory(cube_, dimensions_, slice_idx=17)
+
+        _sliced_counts.assert_called_once_with(cube_, 17)
+        MatrixCls_.assert_called_once_with(dimensions_, [[1], [2]], [[3], [4]])
+        assert matrix is MatrixCls_.return_value
 
     @pytest.mark.parametrize(
         ("slice_idx", "dim_types", "expected"),
@@ -1104,55 +1425,15 @@ class DescribeBaseCubeResultMatrix(object):
             (2, (DT.MR, DT.CAT, DT.CAT), np.s_[2, 0]),
         ),
     )
-    def it_knows_its_regular_matrix_counts_slice_to_help(
+    def it_knows_its_cube_slice_expression_to_help(
         self, cube_, slice_idx, dim_types, expected
     ):
         cube_.dimension_types = dim_types
         cube_.ndim = len(dim_types)
 
-        s = BaseCubeResultMatrix._regular_matrix_counts_slice(cube_, slice_idx)
+        s = BaseCubeResultMatrix._cube_slice_expression(cube_, slice_idx)
 
         assert s == expected
-
-    @pytest.mark.parametrize(
-        "matrix_class_name",
-        (
-            "_CatXCatMatrix",
-            "_MrXCatMatrix",
-            "_CatXMrMatrix",
-            "_MrXMrMatrix",
-        ),
-    )
-    def it_can_construct_a_regular_matrix_to_help(
-        self, request, cube_, dimension_, matrix_class_name
-    ):
-        cube_.dimension_types = (DT.CAT, DT.MR, DT.CAT)
-        MatrixCls_ = class_mock(
-            request, "cr.cube.matrix.cubemeasure.%s" % matrix_class_name
-        )
-        _regular_matrix_class = method_mock(
-            request,
-            BaseCubeResultMatrix,
-            "_regular_matrix_class",
-            return_value=MatrixCls_,
-        )
-        _sliced_counts = method_mock(
-            request,
-            BaseCubeResultMatrix,
-            "_sliced_counts",
-            return_value=([[1], [2]], [[3], [4]]),
-        )
-
-        matrix = BaseCubeResultMatrix._regular_matrix_factory(
-            cube_, (dimension_, dimension_), slice_idx=17
-        )
-
-        _regular_matrix_class.assert_called_once_with((DT.MR, DT.CAT))
-        _sliced_counts.assert_called_once_with(cube_, 17)
-        MatrixCls_.assert_called_once_with(
-            (dimension_, dimension_), [[1], [2]], [[3], [4]]
-        )
-        assert matrix is MatrixCls_.return_value
 
     @pytest.mark.parametrize(
         ("counts", "counts_slice", "expected"),
@@ -1169,16 +1450,16 @@ class DescribeBaseCubeResultMatrix(object):
         cube_.counts = counts
         cube_.unweighted_counts = counts
         cube_.counts_with_missings = counts
-        _regular_matrix_counts_slice = method_mock(
+        _cube_slice_expression_ = method_mock(
             request,
             BaseCubeResultMatrix,
-            "_regular_matrix_counts_slice",
+            "_cube_slice_expression",
             return_value=counts_slice,
         )
 
         sliced_counts = BaseCubeResultMatrix._sliced_counts(cube_, slice_idx=23)
 
-        _regular_matrix_counts_slice.assert_called_once_with(cube_, 23)
+        _cube_slice_expression_.assert_called_once_with(cube_, 23)
         counts, unweighted, with_missing = sliced_counts
         assert counts.tolist() == expected
         assert unweighted.tolist() == expected
@@ -1498,7 +1779,7 @@ class Describe_CatXMrMatrix(object):
             "_array_type_std_res",
             return_value=np.array([[1, 2], [3, 4]]),
         )
-        weighted_cube_counts = np.arange(24).reshape(3, 4, 2)
+        weighted_cube_counts = np.arange(24).reshape((3, 4, 2))
         matrix = _CatXMrMatrix(None, weighted_cube_counts, None)
 
         zscores = matrix.zscores
@@ -1525,7 +1806,7 @@ class Describe_CatXMrMatrix(object):
         )
 
     def it_knows_its_table_proportion_variances_to_help(self, request):
-        weighted_cube_counts = np.arange(12).reshape(2, 3, 2)
+        weighted_cube_counts = np.arange(12).reshape((2, 3, 2))
         np.testing.assert_almost_equal(
             _CatXMrMatrix(None, weighted_cube_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0826446, 0.1155556], [0.244898, 0.231405, 0.2222222]]),
@@ -1707,7 +1988,7 @@ class Describe_MrXCatMatrix(object):
         _array_type_std_res_ = method_mock(
             request, _MrXCatMatrix, "_array_type_std_res", return_value=[[1, 2], [3, 4]]
         )
-        weighted_counts = np.arange(24).reshape(3, 2, 4)
+        weighted_counts = np.arange(24).reshape((3, 2, 4))
         matrix = _MrXCatMatrix(None, weighted_counts, None)
 
         zscores = matrix.zscores
@@ -1738,7 +2019,7 @@ class Describe_MrXCatMatrix(object):
         )
 
     def it_knows_its_table_proportion_variances_to_help(self, request):
-        weighted_counts = np.arange(12).reshape(2, 2, 3)
+        weighted_counts = np.arange(12).reshape((2, 2, 3))
         np.testing.assert_almost_equal(
             _MrXCatMatrix(None, weighted_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0622222, 0.1155556], [0.1038062, 0.118416, 0.1322568]]),
@@ -1980,7 +2261,7 @@ class Describe_MrXMrMatrix(object):
         _array_type_std_res_ = method_mock(
             request, _MrXMrMatrix, "_array_type_std_res", return_value=[[1, 2], [3, 4]]
         )
-        weighted_counts = np.arange(48).reshape(3, 2, 4, 2)
+        weighted_counts = np.arange(48).reshape((3, 2, 4, 2))
         matrix = _MrXMrMatrix(None, weighted_counts, None)
 
         zscores = matrix.zscores
@@ -2017,53 +2298,9 @@ class Describe_MrXMrMatrix(object):
             np.array([[0.5, 0.5], [0.5, 0.5]]),
         )
 
-    def it_knows_its_table_proportion_variances_to_help(self, request):
-        weighted_counts = np.arange(24).reshape(2, 2, 3, 2)
+    def it_knows_its_table_proportion_variances_to_help(self):
+        weighted_counts = np.arange(24).reshape((2, 2, 3, 2))
         np.testing.assert_almost_equal(
             _MrXMrMatrix(None, weighted_counts, None)._table_proportion_variances,
             np.array([[0.0, 0.0826446, 0.1155556], [0.1560874, 0.16, 0.1630506]]),
-        )
-
-
-# === LEGACY MEANS MATRIX OBJECTS ===
-
-
-class Describe_CatXCatMeansMatrix(object):
-    """Unit test suite for `cr.cube.matrix._CatXCatMeansMatrix` object."""
-
-    def it_knows_its_means(self):
-        cube_means = np.array([[2, 3, 1], [5, 6, 4]])
-        matrix = _CatXCatMeansMatrix(None, cube_means, None)
-
-        assert matrix.means.tolist() == [[2, 3, 1], [5, 6, 4]]
-
-    def it_knows_its_weighted_counts(self):
-        cube_means = np.array([[3, 2, 1], [6, 5, 4]])
-        matrix = _CatXCatMeansMatrix(None, cube_means, None)
-
-        np.testing.assert_equal(
-            matrix.weighted_counts,
-            [[np.nan, np.nan, np.nan], [np.nan, np.nan, np.nan]],
-        )
-
-
-class Describe_CatXMrMeansMatrix(object):
-    """Unit test suite for `cr.cube.matrix._CatXMrMeansMatrix` object."""
-
-    def it_knows_its_means(self):
-        means = np.array([[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]])
-        np.testing.assert_equal(
-            _CatXMrMeansMatrix(None, means, None).means,
-            np.array([[1, 2, 3], [5, 6, 7]]),
-        )
-
-
-class Describe_MrXCatMeansMatrix(object):
-    """Unit test suite for `cr.cube.matrix._MrXCatMeansMatrix` object."""
-
-    def it_knows_its_means(self):
-        means = np.arange(24).reshape(3, 2, 4)
-        np.testing.assert_equal(
-            _MrXCatMeansMatrix(None, means, None).means,
-            np.array([[0, 1, 2, 3], [8, 9, 10, 11], [16, 17, 18, 19]]),
         )
