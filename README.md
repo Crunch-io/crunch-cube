@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.7
+- Add cube sum measure
+
 ### 2.1.6
 - Enable explicit ordering by subvar IDs (strings)
 
