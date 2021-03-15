@@ -357,6 +357,15 @@ class Cube(object):
         return self._cube_response["result"].get("n", 0)
 
     @lazyproperty
+    def overlaps(self):
+        """np.ndarray of int if the `cube_overlaps` measure exists, None otherwise."""
+        if self._measures.overlaps is None:
+            return None
+        return self._measures.overlaps.raw_cube_array[self._valid_idxs].astype(
+            np.float64
+        )
+
+    @lazyproperty
     def partitions(self):
         """Sequence of _Slice, _Strand, or _Nub objects from this cube-result."""
         return tuple(
@@ -642,6 +651,17 @@ class _Measures(object):
         return self._cube_dict["result"].get("missing", 0)
 
     @lazyproperty
+    def overlaps(self):
+        """Optional _OverlapMeasure object providing access to overlaps values.
+
+        Will be None if no overlaps are available on the cube result.
+        """
+        overlap = _OverlapMeasure(
+            self._cube_dict, self._all_dimensions, self._cube_idx_arg
+        )
+        return None if overlap.raw_cube_array is None else overlap
+
+    @lazyproperty
     def population_fraction(self):
         """The filtered/unfiltered ratio for cube response.
 
@@ -791,6 +811,50 @@ class _MeanMeasure(_BaseMeasure):
             tuple(np.nan if type(x) is dict else x for x in measure_payload["data"]),
             dtype=np.float64,
         ).flatten()
+
+
+class _OverlapMeasure(_BaseMeasure):
+    """Statistical overlap values from a cube-response."""
+
+    @lazyproperty
+    def missing_count(self):
+        """Numeric value representing count of missing rows in response."""
+        return self._cube_dict["result"]["measures"]["overlap"].get("n_missing", 0)
+
+    @lazyproperty
+    def _measure_payload(self):
+        return self._cube_dict["result"].get("measures", {}).get("overlap")
+
+    @lazyproperty
+    def _flat_values(self):
+        """Optional 1D np.ndarray of np.float64 overlap values as found in cube response.
+
+        Overlap data may include missing items represented by a dict like
+        {'?': -1} in the cube response. These are replaced by np.nan in the
+        returned value.
+        """
+        if self._measure_payload is None:
+            return None
+        return np.array(
+            tuple(
+                np.nan if type(x) is dict else x for x in self._measure_payload["data"]
+            ),
+            dtype=np.float64,
+        ).flatten()
+
+    @lazyproperty
+    def _shape(self):
+        n_subvars = len(self._measure_payload["metadata"]["type"]["subvariables"])
+        return self._all_dimensions.shape + (n_subvars,)
+
+    @lazyproperty
+    def raw_cube_array(self):
+        if self._flat_values is None:
+            return None
+        raw_cube_array = self._flat_values.reshape(self._shape)
+        # ---must be read-only to avoid hard-to-find bugs---
+        raw_cube_array.flags.writeable = False
+        return raw_cube_array
 
 
 class _StdDevMeasure(_BaseMeasure):

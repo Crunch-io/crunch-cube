@@ -56,6 +56,18 @@ class StripeAssembler(object):
         return self._assemble_vector(self._measures.means.blocks)
 
     @lazyproperty
+    def overlaps(self):
+        """1D np.float64 ndarray of MR cube overlaps for each row.
+
+        Raises ValueError when the cube-result does not include
+        an overlap cube-measure.
+        """
+        # We're never going to have insertions on MRs, because they're handled directly
+        # in the zz9, and come as part of the data (i.e. they're not inserted inside
+        # the `cr.cube` library). Therefore we don't use blocks here.
+        return self._measures.overlaps.base_values
+
+    @lazyproperty
     def row_count(self):
         """int count of rows in this stripe.
 

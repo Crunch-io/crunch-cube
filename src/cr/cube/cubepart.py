@@ -1292,6 +1292,20 @@ class _Strand(CubePartition):
         return self.rows_dimension_name
 
     @lazyproperty
+    def overlaps(self):
+        """1D np.float64 ndarray of MR cube overlaps for each row of strand.
+
+        Raises ValueError when accessed on a cube-result that does not contain
+        an overlaps cube-measure.
+        """
+        try:
+            return self._assembler.overlaps
+        except ValueError:
+            raise ValueError(
+                "`.overlaps` is undefined for a cube-result without a `overlap` measure"
+            )
+
+    @lazyproperty
     def population_counts(self):
         """1D np.float64 ndarray of population count for each row of strand.
 
