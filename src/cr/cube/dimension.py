@@ -471,7 +471,6 @@ class Dimension(object):
         else:
             view = self._dimension_dict.get("references", {}).get("view") or {}
             insertion_dicts = view.get("transform", {}).get("insertions", [])
-
         return _Subtotals(insertion_dicts, self.valid_elements)
 
     @lazyproperty

@@ -1423,6 +1423,20 @@ class _Strand(CubePartition):
         return self._rows_dimension._dimension_dict
 
     @lazyproperty
+    def stddev(self):
+        """1D np.float64 ndarray of stddev for each row of strand.
+
+        Raises ValueError when accessed on a cube-result that does not contain a stddev
+        cube-measure.
+        """
+        try:
+            return self._assembler.stddev
+        except ValueError:
+            raise ValueError(
+                "`.stddev` is undefined for a cube-result without a stddev measure"
+            )
+
+    @lazyproperty
     def sums(self):
         """1D np.float64 ndarray of sum for each row of strand.
 

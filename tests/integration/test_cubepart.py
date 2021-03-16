@@ -1107,11 +1107,35 @@ class Describe_Strand(object):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]
         assert strand.is_empty is True
 
+    def it_provides_stddev_measure_for_CAT(self):
+        strand = Cube(CR.CAT_STDDEV).partitions[0]
+
+        assert strand.stddev == pytest.approx([22.898325, 7.778174])
+        assert strand.table_base_range.tolist() == [5, 5]
+
     def it_provides_sum_measure_for_CAT(self):
         strand = Cube(CR.CAT_SUM).partitions[0]
 
         assert strand.sums == pytest.approx([88.0, 77.0])
         assert strand.table_base_range.tolist() == [5, 5]
+
+    def it_provides_sum_measure_for_CAT_HS(self):
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "anchor": "bottom",
+                        "args": [1, 2],
+                        "function": "subtotal",
+                        "hide": False,
+                        "name": "Sub",
+                    }
+                ]
+            }
+        }
+        strand = Cube(CR.CAT_SUM, transforms=transforms).partitions[0]
+
+        assert strand.sums == pytest.approx([88.0, 77.0, 165.0])
 
     def it_provides_sum_measure_for_MR(self):
         strand = Cube(CR.MR_SUM).partitions[0]
