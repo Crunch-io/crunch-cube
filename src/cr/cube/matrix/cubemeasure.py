@@ -29,6 +29,11 @@ class CubeMeasures(object):
         return _BaseCubeMeans.factory(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
+    def cube_overlaps(self):
+        """_BaseCubeOverlaps subclass object for this cube-result."""
+        return _BaseCubeOverlaps.factory(self._cube, self._dimensions, self._slice_idx)
+
+    @lazyproperty
     def cube_sum(self):
         """_BaseCubeSums subclass object for this cube-result."""
         return _BaseCubeSums.factory(self._cube, self._dimensions, self._slice_idx)
@@ -164,6 +169,60 @@ class _MrXMrCubeMeans(_BaseCubeMeans):
         """2D np.float64 ndarray of means for each valid matrix cell."""
         # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
         return self._means[:, 0, :, 0]
+
+
+# === OVERLAPS ===
+
+
+class _BaseCubeOverlaps(_BaseCubeMeasure):
+    """Base class for overlap cube-measure variants."""
+
+    def __init__(self, dimensions, overlaps):
+        super(_BaseCubeOverlaps, self).__init__(dimensions)
+        self._overlaps = overlaps
+
+    @classmethod
+    def factory(cls, cube, dimensions, slice_idx):
+        """Return _BaseCubeOverlaps subclass instance appropriate to `cube`.
+
+        Raises `ValueError` if the cube-result does not include a cube-means measure.
+        """
+        if cube.overlaps is None:
+            raise ValueError("cube-result does not contain cube-overlaps measure")
+        dimension_types = cube.dimension_types[-2:]
+        CubeOverlapsCls = (
+            _CatXMrOverlaps if dimension_types[-1] == DT.MR else _MrXCatOverlaps
+        )
+        return CubeOverlapsCls(
+            dimensions, cube.overlaps[cls._slice_idx_expr(cube, slice_idx)]
+        )
+
+    @lazyproperty
+    def overlaps(self):
+        """3D np.float64 ndarray of cube overlaps."""
+        raise NotImplementedError(  # pragma: no cover
+            "`%s` must implement `.overlaps`" % type(self).__name__
+        )
+
+
+class _CatXMrOverlaps(_BaseCubeOverlaps):
+    """Overlaps cube-measure for a NOT_MR_X_MR slice."""
+
+    def overlaps(self):
+        """3D np.float64 ndarray of overlaps for each valid matrix cell."""
+        return self._overlaps[:, :, 0]
+
+
+class _MrXCatOverlaps(_BaseCubeOverlaps):
+    """Overlaps cube-measure for a MR_X_NON_MR slice.
+
+    Note that the columns-dimensions need not actually be CAT.
+    """
+
+    @lazyproperty
+    def overlaps(self):
+        """3D np.float64 ndarray of overlaps for each valid matrix cell."""
+        return self._overlaps[:, 0, :]
 
 
 # === STD DEV ===

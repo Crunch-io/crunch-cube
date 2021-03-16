@@ -219,6 +219,13 @@ class _RawDimension(object):
         }
 
     @lazyproperty
+    def _is_logical_type(self):
+        return [
+            category.get("id")
+            for category in self._dimension_dict["type"].get("categories", [])
+        ] == [1, 0, -1]
+
+    @lazyproperty
     def _is_array_cat(self):
         """True if a categorical dimension_dict belongs to an array pair.
 
@@ -255,6 +262,7 @@ class _RawDimension(object):
             next_raw_dimension._base_type == "categorical"
             and next_raw_dimension._has_selected_category
             and next_raw_dimension._alias == self._alias
+            and next_raw_dimension._is_logical_type
         )
         return DT.MR if is_mr_subvar else DT.CA
 
@@ -268,10 +276,18 @@ class _RawDimension(object):
         """
         # ---an array categorical is either CA_CAT or MR_CAT---
         if self._is_array_cat:
-            return DT.MR_CAT if self._has_selected_category else DT.CA_CAT
+            return (
+                DT.MR_CAT
+                if self._has_selected_category and self._is_logical_type
+                else DT.CA_CAT
+            )
 
         # ---what's left is logical or plain-old categorical---
-        return DT.LOGICAL if self._has_selected_category else DT.CAT
+        return (
+            DT.LOGICAL
+            if self._has_selected_category and self._is_logical_type
+            else DT.CAT
+        )
 
 
 class Dimension(object):

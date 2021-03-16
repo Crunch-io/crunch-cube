@@ -327,10 +327,10 @@ class TestStandardizedResiduals(TestCase):
 
 
 class TestOverlaps(TestCase):
-    def test_multiple_response_simple_overlap(self):
-        strand_ = Cube(OL.SIMPLE_OVERLAPS).partitions[0]
+    def test_overlaps_mr_sub_x_mr_sel(self):
+        strand = Cube(OL.MR_SUB_X_MR_SEL).partitions[0]
 
-        overlaps = strand_.overlaps
+        overlaps = strand.overlaps
 
         assert overlaps.tolist() == [
             # Subvariables:
@@ -338,4 +338,166 @@ class TestOverlaps(TestCase):
             [3, 1, 1],  # A
             [1, 2, 2],  # B
             [1, 2, 3],  # C
+        ]
+
+    def test_overlaps_cat_x_mr_sub_x_mr_sel(self):
+        matrix = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
+
+        overlaps = matrix.overlaps
+
+        assert overlaps.tolist() == [
+            [
+                # A, B, C
+                [0, 0, 0],  # A
+                [0, 1, 1],  # B
+                [0, 1, 2],  # C
+            ],  # G[0] == 2
+            [
+                # A, B, C
+                [1, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0],
+            ],  # G[1] == 1
+            # --- Missing categories are not shown by cube by default
+            # [
+            #     # A, B, C
+            #     [2, 1, 1],
+            #     [1, 1, 1],
+            #     [1, 1, 1],
+            # ],  # G[2] == missing
+        ]
+
+    def test_overlaps_mr_sub_x_mr_sel_x_cat(self):
+        matrix = Cube(OL.MR_SUB_X_MR_SEL_X_CAT).partitions[0]
+
+        overlaps = matrix.overlaps
+
+        assert overlaps.tolist() == [
+            [
+                # A, B, C
+                [0, 0, 0],  # 2
+                [1, 0, 0],  # 1
+                # [2, 1, 1],  # missing
+            ],  # sv: A
+            [
+                # A, B, C
+                [0, 1, 1],  # 2
+                [0, 0, 0],  # 1
+                # [1, 1, 1],  # missing
+            ],  # sv: B
+            [
+                # A, B, C
+                [0, 1, 2],  # 1
+                [0, 0, 0],  # 2
+                # [1, 1, 1],  # missing
+            ],  # sv: C
+        ]
+
+    def test_overlaps_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel(self):
+        # Test subvar X (partitiions[0])
+        matrix = Cube(OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL).partitions[0]
+
+        overlaps = matrix.overlaps
+
+        assert overlaps.tolist() == [
+            #
+            # --- Missing categories are not shown
+            #
+            # [
+            #     # CA_CATS: No Data
+            #     # ----------------
+            #     # A, B, C
+            #     [2, 1, 1],  # A
+            #     [1, 1, 1],  # B
+            #     [1, 1, 1],  # C
+            # ],
+            [
+                # CA_CATS: Poor
+                # -------------
+                # A, B, C
+                [1, 0, 0],  # A
+                [0, 0, 0],  # B
+                [0, 0, 0],  # C
+            ],
+            [
+                # CA_CATS: Fair
+                # -------------
+                # A, B, C
+                [0, 0, 0],  # A
+                [0, 1, 1],  # B
+                [0, 1, 2],  # C
+            ],
+            [
+                # CA_CATS: Good
+                # -------------
+                # A, B, C
+                [0, 0, 0],  # A
+                [0, 0, 0],  # B
+                [0, 0, 0],  # C
+            ],
+            #
+            # --- Missing categories are not shown
+            #
+            # [
+            #     # CA_CATS: Not Shown
+            #     # ------------------
+            #     # A, B, C
+            #     [0, 0, 0],  # A
+            #     [0, 0, 0],  # B
+            #     [0, 0, 0],  # C
+            # ],
+        ]
+
+        # Test subvar Y (partitions[1])
+        matrix = Cube(OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL).partitions[1]
+
+        overlaps = matrix.overlaps
+
+        assert overlaps.tolist() == [
+            #
+            # --- Missing categories are not shown
+            #
+            # [
+            #     # CA_CATS: Missing
+            #     # ----------------
+            #     # A, B, C
+            #     [1, 1, 1],  # A
+            #     [1, 1, 1],  # B
+            #     [1, 1, 1],  # C
+            # ],
+            [
+                # CA_CATS: Poor
+                # -------------
+                # A, B, C
+                [1, 0, 0],  # A
+                [0, 1, 1],  # B
+                [0, 1, 1],  # C
+            ],
+            [
+                # CA_CATS: Fair
+                # -------------
+                # A, B, C
+                [1, 0, 0],  # A
+                [0, 0, 0],  # B
+                [0, 0, 0],  # C
+            ],
+            [
+                # CA_CATS: Good
+                # -------------
+                # A, B, C
+                [0, 0, 0],  # A
+                [0, 0, 0],  # B
+                [0, 0, 1],  # C
+            ],
+            #
+            # --- Missing categories are not shown
+            #
+            # [
+            #     # CA_CATS: Not Shown
+            #     # ------------------
+            #     # A, B, C
+            #     [0, 0, 0],  # A
+            #     [0, 0, 0],  # B
+            #     [0, 0, 0],  # C
+            # ],
         ]

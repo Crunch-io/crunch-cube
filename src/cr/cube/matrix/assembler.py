@@ -168,6 +168,15 @@ class Assembler(object):
         return self._assemble_matrix(self._measures.means.blocks)
 
     @lazyproperty
+    def overlaps(self):
+        """3D optional np.float64 ndarray of overlaps for 2D cube.
+
+        Raises `ValueError` if the cube-result does not include a overlap cube-measure.
+        """
+        # return self._assemble_matrix(self._measures.overlaps.blocks)
+        return self._measures.overlaps._base_values
+
+    @lazyproperty
     def pvalues(self):
         """2D np.float64/np.nan ndarray of p-value for each matrix cell."""
         return 2 * (1 - norm.cdf(np.abs(self.zscores)))

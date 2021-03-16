@@ -577,6 +577,19 @@ class _Slice(CubePartition):
         return self.rows_dimension_name
 
     @lazyproperty
+    def overlaps(self):
+        """3D optional np.float64 ndarray of overlap value for 2D cube.
+
+        Raises `ValueError` if the cube-result does not include a overlap cube-measure.
+        """
+        try:
+            return self._assembler.overlaps
+        except ValueError:
+            raise ValueError(
+                "`.means` is undefined for a cube-result without a mean measure"
+            )
+
+    @lazyproperty
     def pairwise_indices(self):
         """2D ndarray of tuple of int column-idxs meeting pairwise-t threshold.
 

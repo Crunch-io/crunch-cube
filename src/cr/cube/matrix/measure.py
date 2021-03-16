@@ -51,6 +51,11 @@ class SecondOrderMeasures(object):
         return _Means(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def overlaps(self):
+        """_Overlaps measure object for this cube-result"""
+        return _Overlaps(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def row_proportions(self):
         """_RowProportions measure object for this cube-result."""
         return _RowProportions(self._dimensions, self, self._cube_measures)
@@ -388,6 +393,21 @@ class _Means(_BaseSecondOrderMeasure):
         return NanSubtotals.blocks(
             self._cube_measures.cube_means.means, self._dimensions
         )
+
+
+class _Overlaps(_BaseSecondOrderMeasure):
+    """Provides the overlap measure for a matrix."""
+
+    @lazyproperty
+    def _base_values(self):
+        return self._cube_measures.cube_overlaps.overlaps
+
+    # @lazyproperty
+    # def blocks(self):
+    #     """2D array of the four 2D "blocks" making up this measure."""
+    #     return NanSubtotals.blocks(
+    #         self._cube_measures.cube_means.means, self._dimensions
+    #     )
 
 
 class _RowProportions(_BaseSecondOrderMeasure):
