@@ -76,6 +76,11 @@ class SecondOrderMeasures(object):
         return _Sums(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def stddev(self):
+        """_StdDev measure object for this cube-result"""
+        return _StdDev(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def table_unweighted_bases(self):
         """_TableUnweightedBases measure object for this cube-result."""
         return _TableUnweightedBases(self._dimensions, self, self._cube_measures)
@@ -552,6 +557,17 @@ class _Sums(_BaseSecondOrderMeasure):
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
         return SumSubtotals.blocks(self._cube_measures.cube_sum.sums, self._dimensions)
+
+
+class _StdDev(_BaseSecondOrderMeasure):
+    """Provides the stddev measure for a matrix."""
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure."""
+        return NanSubtotals.blocks(
+            self._cube_measures.cube_stddev.stddev, self._dimensions
+        )
 
 
 class _TableUnweightedBases(_BaseSecondOrderMeasure):

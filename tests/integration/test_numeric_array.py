@@ -141,3 +141,45 @@ class DescribeNumericArrays(object):
                 [3, 2, 5],
             ],
         )
+
+    def it_provides_stddev_for_numeric_array_with_no_grouping(self):
+        """Test stddev on no-dimensions measure of numeric array."""
+        strand = Cube(NA.NUM_ARR_STDDEV_NO_GROUPING).partitions[0]
+
+        assert strand.stddev == pytest.approx([2.5819889, 3.51188458, 2.12132034])
+        assert strand.unweighted_counts.tolist() == [4, 3, 2]
+        assert strand.unweighted_bases.tolist() == [4, 3, 2]
+        assert strand.table_base_range.tolist() == [2, 4]
+
+    def it_provides_stddev_for_num_array_grouped_by_cat(self):
+        """Test stddev on numeric array, grouped by single categorical dimension."""
+        slice_ = Cube(NA.NUM_ARR_STDDEV_GROUPED_BY_CAT).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.stddev,
+            [
+                #  --------Gender------------
+                #     M         F
+                [8.7368949, 17.6776695],  # S1 (Ticket Sold)
+                [2.8867513, np.nan],  # S2 (Ticket Sold)
+                [np.nan, np.nan],  # S3 (Ticket Sold)
+            ],
+        )
+        np.testing.assert_almost_equal(slice_.columns_base, [[3, 2], [3, 1], [1, 1]])
+
+    def it_provides_stddev_for_num_array_x_mr(self):
+        slice_ = Cube(NA.NUM_ARR_STDDEV_X_MR).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.stddev,
+            [
+                # -------------------------MR----------------
+                #     S1      S2       S3
+                [1.4142136, np.nan, np.nan],  # S1 (num arr)
+                [np.nan, np.nan, np.nan],  # S2 (num arr)
+                [np.nan, np.nan, np.nan],  # S3 (num arr)
+            ],
+        )
+        np.testing.assert_almost_equal(
+            slice_.columns_base, [[2, 1, 1], [1, 0, 0], [1, 1, 1]]
+        )

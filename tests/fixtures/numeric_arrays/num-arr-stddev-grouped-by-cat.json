@@ -1,0 +1,221 @@
+{
+  "query": {
+    "measures": {
+      "valid_count_unweighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "c3eac288a696476680a82afaead2b516"
+          }
+        ]
+      },
+      "stddev": {
+        "function": "cube_stddev",
+        "args": [
+          {
+            "variable": "c3eac288a696476680a82afaead2b516"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "variable": "f46d917e75f643f4904b1769b9cc611b"
+      }
+    ],
+    "weight": null
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "dimensions": [
+      {
+        "derived": false,
+        "references": {
+          "alias": "Gender",
+          "name": "Gender"
+        },
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": null,
+              "id": 1,
+              "name": "Male",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": 2,
+              "name": "Female",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": -1,
+              "name": "No Data",
+              "missing": true
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 0,
+    "measures": {
+      "valid_count_unweighted": {
+        "data": [
+          3,
+          3,
+          1,
+          2,
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "uniform_basis": false,
+            "name": "Movies",
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the Par."
+              }
+            ]
+          },
+          "type": {
+            "integer": false,
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        }
+      },
+      "stddev": {
+        "data": [
+          8.7368949481,
+          2.8867513459,
+          {
+            "?": -8
+          },
+          17.6776695297,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "uniform_basis": false,
+            "name": "Movies",
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the Par."
+              }
+            ]
+          },
+          "type": {
+            "integer": null,
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "missing_rules": {}
+          }
+        }
+      }
+    },
+    "n": 5,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 5,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 5,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 5,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 5,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 5,
+      "weighted_n": 5
+    },
+    "filtered": {
+      "unweighted_n": 5,
+      "weighted_n": 5
+    },
+    "counts": [
+      3,
+      2,
+      0
+    ],
+    "element": "crunch:cube"
+  }
+}

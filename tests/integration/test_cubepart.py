@@ -1113,6 +1113,15 @@ class Describe_Strand(object):
         assert strand.stddev == pytest.approx([22.898325, 7.778174])
         assert strand.table_base_range.tolist() == [5, 5]
 
+    def it_provides_stddev_measure_for_MR(self):
+        slice_ = Cube(CR.MR_STDDEV).partitions[0]
+
+        assert slice_.stddev == pytest.approx(
+            np.array([[0.70710678, np.nan, np.nan], [np.nan, np.nan, np.nan]]),
+            nan_ok=True,
+        )
+        assert slice_.table_base.tolist() == [3, 3, 3]
+
     def it_provides_sum_measure_for_CAT(self):
         strand = Cube(CR.CAT_SUM).partitions[0]
 

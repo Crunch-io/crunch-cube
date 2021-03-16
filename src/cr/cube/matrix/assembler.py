@@ -271,6 +271,14 @@ class Assembler(object):
         return self._assemble_matrix(self._measures.sums.blocks)
 
     @lazyproperty
+    def stddev(self):
+        """2D optional np.float64 ndarray of stddev for each cell.
+
+        Raises `ValueError` if the cube-result does not include a stddev cube-measure.
+        """
+        return self._assemble_matrix(self._measures.stddev.blocks)
+
+    @lazyproperty
     def table_base(self):
         """Scalar, 1D, or 2D ndarray of np.float64 unweighted-N for this slice.
 

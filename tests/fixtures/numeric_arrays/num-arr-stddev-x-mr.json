@@ -5,7 +5,7 @@
         "function": "cube_valid_count",
         "args": [
           {
-            "variable": "dea49b395ed94d7cb03216e7046d0c75"
+            "variable": "dcae56175f4c4d95bd51dad94728aaf9"
           }
         ]
       },
@@ -13,15 +13,12 @@
         "function": "cube_stddev",
         "args": [
           {
-            "variable": "dea49b395ed94d7cb03216e7046d0c75"
+            "variable": "dcae56175f4c4d95bd51dad94728aaf9"
           }
         ]
       }
     },
     "dimensions": [
-      {
-        "variable": "0PhnIwHosG6sdAU7rZXR54000006"
-      },
       {
         "function": "dimension",
         "args": [
@@ -29,7 +26,7 @@
             "function": "as_selected",
             "args": [
               {
-                "variable": "bd4508592cc84802b0898b54c9d7fe2b"
+                "variable": "2929df830f2f44e9b2df6ca808a6d619"
               }
             ]
           },
@@ -42,7 +39,7 @@
         "function": "as_selected",
         "args": [
           {
-            "variable": "bd4508592cc84802b0898b54c9d7fe2b"
+            "variable": "2929df830f2f44e9b2df6ca808a6d619"
           }
         ]
       }
@@ -54,38 +51,6 @@
   },
   "result": {
     "dimensions": [
-      {
-        "references": {
-          "alias": "cat",
-          "name": "cat",
-          "description": null
-        },
-        "derived": false,
-        "type": {
-          "ordinal": false,
-          "class": "categorical",
-          "categories": [
-            {
-              "numeric_value": null,
-              "id": 1,
-              "name": "a",
-              "missing": false
-            },
-            {
-              "numeric_value": null,
-              "id": 2,
-              "name": "b",
-              "missing": false
-            },
-            {
-              "numeric_value": null,
-              "id": -1,
-              "name": "No Data",
-              "missing": true
-            }
-          ]
-        }
-      },
       {
         "derived": true,
         "references": {
@@ -124,7 +89,7 @@
                   "description": null
                 },
                 "derived": false,
-                "id": "0PhnIwHosG6sdAU7rZXR54000000"
+                "id": "4QUIV3Vk8ugFondcoPjPUM000000"
               },
               "missing": false
             },
@@ -137,7 +102,7 @@
                   "description": null
                 },
                 "derived": false,
-                "id": "0PhnIwHosG6sdAU7rZXR54000001"
+                "id": "4QUIV3Vk8ugFondcoPjPUM000001"
               },
               "missing": false
             },
@@ -150,7 +115,7 @@
                   "description": null
                 },
                 "derived": false,
-                "id": "0PhnIwHosG6sdAU7rZXR54000002"
+                "id": "4QUIV3Vk8ugFondcoPjPUM000002"
               },
               "missing": false
             }
@@ -185,9 +150,9 @@
         "type": {
           "ordinal": false,
           "subvariables": [
-            "0PhnIwHosG6sdAU7rZXR54000000",
-            "0PhnIwHosG6sdAU7rZXR54000001",
-            "0PhnIwHosG6sdAU7rZXR54000002"
+            "4QUIV3Vk8ugFondcoPjPUM000000",
+            "4QUIV3Vk8ugFondcoPjPUM000001",
+            "4QUIV3Vk8ugFondcoPjPUM000002"
           ],
           "class": "categorical",
           "categories": [
@@ -219,31 +184,31 @@
       "valid_count_unweighted": {
         "data": [
           2,
-          0,
-          0,
           1,
           1,
-          0,
           1,
           1,
-          0,
-          0,
+          1,
           1,
           1,
           0,
           1,
+          0,
+          1,
+          2,
+          2,
+          1,
+          1,
           1,
           0,
           1,
+          0,
           1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
+          2,
+          2,
+          1,
+          1,
+          1,
           0
         ],
         "n_missing": 1,
@@ -251,21 +216,41 @@
           "derived": true,
           "references": {
             "alias": "Movies",
-            "name": "Movies"
+            "uniform_basis": false,
+            "name": "Movies",
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the P."
+              }
+            ]
           },
           "type": {
             "integer": false,
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
             "class": "numeric",
-            "missing_rules": {},
             "missing_reasons": {
               "No Data": -1
-            }
+            },
+            "missing_rules": {}
           }
         }
       },
       "stddev": {
         "data": [
-          0.7071067812,
+          1.4142135624,
           {
             "?": -8
           },
@@ -299,6 +284,8 @@
           {
             "?": -8
           },
+          4.2426406871,
+          2.8284271247,
           {
             "?": -8
           },
@@ -320,18 +307,8 @@
           {
             "?": -8
           },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
+          4.2426406871,
+          2.8284271247,
           {
             "?": -8
           },
@@ -350,16 +327,36 @@
           "derived": true,
           "references": {
             "alias": "Movies",
-            "name": "Movies"
+            "uniform_basis": false,
+            "name": "Movies",
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the P."
+              }
+            ]
           },
           "type": {
             "integer": null,
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
             "class": "numeric",
-            "missing_rules": {},
             "missing_reasons": {
               "No Data": -1,
               "NaN": -8
-            }
+            },
+            "missing_rules": {}
           }
         }
       }
@@ -401,32 +398,14 @@
     },
     "counts": [
       2,
-      0,
-      0,
       1,
       1,
-      0,
+      1,
+      2,
       1,
       1,
-      0,
-      0,
-      1,
-      1,
-      0,
-      1,
-      1,
-      0,
-      1,
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
+      2,
+      1
     ],
     "element": "crunch:cube"
   }
