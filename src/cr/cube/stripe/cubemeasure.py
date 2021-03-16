@@ -105,12 +105,9 @@ class _BaseCubeOverlaps(_BaseCubeMeasure):
         """Return _BaseCubeOverlaps subclass instance appropriate to `cube`."""
         if cube.overlaps is None:
             raise ValueError("cube-result does not contain cube-overlaps measure")
-        OverlapsCls = (
-            _MrCubeOverlaps
-            if rows_dimension.dimension_type == DT.MR
-            else _CatCubeOverlaps
-        )
-        return OverlapsCls(rows_dimension, cube.overlaps)
+        if rows_dimension.dimension_type != DT.MR:
+            raise ValueError("1D cubes that are not MR can't have overlaps")
+        return _MrCubeOverlaps(rows_dimension, cube.overlaps)
 
     @lazyproperty
     def overlaps(self):
@@ -126,15 +123,6 @@ class _CatCubeMeans(_BaseCubeMeans):
     @lazyproperty
     def means(self):
         """1D np.float64 ndarray of mean for each stripe row."""
-        return self._means
-
-
-class _CatCubeOverlaps(_BaseCubeOverlaps):
-    """Overlaps cube-measure for a non-MR stripe."""
-
-    @lazyproperty
-    def overlaps(self):
-        """1D np.float64 ndarray of cube overlaps for each stripe row."""
         return self._means
 
 
