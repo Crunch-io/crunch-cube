@@ -74,6 +74,12 @@ class Describe_Slice(object):
             str(e.value)
             == "`.sums` is undefined for a cube-result without a sum measure"
         )
+        with pytest.raises(ValueError) as e:
+            slice_.stddev
+        assert (
+            str(e.value)
+            == "`.stddev` is undefined for a cube-result without a stddev measure"
+        )
         assert slice_.table_margin == 15
         assert slice_.table_name is None
         assert pytest.approx(slice_.table_percentages) == [
@@ -891,6 +897,11 @@ class Describe_Strand(object):
             strand.sums
         assert str(e.value) == (
             "`.sums` is undefined for a cube-result without a sum measure"
+        )
+        with pytest.raises(ValueError) as e:
+            strand.stddev
+        assert str(e.value) == (
+            "`.stddev` is undefined for a cube-result without a stddev measure"
         )
         assert strand.table_base_range.tolist() == [15, 15]
         assert strand.table_margin_range.tolist() == [15, 15]
