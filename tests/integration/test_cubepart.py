@@ -844,6 +844,20 @@ class Describe_Slice(object):
             nan_ok=True,
         )
 
+    def it_provides_stddev_measure_for_cat_x_mr(self):
+        slice_ = Cube(CR.CAT_X_MR_STDDEV).partitions[0]
+
+        assert slice_.stddev == pytest.approx(
+            np.array(
+                [
+                    [0.70710678, np.nan, np.nan],
+                    [np.nan, np.nan, np.nan],
+                ],
+            ),
+            nan_ok=True,
+        )
+        assert slice_.table_base.tolist() == [3, 3, 3]
+
 
 class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
@@ -1125,13 +1139,10 @@ class Describe_Strand(object):
         assert strand.table_base_range.tolist() == [5, 5]
 
     def it_provides_stddev_measure_for_MR(self):
-        slice_ = Cube(CR.MR_STDDEV).partitions[0]
+        strand = Cube(CR.MR_STDDEV).partitions[0]
 
-        assert slice_.stddev == pytest.approx(
-            np.array([[0.70710678, np.nan, np.nan], [np.nan, np.nan, np.nan]]),
-            nan_ok=True,
-        )
-        assert slice_.table_base.tolist() == [3, 3, 3]
+        assert strand.stddev == pytest.approx([3.22398, 1.23444, 9.23452])
+        assert strand.table_base_range.tolist() == [3, 3]
 
     def it_provides_sum_measure_for_CAT(self):
         strand = Cube(CR.CAT_SUM).partitions[0]
@@ -2028,12 +2039,11 @@ class Test_Slice(object):
 
     def test_ca_x_single_cat_counts(self):
         slice_ = Cube(CR.CA_X_SINGLE_CAT).partitions[0]
-        expected = [[13], [12]]
+        assert slice_.counts == pytest.approx(np.array([[13], [12]]))
         slice_ = Cube(CR.CA_X_SINGLE_CAT).partitions[1]
-        expected = [[16], [12]]
+        assert slice_.counts == pytest.approx(np.array([[16], [12]]))
         slice_ = Cube(CR.CA_X_SINGLE_CAT).partitions[2]
-        expected = [[11], [12]]
-        np.testing.assert_array_equal(slice_.counts, expected)
+        assert slice_.counts == pytest.approx(np.array([[11], [12]]))
 
     def test_ca_x_single_cat_props_by_col(self):
         slice_ = Cube(CR.CA_X_SINGLE_CAT).partitions[0]

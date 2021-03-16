@@ -1,433 +1,294 @@
 {
-  "query": {
-    "measures": {
-      "valid_count_unweighted": {
-        "function": "cube_valid_count",
-        "args": [
-          {
-            "variable": "dea49b395ed94d7cb03216e7046d0c75"
-          }
-        ]
+  "element": "shoji:view",
+  "value": {
+    "query": {
+      "dimensions": [
+        {
+          "args": [
+            {
+              "args": [
+                {
+                  "variable": "3ceb4ea17cd34c6295c26e3d43017757"
+                }
+              ],
+              "function": "as_selected"
+            },
+            {
+              "value": "subvariables"
+            }
+          ],
+          "function": "dimension"
+        },
+        {
+          "args": [
+            {
+              "variable": "3ceb4ea17cd34c6295c26e3d43017757"
+            }
+          ],
+          "function": "as_selected"
+        }
+      ],
+      "measures": {
+        "stddev": {
+          "args": [
+            {
+              "variable": "38bb586090ec488fb58177f687572db6"
+            }
+          ],
+          "function": "cube_stdev"
+        },
+        "valid_count_unweighted": {
+          "args": [
+            {
+              "variable": "38bb586090ec488fb58177f687572db6"
+            }
+          ],
+          "function": "cube_valid_count"
+        }
       },
-      "stddev": {
-        "function": "cube_stddev",
-        "args": [
-          {
-            "variable": "dea49b395ed94d7cb03216e7046d0c75"
-          }
-        ]
-      }
+      "weight": null
     },
-    "dimensions": [
-      {
-        "variable": "0PhnIwHosG6sdAU7rZXR54000006"
-      },
-      {
-        "function": "dimension",
-        "args": [
-          {
-            "function": "as_selected",
-            "args": [
+    "query_environment": {
+      "filter": []
+    },
+    "result": {
+      "counts": [
+        2,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        2,
+        1
+      ],
+      "dimensions": [
+        {
+          "derived": true,
+          "references": {
+            "alias": "M",
+            "name": "M",
+            "subreferences": [
               {
-                "variable": "bd4508592cc84802b0898b54c9d7fe2b"
+                "alias": "X",
+                "description": null,
+                "name": "X"
+              },
+              {
+                "alias": "Y",
+                "description": null,
+                "name": "Y"
+              },
+              {
+                "alias": "Z",
+                "description": null,
+                "name": "Z"
               }
+            ],
+            "uniform_basis": false
+          },
+          "type": {
+            "class": "enum",
+            "elements": [
+              {
+                "id": 1,
+                "missing": false,
+                "value": {
+                  "derived": false,
+                  "id": "72OcG2j95yZHLX7YUk7Xkg000000",
+                  "references": {
+                    "alias": "X",
+                    "description": null,
+                    "name": "X"
+                  }
+                }
+              },
+              {
+                "id": 2,
+                "missing": false,
+                "value": {
+                  "derived": false,
+                  "id": "72OcG2j95yZHLX7YUk7Xkg000001",
+                  "references": {
+                    "alias": "Y",
+                    "description": null,
+                    "name": "Y"
+                  }
+                }
+              },
+              {
+                "id": 3,
+                "missing": false,
+                "value": {
+                  "derived": false,
+                  "id": "72OcG2j95yZHLX7YUk7Xkg000002",
+                  "references": {
+                    "alias": "Z",
+                    "description": null,
+                    "name": "Z"
+                  }
+                }
+              }
+            ],
+            "subtype": {
+              "class": "variable"
+            }
+          }
+        },
+        {
+          "derived": true,
+          "references": {
+            "alias": "M",
+            "name": "M",
+            "subreferences": [
+              {
+                "alias": "X",
+                "description": null,
+                "name": "X"
+              },
+              {
+                "alias": "Y",
+                "description": null,
+                "name": "Y"
+              },
+              {
+                "alias": "Z",
+                "description": null,
+                "name": "Z"
+              }
+            ],
+            "uniform_basis": false
+          },
+          "type": {
+            "categories": [
+              {
+                "id": 1,
+                "missing": false,
+                "name": "Selected",
+                "numeric_value": 1,
+                "selected": true
+              },
+              {
+                "id": 0,
+                "missing": false,
+                "name": "Other",
+                "numeric_value": 0
+              },
+              {
+                "id": -1,
+                "missing": true,
+                "name": "No Data",
+                "numeric_value": null
+              }
+            ],
+            "class": "categorical",
+            "ordinal": false,
+            "subvariables": [
+              "72OcG2j95yZHLX7YUk7Xkg000000",
+              "72OcG2j95yZHLX7YUk7Xkg000001",
+              "72OcG2j95yZHLX7YUk7Xkg000002"
             ]
+          }
+        }
+      ],
+      "element": "crunch:cube",
+      "filter_stats": {
+        "filtered": {
+          "unweighted": {
+            "missing": 0,
+            "other": 0,
+            "selected": 4
           },
-          {
-            "value": "subvariables"
+          "weighted": {
+            "missing": 0,
+            "other": 0,
+            "selected": 4
           }
-        ]
-      },
-      {
-        "function": "as_selected",
-        "args": [
-          {
-            "variable": "bd4508592cc84802b0898b54c9d7fe2b"
-          }
-        ]
-      }
-    ],
-    "weight": null
-  },
-  "query_environment": {
-    "filter": []
-  },
-  "result": {
-    "dimensions": [
-      {
-        "references": {
-          "alias": "cat",
-          "name": "cat",
-          "description": null
         },
-        "derived": false,
-        "type": {
-          "ordinal": false,
-          "class": "categorical",
-          "categories": [
-            {
-              "numeric_value": null,
-              "id": 1,
-              "name": "a",
-              "missing": false
-            },
-            {
-              "numeric_value": null,
-              "id": 2,
-              "name": "b",
-              "missing": false
-            },
-            {
-              "numeric_value": null,
-              "id": -1,
-              "name": "No Data",
-              "missing": true
-            }
-          ]
-        }
-      },
-      {
-        "derived": true,
-        "references": {
-          "subreferences": [
-            {
-              "alias": "X",
-              "name": "X",
-              "description": null
-            },
-            {
-              "alias": "Y",
-              "name": "Y",
-              "description": null
-            },
-            {
-              "alias": "Z",
-              "name": "Z",
-              "description": null
-            }
-          ],
-          "uniform_basis": false,
-          "name": "M",
-          "alias": "M"
-        },
-        "type": {
-          "subtype": {
-            "class": "variable"
+        "filtered_complete": {
+          "unweighted": {
+            "missing": 0,
+            "other": 0,
+            "selected": 4
           },
-          "elements": [
-            {
-              "id": 1,
-              "value": {
-                "references": {
-                  "alias": "X",
-                  "name": "X",
-                  "description": null
-                },
-                "derived": false,
-                "id": "0PhnIwHosG6sdAU7rZXR54000000"
-              },
-              "missing": false
-            },
-            {
-              "id": 2,
-              "value": {
-                "references": {
-                  "alias": "Y",
-                  "name": "Y",
-                  "description": null
-                },
-                "derived": false,
-                "id": "0PhnIwHosG6sdAU7rZXR54000001"
-              },
-              "missing": false
-            },
-            {
-              "id": 3,
-              "value": {
-                "references": {
-                  "alias": "Z",
-                  "name": "Z",
-                  "description": null
-                },
-                "derived": false,
-                "id": "0PhnIwHosG6sdAU7rZXR54000002"
-              },
-              "missing": false
-            }
-          ],
-          "class": "enum"
-        }
-      },
-      {
-        "references": {
-          "subreferences": [
-            {
-              "alias": "X",
-              "name": "X",
-              "description": null
-            },
-            {
-              "alias": "Y",
-              "name": "Y",
-              "description": null
-            },
-            {
-              "alias": "Z",
-              "name": "Z",
-              "description": null
-            }
-          ],
-          "uniform_basis": false,
-          "name": "M",
-          "alias": "M"
-        },
-        "derived": true,
-        "type": {
-          "ordinal": false,
-          "subvariables": [
-            "0PhnIwHosG6sdAU7rZXR54000000",
-            "0PhnIwHosG6sdAU7rZXR54000001",
-            "0PhnIwHosG6sdAU7rZXR54000002"
-          ],
-          "class": "categorical",
-          "categories": [
-            {
-              "numeric_value": 1,
-              "selected": true,
-              "id": 1,
-              "name": "Selected",
-              "missing": false
-            },
-            {
-              "numeric_value": 0,
-              "id": 0,
-              "name": "Other",
-              "missing": false
-            },
-            {
-              "numeric_value": null,
-              "id": -1,
-              "name": "No Data",
-              "missing": true
-            }
-          ]
-        }
-      }
-    ],
-    "missing": 1,
-    "measures": {
-      "valid_count_unweighted": {
-        "data": [
-          2,
-          0,
-          0,
-          1,
-          1,
-          0,
-          1,
-          1,
-          0,
-          0,
-          1,
-          1,
-          0,
-          1,
-          1,
-          0,
-          1,
-          1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        "n_missing": 1,
-        "metadata": {
-          "derived": true,
-          "references": {
-            "alias": "Movies",
-            "name": "Movies"
-          },
-          "type": {
-            "integer": false,
-            "class": "numeric",
-            "missing_rules": {},
-            "missing_reasons": {
-              "No Data": -1
-            }
+          "weighted": {
+            "missing": 0,
+            "other": 0,
+            "selected": 4
           }
-        }
-      },
-      "stddev": {
-        "data": [
-          0.7071067812,
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          },
-          {
-            "?": -8
-          }
-        ],
-        "n_missing": 1,
-        "metadata": {
-          "derived": true,
-          "references": {
-            "alias": "Movies",
-            "name": "Movies"
-          },
-          "type": {
-            "integer": null,
-            "class": "numeric",
-            "missing_rules": {},
-            "missing_reasons": {
-              "No Data": -1,
-              "NaN": -8
-            }
-          }
-        }
-      }
-    },
-    "n": 4,
-    "filter_stats": {
-      "filtered_complete": {
-        "unweighted": {
-          "selected": 4,
-          "other": 0,
-          "missing": 0
-        },
-        "weighted": {
-          "selected": 4,
-          "other": 0,
-          "missing": 0
         }
       },
       "filtered": {
-        "unweighted": {
-          "selected": 4,
-          "other": 0,
-          "missing": 0
+        "unweighted_n": 4,
+        "weighted_n": 4
+      },
+      "measures": {
+        "stddev": {
+          "data": [
+            3.22398,
+            2.12176,
+            3.23254,
+            1.23444,
+            5.23464,
+            7.53464,
+            9.23452,
+            3.12341,
+            1.22122
+          ],
+          "metadata": {
+            "derived": true,
+            "references": {
+              "alias": "Movies",
+              "name": "Movies"
+            },
+            "type": {
+              "class": "numeric",
+              "integer": null,
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "missing_rules": {}
+            }
+          },
+          "n_missing": 1
         },
-        "weighted": {
-          "selected": 4,
-          "other": 0,
-          "missing": 0
+        "valid_count_unweighted": {
+          "data": [
+            2,
+            1,
+            1,
+            1,
+            2,
+            1,
+            1,
+            2,
+            1
+          ],
+          "metadata": {
+            "derived": true,
+            "references": {
+              "alias": "Movies",
+              "name": "Movies"
+            },
+            "type": {
+              "class": "numeric",
+              "integer": false,
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "missing_rules": {}
+            }
+          },
+          "n_missing": 1
         }
+      },
+      "missing": 1,
+      "n": 4,
+      "unfiltered": {
+        "unweighted_n": 4,
+        "weighted_n": 4
       }
-    },
-    "unfiltered": {
-      "unweighted_n": 4,
-      "weighted_n": 4
-    },
-    "filtered": {
-      "unweighted_n": 4,
-      "weighted_n": 4
-    },
-    "counts": [
-      2,
-      0,
-      0,
-      1,
-      1,
-      0,
-      1,
-      1,
-      0,
-      0,
-      1,
-      1,
-      0,
-      1,
-      1,
-      0,
-      1,
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ],
-    "element": "crunch:cube"
+    }
   }
 }
