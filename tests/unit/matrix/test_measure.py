@@ -232,7 +232,7 @@ class Describe_ColumnUnweightedBases(object):
         intersections = column_unweighted_bases._intersections
 
         SumSubtotals_.intersections.assert_called_once_with(
-            [[9, 8, 7], [6, 5, 4], [3, 2, 1]], dimensions_
+            [[9, 8, 7], [6, 5, 4], [3, 2, 1]], dimensions_, diff_cols_nan=True
         )
         assert intersections.tolist() == [[9, 6], [9, 6]]
 
@@ -246,7 +246,7 @@ class Describe_ColumnUnweightedBases(object):
         subtotal_columns = column_unweighted_bases._subtotal_columns
 
         SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[1, 2], [3, 4]], dimensions_
+            [[1, 2], [3, 4]], dimensions_, diff_cols_nan=True
         )
         assert subtotal_columns.tolist() == [[5, 8], [3, 7]]
 
@@ -267,7 +267,7 @@ class Describe_ColumnUnweightedBases(object):
         subtotal_rows = column_unweighted_bases._subtotal_rows
 
         SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[4, 3], [2, 1]], dimensions_
+            [[4, 3], [2, 1]], dimensions_, diff_cols_nan=True
         )
         assert subtotal_rows.tolist() == [[4, 7], [4, 7]]
 
@@ -282,7 +282,7 @@ class Describe_ColumnUnweightedBases(object):
         subtotal_rows = column_unweighted_bases._subtotal_rows
 
         SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[4, 3, 2], [1, 0, 9]], dimensions_
+            [[4, 3, 2], [1, 0, 9]], dimensions_, diff_cols_nan=True
         )
         assert subtotal_rows.tolist() == []
         assert subtotal_rows.shape == (0, 3)
@@ -343,7 +343,9 @@ class Describe_ColumnWeightedBases(object):
         intersections = column_weighted_bases._intersections
 
         SumSubtotals_.intersections.assert_called_once_with(
-            [[9.9, 8.8, 7.7], [6.6, 5.5, 4.4], [3.3, 2.2, 1.1]], dimensions_
+            [[9.9, 8.8, 7.7], [6.6, 5.5, 4.4], [3.3, 2.2, 1.1]],
+            dimensions_,
+            diff_cols_nan=True,
         )
         assert intersections.tolist() == [[9.9, 6.6], [9.9, 6.6]]
 
@@ -357,7 +359,7 @@ class Describe_ColumnWeightedBases(object):
         subtotal_columns = column_weighted_bases._subtotal_columns
 
         SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[1.1, 2.2], [3.3, 4.4]], dimensions_
+            [[1.1, 2.2], [3.3, 4.4]], dimensions_, diff_cols_nan=True
         )
         assert subtotal_columns.tolist() == [[5.5, 8.8], [3.3, 7.7]]
 
@@ -378,7 +380,7 @@ class Describe_ColumnWeightedBases(object):
         subtotal_rows = column_weighted_bases._subtotal_rows
 
         SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[4.4, 3.3], [2.2, 1.1]], dimensions_
+            [[4.4, 3.3], [2.2, 1.1]], dimensions_, diff_cols_nan=True
         )
         assert subtotal_rows.tolist() == [[4.4, 7.7], [4.4, 7.7]]
 
@@ -393,7 +395,7 @@ class Describe_ColumnWeightedBases(object):
         subtotal_rows = column_weighted_bases._subtotal_rows
 
         SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[4.4, 3.3, 2.2], [1.1, 0.0, 9.9]], dimensions_
+            [[4.4, 3.3, 2.2], [1.1, 0.0, 9.9]], dimensions_, diff_cols_nan=True
         )
         assert subtotal_rows.tolist() == []
         assert subtotal_rows.shape == (0, 3)
@@ -496,7 +498,7 @@ class Describe_RowUnweightedBases(object):
         intersections = row_unweighted_bases._intersections
 
         SumSubtotals_.intersections.assert_called_once_with(
-            [[9, 8, 7], [6, 5, 4], [3, 2, 1]], dimensions_
+            [[9, 8, 7], [6, 5, 4], [3, 2, 1]], dimensions_, diff_rows_nan=True
         )
         assert intersections.tolist() == expected_value
         assert intersections.shape == expected_shape
@@ -519,7 +521,7 @@ class Describe_RowUnweightedBases(object):
         subtotal_columns = row_unweighted_bases._subtotal_columns
 
         SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[3, 4, 5], [1, 2, 3]], dimensions_
+            [[3, 4, 5], [1, 2, 3]], dimensions_, diff_rows_nan=True
         )
         assert subtotal_columns.tolist() == [[7, 7], [4, 4]]
 
@@ -536,7 +538,7 @@ class Describe_RowUnweightedBases(object):
         subtotal_columns = row_unweighted_bases._subtotal_columns
 
         SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[2, 3, 4], [9, 0, 1]], dimensions_
+            [[2, 3, 4], [9, 0, 1]], dimensions_, diff_rows_nan=True
         )
         assert subtotal_columns.tolist() == [[], [], []]
         assert subtotal_columns.shape == (3, 0)
@@ -552,7 +554,7 @@ class Describe_RowUnweightedBases(object):
         subtotal_rows = row_unweighted_bases._subtotal_rows
 
         SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[1, 2], [3, 4]], dimensions_
+            [[1, 2], [3, 4]], dimensions_, diff_rows_nan=True
         )
         assert subtotal_rows.tolist() == [[5, 8], [3, 7]]
 
@@ -659,7 +661,7 @@ class Describe_RowWeightedBases(object):
         subtotal_columns = row_weighted_bases._subtotal_columns
 
         SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[3.3, 4.4, 5.5], [1.1, 2.2, 3.3]], dimensions_
+            [[3.3, 4.4, 5.5], [1.1, 2.2, 3.3]], dimensions_, diff_rows_nan=True
         )
         assert subtotal_columns.tolist() == [[7.7, 7.7], [4.4, 4.4]]
 
@@ -676,7 +678,7 @@ class Describe_RowWeightedBases(object):
         subtotal_columns = row_weighted_bases._subtotal_columns
 
         SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[2.2, 3.3, 4.4], [9.9, 0.0, 1.1]], dimensions_
+            [[2.2, 3.3, 4.4], [9.9, 0.0, 1.1]], dimensions_, diff_rows_nan=True
         )
         assert subtotal_columns.tolist() == [[], [], []]
         assert subtotal_columns.shape == (3, 0)
@@ -692,7 +694,7 @@ class Describe_RowWeightedBases(object):
         subtotal_rows = row_weighted_bases._subtotal_rows
 
         SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[1.1, 2.2], [3.3, 4.4]], dimensions_
+            [[1.1, 2.2], [3.3, 4.4]], dimensions_, diff_rows_nan=True
         )
         assert subtotal_rows.tolist() == [[5.5, 8.8], [3.3, 7.7]]
 

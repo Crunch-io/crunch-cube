@@ -3713,7 +3713,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert strand.counts[0] == 81
         assert strand.table_proportions[0] == pytest.approx(0.1184210)
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_computes_measures_for_cat_x_cat_with_subdiffs_on_both(self):
         slice_ = Cube(
             CR.CAT_4_X_CAT_4,
@@ -3782,7 +3781,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert slice_.pvals[:, 0] == pytest.approx(np.full(5, np.nan), nan_ok=True)
         assert slice_.pvals[0, :] == pytest.approx(np.full(5, np.nan), nan_ok=True)
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_computes_measures_for_cat_x_cat_with_subdiffs_and_subtot_on_both(self):
         slice_ = Cube(
             CR.CAT_4_X_CAT_4,
@@ -3863,7 +3861,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert slice_.pvals[:, 0] == pytest.approx(np.full(6, np.nan), nan_ok=True)
         assert slice_.pvals[0, :] == pytest.approx(np.full(6, np.nan), nan_ok=True)
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_computes_measures_for_ca_with_subdiff(self):
         slice_ = Cube(
             CR.CA_CAT_X_CA_SUBVAR,
@@ -3899,7 +3896,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert slice_.zscores[0, :] == pytest.approx(np.full(3, np.nan), nan_ok=True)
         assert slice_.pvals[0, :] == pytest.approx(np.full(3, np.nan), nan_ok=True)
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_computes_measures_for_mr_x_cat_subdiff(self):
         slice_ = Cube(
             CR.MR_X_CAT,
