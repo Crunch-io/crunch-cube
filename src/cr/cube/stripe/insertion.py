@@ -78,20 +78,4 @@ class SumSubtotals(_BaseSubtotals):
         addend_sum = np.sum(base_values[subtotal.addend_idxs])
         subtrahend_sum = np.sum(base_values[subtotal.subtrahend_idxs])
 
-        return addend_sum + subtrahend_sum
-
-
-class SumDiffSubtotals(SumSubtotals):
-    """Subtotals created by np.sum() on addends, primarily bases.
-
-    This sums together addends and SUBTRACTS subtrahends.
-    """
-
-    def _subtotal_value(self, subtotal):
-        """Return scalar value of `subtotal` row."""
-        base_values = self._base_values
-
-        addend_sum = np.sum(base_values[subtotal.addend_idxs])
-        subtrahend_sum = np.sum(base_values[subtotal.subtrahend_idxs])
-
         return addend_sum - subtrahend_sum
