@@ -348,15 +348,15 @@ class Describe_BaseCubeStdDev(object):
         CubeStdDevCls_.assert_called_once_with(dimensions_, [3, 4])
         assert cube_stddev is cube_stddev_
 
-    def but_it_raises_a_value_error_when_cube_result_does_not_contain_sum_measure(
+    def but_it_raises_a_value_error_when_cube_result_does_not_contain_stddev_measure(
         self, cube_
     ):
-        cube_.sums = None
+        cube_.stddev = None
 
         with pytest.raises(ValueError) as e:
-            _BaseCubeSums.factory(cube_, None, None)
+            _BaseCubeStdDev.factory(cube_, None, None)
 
-        assert str(e.value) == "cube-result does not contain cube-sum measure"
+        assert str(e.value) == "cube-result does not contain cube-stddev measure"
 
     # fixture components ---------------------------------------------
 

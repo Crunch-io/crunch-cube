@@ -633,10 +633,12 @@ class _Measures(object):
     @lazyproperty
     def missing_count(self):
         """numeric representing count of missing rows in cube response."""
+        if self.valid_counts is not None:
+            return self.valid_counts.missing_count
+        # The check on the means measure is needed for retro-compatibility with the old
+        # fixtures that don't have valid_counts.
         if self.means is not None:
             return self.means.missing_count
-        if self.sums is not None:
-            return self.sums.missing_count
         return self._cube_dict["result"].get("missing", 0)
 
     @lazyproperty
@@ -795,11 +797,6 @@ class _StdDevMeasure(_BaseMeasure):
     """Statistical stddev values from a cube-response."""
 
     @lazyproperty
-    def missing_count(self):
-        """numeric representing count of missing rows reflected in response."""
-        return self._cube_dict["result"]["measures"]["stddev"].get("n_missing", 0)
-
-    @lazyproperty
     def _flat_values(self):
         """Optional 1D float64 ndarray of stddev values as found in cube response.
 
@@ -821,11 +818,6 @@ class _SumMeasure(_BaseMeasure):
     """Statistical sum values from a cube-response."""
 
     @lazyproperty
-    def missing_count(self):
-        """numeric representing count of missing rows reflected in response."""
-        return self._cube_dict["result"]["measures"]["sum"].get("n_missing", 0)
-
-    @lazyproperty
     def _flat_values(self):
         """Optional 1D float64 ndarray of sum values as found in cube response.
 
@@ -845,6 +837,13 @@ class _SumMeasure(_BaseMeasure):
 
 class _ValidCountsMeasure(_BaseMeasure):
     """Valid counts for cube."""
+
+    @lazyproperty
+    def missing_count(self):
+        """numeric representing count of missing rows reflected in response."""
+        return self._cube_dict["result"]["measures"]["valid_count_unweighted"].get(
+            "n_missing", 0
+        )
 
     @lazyproperty
     def _flat_values(self):
