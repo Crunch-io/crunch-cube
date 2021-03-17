@@ -223,20 +223,20 @@ class DescribeAssembler(object):
         dimensions_,
         _cube_result_matrix_prop_,
         cube_result_matrix_,
-        SumSubtotals_,
+        SumDiffSubtotals_,
         _assemble_matrix_,
     ):
         _rows_dimension_prop_.return_value = dimensions_[0]
         dimensions_[0].dimension_type = DT.MR_SUBVAR
         cube_result_matrix_.columns_margin = [[1, 2], [3, 4]]
         _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        SumDiffSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
         assembler = Assembler(None, dimensions_, None)
 
         columns_margin = assembler.columns_margin
 
-        SumSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
+        SumDiffSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert columns_margin == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 

@@ -3904,7 +3904,7 @@ class DescribeIntegrated_SubtotalDifferences(object):
             [1.9215376, -12.3047603, -31.4956882, -88.6847375, -56.4466419]
         )
         assert slice_.columns_margin[:, 0] == pytest.approx(
-            [91.6820144, 117.7726578, 132.9357785, 228.807993, 254.0608207]
+            [-26.0504936, -36.2011742, -50.9728015, -102.5360802, -77.5821575]
         )
         assert slice_.column_weighted_bases[0, 0] == pytest.approx(91.6820144)
         assert slice_.column_proportions[:, 0] == pytest.approx(

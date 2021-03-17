@@ -136,7 +136,7 @@ class Assembler(object):
         # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
         if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
             return self._assemble_matrix(
-                SumSubtotals.blocks(
+                SumDiffSubtotals.blocks(
                     self._cube_result_matrix.columns_margin, self._dimensions
                 )
             )
