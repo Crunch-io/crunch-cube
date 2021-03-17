@@ -7,7 +7,7 @@ from __future__ import division
 import numpy as np
 
 from cr.cube.matrix.cubemeasure import CubeMeasures
-from cr.cube.matrix.subtotals import SumDiffSubtotals, SumSubtotals, NanSubtotals
+from cr.cube.matrix.subtotals import SumSubtotals, NanSubtotals
 from cr.cube.util import lazyproperty
 
 
@@ -208,7 +208,7 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
         Column-proportions are counts divided by the column base, except that they are
         undefined for columns with subtotal differences.
         """
-        count_blocks = SumDiffSubtotals.blocks(
+        count_blocks = SumSubtotals.blocks(
             self._weighted_cube_counts.weighted_counts,
             self._dimensions,
             diff_cols_nan=True,
@@ -407,7 +407,7 @@ class _RowProportions(_BaseSecondOrderMeasure):
         Row-proportions are counts divided by the row base, except that they are
         undefined for rows with subtotal differences.
         """
-        count_blocks = SumDiffSubtotals.blocks(
+        count_blocks = SumSubtotals.blocks(
             self._weighted_cube_counts.weighted_counts,
             self._dimensions,
             diff_rows_nan=True,
@@ -574,9 +574,7 @@ class _Sums(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        return SumDiffSubtotals.blocks(
-            self._cube_measures.cube_sum.sums, self._dimensions
-        )
+        return SumSubtotals.blocks(self._cube_measures.cube_sum.sums, self._dimensions)
 
 
 class _StdDev(_BaseSecondOrderMeasure):
@@ -828,7 +826,7 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
         These are the base-values, the column-subtotals, the row-subtotals, and the
         subtotal intersection-cell values.
         """
-        return SumDiffSubtotals.blocks(
+        return SumSubtotals.blocks(
             self._unweighted_cube_counts.unweighted_counts, self._dimensions
         )
 
@@ -839,6 +837,6 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        return SumDiffSubtotals.blocks(
+        return SumSubtotals.blocks(
             self._weighted_cube_counts.weighted_counts, self._dimensions
         )

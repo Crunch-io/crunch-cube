@@ -182,10 +182,8 @@ class Describe_ColumnProportions(object):
     """Unit test suite for `cr.cube.matrix.measure._ColumnProportions` object."""
 
     def it_computes_its_blocks(self, request):
-        SumDiffSubtotals_ = class_mock(
-            request, "cr.cube.matrix.measure.SumDiffSubtotals"
-        )
-        SumDiffSubtotals_.blocks.return_value = [[5.0, 12.0], [21.0, 32.0]]
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[5.0, 12.0], [21.0, 32.0]]
         column_weighted_bases_ = instance_mock(
             request, _ColumnWeightedBases, blocks=[[5.0, 6.0], [7.0, 8.0]]
         )
@@ -201,7 +199,7 @@ class Describe_ColumnProportions(object):
         )
 
         assert column_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
-        SumDiffSubtotals_.blocks.assert_called_once_with(ANY, None, diff_cols_nan=True)
+        SumSubtotals_.blocks.assert_called_once_with(ANY, None, diff_cols_nan=True)
 
 
 class Describe_ColumnUnweightedBases(object):
@@ -428,10 +426,8 @@ class Describe_RowProportions(object):
     """Unit test suite for `cr.cube.matrix.measure._RowProportions` object."""
 
     def it_computes_its_blocks(self, request):
-        SumDiffSubtotals_ = class_mock(
-            request, "cr.cube.matrix.measure.SumDiffSubtotals"
-        )
-        SumDiffSubtotals_.blocks.return_value = [[5.0, 12.0], [21.0, 32.0]]
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[5.0, 12.0], [21.0, 32.0]]
         row_weighted_bases_ = instance_mock(
             request, _RowWeightedBases, blocks=[[5.0, 6.0], [7.0, 8.0]]
         )
@@ -445,7 +441,7 @@ class Describe_RowProportions(object):
         row_proportions = _RowProportions(None, second_order_measures_, cube_measures_)
 
         assert row_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
-        SumDiffSubtotals_.blocks.assert_called_once_with(ANY, None, diff_rows_nan=True)
+        SumSubtotals_.blocks.assert_called_once_with(ANY, None, diff_rows_nan=True)
 
 
 class Describe_RowUnweightedBases(object):
@@ -1097,15 +1093,13 @@ class Describe_UnweightedCounts(object):
             "_unweighted_cube_counts",
             return_value=unweighted_cube_counts_,
         )
-        SumDiffSubtotals_ = class_mock(
-            request, "cr.cube.matrix.measure.SumDiffSubtotals"
-        )
-        SumDiffSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         unweighted_counts = _UnweightedCounts(dimensions_, None, None)
 
         blocks = unweighted_counts.blocks
 
-        SumDiffSubtotals_.blocks.assert_called_once_with(ucounts, dimensions_)
+        SumSubtotals_.blocks.assert_called_once_with(ucounts, dimensions_)
         assert blocks == [[[1], [2]], [[3], [4]]]
 
     # fixture components ---------------------------------------------
@@ -1132,15 +1126,13 @@ class Describe_WeightedCounts(object):
             "_weighted_cube_counts",
             return_value=weighted_cube_counts_,
         )
-        SumDiffSubtotals_ = class_mock(
-            request, "cr.cube.matrix.measure.SumDiffSubtotals"
-        )
-        SumDiffSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         weighted_counts = _WeightedCounts(dimensions_, None, None)
 
         blocks = weighted_counts.blocks
 
-        SumDiffSubtotals_.blocks.assert_called_once_with(counts, dimensions_)
+        SumSubtotals_.blocks.assert_called_once_with(counts, dimensions_)
         assert blocks == [[[1], [2]], [[3], [4]]]
 
     # fixture components ---------------------------------------------
