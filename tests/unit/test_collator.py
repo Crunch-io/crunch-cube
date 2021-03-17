@@ -364,16 +364,16 @@ class DescribeSortByValueCollator(object):
         assert display_order == (-3, -1, -2, 1, 0, 2, 3)
 
     def it_computes_the_display_order_to_help(
-        self, request, _top_exclusion_idxs_prop_, _bottom_exclusion_idxs_prop_
+        self, request, _top_fixed_idxs_prop_, _bottom_fixed_idxs_prop_
     ):
         property_mock(
             request, SortByValueCollator, "_top_subtotal_idxs", return_value=(-2, -3)
         )
-        _top_exclusion_idxs_prop_.return_value = (3,)
+        _top_fixed_idxs_prop_.return_value = (3,)
         property_mock(
             request, SortByValueCollator, "_body_idxs", return_value=(2, 1, 5)
         )
-        _bottom_exclusion_idxs_prop_.return_value = (0, 4)
+        _bottom_fixed_idxs_prop_.return_value = (0, 4)
         property_mock(
             request, SortByValueCollator, "_bottom_subtotal_idxs", return_value=()
         )
@@ -383,47 +383,46 @@ class DescribeSortByValueCollator(object):
         assert collator._display_order
 
     @pytest.mark.parametrize(
-        "top_excl_idxs, bottom_excl_idxs, descending, element_values, expected_value",
+        "top_fixed_idxs, bottom_fixed_idxs, descending, element_values, expected_value",
         (
             # --- ascending sort ---
             ((), (), False, (8.0, 2.0, 4.0, 1.0), (3, 1, 2, 0)),
-            # --- ascending with top exclusions (which therefore do not appear ---
+            # --- ascending with fixed on top (which therefore do not appear ---
             ((2, 1), (), False, (8.0, 2.0, 4.0, 1.0), (3, 0)),
             # --- descending sort ---
             ((), (), True, (8.0, 2.0, 4.0, 1.0), (0, 2, 1, 3)),
-            # --- descending with bottom exclusions ---
+            # --- descending with fixed on bottom ---
             ((), (1, 0), True, (8.0, 2.0, 4.0, 1.0), (2, 3)),
-            # --- descending with both kinds of exclusion ---
+            # --- descending with both kinds of fixed idxs ---
             ((0,), (3,), True, (8.0, 2.0, 4.0, 1.0), (2, 1)),
         ),
     )
     def it_computes_the_sorted_body_idxs_to_help(
         self,
-        request,
-        _top_exclusion_idxs_prop_,
-        _bottom_exclusion_idxs_prop_,
+        _top_fixed_idxs_prop_,
+        _bottom_fixed_idxs_prop_,
         _descending_prop_,
-        top_excl_idxs,
-        bottom_excl_idxs,
+        top_fixed_idxs,
+        bottom_fixed_idxs,
         descending,
         element_values,
         expected_value,
     ):
-        """Body-idxs are for elements that are not subtotals and not excluded."""
-        _top_exclusion_idxs_prop_.return_value = top_excl_idxs
-        _bottom_exclusion_idxs_prop_.return_value = bottom_excl_idxs
+        """Body-idxs are for elements that are not subtotals and not fixed."""
+        _top_fixed_idxs_prop_.return_value = top_fixed_idxs
+        _bottom_fixed_idxs_prop_.return_value = bottom_fixed_idxs
         _descending_prop_.return_value = descending
         collator = SortByValueCollator(None, element_values, None, None)
 
         assert collator._body_idxs == expected_value
 
-    def it_computes_the_bottom_exclusion_idxs_to_help(self, _iter_exclusion_idxs_):
-        _iter_exclusion_idxs_.return_value = (n for n in (4, 0, 5, 2))
+    def it_computes_the_bottom_exclusion_idxs_to_help(self, _iter_fixed_idxs_):
+        _iter_fixed_idxs_.return_value = (n for n in (4, 0, 5, 2))
         collator = SortByValueCollator(None, None, None, None)
 
-        bottom_exclusion_idxs = collator._bottom_exclusion_idxs
+        bottom_exclusion_idxs = collator._bottom_fixed_idxs
 
-        _iter_exclusion_idxs_.assert_called_once_with(collator, "bottom")
+        _iter_fixed_idxs_.assert_called_once_with(collator, "bottom")
         assert bottom_exclusion_idxs == (4, 0, 5, 2)
 
     @pytest.mark.parametrize(
@@ -454,14 +453,14 @@ class DescribeSortByValueCollator(object):
         (
             ({}, "top", ()),
             ({}, "bottom", ()),
-            ({"exclude": {}}, "top", ()),
-            ({"exclude": {"foobar": [4, 2]}}, "top", ()),
-            ({"exclude": {"top": [1, 3]}}, "top", (0, 2)),
-            ({"exclude": {"top": [1, 3, 7]}}, "top", (0, 2)),
-            ({"exclude": {"bottom": [4, 2]}}, "bottom", (3, 1)),
+            ({"fixed": {}}, "top", ()),
+            ({"fixed": {"foobar": [4, 2]}}, "top", ()),
+            ({"fixed": {"top": [1, 3]}}, "top", (0, 2)),
+            ({"fixed": {"top": [1, 3, 7]}}, "top", (0, 2)),
+            ({"fixed": {"bottom": [4, 2]}}, "bottom", (3, 1)),
         ),
     )
-    def it_can_iterate_the_exclusion_idxs_for_top_or_bottom(
+    def it_can_iterate_the_fixed_idxs_for_top_or_bottom(
         self, request, _order_dict_prop_, order_dict, top_or_bottom, expected_value
     ):
         property_mock(
@@ -470,7 +469,7 @@ class DescribeSortByValueCollator(object):
         _order_dict_prop_.return_value = order_dict
         collator = SortByValueCollator(None, None, None, None)
 
-        assert tuple(collator._iter_exclusion_idxs(top_or_bottom)) == expected_value
+        assert tuple(collator._iter_fixed_idxs(top_or_bottom)) == expected_value
 
     @pytest.mark.parametrize(
         "order_dict, expected_value",
@@ -508,13 +507,13 @@ class DescribeSortByValueCollator(object):
 
         assert collator._subtotal_idxs == expected_value
 
-    def it_computes_the_top_exclusion_idxs_to_help(self, _iter_exclusion_idxs_):
-        _iter_exclusion_idxs_.return_value = (i for i in (1, 2, 4))
+    def it_computes_the_top_exclusion_idxs_to_help(self, _iter_fixed_idxs_):
+        _iter_fixed_idxs_.return_value = (i for i in (1, 2, 4))
         collator = SortByValueCollator(None, None, None, None)
 
-        top_exclusion_idxs = collator._top_exclusion_idxs
+        top_exclusion_idxs = collator._top_fixed_idxs
 
-        _iter_exclusion_idxs_.assert_called_once_with(collator, "top")
+        _iter_fixed_idxs_.assert_called_once_with(collator, "top")
         assert top_exclusion_idxs == (1, 2, 4)
 
     @pytest.mark.parametrize(
@@ -538,16 +537,16 @@ class DescribeSortByValueCollator(object):
     # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def _bottom_exclusion_idxs_prop_(self, request):
-        return property_mock(request, SortByValueCollator, "_bottom_exclusion_idxs")
+    def _bottom_fixed_idxs_prop_(self, request):
+        return property_mock(request, SortByValueCollator, "_bottom_fixed_idxs")
 
     @pytest.fixture
     def _descending_prop_(self, request):
         return property_mock(request, SortByValueCollator, "_descending")
 
     @pytest.fixture
-    def _iter_exclusion_idxs_(self, request):
-        return method_mock(request, SortByValueCollator, "_iter_exclusion_idxs")
+    def _iter_fixed_idxs_(self, request):
+        return method_mock(request, SortByValueCollator, "_iter_fixed_idxs")
 
     @pytest.fixture
     def _order_dict_prop_(self, request):
@@ -558,5 +557,5 @@ class DescribeSortByValueCollator(object):
         return property_mock(request, SortByValueCollator, "_subtotal_idxs")
 
     @pytest.fixture
-    def _top_exclusion_idxs_prop_(self, request):
-        return property_mock(request, SortByValueCollator, "_top_exclusion_idxs")
+    def _top_fixed_idxs_prop_(self, request):
+        return property_mock(request, SortByValueCollator, "_top_fixed_idxs")

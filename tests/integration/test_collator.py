@@ -96,7 +96,7 @@ class DescribeSortByValueCollator(object):
         ),
     )
     def it_knows_the_display_order_for_a_dimension(
-        self, request, order, xtop, xbot, element_vals, empty_idxs, expected_value
+        self, order, xtop, xbot, element_vals, empty_idxs, expected_value
     ):
         subtot_vals = [60, 40]
         dimension = Dimension(
@@ -110,7 +110,7 @@ class DescribeSortByValueCollator(object):
             dimension_transforms={
                 "order": {
                     "direction": "ascending" if order == "A" else "descending",
-                    "exclude": {"top": xtop, "bottom": xbot},
+                    "fixed": {"top": xtop, "bottom": xbot},
                 },
                 "prune": True,
             },

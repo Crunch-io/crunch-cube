@@ -346,13 +346,13 @@ class SortByValueCollator(_BaseCollator):
 
         Subtotal elements all appear at the top when the sort direction is descending
         and all appear at the bottom when sort-direction is ascending. Top-anchored
-        "excluded-from-sort" elements appear after any top subtotals, followed by
-        non-excluded base-elements, bottom-anchored base-elements, and finally
+        "fixed-from-sort" elements appear after any top subtotals, followed by
+        non-fixed base-elements, bottom-anchored base-elements, and finally
         bottom-subtotals (only when sort-direction is ascending).
 
         Subtotal elements appear in value-sorted order, respecting the sort-direction
-        specified in the request. Excluded base elements appear in the order mentioned
-        in the `"exclude": [...]` array of the order transform. Base elements appear in
+        specified in the request. Fixed base elements appear in the order mentioned
+        in the `"fixed": [...]` array of the order transform. Base elements appear in
         value-sorted order within their grouping.
         """
         hidden_idxs = self._hidden_idxs
@@ -360,9 +360,9 @@ class SortByValueCollator(_BaseCollator):
             idx
             for idx in (
                 self._top_subtotal_idxs
-                + self._top_exclusion_idxs
+                + self._top_fixed_idxs
                 + self._body_idxs
-                + self._bottom_exclusion_idxs
+                + self._bottom_fixed_idxs
                 + self._bottom_subtotal_idxs
             )
             if idx not in hidden_idxs
@@ -376,27 +376,25 @@ class SortByValueCollator(_BaseCollator):
         `._target_values` property defined in the subclass and the "top" and "bottom"
         anchored elements specified in the `"order": {}` dict.
         """
-        excluded_idxs = frozenset(
-            self._top_exclusion_idxs + self._bottom_exclusion_idxs
-        )
+        fixed_idxs = frozenset(self._top_fixed_idxs + self._bottom_fixed_idxs)
         sorted_value_idx_pairs = sorted(
             (
                 (value, idx)
                 for idx, value in enumerate(self._element_values)
-                if idx not in excluded_idxs
+                if idx not in fixed_idxs
             ),
             reverse=self._descending,
         )
         return tuple(idx for _, idx in sorted_value_idx_pairs)
 
     @lazyproperty
-    def _bottom_exclusion_idxs(self):
-        """Tuple of (positive) idx of each excluded base element anchored to bottom.
+    def _bottom_fixed_idxs(self):
+        """Tuple of (positive) idx of each fixed base element anchored to bottom.
 
-        The items appear in the order specified in the "bottom" exclude-grouping of the
+        The items appear in the order specified in the "bottom" fix-grouping of the
         transform; they are not subject to sorting-by-value.
         """
-        return tuple(self._iter_exclusion_idxs("bottom"))
+        return tuple(self._iter_fixed_idxs("bottom"))
 
     @lazyproperty
     def _bottom_subtotal_idxs(self):
@@ -419,22 +417,19 @@ class SortByValueCollator(_BaseCollator):
         """
         return self._order_dict.get("direction", "descending") != "ascending"
 
-    def _iter_exclusion_idxs(self, top_or_bottom):
-        """Generate the element-idx of each exclusion in the `top_or_bottom` group.
+    def _iter_fixed_idxs(self, top_or_bottom):
+        """Generate the element-idx of each fixed item in the `top_or_bottom` group.
 
         `top_or_bottom` must be one of "top" or "bottom". Any element-id specified in
-        the exclusion-group that is not present in the dimension is ignored. This is
+        the fixed-group that is not present in the dimension is ignored. This is
         important because an element (e.g. category) can be removed after the analysis
-        is saved and may no longer be present at export time.
         """
         element_idxs_by_id = {id_: idx for idx, id_ in enumerate(self._element_ids)}
-        excluded_element_ids = self._order_dict.get("exclude", {}).get(
-            top_or_bottom, []
-        )
-        for excluded_element_id in excluded_element_ids:
-            if excluded_element_id not in element_idxs_by_id:
+        fixed_element_ids = self._order_dict.get("fixed", {}).get(top_or_bottom, [])
+        for fixed_element_id in fixed_element_ids:
+            if fixed_element_id not in element_idxs_by_id:
                 continue
-            yield element_idxs_by_id[excluded_element_id]
+            yield element_idxs_by_id[fixed_element_id]
 
     @lazyproperty
     def _subtotal_idxs(self):
@@ -457,13 +452,13 @@ class SortByValueCollator(_BaseCollator):
         return tuple(idx for _, idx in (sorted(keys, reverse=self._descending) + nans))
 
     @lazyproperty
-    def _top_exclusion_idxs(self):
+    def _top_fixed_idxs(self):
         """Tuple of (positive) payload-order idx for each top-anchored element.
 
-        The items appear in the order specified in the "top" exclude-grouping of the
+        The items appear in the order specified in the "top" fix-grouping of the
         transform; they are not subject to sorting-by-value.
         """
-        return tuple(self._iter_exclusion_idxs("top"))
+        return tuple(self._iter_fixed_idxs("top"))
 
     @lazyproperty
     def _top_subtotal_idxs(self):

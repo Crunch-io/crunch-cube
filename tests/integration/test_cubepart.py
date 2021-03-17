@@ -543,7 +543,7 @@ class Describe_Slice(object):
                     "measure": "col_percent",
                     "direction": "ascending",
                     # --- element-ids are 1, 2, 3, 999 ---
-                    "exclude": {"top": [999], "bottom": [1]},
+                    "fixed": {"top": [999], "bottom": [1]},
                 }
             }
         }
