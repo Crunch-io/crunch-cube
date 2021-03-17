@@ -9,7 +9,7 @@ import pytest
 
 from cr.cube.cube import Cube
 
-from ..fixtures import CR
+from ..fixtures import CR, NA
 from ..util import load_python_expression
 
 
@@ -3918,3 +3918,48 @@ class DescribeIntegrated_SubtotalDifferences(object):
         )
         assert slice_.zscores[:, 0] == pytest.approx(np.full(5, np.nan), nan_ok=True)
         assert slice_.pvals[:, 0] == pytest.approx(np.full(5, np.nan), nan_ok=True)
+
+    def it_computes_sum_for_numeric_array_with_subdiffs_and_subtot_on_columns(self):
+        slice_ = Cube(
+            NA.NUM_ARR_SUM_GROUPED_BY_CAT,
+            transforms={
+                "columns_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"negative": [2]},
+                            "anchor": "top",
+                            "name": "subdiff",
+                        },
+                        {
+                            "function": "subtotal",
+                            "args": [1, 2],
+                            "anchor": "bottom",
+                            "name": "subtotal",
+                        },
+                    ]
+                },
+            },
+        ).partitions[0]
+        assert slice_.sums == pytest.approx(
+            np.array(
+                [
+                    [1.0, 4.0, 3.0, 7.0],
+                    [3.0, 3.0, 0.0, 3.0],
+                    [-1.0, 2.0, 3.0, 5.0],
+                ]
+            )
+        )
+
+        # pruning
+        slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT)
+        assert slice_.sums == pytest.approx(
+            np.array(
+                [
+                    [4.0, 3.0],
+                    [3.0, 0.0],
+                    [2.0, 3.0],
+                ]
+            )
+        )

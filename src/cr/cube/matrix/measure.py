@@ -556,7 +556,9 @@ class _Sums(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        return SumSubtotals.blocks(self._cube_measures.cube_sum.sums, self._dimensions)
+        return SumDiffSubtotals.blocks(
+            self._cube_measures.cube_sum.sums, self._dimensions
+        )
 
 
 class _StdDev(_BaseSecondOrderMeasure):
