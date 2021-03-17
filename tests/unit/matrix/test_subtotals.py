@@ -217,7 +217,7 @@ class DescribeSumSubtotals(object):
 
         intersections = SumSubtotals.intersections(base_values, dimensions_)
 
-        _init_.assert_called_once_with(ANY, [[1, 5], [8, 0]], dimensions_)
+        _init_.assert_called_once_with(ANY, [[1, 5], [8, 0]], dimensions_, False, False)
         assert intersections.tolist() == [[1, 2], [3, 4]]
 
     def it_provides_a_subtotal_columns_interface_method(
@@ -233,7 +233,7 @@ class DescribeSumSubtotals(object):
 
         subtotal_columns = SumSubtotals.subtotal_columns(base_values, dimensions_)
 
-        _init_.assert_called_once_with(ANY, [[0, 4], [7, 9]], dimensions_)
+        _init_.assert_called_once_with(ANY, [[0, 4], [7, 9]], dimensions_, False, False)
         assert subtotal_columns.tolist() == [[1, 2], [3, 4]]
 
     def it_provides_a_subtotal_rows_interface_method(
@@ -249,7 +249,7 @@ class DescribeSumSubtotals(object):
 
         subtotal_rows = SumSubtotals.subtotal_rows(base_values, dimensions_)
 
-        _init_.assert_called_once_with(ANY, [[4, 1], [3, 5]], dimensions_)
+        _init_.assert_called_once_with(ANY, [[4, 1], [3, 5]], dimensions_, False, False)
         assert subtotal_rows.tolist() == [[4, 3], [2, 1]]
 
     @pytest.mark.parametrize(

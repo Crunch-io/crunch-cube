@@ -154,28 +154,65 @@ class SumSubtotals(_BaseSubtotals):
 
     Used when calculating bases, for example, which are additive even across
     subtrahends.
+
+    In addition to `base_values` and `dimensions`, `SumDiffSubtotals` have
+    properties for `diff_cols_nan` and `diff_rows_nan` which allow for columns/
+    rows where subtotals have subtrahends to be overidden with np.nan.
     """
 
+    def __init__(
+        self, base_values, dimensions, diff_cols_nan=False, diff_rows_nan=False
+    ):
+        super(SumSubtotals, self).__init__(base_values, dimensions)
+        self._diff_cols_nan = diff_cols_nan
+        self._diff_rows_nan = diff_rows_nan
+
     @classmethod
-    def intersections(cls, base_values, dimensions):
+    def blocks(cls, base_values, dimensions, diff_cols_nan=False, diff_rows_nan=False):
+        """Return base, row and col insertion, and intersection matrices.
+
+        These are in the form ready for assembly.
+        """
+        return cls(base_values, dimensions, diff_cols_nan, diff_rows_nan)._blocks
+
+    @classmethod
+    def intersections(
+        cls, base_values, dimensions, diff_cols_nan=False, diff_rows_nan=False
+    ):
         """Return (n_row_subtotals, n_col_subtotals) ndarray of intersection values.
 
         An intersection value arises where a row-subtotal crosses a column-subtotal.
         """
-        return cls(base_values, dimensions)._intersections
+        return cls(base_values, dimensions, diff_cols_nan, diff_rows_nan)._intersections
 
     @classmethod
-    def subtotal_columns(cls, base_values, dimensions):
+    def subtotal_columns(
+        cls, base_values, dimensions, diff_cols_nan=False, diff_rows_nan=False
+    ):
         """Return (n_base_rows, n_col_subtotals) ndarray of subtotal columns."""
-        return cls(base_values, dimensions)._subtotal_columns
+        return cls(
+            base_values, dimensions, diff_cols_nan, diff_rows_nan
+        )._subtotal_columns
 
     @classmethod
-    def subtotal_rows(cls, base_values, dimensions):
+    def subtotal_rows(
+        cls, base_values, dimensions, diff_cols_nan=False, diff_rows_nan=False
+    ):
         """Return (n_row_subtotals, n_base_cols) ndarray of subtotal rows."""
-        return cls(base_values, dimensions)._subtotal_rows
+        return cls(base_values, dimensions, diff_cols_nan, diff_rows_nan)._subtotal_rows
 
     def _intersection(self, row_subtotal, column_subtotal):
         """Sum for this row/column subtotal intersection."""
+        col_has_subs = len(column_subtotal.subtrahend_idxs) > 0
+        row_has_subs = len(row_subtotal.subtrahend_idxs) > 0
+
+        if (
+            # --- Respect diff_cols_nan/diff_rows_nan
+            (col_has_subs and self._diff_cols_nan)
+            or (row_has_subs and self._diff_rows_nan)
+        ):
+            return np.nan
+
         addend_sum = np.sum(
             self._subtotal_row(row_subtotal)[column_subtotal.addend_idxs]
         )
@@ -186,12 +223,18 @@ class SumSubtotals(_BaseSubtotals):
 
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of values for `subtotal` column."""
+        if self._diff_cols_nan and len(subtotal.subtrahend_idxs) > 0:
+            return np.full(self._base_values.shape[0], np.nan)
+
         addend_sum = np.sum(self._base_values[:, subtotal.addend_idxs], axis=1)
         subtrahend_sum = np.sum(self._base_values[:, subtotal.subtrahend_idxs], axis=1)
         return addend_sum + subtrahend_sum
 
     def _subtotal_row(self, subtotal):
         """Return (n_cols,) ndarray of values for `subtotal` row."""
+        if self._diff_rows_nan and len(subtotal.subtrahend_idxs) > 0:
+            return np.full(self._base_values.shape[1], np.nan)
+
         addend_sum = np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
         subtrahend_sum = np.sum(self._base_values[subtotal.subtrahend_idxs, :], axis=0)
         return addend_sum + subtrahend_sum
