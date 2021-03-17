@@ -924,6 +924,19 @@ class _Slice(CubePartition):
         return self._columns_dimension._dimension_dict
 
     @lazyproperty
+    def stddev(self):
+        """2D optional np.float64 ndarray of stddev value for each table cell.
+
+        Raises `ValueError` if the cube-result does not include a stddev cube-measure.
+        """
+        try:
+            return self._assembler.stddev
+        except ValueError:
+            raise ValueError(
+                "`.stddev` is undefined for a cube-result without a stddev measure"
+            )
+
+    @lazyproperty
     def sums(self):
         """2D optional np.float64 ndarray of sum value for each table cell.
 
@@ -941,19 +954,6 @@ class _Slice(CubePartition):
         return PairwiseSignificance(
             self, self._alpha, self._only_larger
         ).summary_pairwise_indices
-
-    @lazyproperty
-    def stddev(self):
-        """2D optional np.float64 ndarray of stddev value for each table cell.
-
-        Raises `ValueError` if the cube-result does not include a stddev cube-measure.
-        """
-        try:
-            return self._assembler.stddev
-        except ValueError:
-            raise ValueError(
-                "`.stddev` is undefined for a cube-result without a stddev measure"
-            )
 
     @lazyproperty
     def table_base(self):
