@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.8
+- Add cube std deviation measure
+
 ### 2.1.7
 - Add cube sum measure
 
