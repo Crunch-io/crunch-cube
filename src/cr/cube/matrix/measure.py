@@ -4,7 +4,9 @@
 
 from __future__ import division
 
+from collections import namedtuple
 import numpy as np
+from scipy.stats import t
 
 from cr.cube.matrix.cubemeasure import CubeMeasures
 from cr.cube.matrix.subtotals import SumSubtotals, NanSubtotals
@@ -399,15 +401,151 @@ class _Overlaps(_BaseSecondOrderMeasure):
     """Provides the overlap measure for a matrix."""
 
     @lazyproperty
-    def _base_values(self):
+    def _overlaps(self):
         return self._cube_measures.cube_overlaps.overlaps
+
+    @lazyproperty
+    def _valid_overlaps(self):
+        return self._cube_measures.cube_overlaps.valid_overlaps
+
+    @lazyproperty
+    def pairwise_significance(self):
+        return _OverlapsSignificance(self._overlaps, self._valid_overlaps).values
 
     # @lazyproperty
     # def blocks(self):
     #     """2D array of the four 2D "blocks" making up this measure."""
     #     return NanSubtotals.blocks(
-    #         self._cube_measures.cube_means.means, self._dimensions
-    #     )
+
+
+OverlapSignificance = namedtuple("OverlapSignificance", "t_stats p_vals")
+
+
+class _OverlapsSignificance(object):
+    def __init__(self, overlaps, valid_overlaps):
+        assert overlaps.shape == valid_overlaps.shape
+        assert overlaps.shape[1] == overlaps.shape[2]
+        self._overlaps = overlaps
+        self._valid_overlaps = valid_overlaps
+
+    @lazyproperty
+    def _shape(self):
+        return self._overlaps.shape
+
+    @lazyproperty
+    def _n_rows(self):
+        return self._shape[0]
+
+    @lazyproperty
+    def _n_subvar_columns(self):
+        return self._shape[1]
+
+    @lazyproperty
+    def values(self):
+        values = []
+        # for i in range(len(self._slice.column_labels)):
+        for i in range(self._n_subvar_columns):
+            t_stats = self._t_stats[:, i, :]
+            p_vals = self._p_vals[:, i, :]
+            values.append(OverlapSignificance(t_stats, p_vals))
+        return values
+
+    @lazyproperty
+    def _t_stats(self):
+        return np.array(
+            [
+                PerSubvariableOverlapsSignificancesForRow(
+                    self._overlaps[row_idx], self._valid_overlaps[row_idx]
+                ).t_stats
+                for row_idx in range(self._n_rows)
+            ]
+        )
+
+    @lazyproperty
+    def _p_vals(self):
+        return np.array(
+            [
+                PerSubvariableOverlapsSignificancesForRow(
+                    self._overlaps[row_idx], self._valid_overlaps[row_idx]
+                ).p_vals
+                for row_idx in range(self._n_rows)
+            ]
+        )
+
+
+class PerSubvariableOverlapsSignificancesForRow(object):
+    def __init__(self, overlaps, valid_overlaps):
+        self._overlaps = overlaps
+        self._valid_overlaps = valid_overlaps
+
+    @lazyproperty
+    def n_subvars(self):
+        return self._overlaps.shape[0]
+
+    @lazyproperty
+    def values(self):
+        return [
+            _SubvarPairwiseSignificance(
+                self._overlaps, self._valid_overlaps, subvar_idx
+            )
+            for subvar_idx in range(self.n_subvars)
+        ]
+
+    @lazyproperty
+    def t_stats(self):
+        return np.array([svps.t_stats for svps in self.values])
+
+    @lazyproperty
+    def p_vals(self):
+        return np.array([svps.p_vals for svps in self.values])
+
+
+class _SubvarPairwiseSignificance(object):
+    def __init__(self, overlaps, valid_overlaps, subvar_idx):
+        self._overlaps = overlaps
+        self._valid_overlaps = valid_overlaps
+        self._subvar_idx = subvar_idx
+
+    @lazyproperty
+    def n_subvars(self):
+        return self._overlaps.shape[0]
+
+    @lazyproperty
+    def t_stats_and_pvals(self):
+        idx, vo, so = (self._subvar_idx, self._valid_overlaps, self._overlaps)
+        Na = vo[idx, idx]
+        Sa = so[idx, idx]
+        pa = Sa / Na
+        z_scores = []
+        p_vals = []
+        for i in range(self.n_subvars):
+            if i == idx:
+                z_scores.append(0)
+                p_vals.append(0)
+                continue
+            Nb = vo[i, i]
+            Nab = vo[i, idx]
+            Sb = so[i, i]
+            Sab = so[i, idx]
+
+            pb = Sb / Nb
+            pab = Sab / Nab
+            N = Na + Nb - Nab
+            zab = (pa - pb) / np.sqrt(
+                1 / N * (pa * (1 - pa) + pb * (1 - pb) + 2 * pa * pb - 2 * pab)
+            )
+            z_scores.append(zab)
+            pab = 2 * (1 - t.cdf(abs(zab), df=N - 2))
+            p_vals.append(pab)
+        return np.array(z_scores), np.array(p_vals)
+
+    @lazyproperty
+    def t_stats(self):
+        return self.t_stats_and_pvals[0]
+
+    @lazyproperty
+    def p_vals(self):
+        return self.t_stats_and_pvals[1]
 
 
 class _RowProportions(_BaseSecondOrderMeasure):
