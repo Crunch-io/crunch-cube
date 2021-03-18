@@ -577,19 +577,6 @@ class _Slice(CubePartition):
         return self.rows_dimension_name
 
     @lazyproperty
-    def overlaps(self):
-        """3D optional np.float64 ndarray of overlap value for 2D cube.
-
-        Raises `ValueError` if the cube-result does not include a overlap cube-measure.
-        """
-        try:
-            return self._assembler.overlaps
-        except ValueError:
-            raise ValueError(
-                "`.means` is undefined for a cube-result without a mean measure"
-            )
-
-    @lazyproperty
     def pairwise_indices(self):
         """2D ndarray of tuple of int column-idxs meeting pairwise-t threshold.
 
@@ -631,6 +618,8 @@ class _Slice(CubePartition):
         significance test contains `p_vals` and `t_stats` (ndarrays that represent
         probability values and statistical scores).
         """
+        if self.dimension_types[-1] == DT.MR and self._cube.overlaps is not None:
+            return self._assembler.pairwise_significance_tests
         return tuple(
             PairwiseSignificance(self).values[column_idx]
             for column_idx in range(len(self.column_labels))
@@ -1303,20 +1292,6 @@ class _Strand(CubePartition):
     @lazyproperty
     def name(self):
         return self.rows_dimension_name
-
-    @lazyproperty
-    def overlaps(self):
-        """1D np.float64 ndarray of MR cube overlaps for each row of strand.
-
-        Raises ValueError when accessed on a cube-result that does not contain
-        an overlaps cube-measure.
-        """
-        try:
-            return self._assembler.overlaps
-        except ValueError:
-            raise ValueError(
-                "`.overlaps` is undefined for a cube-result without a `overlap` measure"
-            )
 
     @lazyproperty
     def population_counts(self):

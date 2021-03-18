@@ -366,6 +366,15 @@ class Cube(object):
         )
 
     @lazyproperty
+    def valid_overlaps(self):
+        """np.ndarray(int) if `cube_valid_overlaps` measure exists, None otherwise."""
+        if self._measures.valid_overlaps is None:
+            return None
+        return self._measures.valid_overlaps.raw_cube_array[self._valid_idxs].astype(
+            np.float64
+        )
+
+    @lazyproperty
     def partitions(self):
         """Sequence of _Slice, _Strand, or _Nub objects from this cube-result."""
         return tuple(
@@ -744,6 +753,17 @@ class _Measures(object):
         return valid_counts if valid_counts.raw_cube_array is not None else None
 
     @lazyproperty
+    def valid_overlaps(self):
+        """Optional _ValidOverlapMeasure object providing access to valid overlaps vals.
+
+        Will be None if no valid overlaps are available on the cube result.
+        """
+        overlap = _ValidOverlapMeasure(
+            self._cube_dict, self._all_dimensions, self._cube_idx_arg
+        )
+        return None if overlap.raw_cube_array is None else overlap
+
+    @lazyproperty
     def weighted_counts(self):
         """Optional _WeightedCountMeasure object for this cube.
 
@@ -921,6 +941,15 @@ class _ValidCountsMeasure(_BaseMeasure):
             .get("data", [])
         )
         return np.array(valid_counts, dtype=np.float64) if valid_counts else None
+
+
+class _ValidOverlapMeasure(_OverlapMeasure):
+    """Statistical overlap values from a cube-response."""
+
+    @lazyproperty
+    def _measure_payload(self):
+        """dict representing the valid overlaps measure part of the cube response."""
+        return self._cube_dict["result"].get("measures", {}).get("valid_overlap")
 
 
 class _UnweightedCountMeasure(_BaseMeasure):

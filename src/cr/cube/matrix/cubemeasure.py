@@ -177,9 +177,10 @@ class _MrXMrCubeMeans(_BaseCubeMeans):
 class _BaseCubeOverlaps(_BaseCubeMeasure):
     """Base class for overlap cube-measure variants."""
 
-    def __init__(self, dimensions, overlaps):
+    def __init__(self, dimensions, overlaps, valid_overlaps):
         super(_BaseCubeOverlaps, self).__init__(dimensions)
         self._overlaps = overlaps
+        self._valid_overlaps = valid_overlaps
 
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
@@ -194,7 +195,9 @@ class _BaseCubeOverlaps(_BaseCubeMeasure):
             _CatXMrOverlaps if dimension_types[-1] == DT.MR else _MrXCatOverlaps
         )
         return CubeOverlapsCls(
-            dimensions, cube.overlaps[cls._slice_idx_expr(cube, slice_idx)]
+            dimensions,
+            cube.overlaps[cls._slice_idx_expr(cube, slice_idx)],
+            cube.valid_overlaps[cls._slice_idx_expr(cube, slice_idx)],
         )
 
     @lazyproperty
@@ -212,6 +215,10 @@ class _CatXMrOverlaps(_BaseCubeOverlaps):
         """3D np.float64 ndarray of overlaps for each valid matrix cell."""
         return self._overlaps[:, :, 0]
 
+    @lazyproperty
+    def valid_overlaps(self):
+        return self._valid_overlaps[:, :, 0:2].sum(axis=2)
+
 
 class _MrXCatOverlaps(_BaseCubeOverlaps):
     """Overlaps cube-measure for a MR_X_NON_MR slice.
@@ -223,6 +230,10 @@ class _MrXCatOverlaps(_BaseCubeOverlaps):
     def overlaps(self):
         """3D np.float64 ndarray of overlaps for each valid matrix cell."""
         return self._overlaps[:, 0, :]
+
+    @lazyproperty
+    def valid_overlaps(self):
+        return self._valid_overlaps[:, 0:2, :].sum(axis=1)
 
 
 # === STD DEV ===
