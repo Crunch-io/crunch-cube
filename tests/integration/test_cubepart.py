@@ -74,6 +74,12 @@ class Describe_Slice(object):
             str(e.value)
             == "`.sums` is undefined for a cube-result without a sum measure"
         )
+        with pytest.raises(ValueError) as e:
+            slice_.stddev
+        assert (
+            str(e.value)
+            == "`.stddev` is undefined for a cube-result without a stddev measure"
+        )
         assert slice_.table_margin == 15
         assert slice_.table_name is None
         assert pytest.approx(slice_.table_percentages) == [
@@ -537,7 +543,7 @@ class Describe_Slice(object):
                     "measure": "col_percent",
                     "direction": "ascending",
                     # --- element-ids are 1, 2, 3, 999 ---
-                    "exclude": {"top": [999], "bottom": [1]},
+                    "fixed": {"top": [999], "bottom": [1]},
                 }
             }
         }
@@ -838,6 +844,20 @@ class Describe_Slice(object):
             nan_ok=True,
         )
 
+    def it_provides_stddev_measure_for_cat_x_mr(self):
+        slice_ = Cube(CR.CAT_X_MR_STDDEV).partitions[0]
+
+        assert slice_.stddev == pytest.approx(
+            np.array(
+                [
+                    [0.70710678, np.nan, np.nan],
+                    [np.nan, np.nan, np.nan],
+                ],
+            ),
+            nan_ok=True,
+        )
+        assert slice_.table_base.tolist() == [3, 3, 3]
+
 
 class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
@@ -891,6 +911,11 @@ class Describe_Strand(object):
             strand.sums
         assert str(e.value) == (
             "`.sums` is undefined for a cube-result without a sum measure"
+        )
+        with pytest.raises(ValueError) as e:
+            strand.stddev
+        assert str(e.value) == (
+            "`.stddev` is undefined for a cube-result without a stddev measure"
         )
         assert strand.table_base_range.tolist() == [15, 15]
         assert strand.table_margin_range.tolist() == [15, 15]
@@ -1107,11 +1132,41 @@ class Describe_Strand(object):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]
         assert strand.is_empty is True
 
+    def it_provides_stddev_measure_for_CAT(self):
+        strand = Cube(CR.CAT_STDDEV).partitions[0]
+
+        assert strand.stddev == pytest.approx([22.898325, 7.778174])
+        assert strand.table_base_range.tolist() == [5, 5]
+
+    def it_provides_stddev_measure_for_MR(self):
+        strand = Cube(CR.MR_STDDEV).partitions[0]
+
+        assert strand.stddev == pytest.approx([3.22398, 1.23444, 9.23452])
+        assert strand.table_base_range.tolist() == [3, 3]
+
     def it_provides_sum_measure_for_CAT(self):
         strand = Cube(CR.CAT_SUM).partitions[0]
 
         assert strand.sums == pytest.approx([88.0, 77.0])
         assert strand.table_base_range.tolist() == [5, 5]
+
+    def it_provides_sum_measure_for_CAT_HS(self):
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "anchor": "bottom",
+                        "args": [1, 2],
+                        "function": "subtotal",
+                        "hide": False,
+                        "name": "Sub",
+                    }
+                ]
+            }
+        }
+        strand = Cube(CR.CAT_SUM, transforms=transforms).partitions[0]
+
+        assert strand.sums == pytest.approx([88.0, 77.0, 165.0])
 
     def it_provides_sum_measure_for_MR(self):
         strand = Cube(CR.MR_SUM).partitions[0]
@@ -1984,12 +2039,11 @@ class Test_Slice(object):
 
     def test_ca_x_single_cat_counts(self):
         slice_ = Cube(CR.CA_X_SINGLE_CAT).partitions[0]
-        expected = [[13], [12]]
+        assert slice_.counts == pytest.approx(np.array([[13], [12]]))
         slice_ = Cube(CR.CA_X_SINGLE_CAT).partitions[1]
-        expected = [[16], [12]]
+        assert slice_.counts == pytest.approx(np.array([[16], [12]]))
         slice_ = Cube(CR.CA_X_SINGLE_CAT).partitions[2]
-        expected = [[11], [12]]
-        np.testing.assert_array_equal(slice_.counts, expected)
+        assert slice_.counts == pytest.approx(np.array([[11], [12]]))
 
     def test_ca_x_single_cat_props_by_col(self):
         slice_ = Cube(CR.CA_X_SINGLE_CAT).partitions[0]

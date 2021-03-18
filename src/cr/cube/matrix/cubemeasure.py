@@ -34,6 +34,11 @@ class CubeMeasures(object):
         return _BaseCubeSums.factory(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
+    def cube_stddev(self):
+        """_BaseCubeStdDev subclass object for this cube-result."""
+        return _BaseCubeStdDev.factory(self._cube, self._dimensions, self._slice_idx)
+
+    @lazyproperty
     def unweighted_cube_counts(self):
         """_BaseUnweightedCubeCounts subclass object for this cube-result."""
         return _BaseUnweightedCubeCounts.factory(
@@ -159,6 +164,89 @@ class _MrXMrCubeMeans(_BaseCubeMeans):
         """2D np.float64 ndarray of means for each valid matrix cell."""
         # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
         return self._means[:, 0, :, 0]
+
+
+# === STD DEV ===
+
+
+class _BaseCubeStdDev(_BaseCubeMeasure):
+    """Base class for stddev cube-measure variants."""
+
+    def __init__(self, dimensions, stddev):
+        super(_BaseCubeStdDev, self).__init__(dimensions)
+        self._stddev = stddev
+
+    @classmethod
+    def factory(cls, cube, dimensions, slice_idx):
+        """Return _BaseCubeStdDev subclass instance appropriate to `cube`.
+
+        Raises `ValueError` if the cube-result does not include a cube-stddev measure.
+        """
+        if cube.stddev is None:
+            raise ValueError("cube-result does not contain cube-stddev measure")
+        dimension_types = cube.dimension_types[-2:]
+        CubeSumsCls = (
+            _MrXMrCubeStdDev
+            if dimension_types == (DT.MR, DT.MR)
+            else _MrXCatCubeStdDev
+            if dimension_types[0] == DT.MR
+            else _CatXMrCubeStdDev
+            if dimension_types[1] == DT.MR
+            else _CatXCatCubeStdDev
+        )
+        return CubeSumsCls(
+            dimensions, cube.stddev[cls._slice_idx_expr(cube, slice_idx)]
+        )
+
+    @lazyproperty
+    def stddev(self):
+        """2D np.float64 ndarray of cube stddev."""
+        raise NotImplementedError(  # pragma: no cover
+            "`%s` must implement `.stddev`" % type(self).__name__
+        )
+
+
+class _CatXCatCubeStdDev(_BaseCubeStdDev):
+    """StdDev cube-measure for a slice with no MR dimensions."""
+
+    @lazyproperty
+    def stddev(self):
+        """2D np.float64 ndarray of stddev for each valid matrix cell."""
+        return self._stddev
+
+
+class _CatXMrCubeStdDev(_BaseCubeStdDev):
+    """StdDev cube-measure for a NOT_MR_X_MR slice.
+
+    Note that the rows-dimensions need not actually be CAT.
+    """
+
+    @lazyproperty
+    def stddev(self):
+        """2D np.float64 ndarray of stddev for each valid matrix cell."""
+        return self._stddev[:, :, 0]
+
+
+class _MrXCatCubeStdDev(_BaseCubeStdDev):
+    """StdDev cube-measure for an MR_X_NOT_MR slice.
+
+    Note that the columns-dimension need not actually be CAT.
+    """
+
+    @lazyproperty
+    def stddev(self):
+        """2D np.float64 ndarray of stddev for each valid matrix cell."""
+        return self._stddev[:, 0, :]
+
+
+class _MrXMrCubeStdDev(_BaseCubeStdDev):
+    """StdDev cube-measure for an MR_X_MR slice."""
+
+    @lazyproperty
+    def stddev(self):
+        """2D np.float64 ndarray of stddev for each valid matrix cell."""
+        # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
+        return self._stddev[:, 0, :, 0]
 
 
 # === SUMS ===

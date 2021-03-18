@@ -924,6 +924,19 @@ class _Slice(CubePartition):
         return self._columns_dimension._dimension_dict
 
     @lazyproperty
+    def stddev(self):
+        """2D optional np.float64 ndarray of stddev value for each table cell.
+
+        Raises `ValueError` if the cube-result does not include a stddev cube-measure.
+        """
+        try:
+            return self._assembler.stddev
+        except ValueError:
+            raise ValueError(
+                "`.stddev` is undefined for a cube-result without a stddev measure"
+            )
+
+    @lazyproperty
     def sums(self):
         """2D optional np.float64 ndarray of sum value for each table cell.
 
@@ -1421,6 +1434,20 @@ class _Strand(CubePartition):
     def smoothed_dimension_dict(self):
         """dict, row dimension definition"""
         return self._rows_dimension._dimension_dict
+
+    @lazyproperty
+    def stddev(self):
+        """1D np.float64 ndarray of stddev for each row of strand.
+
+        Raises ValueError when accessed on a cube-result that does not contain a stddev
+        cube-measure.
+        """
+        try:
+            return self._assembler.stddev
+        except ValueError:
+            raise ValueError(
+                "`.stddev` is undefined for a cube-result without a stddev measure"
+            )
 
     @lazyproperty
     def sums(self):

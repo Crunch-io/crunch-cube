@@ -383,6 +383,13 @@ class Cube(object):
         return self._measures.population_fraction
 
     @lazyproperty
+    def stddev(self):
+        """Optional float64 ndarray of the cube_stddev if the measure exists."""
+        if self._measures.stddev is None:
+            return None
+        return self._measures.stddev.raw_cube_array[self._valid_idxs].astype(np.float64)
+
+    @lazyproperty
     def sums(self):
         """Optional float64 ndarray of the cube_sum if the measure exists."""
         if self._measures.sums is None:
@@ -626,10 +633,12 @@ class _Measures(object):
     @lazyproperty
     def missing_count(self):
         """numeric representing count of missing rows in cube response."""
+        if self.valid_counts is not None:
+            return self.valid_counts.missing_count
+        # The check on the means measure is needed for retro-compatibility with the old
+        # fixtures that don't have valid_counts.
         if self.means is not None:
             return self.means.missing_count
-        if self.sums is not None:
-            return self.sums.missing_count
         return self._cube_dict["result"].get("missing", 0)
 
     @lazyproperty
@@ -671,6 +680,17 @@ class _Measures(object):
             return np.nan
         except Exception:
             return 1.0
+
+    @lazyproperty
+    def stddev(self):
+        """_StdDevMeasure object providing access to cube stddev values.
+
+        None when the cube response does not contain a stddev measure.
+        """
+        stddev = _StdDevMeasure(
+            self._cube_dict, self._all_dimensions, self._cube_idx_arg
+        )
+        return None if stddev.raw_cube_array is None else stddev
 
     @lazyproperty
     def sums(self):
@@ -773,13 +793,29 @@ class _MeanMeasure(_BaseMeasure):
         ).flatten()
 
 
-class _SumMeasure(_BaseMeasure):
-    """Statistical sum values from a cube-response."""
+class _StdDevMeasure(_BaseMeasure):
+    """Statistical stddev values from a cube-response."""
 
     @lazyproperty
-    def missing_count(self):
-        """numeric representing count of missing rows reflected in response."""
-        return self._cube_dict["result"]["measures"]["sum"].get("n_missing", 0)
+    def _flat_values(self):
+        """Optional 1D float64 ndarray of stddev values as found in cube response.
+
+        StdDev data may include missing items represented by a dict like
+        {'?': -1} in the cube response. These are replaced by np.nan in the
+        returned value.
+        """
+        measure_payload = self._cube_dict["result"].get("measures", {}).get("stddev")
+        if measure_payload is None:
+            return None
+
+        return np.array(
+            tuple(np.nan if type(x) is dict else x for x in measure_payload["data"]),
+            dtype=np.float64,
+        ).flatten()
+
+
+class _SumMeasure(_BaseMeasure):
+    """Statistical sum values from a cube-response."""
 
     @lazyproperty
     def _flat_values(self):
@@ -801,6 +837,13 @@ class _SumMeasure(_BaseMeasure):
 
 class _ValidCountsMeasure(_BaseMeasure):
     """Valid counts for cube."""
+
+    @lazyproperty
+    def missing_count(self):
+        """numeric representing count of missing rows reflected in response."""
+        return self._cube_dict["result"]["measures"]["valid_count_unweighted"].get(
+            "n_missing", 0
+        )
 
     @lazyproperty
     def _flat_values(self):

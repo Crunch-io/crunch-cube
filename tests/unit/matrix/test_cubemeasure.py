@@ -11,27 +11,32 @@ from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import (
     _BaseCubeMeans,
     _BaseCubeMeasure,
+    _BaseCubeStdDev,
     _BaseCubeSums,
     BaseCubeResultMatrix,
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
     _CatXCatCubeMeans,
+    _CatXCatCubeStdDev,
     _CatXCatCubeSums,
     _CatXCatMatrix,
     _CatXCatUnweightedCubeCounts,
     _CatXCatWeightedCubeCounts,
     _CatXMrCubeMeans,
+    _CatXMrCubeStdDev,
     _CatXMrCubeSums,
     _CatXMrMatrix,
     _CatXMrUnweightedCubeCounts,
     _CatXMrWeightedCubeCounts,
     CubeMeasures,
     _MrXCatCubeMeans,
+    _MrXCatCubeStdDev,
     _MrXCatCubeSums,
     _MrXCatMatrix,
     _MrXCatUnweightedCubeCounts,
     _MrXCatWeightedCubeCounts,
     _MrXMrCubeMeans,
+    _MrXMrCubeStdDev,
     _MrXMrCubeSums,
     _MrXMrMatrix,
     _MrXMrUnweightedCubeCounts,
@@ -271,6 +276,197 @@ class Describe_MrXMrCubeMeans(object):
     @pytest.fixture
     def raw_means(self):
         """(2, 2, 2, 2) np.float64 ndarray of means as from Cube."""
+        return np.array(
+            # -- axes are (rows, sel/not, cols, sel/not) --
+            [
+                [  # -- row 0 -------------
+                    # --sel/not--
+                    [  # -- selected ------
+                        [0.1, 0.8],  # -- col 0
+                        [0.1, 0.7],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [0.2, 0.6],  # -- col 0
+                        [0.3, 0.5],  # -- col 1
+                    ],
+                ],
+                [  # -- row 1 -------------
+                    [  # -- selected ------
+                        [0.4, 0.4],  # -- col 0
+                        [0.5, 0.3],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [0.6, 0.2],  # -- col 0
+                        [0.7, 0.1],  # -- col 1
+                    ],
+                ],
+            ]
+        )
+
+
+# === STD DEV ===
+
+
+class Describe_BaseCubeStdDev(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeStdDev`."""
+
+    @pytest.mark.parametrize(
+        "dimension_types, CubeStdDevCls",
+        (
+            ((DT.MR, DT.MR), _MrXMrCubeStdDev),
+            ((DT.MR, DT.CAT), _MrXCatCubeStdDev),
+            ((DT.CAT, DT.MR), _CatXMrCubeStdDev),
+            ((DT.CAT, DT.CAT), _CatXCatCubeStdDev),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_cube_stddev_objects(
+        self, request, dimension_types, CubeStdDevCls, cube_
+    ):
+        dimensions_ = (
+            instance_mock(request, Dimension),
+            instance_mock(request, Dimension),
+        )
+        cube_stddev_ = instance_mock(request, CubeStdDevCls)
+        CubeStdDevCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % CubeStdDevCls.__name__,
+            return_value=cube_stddev_,
+        )
+        _slice_idx_expr_ = method_mock(
+            request,
+            _BaseCubeStdDev,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
+        )
+        cube_.dimension_types = dimension_types
+        cube_.stddev = [[1, 2], [3, 4]]
+
+        cube_stddev = _BaseCubeStdDev.factory(cube_, dimensions_, slice_idx=7)
+
+        _slice_idx_expr_.assert_called_once_with(cube_, 7)
+        CubeStdDevCls_.assert_called_once_with(dimensions_, [3, 4])
+        assert cube_stddev is cube_stddev_
+
+    def but_it_raises_a_value_error_when_cube_result_does_not_contain_stddev_measure(
+        self, cube_
+    ):
+        cube_.stddev = None
+
+        with pytest.raises(ValueError) as e:
+            _BaseCubeStdDev.factory(cube_, None, None)
+
+        assert str(e.value) == "cube-result does not contain cube-stddev measure"
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+
+class Describe_CatXCatCubeStdDev(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeStdDev`."""
+
+    def it_knows_its_stddev(self, request):
+        property_mock(
+            request,
+            _CatXCatCubeStdDev,
+            "stddev",
+            return_value=np.array([[1.1, 2.3, 3.3], [3.4, 1.5, 1.6]]),
+        )
+        cube_stddev = _CatXCatCubeStdDev(None, None)
+
+        assert cube_stddev.stddev.tolist() == [
+            [1.1, 2.3, 3.3],
+            [3.4, 1.5, 1.6],
+        ]
+
+
+class Describe_CatXMrCubeStdDev(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeStdDev`."""
+
+    def it_knows_its_stddev(self, raw_stddev):
+        cube_stddev = _CatXMrCubeStdDev(None, raw_stddev)
+
+        assert cube_stddev.stddev.tolist() == [
+            [1.1, 2.2, 3.2],
+            [4.3, 5.1, 6.1],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_stddev(self):
+        """(2, 3, 2) np.float64 ndarray of stddev as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1.1, 6.1],  # -- col 0 --
+                    [2.2, 5.2],  # -- col 1 --
+                    [3.2, 4.2],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4.3, 3.1],  # -- col 0 --
+                    [5.1, 2.1],  # -- col 1 --
+                    [6.1, 1.1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXCatCubeStdDev(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeStdDev`."""
+
+    def it_knows_its_stddev(self, raw_stddev):
+        cube_stddev = _MrXCatCubeStdDev(None, raw_stddev)
+
+        assert cube_stddev.stddev.tolist() == [
+            [1.1, 6.1],
+            [4.3, 3.1],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_stddev(self):
+        """(2, 3, 2) np.int float64 of stddev as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1.1, 6.1],  # -- col 0 --
+                    [2.2, 5.2],  # -- col 1 --
+                    [3.2, 4.2],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4.3, 3.1],  # -- col 0 --
+                    [5.1, 2.1],  # -- col 1 --
+                    [6.1, 1.1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXMrCubeStdDev(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeStdDev`."""
+
+    def it_knows_its_stddev(self, raw_stddev):
+        cube_stddev = _MrXMrCubeStdDev(None, raw_stddev)
+
+        assert cube_stddev.stddev.tolist() == [
+            [0.1, 0.1],
+            [0.4, 0.5],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_stddev(self):
+        """(2, 2, 2, 2) np.float64 ndarray of stddev as from Cube."""
         return np.array(
             # -- axes are (rows, sel/not, cols, sel/not) --
             [

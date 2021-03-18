@@ -29,6 +29,11 @@ class CubeMeasures(object):
         return _BaseCubeMeans.factory(self._cube, self._rows_dimension)
 
     @lazyproperty
+    def cube_stddev(self):
+        """_BaseCubeStdDev subclass object for this stripe."""
+        return _BaseCubeStdDev.factory(self._cube, self._rows_dimension)
+
+    @lazyproperty
     def cube_sum(self):
         """_BaseCubeSum subclass object for this stripe."""
         return _BaseCubeSums.factory(self._cube, self._rows_dimension)
@@ -131,7 +136,7 @@ class _BaseCubeSums(_BaseCubeMeasure):
 
 
 class _CatCubeSums(_BaseCubeSums):
-    """Means cube-measure for a non-MR stripe."""
+    """Sums cube-measure for a non-MR stripe."""
 
     @lazyproperty
     def sums(self):
@@ -140,14 +145,62 @@ class _CatCubeSums(_BaseCubeSums):
 
 
 class _MrCubeSums(_BaseCubeSums):
-    """Means cube-measure for an MR stripe.
-    Its `.means` is a 2D ndarray with axes (rows, sel/not).
+    """Sums cube-measure for an MR stripe.
+    Its `.sums` is a 2D ndarray with axes (rows, sel/not).
     """
 
     @lazyproperty
     def sums(self):
         """1D np.float64 ndarray of sum for each stripe row."""
         return self._sums[:, 0]
+
+
+# === STD DEV ===
+
+
+class _BaseCubeStdDev(_BaseCubeMeasure):
+    """Base class for stddev cube-measure variants."""
+
+    def __init__(self, rows_dimension, stddev):
+        super(_BaseCubeStdDev, self).__init__(rows_dimension)
+        self._stddev = stddev
+
+    @classmethod
+    def factory(cls, cube, rows_dimension):
+        """Return _BaseCubeStdDev subclass instance appropriate to `cube`."""
+        if cube.stddev is None:
+            raise ValueError("cube-result does not contain cube-stddev measure")
+        StdDevCls = (
+            _MrCubeStdDev if rows_dimension.dimension_type == DT.MR else _CatCubeStdDev
+        )
+        return StdDevCls(rows_dimension, cube.stddev)
+
+    @lazyproperty
+    def stddev(self):
+        """1D np.float64 ndarray of stddev for each stripe row."""
+        raise NotImplementedError(
+            "`%s` must implement `.stddev`" % type(self).__name__
+        )  # pragma: no cover
+
+
+class _CatCubeStdDev(_BaseCubeStdDev):
+    """StdDev cube-measure for a non-MR stripe."""
+
+    @lazyproperty
+    def stddev(self):
+        """1D np.float64 ndarray of stddev for each stripe row."""
+        return self._stddev
+
+
+class _MrCubeStdDev(_BaseCubeStdDev):
+    """StdDev cube-measure for an MR stripe.
+    Its `.stddev` is a 2D ndarray with axes (rows, sel/not).
+    """
+
+    @lazyproperty
+    def stddev(self):
+        """1D np.float64 ndarray of stddev for each stripe row."""
+        return self._stddev[:, 0]
 
 
 # === UNWEIGHTED COUNTS ===
