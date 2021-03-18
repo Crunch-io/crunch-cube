@@ -3713,6 +3713,7 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert strand.counts[0] == 81
         assert strand.table_proportions[0] == pytest.approx(0.1184210)
 
+    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_computes_measures_for_cat_x_cat_with_subdiffs_on_both(self):
         slice_ = Cube(
             CR.CAT_4_X_CAT_4,
@@ -3764,11 +3765,45 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert slice_.column_proportions[:, 0] == pytest.approx(
             np.full(5, np.nan), nan_ok=True
         )
+        assert slice_.column_proportions_moe[:, 0] == pytest.approx(
+            np.full(5, np.nan), nan_ok=True
+        )
+        assert slice_.column_proportions_moe[0, :] == pytest.approx(
+            [np.nan, np.nan, 0, np.nan, np.nan], nan_ok=True
+        )
+        assert slice_.column_std_dev[:, 0] == pytest.approx(
+            np.full(5, np.nan), nan_ok=True
+        )
+        assert slice_.column_std_dev[0, :] == pytest.approx(
+            [np.nan, np.nan, 0, np.nan, np.nan], nan_ok=True
+        )
+        assert slice_.column_std_err[:, 0] == pytest.approx(
+            np.full(5, np.nan), nan_ok=True
+        )
+        assert slice_.column_std_err[0, :] == pytest.approx(
+            [np.nan, np.nan, 0, np.nan, np.nan], nan_ok=True
+        )
         assert slice_.row_proportions[0, :] == pytest.approx(
             np.full(5, np.nan), nan_ok=True
         )
         assert slice_.row_proportions[:, 0] == pytest.approx(
             [np.nan, 0, 0.10810811, -0.02985075, 0.07352941], nan_ok=True
+        )
+        assert slice_.row_proportions_moe[0, :] == pytest.approx(
+            np.full(5, np.nan), nan_ok=True
+        )
+        assert slice_.row_proportions_moe[:, 0] == pytest.approx(
+            [np.nan, 0, 0.07074854, np.nan, 0.06203546], nan_ok=True
+        )
+        assert slice_.row_std_dev[0, :] == pytest.approx(
+            np.full(5, np.nan), nan_ok=True
+        )
+        assert slice_.row_std_dev[:, 0] == pytest.approx(
+            [np.nan, 0, 0.3105169, np.nan, 0.26100352], nan_ok=True
+        )
+        # assert slice_.row_std_err[0, :] == pytest.approx(np.full(5, np.nan), nan_ok=True)
+        assert slice_.row_std_err[:, 0] == pytest.approx(
+            [np.nan, 0, 0.03609686, np.nan, 0.03165133], nan_ok=True
         )
         assert slice_.table_proportions[0, :] == pytest.approx(
             [np.nan, -0.03007519, 0, -0.02255639, -0.0112782], nan_ok=True
