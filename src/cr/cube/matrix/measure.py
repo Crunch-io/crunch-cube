@@ -412,11 +412,6 @@ class _Overlaps(_BaseSecondOrderMeasure):
     def pairwise_significance(self):
         return _OverlapsSignificance(self._overlaps, self._valid_overlaps).values
 
-    # @lazyproperty
-    # def blocks(self):
-    #     """2D array of the four 2D "blocks" making up this measure."""
-    #     return NanSubtotals.blocks(
-
 
 OverlapSignificance = namedtuple("OverlapSignificance", "t_stats p_vals")
 

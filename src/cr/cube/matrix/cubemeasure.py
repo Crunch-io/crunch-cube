@@ -211,6 +211,7 @@ class _BaseCubeOverlaps(_BaseCubeMeasure):
 class _CatXMrOverlaps(_BaseCubeOverlaps):
     """Overlaps cube-measure for a NOT_MR_X_MR slice."""
 
+    @lazyproperty
     def overlaps(self):
         """3D np.float64 ndarray of overlaps for each valid matrix cell."""
         return self._overlaps[:, :, 0]
