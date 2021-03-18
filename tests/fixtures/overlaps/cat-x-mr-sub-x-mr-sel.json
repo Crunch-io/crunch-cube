@@ -13,6 +13,19 @@
                         ]
                     }
                 ]
+            },
+            "valid_overlap": {
+                "function": "cube_valid_overlap",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "variable": "MR"
+                            }
+                        ]
+                    }
+                ]
             }
         },
         "dimensions": [
@@ -212,6 +225,127 @@
             }
         ],
         "measures": {
+            "valid_overlap": {
+                "data": [
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    0,
+                    2,
+                    2,
+                    1,
+                    1,
+                    1,
+                    0,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    1,
+                    2,
+                    2,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    2,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {
+                        "alias": "multiple_response",
+                        "name": "MR",
+                        "subreferences": [
+                            {
+                                "alias": "subvar_A",
+                                "name": "name_A"
+                            },
+                            {
+                                "alias": "subvar_B",
+                                "name": "name_B"
+                            },
+                            {
+                                "alias": "subvar_C",
+                                "name": "name_C"
+                            }
+                        ],
+                        "uniform_basis": false
+                    },
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {},
+                        "subvariables": [
+                            "A",
+                            "B",
+                            "C"
+                        ]
+                    }
+                },
+                "n_missing": 3
+            },
             "overlap": {
                 "data": [
                     0,

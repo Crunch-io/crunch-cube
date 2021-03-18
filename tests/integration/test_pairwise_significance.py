@@ -326,11 +326,11 @@ class TestStandardizedResiduals(TestCase):
         )
 
 
-class TestOverlaps(TestCase):
+class TestOverlapsCounts(TestCase):
     def test_overlaps_mr_sub_x_mr_sel(self):
         strand = Cube(OL.MR_SUB_X_MR_SEL).partitions[0]
 
-        overlaps = strand.overlaps
+        overlaps = strand._assembler._measures.overlaps.base_values
 
         assert overlaps.tolist() == [
             # Subvariables:
@@ -343,7 +343,7 @@ class TestOverlaps(TestCase):
     def test_overlaps_cat_x_mr_sub_x_mr_sel(self):
         matrix = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
-        overlaps = matrix.overlaps
+        overlaps = matrix._assembler._measures.overlaps._overlaps
 
         assert overlaps.tolist() == [
             [
@@ -367,10 +367,28 @@ class TestOverlaps(TestCase):
             # ],  # G[2] == missing
         ]
 
+    def test_valid_overlaps_cat_x_mr_sub_x_mr_sel(self):
+        matrix = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
+
+        valid_overlaps = matrix._assembler._measures.overlaps._valid_overlaps
+
+        assert valid_overlaps.tolist() == [
+            [
+                [1.0, 1.0, 1.0],
+                [1.0, 3.0, 3.0],
+                [1.0, 3.0, 3.0],
+            ],
+            [
+                [2.0, 2.0, 2.0],
+                [2.0, 2.0, 2.0],
+                [2.0, 2.0, 2.0],
+            ],
+        ]
+
     def test_overlaps_mr_sub_x_mr_sel_x_cat(self):
         matrix = Cube(OL.MR_SUB_X_MR_SEL_X_CAT).partitions[0]
 
-        overlaps = matrix.overlaps
+        overlaps = matrix._assembler._measures.overlaps._overlaps
 
         assert overlaps.tolist() == [
             [
@@ -393,11 +411,31 @@ class TestOverlaps(TestCase):
             ],  # sv: C
         ]
 
-    def test_overlaps_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel(self):
+    def test_valid_overlaps_mr_sub_x_mr_sel_x_cat(self):
+        matrix = Cube(OL.MR_SUB_X_MR_SEL_X_CAT).partitions[0]
+
+        valid_overlaps = matrix._assembler._measures.overlaps._valid_overlaps
+
+        assert valid_overlaps.tolist() == [
+            [
+                [1.0, 1.0, 1.0],
+                [2.0, 2.0, 2.0],
+            ],
+            [
+                [1.0, 3.0, 3.0],
+                [2.0, 2.0, 2.0],
+            ],
+            [
+                [1.0, 3.0, 3.0],
+                [2.0, 2.0, 2.0],
+            ],
+        ]
+
+    def test_overlaps_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_0(self):
         # Test subvar X (partitiions[0])
         matrix = Cube(OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
-        overlaps = matrix.overlaps
+        overlaps = matrix._assembler._measures.overlaps._overlaps
 
         assert overlaps.tolist() == [
             #
@@ -448,10 +486,35 @@ class TestOverlaps(TestCase):
             # ],
         ]
 
+    def test_valid_overlaps_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_0(self):
+        # Test subvar X (partitiions[0])
+        matrix = Cube(OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL).partitions[0]
+
+        valid_overlaps = matrix._assembler._measures.overlaps._valid_overlaps
+
+        assert valid_overlaps.tolist() == [
+            [
+                [1.0, 1.0, 1.0],
+                [1.0, 1.0, 1.0],
+                [1.0, 1.0, 1.0],
+            ],
+            [
+                [2.0, 2.0, 2.0],
+                [2.0, 3.0, 3.0],
+                [2.0, 3.0, 3.0],
+            ],
+            [
+                [0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0],
+            ],
+        ]
+
+    def test_overlaps_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_1(self):
         # Test subvar Y (partitions[1])
         matrix = Cube(OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL).partitions[1]
 
-        overlaps = matrix.overlaps
+        overlaps = matrix._assembler._measures.overlaps._overlaps
 
         assert overlaps.tolist() == [
             #
@@ -501,3 +564,137 @@ class TestOverlaps(TestCase):
             #     [0, 0, 0],  # C
             # ],
         ]
+
+    def test_valid_overlaps_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_1(self):
+        # Test subvar X (partitiions[1])
+        matrix = Cube(OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL).partitions[1]
+
+        valid_overlaps = matrix._assembler._measures.overlaps._valid_overlaps
+
+        assert valid_overlaps.tolist() == [
+            [
+                [2.0, 2.0, 2.0],
+                [2.0, 3.0, 3.0],
+                [2.0, 3.0, 3.0],
+            ],
+            [
+                [2.0, 2.0, 2.0],
+                [2.0, 2.0, 2.0],
+                [2.0, 2.0, 2.0],
+            ],
+            [
+                [0.0, 0.0, 0.0],
+                [0.0, 1.0, 1.0],
+                [0.0, 1.0, 1.0],
+            ],
+        ]
+
+
+class TestOverlapsPairwiseSignificance(TestCase):
+    def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_0th_subvar(self):
+        matrix = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
+
+        sig_tests = matrix.pairwise_significance_tests
+
+        np.testing.assert_almost_equal(
+            sig_tests[0].t_stats,
+            [
+                [0.0, -1.22474487, -2.44948974],
+                [0.0, 1.41421356, 1.41421356],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            sig_tests[0].p_vals,
+            [
+                [0.0, 0.43590578, 0.24675171],
+                [0.0, np.nan, np.nan],
+            ],
+        )
+
+    def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_1st_subvar(self):
+        matrix = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
+
+        sig_tests = matrix.pairwise_significance_tests
+
+        np.testing.assert_almost_equal(
+            sig_tests[1].t_stats,
+            [
+                [1.22474487, 0.0, -1.22474487],
+                [-1.41421356, 0.0, np.nan],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            sig_tests[1].p_vals,
+            [
+                [0.43590578, 0.0, 0.43590578],
+                [np.nan, 0.0, np.nan],
+            ],
+        )
+
+    def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_2nd_subvar(self):
+        matrix = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
+
+        sig_tests = matrix.pairwise_significance_tests
+
+        np.testing.assert_almost_equal(
+            sig_tests[2].t_stats,
+            [
+                [2.44948974, 1.22474487, 0.0],
+                [-1.41421356, np.nan, 0.0],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            sig_tests[2].p_vals,
+            [
+                [0.24675171, 0.43590578, 0.0],
+                [np.nan, np.nan, 0.0],
+            ],
+        )
+
+    def test_pairwise_significance_cat_x_mr_realistic_example(self):
+        matrix = Cube(OL.CAT_X_MR_REALISTIC_EXAMPLE).partitions[0]
+
+        sig_tests = matrix.pairwise_significance_tests
+
+        np.testing.assert_almost_equal(
+            sig_tests[4].t_stats,
+            [
+                [
+                    -3.9146295258075634,
+                    1.5105264449340376,
+                    3.2266563272193363,
+                    7.071067811865473,
+                    0.0,
+                    41.383226415679914,
+                ],
+                [
+                    -2.2756474745819952,
+                    2.909837329589324,
+                    3.4013451656911036,
+                    5.1050358012989845,
+                    0.0,
+                    63.718129288296005,
+                ],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            sig_tests[4].p_vals,
+            [
+                [
+                    0.0001337008782529292,
+                    0.1328815484386987,
+                    0.0015191171147603821,
+                    4.5152770411505116e-11,
+                    0.0,
+                    0.0,
+                ],
+                [
+                    0.02435314838688285,
+                    0.004195089619284165,
+                    0.0008696393198390773,
+                    1.0369509280128142e-06,
+                    0.0,
+                    0.0,
+                ],
+            ],
+        )
