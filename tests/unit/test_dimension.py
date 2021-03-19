@@ -1097,6 +1097,46 @@ class Describe_Subtotals(object):
                     {"function": "subtotal", "anchor": 9, "args": [5, 6], "name": "D"},
                 ),
             ),
+            (
+                [
+                    {
+                        "function": "subtotal",
+                        "anchor": 9,
+                        "args": [1],
+                        "kwargs": {"negative": [2]},
+                        "name": "B",
+                    }
+                ],
+                {1, 2, 3, 4, 5, 8, -1},
+                (
+                    {
+                        "function": "subtotal",
+                        "anchor": 9,
+                        "args": [1],
+                        "kwargs": {"negative": [2]},
+                        "name": "B",
+                    },
+                ),
+            ),
+            (
+                [
+                    {
+                        "function": "subtotal",
+                        "anchor": 9,
+                        "kwargs": {"negative": [1, 2]},
+                        "name": "B",
+                    }
+                ],
+                {1, 2, 3, 4, 5, 8, -1},
+                (
+                    {
+                        "function": "subtotal",
+                        "anchor": 9,
+                        "kwargs": {"negative": [1, 2]},
+                        "name": "B",
+                    },
+                ),
+            ),
         ),
     )
     def it_iterates_the_valid_subtotal_insertion_dicts_to_help(

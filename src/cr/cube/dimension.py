@@ -882,11 +882,17 @@ class _Subtotals(Sequence):
                 continue
 
             # ---skip any malformed subtotal-dicts---
-            if not {"anchor", "args", "name"}.issubset(insertion_dict.keys()):
+            if not {"anchor", "name"}.issubset(insertion_dict.keys()):
+                continue
+
+            # ---must have positive or negative elements---
+            positive = insertion_dict.get("args", [])
+            negative = insertion_dict.get("kwargs", {}).get("negative", [])
+            if not (positive or negative):
                 continue
 
             # ---skip if doesn't reference at least one non-missing element---
-            if not self._element_ids.intersection(insertion_dict["args"]):
+            if not self._element_ids.intersection(positive + negative):
                 continue
 
             # ---an insertion-dict that successfully runs this gauntlet
