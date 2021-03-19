@@ -3971,7 +3971,7 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert slice_.zscores[:, 0] == pytest.approx(np.full(5, np.nan), nan_ok=True)
         assert slice_.pvals[:, 0] == pytest.approx(np.full(5, np.nan), nan_ok=True)
 
-    def it_computes_sum_for_numeric_array_with_subdiffs_and_subtot_on_columns(self):
+    def it_computes_sum_for_numarray_with_subdiffs_and_subtot_on_columns(self):
         slice_ = Cube(
             NA.NUM_ARR_SUM_GROUPED_BY_CAT,
             transforms={
@@ -4005,13 +4005,59 @@ class DescribeIntegrated_SubtotalDifferences(object):
         )
 
         # pruning
-        slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT)
+        slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
         assert slice_.sums == pytest.approx(
             np.array(
                 [
                     [4.0, 3.0],
                     [3.0, 0.0],
                     [2.0, 3.0],
+                ]
+            )
+        )
+
+    def it_computes_share_of_sum_for_numarray_with_subdiffs_and_subtot_on_columns(self):
+        slice_ = Cube(
+            NA.NUM_ARR_SUM_GROUPED_BY_CAT,
+            transforms={
+                "columns_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"negative": [2]},
+                            "anchor": "top",
+                            "name": "subdiff",
+                        },
+                        {
+                            "function": "subtotal",
+                            "args": [1, 2],
+                            "anchor": "bottom",
+                            "name": "subtotal",
+                        },
+                    ]
+                },
+            },
+        ).partitions[0]
+
+        assert slice_.share_sum == pytest.approx(
+            np.array(
+                [
+                    [0.46666667, 0.44444444, 0.5, 0.46666667],
+                    [0.2, 0.33333333, 0.0, 0.2],
+                    [0.33333333, 0.22222222, 0.5, 0.33333333],
+                ]
+            )
+        )
+
+        # pruning
+        slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
+        assert slice_.share_sum == pytest.approx(
+            np.array(
+                [
+                    [0.4444444, 0.5],
+                    [0.3333333, 0.0],
+                    [0.2222222, 0.5],
                 ]
             )
         )

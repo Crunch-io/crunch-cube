@@ -84,6 +84,11 @@ class SecondOrderMeasures(object):
         return self._cube_measures.unweighted_cube_counts.rows_pruning_base
 
     @lazyproperty
+    def share_sum(self):
+        """_ShareSum measure object for this cube-result"""
+        return _ShareSum(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def sums(self):
         """_Sums measure object for this cube-result"""
         return _Sums(self._dimensions, self, self._cube_measures)
@@ -671,6 +676,33 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
         return SumSubtotals.subtotal_rows(
             self._base_values, self._dimensions, diff_rows_nan=True
         )
+
+
+class _ShareSum(_BaseSecondOrderMeasure):
+    """Provides the share of sum measure for a matrix."""
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure."""
+        sums_blocks = SumSubtotals.blocks(
+            self._cube_measures.cube_sum.sums, self._dimensions
+        )
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return [
+                [
+                    # --- base values ---
+                    sums_blocks[0][0] / np.sum(sums_blocks[0][0], axis=0),
+                    # --- inserted columns ---
+                    sums_blocks[0][1] / np.sum(sums_blocks[0][1], axis=0),
+                ],
+                [
+                    # --- inserted rows ---
+                    sums_blocks[1][0] / np.sum(sums_blocks[1][0], axis=0),
+                    # --- intersections ---
+                    sums_blocks[1][1] / np.sum(sums_blocks[1][1], axis=0),
+                ],
+            ]
 
 
 class _Sums(_BaseSecondOrderMeasure):

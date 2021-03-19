@@ -135,6 +135,14 @@ class StripeAssembler(object):
         return self._measures.scaled_counts.scale_stderr
 
     @lazyproperty
+    def share_sum(self):
+        """1D np.float64 ndarray of share of sum for each row.
+
+        Raises ValueError when the cube-result does not include a sum cube-measure.
+        """
+        return self._assemble_vector(self._measures.share_sum.blocks)
+
+    @lazyproperty
     def stddev(self):
         """1D np.float64 ndarray of stddev for each row.
 

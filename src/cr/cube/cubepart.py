@@ -965,6 +965,19 @@ class _Slice(CubePartition):
         return self.counts.shape
 
     @lazyproperty
+    def share_sum(self):
+        """2D optional np.float64 ndarray of share of sum value for each table cell.
+
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+        """
+        try:
+            return self._assembler.share_sum
+        except ValueError:
+            raise ValueError(
+                "`.share_sum` is undefined for a cube-result without a sum measure"
+            )
+
+    @lazyproperty
     def smoothed_dimension_dict(self):
         """dict, smoothed column dimension definition"""
         # TODO:  remove this property when the smoother gets the base measure directly
@@ -1472,6 +1485,19 @@ class _Strand(CubePartition):
     def smoothed_dimension_dict(self):
         """dict, row dimension definition"""
         return self._rows_dimension._dimension_dict
+
+    @lazyproperty
+    def share_sum(self):
+        """1D np.float64 ndarray of share of sum for each row of strand.
+
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+        """
+        try:
+            return self._assembler.share_sum
+        except ValueError:
+            raise ValueError(
+                "`.share_sum` is undefined for a cube-result without a sum measure"
+            )
 
     @lazyproperty
     def stddev(self):

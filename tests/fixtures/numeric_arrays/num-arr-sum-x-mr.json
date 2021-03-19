@@ -1,0 +1,373 @@
+{
+  "query": {
+    "measures": {
+      "valid_count_unweighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "f362c24432e14bd089bb1833e8713638"
+          }
+        ]
+      },
+      "sum": {
+        "function": "cube_sum",
+        "args": [
+          {
+            "variable": "f362c24432e14bd089bb1833e8713638"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "function": "dimension",
+        "args": [
+          {
+            "function": "as_selected",
+            "args": [
+              {
+                "variable": "f8c79f8396b14fd090ce73c322bee703"
+              }
+            ]
+          },
+          {
+            "value": "subvariables"
+          }
+        ]
+      },
+      {
+        "function": "as_selected",
+        "args": [
+          {
+            "variable": "f8c79f8396b14fd090ce73c322bee703"
+          }
+        ]
+      }
+    ],
+    "weight": null
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "dimensions": [
+      {
+        "derived": true,
+        "references": {
+          "subreferences": [
+            {
+              "alias": "X",
+              "name": "X",
+              "description": null
+            },
+            {
+              "alias": "Y",
+              "name": "Y",
+              "description": null
+            },
+            {
+              "alias": "Z",
+              "name": "Z",
+              "description": null
+            }
+          ],
+          "uniform_basis": false,
+          "name": "M",
+          "alias": "M"
+        },
+        "type": {
+          "subtype": {
+            "class": "variable"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "references": {
+                  "alias": "X",
+                  "name": "X",
+                  "description": null
+                },
+                "derived": false,
+                "id": "7muU9So4vUwN4akXJ2jWcu000000"
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "references": {
+                  "alias": "Y",
+                  "name": "Y",
+                  "description": null
+                },
+                "derived": false,
+                "id": "7muU9So4vUwN4akXJ2jWcu000001"
+              },
+              "missing": false
+            },
+            {
+              "id": 3,
+              "value": {
+                "references": {
+                  "alias": "Z",
+                  "name": "Z",
+                  "description": null
+                },
+                "derived": false,
+                "id": "7muU9So4vUwN4akXJ2jWcu000002"
+              },
+              "missing": false
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "references": {
+          "subreferences": [
+            {
+              "alias": "X",
+              "name": "X",
+              "description": null
+            },
+            {
+              "alias": "Y",
+              "name": "Y",
+              "description": null
+            },
+            {
+              "alias": "Z",
+              "name": "Z",
+              "description": null
+            }
+          ],
+          "uniform_basis": false,
+          "name": "M",
+          "alias": "M"
+        },
+        "derived": true,
+        "type": {
+          "ordinal": false,
+          "subvariables": [
+            "7muU9So4vUwN4akXJ2jWcu000000",
+            "7muU9So4vUwN4akXJ2jWcu000001",
+            "7muU9So4vUwN4akXJ2jWcu000002"
+          ],
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "selected": true,
+              "id": 1,
+              "name": "Selected",
+              "missing": false
+            },
+            {
+              "numeric_value": 0,
+              "id": 0,
+              "name": "Other",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": -1,
+              "name": "No Data",
+              "missing": true
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 1,
+    "measures": {
+      "valid_count_unweighted": {
+        "data": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          1,
+          0,
+          1,
+          2,
+          2,
+          1,
+          1,
+          1,
+          0,
+          1,
+          0,
+          1,
+          2,
+          2,
+          1,
+          1,
+          1,
+          0
+        ],
+        "n_missing": 1,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "uniform_basis": false,
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the P."
+              }
+            ],
+            "name": "Movies",
+            "view": {
+              "summary_statistic": "sum"
+            }
+          },
+          "type": {
+            "integer": false,
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        }
+      },
+      "sum": {
+        "data": [
+          12.0,
+          9.0,
+          4.0,
+          1.0,
+          5.0,
+          1.0,
+          3.0,
+          2.0,
+          0.0,
+          5.0,
+          0.0,
+          4.0,
+          8.0,
+          14.0,
+          1.0,
+          3.0,
+          2.0,
+          0.0,
+          5.0,
+          0.0,
+          4.0,
+          8.0,
+          14.0,
+          1.0,
+          3.0,
+          2.0,
+          0.0
+        ],
+        "n_missing": 1,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "uniform_basis": false,
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the P."
+              }
+            ],
+            "name": "Movies",
+            "view": {
+              "summary_statistic": "sum"
+            }
+          },
+          "type": {
+            "integer": null,
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        }
+      }
+    },
+    "n": 4,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 4,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 4,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 4,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 4,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 4,
+      "weighted_n": 4
+    },
+    "filtered": {
+      "unweighted_n": 4,
+      "weighted_n": 4
+    },
+    "counts": [
+      2,
+      1,
+      1,
+      1,
+      2,
+      1,
+      1,
+      2,
+      1
+    ],
+    "element": "crunch:cube"
+  }
+}

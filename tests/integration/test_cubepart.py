@@ -69,6 +69,12 @@ class Describe_Slice(object):
         assert slice_.rows_margin.tolist() == [7, 8]
         assert slice_.shape == (2, 2)
         with pytest.raises(ValueError) as e:
+            slice_.share_sum
+        assert (
+            str(e.value)
+            == "`.share_sum` is undefined for a cube-result without a sum measure"
+        )
+        with pytest.raises(ValueError) as e:
             slice_.sums
         assert (
             str(e.value)
@@ -858,6 +864,20 @@ class Describe_Slice(object):
         )
         assert slice_.table_base.tolist() == [3, 3, 3]
 
+    def it_provides_share_of_sum_measure_for_mr_x_mr(self):
+        slice_ = Cube(CR.MR_X_MR_SUM).partitions[0]
+
+        assert slice_.share_sum == pytest.approx(
+            np.array(
+                [
+                    [np.nan, np.nan, np.nan],
+                    [np.nan, np.nan, np.nan],
+                    [np.nan, np.nan, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+
 
 class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
@@ -907,6 +927,11 @@ class Describe_Strand(object):
         assert strand.scale_std_dev == pytest.approx(0.9428090)
         assert strand.scale_std_err == pytest.approx(0.2434322)
         assert strand.shape == (2,)
+        with pytest.raises(ValueError) as e:
+            strand.share_sum
+        assert str(e.value) == (
+            "`.share_sum` is undefined for a cube-result without a sum measure"
+        )
         with pytest.raises(ValueError) as e:
             strand.sums
         assert str(e.value) == (
@@ -1180,6 +1205,21 @@ class Describe_Strand(object):
         assert strand.counts == pytest.approx([3, 2])
         assert strand.means == pytest.approx([2.66666667, 3.5])
         assert strand.sums == pytest.approx([8, 7])
+
+    def it_provides_share_of_sum_measure_for_CAT(self):
+        strand = Cube(CR.CAT_SUM).partitions[0]
+
+        assert strand.sums == pytest.approx([88.0, 77.0])
+        # --- share of sum is the array of sum divided by its sum, so in this case
+        # --- [88/165, 77/165]
+        assert strand.share_sum == pytest.approx([0.5333333, 0.4666666])
+        assert strand.table_base_range.tolist() == [5, 5]
+
+    def it_provides_share_of_sum_measure_for_MR(self):
+        strand = Cube(CR.MR_SUM).partitions[0]
+
+        assert strand.share_sum == pytest.approx([0.4285714, 0.2857142, 0.2857142])
+        assert strand.table_base_range.tolist() == [3, 3]
 
 
 class Describe_Nub(object):

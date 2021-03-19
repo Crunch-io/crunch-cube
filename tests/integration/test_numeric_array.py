@@ -193,3 +193,57 @@ class DescribeNumericArrays(object):
         assert slice_.columns_base == pytest.approx(
             np.array([[2, 1, 1], [1, 0, 0], [1, 1, 1]])
         )
+
+    def it_provides_share_of_sum_for_numeric_array_with_no_grouping(self):
+        strand = Cube(NA.NUM_ARR_SUM_NO_GROUPING).partitions[0]
+
+        assert strand.sums == pytest.approx([25, 44])
+        assert strand.share_sum == pytest.approx([0.3623188, 0.6376811])
+        assert strand.unweighted_counts.tolist() == [6, 6]
+        assert strand.unweighted_bases.tolist() == [6, 6]
+        assert strand.table_base_range.tolist() == [6, 6]
+
+    def it_provides_share_of_sum_for_num_array_grouped_by_cat(self):
+        """Test share of sum on num array, grouped by single categorical dimension."""
+        slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
+
+        assert slice_.share_sum == pytest.approx(
+            np.array(
+                [
+                    #  --------Gender------------
+                    #    M        F
+                    [0.4444444, 0.5],  # S1 (Ticket Sold)
+                    [0.3333333, 0.0],  # S2 (Ticket Sold)
+                    [0.2222222, 0.5],  # S3 (Ticket Sold)
+                ],
+            )
+        )
+        assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 2], [3, 2]]))
+
+    def it_provides_share_of_sum_for_num_array_x_mr(self):
+        slice_ = Cube(NA.NUM_ARR_SUM_X_MR).partitions[0]
+
+        assert slice_.sums == pytest.approx(
+            np.array(
+                [
+                    # -------------MR----------------
+                    # S1   S2    S3
+                    [12.0, 5.0, 5.0],  # S1 (num arr)
+                    [9.0, 0.0, 0.0],  # S2 (num arr)
+                    [4.0, 4.0, 4.0],  # S3 (num arr)
+                ],
+            ),
+            nan_ok=True,
+        )
+        assert slice_.share_sum == pytest.approx(
+            np.array(
+                [
+                    # --------------MR----------------
+                    #     S1      S2       S3
+                    [0.48, 0.5555555, 0.5555555],  # S1 (num arr)
+                    [0.36, 0.0, 0.0],  # S2 (num arr)
+                    [0.16, 0.4444444, 0.4444444],  # S3 (num arr)
+                ],
+            ),
+            nan_ok=True,
+        )
