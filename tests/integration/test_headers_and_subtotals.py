@@ -3713,7 +3713,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert strand.counts[0] == 81
         assert strand.table_proportions[0] == pytest.approx(0.1184210)
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_computes_measures_for_cat_x_cat_with_subdiffs_on_both(self):
         slice_ = Cube(
             CR.CAT_4_X_CAT_4,
@@ -3801,7 +3800,9 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert slice_.row_std_dev[:, 0] == pytest.approx(
             [np.nan, 0, 0.3105169, np.nan, 0.26100352], nan_ok=True
         )
-        # assert slice_.row_std_err[0, :] == pytest.approx(np.full(5, np.nan), nan_ok=True)
+        assert slice_.row_std_err[0, :] == pytest.approx(
+            np.full(5, np.nan), nan_ok=True
+        )
         assert slice_.row_std_err[:, 0] == pytest.approx(
             [np.nan, 0, 0.03609686, np.nan, 0.03165133], nan_ok=True
         )
