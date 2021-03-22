@@ -52,10 +52,15 @@ class SecondOrderMeasures(object):
         """_Means measure object for this cube-result"""
         return _Means(self._dimensions, self, self._cube_measures)
 
-    @lazyproperty
-    def overlaps(self):
-        """_Overlaps measure object for this cube-result"""
-        return _Overlaps(self._dimensions, self, self._cube_measures)
+    def get_t_stats_for(self, subvar_idx):
+        return _PairwiseSigTStats(
+            self._dimensions, self, self._cube_measures, subvar_idx
+        )
+
+    def get_p_vals_for(self, subvar_idx):
+        return _PairwiseSigPVals(
+            self._dimensions, self, self._cube_measures, subvar_idx
+        )
 
     @lazyproperty
     def row_proportions(self):
@@ -397,29 +402,39 @@ class _Means(_BaseSecondOrderMeasure):
         )
 
 
-class _Overlaps(_BaseSecondOrderMeasure):
-    """Provides the overlap measure for a matrix."""
+class _PairwiseSigTStats(_BaseSecondOrderMeasure):
+    def __init__(self, dimensions, second_order_measures, cube_measures, col_idx):
+        super(_PairwiseSigTStats, self).__init__(
+            dimensions, second_order_measures, cube_measures
+        )
+        self._col_idx = col_idx
 
     @lazyproperty
-    def pairwise_significance(self):
-        return _OverlapsSignificance(self._overlaps, self._valid_overlaps).values
+    def blocks(self):
+        return NanSubtotals.blocks(
+            self._pairwise_significance[self._col_idx].t_stats, self._dimensions
+        )
 
     @lazyproperty
-    def _overlaps(self):
-        return self._cube_measures.cube_overlaps.overlaps
+    def _pairwise_significance(self):
+        return _OverlapsSignificance(
+            self._cube_measures.cube_overlaps.overlaps,
+            self._cube_measures.cube_overlaps.valid_overlaps,
+        ).values
 
+
+class _PairwiseSigPVals(_PairwiseSigTStats):
     @lazyproperty
-    def _valid_overlaps(self):
-        return self._cube_measures.cube_overlaps.valid_overlaps
-
-
-OverlapSignificance = namedtuple("OverlapSignificance", "t_stats p_vals")
+    def blocks(self):
+        return NanSubtotals.blocks(
+            self._pairwise_significance[self._col_idx].p_vals, self._dimensions
+        )
 
 
 class _OverlapsSignificance(object):
+    _OverlapSignificance = namedtuple("OverlapSignificance", "t_stats p_vals")
+
     def __init__(self, overlaps, valid_overlaps):
-        assert overlaps.shape == valid_overlaps.shape
-        assert overlaps.shape[1] == overlaps.shape[2]
         self._overlaps = overlaps
         self._valid_overlaps = valid_overlaps
 
@@ -442,7 +457,7 @@ class _OverlapsSignificance(object):
         for i in range(self._n_subvar_columns):
             t_stats = self._t_stats[:, i, :]
             p_vals = self._p_vals[:, i, :]
-            values.append(OverlapSignificance(t_stats, p_vals))
+            values.append(self._OverlapSignificance(t_stats, p_vals))
         return values
 
     @lazyproperty

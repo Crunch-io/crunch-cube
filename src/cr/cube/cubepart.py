@@ -611,6 +611,37 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
+    def pairwise_significance_t_stats(self):
+        """3D ndarray of pairwise-significance t-stats matrices for each subvariable."""
+
+        # If overlaps are defined, calculate significance based on them
+        if self.dimension_types[-1] == DT.MR and self._cube.overlaps is not None:
+            return self._assembler.pairwise_significance_t_stats
+
+        # Wrap the legacy objects in a 3D ndarray, so that's interpretable by exporter
+        return np.array(
+            [
+                PairwiseSignificance(self).values[column_idx].t_stats
+                for column_idx in range(len(self.column_labels))
+            ]
+        )
+
+    @lazyproperty
+    def pairwise_significance_p_vals(self):
+        """3D ndarray of pairwise-significance p-vals matrices for each subvariable."""
+        # If overlaps are defined, calculate significance based on them
+        if self.dimension_types[-1] == DT.MR and self._cube.overlaps is not None:
+            return self._assembler.pairwise_significance_p_vals
+
+        # Wrap the legacy objects in a 3D ndarray, so that's interpretable by exporter
+        return np.array(
+            [
+                PairwiseSignificance(self).values[column_idx].p_vals
+                for column_idx in range(len(self.column_labels))
+            ]
+        )
+
+    @lazyproperty
     def pairwise_significance_tests(self):
         """tuple of _ColumnPairwiseSignificance tests.
 
@@ -618,8 +649,6 @@ class _Slice(CubePartition):
         significance test contains `p_vals` and `t_stats` (ndarrays that represent
         probability values and statistical scores).
         """
-        if self.dimension_types[-1] == DT.MR and self._cube.overlaps is not None:
-            return self._assembler.pairwise_significance_tests
         return tuple(
             PairwiseSignificance(self).values[column_idx]
             for column_idx in range(len(self.column_labels))

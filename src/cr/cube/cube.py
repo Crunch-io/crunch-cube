@@ -358,19 +358,10 @@ class Cube(object):
 
     @lazyproperty
     def overlaps(self):
-        """np.ndarray of int if the `cube_overlaps` measure exists, None otherwise."""
+        """Optional float64 ndarray of cube_overlaps if the measure exists."""
         if self._measures.overlaps is None:
             return None
         return self._measures.overlaps.raw_cube_array[self._valid_idxs].astype(
-            np.float64
-        )
-
-    @lazyproperty
-    def valid_overlaps(self):
-        """np.ndarray(int) if `cube_valid_overlaps` measure exists, None otherwise."""
-        if self._measures.valid_overlaps is None:
-            return None
-        return self._measures.valid_overlaps.raw_cube_array[self._valid_idxs].astype(
             np.float64
         )
 
@@ -453,6 +444,15 @@ class Cube(object):
         axis = 1 if len(self._all_dimensions) >= 2 else 0
         return np.sum(
             self._measures.valid_counts.raw_cube_array[self._valid_idxs], axis=axis
+        )
+
+    @lazyproperty
+    def valid_overlaps(self):
+        """Optional float64 ndarray of cube_valid_overlaps if the measure exists."""
+        if self._measures.valid_overlaps is None:
+            return None
+        return self._measures.valid_overlaps.raw_cube_array[self._valid_idxs].astype(
+            np.float64
         )
 
     @lazyproperty

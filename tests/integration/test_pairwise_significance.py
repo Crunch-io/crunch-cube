@@ -330,7 +330,7 @@ class TestOverlapsCounts(TestCase):
     def test_overlaps_mr_sub_x_mr_sel(self):
         strand = Cube(OL.MR_SUB_X_MR_SEL).partitions[0]
 
-        overlaps = strand._assembler._measures.overlaps.base_values
+        overlaps = strand._assembler._measures._cube_measures.cube_overlaps.overlaps
 
         assert overlaps.tolist() == [
             # Subvariables:
@@ -343,7 +343,7 @@ class TestOverlapsCounts(TestCase):
     def test_overlaps_cat_x_mr_sub_x_mr_sel(self):
         matrix = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
-        overlaps = matrix._assembler._measures.overlaps._overlaps
+        overlaps = matrix._assembler._measures._cube_measures.cube_overlaps.overlaps
 
         assert overlaps.tolist() == [
             [
@@ -370,7 +370,9 @@ class TestOverlapsCounts(TestCase):
     def test_valid_overlaps_cat_x_mr_sub_x_mr_sel(self):
         matrix = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
-        valid_overlaps = matrix._assembler._measures.overlaps._valid_overlaps
+        valid_overlaps = (
+            matrix._assembler._measures._cube_measures.cube_overlaps.valid_overlaps
+        )
 
         assert valid_overlaps.tolist() == [
             [
@@ -388,7 +390,7 @@ class TestOverlapsCounts(TestCase):
     def test_overlaps_mr_sub_x_mr_sel_x_cat(self):
         matrix = Cube(OL.MR_SUB_X_MR_SEL_X_CAT).partitions[0]
 
-        overlaps = matrix._assembler._measures.overlaps._overlaps
+        overlaps = matrix._assembler._measures._cube_measures.cube_overlaps.overlaps
 
         assert overlaps.tolist() == [
             [
@@ -414,7 +416,9 @@ class TestOverlapsCounts(TestCase):
     def test_valid_overlaps_mr_sub_x_mr_sel_x_cat(self):
         matrix = Cube(OL.MR_SUB_X_MR_SEL_X_CAT).partitions[0]
 
-        valid_overlaps = matrix._assembler._measures.overlaps._valid_overlaps
+        valid_overlaps = (
+            matrix._assembler._measures._cube_measures.cube_overlaps.valid_overlaps
+        )
 
         assert valid_overlaps.tolist() == [
             [
@@ -435,7 +439,7 @@ class TestOverlapsCounts(TestCase):
         # Test subvar X (partitiions[0])
         matrix = Cube(OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
-        overlaps = matrix._assembler._measures.overlaps._overlaps
+        overlaps = matrix._assembler._measures._cube_measures.cube_overlaps.overlaps
 
         assert overlaps.tolist() == [
             #
@@ -490,7 +494,9 @@ class TestOverlapsCounts(TestCase):
         # Test subvar X (partitiions[0])
         matrix = Cube(OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
-        valid_overlaps = matrix._assembler._measures.overlaps._valid_overlaps
+        valid_overlaps = (
+            matrix._assembler._measures._cube_measures.cube_overlaps.valid_overlaps
+        )
 
         assert valid_overlaps.tolist() == [
             [
@@ -514,7 +520,7 @@ class TestOverlapsCounts(TestCase):
         # Test subvar Y (partitions[1])
         matrix = Cube(OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL).partitions[1]
 
-        overlaps = matrix._assembler._measures.overlaps._overlaps
+        overlaps = matrix._assembler._measures._cube_measures.cube_overlaps.overlaps
 
         assert overlaps.tolist() == [
             #
@@ -569,7 +575,9 @@ class TestOverlapsCounts(TestCase):
         # Test subvar X (partitiions[1])
         matrix = Cube(OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL).partitions[1]
 
-        valid_overlaps = matrix._assembler._measures.overlaps._valid_overlaps
+        valid_overlaps = (
+            matrix._assembler._measures._cube_measures.cube_overlaps.valid_overlaps
+        )
 
         assert valid_overlaps.tolist() == [
             [
@@ -594,17 +602,15 @@ class TestOverlapsPairwiseSignificance(TestCase):
     def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_0th_subvar(self):
         matrix = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
-        sig_tests = matrix.pairwise_significance_tests
-
         np.testing.assert_almost_equal(
-            sig_tests[0].t_stats,
+            matrix.pairwise_significance_t_stats[0],
             [
                 [0.0, -1.22474487, -2.44948974],
                 [0.0, 1.41421356, 1.41421356],
             ],
         )
         np.testing.assert_almost_equal(
-            sig_tests[0].p_vals,
+            matrix.pairwise_significance_p_vals[0],
             [
                 [0.0, 0.43590578, 0.24675171],
                 [0.0, np.nan, np.nan],
@@ -614,17 +620,15 @@ class TestOverlapsPairwiseSignificance(TestCase):
     def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_1st_subvar(self):
         matrix = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
-        sig_tests = matrix.pairwise_significance_tests
-
         np.testing.assert_almost_equal(
-            sig_tests[1].t_stats,
+            matrix.pairwise_significance_t_stats[1],
             [
                 [1.22474487, 0.0, -1.22474487],
                 [-1.41421356, 0.0, np.nan],
             ],
         )
         np.testing.assert_almost_equal(
-            sig_tests[1].p_vals,
+            matrix.pairwise_significance_p_vals[1],
             [
                 [0.43590578, 0.0, 0.43590578],
                 [np.nan, 0.0, np.nan],
@@ -634,17 +638,15 @@ class TestOverlapsPairwiseSignificance(TestCase):
     def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_2nd_subvar(self):
         matrix = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
-        sig_tests = matrix.pairwise_significance_tests
-
         np.testing.assert_almost_equal(
-            sig_tests[2].t_stats,
+            matrix.pairwise_significance_t_stats[2],
             [
                 [2.44948974, 1.22474487, 0.0],
                 [-1.41421356, np.nan, 0.0],
             ],
         )
         np.testing.assert_almost_equal(
-            sig_tests[2].p_vals,
+            matrix.pairwise_significance_p_vals[2],
             [
                 [0.24675171, 0.43590578, 0.0],
                 [np.nan, np.nan, 0.0],
@@ -654,10 +656,8 @@ class TestOverlapsPairwiseSignificance(TestCase):
     def test_pairwise_significance_cat_x_mr_realistic_example(self):
         matrix = Cube(OL.CAT_X_MR_REALISTIC_EXAMPLE).partitions[0]
 
-        sig_tests = matrix.pairwise_significance_tests
-
         np.testing.assert_almost_equal(
-            sig_tests[4].t_stats,
+            matrix.pairwise_significance_t_stats[4],
             [
                 [
                     -3.9146295258075634,
@@ -678,7 +678,7 @@ class TestOverlapsPairwiseSignificance(TestCase):
             ],
         )
         np.testing.assert_almost_equal(
-            sig_tests[4].p_vals,
+            matrix.pairwise_significance_p_vals[4],
             [
                 [
                     0.0001337008782529292,
