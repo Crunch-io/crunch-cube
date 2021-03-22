@@ -154,7 +154,36 @@ class SumSubtotals(_BaseSubtotals):
 
     In addition to `base_values` and `dimensions`, `SumSubtotals` have
     properties for `diff_cols_nan` and `diff_rows_nan` which allow for columns/
-    rows where subtotals have subtrahends to be overidden with np.nan.
+    rows where subtotals have subtrahends to be overridden with np.nan. These are
+    used for measures such as bases (and measures derived from bases, like proportions)
+    that are not computed along the same direction as a subtotal difference. Example:
+    a subtotal difference in the row dimension does not have a valid row proportion.
+
+    One way of thinking about this is that when calculating proportions, users are
+    only interested in the direction of proportions where the difference is equal
+    to the sum of the addends minus the sum of the subtrahends. But when calculating
+    proportions along a row or column, the proportions are only additive in one
+    direction, so subtotal differences in the other direction don't work. For example,
+    when you go along a row and you are calculating column percents, each column
+    has a different base, so the proportions don't add up.
+
+    Example showing column percents. We do want to calculate column proportion for
+    `a-b`, but not `c-d` because `c-d` is a subtotal difference in the column
+    dimension.
+    ```
+    |     | c-d | c   | d   | c+d  |
+    |-----|-----|-----|-----|------|
+    | a-b | -   | 20  | 50  | 25   |
+    | a   | -   | 60  | 75  | 62.5 |
+    | b   | -   | 40  | 25  | 37.5 |
+    | a+b | -   | 100 | 100 | 100  |
+    ```
+
+    Another way to think about it is that a "base" is a positive thing, so you can't
+    really subtract out the subtrahends. One option would be to add both the addends and
+    the subtrahends, but ultimately we decided that users would be confused by
+    by these values, and they really only want to see the base and proportions in the
+    opposing direction. Therefore we set the corresponding direction to nan.
     """
 
     def __init__(
@@ -169,6 +198,12 @@ class SumSubtotals(_BaseSubtotals):
         """Return base, row and col insertion, and intersection matrices.
 
         These are in the form ready for assembly.
+
+        Keyword arguments:
+        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg for
+        column bases (default False)
+        `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
+        row bases (default False)
         """
         return cls(base_values, dimensions, diff_cols_nan, diff_rows_nan)._blocks
 
@@ -179,6 +214,12 @@ class SumSubtotals(_BaseSubtotals):
         """Return (n_row_subtotals, n_col_subtotals) ndarray of intersection values.
 
         An intersection value arises where a row-subtotal crosses a column-subtotal.
+
+        Keyword arguments:
+        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg for
+        column bases (default False)
+        `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
+        row bases (default False)
         """
         return cls(base_values, dimensions, diff_cols_nan, diff_rows_nan)._intersections
 
@@ -186,7 +227,14 @@ class SumSubtotals(_BaseSubtotals):
     def subtotal_columns(
         cls, base_values, dimensions, diff_cols_nan=False, diff_rows_nan=False
     ):
-        """Return (n_base_rows, n_col_subtotals) ndarray of subtotal columns."""
+        """Return (n_base_rows, n_col_subtotals) ndarray of subtotal columns.
+
+        Keyword arguments:
+        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg for
+        column bases (default False)
+        `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
+        row bases (default False)
+        """
         return cls(
             base_values, dimensions, diff_cols_nan, diff_rows_nan
         )._subtotal_columns
@@ -195,7 +243,14 @@ class SumSubtotals(_BaseSubtotals):
     def subtotal_rows(
         cls, base_values, dimensions, diff_cols_nan=False, diff_rows_nan=False
     ):
-        """Return (n_row_subtotals, n_base_cols) ndarray of subtotal rows."""
+        """Return (n_row_subtotals, n_base_cols) ndarray of subtotal rows.
+
+        Keyword arguments:
+        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg for
+        column bases (default False)
+        `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
+        row bases (default False)
+        """
         return cls(base_values, dimensions, diff_cols_nan, diff_rows_nan)._subtotal_rows
 
     def _intersection(self, row_subtotal, column_subtotal):
