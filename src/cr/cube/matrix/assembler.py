@@ -176,7 +176,9 @@ class Assembler(object):
         """
         return np.array(
             [
-                self._assemble_matrix(self._measures.get_p_vals_for(subvar_idx).blocks)
+                self._assemble_matrix(
+                    self._measures.pairwise_p_vals_for_subvar(subvar_idx).blocks
+                )
                 for subvar_idx in range(len(self.column_labels))
             ]
         )
@@ -190,7 +192,9 @@ class Assembler(object):
         """
         return np.array(
             [
-                self._assemble_matrix(self._measures.get_t_stats_for(subvar_idx).blocks)
+                self._assemble_matrix(
+                    self._measures.pairwise_t_stats_for_subvar(subvar_idx).blocks
+                )
                 for subvar_idx in range(len(self.column_labels))
             ]
         )

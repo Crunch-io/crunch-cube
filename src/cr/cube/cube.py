@@ -358,7 +358,11 @@ class Cube(object):
 
     @lazyproperty
     def overlaps(self):
-        """Optional float64 ndarray of cube_overlaps if the measure exists."""
+        """Optional float64 ndarray of cube_overlaps if the measure exists.
+
+        The array has as many dimensions as there are defined in the cube query, plus
+        the extra subvariables dimension as the last dimension.
+        """
         if self._measures.overlaps is None:
             return None
         return self._measures.overlaps.raw_cube_array[self._valid_idxs].astype(
@@ -448,7 +452,11 @@ class Cube(object):
 
     @lazyproperty
     def valid_overlaps(self):
-        """Optional float64 ndarray of cube_valid_overlaps if the measure exists."""
+        """Optional float64 ndarray of cube_valid_overlaps if the measure exists.
+
+        The array has as many dimensions as there are defined in the cube query, plus
+        the extra subvariables dimension as the last dimension.
+        """
         if self._measures.valid_overlaps is None:
             return None
         return self._measures.valid_overlaps.raw_cube_array[self._valid_idxs].astype(
@@ -809,7 +817,7 @@ class _BaseMeasure(object):
 
     @lazyproperty
     def _shape(self):
-        """tuple(int) representing the shape of the measure.
+        """tuple(int) representing the shape of the raw-cube measure array.
 
         If needed, this property can be overridden, to accustom different measure shapes
         even if the basic cube has the same original shape.
@@ -843,7 +851,7 @@ class _MeanMeasure(_BaseMeasure):
 
 
 class _OverlapMeasure(_BaseMeasure):
-    """Statistical overlap values from a cube-response."""
+    """Overlap values from a cube-response."""
 
     @lazyproperty
     def _flat_values(self):
@@ -922,6 +930,18 @@ class _SumMeasure(_BaseMeasure):
         ).flatten()
 
 
+class _UnweightedCountMeasure(_BaseMeasure):
+    """Unweighted counts for cube."""
+
+    @lazyproperty
+    def _flat_values(self):
+        """1D np.ndarray of np.float64 counts before weighting.
+
+        Use np.float64s to avoid int overflow bugs and so we can use nan.
+        """
+        return np.array(self._cube_dict["result"]["counts"], dtype=np.float64)
+
+
 class _ValidCountsMeasure(_BaseMeasure):
     """Valid counts for cube."""
 
@@ -944,24 +964,12 @@ class _ValidCountsMeasure(_BaseMeasure):
 
 
 class _ValidOverlapMeasure(_OverlapMeasure):
-    """Statistical overlap values from a cube-response."""
+    """Valid overlap values from a cube-response."""
 
     @lazyproperty
     def _measure_payload(self):
         """dict representing the valid overlaps measure part of the cube response."""
         return self._cube_dict["result"].get("measures", {}).get("valid_overlap")
-
-
-class _UnweightedCountMeasure(_BaseMeasure):
-    """Unweighted counts for cube."""
-
-    @lazyproperty
-    def _flat_values(self):
-        """1D np.ndarray of np.float64 counts before weighting.
-
-        Use np.float64s to avoid int overflow bugs and so we can use nan.
-        """
-        return np.array(self._cube_dict["result"]["counts"], dtype=np.float64)
 
 
 class _WeightedCountMeasure(_BaseMeasure):

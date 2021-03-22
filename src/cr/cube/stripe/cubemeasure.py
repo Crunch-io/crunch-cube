@@ -29,11 +29,6 @@ class CubeMeasures(object):
         return _BaseCubeMeans.factory(self._cube, self._rows_dimension)
 
     @lazyproperty
-    def cube_overlaps(self):
-        """_BaseCubeOverlaps subclass object for this stripe."""
-        return _BaseCubeOverlaps.factory(self._cube, self._rows_dimension)
-
-    @lazyproperty
     def cube_stddev(self):
         """_BaseCubeStdDev subclass object for this stripe."""
         return _BaseCubeStdDev.factory(self._cube, self._rows_dimension)
@@ -93,30 +88,6 @@ class _BaseCubeMeans(_BaseCubeMeasure):
         )  # pragma: no cover
 
 
-class _BaseCubeOverlaps(_BaseCubeMeasure):
-    """Base class for overlaps cube-measure variants."""
-
-    def __init__(self, rows_dimension, overlaps):
-        super(_BaseCubeOverlaps, self).__init__(rows_dimension)
-        self._overlaps = overlaps
-
-    @classmethod
-    def factory(cls, cube, rows_dimension):
-        """Return _BaseCubeOverlaps subclass instance appropriate to `cube`."""
-        if cube.overlaps is None:
-            raise ValueError("cube-result does not contain cube-overlaps measure")
-        if rows_dimension.dimension_type != DT.MR:
-            raise ValueError("1D cubes that are not MR can't have overlaps")
-        return _MrCubeOverlaps(rows_dimension, cube.overlaps)
-
-    @lazyproperty
-    def overlaps(self):
-        """1D np.float64 ndarray of overlap for each stripe row."""
-        raise NotImplementedError(
-            "`%s` must implement `.overlaps`" % type(self).__name__
-        )  # pragma: no cover
-
-
 class _CatCubeMeans(_BaseCubeMeans):
     """Means cube-measure for a non-MR stripe."""
 
@@ -136,18 +107,6 @@ class _MrCubeMeans(_BaseCubeMeans):
     def means(self):
         """1D np.float64 ndarray of mean for each stripe row."""
         return self._means[:, 0]
-
-
-class _MrCubeOverlaps(_BaseCubeOverlaps):
-    """Overlaps cube-measure for an MR stripe.
-
-    Its `.overlaps` is a 2D ndarray with axes (rows, sel/not).
-    """
-
-    @lazyproperty
-    def overlaps(self):
-        """1D np.float64 ndarray of overlaps for each stripe row."""
-        return self._overlaps[:, 0]
 
 
 # === SUM ===

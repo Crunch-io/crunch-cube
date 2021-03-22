@@ -4,7 +4,6 @@
 
 from __future__ import division
 
-from collections import namedtuple
 import numpy as np
 from scipy.stats import t
 
@@ -52,12 +51,8 @@ class SecondOrderMeasures(object):
         """_Means measure object for this cube-result"""
         return _Means(self._dimensions, self, self._cube_measures)
 
-    def get_t_stats_for(self, subvar_idx):
-        return _PairwiseSigTStats(
-            self._dimensions, self, self._cube_measures, subvar_idx
-        )
-
-    def get_p_vals_for(self, subvar_idx):
+    def pairwise_p_vals_for_subvar(self, subvar_idx):
+        """_PairwiseSigPVals measure object for this cube-result and selected subvar."""
         return _PairwiseSigPVals(
             self._dimensions, self, self._cube_measures, subvar_idx
         )
@@ -101,6 +96,12 @@ class SecondOrderMeasures(object):
     def table_weighted_bases(self):
         """_TableWeightedBases measure object for this cube-result."""
         return _TableWeightedBases(self._dimensions, self, self._cube_measures)
+
+    def pairwise_t_stats_for_subvar(self, subvar_idx):
+        """_PairwiseSigTStats measure object for this cube-result and selected subvar."""
+        return _PairwiseSigTStats(
+            self._dimensions, self, self._cube_measures, subvar_idx
+        )
 
     @lazyproperty
     def unweighted_counts(self):
@@ -403,167 +404,79 @@ class _Means(_BaseSecondOrderMeasure):
 
 
 class _PairwiseSigTStats(_BaseSecondOrderMeasure):
-    def __init__(self, dimensions, second_order_measures, cube_measures, col_idx):
+    """Provides pairwise significance t-stats measure for matrix and selected subvar.
+
+    Pairwise significance is calculated for each selected subvar (column) separately.
+    """
+
+    def __init__(self, dimensions, second_order_measures, cube_measures, subvar_a_idx):
         super(_PairwiseSigTStats, self).__init__(
             dimensions, second_order_measures, cube_measures
         )
-        self._col_idx = col_idx
+        self._subvar_a_idx = subvar_a_idx
 
     @lazyproperty
     def blocks(self):
-        return NanSubtotals.blocks(
-            self._pairwise_significance[self._col_idx].t_stats, self._dimensions
-        )
-
-    @lazyproperty
-    def _pairwise_significance(self):
-        return _OverlapsSignificance(
-            self._cube_measures.cube_overlaps.overlaps,
-            self._cube_measures.cube_overlaps.valid_overlaps,
-        ).values
-
-
-class _PairwiseSigPVals(_PairwiseSigTStats):
-    @lazyproperty
-    def blocks(self):
-        return NanSubtotals.blocks(
-            self._pairwise_significance[self._col_idx].p_vals, self._dimensions
-        )
-
-
-class _OverlapsSignificance(object):
-    _OverlapSignificance = namedtuple("OverlapSignificance", "t_stats p_vals")
-
-    def __init__(self, overlaps, valid_overlaps):
-        self._overlaps = overlaps
-        self._valid_overlaps = valid_overlaps
-
-    @lazyproperty
-    def _shape(self):
-        return self._overlaps.shape
+        """2D array of the four 2D "blocks" making up this measure."""
+        return NanSubtotals.blocks(self._t_stats, self._dimensions)
 
     @lazyproperty
     def _n_rows(self):
-        return self._shape[0]
+        """int number of rows in the matrix."""
+        return self._cube_measures.cube_overlaps.overlaps.shape[0]
 
     @lazyproperty
-    def _n_subvar_columns(self):
-        return self._shape[1]
-
-    @lazyproperty
-    def values(self):
-        values = []
-        # for i in range(len(self._slice.column_labels)):
-        for i in range(self._n_subvar_columns):
-            t_stats = self._t_stats[:, i, :]
-            p_vals = self._p_vals[:, i, :]
-            values.append(self._OverlapSignificance(t_stats, p_vals))
-        return values
+    def _n_subvars(self):
+        """int number of columns (subvariables) in the matrix."""
+        return self._cube_measures.cube_overlaps.overlaps.shape[1]
 
     @lazyproperty
     def _t_stats(self):
+        """2D ndarray of float64 representing t-stats for pairwise MR testing."""
         return np.array(
             [
-                _PerSubvarPairwiseSignificanceForCategoricalRow(
-                    self._overlaps[row_idx], self._valid_overlaps[row_idx]
-                ).t_stats
+                [
+                    _PairwiseSignificaneBetweenSubvariablesHelper(
+                        self._cube_measures.cube_overlaps.overlaps[row_idx],
+                        self._cube_measures.cube_overlaps.valid_overlaps[row_idx],
+                        self._subvar_a_idx,
+                        subvar_b_idx,
+                    ).t_stats
+                    for subvar_b_idx in range(self._n_subvars)
+                ]
                 for row_idx in range(self._n_rows)
             ]
         )
+
+
+class _PairwiseSigPVals(_PairwiseSigTStats):
+    """Provides pairwise significance p-vals measure for matrix and selected subvar.
+
+    Pairwise significance is calculated for each selected subvar (column) separately.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure."""
+        return NanSubtotals.blocks(self._p_vals, self._dimensions)
 
     @lazyproperty
     def _p_vals(self):
+        """2D ndarray of float64 representing p-vals for pairwise MR testing."""
         return np.array(
             [
-                _PerSubvarPairwiseSignificanceForCategoricalRow(
-                    self._overlaps[row_idx], self._valid_overlaps[row_idx]
-                ).p_vals
+                [
+                    _PairwiseSignificaneBetweenSubvariablesHelper(
+                        self._cube_measures.cube_overlaps.overlaps[row_idx],
+                        self._cube_measures.cube_overlaps.valid_overlaps[row_idx],
+                        self._subvar_a_idx,
+                        subvar_b_idx,
+                    ).p_vals
+                    for subvar_b_idx in range(self._n_subvars)
+                ]
                 for row_idx in range(self._n_rows)
             ]
         )
-
-
-class _PairwiseSignificanceBetweenSubvarsAAndB(object):
-    def __init__(self, overlaps, valid_overlaps, idx_a, idx_b):
-        self._overlaps = overlaps
-        self._valid_overlaps = valid_overlaps
-        self._idx_a = idx_a
-        self._idx_b = idx_b
-
-    @lazyproperty
-    def Na(self):
-        return self._valid_overlaps[self._idx_a, self._idx_a]
-
-    @lazyproperty
-    def Nb(self):
-        return self._valid_overlaps[self._idx_b, self._idx_b]
-
-    @lazyproperty
-    def Nab(self):
-        return self._valid_overlaps[self._idx_a, self._idx_b]
-
-    @lazyproperty
-    def N(self):
-        return self.Na + self.Nb - self.Nab
-
-    @lazyproperty
-    def Sa(self):
-        return self._overlaps[self._idx_a, self._idx_a]
-
-    @lazyproperty
-    def Sb(self):
-        return self._overlaps[self._idx_b, self._idx_b]
-
-    @lazyproperty
-    def Sab(self):
-        return self._overlaps[self._idx_a, self._idx_b]
-
-    @lazyproperty
-    def t_stats(self):
-        if self._idx_a == self._idx_b:
-            return 0
-
-        pa = self.Sa / self.Na
-        pb = self.Sb / self.Nb
-        pab = self.Sab / self.Nab
-
-        return (pa - pb) / np.sqrt(
-            1 / self.N * (pa * (1 - pa) + pb * (1 - pb) + 2 * pa * pb - 2 * pab)
-        )
-
-    @lazyproperty
-    def p_vals(self):
-        if self._idx_a == self._idx_b:
-            return 0
-
-        return 2 * (1 - t.cdf(abs(self.t_stats), df=self.N - 2))
-
-
-class _PerSubvarPairwiseSignificanceForCategoricalRow(object):
-    def __init__(self, overlaps, valid_overlaps):
-        self._overlaps = overlaps
-        self._valid_overlaps = valid_overlaps
-
-    @lazyproperty
-    def n_subvars(self):
-        return self._overlaps.shape[0]
-
-    @lazyproperty
-    def values(self):
-        return [
-            _SelectedSubvarAPairwiseSignificance(
-                self._overlaps, self._valid_overlaps, subvar_a_idx
-            )
-            for subvar_a_idx in range(self.n_subvars)
-        ]
-
-    @lazyproperty
-    def t_stats(self):
-        return np.array([svps.t_stats for svps in self.values])
-
-    @lazyproperty
-    def p_vals(self):
-        return np.array([svps.p_vals for svps in self.values])
 
 
 class _RowProportions(_BaseSecondOrderMeasure):
@@ -741,45 +654,6 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
         # --- MR dimension (MR_X slice) so that case never arises.
         return SumSubtotals.subtotal_rows(
             self._base_values, self._dimensions, diff_rows_nan=True
-        )
-
-
-class _SelectedSubvarAPairwiseSignificance(object):
-    def __init__(self, overlaps, valid_overlaps, subvar_a_idx):
-        self._overlaps = overlaps
-        self._valid_overlaps = valid_overlaps
-        self._subvar_a_idx = subvar_a_idx
-
-    @lazyproperty
-    def n_subvars(self):
-        return self._overlaps.shape[0]
-
-    @lazyproperty
-    def t_stats(self):
-        return np.array(
-            [
-                _PairwiseSignificanceBetweenSubvarsAAndB(
-                    self._overlaps,
-                    self._valid_overlaps,
-                    self._subvar_a_idx,
-                    subvar_b_idx,
-                ).t_stats
-                for subvar_b_idx in range(self.n_subvars)
-            ]
-        )
-
-    @lazyproperty
-    def p_vals(self):
-        return np.array(
-            [
-                _PairwiseSignificanceBetweenSubvarsAAndB(
-                    self._overlaps,
-                    self._valid_overlaps,
-                    self._subvar_a_idx,
-                    subvar_b_idx,
-                ).p_vals
-                for subvar_b_idx in range(self.n_subvars)
-            ]
         )
 
 
@@ -1054,4 +928,63 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
         """2D array of the four 2D "blocks" making up this measure."""
         return SumSubtotals.blocks(
             self._weighted_cube_counts.weighted_counts, self._dimensions
+        )
+
+
+# === PAIRWISE HELPERS ===
+
+
+class _PairwiseSignificaneBetweenSubvariablesHelper(object):
+    """Helper for calculating overlaps significance between subvariables."""
+
+    def __init__(self, overlaps, valid_overlaps, idx_a, idx_b):
+        self._overlaps = overlaps
+        self._valid_overlaps = valid_overlaps
+        self._idx_a = idx_a
+        self._idx_b = idx_b
+
+    @lazyproperty
+    def p_vals(self):
+        """float64 significance p-vals for the selected subvariables."""
+        if self._idx_a == self._idx_b:
+            return 0.0
+
+        return 2 * (1 - t.cdf(abs(self.t_stats), df=self._N - 2))
+
+    @lazyproperty
+    def t_stats(self):
+        """float64 significance t-stats for the selected subvariables."""
+        if self._idx_a == self._idx_b:
+            return 0.0
+
+        Sa, Sb, Sab = self._selected_counts
+        Na, Nb, Nab = self._valid_counts
+        pa, pb, pab = Sa / Na, Sb / Nb, Sab / Nab
+
+        return (pa - pb) / np.sqrt(
+            1 / self._N * (pa * (1 - pa) + pb * (1 - pb) + 2 * pa * pb - 2 * pab)
+        )
+
+    @lazyproperty
+    def _N(self):
+        """int count of non-overlapping cases of subvariables a and b."""
+        Na, Nb, Nab = self._valid_counts
+        return Na + Nb - Nab
+
+    @lazyproperty
+    def _selected_counts(self):
+        """tuple(int) of selected counts for subvars a, b, and the overlaps (a^b)."""
+        return (
+            self._overlaps[self._idx_a, self._idx_a],
+            self._overlaps[self._idx_b, self._idx_b],
+            self._overlaps[self._idx_a, self._idx_b],
+        )
+
+    @lazyproperty
+    def _valid_counts(self):
+        """tuple(int) of valid counts for subvars a, b, and the overlaps (a^b)."""
+        return (
+            self._valid_overlaps[self._idx_a, self._idx_a],
+            self._valid_overlaps[self._idx_b, self._idx_b],
+            self._valid_overlaps[self._idx_a, self._idx_b],
         )

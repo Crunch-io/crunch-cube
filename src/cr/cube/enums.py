@@ -88,9 +88,9 @@ class CUBE_MEASURE(enum.Enum):
     COUNT = "count"
     MEAN = "mean"
     OVERLAP = "overlap"
-    VALID_OVERLAP = "valid_overlap"
     STDDEV = "stddev"
     SUM = "sum"
+    VALID_OVERLAP = "valid_overlap"
     VALID_COUNT_UNWEIGHTED = "valid_count_unweighted"
 
 

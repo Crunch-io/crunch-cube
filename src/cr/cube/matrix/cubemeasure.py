@@ -190,11 +190,9 @@ class _BaseCubeOverlaps(_BaseCubeMeasure):
         """
         if cube.overlaps is None:
             raise ValueError("cube-result does not contain cube-overlaps measure")
-        dimension_types = cube.dimension_types[-2:]
-        CubeOverlapsCls = (
-            _CatXMrOverlaps if dimension_types[-1] == DT.MR else _MrXCatOverlaps
-        )
-        return CubeOverlapsCls(
+        if cube.valid_overlaps is None:
+            raise ValueError("cube-result does not contain cube-valid-overlaps measure")
+        return _CatXMrOverlaps(
             dimensions,
             cube.overlaps[cls._slice_idx_expr(cube, slice_idx)],
             cube.valid_overlaps[cls._slice_idx_expr(cube, slice_idx)],
@@ -213,28 +211,36 @@ class _CatXMrOverlaps(_BaseCubeOverlaps):
 
     @lazyproperty
     def overlaps(self):
-        """3D np.float64 ndarray of overlaps for each valid matrix cell."""
+        """3D np.float64 ndarray of selected overlaps between MR subvariables, per cat.
+
+        For a CAT x MR matrix, the overlaps are calculated for each category, and then
+        for each subvariables pair for that category (which will produce a square
+        matrix for each category). So the output shape that we get back from the
+        database is CAT x MR_SUBVAR x MR_SEL x MR_SUBVAR (the last one being the result
+        of the `cube_overlap` measure, and representing the "pairing" with each subvar
+        of the previous MR_SUBVAR dimension.
+
+        From this shape, we only need the "Selected" part of the MR_SEL dimension, so
+        we need to select the 0th element along the 2nd axis [:, :, 0].
+        """
         return self._overlaps[:, :, 0]
 
     @lazyproperty
     def valid_overlaps(self):
+        """3D np.float64 ndarray of valid overlaps between MR subvariables, per cat.
+
+        For a CAT x MR matrix, the overlaps are calculated for each category, and then
+        for each subvariables pair for that category (which will produce a square
+        matrix for each category). So the output shape that we get back from the
+        database is CAT x MR_SUBVAR x MR_SEL x MR_SUBVAR (the last one being the result
+        of the `cube_overlap` measure, and representing the "pairing" with each subvar
+        of the previous MR_SUBVAR dimension.
+
+        From this shape, we only need the "Selected" + "Other" part of the MR_SEL
+        dimension (i.e. all except missing), so we need to add the 0th and the 1st
+        element along the 2nd axis sum([:, :, 0:2]).
+        """
         return self._valid_overlaps[:, :, 0:2].sum(axis=2)
-
-
-class _MrXCatOverlaps(_BaseCubeOverlaps):
-    """Overlaps cube-measure for a MR_X_NON_MR slice.
-
-    Note that the columns-dimensions need not actually be CAT.
-    """
-
-    @lazyproperty
-    def overlaps(self):
-        """3D np.float64 ndarray of overlaps for each valid matrix cell."""
-        return self._overlaps[:, 0, :]
-
-    @lazyproperty
-    def valid_overlaps(self):
-        return self._valid_overlaps[:, 0:2, :].sum(axis=1)
 
 
 # === STD DEV ===

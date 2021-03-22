@@ -612,7 +612,11 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def pairwise_significance_t_stats(self):
-        """3D ndarray of pairwise-significance t-stats matrices for each subvariable."""
+        """3D ndarray of pairwise-significance t-stats matrices for each subvariable.
+
+        Each subvariable pairwise significance matrix is a 2D ndarray of the t-stats
+        for the selected subvariable index (the selected column).
+        """
 
         # If overlaps are defined, calculate significance based on them
         if self.dimension_types[-1] == DT.MR and self._cube.overlaps is not None:
@@ -628,7 +632,12 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def pairwise_significance_p_vals(self):
-        """3D ndarray of pairwise-significance p-vals matrices for each subvariable."""
+        """3D ndarray of pairwise-significance p-vals matrices for each subvariable.
+
+        Each subvariable pairwise significance matrix is a 2D ndarray of the p-vals
+        for the selected subvariable index (the selected column).
+        """
+
         # If overlaps are defined, calculate significance based on them
         if self.dimension_types[-1] == DT.MR and self._cube.overlaps is not None:
             return self._assembler.pairwise_significance_p_vals

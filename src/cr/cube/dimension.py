@@ -220,6 +220,12 @@ class _RawDimension(object):
 
     @lazyproperty
     def _is_logical_type(self):
+        """True if dimension-dict has the categories equal to those of the logical type.
+
+        Logical type has exactly three categories with IDs [-1, 0, 1]. This type is
+        used to define the selections dimension of the multiple response type, when it
+        follows the subvariables dimension.
+        """
         return [
             category.get("id")
             for category in self._dimension_dict["type"].get("categories", [])

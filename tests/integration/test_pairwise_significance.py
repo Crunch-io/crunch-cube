@@ -327,19 +327,6 @@ class TestStandardizedResiduals(TestCase):
 
 
 class TestOverlapsCounts(TestCase):
-    def test_overlaps_mr_sub_x_mr_sel(self):
-        strand = Cube(OL.MR_SUB_X_MR_SEL).partitions[0]
-
-        overlaps = strand._assembler._measures._cube_measures.cube_overlaps.overlaps
-
-        assert overlaps.tolist() == [
-            # Subvariables:
-            # A, B, C
-            [3, 1, 1],  # A
-            [1, 2, 2],  # B
-            [1, 2, 3],  # C
-        ]
-
     def test_overlaps_cat_x_mr_sub_x_mr_sel(self):
         matrix = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
@@ -383,54 +370,6 @@ class TestOverlapsCounts(TestCase):
             [
                 [2.0, 2.0, 2.0],
                 [2.0, 2.0, 2.0],
-                [2.0, 2.0, 2.0],
-            ],
-        ]
-
-    def test_overlaps_mr_sub_x_mr_sel_x_cat(self):
-        matrix = Cube(OL.MR_SUB_X_MR_SEL_X_CAT).partitions[0]
-
-        overlaps = matrix._assembler._measures._cube_measures.cube_overlaps.overlaps
-
-        assert overlaps.tolist() == [
-            [
-                # A, B, C
-                [0, 0, 0],  # 2
-                [1, 0, 0],  # 1
-                # [2, 1, 1],  # missing
-            ],  # sv: A
-            [
-                # A, B, C
-                [0, 1, 1],  # 2
-                [0, 0, 0],  # 1
-                # [1, 1, 1],  # missing
-            ],  # sv: B
-            [
-                # A, B, C
-                [0, 1, 2],  # 1
-                [0, 0, 0],  # 2
-                # [1, 1, 1],  # missing
-            ],  # sv: C
-        ]
-
-    def test_valid_overlaps_mr_sub_x_mr_sel_x_cat(self):
-        matrix = Cube(OL.MR_SUB_X_MR_SEL_X_CAT).partitions[0]
-
-        valid_overlaps = (
-            matrix._assembler._measures._cube_measures.cube_overlaps.valid_overlaps
-        )
-
-        assert valid_overlaps.tolist() == [
-            [
-                [1.0, 1.0, 1.0],
-                [2.0, 2.0, 2.0],
-            ],
-            [
-                [1.0, 3.0, 3.0],
-                [2.0, 2.0, 2.0],
-            ],
-            [
-                [1.0, 3.0, 3.0],
                 [2.0, 2.0, 2.0],
             ],
         ]

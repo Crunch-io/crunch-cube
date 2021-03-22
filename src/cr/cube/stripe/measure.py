@@ -35,11 +35,6 @@ class StripeMeasures(object):
         return _Means(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
-    def overlaps(self):
-        """_Overlaps measure object for this stripe."""
-        return _Overlaps(self._rows_dimension, self, self._cube_measures)
-
-    @lazyproperty
     def pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each stripe row."""
         return self._cube_measures.unweighted_cube_counts.pruning_base
@@ -195,23 +190,6 @@ class _Means(_BaseSecondOrderMeasure):
         np.nan.
         """
         return NanSubtotals.subtotal_values(self.base_values, self._rows_dimension)
-
-
-class _Overlaps(_BaseSecondOrderMeasure):
-    """Provides the MR cube overlaps measure for a stripe.
-
-    Relies on the presence of the overlaps cube-measure in the cube-result.
-    """
-
-    # We will only ever need base values here, and not the subtotals. This is so
-    # because the only variable that can have overlaps is MR, and we don't have
-    # cr.cube insertions on the MR variables (we have zz9 insertions instead, which
-    # are going to be automatically included, since they're treated as data by cr.cube).
-
-    @lazyproperty
-    def base_values(self):
-        """1D np.float64 ndarray of mean for each row."""
-        return self._cube_measures.cube_overlaps.overlaps
 
 
 class _ScaledCounts(_BaseSecondOrderMeasure):
