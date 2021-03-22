@@ -1081,11 +1081,6 @@ class Describe_Subtotals(object):
                 (),
             ),
             (
-                [{"function": "subtotal", "anchor": 9, "args": [1, 2], "name": "B"}],
-                {1, 2, 3, 4, 5, 8, -1},
-                ({"function": "subtotal", "anchor": 9, "args": [1, 2], "name": "B"},),
-            ),
-            (
                 [
                     {"function": "subtotal", "anchor": 9, "args": [1, 2], "name": "C"},
                     {"function": "subtotal", "anchor": 9, "args": [3, 4], "name": "Z"},
@@ -1097,49 +1092,9 @@ class Describe_Subtotals(object):
                     {"function": "subtotal", "anchor": 9, "args": [5, 6], "name": "D"},
                 ),
             ),
-            (
-                [
-                    {
-                        "function": "subtotal",
-                        "anchor": 9,
-                        "args": [1],
-                        "kwargs": {"negative": [2]},
-                        "name": "B",
-                    }
-                ],
-                {1, 2, 3, 4, 5, 8, -1},
-                (
-                    {
-                        "function": "subtotal",
-                        "anchor": 9,
-                        "args": [1],
-                        "kwargs": {"negative": [2]},
-                        "name": "B",
-                    },
-                ),
-            ),
-            (
-                [
-                    {
-                        "function": "subtotal",
-                        "anchor": 9,
-                        "kwargs": {"negative": [1, 2]},
-                        "name": "B",
-                    }
-                ],
-                {1, 2, 3, 4, 5, 8, -1},
-                (
-                    {
-                        "function": "subtotal",
-                        "anchor": 9,
-                        "kwargs": {"negative": [1, 2]},
-                        "name": "B",
-                    },
-                ),
-            ),
         ),
     )
-    def it_iterates_the_valid_subtotal_insertion_dicts_to_help(
+    def it_removes_invalid_when_iterating_the_valid_subtotal_insertion_dicts_to_help(
         self, insertion_dicts, element_ids, expected_value, _element_ids_prop_
     ):
         _element_ids_prop_.return_value = element_ids
@@ -1148,6 +1103,47 @@ class Describe_Subtotals(object):
         subtotal_dicts = tuple(subtotals._iter_valid_subtotal_dicts())
 
         assert subtotal_dicts == expected_value
+
+    def but_it_accepts_valid_insertion_dicts(self, _element_ids_prop_):
+        _element_ids_prop_.return_value = {1, 2, 5, 8, -1}
+        insertion_dicts = [
+            {
+                "function": "subtotal",
+                "anchor": 9,
+                "args": [1],
+                "name": "old style args",
+            },
+            {
+                "function": "subtotal",
+                "anchor": 9,
+                "args": [1],
+                "kwargs": {"negative": [2]},
+                "name": "old style args with negative",
+            },
+            {
+                "function": "subtotal",
+                "anchor": 9,
+                "kwargs": {"negative": [2]},
+                "name": "negative only",
+            },
+            {
+                "function": "subtotal",
+                "anchor": 9,
+                "kwargs": {"positive": [1]},
+                "name": "new style kwargs",
+            },
+            {
+                "function": "subtotal",
+                "anchor": 9,
+                "kwargs": {"positive": [1], "negative": [2]},
+                "name": "new style kwargs with negative",
+            },
+        ]
+        subtotals = _Subtotals(insertion_dicts, None)
+
+        subtotal_dicts = tuple(subtotals._iter_valid_subtotal_dicts())
+
+        assert subtotal_dicts == tuple(insertion_dicts)
 
     def it_constructs_its_subtotal_objects_to_help(
         self, request, _iter_valid_subtotal_dicts_, valid_elements_, _Subtotal_
@@ -1259,6 +1255,8 @@ class Describe_Subtotal(object):
             ({"args": [3, 2]}, {1, 2, 3}, (3, 2)),
             ({"args": []}, {1, 2, 3}, ()),
             ({"args": [1, 2, 3]}, {}, ()),
+            ({"kwargs": {"positive": [1, 2, 3]}}, {1, 2, 3}, (1, 2, 3)),
+            ({"args": [1], "kwargs": {"positive": [2]}}, {1, 2, 3}, (2,)),
         ),
     )
     def it_provides_access_to_the_addend_element_ids(
