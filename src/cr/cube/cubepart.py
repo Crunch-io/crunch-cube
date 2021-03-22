@@ -535,6 +535,11 @@ class _Slice(CubePartition):
         return self._rows_dimension.description
 
     @lazyproperty
+    def has_scale_means(self):
+        """True if the slice has valid columns scale mean."""
+        return True if self.columns_scale_mean is not None else False
+
+    @lazyproperty
     def inserted_column_idxs(self):
         """tuple of int index of each subtotal column in slice."""
         return self._assembler.inserted_column_idxs
@@ -1319,6 +1324,11 @@ class _Strand(CubePartition):
         specified in a transform has been applied.
         """
         return self._assembler.inserted_row_idxs
+
+    @lazyproperty
+    def has_scale_means(self):
+        """True if the strand has valid scale means."""
+        return True if self.scale_mean is not None else False
 
     @lazyproperty
     def is_empty(self):

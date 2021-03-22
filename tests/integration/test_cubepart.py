@@ -35,6 +35,7 @@ class Describe_Slice(object):
             [0.7142857, 0.2857142],
             [0.6250000, 0.3750000],
         ]
+        assert slice_.has_scale_means is True
         assert slice_.inserted_column_idxs == ()
         assert slice_.inserted_row_idxs == ()
         assert slice_.is_empty is False
@@ -903,6 +904,7 @@ class Describe_Strand(object):
         assert strand.counts.tolist() == [10, 5]
         assert strand.cube_index == 0
         assert strand.dimension_types == (DT.CAT,)
+        assert strand.has_scale_means is True
         assert strand.inserted_row_idxs == ()
         assert strand.is_empty is False
         with pytest.raises(ValueError) as e:
