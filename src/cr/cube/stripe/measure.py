@@ -334,7 +334,7 @@ class _ShareSum(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def subtotal_values(self):
-        """1D ndarray of sum subtotals for each row-subtotal."""
+        """1D ndarray of share of sum subtotals for each row-subtotal."""
         return SumSubtotals.subtotal_values(self.base_values, self._rows_dimension)
 
 

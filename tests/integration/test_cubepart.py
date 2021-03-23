@@ -839,16 +839,14 @@ class Describe_Slice(object):
 
     def it_provides_sum_measure_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR_SUM).partitions[0]
-
         assert slice_.sums == pytest.approx(
             np.array(
                 [
-                    [np.nan, np.nan, np.nan],
-                    [np.nan, 2.0, np.nan],
-                    [np.nan, np.nan, np.nan],
+                    [2.0, 1.0, 2.0],
+                    [1.0, 2.0, 3.0],
+                    [1.0, 2.0, 4.0],
                 ]
-            ),
-            nan_ok=True,
+            )
         )
 
     def it_provides_stddev_measure_for_cat_x_mr(self):
@@ -867,16 +865,14 @@ class Describe_Slice(object):
 
     def it_provides_share_of_sum_measure_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR_SUM).partitions[0]
-
         assert slice_.share_sum == pytest.approx(
             np.array(
                 [
-                    [np.nan, np.nan, np.nan],
-                    [np.nan, np.nan, np.nan],
-                    [np.nan, np.nan, np.nan],
+                    [0.5, 0.2, 0.2222222],
+                    [0.25, 0.4, 0.3333333],
+                    [0.25, 0.4, 0.4444444],
                 ]
-            ),
-            nan_ok=True,
+            )
         )
 
 
@@ -1214,13 +1210,17 @@ class Describe_Strand(object):
         assert strand.sums == pytest.approx([88.0, 77.0])
         # --- share of sum is the array of sum divided by its sum, so in this case
         # --- [88/165, 77/165]
-        assert strand.share_sum == pytest.approx([0.5333333, 0.4666666])
+        assert strand.share_sum.tolist() == [0.5333333333333333, 0.4666666666666667]
         assert strand.table_base_range.tolist() == [5, 5]
 
     def it_provides_share_of_sum_measure_for_MR(self):
         strand = Cube(CR.MR_SUM).partitions[0]
 
-        assert strand.share_sum == pytest.approx([0.4285714, 0.2857142, 0.2857142])
+        assert strand.share_sum.tolist() == [
+            0.42857142857142855,
+            0.2857142857142857,
+            0.2857142857142857,
+        ]
         assert strand.table_base_range.tolist() == [3, 3]
 
 

@@ -974,6 +974,9 @@ class _Slice(CubePartition):
         """2D optional np.float64 ndarray of share of sum value for each table cell.
 
         Raises `ValueError` if the cube-result does not include a sum cube-measure.
+
+        Share of sum is the sum of each subvar item divided by the TOTAL number of
+        items.
         """
         try:
             return self._assembler.share_sum
@@ -1501,6 +1504,9 @@ class _Strand(CubePartition):
         """1D np.float64 ndarray of share of sum for each row of strand.
 
         Raises `ValueError` if the cube-result does not include a sum cube-measure.
+
+        Share of sum is the sum of each subvar item divided by the TOTAL number of
+        items.
         """
         try:
             return self._assembler.share_sum

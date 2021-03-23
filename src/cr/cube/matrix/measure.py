@@ -679,11 +679,18 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
 
 
 class _ShareSum(_BaseSecondOrderMeasure):
-    """Provides the share of sum measure for a matrix."""
+    """Provides the share of sum measure for a matrix.
+
+    Share of sum is the sum of each subvar item divided by the TOTAL number of items.
+    """
 
     @lazyproperty
     def blocks(self):
-        """2D array of the four 2D "blocks" making up this measure."""
+        """2D array of the four 2D "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values.
+        """
         sums_blocks = SumSubtotals.blocks(
             self._cube_measures.cube_sum.sums, self._dimensions
         )
