@@ -189,9 +189,13 @@ class _BaseCubeOverlaps(_BaseCubeMeasure):
         Raises `ValueError` if the cube-result does not include a cube-means measure.
         """
         if cube.overlaps is None:
-            raise ValueError("cube-result does not contain cube-overlaps measure")
+            raise ValueError(
+                "cube-result does not contain cube-overlaps measure"
+            )  # pragma: no cover
         if cube.valid_overlaps is None:
-            raise ValueError("cube-result does not contain cube-valid-overlaps measure")
+            raise ValueError(
+                "cube-result does not contain cube-valid-overlaps measure"
+            )  # pragma: no cover
         return _CatXMrOverlaps(
             dimensions,
             cube.overlaps[cls._slice_idx_expr(cube, slice_idx)],

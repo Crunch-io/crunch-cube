@@ -619,7 +619,11 @@ class _Slice(CubePartition):
         """
 
         # If overlaps are defined, calculate significance based on them
-        if self.dimension_types[-1] == DT.MR and self._cube.overlaps is not None:
+        if (
+            self.dimension_types[-1] == DT.MR
+            and self._cube.overlaps is not None
+            and self._cube.valid_overlaps is not None
+        ):
             return self._assembler.pairwise_significance_t_stats
 
         # Wrap the legacy objects in a 3D ndarray, so that's interpretable by exporter
@@ -639,7 +643,11 @@ class _Slice(CubePartition):
         """
 
         # If overlaps are defined, calculate significance based on them
-        if self.dimension_types[-1] == DT.MR and self._cube.overlaps is not None:
+        if (
+            self.dimension_types[-1] == DT.MR
+            and self._cube.overlaps is not None
+            and self._cube.valid_overlaps is not None
+        ):
             return self._assembler.pairwise_significance_p_vals
 
         # Wrap the legacy objects in a 3D ndarray, so that's interpretable by exporter

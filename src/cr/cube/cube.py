@@ -458,7 +458,7 @@ class Cube(object):
         the extra subvariables dimension as the last dimension.
         """
         if self._measures.valid_overlaps is None:
-            return None
+            return None  # pragma: no cover
         return self._measures.valid_overlaps.raw_cube_array[self._valid_idxs].astype(
             np.float64
         )
