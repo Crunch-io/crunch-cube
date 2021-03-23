@@ -186,7 +186,8 @@ class _BaseCubeOverlaps(_BaseCubeMeasure):
     def factory(cls, cube, dimensions, slice_idx):
         """Return _BaseCubeOverlaps subclass instance appropriate to `cube`.
 
-        Raises `ValueError` if the cube-result does not include a cube-means measure.
+        Raises `ValueError` if the cube-result does not include a cube-overlaps measure
+        or if it doesn't include valid-cube-overlaps measure.
         """
         if cube.overlaps is None:
             raise ValueError(
@@ -244,7 +245,7 @@ class _CatXMrOverlaps(_BaseCubeOverlaps):
         dimension (i.e. all except missing), so we need to add the 0th and the 1st
         element along the 2nd axis sum([:, :, 0:2]).
         """
-        return self._valid_overlaps[:, :, 0:2].sum(axis=2)
+        return np.sum(self._valid_overlaps[:, :, 0:2], axis=2)
 
 
 # === STD DEV ===

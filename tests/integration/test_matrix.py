@@ -7,9 +7,11 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
+from cr.cube.dimension import AllDimensions
 from cr.cube.matrix.assembler import _BaseOrderHelper
+from cr.cube.matrix.cubemeasure import _BaseCubeOverlaps
 
-from ..fixtures import CR
+from ..fixtures import CR, OL
 
 
 class DescribeAssembler(object):
@@ -1496,6 +1498,230 @@ class DescribeAssembler(object):
         assert slice_.sums == pytest.approx(
             np.array([[3.0, 0.0], [2.0, 0.0], [2.0, 0.0]])
         )
+
+
+class DescribeCubemeasure(object):
+    def it_provides_overlaps_for_cat_x_mr_sub_x_mr_sel(self):
+        cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
+        overlaps_measure = _BaseCubeOverlaps.factory(
+            cube=Cube(cube_dict),
+            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            slice_idx=0,
+        )
+
+        assert overlaps_measure.__class__.__name__ == "_CatXMrOverlaps"
+        assert overlaps_measure.overlaps.tolist() == [
+            [
+                # A, B, C
+                [0, 0, 0],  # A
+                [0, 1, 1],  # B
+                [0, 1, 2],  # C
+            ],  # G[0] == 2
+            [
+                # A, B, C
+                [1, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0],
+            ],  # G[1] == 1
+            # --- Missing categories are not shown by cube by default
+            # [
+            #     # A, B, C
+            #     [2, 1, 1],
+            #     [1, 1, 1],
+            #     [1, 1, 1],
+            # ],  # G[2] == missing
+        ]
+
+    def it_provides_valid_overlaps_for_cat_x_mr_sub_x_mr_sel(self):
+        cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
+        overlaps_measure = _BaseCubeOverlaps.factory(
+            cube=Cube(cube_dict),
+            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            slice_idx=0,
+        )
+
+        assert overlaps_measure.valid_overlaps.tolist() == [
+            [
+                [1.0, 1.0, 1.0],
+                [1.0, 3.0, 3.0],
+                [1.0, 3.0, 3.0],
+            ],
+            [
+                [2.0, 2.0, 2.0],
+                [2.0, 2.0, 2.0],
+                [2.0, 2.0, 2.0],
+            ],
+        ]
+
+    def it_provides_overlaps_for_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_0(self):
+        # Test subvar X (partitiions[0])
+        cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
+        overlaps_measure = _BaseCubeOverlaps.factory(
+            cube=Cube(cube_dict),
+            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            slice_idx=0,
+        )
+
+        assert overlaps_measure.overlaps.tolist() == [
+            #
+            # --- Missing categories are not shown
+            #
+            # [
+            #     # CA_CATS: No Data
+            #     # ----------------
+            #     # A, B, C
+            #     [2, 1, 1],  # A
+            #     [1, 1, 1],  # B
+            #     [1, 1, 1],  # C
+            # ],
+            [
+                # CA_CATS: Poor
+                # -------------
+                # A, B, C
+                [1, 0, 0],  # A
+                [0, 0, 0],  # B
+                [0, 0, 0],  # C
+            ],
+            [
+                # CA_CATS: Fair
+                # -------------
+                # A, B, C
+                [0, 0, 0],  # A
+                [0, 1, 1],  # B
+                [0, 1, 2],  # C
+            ],
+            [
+                # CA_CATS: Good
+                # -------------
+                # A, B, C
+                [0, 0, 0],  # A
+                [0, 0, 0],  # B
+                [0, 0, 0],  # C
+            ],
+            #
+            # --- Missing categories are not shown
+            #
+            # [
+            #     # CA_CATS: Not Shown
+            #     # ------------------
+            #     # A, B, C
+            #     [0, 0, 0],  # A
+            #     [0, 0, 0],  # B
+            #     [0, 0, 0],  # C
+            # ],
+        ]
+
+    def it_provides_valid_overlaps_for_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_0(self):
+        # Test subvar X (partitiions[0])
+        cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
+        overlaps_measure = _BaseCubeOverlaps.factory(
+            cube=Cube(cube_dict),
+            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            slice_idx=0,
+        )
+
+        assert overlaps_measure.valid_overlaps.tolist() == [
+            [
+                [1.0, 1.0, 1.0],
+                [1.0, 1.0, 1.0],
+                [1.0, 1.0, 1.0],
+            ],
+            [
+                [2.0, 2.0, 2.0],
+                [2.0, 3.0, 3.0],
+                [2.0, 3.0, 3.0],
+            ],
+            [
+                [0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0],
+            ],
+        ]
+
+    def it_provides_overlaps_for_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_1(self):
+        # Test subvar Y (partitions[1])
+        cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
+        overlaps_measure = _BaseCubeOverlaps.factory(
+            cube=Cube(cube_dict),
+            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            slice_idx=1,
+        )
+
+        assert overlaps_measure.overlaps.tolist() == [
+            #
+            # --- Missing categories are not shown
+            #
+            # [
+            #     # CA_CATS: Missing
+            #     # ----------------
+            #     # A, B, C
+            #     [1, 1, 1],  # A
+            #     [1, 1, 1],  # B
+            #     [1, 1, 1],  # C
+            # ],
+            [
+                # CA_CATS: Poor
+                # -------------
+                # A, B, C
+                [1, 0, 0],  # A
+                [0, 1, 1],  # B
+                [0, 1, 1],  # C
+            ],
+            [
+                # CA_CATS: Fair
+                # -------------
+                # A, B, C
+                [1, 0, 0],  # A
+                [0, 0, 0],  # B
+                [0, 0, 0],  # C
+            ],
+            [
+                # CA_CATS: Good
+                # -------------
+                # A, B, C
+                [0, 0, 0],  # A
+                [0, 0, 0],  # B
+                [0, 0, 1],  # C
+            ],
+            #
+            # --- Missing categories are not shown
+            #
+            # [
+            #     # CA_CATS: Not Shown
+            #     # ------------------
+            #     # A, B, C
+            #     [0, 0, 0],  # A
+            #     [0, 0, 0],  # B
+            #     [0, 0, 0],  # C
+            # ],
+        ]
+
+    def it_provides_valid_overlaps_for_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_1(self):
+        # Test subvar X (partitiions[1])
+        cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
+        overlaps_measure = _BaseCubeOverlaps.factory(
+            cube=Cube(cube_dict),
+            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            slice_idx=1,
+        )
+
+        assert overlaps_measure.valid_overlaps.tolist() == [
+            [
+                [2.0, 2.0, 2.0],
+                [2.0, 3.0, 3.0],
+                [2.0, 3.0, 3.0],
+            ],
+            [
+                [2.0, 2.0, 2.0],
+                [2.0, 2.0, 2.0],
+                [2.0, 2.0, 2.0],
+            ],
+            [
+                [0.0, 0.0, 0.0],
+                [0.0, 1.0, 1.0],
+                [0.0, 1.0, 1.0],
+            ],
+        ]
 
 
 class Describe_BaseOrderHelper(object):

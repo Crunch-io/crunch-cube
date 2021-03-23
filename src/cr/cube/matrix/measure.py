@@ -57,6 +57,12 @@ class SecondOrderMeasures(object):
             self._dimensions, self, self._cube_measures, subvar_idx
         )
 
+    def pairwise_t_stats_for_subvar(self, subvar_idx):
+        """_PairwiseSigTStats measure object for this cube-result and selected subvar."""
+        return _PairwiseSigTStats(
+            self._dimensions, self, self._cube_measures, subvar_idx
+        )
+
     @lazyproperty
     def row_proportions(self):
         """_RowProportions measure object for this cube-result."""
@@ -96,12 +102,6 @@ class SecondOrderMeasures(object):
     def table_weighted_bases(self):
         """_TableWeightedBases measure object for this cube-result."""
         return _TableWeightedBases(self._dimensions, self, self._cube_measures)
-
-    def pairwise_t_stats_for_subvar(self, subvar_idx):
-        """_PairwiseSigTStats measure object for this cube-result and selected subvar."""
-        return _PairwiseSigTStats(
-            self._dimensions, self, self._cube_measures, subvar_idx
-        )
 
     @lazyproperty
     def unweighted_counts(self):
@@ -409,11 +409,13 @@ class _PairwiseSigTStats(_BaseSecondOrderMeasure):
     Pairwise significance is calculated for each selected subvar (column) separately.
     """
 
-    def __init__(self, dimensions, second_order_measures, cube_measures, subvar_a_idx):
+    def __init__(
+        self, dimensions, second_order_measures, cube_measures, selected_subvar_idx
+    ):
         super(_PairwiseSigTStats, self).__init__(
             dimensions, second_order_measures, cube_measures
         )
-        self._subvar_a_idx = subvar_a_idx
+        self._selected_subvar_idx = selected_subvar_idx
 
     @lazyproperty
     def blocks(self):
@@ -432,17 +434,24 @@ class _PairwiseSigTStats(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def _t_stats(self):
-        """2D ndarray of float64 representing t-stats for pairwise MR testing."""
+        """2D ndarray of float64 representing t-stats for pairwise MR testing.
+
+        For each (category) row, we calculate the test statistic of the overlap between
+        columns (subvariables) of the crossing MR variable. To do that we have to
+        iterate across all categories (rows), and then across all subvars (columns).
+        Each of these iterations produces a single number for the test statistic, so we
+        end up with n_rows x n_cols 2-dimensional ndarray.
+        """
         return np.array(
             [
                 [
                     _PairwiseSignificaneBetweenSubvariablesHelper(
                         self._cube_measures.cube_overlaps.overlaps[row_idx],
                         self._cube_measures.cube_overlaps.valid_overlaps[row_idx],
-                        self._subvar_a_idx,
-                        subvar_b_idx,
+                        self._selected_subvar_idx,
+                        subvar_idx,
                     ).t_stats
-                    for subvar_b_idx in range(self._n_subvars)
+                    for subvar_idx in range(self._n_subvars)
                 ]
                 for row_idx in range(self._n_rows)
             ]
@@ -462,17 +471,24 @@ class _PairwiseSigPVals(_PairwiseSigTStats):
 
     @lazyproperty
     def _p_vals(self):
-        """2D ndarray of float64 representing p-vals for pairwise MR testing."""
+        """2D ndarray of float64 representing p-vals for pairwise MR testing.
+
+        For each (category) row, we calculate the test significance of the overlap
+        between columns (subvariables) of the crossing MR variable. To do that we have
+        to iterate across all categories (rows), and then across all subvars (columns).
+        Each of these iterations produces a single number for the significance, so we
+        end up with n_rows x n_cols 2-dimensional ndarray.
+        """
         return np.array(
             [
                 [
                     _PairwiseSignificaneBetweenSubvariablesHelper(
                         self._cube_measures.cube_overlaps.overlaps[row_idx],
                         self._cube_measures.cube_overlaps.valid_overlaps[row_idx],
-                        self._subvar_a_idx,
-                        subvar_b_idx,
+                        self._selected_subvar_idx,
+                        subvar_idx,
                     ).p_vals
-                    for subvar_b_idx in range(self._n_subvars)
+                    for subvar_idx in range(self._n_subvars)
                 ]
                 for row_idx in range(self._n_rows)
             ]
@@ -946,10 +962,11 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
     @lazyproperty
     def p_vals(self):
         """float64 significance p-vals for the selected subvariables."""
-        if self._idx_a == self._idx_b:
-            return 0.0
-
-        return 2 * (1 - t.cdf(abs(self.t_stats), df=self._N - 2))
+        return (
+            0.0
+            if self._idx_a == self._idx_b
+            else 2 * (1 - t.cdf(abs(self.t_stats), df=self._df - 2))
+        )
 
     @lazyproperty
     def t_stats(self):
@@ -962,18 +979,26 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
         pa, pb, pab = Sa / Na, Sb / Nb, Sab / Nab
 
         return (pa - pb) / np.sqrt(
-            1 / self._N * (pa * (1 - pa) + pb * (1 - pb) + 2 * pa * pb - 2 * pab)
+            1 / self._df * (pa * (1 - pa) + pb * (1 - pb) + 2 * pa * pb - 2 * pab)
         )
 
     @lazyproperty
-    def _N(self):
-        """int count of non-overlapping cases of subvariables a and b."""
+    def _df(self):
+        """int representing degrees of freedom for the CDF distribution.
+
+        This is the count of non-overlapping cases of subvariables a and b.
+        """
         Na, Nb, Nab = self._valid_counts
         return Na + Nb - Nab
 
     @lazyproperty
     def _selected_counts(self):
-        """tuple(int) of selected counts for subvars a, b, and the overlaps (a^b)."""
+        """tuple(int/float64) of selected counts for subvars a, b, and combined (a^b).
+
+        Most often these numbers will be int, because that's how the database counts
+        if the responses are of the "Selected" category (row[idx] == 1). They can only
+        be float64 when the overlaps result is weighted.
+        """
         return (
             self._overlaps[self._idx_a, self._idx_a],
             self._overlaps[self._idx_b, self._idx_b],
@@ -982,7 +1007,12 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
 
     @lazyproperty
     def _valid_counts(self):
-        """tuple(int) of valid counts for subvars a, b, and the overlaps (a^b)."""
+        """tuple(int/float64) of valid counts for subvars a, b, and combined (a^b).
+
+        Most often these numbers will be int, because that's how the database counts
+        if the responses are different than the "Missing" category (row[idx] != -1).
+        They can only be float64 when the overlaps result is weighted.
+        """
         return (
             self._valid_overlaps[self._idx_a, self._idx_a],
             self._valid_overlaps[self._idx_b, self._idx_b],

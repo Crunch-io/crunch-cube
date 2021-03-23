@@ -17,7 +17,11 @@ from cr.cube.cube import (
 from cr.cube.dimension import _ApparentDimensions, AllDimensions
 from cr.cube.enums import DIMENSION_TYPE as DT
 
-from ..fixtures import CR, NA  # ---mnemonic: CR = 'cube-response'---
+from ..fixtures import (
+    CR,  # cube-response
+    OL,  # overlaps
+    NA,  # numeric-array
+)
 
 
 class DescribeIntegratedCube(object):
@@ -125,6 +129,25 @@ class DescribeIntegratedCube(object):
 
 class DescribeIntegrated_Measures(object):
     """Integration-tests that exercise the `cr.cube.cube._Measures` object."""
+
+    def it_provides_access_to_the_overlaps_measure(self):
+        cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
+        measures = _Measures(
+            cube_dict,
+            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+        )
+
+        overlaps = measures.overlaps
+
+        assert type(overlaps).__name__ == "_OverlapMeasure"
+
+    def but_only_when_the_cube_response_contains_overlaps(self):
+        cube_dict = CR.CAT_X_CAT
+        measures = _Measures(cube_dict, None)
+
+        overlaps = measures.overlaps
+
+        assert overlaps is None
 
     def it_provides_access_to_the_mean_measure(self):
         cube_dict = CR.CAT_X_CAT_MEAN_WGTD
