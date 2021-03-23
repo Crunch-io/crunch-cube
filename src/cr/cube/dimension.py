@@ -886,11 +886,10 @@ class _Subtotals(Sequence):
                 continue
 
             # ---use "new style" kwargs defining positive terms if available---
-            positive = insertion_dict.get("kwargs", {}).get("positive", [])
-
-            # ---but if missing, check for "old style" args defining positive terms---
-            if not positive:
-                positive = insertion_dict.get("args", [])
+            # ---but if missing, use "old style" args defining positive terms---
+            positive = insertion_dict.get("kwargs", {}).get(
+                "positive"
+            ) or insertion_dict.get("args", [])
 
             negative = insertion_dict.get("kwargs", {}).get("negative", [])
 
@@ -963,9 +962,9 @@ class _Subtotal(object):
         representing missing data is excluded.
         """
         # ---Prefer positive "kwargs" over "args" so we can migrate---
-        positive = self._subtotal_dict.get("kwargs", {}).get("positive", [])
-        if not positive:
-            positive = self._subtotal_dict.get("args", [])
+        positive = self._subtotal_dict.get("kwargs", {}).get(
+            "positive"
+        ) or self._subtotal_dict.get("args", [])
 
         return tuple(arg for arg in positive if arg in self._valid_elements.element_ids)
 
