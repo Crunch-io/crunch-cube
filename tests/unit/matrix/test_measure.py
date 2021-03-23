@@ -182,10 +182,8 @@ class Describe_ColumnProportions(object):
     """Unit test suite for `cr.cube.matrix.measure._ColumnProportions` object."""
 
     def it_computes_its_blocks(self, request):
-        SumDiffSubtotals_ = class_mock(
-            request, "cr.cube.matrix.measure.SumDiffSubtotals"
-        )
-        SumDiffSubtotals_.blocks.return_value = [[5.0, 12.0], [21.0, 32.0]]
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[5.0, 12.0], [21.0, 32.0]]
         column_weighted_bases_ = instance_mock(
             request, _ColumnWeightedBases, blocks=[[5.0, 6.0], [7.0, 8.0]]
         )
@@ -201,7 +199,7 @@ class Describe_ColumnProportions(object):
         )
 
         assert column_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
-        SumDiffSubtotals_.blocks.assert_called_once_with(ANY, None, diff_cols_nan=True)
+        SumSubtotals_.blocks.assert_called_once_with(ANY, None, diff_cols_nan=True)
 
 
 class Describe_ColumnUnweightedBases(object):
@@ -232,7 +230,7 @@ class Describe_ColumnUnweightedBases(object):
         intersections = column_unweighted_bases._intersections
 
         SumSubtotals_.intersections.assert_called_once_with(
-            [[9, 8, 7], [6, 5, 4], [3, 2, 1]], dimensions_
+            [[9, 8, 7], [6, 5, 4], [3, 2, 1]], dimensions_, diff_cols_nan=True
         )
         assert intersections.tolist() == [[9, 6], [9, 6]]
 
@@ -246,7 +244,7 @@ class Describe_ColumnUnweightedBases(object):
         subtotal_columns = column_unweighted_bases._subtotal_columns
 
         SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[1, 2], [3, 4]], dimensions_
+            [[1, 2], [3, 4]], dimensions_, diff_cols_nan=True
         )
         assert subtotal_columns.tolist() == [[5, 8], [3, 7]]
 
@@ -267,7 +265,7 @@ class Describe_ColumnUnweightedBases(object):
         subtotal_rows = column_unweighted_bases._subtotal_rows
 
         SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[4, 3], [2, 1]], dimensions_
+            [[4, 3], [2, 1]], dimensions_, diff_cols_nan=True
         )
         assert subtotal_rows.tolist() == [[4, 7], [4, 7]]
 
@@ -282,7 +280,7 @@ class Describe_ColumnUnweightedBases(object):
         subtotal_rows = column_unweighted_bases._subtotal_rows
 
         SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[4, 3, 2], [1, 0, 9]], dimensions_
+            [[4, 3, 2], [1, 0, 9]], dimensions_, diff_cols_nan=True
         )
         assert subtotal_rows.tolist() == []
         assert subtotal_rows.shape == (0, 3)
@@ -343,7 +341,9 @@ class Describe_ColumnWeightedBases(object):
         intersections = column_weighted_bases._intersections
 
         SumSubtotals_.intersections.assert_called_once_with(
-            [[9.9, 8.8, 7.7], [6.6, 5.5, 4.4], [3.3, 2.2, 1.1]], dimensions_
+            [[9.9, 8.8, 7.7], [6.6, 5.5, 4.4], [3.3, 2.2, 1.1]],
+            dimensions_,
+            diff_cols_nan=True,
         )
         assert intersections.tolist() == [[9.9, 6.6], [9.9, 6.6]]
 
@@ -357,7 +357,7 @@ class Describe_ColumnWeightedBases(object):
         subtotal_columns = column_weighted_bases._subtotal_columns
 
         SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[1.1, 2.2], [3.3, 4.4]], dimensions_
+            [[1.1, 2.2], [3.3, 4.4]], dimensions_, diff_cols_nan=True
         )
         assert subtotal_columns.tolist() == [[5.5, 8.8], [3.3, 7.7]]
 
@@ -378,7 +378,7 @@ class Describe_ColumnWeightedBases(object):
         subtotal_rows = column_weighted_bases._subtotal_rows
 
         SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[4.4, 3.3], [2.2, 1.1]], dimensions_
+            [[4.4, 3.3], [2.2, 1.1]], dimensions_, diff_cols_nan=True
         )
         assert subtotal_rows.tolist() == [[4.4, 7.7], [4.4, 7.7]]
 
@@ -393,7 +393,7 @@ class Describe_ColumnWeightedBases(object):
         subtotal_rows = column_weighted_bases._subtotal_rows
 
         SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[4.4, 3.3, 2.2], [1.1, 0.0, 9.9]], dimensions_
+            [[4.4, 3.3, 2.2], [1.1, 0.0, 9.9]], dimensions_, diff_cols_nan=True
         )
         assert subtotal_rows.tolist() == []
         assert subtotal_rows.shape == (0, 3)
@@ -426,10 +426,8 @@ class Describe_RowProportions(object):
     """Unit test suite for `cr.cube.matrix.measure._RowProportions` object."""
 
     def it_computes_its_blocks(self, request):
-        SumDiffSubtotals_ = class_mock(
-            request, "cr.cube.matrix.measure.SumDiffSubtotals"
-        )
-        SumDiffSubtotals_.blocks.return_value = [[5.0, 12.0], [21.0, 32.0]]
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[5.0, 12.0], [21.0, 32.0]]
         row_weighted_bases_ = instance_mock(
             request, _RowWeightedBases, blocks=[[5.0, 6.0], [7.0, 8.0]]
         )
@@ -443,7 +441,7 @@ class Describe_RowProportions(object):
         row_proportions = _RowProportions(None, second_order_measures_, cube_measures_)
 
         assert row_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
-        SumDiffSubtotals_.blocks.assert_called_once_with(ANY, None, diff_rows_nan=True)
+        SumSubtotals_.blocks.assert_called_once_with(ANY, None, diff_rows_nan=True)
 
 
 class Describe_RowUnweightedBases(object):
@@ -496,7 +494,7 @@ class Describe_RowUnweightedBases(object):
         intersections = row_unweighted_bases._intersections
 
         SumSubtotals_.intersections.assert_called_once_with(
-            [[9, 8, 7], [6, 5, 4], [3, 2, 1]], dimensions_
+            [[9, 8, 7], [6, 5, 4], [3, 2, 1]], dimensions_, diff_rows_nan=True
         )
         assert intersections.tolist() == expected_value
         assert intersections.shape == expected_shape
@@ -519,7 +517,7 @@ class Describe_RowUnweightedBases(object):
         subtotal_columns = row_unweighted_bases._subtotal_columns
 
         SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[3, 4, 5], [1, 2, 3]], dimensions_
+            [[3, 4, 5], [1, 2, 3]], dimensions_, diff_rows_nan=True
         )
         assert subtotal_columns.tolist() == [[7, 7], [4, 4]]
 
@@ -536,7 +534,7 @@ class Describe_RowUnweightedBases(object):
         subtotal_columns = row_unweighted_bases._subtotal_columns
 
         SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[2, 3, 4], [9, 0, 1]], dimensions_
+            [[2, 3, 4], [9, 0, 1]], dimensions_, diff_rows_nan=True
         )
         assert subtotal_columns.tolist() == [[], [], []]
         assert subtotal_columns.shape == (3, 0)
@@ -552,7 +550,7 @@ class Describe_RowUnweightedBases(object):
         subtotal_rows = row_unweighted_bases._subtotal_rows
 
         SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[1, 2], [3, 4]], dimensions_
+            [[1, 2], [3, 4]], dimensions_, diff_rows_nan=True
         )
         assert subtotal_rows.tolist() == [[5, 8], [3, 7]]
 
@@ -659,7 +657,7 @@ class Describe_RowWeightedBases(object):
         subtotal_columns = row_weighted_bases._subtotal_columns
 
         SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[3.3, 4.4, 5.5], [1.1, 2.2, 3.3]], dimensions_
+            [[3.3, 4.4, 5.5], [1.1, 2.2, 3.3]], dimensions_, diff_rows_nan=True
         )
         assert subtotal_columns.tolist() == [[7.7, 7.7], [4.4, 4.4]]
 
@@ -676,7 +674,7 @@ class Describe_RowWeightedBases(object):
         subtotal_columns = row_weighted_bases._subtotal_columns
 
         SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[2.2, 3.3, 4.4], [9.9, 0.0, 1.1]], dimensions_
+            [[2.2, 3.3, 4.4], [9.9, 0.0, 1.1]], dimensions_, diff_rows_nan=True
         )
         assert subtotal_columns.tolist() == [[], [], []]
         assert subtotal_columns.shape == (3, 0)
@@ -692,7 +690,7 @@ class Describe_RowWeightedBases(object):
         subtotal_rows = row_weighted_bases._subtotal_rows
 
         SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[1.1, 2.2], [3.3, 4.4]], dimensions_
+            [[1.1, 2.2], [3.3, 4.4]], dimensions_, diff_rows_nan=True
         )
         assert subtotal_rows.tolist() == [[5.5, 8.8], [3.3, 7.7]]
 
@@ -1095,15 +1093,13 @@ class Describe_UnweightedCounts(object):
             "_unweighted_cube_counts",
             return_value=unweighted_cube_counts_,
         )
-        SumDiffSubtotals_ = class_mock(
-            request, "cr.cube.matrix.measure.SumDiffSubtotals"
-        )
-        SumDiffSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         unweighted_counts = _UnweightedCounts(dimensions_, None, None)
 
         blocks = unweighted_counts.blocks
 
-        SumDiffSubtotals_.blocks.assert_called_once_with(ucounts, dimensions_)
+        SumSubtotals_.blocks.assert_called_once_with(ucounts, dimensions_)
         assert blocks == [[[1], [2]], [[3], [4]]]
 
     # fixture components ---------------------------------------------
@@ -1130,15 +1126,13 @@ class Describe_WeightedCounts(object):
             "_weighted_cube_counts",
             return_value=weighted_cube_counts_,
         )
-        SumDiffSubtotals_ = class_mock(
-            request, "cr.cube.matrix.measure.SumDiffSubtotals"
-        )
-        SumDiffSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         weighted_counts = _WeightedCounts(dimensions_, None, None)
 
         blocks = weighted_counts.blocks
 
-        SumDiffSubtotals_.blocks.assert_called_once_with(counts, dimensions_)
+        SumSubtotals_.blocks.assert_called_once_with(counts, dimensions_)
         assert blocks == [[[1], [2]], [[3], [4]]]
 
     # fixture components ---------------------------------------------

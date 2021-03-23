@@ -9,7 +9,6 @@ from cr.cube.dimension import Dimension, _Subtotal
 from cr.cube.stripe.insertion import (
     _BaseSubtotals,
     NanSubtotals,
-    SumDiffSubtotals,
     SumSubtotals,
 )
 
@@ -70,70 +69,7 @@ class DescribeNanSubtotals(object):
 
 
 class DescribeSumSubtotals(object):
-    """Unit test suite for `cr.cube.stripe.SumSubtotals` object."""
-
-    def it_computes_the_subtotal_values(self, request):
-        row_subtotals_ = tuple(instance_mock(request, _Subtotal) for _ in range(3))
-        property_mock(
-            request, SumSubtotals, "_row_subtotals", return_value=row_subtotals_
-        )
-        _subtotal_value_ = method_mock(
-            request, SumSubtotals, "_subtotal_value", side_effect=iter((9, 8, 7, 6, 5))
-        )
-        sum_subtotals = SumSubtotals(None, None)
-
-        subtotal_values = sum_subtotals._subtotal_values
-
-        assert _subtotal_value_.call_args_list == [
-            call(sum_subtotals, row_subtotals_[0]),
-            call(sum_subtotals, row_subtotals_[1]),
-            call(sum_subtotals, row_subtotals_[2]),
-        ]
-        assert subtotal_values.tolist() == [9, 8, 7]
-
-    def but_it_returns_an_empty_array_when_there_are_no_subtotals(self, request):
-        """The dtype of the empty array is the same as that of the base-values."""
-        property_mock(request, SumSubtotals, "_row_subtotals", return_value=())
-        sum_subtotals = SumSubtotals(None, None)
-
-        subtotal_values = sum_subtotals._subtotal_values
-
-        assert subtotal_values.tolist() == []
-        assert subtotal_values.dtype == np.float64
-
-    @pytest.mark.parametrize(
-        ("addend_idxs", "subtrahend_idxs", "expected"),
-        (
-            ([0, 1], [2, 3], 15),
-            ([1], [], 2),
-            ([], [1], 2),
-        ),
-    )
-    def it_can_compute_a_subtotal_value_to_help(
-        self, request, addend_idxs, subtrahend_idxs, expected
-    ):
-        property_mock(
-            request,
-            _Subtotal,
-            "addend_idxs",
-            return_value=np.array(addend_idxs, dtype=int),
-        )
-        subtrahend_idxs_ = property_mock(
-            request,
-            _Subtotal,
-            "subtrahend_idxs",
-            return_value=np.array(subtrahend_idxs, dtype=int),
-        )
-
-        subtotal_value = SumSubtotals(np.array([1, 2, 4, 8]), None)._subtotal_value(
-            _Subtotal(None, None, None)
-        )
-
-        np.testing.assert_equal(subtotal_value, expected)
-
-
-class Describe_SumDiffSubtotals(object):
-    """Unit test suite for `cr.cube.matrix.SumDiffSubtotals` object."""
+    """Unit test suite for `cr.cube.matrix.SumSubtotals` object."""
 
     @pytest.mark.parametrize(
         ("addend_idxs", "subtrahend_idxs", "expected"),
@@ -159,7 +95,7 @@ class Describe_SumDiffSubtotals(object):
             return_value=np.array(subtrahend_idxs, dtype=int),
         )
 
-        subtotal_value = SumDiffSubtotals(np.array([1, 2, 4, 8]), None)._subtotal_value(
+        subtotal_value = SumSubtotals(np.array([1, 2, 4, 8]), None)._subtotal_value(
             _Subtotal(None, None, None)
         )
 

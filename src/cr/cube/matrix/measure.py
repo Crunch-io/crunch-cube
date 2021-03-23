@@ -7,7 +7,7 @@ from __future__ import division
 import numpy as np
 
 from cr.cube.matrix.cubemeasure import CubeMeasures
-from cr.cube.matrix.subtotals import SumDiffSubtotals, SumSubtotals, NanSubtotals
+from cr.cube.matrix.subtotals import SumSubtotals, NanSubtotals
 from cr.cube.util import lazyproperty
 
 
@@ -208,7 +208,7 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
         Column-proportions are counts divided by the column base, except that they are
         undefined for columns with subtotal differences.
         """
-        count_blocks = SumDiffSubtotals.blocks(
+        count_blocks = SumSubtotals.blocks(
             self._weighted_cube_counts.weighted_counts,
             self._dimensions,
             diff_cols_nan=True,
@@ -259,7 +259,9 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
         # --- shape of the intersections. This works in the X_CAT case because each row
         # --- of subtotal-columns is the same. In the X_MR case there can be no subtotal
         # --- columns and so it is just an empty row that is broadcast.
-        shape = SumSubtotals.intersections(self._base_values, self._dimensions).shape
+        shape = SumSubtotals.intersections(
+            self._base_values, self._dimensions, diff_cols_nan=True
+        ).shape
         columns_base = self._subtotal_columns[0]
         return np.broadcast_to(columns_base, shape)
 
@@ -275,7 +277,9 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
         # --- though, see below. This wouldn't work on MR-columns but there can be no
         # --- subtotal columns on an MR dimension (X_MR slice) so that case never
         # --- arises.
-        return SumSubtotals.subtotal_columns(self._base_values, self._dimensions)
+        return SumSubtotals.subtotal_columns(
+            self._base_values, self._dimensions, diff_cols_nan=True
+        )
 
     @lazyproperty
     def _subtotal_rows(self):
@@ -288,7 +292,9 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
         # --- column-base as all other cells in that column. Note that this initial
         # --- subtotal-rows matrix is used only for its shape (and when it is empty)
         # --- because it computes the wrong cell values for this case.
-        subtotal_rows = SumSubtotals.subtotal_rows(self._base_values, self._dimensions)
+        subtotal_rows = SumSubtotals.subtotal_rows(
+            self._base_values, self._dimensions, diff_cols_nan=True
+        )
 
         # --- in the "no-row-subtotals" case, short-circuit with a (0, ncols) array
         # --- return value, both because that is the right answer, but also because the
@@ -331,7 +337,9 @@ class _ColumnWeightedBases(_BaseSecondOrderMeasure):
         # --- shape of the intersections. This works in the X_CAT case because each row
         # --- of subtotal-columns is the same. In the X_MR case there can be no subtotal
         # --- columns so an empty row is broadcast to shape.
-        shape = SumSubtotals.intersections(self._base_values, self._dimensions).shape
+        shape = SumSubtotals.intersections(
+            self._base_values, self._dimensions, diff_cols_nan=True
+        ).shape
         intersections_row = self._subtotal_columns[0]
         return np.broadcast_to(intersections_row, shape)
 
@@ -343,7 +351,9 @@ class _ColumnWeightedBases(_BaseSecondOrderMeasure):
         """
         # --- Summing works on columns because column-proportion denominators add along
         # --- that axis.
-        return SumSubtotals.subtotal_columns(self._base_values, self._dimensions)
+        return SumSubtotals.subtotal_columns(
+            self._base_values, self._dimensions, diff_cols_nan=True
+        )
 
     @lazyproperty
     def _subtotal_rows(self):
@@ -355,7 +365,9 @@ class _ColumnWeightedBases(_BaseSecondOrderMeasure):
         # --- the subtotal-rows matrix because these don't add. Note that this initial
         # --- subtotal-rows matrix is used only for its shape because it computes the
         # --- wrong values.
-        subtotal_rows = SumSubtotals.subtotal_rows(self._base_values, self._dimensions)
+        subtotal_rows = SumSubtotals.subtotal_rows(
+            self._base_values, self._dimensions, diff_cols_nan=True
+        )
         # --- in the "no-row-subtotals" case, short-circuit with a (0, ncols) array
         # --- return value, both because that is the right answer, but also because the
         # --- non-empty columns-base array cannot be broadcast into that shape.
@@ -395,7 +407,7 @@ class _RowProportions(_BaseSecondOrderMeasure):
         Row-proportions are counts divided by the row base, except that they are
         undefined for rows with subtotal differences.
         """
-        count_blocks = SumDiffSubtotals.blocks(
+        count_blocks = SumSubtotals.blocks(
             self._weighted_cube_counts.weighted_counts,
             self._dimensions,
             diff_rows_nan=True,
@@ -446,7 +458,9 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
         # --- shape of the intersections. This works in the CAT_X case because each
         # --- column of subtotal-rows is the same. In the MR_X case there can be no
         # --- subtotal rows so just an empty column is broadcast.
-        shape = SumSubtotals.intersections(self._base_values, self._dimensions).shape
+        shape = SumSubtotals.intersections(
+            self._base_values, self._dimensions, diff_rows_nan=True
+        ).shape
         intersection_column = self._subtotal_rows[:, 0]
         return np.broadcast_to(intersection_column[:, None], shape)
 
@@ -461,7 +475,7 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
         # --- initial subtotal-columns matrix is used only for its shape because it
         # --- computes the wrong values.
         subtotal_columns = SumSubtotals.subtotal_columns(
-            self._base_values, self._dimensions
+            self._base_values, self._dimensions, diff_rows_nan=True
         )
         # --- in the "no-column-subtotals" case, short-circuit with an (nrows, 0) array
         # --- return value, both because that is the right answer, but also because the
@@ -482,7 +496,9 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
         # --- Summing works on rows because row-proportion denominators add along this
         # --- axis. This wouldn't work on MR-rows but there can be no subtotals on an
         # --- MR rows dimension (or any MR dimension) so that case never arises.
-        return SumSubtotals.subtotal_rows(self._base_values, self._dimensions)
+        return SumSubtotals.subtotal_rows(
+            self._base_values, self._dimensions, diff_rows_nan=True
+        )
 
 
 class _RowWeightedBases(_BaseSecondOrderMeasure):
@@ -526,7 +542,7 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
         # --- subtotal-columns matrix is used only for its shape because it computes
         # --- the wrong values.
         subtotal_columns = SumSubtotals.subtotal_columns(
-            self._base_values, self._dimensions
+            self._base_values, self._dimensions, diff_rows_nan=True
         )
         # --- in the "no-column-subtotals" case, short-circuit with an (nrows, 0) array
         # --- return value, both because that is the right answer, but also because the
@@ -547,7 +563,9 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
         # --- Summing works on rows because row-proportion denominators add along this
         # --- axis. This wouldn't work on MR-rows but there can be no subtotals on an
         # --- MR dimension (MR_X slice) so that case never arises.
-        return SumSubtotals.subtotal_rows(self._base_values, self._dimensions)
+        return SumSubtotals.subtotal_rows(
+            self._base_values, self._dimensions, diff_rows_nan=True
+        )
 
 
 class _Sums(_BaseSecondOrderMeasure):
@@ -556,9 +574,7 @@ class _Sums(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        return SumDiffSubtotals.blocks(
-            self._cube_measures.cube_sum.sums, self._dimensions
-        )
+        return SumSubtotals.blocks(self._cube_measures.cube_sum.sums, self._dimensions)
 
 
 class _StdDev(_BaseSecondOrderMeasure):
@@ -810,7 +826,7 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
         These are the base-values, the column-subtotals, the row-subtotals, and the
         subtotal intersection-cell values.
         """
-        return SumDiffSubtotals.blocks(
+        return SumSubtotals.blocks(
             self._unweighted_cube_counts.unweighted_counts, self._dimensions
         )
 
@@ -821,6 +837,6 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        return SumDiffSubtotals.blocks(
+        return SumSubtotals.blocks(
             self._weighted_cube_counts.weighted_counts, self._dimensions
         )

@@ -615,15 +615,13 @@ class Describe_UnweightedCounts(object):
     def it_knows_its_subtotal_values(self, request):
         rows_dimension_ = instance_mock(request, Dimension)
         property_mock(request, _UnweightedCounts, "base_values", return_value=[1, 2, 3])
-        SumDiffSubtotals_ = class_mock(
-            request, "cr.cube.stripe.measure.SumDiffSubtotals"
-        )
-        SumDiffSubtotals_.subtotal_values.return_value = np.array([3, 5])
+        SumSubtotals_ = class_mock(request, "cr.cube.stripe.measure.SumSubtotals")
+        SumSubtotals_.subtotal_values.return_value = np.array([3, 5])
         unweighted_counts = _UnweightedCounts(rows_dimension_, None, None)
 
         subtotal_values = unweighted_counts.subtotal_values
 
-        SumDiffSubtotals_.subtotal_values.assert_called_once_with(
+        SumSubtotals_.subtotal_values.assert_called_once_with(
             [1, 2, 3], rows_dimension_
         )
         assert subtotal_values.tolist() == [3, 5]
@@ -717,15 +715,13 @@ class Describe_WeightedCounts(object):
         property_mock(
             request, _WeightedCounts, "base_values", return_value=[1.1, 2.2, 3.3]
         )
-        SumDiffSubtotals_ = class_mock(
-            request, "cr.cube.stripe.measure.SumDiffSubtotals"
-        )
-        SumDiffSubtotals_.subtotal_values.return_value = np.array([3.3, 5.5])
+        SumSubtotals_ = class_mock(request, "cr.cube.stripe.measure.SumSubtotals")
+        SumSubtotals_.subtotal_values.return_value = np.array([3.3, 5.5])
         weighted_counts = _WeightedCounts(rows_dimension_, None, None)
 
         subtotal_values = weighted_counts.subtotal_values
 
-        SumDiffSubtotals_.subtotal_values.assert_called_once_with(
+        SumSubtotals_.subtotal_values.assert_called_once_with(
             [1.1, 2.2, 3.3], rows_dimension_
         )
         assert subtotal_values.tolist() == [3.3, 5.5]

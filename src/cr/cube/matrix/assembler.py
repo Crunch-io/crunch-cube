@@ -24,7 +24,6 @@ from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.measure import SecondOrderMeasures
 from cr.cube.matrix.subtotals import (
     NanSubtotals,
-    SumDiffSubtotals,
     SumSubtotals,
     TableStdErrSubtotals,
     ZscoreSubtotals,
@@ -252,7 +251,7 @@ class Assembler(object):
         # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
         if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
             return self._assemble_matrix(
-                SumDiffSubtotals.blocks(
+                SumSubtotals.blocks(
                     self._cube_result_matrix.rows_margin, self._dimensions
                 )
             )
