@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.9
+- Improvements to subtotal differences
+
 ### 2.1.8
 - Add cube std deviation measure
 
