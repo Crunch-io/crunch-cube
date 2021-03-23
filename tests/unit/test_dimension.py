@@ -1074,6 +1074,7 @@ class Describe_Subtotals(object):
             (["not-a-dict", None], (), ()),
             ([{"function": "hyperdrive"}], (), ()),
             ([{"function": "subtotal", "arghhs": []}], (), ()),
+            ([{"function": "subtotal", "anchor": 9, "name": "no args"}], (), ()),
             ([{"function": "subtotal", "anchor": 9, "args": [1, 2]}], (), ()),
             (
                 [{"function": "subtotal", "anchor": 9, "args": [1, 2], "name": "A"}],
