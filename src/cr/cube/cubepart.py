@@ -1105,7 +1105,7 @@ class _Slice(CubePartition):
     @lazyproperty
     def _column_variances(self):
         """Variance for column percentages."""
-        p = self.counts / self.columns_margin
+        p = self.column_proportions
         return p * (1 - p)
 
     @lazyproperty
@@ -1165,17 +1165,7 @@ class _Slice(CubePartition):
     @lazyproperty
     def _row_variance(self):
         """2D np.float64 ndarray of row-percentage variance for each cell."""
-        # --- rows-margin is a vector that represents a column (to the right of the
-        # --- crosstab), or a table-like structure, in the case of Multiple Response.
-        # --- We need to divide all values in the crosstab by it and therefore need to
-        # --- cast it to an actual column, when it's not a table already, because
-        # --- of how NumPy does broadcasting.
-        rows_margin = (
-            self.rows_margin  # --- No need to inflate (MR dim involved)
-            if len(self.rows_margin.shape) > 1
-            else self.rows_margin[:, np.newaxis]  # --- Inflate for correct broadcasting
-        )
-        p = self.counts / rows_margin
+        p = self.row_proportions
         return p * (1 - p)
 
     @lazyproperty
