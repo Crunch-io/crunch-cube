@@ -882,11 +882,23 @@ class _Subtotals(Sequence):
                 continue
 
             # ---skip any malformed subtotal-dicts---
-            if not {"anchor", "args", "name"}.issubset(insertion_dict.keys()):
+            if not {"anchor", "name"}.issubset(insertion_dict.keys()):
+                continue
+
+            # ---use "new style" kwargs defining positive terms if available---
+            # ---but if missing, use "old style" args defining positive terms---
+            positive = insertion_dict.get("kwargs", {}).get(
+                "positive"
+            ) or insertion_dict.get("args", [])
+
+            negative = insertion_dict.get("kwargs", {}).get("negative", [])
+
+            # ---must have positive or negative elements---
+            if not (positive or negative):
                 continue
 
             # ---skip if doesn't reference at least one non-missing element---
-            if not self._element_ids.intersection(insertion_dict["args"]):
+            if not self._element_ids.intersection(positive + negative):
                 continue
 
             # ---an insertion-dict that successfully runs this gauntlet
@@ -949,11 +961,12 @@ class _Subtotal(object):
         Any element id not present in the dimension or present but
         representing missing data is excluded.
         """
-        return tuple(
-            arg
-            for arg in self._subtotal_dict.get("args", [])
-            if arg in self._valid_elements.element_ids
-        )
+        # ---Prefer positive "kwargs" over "args" so we can migrate---
+        positive = self._subtotal_dict.get("kwargs", {}).get(
+            "positive"
+        ) or self._subtotal_dict.get("args", [])
+
+        return tuple(arg for arg in positive if arg in self._valid_elements.element_ids)
 
     @lazyproperty
     def addend_idxs(self):
