@@ -1,0 +1,994 @@
+{
+    "query": {
+        "measures": {
+            "overlap": {
+                "function": "cube_overlap",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "variable": "MR"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "valid_overlap": {
+                "function": "cube_valid_overlap",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "variable": "MR"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "dimensions": [
+            {
+                "each": 1
+            },
+            {
+                "variable": "CA"
+            },
+            {
+                "each": 3
+            },
+            {
+                "function": "as_selected",
+                "args": [
+                    {
+                        "variable": "MR"
+                    }
+                ]
+            }
+        ]
+    },
+    "result": {
+        "counts": [
+            2,
+            0,
+            1,
+            1,
+            2,
+            0,
+            1,
+            2,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            1,
+            1,
+            0,
+            2,
+            1,
+            1,
+            2,
+            0,
+            2,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            2,
+            0,
+            1,
+            2,
+            0,
+            1,
+            1,
+            0,
+            0,
+            2,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "cat_array_CA",
+                    "name": "CA",
+                    "subreferences": [
+                        {
+                            "alias": "subvar_X",
+                            "name": "name_X"
+                        },
+                        {
+                            "alias": "subvar_Y",
+                            "name": "name_Y"
+                        }
+                    ],
+                    "uniform_basis": false
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "X",
+                                "references": {
+                                    "alias": "subvar_X",
+                                    "name": "name_X"
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "Y",
+                                "references": {
+                                    "alias": "subvar_Y",
+                                    "name": "name_Y"
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": false,
+                "references": {
+                    "alias": "cat_array_CA",
+                    "name": "CA",
+                    "subreferences": [
+                        {
+                            "alias": "subvar_X",
+                            "name": "name_X"
+                        },
+                        {
+                            "alias": "subvar_Y",
+                            "name": "name_Y"
+                        }
+                    ],
+                    "uniform_basis": false
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 1,
+                            "name": "Poor",
+                            "numeric_value": null,
+                            "selected": true
+                        },
+                        {
+                            "id": 2,
+                            "name": "Fair",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 3,
+                            "name": "Good",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 4,
+                            "missing": true,
+                            "name": "Not shown",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "X",
+                        "Y"
+                    ]
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "multiple_response",
+                    "name": "MR",
+                    "subreferences": [
+                        {
+                            "alias": "subvar_A",
+                            "name": "name_A"
+                        },
+                        {
+                            "alias": "subvar_B",
+                            "name": "name_B"
+                        },
+                        {
+                            "alias": "subvar_C",
+                            "name": "name_C"
+                        }
+                    ],
+                    "uniform_basis": false
+                },
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "A",
+                                "references": {
+                                    "alias": "subvar_A",
+                                    "name": "name_A"
+                                }
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "B",
+                                "references": {
+                                    "alias": "subvar_B",
+                                    "name": "name_B"
+                                }
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "value": {
+                                "derived": false,
+                                "id": "C",
+                                "references": {
+                                    "alias": "subvar_C",
+                                    "name": "name_C"
+                                }
+                            }
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "multiple_response",
+                    "name": "MR",
+                    "subreferences": [
+                        {
+                            "alias": "subvar_A",
+                            "name": "name_A"
+                        },
+                        {
+                            "alias": "subvar_B",
+                            "name": "name_B"
+                        },
+                        {
+                            "alias": "subvar_C",
+                            "name": "name_C"
+                        }
+                    ],
+                    "uniform_basis": false
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true
+                        },
+                        {
+                            "id": 0,
+                            "missing": false,
+                            "name": "Other",
+                            "numeric_value": 0
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false,
+                    "subvariables": [
+                        "A",
+                        "B",
+                        "C"
+                    ]
+                }
+            }
+        ],
+        "measures": {
+            "valid_overlap": {
+                "data": [
+                    2,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    1,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2,
+                    2,
+                    2,
+                    0,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    1,
+                    2,
+                    2,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    1,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 2,
+                "metadata": {
+                    "derived": true,
+                    "references": {
+                        "alias": "multiple_response",
+                        "uniform_basis": false,
+                        "name": "MR",
+                        "subreferences": [
+                            {
+                                "alias": "subvar_A",
+                                "name": "name_A"
+                            },
+                            {
+                                "alias": "subvar_B",
+                                "name": "name_B"
+                            },
+                            {
+                                "alias": "subvar_C",
+                                "name": "name_C"
+                            }
+                        ]
+                    },
+                    "type": {
+                        "integer": true,
+                        "subvariables": [
+                            "A",
+                            "B",
+                            "C"
+                        ],
+                        "missing_rules": {},
+                        "class": "numeric",
+                        "missing_reasons": {
+                            "No Data": -1
+                        }
+                    }
+                }
+            },
+            "overlap": {
+                "data": [
+                    2,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {
+                        "alias": "multiple_response",
+                        "name": "MR",
+                        "subreferences": [
+                            {
+                                "alias": "subvar_A",
+                                "name": "name_A"
+                            },
+                            {
+                                "alias": "subvar_B",
+                                "name": "name_B"
+                            },
+                            {
+                                "alias": "subvar_C",
+                                "name": "name_C"
+                            }
+                        ],
+                        "uniform_basis": false
+                    },
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {},
+                        "subvariables": [
+                            "A",
+                            "B",
+                            "C"
+                        ]
+                    }
+                },
+                "n_missing": 2
+            }
+        },
+        "n": 8
+    }
+}

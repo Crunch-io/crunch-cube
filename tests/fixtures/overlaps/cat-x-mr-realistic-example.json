@@ -1,0 +1,1247 @@
+{
+    "element": "shoji:view",
+    "value": {
+        "query": {
+            "measures": {
+                "count": {
+                    "function": "cube_count",
+                    "args": []
+                },
+                "valid_overlap": {
+                    "function": "cube_valid_overlap",
+                    "args": [
+                        {
+                            "function": "as_selected",
+                            "args": [
+                                {
+                                    "variable": "https://alpha.crunch.io/api/datasets/cee93911ba4548fda9782abdd001b86b/variables/5berISTzbqXmgSYsOf3dmT00018e/"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "overlap": {
+                    "function": "cube_overlap",
+                    "args": [
+                        {
+                            "function": "as_selected",
+                            "args": [
+                                {
+                                    "variable": "https://alpha.crunch.io/api/datasets/cee93911ba4548fda9782abdd001b86b/variables/5berISTzbqXmgSYsOf3dmT00018e/"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "dimensions": [
+                {
+                    "variable": "https://alpha.crunch.io/api/datasets/cee93911ba4548fda9782abdd001b86b/variables/5berISTzbqXmgSYsOf3dmT000000/"
+                },
+                {
+                    "function": "dimension",
+                    "args": [
+                        {
+                            "function": "as_selected",
+                            "args": [
+                                {
+                                    "variable": "https://alpha.crunch.io/api/datasets/cee93911ba4548fda9782abdd001b86b/variables/5berISTzbqXmgSYsOf3dmT00018e/"
+                                }
+                            ]
+                        },
+                        {
+                            "value": "subvariables"
+                        }
+                    ]
+                },
+                {
+                    "function": "as_selected",
+                    "args": [
+                        {
+                            "variable": "https://alpha.crunch.io/api/datasets/cee93911ba4548fda9782abdd001b86b/variables/5berISTzbqXmgSYsOf3dmT00018e/"
+                        }
+                    ]
+                }
+            ],
+            "weight": null
+        },
+        "query_environment": {
+            "filter": []
+        },
+        "result": {
+            "dimensions": [
+                {
+                    "derived": false,
+                    "references": {
+                        "alias": "q8000",
+                        "name": "gender",
+                        "description": "(GENDER)  What is your gender?You can select your answer by clicking the image."
+                    },
+                    "type": {
+                        "ordinal": false,
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "id": 1,
+                                "name": "Male",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": 2,
+                                "id": 2,
+                                "name": "Female",
+                                "missing": false
+                            },
+                            {
+                                "numeric_value": null,
+                                "id": -1,
+                                "name": "No Data",
+                                "missing": true
+                            }
+                        ]
+                    }
+                },
+                {
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "q8051_1",
+                                "name": "Alcohol",
+                                "description": "q8051_1"
+                            },
+                            {
+                                "alias": "q8051_2",
+                                "name": "Milk",
+                                "description": "q8051_2"
+                            },
+                            {
+                                "alias": "q8051_3",
+                                "name": "Juice",
+                                "description": "q8051_3"
+                            },
+                            {
+                                "alias": "q8051_4",
+                                "name": "Tea",
+                                "description": "q8051_4"
+                            },
+                            {
+                                "alias": "q8051_5",
+                                "name": "Coffee",
+                                "description": "q8051_5"
+                            },
+                            {
+                                "alias": "q8051_6",
+                                "name": "None of the above",
+                                "description": "q8051_6"
+                            }
+                        ],
+                        "uniform_basis": false,
+                        "alias": "q8051_Multi_DP",
+                        "description": "q8051_Multi_DP (P1M CATEGORY CONSUMED AND PURCHASED)  Which of the following beverages have you personally bought and drank in the last month?Multiple answers possible ",
+                        "name": "category consumed/purchased"
+                    },
+                    "derived": true,
+                    "type": {
+                        "subtype": {
+                            "class": "variable"
+                        },
+                        "elements": [
+                            {
+                                "id": 1,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "q8051_1",
+                                        "name": "Alcohol",
+                                        "description": "q8051_1"
+                                    },
+                                    "id": "0010"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 2,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "q8051_2",
+                                        "name": "Milk",
+                                        "description": "q8051_2"
+                                    },
+                                    "id": "0011"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 3,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "q8051_3",
+                                        "name": "Juice",
+                                        "description": "q8051_3"
+                                    },
+                                    "id": "0012"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 4,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "q8051_4",
+                                        "name": "Tea",
+                                        "description": "q8051_4"
+                                    },
+                                    "id": "0013"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 5,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "q8051_5",
+                                        "name": "Coffee",
+                                        "description": "q8051_5"
+                                    },
+                                    "id": "0014"
+                                },
+                                "missing": false
+                            },
+                            {
+                                "id": 6,
+                                "value": {
+                                    "derived": false,
+                                    "references": {
+                                        "alias": "q8051_6",
+                                        "name": "None of the above",
+                                        "description": "q8051_6"
+                                    },
+                                    "id": "0015"
+                                },
+                                "missing": false
+                            }
+                        ],
+                        "class": "enum"
+                    }
+                },
+                {
+                    "derived": true,
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "q8051_1",
+                                "name": "Alcohol",
+                                "description": "q8051_1"
+                            },
+                            {
+                                "alias": "q8051_2",
+                                "name": "Milk",
+                                "description": "q8051_2"
+                            },
+                            {
+                                "alias": "q8051_3",
+                                "name": "Juice",
+                                "description": "q8051_3"
+                            },
+                            {
+                                "alias": "q8051_4",
+                                "name": "Tea",
+                                "description": "q8051_4"
+                            },
+                            {
+                                "alias": "q8051_5",
+                                "name": "Coffee",
+                                "description": "q8051_5"
+                            },
+                            {
+                                "alias": "q8051_6",
+                                "name": "None of the above",
+                                "description": "q8051_6"
+                            }
+                        ],
+                        "uniform_basis": false,
+                        "description": "q8051_Multi_DP (P1M CATEGORY CONSUMED AND PURCHASED)  Which of the following beverages have you personally bought and drank in the last month?Multiple answers possible ",
+                        "name": "category consumed/purchased",
+                        "alias": "q8051_Multi_DP"
+                    },
+                    "type": {
+                        "ordinal": false,
+                        "subvariables": [
+                            "0010",
+                            "0011",
+                            "0012",
+                            "0013",
+                            "0014",
+                            "0015"
+                        ],
+                        "class": "categorical",
+                        "categories": [
+                            {
+                                "numeric_value": 1,
+                                "selected": true,
+                                "id": 1,
+                                "missing": false,
+                                "name": "Selected"
+                            },
+                            {
+                                "numeric_value": 0,
+                                "missing": false,
+                                "id": 0,
+                                "name": "Other"
+                            },
+                            {
+                                "numeric_value": null,
+                                "missing": true,
+                                "id": -1,
+                                "name": "No Data"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "missing": 0,
+            "measures": {
+                "count": {
+                    "data": [
+                        162,
+                        0,
+                        0,
+                        142,
+                        20,
+                        0,
+                        133,
+                        29,
+                        0,
+                        103,
+                        59,
+                        0,
+                        148,
+                        14,
+                        0,
+                        0,
+                        162,
+                        0,
+                        145,
+                        0,
+                        0,
+                        128,
+                        17,
+                        0,
+                        125,
+                        20,
+                        0,
+                        113,
+                        32,
+                        0,
+                        140,
+                        5,
+                        0,
+                        0,
+                        145,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "n_missing": 0,
+                    "metadata": {
+                        "references": {},
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "class": "numeric"
+                        }
+                    }
+                },
+                "valid_overlap": {
+                    "data": [
+                        162,
+                        162,
+                        162,
+                        162,
+                        162,
+                        162,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        142,
+                        142,
+                        142,
+                        142,
+                        142,
+                        142,
+                        20,
+                        20,
+                        20,
+                        20,
+                        20,
+                        20,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        133,
+                        133,
+                        133,
+                        133,
+                        133,
+                        133,
+                        29,
+                        29,
+                        29,
+                        29,
+                        29,
+                        29,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        103,
+                        103,
+                        103,
+                        103,
+                        103,
+                        103,
+                        59,
+                        59,
+                        59,
+                        59,
+                        59,
+                        59,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        148,
+                        148,
+                        148,
+                        148,
+                        148,
+                        148,
+                        14,
+                        14,
+                        14,
+                        14,
+                        14,
+                        14,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        162,
+                        162,
+                        162,
+                        162,
+                        162,
+                        162,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        145,
+                        145,
+                        145,
+                        145,
+                        145,
+                        145,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        128,
+                        128,
+                        128,
+                        128,
+                        128,
+                        128,
+                        17,
+                        17,
+                        17,
+                        17,
+                        17,
+                        17,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        125,
+                        125,
+                        125,
+                        125,
+                        125,
+                        125,
+                        20,
+                        20,
+                        20,
+                        20,
+                        20,
+                        20,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        113,
+                        113,
+                        113,
+                        113,
+                        113,
+                        113,
+                        32,
+                        32,
+                        32,
+                        32,
+                        32,
+                        32,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        140,
+                        140,
+                        140,
+                        140,
+                        140,
+                        140,
+                        5,
+                        5,
+                        5,
+                        5,
+                        5,
+                        5,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        145,
+                        145,
+                        145,
+                        145,
+                        145,
+                        145,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "n_missing": 0,
+                    "metadata": {
+                        "references": {
+                            "subreferences": [
+                                {
+                                    "alias": "q8051_1",
+                                    "name": "Alcohol",
+                                    "description": "q8051_1"
+                                },
+                                {
+                                    "alias": "q8051_2",
+                                    "name": "Milk",
+                                    "description": "q8051_2"
+                                },
+                                {
+                                    "alias": "q8051_3",
+                                    "name": "Juice",
+                                    "description": "q8051_3"
+                                },
+                                {
+                                    "alias": "q8051_4",
+                                    "name": "Tea",
+                                    "description": "q8051_4"
+                                },
+                                {
+                                    "alias": "q8051_5",
+                                    "name": "Coffee",
+                                    "description": "q8051_5"
+                                },
+                                {
+                                    "alias": "q8051_6",
+                                    "name": "None of the above",
+                                    "description": "q8051_6"
+                                }
+                            ],
+                            "uniform_basis": false,
+                            "alias": "q8051_Multi_DP",
+                            "description": "q8051_Multi_DP (P1M CATEGORY CONSUMED AND PURCHASED)  Which of the following beverages have you personally bought and drank in the last month?Multiple answers possible ",
+                            "name": "category consumed/purchased"
+                        },
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "class": "numeric",
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "subvariables": [
+                                "0010",
+                                "0011",
+                                "0012",
+                                "0013",
+                                "0014",
+                                "0015"
+                            ]
+                        }
+                    }
+                },
+                "overlap": {
+                    "data": [
+                        162,
+                        142,
+                        133,
+                        103,
+                        148,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        142,
+                        142,
+                        124,
+                        95,
+                        137,
+                        0,
+                        20,
+                        0,
+                        9,
+                        8,
+                        11,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        133,
+                        124,
+                        133,
+                        96,
+                        129,
+                        0,
+                        29,
+                        18,
+                        0,
+                        7,
+                        19,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        103,
+                        95,
+                        96,
+                        103,
+                        99,
+                        0,
+                        59,
+                        47,
+                        37,
+                        0,
+                        49,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        148,
+                        137,
+                        129,
+                        99,
+                        148,
+                        0,
+                        14,
+                        5,
+                        4,
+                        4,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        162,
+                        142,
+                        133,
+                        103,
+                        148,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        145,
+                        128,
+                        125,
+                        113,
+                        140,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        128,
+                        128,
+                        113,
+                        102,
+                        125,
+                        0,
+                        17,
+                        0,
+                        12,
+                        11,
+                        15,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        125,
+                        113,
+                        125,
+                        105,
+                        122,
+                        0,
+                        20,
+                        15,
+                        0,
+                        8,
+                        18,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        113,
+                        102,
+                        105,
+                        113,
+                        110,
+                        0,
+                        32,
+                        26,
+                        20,
+                        0,
+                        30,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        140,
+                        125,
+                        122,
+                        110,
+                        140,
+                        0,
+                        5,
+                        3,
+                        3,
+                        3,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        145,
+                        128,
+                        125,
+                        113,
+                        140,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "n_missing": 0,
+                    "metadata": {
+                        "references": {
+                            "subreferences": [
+                                {
+                                    "alias": "q8051_1",
+                                    "name": "Alcohol",
+                                    "description": "q8051_1"
+                                },
+                                {
+                                    "alias": "q8051_2",
+                                    "name": "Milk",
+                                    "description": "q8051_2"
+                                },
+                                {
+                                    "alias": "q8051_3",
+                                    "name": "Juice",
+                                    "description": "q8051_3"
+                                },
+                                {
+                                    "alias": "q8051_4",
+                                    "name": "Tea",
+                                    "description": "q8051_4"
+                                },
+                                {
+                                    "alias": "q8051_5",
+                                    "name": "Coffee",
+                                    "description": "q8051_5"
+                                },
+                                {
+                                    "alias": "q8051_6",
+                                    "name": "None of the above",
+                                    "description": "q8051_6"
+                                }
+                            ],
+                            "uniform_basis": false,
+                            "alias": "q8051_Multi_DP",
+                            "description": "q8051_Multi_DP (P1M CATEGORY CONSUMED AND PURCHASED)  Which of the following beverages have you personally bought and drank in the last month?Multiple answers possible ",
+                            "name": "category consumed/purchased"
+                        },
+                        "derived": true,
+                        "type": {
+                            "integer": true,
+                            "class": "numeric",
+                            "missing_rules": {},
+                            "missing_reasons": {
+                                "No Data": -1
+                            },
+                            "subvariables": [
+                                "0010",
+                                "0011",
+                                "0012",
+                                "0013",
+                                "0014",
+                                "0015"
+                            ]
+                        }
+                    }
+                }
+            },
+            "n": 307,
+            "filter_stats": {
+                "filtered_complete": {
+                    "unweighted": {
+                        "selected": 307,
+                        "other": 0,
+                        "missing": 0
+                    },
+                    "weighted": {
+                        "selected": 307,
+                        "other": 0,
+                        "missing": 0
+                    }
+                },
+                "filtered": {
+                    "unweighted": {
+                        "selected": 307,
+                        "other": 0,
+                        "missing": 0
+                    },
+                    "weighted": {
+                        "selected": 307,
+                        "other": 0,
+                        "missing": 0
+                    }
+                }
+            },
+            "unfiltered": {
+                "unweighted_n": 307,
+                "weighted_n": 307
+            },
+            "filtered": {
+                "unweighted_n": 307,
+                "weighted_n": 307
+            },
+            "counts": [
+                162,
+                0,
+                0,
+                142,
+                20,
+                0,
+                133,
+                29,
+                0,
+                103,
+                59,
+                0,
+                148,
+                14,
+                0,
+                0,
+                162,
+                0,
+                145,
+                0,
+                0,
+                128,
+                17,
+                0,
+                125,
+                20,
+                0,
+                113,
+                32,
+                0,
+                140,
+                5,
+                0,
+                0,
+                145,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "element": "crunch:cube"
+        }
+    }
+}

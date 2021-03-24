@@ -10,7 +10,7 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
 
-from ..fixtures import CR, SM
+from ..fixtures import CR, OL, SM
 from ..util import load_python_expression
 
 
@@ -143,6 +143,15 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_array_almost_equal(
             actual.p_vals, load_python_expression("ca-subvar-hs-x-cat-hs-pw-pvals")
         )
+        # check new api also
+        np.testing.assert_array_almost_equal(
+            slice_.pairwise_significance_t_stats[1],
+            load_python_expression("ca-subvar-hs-x-cat-hs-pw-tstats"),
+        )
+        np.testing.assert_array_almost_equal(
+            slice_.pairwise_significance_p_vals[1],
+            load_python_expression("ca-subvar-hs-x-cat-hs-pw-pvals"),
+        )
 
     def test_cat_nps_numval_x_cat_scale_means_pariwise_t_tests(self):
         slice_ = Cube(SM.CAT_NPS_NUMVAL_X_CAT).partitions[0]
@@ -179,6 +188,15 @@ class TestStandardizedResiduals(TestCase):
         np.testing.assert_almost_equal(
             actual.p_vals, load_python_expression("cat-x-cat-pw-pvals")
         )
+        # test new api also
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_t_stats[2],
+            load_python_expression("cat-x-cat-pw-tstats"),
+        )
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_p_vals[2],
+            load_python_expression("cat-x-cat-pw-pvals"),
+        )
 
     def test_cat_x_cat_hs_pairwise_t_tests(self):
         slice_ = Cube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).partitions[0]
@@ -190,6 +208,15 @@ class TestStandardizedResiduals(TestCase):
         )
         np.testing.assert_almost_equal(
             p_vals, load_python_expression("cat-x-cat-hs-pw-pvals")
+        )
+        # test new api also
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_t_stats[0],
+            load_python_expression("cat-x-cat-hs-pw-tstats"),
+        )
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_p_vals[0],
+            load_python_expression("cat-x-cat-hs-pw-pvals"),
         )
 
     def test_cat_x_cat_hs_scale_means_pairwise_t_tests(self):
@@ -301,6 +328,15 @@ class TestStandardizedResiduals(TestCase):
             pairwise_indices,
             np.array(load_python_expression("cat-x-cat-wgtd-pw-indices"), dtype=tuple),
         )
+        # test new api also
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_t_stats[0],
+            load_python_expression("cat-x-cat-wgtd-pw-tstats"),
+        )
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_p_vals[0],
+            load_python_expression("cat-x-cat-wgtd-pw-pvals"),
+        )
 
     def test_cat_x_cat_wgtd_scale_means_pariwise_t_tests(self):
         slice_ = Cube(CR.CAT_X_CAT_WEIGHTED_TTESTS).partitions[0]
@@ -323,4 +359,115 @@ class TestStandardizedResiduals(TestCase):
         )
         np.testing.assert_array_almost_equal(
             actual.p_vals, load_python_expression("mr-x-mr-pw-pvals")
+        )
+        # test new api also
+        np.testing.assert_array_almost_equal(
+            slice_.pairwise_significance_t_stats[1],
+            load_python_expression("mr-x-mr-pw-tstats"),
+        )
+        np.testing.assert_array_almost_equal(
+            slice_.pairwise_significance_p_vals[1],
+            load_python_expression("mr-x-mr-pw-pvals"),
+        )
+
+
+class TestOverlapsPairwiseSignificance(TestCase):
+    def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_0th_subvar(self):
+        slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_t_stats[0],
+            [
+                [0.0, -1.22474487, -2.44948974],
+                [0.0, 1.41421356, 1.41421356],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_p_vals[0],
+            [
+                [0.0, 0.43590578, 0.24675171],
+                [0.0, np.nan, np.nan],
+            ],
+        )
+
+    def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_1st_subvar(self):
+        slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_t_stats[1],
+            [
+                [1.22474487, 0.0, -1.22474487],
+                [-1.41421356, 0.0, np.nan],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_p_vals[1],
+            [
+                [0.43590578, 0.0, 0.43590578],
+                [np.nan, 0.0, np.nan],
+            ],
+        )
+
+    def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_2nd_subvar(self):
+        slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_t_stats[2],
+            [
+                [2.44948974, 1.22474487, 0.0],
+                [-1.41421356, np.nan, 0.0],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_p_vals[2],
+            [
+                [0.24675171, 0.43590578, 0.0],
+                [np.nan, np.nan, 0.0],
+            ],
+        )
+
+    def test_pairwise_significance_cat_x_mr_realistic_example(self):
+        slice_ = Cube(OL.CAT_X_MR_REALISTIC_EXAMPLE).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_t_stats[4],
+            [
+                [
+                    -3.9146295258075634,
+                    1.5105264449340376,
+                    3.2266563272193363,
+                    7.071067811865473,
+                    0.0,
+                    41.383226415679914,
+                ],
+                [
+                    -2.2756474745819952,
+                    2.909837329589324,
+                    3.4013451656911036,
+                    5.1050358012989845,
+                    0.0,
+                    63.718129288296005,
+                ],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_p_vals[4],
+            [
+                [
+                    0.0001337008782529292,
+                    0.1328815484386987,
+                    0.0015191171147603821,
+                    4.5152770411505116e-11,
+                    0.0,
+                    0.0,
+                ],
+                [
+                    0.02435314838688285,
+                    0.004195089619284165,
+                    0.0008696393198390773,
+                    1.0369509280128142e-06,
+                    0.0,
+                    0.0,
+                ],
+            ],
         )

@@ -384,24 +384,29 @@ class Describe_RawDimension(object):
         assert dimension_type == expected_value
 
     @pytest.mark.parametrize(
-        "is_array_cat, has_selected_cat, expected_value",
+        "is_array_cat, has_selected_cat, is_logical_type, expected_value",
         (
-            (False, False, DT.CAT),
-            (False, True, DT.LOGICAL),
-            (True, False, DT.CA_CAT),
-            (True, True, DT.MR_CAT),
+            (False, False, False, DT.CAT),
+            (False, True, False, DT.CAT),
+            (False, True, True, DT.LOGICAL),
+            (True, False, False, DT.CA_CAT),
+            (True, True, True, DT.MR_CAT),
+            (True, True, False, DT.CA_CAT),
         ),
     )
     def it_resolves_a_categorical_type_to_help(
         self,
         is_array_cat,
         has_selected_cat,
+        is_logical_type,
         expected_value,
         _is_array_cat_prop_,
         _has_selected_category_prop_,
+        _is_logical_type_prop_,
     ):
         _is_array_cat_prop_.return_value = is_array_cat
         _has_selected_category_prop_.return_value = has_selected_cat
+        _is_logical_type_prop_.return_value = is_logical_type
         raw_dimension = _RawDimension(None, None)
 
         dimension_type = raw_dimension._resolve_categorical()
@@ -425,6 +430,10 @@ class Describe_RawDimension(object):
     @pytest.fixture
     def _is_array_cat_prop_(self, request):
         return property_mock(request, _RawDimension, "_is_array_cat")
+
+    @pytest.fixture
+    def _is_logical_type_prop_(self, request):
+        return property_mock(request, _RawDimension, "_is_logical_type")
 
     @pytest.fixture
     def _next_raw_dimension_prop_(self, request):

@@ -29,6 +29,11 @@ class CubeMeasures(object):
         return _BaseCubeMeans.factory(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
+    def cube_overlaps(self):
+        """_BaseCubeOverlaps subclass object for this cube-result."""
+        return _BaseCubeOverlaps.factory(self._cube, self._dimensions, self._slice_idx)
+
+    @lazyproperty
     def cube_sum(self):
         """_BaseCubeSums subclass object for this cube-result."""
         return _BaseCubeSums.factory(self._cube, self._dimensions, self._slice_idx)
@@ -164,6 +169,83 @@ class _MrXMrCubeMeans(_BaseCubeMeans):
         """2D np.float64 ndarray of means for each valid matrix cell."""
         # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
         return self._means[:, 0, :, 0]
+
+
+# === OVERLAPS ===
+
+
+class _BaseCubeOverlaps(_BaseCubeMeasure):
+    """Base class for overlap cube-measure variants."""
+
+    def __init__(self, dimensions, overlaps, valid_overlaps):
+        super(_BaseCubeOverlaps, self).__init__(dimensions)
+        self._overlaps = overlaps
+        self._valid_overlaps = valid_overlaps
+
+    @classmethod
+    def factory(cls, cube, dimensions, slice_idx):
+        """Return _BaseCubeOverlaps subclass instance appropriate to `cube`.
+
+        Raises `ValueError` if the cube-result does not include a cube-overlaps measure
+        or if it doesn't include valid-cube-overlaps measure.
+        """
+        if cube.overlaps is None:
+            raise ValueError(
+                "cube-result does not contain cube-overlaps measure"
+            )  # pragma: no cover
+        if cube.valid_overlaps is None:
+            raise ValueError(
+                "cube-result does not contain cube-valid-overlaps measure"
+            )  # pragma: no cover
+        return _CatXMrOverlaps(
+            dimensions,
+            cube.overlaps[cls._slice_idx_expr(cube, slice_idx)],
+            cube.valid_overlaps[cls._slice_idx_expr(cube, slice_idx)],
+        )
+
+    @lazyproperty
+    def overlaps(self):
+        """3D np.float64 ndarray of cube overlaps."""
+        raise NotImplementedError(  # pragma: no cover
+            "`%s` must implement `.overlaps`" % type(self).__name__
+        )
+
+
+class _CatXMrOverlaps(_BaseCubeOverlaps):
+    """Overlaps cube-measure for a NOT_MR_X_MR slice."""
+
+    @lazyproperty
+    def overlaps(self):
+        """3D np.float64 ndarray of selected overlaps between MR subvariables, per cat.
+
+        For a CAT x MR matrix, the overlaps are calculated for each category, and then
+        for each subvariables pair for that category (which will produce a square
+        matrix for each category). So the output shape that we get back from the
+        database is CAT x MR_SUBVAR x MR_SEL x MR_SUBVAR (the last one being the result
+        of the `cube_overlap` measure, and representing the "pairing" with each subvar
+        of the previous MR_SUBVAR dimension.
+
+        From this shape, we only need the "Selected" part of the MR_SEL dimension, so
+        we need to select the 0th element along the 2nd axis [:, :, 0].
+        """
+        return self._overlaps[:, :, 0]
+
+    @lazyproperty
+    def valid_overlaps(self):
+        """3D np.float64 ndarray of valid overlaps between MR subvariables, per cat.
+
+        For a CAT x MR matrix, the overlaps are calculated for each category, and then
+        for each subvariables pair for that category (which will produce a square
+        matrix for each category). So the output shape that we get back from the
+        database is CAT x MR_SUBVAR x MR_SEL x MR_SUBVAR (the last one being the result
+        of the `cube_overlap` measure, and representing the "pairing" with each subvar
+        of the previous MR_SUBVAR dimension.
+
+        From this shape, we only need the "Selected" + "Other" part of the MR_SEL
+        dimension (i.e. all except missing), so we need to add the 0th and the 1st
+        element along the 2nd axis sum([:, :, 0:2]).
+        """
+        return np.sum(self._valid_overlaps[:, :, 0:2], axis=2)
 
 
 # === STD DEV ===

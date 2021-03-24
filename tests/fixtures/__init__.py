@@ -58,5 +58,6 @@ class LazyCubeResponseLoader(object):
 
 CR = LazyCubeResponseLoader(".")  # ---mnemonic: CR = 'cube-response'---
 NA = LazyCubeResponseLoader("./numeric_arrays")
+OL = LazyCubeResponseLoader("./overlaps")
 SM = LazyCubeResponseLoader("./scale_means")
 TR = LazyCubeResponseLoader("./transforms")
