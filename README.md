@@ -112,6 +112,10 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.10
+- Add pairwise t test considering overlaps
+- Add hare of sum measure
+
 ### 2.1.9
 - Improvements to subtotal differences
 
