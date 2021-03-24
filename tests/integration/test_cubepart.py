@@ -35,6 +35,7 @@ class Describe_Slice(object):
             [0.7142857, 0.2857142],
             [0.6250000, 0.3750000],
         ]
+        assert slice_.has_scale_means is True
         assert slice_.inserted_column_idxs == ()
         assert slice_.inserted_row_idxs == ()
         assert slice_.is_empty is False
@@ -68,6 +69,12 @@ class Describe_Slice(object):
         assert slice_.rows_dimension_type == DT.CAT
         assert slice_.rows_margin.tolist() == [7, 8]
         assert slice_.shape == (2, 2)
+        with pytest.raises(ValueError) as e:
+            slice_.share_sum
+        assert (
+            str(e.value)
+            == "`.share_sum` is undefined for a cube-result without a sum measure"
+        )
         with pytest.raises(ValueError) as e:
             slice_.sums
         assert (
@@ -832,16 +839,14 @@ class Describe_Slice(object):
 
     def it_provides_sum_measure_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR_SUM).partitions[0]
-
         assert slice_.sums == pytest.approx(
             np.array(
                 [
-                    [np.nan, np.nan, np.nan],
-                    [np.nan, 2.0, np.nan],
-                    [np.nan, np.nan, np.nan],
+                    [2.0, 1.0, 2.0],
+                    [1.0, 2.0, 3.0],
+                    [1.0, 2.0, 4.0],
                 ]
-            ),
-            nan_ok=True,
+            )
         )
 
     def it_provides_stddev_measure_for_cat_x_mr(self):
@@ -857,6 +862,18 @@ class Describe_Slice(object):
             nan_ok=True,
         )
         assert slice_.table_base.tolist() == [3, 3, 3]
+
+    def it_provides_share_of_sum_measure_for_mr_x_mr(self):
+        slice_ = Cube(CR.MR_X_MR_SUM).partitions[0]
+        assert slice_.share_sum == pytest.approx(
+            np.array(
+                [
+                    [0.5, 0.2, 0.2222222],
+                    [0.25, 0.4, 0.3333333],
+                    [0.25, 0.4, 0.4444444],
+                ]
+            )
+        )
 
 
 class Describe_Strand(object):
@@ -883,6 +900,7 @@ class Describe_Strand(object):
         assert strand.counts.tolist() == [10, 5]
         assert strand.cube_index == 0
         assert strand.dimension_types == (DT.CAT,)
+        assert strand.has_scale_means is True
         assert strand.inserted_row_idxs == ()
         assert strand.is_empty is False
         with pytest.raises(ValueError) as e:
@@ -907,6 +925,11 @@ class Describe_Strand(object):
         assert strand.scale_std_dev == pytest.approx(0.9428090)
         assert strand.scale_std_err == pytest.approx(0.2434322)
         assert strand.shape == (2,)
+        with pytest.raises(ValueError) as e:
+            strand.share_sum
+        assert str(e.value) == (
+            "`.share_sum` is undefined for a cube-result without a sum measure"
+        )
         with pytest.raises(ValueError) as e:
             strand.sums
         assert str(e.value) == (
@@ -1180,6 +1203,25 @@ class Describe_Strand(object):
         assert strand.counts == pytest.approx([3, 2])
         assert strand.means == pytest.approx([2.66666667, 3.5])
         assert strand.sums == pytest.approx([8, 7])
+
+    def it_provides_share_of_sum_measure_for_CAT(self):
+        strand = Cube(CR.CAT_SUM).partitions[0]
+
+        assert strand.sums == pytest.approx([88.0, 77.0])
+        # --- share of sum is the array of sum divided by its sum, so in this case
+        # --- [88/165, 77/165]
+        assert strand.share_sum.tolist() == [0.5333333333333333, 0.4666666666666667]
+        assert strand.table_base_range.tolist() == [5, 5]
+
+    def it_provides_share_of_sum_measure_for_MR(self):
+        strand = Cube(CR.MR_SUM).partitions[0]
+
+        assert strand.share_sum.tolist() == [
+            0.42857142857142855,
+            0.2857142857142857,
+            0.2857142857142857,
+        ]
+        assert strand.table_base_range.tolist() == [3, 3]
 
 
 class Describe_Nub(object):

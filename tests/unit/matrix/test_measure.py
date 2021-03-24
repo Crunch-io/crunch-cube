@@ -21,6 +21,8 @@ from cr.cube.matrix.measure import (
     _RowUnweightedBases,
     _RowWeightedBases,
     SecondOrderMeasures,
+    _ShareSum,
+    _Sums,
     _TableUnweightedBases,
     _TableWeightedBases,
     _UnweightedCounts,
@@ -715,6 +717,32 @@ class Describe_RowWeightedBases(object):
     @pytest.fixture
     def _weighted_cube_counts_prop_(self, request):
         return property_mock(request, _RowWeightedBases, "_weighted_cube_counts")
+
+
+class Describe_ShareSum(object):
+    """Unit test suite for `cr.cube.matrix.measure._ShareSum` object."""
+
+    def it_computes_its_blocks(self, request):
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [
+            [[5.0, 12.0], [21.0, 32.0]],
+            [[], []],
+            [[], []],
+            [[], []],
+        ]
+        sums_blocks_ = instance_mock(request, _Sums, blocks=[[5.0, 6.0], [7.0, 8.0]])
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            sums=sums_blocks_,
+        )
+        cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
+
+        share_sum = _ShareSum(None, second_order_measures_, cube_measures_)
+
+        assert share_sum.blocks[0][0] == pytest.approx([0.2941176, 0.7058823])
+        assert share_sum.blocks[0][1] == pytest.approx([0.3962264, 0.6037735])
+        SumSubtotals_.blocks.assert_called_once_with(ANY, None)
 
 
 class Describe_TableUnweightedBases(object):

@@ -8,7 +8,7 @@
           "args": [],
           "function": "cube_count"
         },
-        "mean": {
+        "sum": {
           "args": [
             {
               "args": [
@@ -22,7 +22,7 @@
               "function": "cast"
             }
           ],
-          "function": "cube_mean"
+          "function": "cube_sum"
         }
       },
       "weight": null
@@ -90,11 +90,11 @@
             }
           }
         },
-        "mean": {
+        "sum": {
           "data": [
             [
-              2.5,
-              25
+              25,
+              44
             ]
           ],
           "metadata": {

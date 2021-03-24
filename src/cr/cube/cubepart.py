@@ -535,6 +535,11 @@ class _Slice(CubePartition):
         return self._rows_dimension.description
 
     @lazyproperty
+    def has_scale_means(self):
+        """True if the slice has valid columns scale mean."""
+        return True if self.columns_scale_mean is not None else False
+
+    @lazyproperty
     def inserted_column_idxs(self):
         """tuple of int index of each subtotal column in slice."""
         return self._assembler.inserted_column_idxs
@@ -965,6 +970,22 @@ class _Slice(CubePartition):
         return self.counts.shape
 
     @lazyproperty
+    def share_sum(self):
+        """2D optional np.float64 ndarray of share of sum value for each table cell.
+
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+
+        Share of sum is the sum of each subvar item divided by the TOTAL number of
+        items.
+        """
+        try:
+            return self._assembler.share_sum
+        except ValueError:
+            raise ValueError(
+                "`.share_sum` is undefined for a cube-result without a sum measure"
+            )
+
+    @lazyproperty
     def smoothed_dimension_dict(self):
         """dict, smoothed column dimension definition"""
         # TODO:  remove this property when the smoother gets the base measure directly
@@ -1308,6 +1329,11 @@ class _Strand(CubePartition):
         return self._assembler.inserted_row_idxs
 
     @lazyproperty
+    def has_scale_means(self):
+        """True if the strand has valid scale means."""
+        return True if self.scale_mean is not None else False
+
+    @lazyproperty
     def is_empty(self):
         return any(s == 0 for s in self.shape)
 
@@ -1472,6 +1498,22 @@ class _Strand(CubePartition):
     def smoothed_dimension_dict(self):
         """dict, row dimension definition"""
         return self._rows_dimension._dimension_dict
+
+    @lazyproperty
+    def share_sum(self):
+        """1D np.float64 ndarray of share of sum for each row of strand.
+
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+
+        Share of sum is the sum of each subvar item divided by the TOTAL number of
+        items.
+        """
+        try:
+            return self._assembler.share_sum
+        except ValueError:
+            raise ValueError(
+                "`.share_sum` is undefined for a cube-result without a sum measure"
+            )
 
     @lazyproperty
     def stddev(self):

@@ -48,6 +48,11 @@ class StripeMeasures(object):
         return _ScaledCounts(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
+    def share_sum(self):
+        """_ShareSum measure object for this stripe."""
+        return _ShareSum(self._rows_dimension, self, self._cube_measures)
+
+    @lazyproperty
     def stddev(self):
         """_StdDev measure object for this stripe."""
         return _StdDev(self._rows_dimension, self, self._cube_measures)
@@ -313,6 +318,24 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         Otherwise, the values appear in payload order.
         """
         return self._weighted_cube_counts.weighted_counts[self._has_numeric_value]
+
+
+class _ShareSum(_BaseSecondOrderMeasure):
+    """Provides the share of sum measure for a stripe.
+
+    Relies on the presence of a sum cube-measure in the cube-result.
+    """
+
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of share of sum for each row."""
+        sums = self._cube_measures.cube_sum.sums
+        return sums / np.sum(sums)
+
+    @lazyproperty
+    def subtotal_values(self):
+        """1D ndarray of share of sum subtotals for each row-subtotal."""
+        return SumSubtotals.subtotal_values(self.base_values, self._rows_dimension)
 
 
 class _StdDev(_BaseSecondOrderMeasure):
