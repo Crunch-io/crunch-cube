@@ -104,7 +104,7 @@ class Assembler(object):
         rows_dim_type = self._rows_dimension.dimension_type
         if rows_dim_type in (DT.MR_SUBVAR, DT.NUM_ARRAY):
             return self._assemble_matrix(
-                SumSubtotals.blocks(columns_base, self._dimensions)
+                SumSubtotals.blocks(columns_base, self._dimensions, diff_cols_nan=True)
             )
 
         # --- otherwise columns-base is a vector ---
@@ -112,6 +112,7 @@ class Assembler(object):
             columns_base,
             self._column_subtotals,
             self._column_order,
+            diffs_nan=True,
         )
 
     @lazyproperty
@@ -136,7 +137,8 @@ class Assembler(object):
         if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
-                    self._cube_result_matrix.columns_margin, self._dimensions
+                    self._cube_result_matrix.columns_margin,
+                    self._dimensions,
                 )
             )
 
@@ -241,13 +243,18 @@ class Assembler(object):
         if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
-                    self._cube_result_matrix.rows_base, self._dimensions
+                    self._cube_result_matrix.rows_base,
+                    self._dimensions,
+                    diff_rows_nan=True,
                 )
             )
 
         # --- otherwise rows-base is a vector ---
         return self._assemble_vector(
-            self._cube_result_matrix.rows_base, self._row_subtotals, self._row_order
+            self._cube_result_matrix.rows_base,
+            self._row_subtotals,
+            self._row_order,
+            diffs_nan=True,
         )
 
     @lazyproperty
@@ -511,7 +518,7 @@ class Assembler(object):
         # --- desired output.
         return np.block(blocks)[np.ix_(self._row_order, self._column_order)]
 
-    def _assemble_vector(self, base_vector, subtotals, order):
+    def _assemble_vector(self, base_vector, subtotals, order, diffs_nan=False):
         """Return 1D ndarray of `base_vector` with inserted `subtotals`, in `order`.
 
         Each subtotal value is the result of applying np.sum to the addends and
@@ -520,12 +527,14 @@ class Assembler(object):
         array is arranged by `order`, including possibly removing hidden or pruned
         values.
         """
-        # TODO: This works for "sum" and "diff" subtotals, which is all that it needs
-        # so far, but a fuller solution will probably get the subtotal values from a
-        # _BaseSubtotals subclass.
+        # TODO: This works for "sum" and "diff" subtotals, because either we set to
+        # nan or add & subtract, but a fuller solution will probably get the subtotal
+        # values from a _BaseSubtotals subclass.
         vector_subtotals = np.array(
             [
-                np.sum(base_vector[subtotal.addend_idxs])
+                np.nan
+                if diffs_nan and len(subtotal.subtrahend_idxs) > 0
+                else np.sum(base_vector[subtotal.addend_idxs])
                 - np.sum(base_vector[subtotal.subtrahend_idxs])
                 for subtotal in subtotals
             ]
