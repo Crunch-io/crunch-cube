@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.11
+- Bug fix for numeric array with weighted counts
+
 ### 2.1.10
 - Add pairwise t test considering overlaps
 - Add hare of sum measure
