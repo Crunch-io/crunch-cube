@@ -80,6 +80,26 @@
       ],
       "missing": 0,
       "measures": {
+        "count": {
+          "data": [
+            10.0,
+            10.0,
+            0.0
+          ],
+          "n_missing": 0,
+          "metadata": {
+            "references": {},
+            "derived": true,
+            "type": {
+              "integer": false,
+              "missing_rules": {},
+              "missing_reasons": {
+                "No Data": -1
+              },
+              "class": "numeric"
+            }
+          }
+        },
         "valid_count_unweighted": {
           "data": [
             3,
