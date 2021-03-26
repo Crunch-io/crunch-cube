@@ -144,7 +144,7 @@ class DescribeAssembler(object):
         columns_base = assembler.columns_base
 
         _assemble_vector_.assert_called_once_with(
-            assembler, [1, 2, 3], [3, 5], [0, -2, 1, 2, -1]
+            assembler, [1, 2, 3], [3, 5], [0, -2, 1, 2, -1], diffs_nan=True
         )
         assert columns_base.tolist() == [1, 3, 2, 3, 5]
 
@@ -311,7 +311,7 @@ class DescribeAssembler(object):
         rows_base = assembler.rows_base
 
         _assemble_vector_.assert_called_once_with(
-            assembler, [1, 2, 3], [3, 5], [0, -2, 1, 2, -1]
+            assembler, [1, 2, 3], [3, 5], [0, -2, 1, 2, -1], diffs_nan=True
         )
         assert rows_base == [1, 3, 2, 3, 5]
 
@@ -334,7 +334,9 @@ class DescribeAssembler(object):
 
         rows_base = assembler.rows_base
 
-        SumSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
+        SumSubtotals_.blocks.assert_called_once_with(
+            [[1, 2], [3, 4]], dimensions_, diff_rows_nan=True
+        )
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert rows_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
