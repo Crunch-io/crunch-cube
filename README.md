@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.12
+- Bug fixes for subtotal differences
+
 ### 2.1.11
 - Bug fix for numeric array with weighted counts
 
