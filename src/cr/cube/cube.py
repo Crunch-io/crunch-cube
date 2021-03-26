@@ -477,7 +477,7 @@ class Cube(object):
         )
         return (
             weighted_counts.raw_cube_array[self._valid_idxs]
-            if self._measures.weighted_counts is not None
+            if weighted_counts is not None
             else None
         )
 
