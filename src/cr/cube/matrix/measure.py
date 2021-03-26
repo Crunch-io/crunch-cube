@@ -692,7 +692,10 @@ class _ShareSum(_BaseSecondOrderMeasure):
         subtotal intersection-cell values.
         """
         sums_blocks = SumSubtotals.blocks(
-            self._cube_measures.cube_sum.sums, self._dimensions
+            self._cube_measures.cube_sum.sums,
+            self._dimensions,
+            diff_cols_nan=True,
+            diff_rows_nan=True,
         )
         # --- do not propagate divide-by-zero warnings to stderr ---
         with np.errstate(divide="ignore", invalid="ignore"):
@@ -718,7 +721,12 @@ class _Sums(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        return SumSubtotals.blocks(self._cube_measures.cube_sum.sums, self._dimensions)
+        return SumSubtotals.blocks(
+            self._cube_measures.cube_sum.sums,
+            self._dimensions,
+            diff_rows_nan=True,
+            diff_cols_nan=True,
+        )
 
 
 class _StdDev(_BaseSecondOrderMeasure):

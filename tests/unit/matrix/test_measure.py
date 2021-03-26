@@ -742,7 +742,7 @@ class Describe_ShareSum(object):
 
         assert share_sum.blocks[0][0] == pytest.approx([0.2941176, 0.7058823])
         assert share_sum.blocks[0][1] == pytest.approx([0.3962264, 0.6037735])
-        SumSubtotals_.blocks.assert_called_once_with(ANY, None)
+        SumSubtotals_.blocks.assert_called_once_with(ANY, None, True, True)
 
 
 class Describe_TableUnweightedBases(object):
