@@ -70,10 +70,11 @@ class Describe_Slice(object):
         assert slice_.rows_margin.tolist() == [7, 8]
         assert slice_.shape == (2, 2)
         with pytest.raises(ValueError) as e:
-            slice_.share_sum
+            slice_.column_share_sum
         assert (
             str(e.value)
-            == "`.share_sum` is undefined for a cube-result without a sum measure"
+            == "`.column_share_sum` is undefined for a cube-result without a sum "
+            "measure"
         )
         with pytest.raises(ValueError) as e:
             slice_.sums
@@ -865,7 +866,7 @@ class Describe_Slice(object):
 
     def it_provides_share_of_sum_measure_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR_SUM).partitions[0]
-        assert slice_.share_sum == pytest.approx(
+        assert slice_.column_share_sum == pytest.approx(
             np.array(
                 [
                     [0.5, 0.2, 0.2222222],

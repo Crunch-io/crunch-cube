@@ -15,13 +15,13 @@ from cr.cube.matrix.cubemeasure import (
 from cr.cube.matrix.measure import (
     _BaseSecondOrderMeasure,
     _ColumnProportions,
+    _ColumnShareSum,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
     _RowProportions,
     _RowUnweightedBases,
     _RowWeightedBases,
     SecondOrderMeasures,
-    _ShareSum,
     _Sums,
     _TableUnweightedBases,
     _TableWeightedBases,
@@ -738,7 +738,7 @@ class Describe_ShareSum(object):
         )
         cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
 
-        share_sum = _ShareSum(None, second_order_measures_, cube_measures_)
+        share_sum = _ColumnShareSum(None, second_order_measures_, cube_measures_)
 
         assert share_sum.blocks[0][0] == pytest.approx([0.2941176, 0.7058823])
         assert share_sum.blocks[0][1] == pytest.approx([0.3962264, 0.6037735])

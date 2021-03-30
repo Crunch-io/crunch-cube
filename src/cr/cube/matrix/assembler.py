@@ -87,6 +87,14 @@ class Assembler(object):
         return self._assemble_matrix(self._measures.column_proportions.blocks)
 
     @lazyproperty
+    def column_share_sum(self):
+        """2D optional np.float64 ndarray of column share of sum for each cell.
+
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+        """
+        return self._assemble_matrix(self._measures.column_share_sum.blocks)
+
+    @lazyproperty
     def column_unweighted_bases(self):
         """2D np.float64 ndarray of unweighted col-proportions denominator per cell."""
         return self._assemble_matrix(self._measures.column_unweighted_bases.blocks)
@@ -299,14 +307,6 @@ class Assembler(object):
         return self._assemble_vector(
             self._cube_result_matrix.rows_margin, self._row_subtotals, self._row_order
         )
-
-    @lazyproperty
-    def share_sum(self):
-        """2D optional np.float64 ndarray of share of sum for each cell.
-
-        Raises `ValueError` if the cube-result does not include a sum cube-measure.
-        """
-        return self._assemble_matrix(self._measures.share_sum.blocks)
 
     @lazyproperty
     def sums(self):

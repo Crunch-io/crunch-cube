@@ -207,7 +207,7 @@ class DescribeNumericArrays(object):
         """Test share of sum on num array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
 
-        assert slice_.share_sum == pytest.approx(
+        assert slice_.column_share_sum == pytest.approx(
             np.array(
                 [
                     #  --------Gender------------
@@ -235,7 +235,7 @@ class DescribeNumericArrays(object):
             ),
             nan_ok=True,
         )
-        assert slice_.share_sum == pytest.approx(
+        assert slice_.column_share_sum == pytest.approx(
             np.array(
                 [
                     # --------------MR----------------
