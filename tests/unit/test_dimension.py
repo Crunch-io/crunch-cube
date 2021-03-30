@@ -731,7 +731,7 @@ class Describe_AllElements(object):
         dimension_transforms_dict = {"dimension": "transforms"}
         _elements_prop_.return_value = elements_
         _ValidElements_.return_value = valid_elements_
-        all_elements = _AllElements(None, dimension_transforms_dict)
+        all_elements = _AllElements(None, dimension_transforms_dict, None)
 
         valid_elements = all_elements.valid_elements
 
@@ -762,7 +762,7 @@ class Describe_AllElements(object):
             for idx in range(3)
         )
         _Element_.side_effect = iter(elements_)
-        all_elements = _AllElements(None, None)
+        all_elements = _AllElements(None, None, None)
 
         elements = all_elements._elements
 
@@ -787,7 +787,7 @@ class Describe_AllElements(object):
             {"id": 2, "element": "dict_2"},
             {"id": 6, "element": "dict_6"},
         )
-        all_elements = _AllElements(None, dimension_transforms_dict)
+        all_elements = _AllElements(None, dimension_transforms_dict, None)
 
         element_makings = tuple(all_elements._iter_element_makings())
 
