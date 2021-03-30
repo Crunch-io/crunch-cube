@@ -1163,6 +1163,22 @@ class _Slice(CubePartition):
         return self._assembler.table_weighted_bases
 
     @lazyproperty
+    def total_share_sum(self):
+        """2D optional np.float64 ndarray of total share sum value for each table cell.
+
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+
+        Total share of sum is the sum of each subvar item divided by the TOTAL of items.
+        """
+        try:
+            return self._assembler.total_share_sum
+        except ValueError:
+            raise ValueError(
+                "`.total_share_sum` is undefined for a cube-result without a sum "
+                "measure"
+            )
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.float64 ndarray of unweighted count for each slice matrix cell."""
         return self._assembler.unweighted_counts

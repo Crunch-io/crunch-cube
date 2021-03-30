@@ -26,6 +26,7 @@ from cr.cube.matrix.measure import (
     _Sums,
     _TableUnweightedBases,
     _TableWeightedBases,
+    _TotalShareSum,
     _UnweightedCounts,
     _WeightedCounts,
 )
@@ -773,6 +774,38 @@ class Describe_RowShareSum(object):
             np.array([[0.29411765, 0.70588235]])
         )
         assert row_share_sum.blocks[0][1] == pytest.approx(
+            np.array([[0.3962264, 0.6037735]])
+        )
+        SumSubtotals_.blocks.assert_called_once_with(ANY, None, True, True)
+
+
+class Describe_TotalShareSum(object):
+    """Unit test suite for `cr.cube.matrix.measure._RowShareSum` object."""
+
+    def it_computes_its_blocks(self, request):
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [
+            np.array([[[5.0, 12.0]], [[21.0, 32.0]]]),
+            np.array([[[]], [[]]]),
+            np.array([[[]], [[]]]),
+            np.array([[[]], [[]]]),
+        ]
+        sums_blocks_ = instance_mock(
+            request, _Sums, blocks=np.array([[[5.0, 6.0]], [[7.0, 8.0]]])
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            sums=sums_blocks_,
+        )
+        cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
+
+        total_share_sum = _TotalShareSum(None, second_order_measures_, cube_measures_)
+
+        assert total_share_sum.blocks[0][0] == pytest.approx(
+            np.array([[0.29411765, 0.70588235]])
+        )
+        assert total_share_sum.blocks[0][1] == pytest.approx(
             np.array([[0.3962264, 0.6037735]])
         )
         SumSubtotals_.blocks.assert_called_once_with(ANY, None, True, True)

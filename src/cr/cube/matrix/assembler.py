@@ -476,6 +476,14 @@ class Assembler(object):
         return self._assemble_matrix(self._measures.table_weighted_bases.blocks)
 
     @lazyproperty
+    def total_share_sum(self):
+        """2D optional np.float64 ndarray of total share of sum for each cell.
+
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+        """
+        return self._assemble_matrix(self._measures.total_share_sum.blocks)
+
+    @lazyproperty
     def unweighted_counts(self):
         """2D np.float64 ndarray of unweighted-count for each cell."""
         return self._assemble_matrix(self._measures.unweighted_counts.blocks)

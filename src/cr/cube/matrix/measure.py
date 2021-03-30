@@ -114,6 +114,11 @@ class SecondOrderMeasures(object):
         return _TableWeightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def total_share_sum(self):
+        """_TotalShareSum measure object for this cube-result"""
+        return _TotalShareSum(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def unweighted_counts(self):
         """_UnweightedCounts measure object for this cube-result."""
         return _UnweightedCounts(self._dimensions, self, self._cube_measures)
@@ -1008,6 +1013,43 @@ class _TableWeightedBases(_BaseSecondOrderMeasure):
         return np.broadcast_to(
             self._weighted_cube_counts.table_margin, subtotal_rows.shape
         )
+
+
+class _TotalShareSum(_BaseSecondOrderMeasure):
+    """Provides the row share of sum measure for a matrix.
+
+    Row share sum is the sum of each subvar divided by the TOTAL number of row items.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values.
+        """
+        sums_blocks = SumSubtotals.blocks(
+            self._cube_measures.cube_sum.sums,
+            self._dimensions,
+            diff_cols_nan=True,
+            diff_rows_nan=True,
+        )
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return [
+                [
+                    # --- base values ---
+                    sums_blocks[0][0] / np.sum(sums_blocks[0][0]),
+                    # --- inserted columns ---
+                    sums_blocks[0][1] / np.sum(sums_blocks[0][1]),
+                ],
+                [
+                    # --- inserted rows ---
+                    sums_blocks[1][0] / np.sum(sums_blocks[1][0]),
+                    # --- intersections ---
+                    sums_blocks[1][1] / np.sum(sums_blocks[1][1]),
+                ],
+            ]
 
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):

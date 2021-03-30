@@ -104,6 +104,13 @@ class Describe_Slice(object):
             [0.3333333, 0.1333333],
             [0.3333333, 0.2000000],
         ]
+        with pytest.raises(ValueError) as e:
+            slice_.total_share_sum
+        assert (
+            str(e.value)
+            == "`.total_share_sum` is undefined for a cube-result without a sum "
+            "measure"
+        )
         assert slice_.unweighted_counts.tolist() == [[5, 2], [5, 3]]
         assert slice_.variable_name == "v7"
 
@@ -888,6 +895,15 @@ class Describe_Slice(object):
                     [0.4, 0.2, 0.4],
                     [0.1666666, 0.3333333, 0.5],
                     [0.1428571, 0.2857142, 0.5714285],
+                ]
+            )
+        )
+        assert slice_.total_share_sum == pytest.approx(
+            np.array(
+                [
+                    [0.11111111, 0.05555556, 0.11111111],
+                    [0.05555556, 0.11111111, 0.16666667],
+                    [0.05555556, 0.11111111, 0.22222222],
                 ]
             )
         )
