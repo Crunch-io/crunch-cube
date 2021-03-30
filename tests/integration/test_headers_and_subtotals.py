@@ -4058,6 +4058,16 @@ class DescribeIntegrated_SubtotalDifferences(object):
             ),
             nan_ok=True,
         )
+        assert slice_.row_share_sum == pytest.approx(
+            np.array(
+                [
+                    [np.nan, 0.5714285, 0.4285714, np.nan],
+                    [np.nan, 1.0, 0.0, np.nan],
+                    [np.nan, 0.4, 0.6, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
 
         # pruning
         slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
@@ -4069,4 +4079,14 @@ class DescribeIntegrated_SubtotalDifferences(object):
                     [0.2222222, 0.5],
                 ]
             )
+        )
+        assert slice_.row_share_sum == pytest.approx(
+            np.array(
+                [
+                    [0.57142857, 0.42857143],
+                    [1.0, 0.0],
+                    [0.4, 0.6],
+                ]
+            ),
+            nan_ok=True,
         )

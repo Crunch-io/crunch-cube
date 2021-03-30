@@ -26,6 +26,13 @@ class Describe_Slice(object):
         assert slice_.column_labels.tolist() == ["C", "E"]
         assert slice_.column_percentages.tolist() == [[50, 40], [50, 60]]
         assert pytest.approx(slice_.column_proportions) == [[0.5, 0.4], [0.5, 0.6]]
+        with pytest.raises(ValueError) as e:
+            slice_.column_share_sum
+        assert (
+            str(e.value)
+            == "`.column_share_sum` is undefined for a cube-result without a sum "
+            "measure"
+        )
         assert slice_.columns_dimension_name == "v7"
         assert slice_.columns_dimension_type == DT.CAT
         assert slice_.columns_margin.tolist() == [10, 5]
@@ -63,19 +70,18 @@ class Describe_Slice(object):
             [71.42857, 28.57142],
             [62.50000, 37.50000],
         ]
+        with pytest.raises(ValueError) as e:
+            slice_.row_share_sum
+        assert (
+            str(e.value)
+            == "`.row_share_sum` is undefined for a cube-result without a sum measure"
+        )
         assert slice_.rows_dimension_description == "Pet Owners"
         assert slice_.rows_dimension_fills == (None, None)
         assert slice_.rows_dimension_name == "v4"
         assert slice_.rows_dimension_type == DT.CAT
         assert slice_.rows_margin.tolist() == [7, 8]
         assert slice_.shape == (2, 2)
-        with pytest.raises(ValueError) as e:
-            slice_.column_share_sum
-        assert (
-            str(e.value)
-            == "`.column_share_sum` is undefined for a cube-result without a sum "
-            "measure"
-        )
         with pytest.raises(ValueError) as e:
             slice_.sums
         assert (
@@ -866,12 +872,22 @@ class Describe_Slice(object):
 
     def it_provides_share_of_sum_measure_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR_SUM).partitions[0]
+
         assert slice_.column_share_sum == pytest.approx(
             np.array(
                 [
                     [0.5, 0.2, 0.2222222],
                     [0.25, 0.4, 0.3333333],
                     [0.25, 0.4, 0.4444444],
+                ]
+            )
+        )
+        assert slice_.row_share_sum == pytest.approx(
+            np.array(
+                [
+                    [0.4, 0.2, 0.4],
+                    [0.1666666, 0.3333333, 0.5],
+                    [0.1428571, 0.2857142, 0.5714285],
                 ]
             )
         )

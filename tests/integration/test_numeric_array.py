@@ -218,6 +218,18 @@ class DescribeNumericArrays(object):
                 ],
             )
         )
+        assert slice_.row_share_sum == pytest.approx(
+            np.array(
+                [
+                    # --------------Gender----------------
+                    #     M        F
+                    [0.5714285, 0.4285714],  # S1 (Ticket Sold)
+                    [1.0000, 0.0000],  # S2 (Ticket Sold)
+                    [0.4000, 0.6000],  # S3 (Ticket Sold)
+                ],
+            ),
+            nan_ok=True,
+        )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 2], [3, 2]]))
 
     def it_provides_share_of_sum_for_num_array_x_mr(self):
@@ -243,6 +255,18 @@ class DescribeNumericArrays(object):
                     [0.48, 0.5555555, 0.5555555],  # S1 (num arr)
                     [0.36, 0.0, 0.0],  # S2 (num arr)
                     [0.16, 0.4444444, 0.4444444],  # S3 (num arr)
+                ],
+            ),
+            nan_ok=True,
+        )
+        assert slice_.row_share_sum == pytest.approx(
+            np.array(
+                [
+                    # --------------MR----------------
+                    #     S1      S2       S3
+                    [0.5454545, 0.2272727, 0.2272727],  # S1 (num arr)
+                    [1.0, 0.0, 0.0],  # S2 (num arr)
+                    [0.3333333, 0.3333333, 0.3333333],  # S3 (num arr)
                 ],
             ),
             nan_ok=True,

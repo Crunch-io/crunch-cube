@@ -74,6 +74,11 @@ class SecondOrderMeasures(object):
         return _RowProportions(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def row_share_sum(self):
+        """_RowShareSum measure object for this cube-result"""
+        return _RowShareSum(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def row_unweighted_bases(self):
         """_RowUnweightedBases measure object for this cube-result."""
         return _RowUnweightedBases(self._dimensions, self, self._cube_measures)
@@ -575,6 +580,43 @@ class _RowProportions(_BaseSecondOrderMeasure):
                     count_blocks[1][0] / weighted_base_blocks[1][0],
                     # --- intersections ---
                     count_blocks[1][1] / weighted_base_blocks[1][1],
+                ],
+            ]
+
+
+class _RowShareSum(_BaseSecondOrderMeasure):
+    """Provides the row share of sum measure for a matrix.
+
+    Row share sum is the sum of each subvar divided by the TOTAL number of row items.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values.
+        """
+        sums_blocks = SumSubtotals.blocks(
+            self._cube_measures.cube_sum.sums,
+            self._dimensions,
+            diff_cols_nan=True,
+            diff_rows_nan=True,
+        )
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return [
+                [
+                    # --- base values ---
+                    (sums_blocks[0][0].T / np.sum(sums_blocks[0][0], axis=1)).T,
+                    # --- inserted columns ---
+                    (sums_blocks[0][1].T / np.sum(sums_blocks[0][1], axis=1)).T,
+                ],
+                [
+                    # --- inserted rows ---
+                    (sums_blocks[1][0].T / np.sum(sums_blocks[1][0], axis=1)).T,
+                    # --- intersections ---
+                    (sums_blocks[1][1].T / np.sum(sums_blocks[1][1], axis=1)).T,
                 ],
             ]
 

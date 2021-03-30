@@ -765,6 +765,22 @@ class _Slice(CubePartition):
         return Z_975 * self.row_std_err
 
     @lazyproperty
+    def row_share_sum(self):
+        """2D optional np.float64 ndarray of row share sum value for each table cell.
+
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+
+        Row share of sum is the sum of each subvar item divided by the TOTAL number of
+        row items.
+        """
+        try:
+            return self._assembler.row_share_sum
+        except ValueError:
+            raise ValueError(
+                "`.row_share_sum` is undefined for a cube-result without a sum measure"
+            )
+
+    @lazyproperty
     def row_std_dev(self):
         """2D np.float64 ndarray of standard deviation for row percentages."""
         return np.sqrt(self._row_variance)
