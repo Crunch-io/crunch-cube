@@ -197,19 +197,14 @@ class _BaseCubeOverlaps(_BaseCubeMeasure):
             raise ValueError(
                 "cube-result does not contain cube-valid-overlaps measure"
             )  # pragma: no cover
+
         dimension_types = tuple(d.dimension_type for d in dimensions)
+        idx_expr = cls._slice_idx_expr(cube, slice_idx)
+        args = (dimensions, cube.overlaps[idx_expr], cube.valid_overlaps[idx_expr])
         return (
-            _MrXMrOverlaps(
-                dimensions,
-                cube.overlaps[cls._slice_idx_expr(cube, slice_idx)],
-                cube.valid_overlaps[cls._slice_idx_expr(cube, slice_idx)],
-            )
+            _MrXMrOverlaps(*args)
             if dimension_types == (DT.MR, DT.MR)
-            else _CatXMrOverlaps(
-                dimensions,
-                cube.overlaps[cls._slice_idx_expr(cube, slice_idx)],
-                cube.valid_overlaps[cls._slice_idx_expr(cube, slice_idx)],
-            )
+            else _CatXMrOverlaps(*args)
         )
 
     @lazyproperty
