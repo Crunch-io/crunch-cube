@@ -801,13 +801,13 @@ class Describe_AllElements(object):
         "element_transform, dimension_type, element_dict, expected_value",
         (
             (
-                {"S2": {"hide": True}, "selector": "subvar_id"},
+                {"S2": {"hide": True}, "key": "subvar_id"},
                 DT.NUM_ARRAY,
                 {"id": 1, "value": {"references": {"alias": "A1"}, "id": "S2"}},
                 "S2",
             ),
             (
-                {"A1": {"hide": True}, "selector": "alias"},
+                {"A1": {"hide": True}, "key": "alias"},
                 DT.NUM_ARRAY,
                 {"id": 1, "value": {"references": {"alias": "A1"}, "id": "S2"}},
                 "A1",
@@ -819,13 +819,13 @@ class Describe_AllElements(object):
                 "S2",
             ),
             (
-                {"A1": {"hide": True}, "selector": "alias"},
+                {"A1": {"hide": True}, "key": "alias"},
                 DT.NUM_ARRAY,
                 {"id": 1, "value": {"references": {"alias": ""}, "id": "S2"}},
                 1,
             ),
             (
-                {"A1": {"hide": True}, "selector": "alias"},
+                {"A1": {"hide": True}, "key": "alias"},
                 DT.NUM_ARRAY,
                 {"id": 1, "value": {"references": {"alias": None}, "id": "S2"}},
                 1,

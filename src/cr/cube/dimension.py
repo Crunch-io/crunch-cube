@@ -591,15 +591,17 @@ class _AllElements(_BaseElements):
 
     def _element_id_from_dict(self, element_dict):
         """Returns the element identifier given its dict."""
-        selector = self._elements_transforms.get("selector")
+        key = self._elements_transforms.get("key")
         default_id = element_dict["id"]
         if self._dimension_type in DT.ARRAY_TYPES:
             element_value = element_dict.get("value", {})
-            if selector == "alias":
+            if key == "alias":
                 # --- In case of specified key alias, returns the subvariable alias.
                 return element_value.get("references", {}).get("alias") or default_id
+            elif key == "subvar_id":
+                return element_value.get("id")
             # --- Returns the subvariable id.
-            return element_value.get("id")
+            return element_value.get("id") or default_id
         # --- Fallback case is the positional idx.
         return default_id
 
