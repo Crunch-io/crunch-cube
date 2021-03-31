@@ -591,11 +591,17 @@ class _AllElements(_BaseElements):
 
     def _element_id_from_dict(self, element_dict):
         """Returns the element identifier given its dict."""
+        selector = self._elements_transforms.get("selector")
+        default_id = element_dict["id"]
         if self._dimension_type in DT.ARRAY_TYPES:
-            # --- In case of array dimensions returns the id of the subvariable.
-            return element_dict.get("value", {}).get("id")
+            element_value = element_dict.get("value", {})
+            if selector == "alias":
+                # --- In case of specified key alias, returns the subvariable alias.
+                return element_value.get("references", {}).get("alias") or default_id
+            # --- Returns the subvariable id.
+            return element_value.get("id")
         # --- Fallback case is the positional idx.
-        return element_dict["id"]
+        return default_id
 
     @lazyproperty
     def _elements(self):
@@ -613,6 +619,11 @@ class _AllElements(_BaseElements):
             ) in self._iter_element_makings()
         )
 
+    @lazyproperty
+    def _elements_transforms(self):
+        """Element transform dict expressed in the dimension transforms expression."""
+        return self._dimension_transforms_dict.get("elements", {})
+
     def _iter_element_makings(self):
         """Generate tuple of values needed to construct each element object.
 
@@ -620,9 +631,8 @@ class _AllElements(_BaseElements):
         element in this dimension, in the order they appear in the cube-result. All
         elements are included (including missing).
         """
-        element_dicts = self._element_dicts
-        elements_transforms = self._dimension_transforms_dict.get("elements", {})
-        for idx, element_dict in enumerate(element_dicts):
+        elements_transforms = self._elements_transforms
+        for idx, element_dict in enumerate(self._element_dicts):
             element_id = self._element_id_from_dict(element_dict)
             # TODO: Each element transforms dict is keyed by the str() version of it int
             # value as a consequence of JSON serialization (which does not allow

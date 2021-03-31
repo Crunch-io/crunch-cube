@@ -797,6 +797,53 @@ class Describe_AllElements(object):
             (2, {"id": 6, "element": "dict_6"}, {"element": "xfrms_6"}),
         )
 
+    @pytest.mark.parametrize(
+        "element_transform, dimension_type, element_dict, expected_value",
+        (
+            (
+                {"S2": {"hide": True}, "selector": "subvar_id"},
+                DT.NUM_ARRAY,
+                {"id": 1, "value": {"references": {"alias": "A1"}, "id": "S2"}},
+                "S2",
+            ),
+            (
+                {"A1": {"hide": True}, "selector": "alias"},
+                DT.NUM_ARRAY,
+                {"id": 1, "value": {"references": {"alias": "A1"}, "id": "S2"}},
+                "A1",
+            ),
+            (
+                {"1": {"hide": True}},
+                DT.CA,
+                {"id": 1, "value": {"references": {"alias": "A1"}, "id": "S2"}},
+                "S2",
+            ),
+            (
+                {"A1": {"hide": True}, "selector": "alias"},
+                DT.NUM_ARRAY,
+                {"id": 1, "value": {"references": {"alias": ""}, "id": "S2"}},
+                1,
+            ),
+            (
+                {"A1": {"hide": True}, "selector": "alias"},
+                DT.NUM_ARRAY,
+                {"id": 1, "value": {"references": {"alias": None}, "id": "S2"}},
+                1,
+            ),
+            ({"1": {"hide": True}}, DT.CAT, {"id": 1, "name": "Male"}, 1),
+            ({"0001": {"hide": True}}, DT.CAT, {"id": 1, "name": "Male"}, 1),
+        ),
+    )
+    def it_knows_its_element_id_from_dict(
+        self, element_transform, dimension_type, element_dict, expected_value
+    ):
+        dimension_transforms_dict = {"elements": element_transform}
+        all_elements = _AllElements(None, dimension_transforms_dict, dimension_type)
+
+        _element_id_from_dict = all_elements._element_id_from_dict(element_dict)
+
+        assert _element_id_from_dict == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

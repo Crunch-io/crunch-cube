@@ -47,10 +47,18 @@ class DescribeNumericArrays(object):
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 1], [1, 1]]))
 
-    def it_provides_means_for_num_array_with_hiding_transforms_grouped_by_cat(self):
-        transforms = {
-            "rows_dimension": {"elements": {"S2": {"hide": True}}},
-        }
+    @pytest.mark.parametrize(
+        "element_transform",
+        (
+            {"S2": {"hide": True}, "selector": "subvar_id"},
+            {"Fight Club": {"hide": True}, "selector": "alias"},
+            {"1": {"hide": True}},
+        ),
+    )
+    def it_provides_means_for_num_array_hiding_transforms_grouped_by_cat(
+        self, element_transform
+    ):
+        transforms = {"rows_dimension": {"elements": element_transform}}
         slice_ = Cube(
             NA.NUM_ARR_MEANS_GROUPED_BY_CAT, transforms=transforms
         ).partitions[0]
