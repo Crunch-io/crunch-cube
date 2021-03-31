@@ -112,6 +112,11 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.13
+- Handle hiding transforms with subvar alias and id
+- Additional share of sum measures
+- Overlaps for MRxMR matrix
+
 ### 2.1.12
 - Bug fixes for subtotal differences
 
