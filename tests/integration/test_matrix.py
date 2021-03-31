@@ -597,9 +597,9 @@ class DescribeAssembler(object):
         ]
 
     @pytest.mark.parametrize(
-        "hided_rows", ({"5": {"hide": True}}, {"00004": {"hide": True}})
+        "hidden_rows", ({"5": {"hide": True}}, {"00004": {"hide": True}})
     )
-    def it_computes_unweighted_counts_for_ca_subvar_x_ca_cat_hiddens(self, hided_rows):
+    def it_computes_unweighted_counts_for_ca_subvar_x_ca_cat_hiddens(self, hidden_rows):
         """Assembler hides, prunes, and places in payload order.
 
         This fixture has no insertions, and exercises the "no-insertions" case which
@@ -609,7 +609,7 @@ class DescribeAssembler(object):
             Cube(CR.CA_SUBVAR_X_CA_CAT_EMPTIES),
             slice_idx=0,
             transforms={
-                "rows_dimension": {"elements": hided_rows, "prune": True},
+                "rows_dimension": {"elements": hidden_rows, "prune": True},
                 "columns_dimension": {
                     "elements": {"99": {"hide": True}},
                     "prune": True,

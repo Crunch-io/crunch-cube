@@ -60,7 +60,7 @@ class DescribeNumericArrays(object):
                 [  # -------Gender-----
                     #     M        F
                     [87.6666667, 52.5],  # S1: Dark Night
-                    #     --      --       S2: Fight Club HIDED
+                    #     --      --       S2: Fight Club HIDDEN
                     [1.00000000, 45.0],  # S3: Meet the parents
                 ],
             )

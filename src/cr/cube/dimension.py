@@ -589,7 +589,7 @@ class _AllElements(_BaseElements):
             else self._type_dict["elements"]
         )
 
-    def _element_id(self, element_dict):
+    def _element_id_from_dict(self, element_dict):
         """Returns the element identifier given its dict."""
         if self._dimension_type in DT.ARRAY_TYPES:
             # --- In case of array dimensions returns the id of the subvariable.
@@ -623,7 +623,7 @@ class _AllElements(_BaseElements):
         element_dicts = self._element_dicts
         elements_transforms = self._dimension_transforms_dict.get("elements", {})
         for idx, element_dict in enumerate(element_dicts):
-            element_id = self._element_id(element_dict)
+            element_id = self._element_id_from_dict(element_dict)
             # TODO: Each element transforms dict is keyed by the str() version of it int
             # value as a consequence of JSON serialization (which does not allow
             # non-string keys). Hence the str(element_id) here.
