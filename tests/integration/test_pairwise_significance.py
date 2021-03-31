@@ -471,3 +471,23 @@ class TestOverlapsPairwiseSignificance(TestCase):
                 ],
             ],
         )
+
+    def test_pairwise_significance_mr_x_mr(self):
+        slice_ = Cube(OL.MR_X_MR).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_t_stats[1],
+            [
+                [-1.11803399, 0.0, 1.82574186],
+                [1.47709789, 0.0, 3.46410162],
+                [np.nan, 0.0, np.nan],
+            ],
+        )
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_p_vals[1],
+            [
+                [0.34501476, 0.0, 0.1653704],
+                [0.21370636, 0.0, 0.02572142],
+                [np.nan, 0.0, np.nan],
+            ],
+        )

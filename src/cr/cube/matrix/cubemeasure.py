@@ -197,10 +197,14 @@ class _BaseCubeOverlaps(_BaseCubeMeasure):
             raise ValueError(
                 "cube-result does not contain cube-valid-overlaps measure"
             )  # pragma: no cover
-        return _CatXMrOverlaps(
-            dimensions,
-            cube.overlaps[cls._slice_idx_expr(cube, slice_idx)],
-            cube.valid_overlaps[cls._slice_idx_expr(cube, slice_idx)],
+
+        dimension_types = tuple(d.dimension_type for d in dimensions)
+        idx_expr = cls._slice_idx_expr(cube, slice_idx)
+        args = (dimensions, cube.overlaps[idx_expr], cube.valid_overlaps[idx_expr])
+        return (
+            _MrXMrOverlaps(*args)
+            if dimension_types == (DT.MR, DT.MR)
+            else _CatXMrOverlaps(*args)
         )
 
     @lazyproperty
@@ -246,6 +250,43 @@ class _CatXMrOverlaps(_BaseCubeOverlaps):
         element along the 2nd axis sum([:, :, 0:2]).
         """
         return np.sum(self._valid_overlaps[:, :, 0:2], axis=2)
+
+
+class _MrXMrOverlaps(_BaseCubeOverlaps):
+    """Overlaps cube-measure for a MR_X_MR slice."""
+
+    @lazyproperty
+    def overlaps(self):
+        """3D np.float64 ndarray of selected overlaps between MR subvariables, per cat.
+
+        For a MR x MR slice, the overlaps are calculated for each MR subvar row, and
+        then for each subvariables pair for that row (which will produce a square
+        matrix for each category). So the output shape that we get back from the
+        database is MR_SUBVAR x MR_SEL x MR_SUBVAR x MR_SEL x MR_SUBVAR (the last one
+        being the result of the `cube_overlap` measure, and representing the "pairing"
+        with each subvar of the last MR_SUBVAR dimension.
+
+        From this shape, we only need the "Selected" part of both MR_SEL dimensions, so
+        we need to select the 0th element along the 1st and 3rd axes [:, 0, :, 0].
+        """
+        return self._overlaps[:, 0, :, 0]
+
+    @lazyproperty
+    def valid_overlaps(self):
+        """3D np.float64 ndarray of valid overlaps between MR subvariables, per row.
+
+        For a MR x MR slice, the overlaps are calculated for each row, and then
+        for each subvariables pair for that row (which will produce a square matrix for
+        each row). So the output shape that we get back from the database is
+        MR_SUBVAR x MR_SEL x MR_SUBVAR x MR_SEL x MR_SUBVAR (the last one being the
+        result of the `cube_overlap` measure, and representing the "pairing" with each
+        subvar of the last MR_SUBVAR dimension.
+
+        From this shape, we only need the "Selected" + "Other" part of both MR_SEL
+        dimensions (i.e. all except missing), so we need to add the 0th and the 1st
+        element along the 1st and 3rd axes sum([:, 0:2, :, 0:2], axis=(1, 3)).
+        """
+        return np.sum(self._valid_overlaps[:, 0:2, :, 0:2], axis=(1, 3))
 
 
 # === STD DEV ===
