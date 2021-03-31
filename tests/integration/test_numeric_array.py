@@ -207,7 +207,7 @@ class DescribeNumericArrays(object):
         """Test share of sum on num array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
 
-        assert slice_.share_sum == pytest.approx(
+        assert slice_.column_share_sum == pytest.approx(
             np.array(
                 [
                     #  --------Gender------------
@@ -217,6 +217,30 @@ class DescribeNumericArrays(object):
                     [0.2222222, 0.5],  # S3 (Ticket Sold)
                 ],
             )
+        )
+        assert slice_.row_share_sum == pytest.approx(
+            np.array(
+                [
+                    # --------------Gender----------------
+                    #     M        F
+                    [0.5714285, 0.4285714],  # S1 (Ticket Sold)
+                    [1.00, 0.0],  # S2 (Ticket Sold)
+                    [0.4000, 0.6000],  # S3 (Ticket Sold)
+                ],
+            ),
+            nan_ok=True,
+        )
+        assert slice_.total_share_sum == pytest.approx(
+            np.array(
+                [
+                    # --------------Gender----------------
+                    #     M        F
+                    [0.26666667, 0.2],  # S1 (Ticket Sold)
+                    [0.2, 0.0],  # S2 (Ticket Sold)
+                    [0.13333333, 0.2],  # S3 (Ticket Sold)
+                ],
+            ),
+            nan_ok=True,
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 2], [3, 2]]))
 
@@ -235,7 +259,7 @@ class DescribeNumericArrays(object):
             ),
             nan_ok=True,
         )
-        assert slice_.share_sum == pytest.approx(
+        assert slice_.column_share_sum == pytest.approx(
             np.array(
                 [
                     # --------------MR----------------
@@ -243,6 +267,30 @@ class DescribeNumericArrays(object):
                     [0.48, 0.5555555, 0.5555555],  # S1 (num arr)
                     [0.36, 0.0, 0.0],  # S2 (num arr)
                     [0.16, 0.4444444, 0.4444444],  # S3 (num arr)
+                ],
+            ),
+            nan_ok=True,
+        )
+        assert slice_.row_share_sum == pytest.approx(
+            np.array(
+                [
+                    # --------------MR----------------
+                    #     S1      S2       S3
+                    [0.5454545, 0.2272727, 0.2272727],  # S1 (num arr)
+                    [1.0, 0.0, 0.0],  # S2 (num arr)
+                    [0.3333333, 0.3333333, 0.3333333],  # S3 (num arr)
+                ],
+            ),
+            nan_ok=True,
+        )
+        assert slice_.total_share_sum == pytest.approx(
+            np.array(
+                [
+                    # --------------MR----------------
+                    #     S1      S2       S3
+                    [0.27906977, 0.11627907, 0.11627907],  # S1 (num arr)
+                    [0.20930233, 0.0, 0.0],  # S2 (num arr)
+                    [0.09302326, 0.09302326, 0.09302326],  # S3 (num arr)
                 ],
             ),
             nan_ok=True,

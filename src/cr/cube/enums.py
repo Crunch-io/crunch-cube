@@ -74,10 +74,12 @@ class MEASURE(enum.Enum):
     # --- value for each member should match the export measure keyname ---
     COL_INDEX = "col_index"
     COL_PERCENT = "col_percent"
+    COL_SHARE_SUM = "col_share_sum"
     MEAN = "mean"
-    SHARE_SUM = "share_sum"
+    ROW_SHARE_SUM = "row_share_sum"
     SUM = "sum"
     TABLE_STDERR = "table_stderr"
+    TOTAL_SHARE_SUM = "total_share_sum"
     UNWEIGHTED_COUNT = "count_unweighted"
     WEIGHTED_COUNT = "count_weighted"
     Z_SCORE = "z_score"
@@ -96,5 +98,12 @@ class CUBE_MEASURE(enum.Enum):
 
 
 NUMERIC_MEASURES = frozenset(
-    (CUBE_MEASURE.SUM, CUBE_MEASURE.MEAN, CUBE_MEASURE.STDDEV, MEASURE.SHARE_SUM)
+    (
+        CUBE_MEASURE.SUM,
+        CUBE_MEASURE.MEAN,
+        CUBE_MEASURE.STDDEV,
+        MEASURE.COL_SHARE_SUM,
+        MEASURE.ROW_SHARE_SUM,
+        MEASURE.TOTAL_SHARE_SUM,
+    )
 )

@@ -292,6 +292,23 @@ class _Slice(CubePartition):
         return Z_975 * self.column_std_err
 
     @lazyproperty
+    def column_share_sum(self):
+        """2D optional np.float64 ndarray of column share sum value for each table cell.
+
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+
+        Column share of sum is the sum of each subvar item divided by the TOTAL number
+        of column items.
+        """
+        try:
+            return self._assembler.column_share_sum
+        except ValueError:
+            raise ValueError(
+                "`.column_share_sum` is undefined for a cube-result without a sum "
+                "measure"
+            )
+
+    @lazyproperty
     def column_std_dev(self):
         """standard deviation for column percentages
 
@@ -748,6 +765,22 @@ class _Slice(CubePartition):
         return Z_975 * self.row_std_err
 
     @lazyproperty
+    def row_share_sum(self):
+        """2D optional np.float64 ndarray of row share sum value for each table cell.
+
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+
+        Row share of sum is the sum of each subvar item divided by the TOTAL number of
+        row items.
+        """
+        try:
+            return self._assembler.row_share_sum
+        except ValueError:
+            raise ValueError(
+                "`.row_share_sum` is undefined for a cube-result without a sum measure"
+            )
+
+    @lazyproperty
     def row_std_dev(self):
         """2D np.float64 ndarray of standard deviation for row percentages."""
         return np.sqrt(self._row_variance)
@@ -970,22 +1003,6 @@ class _Slice(CubePartition):
         return self.counts.shape
 
     @lazyproperty
-    def share_sum(self):
-        """2D optional np.float64 ndarray of share of sum value for each table cell.
-
-        Raises `ValueError` if the cube-result does not include a sum cube-measure.
-
-        Share of sum is the sum of each subvar item divided by the TOTAL number of
-        items.
-        """
-        try:
-            return self._assembler.share_sum
-        except ValueError:
-            raise ValueError(
-                "`.share_sum` is undefined for a cube-result without a sum measure"
-            )
-
-    @lazyproperty
     def smoothed_dimension_dict(self):
         """dict, smoothed column dimension definition"""
         # TODO:  remove this property when the smoother gets the base measure directly
@@ -1144,6 +1161,22 @@ class _Slice(CubePartition):
     def table_weighted_bases(self):
         """2D np.float64 ndarray of table-proportion denominator for each cell."""
         return self._assembler.table_weighted_bases
+
+    @lazyproperty
+    def total_share_sum(self):
+        """2D optional np.float64 ndarray of total share sum value for each table cell.
+
+        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+
+        Total share of sum is the sum of each subvar item divided by the TOTAL of items.
+        """
+        try:
+            return self._assembler.total_share_sum
+        except ValueError:
+            raise ValueError(
+                "`.total_share_sum` is undefined for a cube-result without a sum "
+                "measure"
+            )
 
     @lazyproperty
     def unweighted_counts(self):

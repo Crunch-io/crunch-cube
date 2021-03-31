@@ -4048,7 +4048,7 @@ class DescribeIntegrated_SubtotalDifferences(object):
                 },
             },
         ).partitions[0]
-        assert slice_.share_sum == pytest.approx(
+        assert slice_.column_share_sum == pytest.approx(
             np.array(
                 [
                     [np.nan, 0.44444444, 0.5, 0.46666667],
@@ -4058,10 +4058,30 @@ class DescribeIntegrated_SubtotalDifferences(object):
             ),
             nan_ok=True,
         )
+        assert slice_.row_share_sum == pytest.approx(
+            np.array(
+                [
+                    [np.nan, 0.5714285, 0.4285714, np.nan],
+                    [np.nan, 1.0, 0.0, np.nan],
+                    [np.nan, 0.4, 0.6, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+        assert slice_.total_share_sum == pytest.approx(
+            np.array(
+                [
+                    [np.nan, 0.26666667, 0.2, np.nan],
+                    [np.nan, 0.2, 0.0, np.nan],
+                    [np.nan, 0.13333333, 0.2, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
 
         # pruning
         slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
-        assert slice_.share_sum == pytest.approx(
+        assert slice_.column_share_sum == pytest.approx(
             np.array(
                 [
                     [0.4444444, 0.5],
@@ -4069,4 +4089,24 @@ class DescribeIntegrated_SubtotalDifferences(object):
                     [0.2222222, 0.5],
                 ]
             )
+        )
+        assert slice_.row_share_sum == pytest.approx(
+            np.array(
+                [
+                    [0.57142857, 0.42857143],
+                    [1.0, 0.0],
+                    [0.4, 0.6],
+                ]
+            ),
+            nan_ok=True,
+        )
+        assert slice_.total_share_sum == pytest.approx(
+            np.array(
+                [
+                    [0.26666667, 0.2],
+                    [0.2, 0.0],
+                    [0.13333333, 0.2],
+                ]
+            ),
+            nan_ok=True,
         )
