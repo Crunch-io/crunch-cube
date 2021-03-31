@@ -47,6 +47,35 @@ class DescribeNumericArrays(object):
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 1], [1, 1]]))
 
+    @pytest.mark.parametrize(
+        "element_transform",
+        (
+            {"S2": {"hide": True}, "key": "subvar_id"},
+            {"S2": {"hide": True}},
+            {"Fight Club": {"hide": True}, "key": "alias"},
+            {"1": {"hide": True}},
+        ),
+    )
+    def it_provides_means_for_num_array_hiding_transforms_grouped_by_cat(
+        self, element_transform
+    ):
+        transforms = {"rows_dimension": {"elements": element_transform}}
+        slice_ = Cube(
+            NA.NUM_ARR_MEANS_GROUPED_BY_CAT, transforms=transforms
+        ).partitions[0]
+
+        assert slice_.means == pytest.approx(
+            np.array(
+                [  # -------Gender-----
+                    #     M        F
+                    [87.6666667, 52.5],  # S1: Dark Night
+                    #     --      --       S2: Fight Club HIDDEN
+                    [1.00000000, 45.0],  # S3: Meet the parents
+                ],
+            )
+        )
+        assert slice_.columns_base == pytest.approx(np.array([[3, 2], [1, 1]]))
+
     def it_provides_means_for_num_array_grouped_by_date(self):
         """Test means on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_DATE).partitions[0]

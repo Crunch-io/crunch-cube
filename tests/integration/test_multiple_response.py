@@ -313,13 +313,29 @@ def test_mr_x_single_wave():
     np.testing.assert_almost_equal(slice_.rows_margin, expected)
 
 
-def test_array_x_mr_by_col():
-    slice_ = Cube(CR.CA_SUBVAR_X_CA_CAT_X_MR).partitions[0]
-    expected = [
-        [0.5146153267487166, 0.04320534228100489, 0.5933354514113938],
-        [0.4853846732512835, 0.9567946577189951, 0.4066645485886063],
-    ]
-    np.testing.assert_almost_equal(slice_.column_proportions, expected)
+@pytest.mark.parametrize(
+    "transforms, expectation",
+    (
+        (
+            None,
+            [[0.514615, 0.0432053, 0.593335], [0.4853846, 0.9567946, 0.4066645]],
+        ),
+        (
+            # Hide MR col using positional element identifier
+            {"columns_dimension": {"elements": {"1": {"hide": True}}}},
+            [[0.0432053, 0.593335], [0.9567946, 0.4066645]],
+        ),
+        (
+            # Hide MR col using subvaribale element identifier
+            {"columns_dimension": {"elements": {"0007": {"hide": True}}}},
+            [[0.0432053, 0.593335], [0.9567946, 0.4066645]],
+        ),
+    ),
+)
+def test_array_x_mr_by_col(transforms, expectation):
+    slice_ = Cube(CR.CA_SUBVAR_X_CA_CAT_X_MR, transforms=transforms).partitions[0]
+
+    assert slice_.column_proportions == pytest.approx(np.array(expectation))
 
 
 def test_array_x_mr_by_row():

@@ -17,7 +17,7 @@ from cr.cube.dimension import (
 )
 from cr.cube.enums import DIMENSION_TYPE as DT
 
-from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
+from ..fixtures import CR, NA  # ---mnemonic: CR = 'cube-response'---
 from ..unitutil import instance_mock, property_mock
 
 
@@ -172,19 +172,26 @@ class DescribeIntegratedDimension(object):
 class DescribeIntegrated_AllElements(object):
     """Integration-test suite for `cr.cube.dimension._AllElements` object."""
 
-    def it_constructs_its_element_objects_to_help(self, type_dict):
+    def it_constructs_its_element_objects_to_help(self):
+        type_dict = Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
         dimension_transforms = {}
-        all_elements = _AllElements(type_dict, dimension_transforms)
+        all_elements = _AllElements(type_dict, dimension_transforms, None)
 
         elements = all_elements._elements
 
         assert all(isinstance(element, _Element) for element in elements)
 
-    # fixture components ---------------------------------------------
+    def it_hides_element_objects_by_subvariable_id_to_help(self):
+        type_dict = (
+            Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT).dimensions[0]._dimension_dict["type"]
+        )
+        dimension_transforms = {"elements": {"S2": {"hide": True}}}
+        all_elements = _AllElements(type_dict, dimension_transforms, DT.NUM_ARRAY)
 
-    @pytest.fixture
-    def type_dict(self):
-        return Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
+        elements = all_elements._elements
+
+        assert len(elements) == 3
+        assert elements[1].is_hidden is True
 
 
 class DescribeIntegrated_ValidElements(object):
@@ -214,7 +221,7 @@ class DescribeIntegrated_ValidElements(object):
     @pytest.fixture
     def all_elements(self):
         return _AllElements(
-            CR.ECON_BLAME_WITH_HS["value"]["result"]["dimensions"][0]["type"], {}
+            CR.ECON_BLAME_WITH_HS["value"]["result"]["dimensions"][0]["type"], {}, None
         )._elements
 
 
