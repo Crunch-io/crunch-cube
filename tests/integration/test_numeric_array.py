@@ -31,9 +31,12 @@ class DescribeNumericArrays(object):
         )
         assert slice_.rows_scale_median == pytest.approx([3.0, 3.0, 3.0, 3.0])
 
-    def it_provides_means_for_num_array_grouped_by_cat(self):
+    @pytest.mark.parametrize("transforms", (None, {"dimension_order": [[0], [1]]}))
+    def it_provides_means_for_num_array_grouped_by_cat(self, transforms):
         """Test means on numeric array, grouped by single categorical dimension."""
-        slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT).partitions[0]
+        slice_ = Cube(
+            NA.NUM_ARR_MEANS_GROUPED_BY_CAT, transforms=transforms
+        ).partitions[0]
 
         assert slice_.means == pytest.approx(
             np.array(
@@ -46,6 +49,23 @@ class DescribeNumericArrays(object):
             )
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 1], [1, 1]]))
+
+    def it_provides_means_for_num_array_on_cols_grouped_by_cat(self):
+        """Test means on numeric array, grouped by single categorical dimension."""
+        transforms = {"dimension_order": [[1], [0]]}
+        slice_ = Cube(
+            NA.NUM_ARR_MEANS_GROUPED_BY_CAT, transforms=transforms
+        ).partitions[0]
+
+        assert slice_.means == pytest.approx(
+            np.array(
+                [  # --------Subvars-----------
+                    [87.6666667, 93.3333333, 1],  # Male
+                    [52.5, 50.0, 45.0],  # Female
+                ]
+            )
+        )
+        assert slice_.columns_base.tolist() == [5, 4, 2]
 
     @pytest.mark.parametrize(
         "element_transform",
@@ -76,9 +96,12 @@ class DescribeNumericArrays(object):
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [1, 1]]))
 
-    def it_provides_means_for_num_array_grouped_by_date(self):
+    @pytest.mark.parametrize("transforms", (None, {"dimension_order": [[0], [1]]}))
+    def it_provides_means_for_num_array_grouped_by_date(self, transforms):
         """Test means on numeric array, grouped by single categorical dimension."""
-        slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_DATE).partitions[0]
+        slice_ = Cube(
+            NA.NUM_ARR_MEANS_GROUPED_BY_DATE, transforms=transforms
+        ).partitions[0]
 
         assert slice_.means == pytest.approx(
             np.array(
@@ -111,8 +134,9 @@ class DescribeNumericArrays(object):
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 1], [1, 1]]))
 
-    def it_provides_means_for_num_array_x_mr(self):
-        slice_ = Cube(NA.NUM_ARR_MEANS_X_MR).partitions[0]
+    @pytest.mark.parametrize("transforms", (None, {"dimension_order": [[0], [1, 2]]}))
+    def it_provides_means_for_num_array_x_mr(self, transforms):
+        slice_ = Cube(NA.NUM_ARR_MEANS_X_MR, transforms=transforms).partitions[0]
         expected_means = [
             # -------------------------MR--------------------------
             #     S1         S2         S3         S4        S5
@@ -125,6 +149,28 @@ class DescribeNumericArrays(object):
         # ---column-base for each cell.
         assert slice_.columns_base == pytest.approx(
             np.array([[38, 14, 6, 18, 38], [38, 14, 6, 18, 38]])
+        )
+
+    def it_provides_means_for_mr_x_num_array(self):
+        transforms = {"dimension_order": [[1, 2], [0]]}
+        slice_ = Cube(NA.NUM_ARR_MEANS_X_MR, transforms=transforms).partitions[0]
+        expected_means = [
+            # ----- Num Array ------
+            #     S1         S2
+            [4.55263158, 3.71052632],  # S1 (MR)
+            [4.78571429, 3.85714286],  # S2 (MR)
+            [4.33333333, 3.83333333],  # S3 (MR)
+            [4.44444444, 3.55555556],  # S4 (MR)
+            [4.55263158, 3.71052632],  # S5 (MR)
+        ]
+
+        assert slice_.means == pytest.approx(np.array(expected_means))
+        # ---The columns_base is 2D because a NUM_ARR_X_MR matrix has a distinct
+        # ---column-base for each cell.
+        assert slice_.columns_base == pytest.approx(
+            np.array(
+                [[38.0, 38.0], [38.0, 38.0], [38.0, 38.0], [38.0, 38.0], [38.0, 38.0]]
+            )
         )
 
     def it_provides_means_for_numeric_array_with_no_grouping(self):

@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 """Provides the Dimension class."""
-
+import itertools
 import sys
 
 if sys.version_info >= (3, 3):
@@ -45,8 +45,9 @@ class _BaseDimensions(Sequence):
 class AllDimensions(_BaseDimensions):
     """Collection containing every dimension defined in cube response."""
 
-    def __init__(self, dimension_dicts):
+    def __init__(self, dimension_dicts, dimension_order=None):
         self._dimension_dicts = dimension_dicts
+        self._dimension_order = dimension_order
 
     @lazyproperty
     def apparent_dimensions(self):
@@ -68,9 +69,14 @@ class AllDimensions(_BaseDimensions):
         dimensions the dimension order correspond simpy to the reverse of the original
         dimension order.
         """
+
+        if self._dimension_order is not None:
+            return tuple(list(itertools.chain(*self._dimension_order[::-1])))
+
         # NOTE: this is a temporary hack that goes away when we introduce the dim_order
         # concept. We should receive the actual order directly in the cube_response.
         # So, all this logic will be deleted.
+        # TODO: remove the following condition when dim_order is sent by the client
         dimension_types = tuple(d.dimension_type for d in self._dimensions)
         dim_order = tuple(range(len(self._dimensions)))
         if len(self._dimensions) >= 2 and DT.NUM_ARRAY in dimension_types:

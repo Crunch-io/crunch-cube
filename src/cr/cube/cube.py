@@ -491,7 +491,10 @@ class Cube(object):
         user-apparent dimensions (basically the categories dimension of each MR
         dimension-pair is suppressed).
         """
-        return AllDimensions(dimension_dicts=self._cube_dict["result"]["dimensions"])
+        return AllDimensions(
+            dimension_dicts=self._cube_dict["result"]["dimensions"],
+            dimension_order=self._dimension_order,
+        )
 
     @lazyproperty
     def _available_numeric_measures(self):
@@ -521,12 +524,21 @@ class Cube(object):
         """dict containing raw cube response, parsed from JSON payload."""
         cube_dict = copy.deepcopy(self._cube_response)
         if self._numeric_measure_subvariables:
-            dimensions = cube_dict.get("result", {}).get("dimensions", [])
             # ---dim inflation---
-            # ---In case of numeric arrays, we need to inflate the row dimension
-            # ---according to the mean subvariables. For each subvar the row dimension
+            # ---In case of numeric arrays, we need to inflate the row of col dimension
+            # ---according to dimension order. For each subvar the affected dimension
             # ---will have a new element related to the subvar metadata.
-            dimensions.insert(0, self._numeric_array_dimension)
+            dimensions = cube_dict["result"].get("dimensions", [])
+            dim_order = self._dimension_order
+            if dim_order is not None:
+                if dim_order[0][0] == 0:
+                    dimensions.insert(0, self._numeric_array_dimension)
+                else:
+                    dimensions.append(self._numeric_array_dimension)
+            else:
+                # ---If the dimension order is not specified the numeric array will be
+                # ---on the rows.
+                dimensions.insert(0, self._numeric_array_dimension)
         return cube_dict
 
     @lazyproperty
@@ -545,6 +557,16 @@ class Cube(object):
                 "Unsupported type <%s> provided. Cube response must be JSON "
                 "(str) or dict." % type(self._cube_response_arg).__name__
             )
+
+    @lazyproperty
+    def _dimension_order(self):
+        """Optional list of integer representing the dimension order to respect.
+
+        E.G.
+           NUMARRAYxCAT Dim Order [1, 0] -> Num array subvar on the row, cats on cols.
+           CATx_NUMARRAY Dim Order [0, 1] -> Num array subvar on the cols, cats on rows.
+        """
+        return self._transforms_dict.get("dimension_order")
 
     @lazyproperty
     def _is_single_filter_col_cube(self):
@@ -634,7 +656,7 @@ class Cube(object):
         valid_idxs = np.ix_(
             *tuple(d.valid_elements.element_idxs for d in self._all_dimensions)
         )
-        # The dimension dimension order can change in case of numeric array variable on
+        # The dimension order can change in case of numeric array variable on
         # the row, and so valid indices needs to be returned in an ordered way.
         return tuple(valid_idxs[i] for i in self._all_dimensions.dimension_order)
 
