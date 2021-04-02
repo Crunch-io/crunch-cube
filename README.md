@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.14
+- Improve pairwise t test performance
+
 ### 2.1.13
 - Handle hiding transforms with subvar alias and id
 - Additional share of sum measures
