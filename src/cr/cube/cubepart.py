@@ -632,33 +632,8 @@ class _Slice(CubePartition):
             )
         )
 
-    @lazyproperty
-    def pairwise_significance_t_stats(self):
-        """3D ndarray of pairwise-significance t-stats matrices for each subvariable.
-
-        Each subvariable pairwise significance matrix is a 2D ndarray of the t-stats
-        for the selected subvariable index (the selected column).
-        """
-
-        # If overlaps are defined, calculate significance based on them
-        if (
-            self.dimension_types[-1] == DT.MR
-            and self._cube.overlaps is not None
-            and self._cube.valid_overlaps is not None
-        ):
-            return self._assembler.pairwise_significance_t_stats
-
-        # Wrap the legacy objects in a 3D ndarray, so that's interpretable by exporter
-        return np.array(
-            [
-                PairwiseSignificance(self).values[column_idx].t_stats
-                for column_idx in range(len(self.column_labels))
-            ]
-        )
-
-    @lazyproperty
-    def pairwise_significance_p_vals(self):
-        """3D ndarray of pairwise-significance p-vals matrices for each subvariable.
+    def pairwise_significance_p_vals(self, subvar_idx):
+        """2D ndarray of pairwise-significance p-vals matrices for subvariable idx.
 
         Each subvariable pairwise significance matrix is a 2D ndarray of the p-vals
         for the selected subvariable index (the selected column).
@@ -670,7 +645,7 @@ class _Slice(CubePartition):
             and self._cube.overlaps is not None
             and self._cube.valid_overlaps is not None
         ):
-            return self._assembler.pairwise_significance_p_vals
+            return self._assembler.pairwise_significance_p_vals(subvar_idx)
 
         # Wrap the legacy objects in a 3D ndarray, so that's interpretable by exporter
         return np.array(
@@ -678,7 +653,30 @@ class _Slice(CubePartition):
                 PairwiseSignificance(self).values[column_idx].p_vals
                 for column_idx in range(len(self.column_labels))
             ]
-        )
+        )[subvar_idx]
+
+    def pairwise_significance_t_stats(self, subvar_idx):
+        """return 2D ndarray of pairwise-significance t-stats matrices for subvariable.
+
+        Each subvariable pairwise significance matrix is a 2D ndarray of the t-stats
+        for the selected subvariable index (the selected column).
+        """
+
+        # If overlaps are defined, calculate significance based on them
+        if (
+            self.dimension_types[-1] == DT.MR
+            and self._cube.overlaps is not None
+            and self._cube.valid_overlaps is not None
+        ):
+            return self._assembler.pairwise_significance_t_stats(subvar_idx)
+
+        # Wrap the legacy objects in a 3D ndarray, so that's interpretable by exporter
+        return np.array(
+            [
+                PairwiseSignificance(self).values[column_idx].t_stats
+                for column_idx in range(len(self.column_labels))
+            ]
+        )[subvar_idx]
 
     @lazyproperty
     def pairwise_significance_tests(self):
