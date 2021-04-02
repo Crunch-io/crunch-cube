@@ -632,12 +632,15 @@ class _Slice(CubePartition):
             )
         )
 
-    @lazyproperty
-    def pairwise_significance_t_stats(self):
-        """3D ndarray of pairwise-significance t-stats matrices for each subvariable.
+    def pairwise_significance_p_vals(self, column_idx):
+        """2D ndarray of pairwise-significance p-vals matrices for column idx.
 
-        Each subvariable pairwise significance matrix is a 2D ndarray of the t-stats
-        for the selected subvariable index (the selected column).
+        For cubes where the last dimension is categorical, column idxs represent
+        specific categories.
+
+        For cubes where the last dimension is a multiple response, each subvariable
+        pairwise significance matrix is a 2D ndarray of the p-vals for the selected
+        subvariable index (the selected column).
         """
 
         # If overlaps are defined, calculate significance based on them
@@ -646,22 +649,20 @@ class _Slice(CubePartition):
             and self._cube.overlaps is not None
             and self._cube.valid_overlaps is not None
         ):
-            return self._assembler.pairwise_significance_t_stats
+            return self._assembler.pairwise_significance_p_vals(column_idx)
 
-        # Wrap the legacy objects in a 3D ndarray, so that's interpretable by exporter
-        return np.array(
-            [
-                PairwiseSignificance(self).values[column_idx].t_stats
-                for column_idx in range(len(self.column_labels))
-            ]
-        )
+        # If overlaps are not defined, default to the old-way of calculation
+        return PairwiseSignificance(self).values[column_idx].p_vals
 
-    @lazyproperty
-    def pairwise_significance_p_vals(self):
-        """3D ndarray of pairwise-significance p-vals matrices for each subvariable.
+    def pairwise_significance_t_stats(self, column_idx):
+        """return 2D ndarray of pairwise-significance t-stats matrices for subvariable.
 
-        Each subvariable pairwise significance matrix is a 2D ndarray of the p-vals
-        for the selected subvariable index (the selected column).
+        For cubes where the last dimension is categorical, column idxs represent
+        specific categories.
+
+        For cubes where the last dimension is a multiple response, each subvariable
+        pairwise significance matrix is a 2D ndarray of the t-stats for the selected
+        subvariable index (the selected column).
         """
 
         # If overlaps are defined, calculate significance based on them
@@ -670,15 +671,10 @@ class _Slice(CubePartition):
             and self._cube.overlaps is not None
             and self._cube.valid_overlaps is not None
         ):
-            return self._assembler.pairwise_significance_p_vals
+            return self._assembler.pairwise_significance_t_stats(column_idx)
 
-        # Wrap the legacy objects in a 3D ndarray, so that's interpretable by exporter
-        return np.array(
-            [
-                PairwiseSignificance(self).values[column_idx].p_vals
-                for column_idx in range(len(self.column_labels))
-            ]
-        )
+        # If overlaps are not defined, default to the old-way of calculation
+        return PairwiseSignificance(self).values[column_idx].t_stats
 
     @lazyproperty
     def pairwise_significance_tests(self):

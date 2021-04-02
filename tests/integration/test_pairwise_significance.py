@@ -145,11 +145,11 @@ class TestStandardizedResiduals(TestCase):
         )
         # check new api also
         np.testing.assert_array_almost_equal(
-            slice_.pairwise_significance_t_stats[1],
+            slice_.pairwise_significance_t_stats(1),
             load_python_expression("ca-subvar-hs-x-cat-hs-pw-tstats"),
         )
         np.testing.assert_array_almost_equal(
-            slice_.pairwise_significance_p_vals[1],
+            slice_.pairwise_significance_p_vals(1),
             load_python_expression("ca-subvar-hs-x-cat-hs-pw-pvals"),
         )
 
@@ -190,11 +190,11 @@ class TestStandardizedResiduals(TestCase):
         )
         # test new api also
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats[2],
+            slice_.pairwise_significance_t_stats(2),
             load_python_expression("cat-x-cat-pw-tstats"),
         )
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals[2],
+            slice_.pairwise_significance_p_vals(2),
             load_python_expression("cat-x-cat-pw-pvals"),
         )
 
@@ -211,11 +211,11 @@ class TestStandardizedResiduals(TestCase):
         )
         # test new api also
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats[0],
+            slice_.pairwise_significance_t_stats(0),
             load_python_expression("cat-x-cat-hs-pw-tstats"),
         )
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals[0],
+            slice_.pairwise_significance_p_vals(0),
             load_python_expression("cat-x-cat-hs-pw-pvals"),
         )
 
@@ -330,11 +330,11 @@ class TestStandardizedResiduals(TestCase):
         )
         # test new api also
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats[0],
+            slice_.pairwise_significance_t_stats(0),
             load_python_expression("cat-x-cat-wgtd-pw-tstats"),
         )
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals[0],
+            slice_.pairwise_significance_p_vals(0),
             load_python_expression("cat-x-cat-wgtd-pw-pvals"),
         )
 
@@ -362,11 +362,11 @@ class TestStandardizedResiduals(TestCase):
         )
         # test new api also
         np.testing.assert_array_almost_equal(
-            slice_.pairwise_significance_t_stats[1],
+            slice_.pairwise_significance_t_stats(1),
             load_python_expression("mr-x-mr-pw-tstats"),
         )
         np.testing.assert_array_almost_equal(
-            slice_.pairwise_significance_p_vals[1],
+            slice_.pairwise_significance_p_vals(1),
             load_python_expression("mr-x-mr-pw-pvals"),
         )
 
@@ -376,14 +376,14 @@ class TestOverlapsPairwiseSignificance(TestCase):
         slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats[0],
+            slice_.pairwise_significance_t_stats(0),
             [
                 [0.0, -1.22474487, -2.44948974],
                 [0.0, 1.41421356, 1.41421356],
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals[0],
+            slice_.pairwise_significance_p_vals(0),
             [
                 [0.0, 0.43590578, 0.24675171],
                 [0.0, np.nan, np.nan],
@@ -394,14 +394,14 @@ class TestOverlapsPairwiseSignificance(TestCase):
         slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats[1],
+            slice_.pairwise_significance_t_stats(1),
             [
                 [1.22474487, 0.0, -1.22474487],
                 [-1.41421356, 0.0, np.nan],
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals[1],
+            slice_.pairwise_significance_p_vals(1),
             [
                 [0.43590578, 0.0, 0.43590578],
                 [np.nan, 0.0, np.nan],
@@ -412,14 +412,14 @@ class TestOverlapsPairwiseSignificance(TestCase):
         slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats[2],
+            slice_.pairwise_significance_t_stats(2),
             [
                 [2.44948974, 1.22474487, 0.0],
                 [-1.41421356, np.nan, 0.0],
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals[2],
+            slice_.pairwise_significance_p_vals(2),
             [
                 [0.24675171, 0.43590578, 0.0],
                 [np.nan, np.nan, 0.0],
@@ -430,7 +430,7 @@ class TestOverlapsPairwiseSignificance(TestCase):
         slice_ = Cube(OL.CAT_X_MR_REALISTIC_EXAMPLE).partitions[0]
 
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats[4],
+            slice_.pairwise_significance_t_stats(4),
             [
                 [
                     -3.9146295258075634,
@@ -451,7 +451,7 @@ class TestOverlapsPairwiseSignificance(TestCase):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals[4],
+            slice_.pairwise_significance_p_vals(4),
             [
                 [
                     0.0001337008782529292,
@@ -476,7 +476,7 @@ class TestOverlapsPairwiseSignificance(TestCase):
         slice_ = Cube(OL.MR_X_MR).partitions[0]
 
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats[1],
+            slice_.pairwise_significance_t_stats(1),
             [
                 [-1.11803399, 0.0, 1.82574186],
                 [1.47709789, 0.0, 3.46410162],
@@ -484,7 +484,7 @@ class TestOverlapsPairwiseSignificance(TestCase):
             ],
         )
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals[1],
+            slice_.pairwise_significance_p_vals(1),
             [
                 [0.34501476, 0.0, 0.1653704],
                 [0.21370636, 0.0, 0.02572142],

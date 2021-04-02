@@ -177,36 +177,24 @@ class Assembler(object):
         """
         return self._assemble_matrix(self._measures.means.blocks)
 
-    @lazyproperty
-    def pairwise_significance_p_vals(self):
-        """3D optional np.float64 ndarray of overlaps-p_vals matrices for each subvar.
+    def pairwise_significance_p_vals(self, subvar_idx):
+        """2D optional np.float64 ndarray of overlaps-p_vals matrices for subvar idx.
 
         Raises `ValueError if the cube-result does not include `overlaps`
         and `valid_overlaps` cube-measures.
         """
-        return np.array(
-            [
-                self._assemble_matrix(
-                    self._measures.pairwise_p_vals_for_subvar(subvar_idx).blocks
-                )
-                for subvar_idx in range(len(self.column_labels))
-            ]
+        return self._assemble_matrix(
+            self._measures.pairwise_p_vals_for_subvar(subvar_idx).blocks
         )
 
-    @lazyproperty
-    def pairwise_significance_t_stats(self):
-        """3D optional np.float64 ndarray of overlaps-t_stats matrices for each subvar.
+    def pairwise_significance_t_stats(self, subvar_idx):
+        """2D optional np.float64 ndarray of overlaps-t_stats matrices for subvar idx.
 
         Raises `ValueError if the cube-result does not include `overlaps`
         and `valid_overlaps` cube-measures.
         """
-        return np.array(
-            [
-                self._assemble_matrix(
-                    self._measures.pairwise_t_stats_for_subvar(subvar_idx).blocks
-                )
-                for subvar_idx in range(len(self.column_labels))
-            ]
+        return self._assemble_matrix(
+            self._measures.pairwise_t_stats_for_subvar(subvar_idx).blocks
         )
 
     @lazyproperty
