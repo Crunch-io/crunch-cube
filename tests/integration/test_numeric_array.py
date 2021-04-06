@@ -47,6 +47,20 @@ class DescribeNumericArrays(object):
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 1], [1, 1]]))
 
+    def it_provides_means_for_cat_x_numeric_array(self):
+        slice_ = Cube(
+            NA.NUM_ARR_MEANS_GROUPED_BY_CAT, transforms={"dimension_order": [0, 1]}
+        ).partitions[0]
+
+        assert slice_.means == pytest.approx(
+            np.array(
+                [  # --------Subvars-----------
+                    [87.6666667, 93.3333333, 1],  # Male
+                    [52.5, 50.0, 45.0],  # Female
+                ]
+            )
+        )
+
     @pytest.mark.parametrize(
         "element_transform",
         (
@@ -63,7 +77,7 @@ class DescribeNumericArrays(object):
         slice_ = Cube(
             NA.NUM_ARR_MEANS_GROUPED_BY_CAT, transforms=transforms
         ).partitions[0]
-
+        breakpoint()
         assert slice_.means == pytest.approx(
             np.array(
                 [  # -------Gender-----

@@ -107,13 +107,18 @@ class _BaseCubeMeans(_BaseCubeMeasure):
         if cube.means is None:
             raise ValueError("cube-result does not contain cube-means measure")
         dimension_types = cube.dimension_types[-2:]
+        dimension_types_ordered = [dimension_types[i] for i in cube.dimension_order]
         CubeMeansCls = (
             _MrXMrCubeMeans
-            if dimension_types == (DT.MR, DT.MR)
+            if dimension_types_ordered == (DT.MR, DT.MR)
             else _MrXCatCubeMeans
-            if dimension_types[0] == DT.MR
+            if dimension_types_ordered[0] == DT.MR
             else _CatXMrCubeMeans
-            if dimension_types[1] == DT.MR
+            if dimension_types_ordered[1] == DT.MR
+            else _NumArrayXCatCubeMeans
+            if dimension_types_ordered[0] == DT.NUM_ARRAY
+            else _CatXNumArrayCubeMeans
+            if dimension_types_ordered[1] == DT.NUM_ARRAY
             else _CatXCatCubeMeans
         )
         return CubeMeansCls(
@@ -135,6 +140,24 @@ class _CatXCatCubeMeans(_BaseCubeMeans):
     def means(self):
         """2D np.float64 ndarray of means for each valid matrix cell."""
         return self._means
+
+
+class _CatXNumArrayCubeMeans(_BaseCubeMeans):
+    """Means cube-measure for a slice with no MR dimensions."""
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of means for each valid matrix cell."""
+        return self._means
+
+
+class _NumArrayXCatCubeMeans(_BaseCubeMeans):
+    """Means cube-measure for a slice with no MR dimensions."""
+
+    @lazyproperty
+    def means(self):
+        """2D np.float64 ndarray of means for each valid matrix cell."""
+        return self._means.T
 
 
 class _CatXMrCubeMeans(_BaseCubeMeans):
@@ -1155,7 +1178,7 @@ class BaseCubeResultMatrix(object):
             _NumArrayXMrMatrix
             if dimension_types == (DT.NUM_ARRAY, DT.MR)
             else _NumArrayXCatMatrix
-            if dimension_types[0] == DT.NUM_ARRAY
+            if dimension_types[1] == DT.NUM_ARRAY
             else _MrXMrMatrix
             if dimension_types == (DT.MR, DT.MR)
             else _MrXCatMatrix
@@ -2079,7 +2102,7 @@ class _NumArrayXCatMatrix(_CatXCatMatrix):
         In this case the columns base correspond to the unweighted counts that for the
         numeric arrays cases corresponds to the valid counts measure result.
         """
-        return self._unweighted_counts
+        return self._unweighted_counts.T
 
 
 class _NumArrayXMrMatrix(_CatXMrMatrix):
@@ -2093,4 +2116,4 @@ class _NumArrayXMrMatrix(_CatXMrMatrix):
         the column base is the unweighted counts sliced for all the subvar on the NUM
         ARRAY dimension and all the subvars on the MR (selected) one.
         """
-        return self._unweighted_counts[:, :, 0]
+        return self._unweighted_counts[:, :, 0].T

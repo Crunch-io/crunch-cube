@@ -271,6 +271,18 @@ class Cube(object):
         return self.dimensions[0].description
 
     @lazyproperty
+    def dimension_order(self):
+        """Optional list of integer representing the dimension order to respect.
+
+        E.G.
+        NUMARRAYxCAT Dim Order [1, 0] -> Num array subvar on the row, cats on cols.
+        CATx_NUMARRAY Dim Order [0, 1] -> Num array subvar on the cols, cats on rows.
+        """
+        # return [0, 1]
+        dimension_order_transform = self._transforms_dict.get("dimension_order")
+        return dimension_order_transform or self._all_dimensions.dimension_order
+
+    @lazyproperty
     def dimension_types(self):
         """Tuple of DIMENSION_TYPE member for each dimension of cube."""
         return tuple(d.dimension_type for d in self.dimensions)
@@ -526,7 +538,7 @@ class Cube(object):
             # ---In case of numeric arrays, we need to inflate the row dimension
             # ---according to the mean subvariables. For each subvar the row dimension
             # ---will have a new element related to the subvar metadata.
-            dimensions.insert(0, self._numeric_array_dimension)
+            dimensions.append(self._numeric_array_dimension)
         return cube_dict
 
     @lazyproperty
@@ -636,7 +648,8 @@ class Cube(object):
         )
         # The dimension dimension order can change in case of numeric array variable on
         # the row, and so valid indices needs to be returned in an ordered way.
-        return tuple(valid_idxs[i] for i in self._all_dimensions.dimension_order)
+        return valid_idxs
+        return tuple(valid_idxs[i] for i in self.dimension_order)
 
 
 class _Measures(object):

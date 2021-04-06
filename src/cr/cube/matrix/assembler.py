@@ -551,7 +551,9 @@ class Assembler(object):
 
         Negative values represent inserted subtotal-column locations.
         """
-        return _BaseOrderHelper.column_display_order(self._dimensions, self._measures)
+        return _BaseOrderHelper.column_display_order(
+            self._dimensions_with_order, self._measures
+        )
 
     @lazyproperty
     def _column_subtotals(self):
@@ -561,7 +563,7 @@ class Assembler(object):
     @lazyproperty
     def _columns_dimension(self):
         """The `Dimension` object representing column elements in this matrix."""
-        return self._dimensions[1]
+        return self._dimensions_with_order[1]
 
     @lazyproperty
     def _cube_result_matrix(self):
@@ -574,6 +576,10 @@ class Assembler(object):
         return BaseCubeResultMatrix.factory(
             self._cube, self._dimensions, self._slice_idx
         )
+
+    @lazyproperty
+    def _dimensions_with_order(self):
+        return tuple(self._dimensions[i] for i in self._cube.dimension_order)
 
     def _dimension_labels(self, dimension, order):
         """1D str ndarray of name for each vector of `dimension`.
@@ -598,7 +604,9 @@ class Assembler(object):
 
         Negative values represent inserted subtotal-row locations.
         """
-        return _BaseOrderHelper.row_display_order(self._dimensions, self._measures)
+        return _BaseOrderHelper.row_display_order(
+            self._dimensions_with_order, self._measures
+        )
 
     @lazyproperty
     def _row_subtotals(self):
@@ -608,7 +616,7 @@ class Assembler(object):
     @lazyproperty
     def _rows_dimension(self):
         """The `Dimension` object representing row elements in this matrix."""
-        return self._dimensions[0]
+        return self._dimensions_with_order[0]
 
 
 class _BaseOrderHelper(object):
