@@ -126,6 +126,48 @@ class DescribeIntegratedCube(object):
 
         assert cube.n_responses == 5
 
+    def it_provides_multiple_measures_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+        cube = Cube(NA.NUM_ARR_MULTI_NUMERIC_MEASURES_GROUPED_BY_CAT)
+
+        assert cube.sums.tolist() == [
+            [183.0, 105.0, 43.0, 31.0],
+            [230.0, 71.0, 79.0, 123.0],
+            [25.0, 58.0, 148.0, 72.0],
+        ]
+        assert cube.means == pytest.approx(
+            np.array(
+                [
+                    [61.0, 52.5, 14.333333, 10.333333],
+                    [76.6666667, 35.5, 26.333333, 41.0],
+                    [8.333333, 29.0, 49.333333, 24.0],
+                ]
+            )
+        )
+        assert cube.covariance == pytest.approx(
+            np.array(
+                [
+                    [
+                        [1623.0, 1107.5, 155.5],
+                        [312.5, -362.5, 400.0],
+                        [217.333333, 124.333333, 11.333333],
+                        [25.333333, 73.0, 12.0],
+                    ],
+                    [
+                        [1107.5, 758.333333, 124.166666],
+                        [-362.5, 420.5, -464.0],
+                        [124.333333, 134.333333, -189.666666],
+                        [73.0, 937.0, -639.5],
+                    ],
+                    [
+                        [155.5, 124.166666, 140.333333],
+                        [400.0, -464.0, 512.0],
+                        [11.333333, -189.666666, 609.333333],
+                        [12.0, -639.5, 631.0],
+                    ],
+                ]
+            )
+        )
+
 
 class DescribeIntegrated_Measures(object):
     """Integration-tests that exercise the `cr.cube.cube._Measures` object."""

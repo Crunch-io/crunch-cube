@@ -259,6 +259,15 @@ class Cube(object):
         )
 
     @lazyproperty
+    def covariance(self):
+        """Optional float64 ndarray of the cube_covariance if the measure exists."""
+        if self._measures.covariance is None:
+            return None
+        return self._measures.covariance.raw_cube_array[self._valid_idxs].astype(
+            np.float64
+        )
+
+    @lazyproperty
     def cube_index(self):
         """Offset of this cube within its CubeSet."""
         return 0 if self._cube_idx_arg is None else self._cube_idx_arg
@@ -648,6 +657,17 @@ class _Measures(object):
         self._cube_idx_arg = cube_idx_arg
 
     @lazyproperty
+    def covariance(self):
+        """Optional _CovarianceMeasure object providing access to covariance values.
+
+        Will be None if covariance is not available int the cube response.
+        """
+        covariance = _CovarianceMeasure(
+            self._cube_dict, self._all_dimensions, self._cube_idx_arg
+        )
+        return None if covariance.raw_cube_array is None else covariance
+
+    @lazyproperty
     def means(self):
         """Optional _MeanMeasure object providing access to means values.
 
@@ -823,6 +843,43 @@ class _BaseMeasure(object):
         even if the basic cube has the same original shape.
         """
         return self._all_dimensions.shape
+
+
+class _CovarianceMeasure(_BaseMeasure):
+    """Covariance values from a cube-response."""
+
+    @lazyproperty
+    def _flat_values(self):
+        """Optional 1D np.ndarray of np.float64 cov values as found in cube response.
+
+        Covariance data may include missing items represented by a dict like
+        {'?': -1} in the cube response. These are replaced by np.nan in the
+        returned value.
+        """
+        if self._measure_payload is None:
+            return None
+        return np.array(
+            tuple(
+                np.nan if type(x) is dict else x for x in self._measure_payload["data"]
+            ),
+            dtype=np.float64,
+        ).flatten()
+
+    @lazyproperty
+    def _measure_payload(self):
+        """dict representing the covariance measure part of the cube response."""
+        return self._cube_dict["result"].get("measures", {}).get("covariance")
+
+    @lazyproperty
+    def _numeric_measure_subvariables(self):
+        """List of subvariables, typically for numeric arrays."""
+        metadata = self._measure_payload.get("metadata", {})
+        return metadata.get("type", {}).get("subvariables", [])
+
+    @lazyproperty
+    def _shape(self):
+        """tuple(int) representing the shape of the covariance."""
+        return self._all_dimensions.shape + (len(self._numeric_measure_subvariables),)
 
 
 class _MeanMeasure(_BaseMeasure):

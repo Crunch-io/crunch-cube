@@ -1,0 +1,485 @@
+{
+  "query": {
+    "measures": {
+      "valid_count_unweighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "9bf24ea26b364a0897d77471695f4c88"
+          }
+        ]
+      },
+      "sum": {
+        "function": "cube_sum",
+        "args": [
+          {
+            "variable": "9bf24ea26b364a0897d77471695f4c88"
+          }
+        ]
+      },
+      "covariance": {
+        "function": "cube_covariance",
+        "args": [
+          {
+            "variable": "9bf24ea26b364a0897d77471695f4c88"
+          }
+        ]
+      },
+      "stddev": {
+        "function": "cube_stddev",
+        "args": [
+          {
+            "variable": "9bf24ea26b364a0897d77471695f4c88"
+          }
+        ]
+      },
+      "mean": {
+        "function": "cube_mean",
+        "args": [
+          {
+            "variable": "9bf24ea26b364a0897d77471695f4c88"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "variable": "2dd2bf09e1b247df9d579fbee60bb2f0"
+      }
+    ],
+    "weight": null
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "dimensions": [
+      {
+        "derived": false,
+        "references": {
+          "alias": "Country",
+          "name": "Country"
+        },
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": null,
+              "id": 1,
+              "name": "Italy",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": 2,
+              "name": "US",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": 3,
+              "name": "Spain",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": 4,
+              "name": "Japan",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": -1,
+              "name": "No Data",
+              "missing": true
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 0,
+    "measures": {
+      "valid_count_unweighted": {
+        "data": [
+          3,
+          3,
+          3,
+          2,
+          2,
+          2,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          0,
+          0,
+          0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "uniform_basis": false,
+            "name": "Movies",
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the Par."
+              }
+            ]
+          },
+          "type": {
+            "integer": false,
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        }
+      },
+      "sum": {
+        "data": [
+          183.0,
+          230.0,
+          25.0,
+          105.0,
+          71.0,
+          58.0,
+          43.0,
+          79.0,
+          148.0,
+          31.0,
+          123.0,
+          72.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "uniform_basis": false,
+            "name": "Movies",
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the Par."
+              }
+            ]
+          },
+          "type": {
+            "integer": null,
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        }
+      },
+      "covariance": {
+        "data": [
+          1623.0,
+          1107.5,
+          155.5,
+          1107.5,
+          758.3333333333,
+          124.1666666667,
+          155.5,
+          124.1666666667,
+          140.3333333333,
+          312.5,
+          -362.5,
+          400.0,
+          -362.5,
+          420.5,
+          -464.0,
+          400.0,
+          -464.0,
+          512.0,
+          217.3333333333,
+          124.3333333333,
+          11.3333333333,
+          124.3333333333,
+          134.3333333333,
+          -189.6666666667,
+          11.3333333333,
+          -189.6666666667,
+          609.3333333333,
+          25.3333333333,
+          73.0,
+          12.0,
+          73.0,
+          937.0,
+          -639.5,
+          12.0,
+          -639.5,
+          631.0,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": false,
+          "references": {
+            "alias": "Movies",
+            "uniform_basis": false,
+            "name": "Movies",
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the Par."
+              }
+            ]
+          },
+          "type": {
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "missing_rules": {},
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            }
+          }
+        }
+      },
+      "stddev": {
+        "data": [
+          40.286474157,
+          27.5378527364,
+          11.8462370959,
+          17.6776695297,
+          20.5060966544,
+          22.627416998,
+          14.7422295917,
+          11.5902257671,
+          24.6846781088,
+          5.0332229568,
+          30.61045573,
+          25.1197133742,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "uniform_basis": false,
+            "name": "Movies",
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the Par."
+              }
+            ]
+          },
+          "type": {
+            "integer": null,
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "missing_rules": {}
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          61.0,
+          76.6666666667,
+          8.3333333333,
+          52.5,
+          35.5,
+          29.0,
+          14.3333333333,
+          26.3333333333,
+          49.3333333333,
+          10.3333333333,
+          41.0,
+          24.0,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "uniform_basis": false,
+            "name": "Movies",
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the Par."
+              }
+            ]
+          },
+          "type": {
+            "integer": true,
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "missing_rules": {}
+          }
+        }
+      }
+    },
+    "n": 11,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 11,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 11,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 11,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 11,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 11,
+      "weighted_n": 11
+    },
+    "filtered": {
+      "unweighted_n": 11,
+      "weighted_n": 11
+    },
+    "counts": [
+      3,
+      2,
+      3,
+      3,
+      0
+    ],
+    "element": "crunch:cube"
+  }
+}
