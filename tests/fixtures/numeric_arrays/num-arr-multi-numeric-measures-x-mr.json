@@ -1,0 +1,653 @@
+{
+  "query": {
+    "measures": {
+      "count": {
+        "function": "cube_count",
+        "args": []
+      },
+      "valid_count_unweighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "5208432eb22e43c88d601520b062eedd"
+          }
+        ]
+      },
+      "sum": {
+        "function": "cube_sum",
+        "args": [
+          {
+            "variable": "5208432eb22e43c88d601520b062eedd"
+          }
+        ]
+      },
+      "stddev": {
+        "function": "cube_stddev",
+        "args": [
+          {
+            "variable": "5208432eb22e43c88d601520b062eedd"
+          }
+        ]
+      },
+      "mean": {
+        "function": "cube_mean",
+        "args": [
+          {
+            "variable": "5208432eb22e43c88d601520b062eedd"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "function": "dimension",
+        "args": [
+          {
+            "function": "as_selected",
+            "args": [
+              {
+                "variable": "4fc46d385dcd4940bfd97794dacd9da6"
+              }
+            ]
+          },
+          {
+            "value": "subvariables"
+          }
+        ]
+      },
+      {
+        "function": "as_selected",
+        "args": [
+          {
+            "variable": "4fc46d385dcd4940bfd97794dacd9da6"
+          }
+        ]
+      }
+    ],
+    "weight": "http:\/\/127.0.0.1:8080\/datasets\/03a093a767784455959dc93da9834ae6\/variables\/19d549d65717451f839c52194efbe5c2\/"
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "dimensions": [
+      {
+        "references": {
+          "alias": "Pet Owned Multiple Response",
+          "uniform_basis": false,
+          "subreferences": [
+            {
+              "name": "Cat",
+              "notes": null,
+              "alias": "allpets_1__1",
+              "type": "categorical",
+              "categories": [],
+              "description": ""
+            },
+            {
+              "name": "Dog",
+              "notes": null,
+              "alias": "allpets_2__1",
+              "type": "categorical",
+              "categories": [],
+              "description": ""
+            },
+            {
+              "name": "Bird",
+              "notes": null,
+              "alias": "allpets_3__1",
+              "type": "categorical",
+              "categories": [],
+              "description": ""
+            }
+          ],
+          "description": "Do you have any of these animals as pets? Please select all that apply.",
+          "name": "Pet Owned Multiple Response"
+        },
+        "derived": true,
+        "type": {
+          "subtype": {
+            "class": "variable"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "derived": false,
+                "references": {
+                  "name": "Cat",
+                  "notes": null,
+                  "alias": "allpets_1__1",
+                  "type": "categorical",
+                  "categories": [],
+                  "description": ""
+                },
+                "id": "0001"
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "derived": false,
+                "references": {
+                  "name": "Dog",
+                  "notes": null,
+                  "alias": "allpets_2__1",
+                  "type": "categorical",
+                  "categories": [],
+                  "description": ""
+                },
+                "id": "0002"
+              },
+              "missing": false
+            },
+            {
+              "id": 3,
+              "value": {
+                "derived": false,
+                "references": {
+                  "name": "Bird",
+                  "notes": null,
+                  "alias": "allpets_3__1",
+                  "type": "categorical",
+                  "categories": [],
+                  "description": ""
+                },
+                "id": "0003"
+              },
+              "missing": false
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "derived": true,
+        "references": {
+          "alias": "Pet Owned Multiple Response",
+          "uniform_basis": false,
+          "description": "Do you have any of these animals as pets? Please select all that apply.",
+          "name": "Pet Owned Multiple Response",
+          "subreferences": [
+            {
+              "name": "Cat",
+              "notes": null,
+              "alias": "allpets_1__1",
+              "type": "categorical",
+              "categories": [],
+              "description": ""
+            },
+            {
+              "name": "Dog",
+              "notes": null,
+              "alias": "allpets_2__1",
+              "type": "categorical",
+              "categories": [],
+              "description": ""
+            },
+            {
+              "name": "Bird",
+              "notes": null,
+              "alias": "allpets_3__1",
+              "type": "categorical",
+              "categories": [],
+              "description": ""
+            }
+          ]
+        },
+        "type": {
+          "ordinal": false,
+          "subvariables": [
+            "0001",
+            "0002",
+            "0003"
+          ],
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "selected": true,
+              "id": 1,
+              "missing": false,
+              "name": "Selected"
+            },
+            {
+              "numeric_value": 0,
+              "missing": false,
+              "id": 0,
+              "name": "Other"
+            },
+            {
+              "numeric_value": null,
+              "missing": true,
+              "id": -1,
+              "name": "No Data"
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 3,
+    "measures": {
+      "count": {
+        "data": [
+          2.5025,
+          1.0725,
+          9.425,
+          3.9758333333,
+          1.4733333333,
+          7.5508333333,
+          3.9758333333,
+          2.21,
+          6.8141666667
+        ],
+        "n_missing": 3,
+        "metadata": {
+          "references": {},
+          "derived": true,
+          "type": {
+            "integer": false,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "valid_count_unweighted": {
+        "data": [
+          4,
+          4,
+          2,
+          4,
+          4,
+          3,
+          4,
+          4,
+          11,
+          9,
+          11,
+          12,
+          5,
+          5,
+          4,
+          5,
+          3,
+          1,
+          3,
+          3,
+          11,
+          10,
+          10,
+          12,
+          5,
+          4,
+          5,
+          5,
+          6,
+          5,
+          5,
+          6,
+          8,
+          7,
+          7,
+          9
+        ],
+        "n_missing": 3,
+        "metadata": {
+          "references": {
+            "uniform_basis": false,
+            "description": "Testing-Description Text",
+            "subreferences": [
+              {
+                "alias": "My c1 H",
+                "name": "My c1 H"
+              },
+              {
+                "alias": "My c3",
+                "name": "My c3"
+              },
+              {
+                "alias": "My c2 H",
+                "name": "My c2 H"
+              },
+              {
+                "alias": "My c4",
+                "name": "My c4"
+              }
+            ],
+            "notes": "Test note",
+            "alias": "Numeric arr with four subvariables appended",
+            "name": "Numeric arr with four subvariables"
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "subvariables": [
+              "0001",
+              "0003",
+              "0002",
+              "0004"
+            ]
+          }
+        }
+      },
+      "sum": {
+        "data": [
+          153.725,
+          160.875,
+          100.1,
+          175.175,
+          75.075,
+          75.075,
+          75.075,
+          75.075,
+          540.9083333333,
+          489.9916666667,
+          467.8916666667,
+          356.85,
+          278.3083333333,
+          270.9416666667,
+          140.9416666667,
+          146.0333333333,
+          95.7666666667,
+          51.5666666667,
+          88.4,
+          51.5666666667,
+          395.6333333333,
+          403.4333333333,
+          413.725,
+          409.5,
+          213.3083333333,
+          197.7083333333,
+          270.9416666667,
+          166.4,
+          147.3333333333,
+          162.0666666667,
+          95.7666666667,
+          117.8666666667,
+          409.0666666667,
+          366.1666666667,
+          276.3583333333,
+          322.8333333333
+        ],
+        "n_missing": 3,
+        "metadata": {
+          "references": {
+            "uniform_basis": false,
+            "description": "Testing-Description Text",
+            "subreferences": [
+              {
+                "alias": "My c1 H",
+                "name": "My c1 H"
+              },
+              {
+                "alias": "My c3",
+                "name": "My c3"
+              },
+              {
+                "alias": "My c2 H",
+                "name": "My c2 H"
+              },
+              {
+                "alias": "My c4",
+                "name": "My c4"
+              }
+            ],
+            "notes": "Test note",
+            "alias": "Numeric arr with four subvariables appended",
+            "name": "Numeric arr with four subvariables"
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "subvariables": [
+              "0001",
+              "0003",
+              "0002",
+              "0004"
+            ]
+          }
+        }
+      },
+      "stddev": {
+        "data": [
+          34.9927106112,
+          6.9985421222,
+          {
+            "?": -8
+          },
+          0.0,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          12.9217155923,
+          8.2330099201,
+          21.515057889,
+          23.2489840555,
+          14.0583964393,
+          10.906264729,
+          36.489750407,
+          32.4632843278,
+          7.0710678119,
+          {
+            "?": -8
+          },
+          0.0,
+          21.2132034356,
+          19.2735136416,
+          5.3854425649,
+          7.4658763319,
+          20.6604279534,
+          14.0980550766,
+          9.0645940969,
+          4.4863520946,
+          36.3822702624,
+          25.1661147842,
+          5.7735026919,
+          7.0710678119,
+          15.2752523165,
+          11.0720318659,
+          4.4653730928,
+          25.3303994932,
+          22.1156823171
+        ],
+        "n_missing": 3,
+        "metadata": {
+          "references": {
+            "uniform_basis": false,
+            "description": "Testing-Description Text",
+            "subreferences": [
+              {
+                "alias": "My c1 H",
+                "name": "My c1 H"
+              },
+              {
+                "alias": "My c3",
+                "name": "My c3"
+              },
+              {
+                "alias": "My c2 H",
+                "name": "My c2 H"
+              },
+              {
+                "alias": "My c4",
+                "name": "My c4"
+              }
+            ],
+            "notes": "Test note",
+            "alias": "Numeric arr with four subvariables appended",
+            "name": "Numeric arr with four subvariables"
+          },
+          "derived": true,
+          "type": {
+            "integer": null,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "subvariables": [
+              "0001",
+              "0003",
+              "0002",
+              "0004"
+            ]
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          61.4285714286,
+          64.2857142857,
+          70.0,
+          70.0,
+          70.0,
+          70.0,
+          70.0,
+          70.0,
+          64.7600518807,
+          67.5074626866,
+          53.8528678304,
+          37.8620689655,
+          70.0,
+          68.1471389646,
+          43.5117056856,
+          36.7302452316,
+          65.0,
+          70.0,
+          60.0,
+          35.0,
+          61.0702341137,
+          65.9115044248,
+          63.8628762542,
+          54.2324246772,
+          53.651226158,
+          61.0367892977,
+          68.1471389646,
+          41.8528610354,
+          66.6666666667,
+          73.3333333333,
+          65.0,
+          53.3333333333,
+          71.2452830189,
+          68.0080482897,
+          48.1320754717,
+          47.3767885533
+        ],
+        "n_missing": 3,
+        "metadata": {
+          "references": {
+            "uniform_basis": false,
+            "description": "Testing-Description Text",
+            "subreferences": [
+              {
+                "alias": "My c1 H",
+                "name": "My c1 H"
+              },
+              {
+                "alias": "My c3",
+                "name": "My c3"
+              },
+              {
+                "alias": "My c2 H",
+                "name": "My c2 H"
+              },
+              {
+                "alias": "My c4",
+                "name": "My c4"
+              }
+            ],
+            "notes": "Test note",
+            "alias": "Numeric arr with four subvariables appended",
+            "name": "Numeric arr with four subvariables"
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "subvariables": [
+              "0001",
+              "0003",
+              "0002",
+              "0004"
+            ]
+          }
+        }
+      }
+    },
+    "n": 20,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 13.0,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 13.0,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 20,
+      "weighted_n": 13.0
+    },
+    "filtered": {
+      "unweighted_n": 20,
+      "weighted_n": 13.0
+    },
+    "counts": [
+      4,
+      4,
+      12,
+      5,
+      3,
+      12,
+      5,
+      6,
+      9
+    ],
+    "element": "crunch:cube"
+  }
+}

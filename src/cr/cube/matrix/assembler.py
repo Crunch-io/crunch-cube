@@ -197,6 +197,24 @@ class Assembler(object):
             self._measures.pairwise_t_stats_for_subvar(subvar_idx).blocks
         )
 
+    def pairwise_significance_means_p_vals(self, column_idx):
+        """2D optional np.float64 ndarray of mean difference p_vals for column idx.
+
+        Raises `ValueError if the cube-result does not include `mean` cube-measures.
+        """
+        return self._assemble_matrix(
+            self._measures.pairwise_significance_means_p_vals(column_idx).blocks
+        )
+
+    def pairwise_significance_means_t_stats(self, column_idx):
+        """2D optional np.float64 ndarray of mean difference t_stats for column idx.
+
+        Raises `ValueError if the cube-result does not include `mean` cube-measures.
+        """
+        return self._assemble_matrix(
+            self._measures.pairwise_significance_means_t_stats(column_idx).blocks
+        )
+
     @lazyproperty
     def pvalues(self):
         """2D np.float64/np.nan ndarray of p-value for each matrix cell."""

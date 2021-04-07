@@ -676,6 +676,28 @@ class _Slice(CubePartition):
         # If overlaps are not defined, default to the old-way of calculation
         return PairwiseSignificance(self).values[column_idx].t_stats
 
+    def pairwise_significance_means_p_vals(self, column_idx):
+        """Optional 2D ndarray of means significance p-vals matrices for column idx."""
+        # Significance of means difference is available only is cube contains means.
+        try:
+            return self._assembler.pairwise_significance_means_p_vals(column_idx)
+        except ValueError:
+            raise ValueError(
+                "`.pairwise_significance_means_p_vals` is undefined for a cube-result "
+                "without a mean measure"
+            )
+
+    def pairwise_significance_means_t_stats(self, column_idx):
+        """Optional 2D ndarray of means significance t-stats matrices for column idx."""
+        # Significance of means difference is available only is cube contains means.
+        try:
+            return self._assembler.pairwise_significance_means_t_stats(column_idx)
+        except ValueError:
+            raise ValueError(
+                "`.pairwise_significance_means_t_stats` is undefined for a cube-result "
+                "without a mean measure"
+            )
+
     @lazyproperty
     def pairwise_significance_tests(self):
         """tuple of _ColumnPairwiseSignificance tests.
