@@ -109,6 +109,7 @@ class DescribeIntegratedCube(object):
     def it_provides_valid_counts_for_NUM_ARRAY_GROUPED_BY_CAT(self):
         cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
 
+        assert cube.covariance is None
         assert cube.counts == pytest.approx(np.array([[3, 2], [3, 1], [1, 1]]))
 
     def it_provides_valid_counts_summary_for_NUM_ARRAY_GROUPED_BY_CAT(self):
@@ -167,6 +168,11 @@ class DescribeIntegratedCube(object):
                 ]
             )
         )
+
+    def test_optional_covariance_cube_measure(self):
+        cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
+
+        assert cube.covariance is None
 
 
 class DescribeIntegrated_Measures(object):

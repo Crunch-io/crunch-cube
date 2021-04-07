@@ -53,6 +53,20 @@ class Describe_Slice(object):
             str(e.value)
             == "`.means` is undefined for a cube-result without a mean measure"
         )
+        with pytest.raises(ValueError) as e:
+            slice_.pairwise_significance_means_p_vals(0)
+        assert (
+            str(e.value)
+            == "`.pairwise_significance_means_p_vals` is undefined for a cube-result"
+            " without a mean measure"
+        )
+        with pytest.raises(ValueError) as e:
+            slice_.pairwise_significance_means_t_stats(0)
+        assert (
+            str(e.value)
+            == "`.pairwise_significance_means_t_stats` is undefined for a cube-result"
+            " without a mean measure"
+        )
         assert pytest.approx(slice_.population_counts) == [
             [3000.333, 1200.133],
             [3000.333, 1800.200],
