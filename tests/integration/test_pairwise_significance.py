@@ -541,3 +541,20 @@ class TestMeanDifferenceSignificance(object):
             ),
             nan_ok=True,
         )
+
+    def test_mean_diff_significance_indices_for_numeric_array_grouped_by_cat(self):
+        transforms = {"pairwise_indices": {"alpha": [0.05, 0.08]}}
+        slice_ = Cube(
+            NA.NUM_ARR_MULTI_NUMERIC_MEASURES_GROUPED_BY_CAT, transforms=transforms
+        ).partitions[0]
+
+        assert slice_.pairwise_means_indices.tolist() == [
+            [(), (), (0, 1), (0, 1)],
+            [(), (0,), (0,), (0,)],
+            [(1, 2, 3), (2,), (), (2,)],
+        ]
+        assert slice_.pairwise_means_indices_alt.tolist() == [
+            [(), (), (0, 1), (0, 1)],
+            [(), (0,), (0, 3), (0,)],
+            [(1, 2, 3), (2,), (), (2,)],
+        ]

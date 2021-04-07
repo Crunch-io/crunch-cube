@@ -177,6 +177,15 @@ class Assembler(object):
         """
         return self._assemble_matrix(self._measures.means.blocks)
 
+    def pairwise_means_indices(self, alpha, only_larger):
+        """2D optional ndarray of tuple of int column-idxs means pairwise-t threshold.
+
+        Raises `ValueError if the cube-result does not include `means` cube-measures.
+        """
+        return self._assemble_matrix(
+            self._measures.pairwise_means_indices(alpha, only_larger).blocks
+        )
+
     def pairwise_significance_p_vals(self, subvar_idx):
         """2D optional np.float64 ndarray of overlaps-p_vals matrices for subvar idx.
 
