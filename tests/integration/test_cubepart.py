@@ -54,6 +54,13 @@ class Describe_Slice(object):
             == "`.means` is undefined for a cube-result without a mean measure"
         )
         with pytest.raises(ValueError) as e:
+            slice_.pairwise_means_indices
+        assert (
+            str(e.value) == "`.pairwise_means_indices` is undefined for a cube-result"
+            " without a mean measure"
+        )
+        assert slice_.pairwise_means_indices_alt is None
+        with pytest.raises(ValueError) as e:
             slice_.pairwise_significance_means_p_vals(0)
         assert (
             str(e.value)

@@ -558,3 +558,35 @@ class TestMeanDifferenceSignificance(object):
             [(), (0,), (0, 3), (0,)],
             [(1, 2, 3), (2,), (), (2,)],
         ]
+
+    def but_it_raises_an_error_when_mean_diff_significance_is_not_available(self):
+        transforms = {"pairwise_indices": {"alpha": [0.05, 0.08]}}
+        slice_ = Cube(CR.CAT_X_CAT, transforms=transforms).partitions[0]
+
+        with pytest.raises(ValueError) as e:
+            slice_.pairwise_means_indices
+        assert (
+            str(e.value) == "`.pairwise_means_indices` is undefined for a cube-result"
+            " without a mean measure"
+        )
+        with pytest.raises(ValueError) as e:
+            slice_.pairwise_means_indices_alt
+        assert (
+            str(e.value)
+            == "`.pairwise_means_indices_alt` is undefined for a cube-result"
+            " without a mean measure"
+        )
+        with pytest.raises(ValueError) as e:
+            slice_.pairwise_significance_means_p_vals(0)
+        assert (
+            str(e.value)
+            == "`.pairwise_significance_means_p_vals` is undefined for a cube-result"
+            " without a mean measure"
+        )
+        with pytest.raises(ValueError) as e:
+            slice_.pairwise_significance_means_t_stats(0)
+        assert (
+            str(e.value)
+            == "`.pairwise_significance_means_t_stats` is undefined for a cube-result"
+            " without a mean measure"
+        )
