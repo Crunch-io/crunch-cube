@@ -1460,6 +1460,34 @@ class _Strand(CubePartition):
     def name(self):
         return self.rows_dimension_name
 
+    def pairwise_significance_means_p_vals(self, column_idx):
+        """Optional 1D np.float64 ndarray of p-vals for means differences.
+
+        Raises ValueError when accessed on a cube-result that does not contain a mean
+        cube-measure.
+        """
+        try:
+            return self._assembler.pairwise_significance_means_p_vals(column_idx)
+        except ValueError:
+            raise ValueError(
+                "`.pairwise_significance_means_p_vals` is undefined for a cube-result "
+                "without a mean measure"
+            )
+
+    def pairwise_significance_means_t_stats(self, column_idx):
+        """Optional 1D np.float64 ndarray of t-stats for means differences.
+
+        Raises ValueError when accessed on a cube-result that does not contain a mean
+        cube-measure.
+        """
+        try:
+            return self._assembler.pairwise_significance_means_t_stats(column_idx)
+        except ValueError:
+            raise ValueError(
+                "`.pairwise_significance_means_t_stats` is undefined for a cube-result "
+                "without a mean measure"
+            )
+
     @lazyproperty
     def population_counts(self):
         """1D np.float64 ndarray of population count for each row of strand.

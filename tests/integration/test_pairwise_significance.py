@@ -590,3 +590,52 @@ class TestMeanDifferenceSignificance(object):
             == "`.pairwise_significance_means_t_stats` is undefined for a cube-result"
             " without a mean measure"
         )
+
+    def test_mean_diff_significance_for_cat_mean(self):
+        strand_ = Cube(CR.CAT_MEAN).partitions[0]
+
+        assert strand_.pairwise_significance_means_t_stats(0) == pytest.approx(
+            [0.0, np.nan, -1.8516402, -0.57735027, -3.086067], nan_ok=True
+        )
+        assert strand_.pairwise_significance_means_p_vals(0) == pytest.approx(
+            [1.0, np.nan, 0.068840804, 0.565793610, 0.003030115], nan_ok=True
+        )
+
+    def test_mean_diff_significance_for_cat_x_cat(self):
+        slice_ = Cube(CR.MEAN_CAT_X_CAT).partitions[0]
+
+        assert slice_.pairwise_significance_means_t_stats(1) == pytest.approx(
+            np.array(
+                [
+                    [np.nan, np.nan, np.nan, np.nan],
+                    [-14.1421356, 0.0, -3.1066887, np.nan],
+                    [-1.75662013, 0.0, np.nan, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+        assert slice_.pairwise_significance_means_p_vals(1) == pytest.approx(
+            np.array(
+                [
+                    [np.nan, np.nan, np.nan, np.nan],
+                    [8.21565038e-15, 1.00000000e00, 4.80968355e-03, np.nan],
+                    [8.91869315e-02, 1.00000000e00, np.nan, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+
+    def test_mean_diff_significance_indices_for_cat_x_cat(self):
+        transforms = {"pairwise_indices": {"alpha": [0.05, 0.01]}}
+        slice_ = Cube(CR.MEAN_CAT_X_CAT, transforms=transforms).partitions[0]
+
+        assert slice_.pairwise_means_indices.tolist() == [
+            [(), (), (), ()],
+            [(), (0, 2), (0,), ()],
+            [(), (), (), ()],
+        ]
+        assert slice_.pairwise_means_indices_alt.tolist() == [
+            [(3,), (), (3,), ()],
+            [(), (0, 2), (0,), ()],
+            [(), (), (), ()],
+        ]

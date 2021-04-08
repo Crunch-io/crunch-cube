@@ -5,6 +5,7 @@
 from __future__ import division
 
 import numpy as np
+from scipy.stats import t
 
 from cr.cube.stripe.cubemeasure import CubeMeasures
 from cr.cube.stripe.insertion import NanSubtotals, SumSubtotals
@@ -33,6 +34,18 @@ class StripeMeasures(object):
     def means(self):
         """_Means measure object for this stripe."""
         return _Means(self._rows_dimension, self, self._cube_measures)
+
+    def pairwise_significance_means_p_vals(self, column_idx):
+        """_PairwiseMeansSigPVals measure object for this cube-result."""
+        return _PairwiseMeansSigPVals(
+            self._rows_dimension, self, self._cube_measures, column_idx
+        )
+
+    def pairwise_significance_means_t_stats(self, column_idx):
+        """_PairwiseMeansSigTStats measure object for this cube-result."""
+        return _PairwiseMeansSigTStats(
+            self._rows_dimension, self, self._cube_measures, column_idx
+        )
 
     @lazyproperty
     def pruning_base(self):
@@ -194,6 +207,60 @@ class _Means(_BaseSecondOrderMeasure):
         Mean values cannot be subtotaled and each subtotal value is unconditionally
         np.nan.
         """
+        return NanSubtotals.subtotal_values(self.base_values, self._rows_dimension)
+
+
+class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
+    """Provides pairwise means significance t-stats measure for a stripe.
+
+    Pairwise significance is calculated for each selected column separately.
+    """
+
+    def __init__(self, rows_dimension, measures, cube_measures, selected_column_idx):
+        super(_PairwiseMeansSigTStats, self).__init__(
+            rows_dimension, measures, cube_measures
+        )
+        self._selected_column_idx = selected_column_idx
+
+    @lazyproperty
+    def base_values(self):
+        return self._t_stats
+
+    @lazyproperty
+    def subtotal_values(self):
+        """1D ndarray of np.nan for each row-subtotal."""
+        return NanSubtotals.subtotal_values(self.base_values, self._rows_dimension)
+
+    @lazyproperty
+    def _t_stats(self):
+        """1D np.float64 ndarray of t-stats for means pairwise testing"""
+        means = self._cube_measures.cube_means.means
+        variance = np.power(self._cube_measures.cube_stddev.stddev, 2)
+        bases = self._cube_measures.unweighted_cube_counts.bases
+
+        combined_variance = variance[self._selected_column_idx] + variance
+        diff = means[self._selected_column_idx] - means
+        n = bases[self._selected_column_idx] + bases
+        return diff * np.sqrt(n / combined_variance)
+
+
+class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
+    """Provides pairwise means significance p-vals measure for a stripe.
+
+    Pairwise significance is calculated for each selected column separately.
+    """
+
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of p-vals for means pairwise testing"""
+        bases = self._cube_measures.unweighted_cube_counts.bases
+        n = bases[self._selected_column_idx] + bases
+        df = 2 * (n - 1)
+        return 2 * (1 - t.cdf(abs(self._t_stats), df=df.T))
+
+    @lazyproperty
+    def subtotal_values(self):
+        """1D ndarray of np.nan for each row-subtotal."""
         return NanSubtotals.subtotal_values(self.base_values, self._rows_dimension)
 
 
