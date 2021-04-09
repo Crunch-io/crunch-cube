@@ -632,6 +632,50 @@ class _Slice(CubePartition):
             )
         )
 
+    @lazyproperty
+    def pairwise_means_indices(self):
+        """Optional 2D ndarray of tuple column-idxs significance threshold for mean.
+
+        Like::
+
+            [
+               [(1, 3, 4), (), (0,), (), ()],
+               [(2,), (1, 2), (), (), (0, 3)],
+               [(), (), (), (), ()],
+            ]
+
+        Has the same shape as `.means`. Each int represents the offset of another
+        column in the same row with a confidence interval meeting the threshold defined
+        for this analysis.
+        """
+        try:
+            return self._assembler.pairwise_means_indices(
+                self._alpha, self._only_larger
+            )
+        except ValueError:
+            raise ValueError(
+                "`.pairwise_means_indices` is undefined for a cube-result "
+                "without a mean measure"
+            )
+
+    @lazyproperty
+    def pairwise_means_indices_alt(self):
+        """2D ndarray of tuple of column-idxs meeting alternate threshold for mean.
+
+        This value is None if no alternate threshold has been defined.
+        """
+        if self._alpha_alt is None:
+            return None
+        try:
+            return self._assembler.pairwise_means_indices(
+                self._alpha_alt, self._only_larger
+            )
+        except ValueError:
+            raise ValueError(
+                "`.pairwise_means_indices_alt` is undefined for a cube-result "
+                "without a mean measure"
+            )
+
     def pairwise_significance_p_vals(self, column_idx):
         """2D ndarray of pairwise-significance p-vals matrices for column idx.
 
@@ -675,6 +719,28 @@ class _Slice(CubePartition):
 
         # If overlaps are not defined, default to the old-way of calculation
         return PairwiseSignificance(self).values[column_idx].t_stats
+
+    def pairwise_significance_means_p_vals(self, column_idx):
+        """Optional 2D ndarray of means significance p-vals matrices for column idx."""
+        # Significance of means difference is available only is cube contains means.
+        try:
+            return self._assembler.pairwise_significance_means_p_vals(column_idx)
+        except ValueError:
+            raise ValueError(
+                "`.pairwise_significance_means_p_vals` is undefined for a cube-result "
+                "without a mean measure"
+            )
+
+    def pairwise_significance_means_t_stats(self, column_idx):
+        """Optional 2D ndarray of means significance t-stats matrices for column idx."""
+        # Significance of means difference is available only is cube contains means.
+        try:
+            return self._assembler.pairwise_significance_means_t_stats(column_idx)
+        except ValueError:
+            raise ValueError(
+                "`.pairwise_significance_means_t_stats` is undefined for a cube-result "
+                "without a mean measure"
+            )
 
     @lazyproperty
     def pairwise_significance_tests(self):

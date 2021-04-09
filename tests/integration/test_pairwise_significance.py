@@ -10,7 +10,7 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
 
-from ..fixtures import CR, OL, SM
+from ..fixtures import CR, OL, SM, NA
 from ..util import load_python_expression
 
 
@@ -491,3 +491,141 @@ class TestOverlapsPairwiseSignificance(TestCase):
                 [np.nan, 0.0, np.nan],
             ],
         )
+
+
+class TestMeanDifferenceSignificance(object):
+    def test_mean_diff_significance_for_numeric_array_grouped_by_cat(self):
+        slice_ = Cube(NA.NUM_ARR_MULTI_NUMERIC_MEASURES_GROUPED_BY_CAT).partitions[0]
+
+        assert slice_.pairwise_significance_means_t_stats(0) == pytest.approx(
+            np.array(
+                [
+                    [0.0, 0.7482866, 4.61524529, 5.29463547],
+                    [0.0, 4.64371041, 7.14738681, 3.67511747],
+                    [0.0, -3.13387218, -6.35310465, -2.3932706],
+                ]
+            )
+        )
+        assert slice_.pairwise_significance_means_p_vals(0) == pytest.approx(
+            np.array(
+                [
+                    [1.00000000e00, 4.60526868e-01, 5.38716457e-05, 7.11866628e-06],
+                    [1.00000000e00, 7.34317022e-05, 2.90876736e-08, 8.12768987e-04],
+                    [1.00000000e00, 4.02303806e-03, 3.00760739e-07, 2.23647892e-02],
+                ]
+            )
+        )
+
+    def test_mean_diff_significance_for_numeric_array_x_mr(self):
+        slice_ = Cube(NA.NUM_ARR_MULTI_NUMERIC_MEASURES_X_MR).partitions[0]
+
+        assert slice_.pairwise_significance_means_t_stats(0) == pytest.approx(
+            np.array(
+                [
+                    [0.0, -1.3056921, 1.1842639],
+                    [0.0, -1.7117695, 1.6297401],
+                    [np.nan, np.nan, np.nan],
+                    [np.nan, 5.8872721, 4.4442801],
+                ]
+            ),
+            nan_ok=True,
+        )
+        assert slice_.pairwise_significance_means_p_vals(0) == pytest.approx(
+            np.array(
+                [
+                    [1.00000000e00, 1.96331347e-01, 2.40688158e-01],
+                    [1.00000000e00, 9.17815019e-02, 1.08068956e-01],
+                    [np.nan, np.nan, np.nan],
+                    [np.nan, 1.57810759e-07, 3.57756031e-05],
+                ]
+            ),
+            nan_ok=True,
+        )
+
+    def test_mean_diff_significance_indices_for_numeric_array_grouped_by_cat(self):
+        transforms = {"pairwise_indices": {"alpha": [0.05, 0.08]}}
+        slice_ = Cube(
+            NA.NUM_ARR_MULTI_NUMERIC_MEASURES_GROUPED_BY_CAT, transforms=transforms
+        ).partitions[0]
+
+        assert slice_.pairwise_means_indices.tolist() == [
+            [(), (), (0, 1), (0, 1)],
+            [(), (0,), (0,), (0,)],
+            [(1, 2, 3), (2,), (), (2,)],
+        ]
+        assert slice_.pairwise_means_indices_alt.tolist() == [
+            [(), (), (0, 1), (0, 1)],
+            [(), (0,), (0, 3), (0,)],
+            [(1, 2, 3), (2,), (), (2,)],
+        ]
+
+    def test_mean_diff_significance_is_not_available(self):
+        transforms = {"pairwise_indices": {"alpha": [0.05, 0.08]}}
+        slice_ = Cube(CR.CAT_X_CAT, transforms=transforms).partitions[0]
+
+        with pytest.raises(ValueError) as e:
+            slice_.pairwise_means_indices
+        assert (
+            str(e.value) == "`.pairwise_means_indices` is undefined for a cube-result"
+            " without a mean measure"
+        )
+        with pytest.raises(ValueError) as e:
+            slice_.pairwise_means_indices_alt
+        assert (
+            str(e.value)
+            == "`.pairwise_means_indices_alt` is undefined for a cube-result"
+            " without a mean measure"
+        )
+        with pytest.raises(ValueError) as e:
+            slice_.pairwise_significance_means_p_vals(0)
+        assert (
+            str(e.value)
+            == "`.pairwise_significance_means_p_vals` is undefined for a cube-result"
+            " without a mean measure"
+        )
+        with pytest.raises(ValueError) as e:
+            slice_.pairwise_significance_means_t_stats(0)
+        assert (
+            str(e.value)
+            == "`.pairwise_significance_means_t_stats` is undefined for a cube-result"
+            " without a mean measure"
+        )
+
+    def test_mean_diff_significance_for_cat_x_cat(self):
+        slice_ = Cube(CR.MEAN_CAT_X_CAT).partitions[0]
+
+        assert slice_.pairwise_significance_means_t_stats(1) == pytest.approx(
+            np.array(
+                [
+                    [np.nan, np.nan, np.nan, np.nan],
+                    [-14.1421356, 0.0, -3.1066887, np.nan],
+                    [-1.75662013, 0.0, np.nan, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+        assert slice_.pairwise_significance_means_p_vals(1) == pytest.approx(
+            np.array(
+                [
+                    [np.nan, np.nan, np.nan, np.nan],
+                    [8.21565038e-15, 1.00000000e00, 4.80968355e-03, np.nan],
+                    [8.91869315e-02, 1.00000000e00, np.nan, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+
+    def test_mean_diff_significance_indices_for_cat_x_cat(self):
+        transforms = {"pairwise_indices": {"alpha": [0.05, 0.01]}}
+        slice_ = Cube(CR.MEAN_CAT_X_CAT, transforms=transforms).partitions[0]
+
+        assert slice_.pairwise_means_indices.tolist() == [
+            [(), (), (), ()],
+            [(), (0, 2), (0,), ()],
+            [(), (), (), ()],
+        ]
+        assert slice_.pairwise_means_indices_alt.tolist() == [
+            [(3,), (), (3,), ()],
+            [(), (0, 2), (0,), ()],
+            [(), (), (), ()],
+        ]

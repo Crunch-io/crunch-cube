@@ -1,0 +1,321 @@
+{
+  "query": {
+    "dimensions": [
+      {
+        "variable": "0gA2VvcwmEZimsx78ZaXUP000002"
+      }
+    ],
+    "measures": {
+      "mean": {
+        "args": [
+          {
+            "variable": "5208432eb22e43c88d601520b062eedd"
+          }
+        ],
+        "function": "cube_mean"
+      },
+      "stddev": {
+        "args": [
+          {
+            "variable": "5208432eb22e43c88d601520b062eedd"
+          }
+        ],
+        "function": "cube_stddev"
+      },
+      "sum": {
+        "args": [
+          {
+            "variable": "5208432eb22e43c88d601520b062eedd"
+          }
+        ],
+        "function": "cube_sum"
+      },
+      "valid_count_unweighted": {
+        "args": [
+          {
+            "variable": "5208432eb22e43c88d601520b062eedd"
+          }
+        ],
+        "function": "cube_valid_count"
+      }
+    }
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "counts": [
+      4,
+      4,
+      4,
+      4,
+      4,
+      0
+    ],
+    "dimensions": [
+      {
+        "derived": false,
+        "references": {
+          "alias": "country",
+          "description": "",
+          "format": {
+            "summary": {
+              "digits": 0
+            }
+          },
+          "name": "Country",
+          "notes": "",
+          "view": {
+            "column_width": null,
+            "include_missing": false,
+            "show_counts": false,
+            "show_numeric_values": false
+          }
+        },
+        "type": {
+          "categories": [
+            {
+              "id": 1,
+              "missing": false,
+              "name": "Argentina",
+              "numeric_value": null
+            },
+            {
+              "id": 2,
+              "missing": false,
+              "name": "Australia",
+              "numeric_value": null
+            },
+            {
+              "id": 3,
+              "missing": false,
+              "name": "Austria",
+              "numeric_value": null
+            },
+            {
+              "id": 4,
+              "missing": false,
+              "name": "Belgium",
+              "numeric_value": null
+            },
+            {
+              "id": 5,
+              "missing": false,
+              "name": "Brazil",
+              "numeric_value": null
+            },
+            {
+              "id": -1,
+              "missing": true,
+              "name": "No Data",
+              "numeric_value": null
+            }
+          ],
+          "class": "categorical",
+          "ordinal": false
+        }
+      }
+    ],
+    "filter_stats": {
+      "filtered": {
+        "unweighted": {
+          "missing": 0,
+          "other": 0,
+          "selected": 20
+        },
+        "weighted": {
+          "missing": 0,
+          "other": 0,
+          "selected": 20
+        }
+      },
+      "filtered_complete": {
+        "unweighted": {
+          "missing": 0,
+          "other": 0,
+          "selected": 20
+        },
+        "weighted": {
+          "missing": 0,
+          "other": 0,
+          "selected": 20
+        }
+      }
+    },
+    "filtered": {
+      "unweighted_n": 20,
+      "weighted_n": 20
+    },
+    "measures": {
+      "mean": {
+        "data": [
+          1.5,
+          2.0,
+          2.0,
+          1.6666666667,
+          2.75,
+          {
+            "?": -8
+          }
+        ],
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "ndogs",
+            "description": "",
+            "format": {
+              "data": {
+                "digits": 2
+              },
+              "summary": {
+                "digits": 2
+              }
+            },
+            "name": "Number of dogs",
+            "notes": "",
+            "view": {
+              "column_width": null
+            }
+          },
+          "type": {
+            "class": "numeric",
+            "integer": true,
+            "missing_reasons": {
+              "NaN": -8,
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        },
+        "n_missing": 4
+      },
+      "stddev": {
+        "data": [
+          0.5773502692,
+          {
+            "?": -8
+          },
+          1.4142135624,
+          1.5275252317,
+          2.2173557826,
+          {
+            "?": -8
+          }
+        ],
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "ndogs",
+            "description": "",
+            "format": {
+              "data": {
+                "digits": 2
+              },
+              "summary": {
+                "digits": 2
+              }
+            },
+            "name": "Number of dogs",
+            "notes": "",
+            "view": {
+              "column_width": null
+            }
+          },
+          "type": {
+            "class": "numeric",
+            "integer": null,
+            "missing_reasons": {
+              "NaN": -8,
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        },
+        "n_missing": 4
+      },
+      "sum": {
+        "data": [
+          6.0,
+          2.0,
+          8.0,
+          5.0,
+          11.0,
+          0.0
+        ],
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "ndogs",
+            "description": "",
+            "format": {
+              "data": {
+                "digits": 2
+              },
+              "summary": {
+                "digits": 2
+              }
+            },
+            "name": "Number of dogs",
+            "notes": "",
+            "view": {
+              "column_width": null
+            }
+          },
+          "type": {
+            "class": "numeric",
+            "integer": null,
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        },
+        "n_missing": 4
+      },
+      "valid_count_unweighted": {
+        "data": [
+          4,
+          1,
+          4,
+          3,
+          4,
+          0
+        ],
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "ndogs",
+            "description": "",
+            "format": {
+              "data": {
+                "digits": 2
+              },
+              "summary": {
+                "digits": 2
+              }
+            },
+            "name": "Number of dogs",
+            "notes": "",
+            "view": {
+              "column_width": null
+            }
+          },
+          "type": {
+            "class": "numeric",
+            "integer": false,
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        },
+        "n_missing": 4
+      }
+    },
+    "n": 20,
+    "unfiltered": {
+      "unweighted_n": 20,
+      "weighted_n": 20
+    }
+  }
+}

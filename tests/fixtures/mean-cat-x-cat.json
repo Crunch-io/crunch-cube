@@ -1,0 +1,358 @@
+{
+  "query": {
+    "measures": {
+      "valid_count_unweighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "b3a8c734140d438bb2801f6fd9e35afb"
+          }
+        ]
+      },
+      "stddev": {
+        "function": "cube_stddev",
+        "args": [
+          {
+            "variable": "b3a8c734140d438bb2801f6fd9e35afb"
+          }
+        ]
+      },
+      "mean": {
+        "function": "cube_mean",
+        "args": [
+          {
+            "variable": "b3a8c734140d438bb2801f6fd9e35afb"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "variable": "641d0ea5bb214cd0946f1ed8756aaf5f"
+      },
+      {
+        "variable": "fa5a6eb70f1e49afbc6bcafe5028d7db"
+      }
+    ],
+    "weight": null
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "dimensions": [
+      {
+        "derived": false,
+        "references": {
+          "alias": "Pet",
+          "name": "Pet"
+        },
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": null,
+              "id": 1,
+              "name": "Dog",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": 2,
+              "name": "Cat",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": 3,
+              "name": "Bird",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": -1,
+              "name": "No Data",
+              "missing": true
+            }
+          ]
+        }
+      },
+      {
+        "derived": false,
+        "references": {
+          "alias": "Country",
+          "name": "Country"
+        },
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": null,
+              "id": 1,
+              "name": "Italy",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": 2,
+              "name": "US",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": 3,
+              "name": "Spain",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": 4,
+              "name": "Japan",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": -1,
+              "name": "No Data",
+              "missing": true
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 0,
+    "measures": {
+      "valid_count_unweighted": {
+        "data": [
+          2,
+          1,
+          2,
+          4,
+          0,
+          2,
+          2,
+          3,
+          1,
+          0,
+          5,
+          4,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "NDogs",
+            "name": "NDogs",
+            "view": {
+              "summary_statistic": "mean"
+            }
+          },
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            }
+          }
+        }
+      },
+      "stddev": {
+        "data": [
+          0.7071067812,
+          {
+            "?": -8
+          },
+          0.7071067812,
+          0.9574271078,
+          {
+            "?": -8
+          },
+          0.0,
+          0.7071067812,
+          1.1547005384,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          1.4142135624,
+          0.9574271078,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "NDogs",
+            "name": "NDogs",
+            "view": {
+              "summary_statistic": "mean"
+            }
+          },
+          "type": {
+            "integer": null,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            }
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          1.5,
+          2.0,
+          1.5,
+          2.25,
+          {
+            "?": -8
+          },
+          4.0,
+          1.5,
+          2.6666666667,
+          3.0,
+          {
+            "?": -8
+          },
+          3.0,
+          2.25,
+          2.0,
+          3.0,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "NDogs",
+            "name": "NDogs",
+            "view": {
+              "summary_statistic": "mean"
+            }
+          },
+          "type": {
+            "integer": true,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            }
+          }
+        }
+      }
+    },
+    "n": 28,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 28,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 28,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 28,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 28,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 28,
+      "weighted_n": 28
+    },
+    "filtered": {
+      "unweighted_n": 28,
+      "weighted_n": 28
+    },
+    "counts": [
+      2,
+      1,
+      2,
+      4,
+      0,
+      2,
+      2,
+      3,
+      1,
+      0,
+      5,
+      4,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "element": "crunch:cube"
+  }
+}

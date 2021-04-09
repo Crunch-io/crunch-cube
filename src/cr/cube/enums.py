@@ -88,6 +88,7 @@ class MEASURE(enum.Enum):
 class CUBE_MEASURE(enum.Enum):
     """Enumerated values representing cube measures."""
 
+    COVARIANCE = "covariance"
     COUNT = "count"
     MEAN = "mean"
     OVERLAP = "overlap"
