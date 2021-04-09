@@ -965,18 +965,6 @@ class Describe_Strand(object):
         assert strand.min_base_size_mask.tolist() == [False, False]
         assert strand.name == "v7"
         assert strand.ndim == 1
-        with pytest.raises(ValueError) as e:
-            strand.pairwise_significance_means_p_vals(0)
-        assert str(e.value) == (
-            "`.pairwise_significance_means_p_vals` is undefined for a cube-result "
-            "without a mean measure"
-        )
-        with pytest.raises(ValueError) as e:
-            strand.pairwise_significance_means_t_stats(0)
-        assert str(e.value) == (
-            "`.pairwise_significance_means_t_stats` is undefined for a cube-result "
-            "without a mean measure"
-        )
         assert strand.population_counts == pytest.approx([666.6667, 333.3333])
         assert strand.population_counts_moe == pytest.approx([238.5592, 238.5592])
         assert strand.row_count == 2

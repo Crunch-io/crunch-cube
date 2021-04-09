@@ -591,16 +591,6 @@ class TestMeanDifferenceSignificance(object):
             " without a mean measure"
         )
 
-    def test_mean_diff_significance_for_cat_mean(self):
-        strand_ = Cube(CR.CAT_MEAN).partitions[0]
-
-        assert strand_.pairwise_significance_means_t_stats(0) == pytest.approx(
-            [0.0, np.nan, -1.8516402, -0.57735027, -3.086067], nan_ok=True
-        )
-        assert strand_.pairwise_significance_means_p_vals(0) == pytest.approx(
-            [1.0, np.nan, 0.068840804, 0.565793610, 0.003030115], nan_ok=True
-        )
-
     def test_mean_diff_significance_for_cat_x_cat(self):
         slice_ = Cube(CR.MEAN_CAT_X_CAT).partitions[0]
 
