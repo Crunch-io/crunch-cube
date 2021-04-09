@@ -75,7 +75,12 @@ class SecondOrderMeasures(object):
         )
 
     def pairwise_significance_means_p_vals(self, column_idx):
-        """_PairwiseMeansSigPVals measure object for this cube-result."""
+        """_PairwiseMeansSigPVals measure object for this cube-result.
+
+        The `column_idx` is the reference column on which calculate the pairwise sig
+        test for mean measure. E.G. a single category of a categorical variable or
+        a subvariable reference for an array type.
+        """
         return _PairwiseMeansSigPVals(
             self._dimensions, self, self._cube_measures, column_idx
         )

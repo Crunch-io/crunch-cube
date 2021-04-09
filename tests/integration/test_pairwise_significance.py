@@ -559,7 +559,7 @@ class TestMeanDifferenceSignificance(object):
             [(1, 2, 3), (2,), (), (2,)],
         ]
 
-    def but_it_raises_an_error_when_mean_diff_significance_is_not_available(self):
+    def test_mean_diff_significance_is_not_available(self):
         transforms = {"pairwise_indices": {"alpha": [0.05, 0.08]}}
         slice_ = Cube(CR.CAT_X_CAT, transforms=transforms).partitions[0]
 
