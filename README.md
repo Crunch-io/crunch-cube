@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.15
+- Pairwise t test for mean differences
+
 ### 2.1.14
 - Improve pairwise t test performance
 
