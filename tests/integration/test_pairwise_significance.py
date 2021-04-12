@@ -375,121 +375,200 @@ class TestOverlapsPairwiseSignificance(TestCase):
     def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_0th_subvar(self):
         slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats(0),
-            [
-                [0.0, -1.22474487, -2.44948974],
-                [0.0, 1.41421356, 1.41421356],
-            ],
+        assert slice_.column_percentages.tolist() == [
+            [0.0, 100.0, 100.0],
+            [100.0, 0.0, 0.0],
+        ]
+        assert slice_.pairwise_significance_t_stats(0) == pytest.approx(
+            np.array(
+                [
+                    [0.0, -3.11420549, -2.61911361],
+                    [0.0, 3.11420549, 2.61911361],
+                ]
+            )
         )
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals(0),
-            [
-                [0.0, 0.43590578, 0.24675171],
-                [0.0, np.nan, np.nan],
-            ],
+        assert slice_.pairwise_significance_p_vals(0) == pytest.approx(
+            np.array(
+                [
+                    [0.0, 0.05270861, 0.07906174],
+                    [0.0, 0.05270861, 0.07906174],
+                ]
+            )
         )
 
     def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_1st_subvar(self):
         slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats(1),
-            [
-                [1.22474487, 0.0, -1.22474487],
-                [-1.41421356, 0.0, np.nan],
-            ],
+        assert slice_.column_percentages.tolist() == [
+            [0.0, 100.0, 100.0],
+            [100.0, 0.0, 0.0],
+        ]
+        assert slice_.pairwise_significance_t_stats(1) == pytest.approx(
+            np.array(
+                [
+                    [3.11420549, 0.0, 0.0],
+                    [-3.11420549, 0.0, 0.0],
+                ]
+            )
         )
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals(1),
-            [
-                [0.43590578, 0.0, 0.43590578],
-                [np.nan, 0.0, np.nan],
-            ],
+        assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
+            np.array(
+                [
+                    [0.05270861, 0.0, 1.0],
+                    [0.05270861, 0.0, 1.0],
+                ]
+            )
         )
 
     def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_2nd_subvar(self):
         slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats(2),
-            [
-                [2.44948974, 1.22474487, 0.0],
-                [-1.41421356, np.nan, 0.0],
-            ],
+        assert slice_.column_percentages.tolist() == [
+            [0.0, 100.0, 100.0],
+            [100.0, 0.0, 0.0],
+        ]
+        assert slice_.pairwise_significance_t_stats(2) == pytest.approx(
+            np.array(
+                [
+                    [2.61911361, 0.0, 0.0],
+                    [-2.61911361, 0.0, 0.0],
+                ],
+            ),
         )
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals(2),
-            [
-                [0.24675171, 0.43590578, 0.0],
-                [np.nan, np.nan, 0.0],
-            ],
+        assert slice_.pairwise_significance_p_vals(2) == pytest.approx(
+            np.array(
+                [
+                    [0.07906174, 1.0, 0.0],
+                    [0.07906174, 1.0, 0.0],
+                ],
+            ),
         )
 
     def test_pairwise_significance_cat_x_mr_realistic_example(self):
         slice_ = Cube(OL.CAT_X_MR_REALISTIC_EXAMPLE).partitions[0]
 
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats(4),
-            [
+        assert slice_.column_percentages == pytest.approx(
+            np.array(
                 [
-                    -3.9146295258075634,
-                    1.5105264449340376,
-                    3.2266563272193363,
-                    7.071067811865473,
-                    0.0,
-                    41.383226415679914,
-                ],
-                [
-                    -2.2756474745819952,
-                    2.909837329589324,
-                    3.4013451656911036,
-                    5.1050358012989845,
-                    0.0,
-                    63.718129288296005,
-                ],
-            ],
+                    [52.7687, 52.5926, 51.5504, 47.6852, 51.3889, np.nan],
+                    [47.2313, 47.4074, 48.4496, 52.3148, 48.6111, np.nan],
+                ]
+            ),
+            nan_ok=True,
         )
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals(4),
-            [
+        assert slice_.pairwise_significance_t_stats(4) == pytest.approx(
+            np.array(
                 [
-                    0.0001337008782529292,
-                    0.1328815484386987,
-                    0.0015191171147603821,
-                    4.5152770411505116e-11,
-                    0.0,
-                    0.0,
+                    [-1.00337549, -0.64382181, -0.0773666, 1.3677023, 0.0, np.nan],
+                    [1.00337549, 0.64382181, 0.0773666, -1.3677023, 0.0, np.nan],
                 ],
+            ),
+            nan_ok=True,
+        )
+        assert slice_.pairwise_significance_p_vals(4) == pytest.approx(
+            np.array(
                 [
-                    0.02435314838688285,
-                    0.004195089619284165,
-                    0.0008696393198390773,
-                    1.0369509280128142e-06,
-                    0.0,
-                    0.0,
+                    [0.31647509, 0.52017481, 0.93838264, 0.17241219, 0.0, np.nan],
+                    [0.31647509, 0.52017481, 0.93838264, 0.17241219, 0.0, np.nan],
                 ],
-            ],
+            ),
+            nan_ok=True,
         )
 
     def test_pairwise_significance_mr_x_mr(self):
         slice_ = Cube(OL.MR_X_MR).partitions[0]
 
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats(1),
-            [
-                [-1.11803399, 0.0, 1.82574186],
-                [1.47709789, 0.0, 3.46410162],
-                [np.nan, 0.0, np.nan],
-            ],
+        assert slice_.column_percentages == pytest.approx(
+            np.array(
+                [
+                    [100.0, 66.66667, np.nan],
+                    [66.66667, 100.0, np.nan],
+                    [0.0, 0.0, np.nan],
+                ]
+            ),
+            nan_ok=True,
         )
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals(1),
-            [
-                [0.34501476, 0.0, 0.1653704],
-                [0.21370636, 0.0, 0.02572142],
-                [np.nan, 0.0, np.nan],
-            ],
+        assert slice_.pairwise_significance_t_stats(1) == pytest.approx(
+            np.array(
+                [
+                    [-2.81499441, 0.0, np.nan],
+                    [2.81499441, 0.0, np.nan],
+                    [0.0, 0.0, np.nan],
+                ],
+            ),
+            nan_ok=True,
+        )
+        assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
+            np.array(
+                [
+                    [0.01305847, 0.0, np.nan],
+                    [0.01305847, 0.0, np.nan],
+                    [1.0, 0.0, np.nan],
+                ],
+            ),
+            nan_ok=True,
+        )
+
+    def test_pairwise_cat_x_mr_gender_x_all_pets_owned(self):
+        slice_ = Cube(OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED).partitions[0]
+
+        assert slice_.column_percentages.tolist() == [
+            [75.0, 20.0, 60.0],
+            [25.0, 80.0, 40.0],
+        ]
+
+        # Assert for first column (subvariable)
+        assert slice_.pairwise_significance_t_stats(0).tolist() == pytest.approx(
+            np.array(
+                [
+                    [0.0, 2.76314, 1.587178],
+                    [0.0, -2.76314, -1.587178],
+                ]
+            ),
+        )
+        assert slice_.pairwise_significance_p_vals(0) == pytest.approx(
+            np.array(
+                [
+                    [0.0, 0.0103743, 0.1229579],
+                    [0.0, 0.0103743, 0.1229579],
+                ]
+            ),
+        )
+
+        # Assert for second column (subvariable)
+        assert slice_.pairwise_significance_t_stats(1).tolist() == pytest.approx(
+            np.array(
+                [
+                    [-2.76314, 0.0, -9.07697],
+                    [2.76314, 0.0, 9.07697],
+                ]
+            ),
+        )
+        assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
+            np.array(
+                [
+                    [0.0103743, 0.0, 0.003145e-06],
+                    [0.0103743, 0.0, 0.003145e-06],
+                ]
+            ),
+        )
+
+        # Assert for third column (subvariable)
+        assert slice_.pairwise_significance_t_stats(2).tolist() == pytest.approx(
+            np.array(
+                [
+                    [-1.587178, 9.07697, 0.0],
+                    [1.587178, -9.07697, 0.0],
+                ]
+            ),
+        )
+        assert slice_.pairwise_significance_p_vals(2) == pytest.approx(
+            np.array(
+                [
+                    [0.1229579, 0.003146e-06, 0.0],
+                    [0.1229579, 0.003146e-06, 0.0],
+                ]
+            ),
         )
 
 

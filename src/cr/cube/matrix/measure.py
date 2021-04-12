@@ -521,8 +521,9 @@ class _PairwiseSigTStats(_BaseSecondOrderMeasure):
             [
                 [
                     _PairwiseSignificaneBetweenSubvariablesHelper(
-                        self._cube_measures.cube_overlaps.overlaps[row_idx],
-                        self._cube_measures.cube_overlaps.valid_overlaps[row_idx],
+                        self._cube_measures.cube_overlaps.overlaps,
+                        self._cube_measures.cube_overlaps.valid_overlaps,
+                        row_idx,
                         self._selected_subvar_idx,
                         subvar_idx,
                     ).t_stats
@@ -558,8 +559,9 @@ class _PairwiseSigPVals(_PairwiseSigTStats):
             [
                 [
                     _PairwiseSignificaneBetweenSubvariablesHelper(
-                        self._cube_measures.cube_overlaps.overlaps[row_idx],
-                        self._cube_measures.cube_overlaps.valid_overlaps[row_idx],
+                        self._cube_measures.cube_overlaps.overlaps,
+                        self._cube_measures.cube_overlaps.valid_overlaps,
+                        row_idx,
                         self._selected_subvar_idx,
                         subvar_idx,
                     ).p_vals
@@ -1215,9 +1217,10 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
 class _PairwiseSignificaneBetweenSubvariablesHelper(object):
     """Helper for calculating overlaps significance between subvariables."""
 
-    def __init__(self, overlaps, valid_overlaps, idx_a, idx_b):
+    def __init__(self, overlaps, valid_overlaps, row_idx, idx_a, idx_b):
         self._overlaps = overlaps
         self._valid_overlaps = valid_overlaps
+        self._row_idx = row_idx
         self._idx_a = idx_a
         self._idx_b = idx_b
 
@@ -1239,8 +1242,9 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
         Sa, Sb, Sab = self._selected_counts
         Na, Nb, Nab = self._valid_counts
         pa, pb, pab = Sa / Na, Sb / Nb, Sab / Nab
+        pct_a, pct_b = self._proportions
 
-        return (pa - pb) / np.sqrt(
+        return (pct_a - pct_b) / np.sqrt(
             1 / self._df * (pa * (1 - pa) + pb * (1 - pb) + 2 * pa * pb - 2 * pab)
         )
 
@@ -1254,6 +1258,14 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
         return Na + Nb - Nab
 
     @lazyproperty
+    def _proportions(self):
+        """tuple(float64) of column proportions"""
+        pa = self._overlaps[self._row_idx, self._idx_a, self._idx_a]
+        pb = self._overlaps[self._row_idx, self._idx_b, self._idx_b]
+        Sa, Sb, _ = self._selected_counts
+        return (pa / Sa, pb / Sb)
+
+    @lazyproperty
     def _selected_counts(self):
         """tuple(int/float64) of selected counts for subvars a, b, and combined (a^b).
 
@@ -1262,9 +1274,9 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
         be float64 when the overlaps result is weighted.
         """
         return (
-            self._overlaps[self._idx_a, self._idx_a],
-            self._overlaps[self._idx_b, self._idx_b],
-            self._overlaps[self._idx_a, self._idx_b],
+            self._overlaps.sum(axis=0)[self._idx_a, self._idx_a],
+            self._overlaps.sum(axis=0)[self._idx_b, self._idx_b],
+            self._overlaps.sum(axis=0)[self._idx_a, self._idx_b],
         )
 
     @lazyproperty
@@ -1276,7 +1288,7 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
         They can only be float64 when the overlaps result is weighted.
         """
         return (
-            self._valid_overlaps[self._idx_a, self._idx_a],
-            self._valid_overlaps[self._idx_b, self._idx_b],
-            self._valid_overlaps[self._idx_a, self._idx_b],
+            self._valid_overlaps.sum(axis=0)[self._idx_a, self._idx_a],
+            self._valid_overlaps.sum(axis=0)[self._idx_b, self._idx_b],
+            self._valid_overlaps.sum(axis=0)[self._idx_a, self._idx_b],
         )
