@@ -1,5 +1,44 @@
 # History of Changes
 
+### 2.1.13
+- Handle hiding transforms with subvar alias and id
+- Additional share of sum measures
+- Overlaps for MRxMR matrix
+
+### 2.1.12
+- Bug fixes for subtotal differences
+
+### 2.1.11
+- Bug fix for numeric array with weighted counts
+
+### 2.1.10
+- Add pairwise t test considering overlaps
+- Add hare of sum measure
+
+### 2.1.9
+- Improvements to subtotal differences
+
+### 2.1.8
+- Add cube std deviation measure
+
+### 2.1.7
+- Add cube sum measure
+
+### 2.1.6
+- Enable explicit ordering by subvar IDs (strings)
+
+### 2.1.5
+- Bug fix for shape calculation on numeric arrays.
+
+### 2.1.4
+- Change `population_moe` -> `population_counts_moe` for `_Strand`
+
+### 2.1.3
+- Transpose dimension for numeric arrays
+
+### 2.1.2
+- Handle numeric array explicit order
+
 ### 2.1.1
 - Custom column bases for Numeric Array matrix types
 
