@@ -1,0 +1,557 @@
+{
+    "query": {
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "dimensions": [
+            {
+                "variable": "cf4a4d3a1204457290a97fbf2db7b6cf"
+            },
+            {
+                "function": "dimension",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "variable": "3QPnyW5KMYriuoG5PCewcD000000"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "subvariables"
+                    }
+                ]
+            },
+            {
+                "function": "as_selected",
+                "args": [
+                    {
+                        "variable": "3QPnyW5KMYriuoG5PCewcD000000"
+                    }
+                ]
+            }
+        ],
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "dimensions": [
+            {
+                "derived": false,
+                "references": {
+                    "alias": "Gender",
+                    "name": "Gender",
+                    "view": {
+                        "show_numeric_values": false
+                    }
+                },
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": null,
+                            "id": 1,
+                            "name": "Male",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": 2,
+                            "name": "Female",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        }
+                    ]
+                }
+            },
+            {
+                "references": {
+                    "alias": "allpets",
+                    "uniform_basis": false,
+                    "subreferences": [
+                        {
+                            "alias": "allpets_1",
+                            "name": "Cat"
+                        },
+                        {
+                            "alias": "allpets_2",
+                            "name": "Dog"
+                        },
+                        {
+                            "alias": "allpets_3",
+                            "name": "Bird"
+                        }
+                    ],
+                    "description": "Do you have any of these animals as pets? Please select all that apply.",
+                    "name": "All pets owned"
+                },
+                "derived": true,
+                "type": {
+                    "subtype": {
+                        "class": "variable"
+                    },
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "allpets_1",
+                                    "name": "Cat"
+                                },
+                                "id": "0001"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "allpets_2",
+                                    "name": "Dog"
+                                },
+                                "id": "0002"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "allpets_3",
+                                    "name": "Bird"
+                                },
+                                "id": "0003"
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "class": "enum"
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "alias": "allpets",
+                    "uniform_basis": false,
+                    "description": "Do you have any of these animals as pets? Please select all that apply.",
+                    "name": "All pets owned",
+                    "subreferences": [
+                        {
+                            "alias": "allpets_1",
+                            "name": "Cat"
+                        },
+                        {
+                            "alias": "allpets_2",
+                            "name": "Dog"
+                        },
+                        {
+                            "alias": "allpets_3",
+                            "name": "Bird"
+                        }
+                    ]
+                },
+                "type": {
+                    "ordinal": false,
+                    "subvariables": [
+                        "0001",
+                        "0002",
+                        "0003"
+                    ],
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "selected": true,
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected"
+                        },
+                        {
+                            "numeric_value": 0,
+                            "missing": false,
+                            "id": 0,
+                            "name": "Other"
+                        },
+                        {
+                            "numeric_value": null,
+                            "missing": true,
+                            "id": -1,
+                            "name": "No Data"
+                        }
+                    ]
+                }
+            }
+        ],
+        "missing": 6,
+        "measures": {
+            "count": {
+                "data": [
+                    6,
+                    4,
+                    10,
+                    2,
+                    6,
+                    12,
+                    6,
+                    6,
+                    8,
+                    2,
+                    4,
+                    14,
+                    8,
+                    0,
+                    12,
+                    4,
+                    6,
+                    10,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 6,
+                "metadata": {
+                    "references": {},
+                    "derived": true,
+                    "type": {
+                        "integer": true,
+                        "missing_rules": {},
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "class": "numeric"
+                    }
+                }
+            },
+            "valid_overlap": {
+                "data": [
+                    6,
+                    0,
+                    2,
+                    4,
+                    2,
+                    2,
+                    0,
+                    6,
+                    8,
+                    0,
+                    2,
+                    2,
+                    2,
+                    6,
+                    4,
+                    8,
+                    0,
+                    6,
+                    2,
+                    4,
+                    6,
+                    2,
+                    2,
+                    6,
+                    6,
+                    2,
+                    0,
+                    2,
+                    0,
+                    0,
+                    4,
+                    2,
+                    2,
+                    0,
+                    6,
+                    8,
+                    2,
+                    8,
+                    6,
+                    0,
+                    0,
+                    0,
+                    4,
+                    0,
+                    4,
+                    2,
+                    4,
+                    4,
+                    0,
+                    2,
+                    6,
+                    4,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 6,
+                "metadata": {
+                    "references": {
+                        "alias": "allpets",
+                        "uniform_basis": false,
+                        "subreferences": [
+                            {
+                                "alias": "allpets_1",
+                                "name": "Cat"
+                            },
+                            {
+                                "alias": "allpets_2",
+                                "name": "Dog"
+                            },
+                            {
+                                "alias": "allpets_3",
+                                "name": "Bird"
+                            }
+                        ],
+                        "description": "Do you have any of these animals as pets? Please select all that apply.",
+                        "name": "All pets owned"
+                    },
+                    "derived": true,
+                    "type": {
+                        "integer": true,
+                        "class": "numeric",
+                        "missing_rules": {},
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "subvariables": [
+                            "0001",
+                            "0002",
+                            "0003"
+                        ]
+                    }
+                }
+            },
+            "overlap": {
+                "data": [
+                    6,
+                    0,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2,
+                    4,
+                    0,
+                    2,
+                    2,
+                    0,
+                    0,
+                    2,
+                    6,
+                    0,
+                    2,
+                    2,
+                    2,
+                    6,
+                    0,
+                    0,
+                    0,
+                    4,
+                    0,
+                    0,
+                    2,
+                    0,
+                    0,
+                    0,
+                    2,
+                    2,
+                    0,
+                    6,
+                    2,
+                    0,
+                    8,
+                    4,
+                    0,
+                    0,
+                    0,
+                    2,
+                    0,
+                    0,
+                    0,
+                    4,
+                    4,
+                    0,
+                    2,
+                    0,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 6,
+                "metadata": {
+                    "references": {
+                        "alias": "allpets",
+                        "uniform_basis": false,
+                        "subreferences": [
+                            {
+                                "alias": "allpets_1",
+                                "name": "Cat"
+                            },
+                            {
+                                "alias": "allpets_2",
+                                "name": "Dog"
+                            },
+                            {
+                                "alias": "allpets_3",
+                                "name": "Bird"
+                            }
+                        ],
+                        "description": "Do you have any of these animals as pets? Please select all that apply.",
+                        "name": "All pets owned"
+                    },
+                    "derived": true,
+                    "type": {
+                        "integer": true,
+                        "class": "numeric",
+                        "missing_rules": {},
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "subvariables": [
+                            "0001",
+                            "0002",
+                            "0003"
+                        ]
+                    }
+                }
+            }
+        },
+        "n": 40,
+        "filter_stats": {
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 40,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 40,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered": {
+                "unweighted": {
+                    "selected": 40,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 40,
+                    "other": 0,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 40,
+            "weighted_n": 40
+        },
+        "filtered": {
+            "unweighted_n": 40,
+            "weighted_n": 40
+        },
+        "counts": [
+            6,
+            4,
+            10,
+            2,
+            6,
+            12,
+            6,
+            6,
+            8,
+            2,
+            4,
+            14,
+            8,
+            0,
+            12,
+            4,
+            6,
+            10,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "element": "crunch:cube"
+    }
+}
