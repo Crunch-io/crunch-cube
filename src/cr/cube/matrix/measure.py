@@ -56,6 +56,12 @@ class SecondOrderMeasures(object):
         """_Means measure object for this cube-result"""
         return _Means(self._dimensions, self, self._cube_measures)
 
+    def pairwise_indices(self, alpha, only_larger):
+        """_PairwiseIndices measure object for this cube-result"""
+        return _PairwiseIndices(
+            self._dimensions, self, self._cube_measures, alpha, only_larger
+        )
+
     def pairwise_means_indices(self, alpha, only_larger):
         """_PairwiseMeansIndices measure object for this cube-result"""
         return _PairwiseMeansIndices(
@@ -495,7 +501,7 @@ class _PairwiseSigTStats(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        return NanSubtotals.blocks(self._t_stats, self._dimensions)
+        return NanSubtotals.blocks(self.t_stats, self._dimensions)
 
     @lazyproperty
     def _n_rows(self):
@@ -508,7 +514,7 @@ class _PairwiseSigTStats(_BaseSecondOrderMeasure):
         return self._cube_measures.cube_overlaps.overlaps.shape[1]
 
     @lazyproperty
-    def _t_stats(self):
+    def t_stats(self):
         """2D ndarray of float64 representing t-stats for pairwise MR testing.
 
         For each (category) row, we calculate the test statistic of the overlap between
@@ -543,10 +549,10 @@ class _PairwiseSigPVals(_PairwiseSigTStats):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        return NanSubtotals.blocks(self._p_vals, self._dimensions)
+        return NanSubtotals.blocks(self.p_vals, self._dimensions)
 
     @lazyproperty
-    def _p_vals(self):
+    def p_vals(self):
         """2D ndarray of float64 representing p-vals for pairwise MR testing.
 
         For each (category) row, we calculate the test significance of the overlap
@@ -630,13 +636,13 @@ class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
         return 2 * (1 - t.cdf(abs(self.t_stats), df=df.T))
 
 
-class _PairwiseMeansIndices(_BaseSecondOrderMeasure):
-    """Provides pairwise means significance indices measure for matrix."""
+class _PairwiseIndices(_BaseSecondOrderMeasure):
+    """Provides pairwise significance indices measure for matrix."""
 
     def __init__(
         self, dimensions, second_order_measures, cube_measures, alpha, only_larger
     ):
-        super(_PairwiseMeansIndices, self).__init__(
+        super(_PairwiseIndices, self).__init__(
             dimensions, second_order_measures, cube_measures
         )
         self._alpha = alpha
@@ -661,6 +667,27 @@ class _PairwiseMeansIndices(_BaseSecondOrderMeasure):
         col_significance = np.empty((len(significance),), dtype=object)
         col_significance[:] = [tuple(np.where(sig_row)[0]) for sig_row in significance]
         return col_significance
+
+    @lazyproperty
+    def _values(self):
+        """list of _PairwiseSigPVals tests objects.
+
+        Result has as many elements as there are columns in the slice. Each
+        significance test contains `p_vals` and `t_stats` significance tests.
+        """
+        return [
+            _PairwiseSigPVals(
+                self._dimensions,
+                self._second_order_measures,
+                self._cube_measures,
+                col_idx,
+            )
+            for col_idx in range(self._cube_measures.cube_overlaps.overlaps.shape[1])
+        ]
+
+
+class _PairwiseMeansIndices(_PairwiseIndices):
+    """Provides pairwise means significance indices measure for matrix."""
 
     @lazyproperty
     def _values(self):

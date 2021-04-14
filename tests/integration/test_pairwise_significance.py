@@ -571,6 +571,19 @@ class TestOverlapsPairwiseSignificance(TestCase):
             ),
         )
 
+    def test_pairwise_significance_indices(self):
+        slice_ = Cube(OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED).partitions[0]
+
+        assert slice_.column_percentages.tolist() == [
+            [75.0, 20.0, 60.0],
+            [25.0, 80.0, 40.0],
+        ]
+
+        assert slice_.pairwise_indices.tolist() == [
+            [(), (0, 2), ()],
+            [(1,), (), (1,)],
+        ]
+
 
 class TestMeanDifferenceSignificance(object):
     def test_mean_diff_significance_for_numeric_array_grouped_by_cat(self):

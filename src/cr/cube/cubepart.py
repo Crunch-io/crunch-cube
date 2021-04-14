@@ -614,6 +614,15 @@ class _Slice(CubePartition):
         column in the same row with a confidence interval meeting the threshold defined
         for this analysis.
         """
+        # If overlaps are defined, calculate significance based on them
+        if (
+            self.dimension_types[-1] == DT.MR
+            and self._cube.overlaps is not None
+            and self._cube.valid_overlaps is not None
+        ):
+            return self._assembler.pairwise_indices(self._alpha, self._only_larger)
+
+        # If overlaps are not defined, default to the legacy way of calculating sig
         return PairwiseSignificance.pairwise_indices(
             self, self._alpha, self._only_larger
         )
