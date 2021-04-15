@@ -583,13 +583,13 @@ class TestOverlapsPairwiseSignificance(TestCase):
         ]
 
         assert slice_.pairwise_indices.tolist() == [
-            [(), (0, 2), ()],
             [(1,), (), (1,)],
+            [(), (0, 2), ()],
         ]
 
         assert slice_.pairwise_indices_alt.tolist() == [
-            [(), (0, 2), ()],
             [(1,), (), (1,)],
+            [(), (0, 2), ()],
         ]
 
 
