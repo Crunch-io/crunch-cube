@@ -592,6 +592,10 @@ class TestOverlapsPairwiseSignificance(TestCase):
             [(), (0, 2), (0,)],
         ]
 
+    def test_alt_pairwise_indices_without_alt_alpha(self):
+        slice_ = Cube(OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED).partitions[0]
+        assert slice_.pairwise_indices_alt is None
+
 
 class TestMeanDifferenceSignificance(object):
     def test_mean_diff_significance_for_numeric_array_grouped_by_cat(self):
