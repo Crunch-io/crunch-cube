@@ -572,7 +572,7 @@ class TestOverlapsPairwiseSignificance(TestCase):
         )
 
     def test_pairwise_significance_indices(self):
-        transforms = {"pairwise_indices": {"alpha": [0.05, 0.08]}}
+        transforms = {"pairwise_indices": {"alpha": [0.05, 0.13]}}
         slice_ = Cube(
             OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED, transforms=transforms
         ).partitions[0]
@@ -588,8 +588,8 @@ class TestOverlapsPairwiseSignificance(TestCase):
         ]
 
         assert slice_.pairwise_indices_alt.tolist() == [
-            [(1,), (), (1,)],
-            [(), (0, 2), ()],
+            [(1, 2), (), (1,)],
+            [(), (0, 2), (0,)],
         ]
 
 
