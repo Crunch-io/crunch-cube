@@ -654,10 +654,7 @@ class _PairwiseIndices(_BaseSecondOrderMeasure):
         pairwise_indices = np.array(
             [self._pairwise_indices(v.p_vals, v.t_stats) for v in self._values]
         ).T
-        blocks = np.array(
-            [[tuple(cell) for cell in row] for row in pairwise_indices], dtype=tuple
-        )
-        return NanSubtotals.blocks(blocks, self._dimensions)
+        return NanSubtotals.blocks(pairwise_indices, self._dimensions)
 
     def _pairwise_indices(self, p_vals, t_stats):
         """1D ndarray containing tuples of int pairwise indices of each column."""
