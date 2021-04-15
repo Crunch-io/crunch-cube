@@ -634,6 +634,9 @@ class _Slice(CubePartition):
         This value is None if no alternate threshold has been defined.
         """
 
+        if self._alpha_alt is None:
+            return None
+
         # If overlaps are defined, calculate significance based on them
         if (
             self.dimension_types[-1] == DT.MR
@@ -643,12 +646,8 @@ class _Slice(CubePartition):
             return self._assembler.pairwise_indices(self._alpha_alt, self._only_larger)
 
         # If no overlaps are defined, default to legacy way of calculating pw indices
-        return (
-            None
-            if self._alpha_alt is None
-            else PairwiseSignificance.pairwise_indices(
-                self, self._alpha_alt, self._only_larger
-            )
+        return PairwiseSignificance.pairwise_indices(
+            self, self._alpha_alt, self._only_larger
         )
 
     @lazyproperty
