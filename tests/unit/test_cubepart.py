@@ -253,7 +253,11 @@ class Describe_Slice(object):
         assert is_empty is expected_value
 
     def it_provides_the_secondary_pairwise_indices(
-        self, _alpha_alt_prop_, _only_larger_prop_, PairwiseSignificance_
+        self,
+        _alpha_alt_prop_,
+        _only_larger_prop_,
+        PairwiseSignificance_,
+        dimension_types_prop_,
     ):
         PairwiseSignificance_.pairwise_indices.return_value = [[(0,), (1,)], [(), ()]]
         _alpha_alt_prop_.return_value = 0.42
@@ -267,7 +271,9 @@ class Describe_Slice(object):
         )
         assert pairwise_indices_alt == [[(0,), (1,)], [(), ()]]
 
-    def but_it_returns_None_when_no_secondary_alpha_specified(self, _alpha_alt_prop_):
+    def but_it_returns_None_when_no_secondary_alpha_specified(
+        self, _alpha_alt_prop_, dimension_types_prop_
+    ):
         _alpha_alt_prop_.return_value = None
         assert _Slice(None, None, None, None, None).pairwise_indices_alt is None
 
@@ -456,6 +462,10 @@ class Describe_Slice(object):
     @pytest.fixture
     def _dimensions_prop_(self, request):
         return property_mock(request, _Slice, "_dimensions")
+
+    @pytest.fixture
+    def dimension_types_prop_(self, request):
+        return property_mock(request, _Slice, "dimension_types")
 
     @pytest.fixture
     def _only_larger_prop_(self, request):
