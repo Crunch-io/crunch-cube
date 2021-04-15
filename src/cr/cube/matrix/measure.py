@@ -665,13 +665,13 @@ class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
         t_stats = self.t_stats
         col_bases = self._cube_measures.unweighted_cube_counts.column_bases
         p_vals = []
-        i = 0
+        offset = 0
         for col in range(self._n_cols):
             if col in self._inserted_col_idxs:
-                i += 1
+                offset += 1
                 p_vals.append(np.full(t_stats.shape, np.nan))
             else:
-                n = col_bases[:, col - i] + col_bases.T
+                n = col_bases[:, col - offset] + col_bases.T
                 df = 2 * (n - 1)
                 p_vals.append(2 * (1 - t.cdf(abs(t_stats), df=df.T)))
         return p_vals

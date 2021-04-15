@@ -10,65 +10,6 @@
           "view": {
             "show_counts": false,
             "column_width": null,
-            "transform": {
-              "insertions": [
-                {
-                  "function": "subtotal",
-                  "args": [
-                    1,
-                    2,
-                    3
-                  ],
-                  "anchor": "top",
-                  "name": "\"A\" countries",
-                  "id": "a_countries"
-                },
-                {
-                  "function": "subtotal",
-                  "args": [
-                    4,
-                    5
-                  ],
-                  "anchor": "top",
-                  "name": "\"B\" countries",
-                  "id": "b_countries"
-                },
-                {
-                  "function": "subtotal",
-                  "name": "DIFF A-B",
-                  "args": [
-                    1,
-                    2,
-                    3
-                  ],
-                  "anchor": "top",
-                  "kwargs": {
-                    "negative": [
-                      4,
-                      5
-                    ]
-                  },
-                  "id": "diff_a_b"
-                },
-                {
-                  "function": "subtotal",
-                  "name": "DIFF B-A",
-                  "args": [
-                    4,
-                    5
-                  ],
-                  "anchor": "top",
-                  "kwargs": {
-                    "negative": [
-                      1,
-                      2,
-                      3
-                    ]
-                  },
-                  "id": "diff_b_a"
-                }
-              ]
-            },
             "include_missing": false,
             "show_numeric_values": false
           }
