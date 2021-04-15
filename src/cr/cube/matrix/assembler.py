@@ -209,7 +209,12 @@ class Assembler(object):
             self.pairwise_significance_means_p_vals(col)
             for col in range(len(self._column_order))
         ]
-        return np.array([pairwise_indices(p, t) for p, t in zip(p_vals, t_stats)]).T
+        indices = np.array([pairwise_indices(p, t) for p, t in zip(p_vals, t_stats)]).T
+        # --- a None value indicates "cannot calculate", which is distinct from
+        # --- () that means "not significance"
+        for idx in self.inserted_column_idxs:
+            indices[:, idx] = None
+        return indices
 
     def pairwise_significance_p_vals(self, subvar_idx):
         """2D optional np.float64 ndarray of overlaps-p_vals matrices for subvar idx.
