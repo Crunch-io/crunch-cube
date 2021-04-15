@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.18
+- Fix alt pairwise bug (with no alt alpha)
+
 ### 2.1.17
 - Fix overlaps pairwise signs
 - Add overlaps pairwise indices
