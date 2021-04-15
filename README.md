@@ -112,6 +112,10 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.17
+- Fix overlaps pairwise signs
+- Add overlaps pairwise indices
+
 ### 2.1.16
 - Fix overlaps pairwise significance for MR
 
