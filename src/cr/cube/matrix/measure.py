@@ -62,12 +62,6 @@ class SecondOrderMeasures(object):
             self._dimensions, self, self._cube_measures, alpha, only_larger
         )
 
-    def pairwise_means_indices(self, alpha, only_larger):
-        """_PairwiseMeansIndices measure object for this cube-result"""
-        return _PairwiseMeansIndices(
-            self._dimensions, self, self._cube_measures, alpha, only_larger
-        )
-
     def pairwise_p_vals_for_subvar(self, subvar_idx):
         """_PairwiseSigPVals measure object for this cube-result and selected subvar"""
         return _PairwiseSigPVals(
@@ -80,7 +74,7 @@ class SecondOrderMeasures(object):
             self._dimensions, self, self._cube_measures, subvar_idx
         )
 
-    def pairwise_significance_means_p_vals(self, column_idx):
+    def pairwise_significance_means_p_vals(self, column_idx, inserted_col_idxs):
         """_PairwiseMeansSigPVals measure object for this cube-result.
 
         The `column_idx` is the reference column on which calculate the pairwise sig
@@ -88,13 +82,21 @@ class SecondOrderMeasures(object):
         a subvariable reference for an array type.
         """
         return _PairwiseMeansSigPVals(
-            self._dimensions, self, self._cube_measures, column_idx
+            self._dimensions,
+            self,
+            self._cube_measures,
+            column_idx,
+            inserted_col_idxs,
         )
 
-    def pairwise_significance_means_t_stats(self, column_idx):
+    def pairwise_significance_means_t_stats(self, column_idx, inserted_col_idxs):
         """_PairwiseMeansSigTStats measure object for this cube-result."""
         return _PairwiseMeansSigTStats(
-            self._dimensions, self, self._cube_measures, column_idx
+            self._dimensions,
+            self,
+            self._cube_measures,
+            column_idx,
+            inserted_col_idxs,
         )
 
     @lazyproperty
@@ -585,12 +587,18 @@ class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
     """
 
     def __init__(
-        self, dimensions, second_order_measures, cube_measures, selected_column_idx
+        self,
+        dimensions,
+        second_order_measures,
+        cube_measures,
+        selected_column_idx,
+        inserted_col_idxs,
     ):
         super(_PairwiseMeansSigTStats, self).__init__(
             dimensions, second_order_measures, cube_measures
         )
         self._selected_column_idx = selected_column_idx
+        self._inserted_col_idxs = inserted_col_idxs
 
     @lazyproperty
     def blocks(self):
@@ -599,7 +607,19 @@ class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def t_stats(self):
-        """2D ndarray of float64 representing t-stats for means pairwise testing.
+        """2D float64 ndarray of means t-stats significance for the selected column."""
+        return self._t_stats[self._selected_column_idx]
+
+    @lazyproperty
+    def _n_cols(self):
+        """integer number of columns including subtotals."""
+        return self._cube_measures.cube_means.means.shape[-1] + len(
+            self._inserted_col_idxs
+        )
+
+    @lazyproperty
+    def _t_stats(self):
+        """List of 2D float64 ndarrays representing t-stats for means pairwise testing.
 
         Calculate the level of significance for the difference of two means from the
         selected column different from a hypothesized value.
@@ -609,11 +629,18 @@ class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
         means = self._cube_measures.cube_means.means
         variance = np.power(self._cube_measures.cube_stddev.stddev, 2)
         col_bases = self._cube_measures.unweighted_cube_counts.column_bases
-
-        combined_variance = variance[:, self._selected_column_idx] + variance.T
-        diff = means[:, self._selected_column_idx] - means.T
-        n = col_bases[:, self._selected_column_idx] + col_bases.T
-        return diff.T * np.sqrt(n.T / combined_variance.T)
+        t_stats = []
+        offset = 0
+        for col in range(self._n_cols):
+            if col in self._inserted_col_idxs:
+                offset += 1
+                t_stats.append(np.full(means.shape, np.nan))
+            else:
+                combined_variance = variance[:, col - offset] + variance.T
+                diff = means[:, col - offset] - means.T
+                n = col_bases[:, col - offset] + col_bases.T
+                t_stats.append(diff.T * np.sqrt(n.T / combined_variance.T))
+        return t_stats
 
 
 class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
@@ -629,11 +656,25 @@ class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
 
     @lazyproperty
     def p_vals(self):
-        """2D ndarray of float64 representing p-vals for means pairwise testing."""
+        """2D float64 ndarray of means p-vals significance for the selected column."""
+        return self._p_vals[self._selected_column_idx]
+
+    @lazyproperty
+    def _p_vals(self):
+        """List of 2D float64 ndarray representing p-vals for means pairwise testing."""
+        t_stats = self.t_stats
         col_bases = self._cube_measures.unweighted_cube_counts.column_bases
-        n = col_bases[:, self._selected_column_idx] + col_bases.T
-        df = 2 * (n - 1)
-        return 2 * (1 - t.cdf(abs(self.t_stats), df=df.T))
+        p_vals = []
+        i = 0
+        for col in range(self._n_cols):
+            if col in self._inserted_col_idxs:
+                i += 1
+                p_vals.append(np.full(t_stats.shape, np.nan))
+            else:
+                n = col_bases[:, col - i] + col_bases.T
+                df = 2 * (n - 1)
+                p_vals.append(2 * (1 - t.cdf(abs(t_stats), df=df.T)))
+        return p_vals
 
 
 class _PairwiseIndices(_BaseSecondOrderMeasure):
@@ -680,27 +721,6 @@ class _PairwiseIndices(_BaseSecondOrderMeasure):
                 col_idx,
             )
             for col_idx in range(self._cube_measures.cube_overlaps.overlaps.shape[1])
-        ]
-
-
-class _PairwiseMeansIndices(_PairwiseIndices):
-    """Provides pairwise means significance indices measure for matrix."""
-
-    @lazyproperty
-    def _values(self):
-        """list of _PairwiseMeansSigPVals tests objects.
-
-        Result has as many elements as there are columns in the slice. Each
-        significance test contains `p_vals` and `t_stats` significance tests.
-        """
-        return [
-            _PairwiseMeansSigPVals(
-                self._dimensions,
-                self._second_order_measures,
-                self._cube_measures,
-                col_idx,
-            )
-            for col_idx in range(self._cube_measures.cube_means.means.shape[1])
         ]
 
 

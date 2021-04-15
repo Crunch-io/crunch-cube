@@ -201,8 +201,14 @@ class Assembler(object):
             col_signif[:] = [tuple(np.where(sig_row)[0]) for sig_row in significance]
             return col_signif
 
-        p_vals = self._assemble_p_vals_mean_difference
-        t_stats = self._assemble_t_stats_mean_difference
+        t_stats = [
+            self.pairwise_significance_means_t_stats(col)
+            for col in range(len(self._column_order))
+        ]
+        p_vals = [
+            self.pairwise_significance_means_p_vals(col)
+            for col in range(len(self._column_order))
+        ]
         return np.array([pairwise_indices(p, t) for p, t in zip(p_vals, t_stats)]).T
 
     def pairwise_significance_p_vals(self, subvar_idx):
@@ -230,14 +236,22 @@ class Assembler(object):
 
         Raises `ValueError if the cube-result does not include `mean` cube-measures.
         """
-        return self._assemble_p_vals_mean_difference[column_idx]
+        return self._assemble_matrix(
+            self._measures.pairwise_significance_means_p_vals(
+                column_idx, self.inserted_column_idxs
+            ).blocks
+        )
 
     def pairwise_significance_means_t_stats(self, column_idx):
         """2D optional np.float64 ndarray of mean difference t_stats for column idx.
 
         Raises `ValueError if the cube-result does not include `mean` cube-measures.
         """
-        return self._assemble_t_stats_mean_difference[column_idx]
+        return self._assemble_matrix(
+            self._measures.pairwise_significance_means_t_stats(
+                column_idx, self.inserted_column_idxs
+            ).blocks
+        )
 
     @lazyproperty
     def pvalues(self):
@@ -563,38 +577,6 @@ class Assembler(object):
         # --- appears in. This directly produces a final array that is exactly the
         # --- desired output.
         return np.block(blocks)[np.ix_(self._row_order, self._column_order)]
-
-    @lazyproperty
-    def _assemble_p_vals_mean_difference(self):
-        """List of 2D float64 ndarray of p_vals mean values for each column.
-
-        p_vals measure is not available for subtotals, in case of subtotals on the
-        column dimensions the p_vals will be a 2D array of np.nan.
-        """
-        return [
-            self._assemble_matrix(
-                self._measures.pairwise_significance_means_p_vals(col).blocks
-            )
-            if col >= 0
-            else np.full(self.means.shape, np.nan)
-            for col in self._column_order
-        ]
-
-    @lazyproperty
-    def _assemble_t_stats_mean_difference(self):
-        """List of 2D float64 ndarray of t_stats mean values for each column.
-
-        t_stats measure is not available for subtotals, in case of subtotals on the
-        column dimensions the t_stats will be a 2D array of np.nan.
-        """
-        return [
-            self._assemble_matrix(
-                self._measures.pairwise_significance_means_t_stats(col).blocks
-            )
-            if col >= 0
-            else np.full(self.means.shape, np.nan)
-            for col in self._column_order
-        ]
 
     def _assemble_vector(self, base_vector, subtotals, order, diffs_nan=False):
         """Return 1D ndarray of `base_vector` with inserted `subtotals`, in `order`.

@@ -637,54 +637,31 @@ class TestMeanDifferenceSignificance(object):
             )
         )
 
-    def test_mean_diff_significance_for_numeric_array_grouped_by_cat_hs_weighted(self):
-        slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS_WEIGHTED).partitions[0]
+    def test_mean_diff_significance_for_numeric_array_grouped_by_cat_hs(self):
+        slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS).partitions[0]
 
-        # Column 1 (idx 0) is a subtotal and the hypothesis testing for a subtotal
-        # is not computable ATM.
-        assert slice_.pairwise_significance_means_t_stats(0).tolist() == pytest.approx(
-            np.full(slice_.means.shape, np.nan), nan_ok=True
+        # Column (0,3,5,8) are subtotals and the hypothesis testing for a subtotal
+        # computable ATM.
+        for col in slice_.inserted_column_idxs:
+            assert slice_.pairwise_significance_means_t_stats(
+                col
+            ).tolist() == pytest.approx(
+                np.full(slice_.means.shape, np.nan), nan_ok=True
+            )
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_means_t_stats(7),
+            load_python_expression("num-arr-means-grouped-by-cat-hs-t-stats-hs-col-7"),
         )
-        assert slice_.pairwise_significance_means_t_stats(4).tolist() == pytest.approx(
-            np.array(
-                [
-                    [
-                        np.nan,
-                        np.nan,
-                        np.nan,
-                        np.nan,
-                        0.0,
-                        np.nan,
-                        -0.7317257,
-                        1.11337208,
-                        0.79933698,
-                    ],
-                    [
-                        np.nan,
-                        np.nan,
-                        np.nan,
-                        np.nan,
-                        0.0,
-                        np.nan,
-                        0.9919473,
-                        0.9202630,
-                        0.7316202,
-                    ],
-                    [
-                        np.nan,
-                        np.nan,
-                        np.nan,
-                        np.nan,
-                        0.0,
-                        np.nan,
-                        0.4034590,
-                        -2.524321,
-                        -2.412073,
-                    ],
-                ]
-            ),
-            nan_ok=True,
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_means_p_vals(7),
+            load_python_expression("num-arr-means-grouped-by-cat-hs-p-vals-hs-col-7"),
         )
+        assert slice_.pairwise_means_indices.tolist() == [
+            [(), (), (7,), (), (), (), (), (), ()],
+            [(), (), (), (), (), (), (), (), ()],
+            [(), (), (1, 4, 7), (), (), (), (1, 4, 7), (), ()],
+            [(), (), (), (), (), (), (), (), ()],
+        ]
 
     def test_mean_diff_significance_for_numeric_array_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_MULTI_NUMERIC_MEASURES_X_MR).partitions[0]
@@ -831,10 +808,10 @@ class TestMeanDifferenceSignificance(object):
         assert slice_.pairwise_means_indices.tolist() == [
             [(), (), (), (), (), (), (), ()],
             [(), (), (), (), (), (), (), ()],
-            [(), (), (), (), (), (), (5,), ()],
+            [(), (), (), (), (), (), (), (5,)],
         ]
         assert slice_.pairwise_means_indices_alt.tolist() == [
             [(), (), (), (), (), (), (), ()],
             [(), (), (), (), (), (), (), ()],
-            [(), (), (), (), (), (), (4, 5), (4, 5)],
+            [(), (), (), (), (), (), (), (4, 5)],
         ]
