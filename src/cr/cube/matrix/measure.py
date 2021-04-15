@@ -1244,7 +1244,9 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
         pa, pb, pab = Sa / Na, Sb / Nb, Sab / Nab
         col_prop_a, col_prop_b = self._column_proportions
 
-        return (col_prop_a - col_prop_b) / np.sqrt(
+        # ---Subtract the selected column from the "variable" column, to get
+        # ---the correct sign of the test statistic (hence b-a, and not a-b).
+        return (col_prop_b - col_prop_a) / np.sqrt(
             1 / self._df * (pa * (1 - pa) + pb * (1 - pb) + 2 * pa * pb - 2 * pab)
         )
 
