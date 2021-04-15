@@ -96,6 +96,7 @@ class CUBE_MEASURE(enum.Enum):
     SUM = "sum"
     VALID_OVERLAP = "valid_overlap"
     VALID_COUNT_UNWEIGHTED = "valid_count_unweighted"
+    VALID_COUNT_WEIGHTED = "valid_count_weighted"
 
 
 NUMERIC_MEASURES = frozenset(

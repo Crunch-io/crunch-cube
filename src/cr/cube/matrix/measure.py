@@ -155,9 +155,19 @@ class SecondOrderMeasures(object):
         return _UnweightedCounts(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def unweighted_valid_counts(self):
+        """_UnweightedValidCounts measure object for this cube-result."""
+        return _UnweightedValidCounts(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def weighted_counts(self):
         """_WeightedCounts measure object for this cube-result."""
         return _WeightedCounts(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def weighted_valid_counts(self):
+        """_WeightedValidCounts measure object for this cube-result."""
+        return _WeightedValidCounts(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def _cube_measures(self):
@@ -1246,6 +1256,18 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
         )
 
 
+class _UnweightedValidCounts(_BaseSecondOrderMeasure):
+    """Provides the unweighted valid counts measure for a matrix."""
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure."""
+        return SumSubtotals.blocks(
+            self._cube_measures.unweighted_cube_valid_counts.unweighted_valid_counts,
+            self._dimensions,
+        )
+
+
 class _WeightedCounts(_BaseSecondOrderMeasure):
     """Provides the weighted-counts measure for a matrix."""
 
@@ -1254,6 +1276,18 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
         """2D array of the four 2D "blocks" making up this measure."""
         return SumSubtotals.blocks(
             self._weighted_cube_counts.weighted_counts, self._dimensions
+        )
+
+
+class _WeightedValidCounts(_BaseSecondOrderMeasure):
+    """Provides the weighted valid counts measure for a matrix."""
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure."""
+        return SumSubtotals.blocks(
+            self._cube_measures.weighted_cube_valid_counts.weighted_valid_counts,
+            self._dimensions,
         )
 
 

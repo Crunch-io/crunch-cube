@@ -1264,6 +1264,26 @@ class _Slice(CubePartition):
         return self._assembler.unweighted_counts
 
     @lazyproperty
+    def unweighted_valid_counts(self):
+        try:
+            return self._assembler.unweighted_valid_counts
+        except ValueError:
+            raise ValueError(
+                "`.unweighted_valid_counts` is undefined for a cube-result without "
+                "a valid count unweighted measure"
+            )
+
+    @lazyproperty
+    def weighted_valid_counts(self):
+        try:
+            return self._assembler.weighted_valid_counts
+        except ValueError:
+            raise ValueError(
+                "`.weighted_valid_counts` is undefined for a cube-result without "
+                "a valid count weighted measure"
+            )
+
+    @lazyproperty
     def zscores(self):
         """2D np.float64 ndarray of std-res value for each cell of matrix.
 
