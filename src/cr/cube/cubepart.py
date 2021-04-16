@@ -1768,10 +1768,10 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def unweighted_valid_counts(self):
-        """1D np.float64 ndarray of sum for each row of strand.
+        """1D np.float64 ndarray of unweighted valid counts for each row of strand.
 
-        Raises ValueError when accessed on a cube-result that does not contain a sum
-        cube-measure.
+        Raises ValueError when accessed on a cube-result that does not contain a
+        unweighted valid count cube-measure.
         """
         try:
             return self._assembler.unweighted_valid_counts
@@ -1790,6 +1790,21 @@ class _Strand(CubePartition):
         were necessarily presented to all respondents.
         """
         return self._assembler.weighted_bases
+
+    @lazyproperty
+    def weighted_valid_counts(self):
+        """1D np.float64 ndarray of weighted valid counts for each row of strand.
+
+        Raises ValueError when accessed on a cube-result that does not contain a
+        weighted valid count cube-measure.
+        """
+        try:
+            return self._assembler.weighted_valid_counts
+        except ValueError:
+            raise ValueError(
+                "`.weighted_valid_counts` is undefined for a cube-result without a "
+                "valid count weighted measure"
+            )
 
     # ---implementation (helpers)-------------------------------------
 

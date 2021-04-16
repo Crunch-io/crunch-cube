@@ -360,3 +360,11 @@ class DescribeNumericArrays(object):
         strand = Cube(NA.NUM_ARR_MEANS_NO_GROUPING).partitions[0]
 
         assert strand.unweighted_valid_counts.tolist() == [6.0, 6.0]
+
+    def it_provides_weighted_and_unweighted_valid_counts_for_num_arr_no_grouping_wgtd(
+        self,
+    ):
+        strand = Cube(NA.NUM_ARR_MEANS_NO_GROUPING_WEIGHTED).partitions[0]
+
+        assert strand.unweighted_valid_counts.tolist() == [19.0, 16.0, 17.0, 20.0]
+        assert strand.weighted_valid_counts.tolist() == [10.33, 11.22, 18.99, 14.55]

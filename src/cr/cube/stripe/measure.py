@@ -110,6 +110,11 @@ class StripeMeasures(object):
         return _WeightedCounts(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
+    def weighted_valid_counts(self):
+        """_WeightedValidCounts measure object for this stripe."""
+        return _WeightedValidCounts(self._rows_dimension, self, self._cube_measures)
+
+    @lazyproperty
     def _cube_measures(self):
         """CubeMeasures collection object for this cube-result.
 
@@ -611,6 +616,23 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
     def base_values(self):
         """1D np.float64 ndarray of weighted-count for each row."""
         return self._weighted_cube_counts.weighted_counts
+
+    @lazyproperty
+    def subtotal_values(self):
+        """1D np.float64 ndarray of sum for each row-subtotal."""
+        # --- counts don't sum on an MR dimension, but an MR stripe can have no
+        # --- subtotals. This just returns an empty array in that case and we don't need
+        # --- to special-case MR.
+        return SumSubtotals.subtotal_values(self.base_values, self._rows_dimension)
+
+
+class _WeightedValidCounts(_BaseSecondOrderMeasure):
+    """Provides the weighted-valid-counts measure for a stripe."""
+
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of weighted-valid-count for each stripe base-row."""
+        return self._cube_measures.weighted_cube_valid_counts.weighted_valid_counts
 
     @lazyproperty
     def subtotal_values(self):
