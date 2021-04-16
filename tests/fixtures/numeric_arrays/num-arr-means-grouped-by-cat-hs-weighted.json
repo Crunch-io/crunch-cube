@@ -1,0 +1,500 @@
+{
+  "result": {
+    "dimensions": [
+      {
+        "derived": false,
+        "references": {
+          "alias": "country",
+          "description": "",
+          "name": "Country",
+          "view": {
+            "show_counts": false,
+            "column_width": null,
+            "include_missing": false,
+            "show_numeric_values": false
+          }
+        },
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 4,
+              "id": 4,
+              "name": "Belgium",
+              "missing": false
+            },
+            {
+              "numeric_value": 1,
+              "id": 1,
+              "name": "Argentina",
+              "missing": false
+            },
+            {
+              "numeric_value": 2,
+              "id": 2,
+              "name": "Australia",
+              "missing": false
+            },
+            {
+              "numeric_value": 3,
+              "id": 3,
+              "name": "Austria",
+              "missing": false
+            },
+            {
+              "numeric_value": 5,
+              "id": 5,
+              "name": "Brazil",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": -1,
+              "name": "No Data",
+              "missing": true
+            }
+          ]
+        }
+      }
+    ],
+    "measures": {
+      "valid_count_unweighted": {
+        "data": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          3,
+          4,
+          3,
+          3,
+          3,
+          0,
+          0,
+          0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {
+            "alias": "Num Array with 3 subvariables",
+            "uniform_basis": false,
+            "description": "MJ modified description",
+            "name": "Num Array with 3 subvariables",
+            "subreferences": [
+              {
+                "alias": "First Mov a2",
+                "name": "First Mov a2"
+              },
+              {
+                "alias": "Second Mov b2",
+                "name": "Second Mov b2"
+              },
+              {
+                "alias": "Third Mov c3",
+                "name": "Third Mov c3"
+              }
+            ]
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "subvariables": [
+              "0001",
+              "0002",
+              "0003"
+            ]
+          }
+        }
+      },
+      "sum": {
+        "data": [
+          307.125,
+          346.775,
+          264.4416666667,
+          0.0,
+          0.0,
+          0.0,
+          184.1666666667,
+          187.85,
+          139.9666666667,
+          145.1666666667,
+          183.95,
+          173.3333333333,
+          250.25,
+          305.6625,
+          286.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {
+            "alias": "Num Array with 3 subvariables",
+            "uniform_basis": false,
+            "description": "MJ modified description",
+            "name": "Num Array with 3 subvariables",
+            "subreferences": [
+              {
+                "alias": "First Mov a2",
+                "name": "First Mov a2"
+              },
+              {
+                "alias": "Second Mov b2",
+                "name": "Second Mov b2"
+              },
+              {
+                "alias": "Third Mov c3",
+                "name": "Third Mov c3"
+              }
+            ]
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "subvariables": [
+              "0001",
+              "0002",
+              "0003"
+            ]
+          }
+        }
+      },
+      "covariance": {
+        "data": [
+          2175.5571469907,
+          1155.5228298611,
+          1430.8519965278,
+          1155.5228298611,
+          1088.59765625,
+          688.9596006944,
+          1430.8519965278,
+          688.9596006944,
+          1195.5058043981,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          452.2314814815,
+          -67.8347222222,
+          452.2314814815,
+          -67.8347222222,
+          40.7008333333,
+          -67.8347222222,
+          452.2314814815,
+          -67.8347222222,
+          452.2314814815,
+          2.3472222222,
+          -79.5708333333,
+          -60.0888888889,
+          -79.5708333333,
+          2697.45125,
+          2037.0133333333,
+          -60.0888888889,
+          2037.0133333333,
+          1538.2755555556,
+          3514.671875,
+          1485.74765625,
+          1022.45,
+          1485.74765625,
+          2997.8553515625,
+          -76.68375,
+          1022.45,
+          -76.68375,
+          2453.88,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": false,
+          "references": {
+            "alias": "Num Array with 3 subvariables",
+            "uniform_basis": false,
+            "subreferences": [
+              {
+                "alias": "First Mov a2",
+                "name": "First Mov a2"
+              },
+              {
+                "alias": "Second Mov b2",
+                "name": "Second Mov b2"
+              },
+              {
+                "alias": "Third Mov c3",
+                "name": "Third Mov c3"
+              }
+            ],
+            "description": "MJ modified description",
+            "name": "Num Array with 3 subvariables"
+          },
+          "type": {
+            "subvariables": [
+              "0001",
+              "0002",
+              "0003"
+            ],
+            "missing_rules": {},
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            }
+          }
+        }
+      },
+      "stddev": {
+        "data": [
+          28.7505754611,
+          6.7295281419,
+          25.6246712709,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          28.8675134595,
+          8.6602540378,
+          28.8675134595,
+          33.4962684489,
+          10.0488805347,
+          0.0,
+          30.0,
+          8.4187291202,
+          0.0,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {
+            "alias": "Num Array with 3 subvariables",
+            "uniform_basis": false,
+            "description": "MJ modified description",
+            "name": "Num Array with 3 subvariables",
+            "subreferences": [
+              {
+                "alias": "First Mov a2",
+                "name": "First Mov a2"
+              },
+              {
+                "alias": "Second Mov b2",
+                "name": "Second Mov b2"
+              },
+              {
+                "alias": "Third Mov c3",
+                "name": "Third Mov c3"
+              }
+            ]
+          },
+          "derived": true,
+          "type": {
+            "integer": null,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "subvariables": [
+              "0001",
+              "0002",
+              "0003"
+            ]
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          77.2479564033,
+          87.2207084469,
+          66.5122615804,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          83.3333333333,
+          85.0,
+          63.3333333333,
+          67.0,
+          84.9,
+          80.0,
+          70.0,
+          85.5,
+          80.0,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {
+            "alias": "Num Array with 3 subvariables",
+            "uniform_basis": false,
+            "description": "MJ modified description",
+            "name": "Num Array with 3 subvariables",
+            "subreferences": [
+              {
+                "alias": "First Mov a2",
+                "name": "First Mov a2"
+              },
+              {
+                "alias": "Second Mov b2",
+                "name": "Second Mov b2"
+              },
+              {
+                "alias": "Third Mov c3",
+                "name": "Third Mov c3"
+              }
+            ]
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "subvariables": [
+              "0001",
+              "0002",
+              "0003"
+            ]
+          }
+        }
+      }
+    },
+    "n": 20,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 13.0,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 13.0,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 20,
+      "weighted_n": 13.0
+    },
+    "filtered": {
+      "unweighted_n": 20,
+      "weighted_n": 13.0
+    },
+    "counts": [
+      4,
+      4,
+      4,
+      4,
+      4,
+      0
+    ]
+  }
+}

@@ -1,0 +1,479 @@
+{
+  "query": {
+    "measures": {
+      "count": {
+        "function": "cube_count",
+        "args": []
+      },
+      "valid_count_unweighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "fb98968878c74b1f900f4e935004b0f7"
+          }
+        ]
+      },
+      "sum": {
+        "function": "cube_sum",
+        "args": [
+          {
+            "variable": "fb98968878c74b1f900f4e935004b0f7"
+          }
+        ]
+      },
+      "stddev": {
+        "function": "cube_stddev",
+        "args": [
+          {
+            "variable": "fb98968878c74b1f900f4e935004b0f7"
+          }
+        ]
+      },
+      "mean": {
+        "function": "cube_mean",
+        "args": [
+          {
+            "variable": "fb98968878c74b1f900f4e935004b0f7"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "variable": "3QPnyW5KMYriuoG5PCewcD000002"
+      }
+    ],
+    "weight": null
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "dimensions": [
+      {
+        "derived": false,
+        "references": {
+          "alias": "country",
+          "view": {
+            "show_counts": false,
+            "show_numeric_values": false,
+            "include_missing": false,
+            "column_width": null
+          },
+          "description": "",
+          "name": "Country"
+        },
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 4,
+              "id": 4,
+              "name": "Belgium",
+              "missing": false
+            },
+            {
+              "numeric_value": 1,
+              "id": 1,
+              "name": "Argentina",
+              "missing": false
+            },
+            {
+              "numeric_value": 2,
+              "id": 2,
+              "name": "Australia",
+              "missing": false
+            },
+            {
+              "numeric_value": 3,
+              "id": 3,
+              "name": "Austria",
+              "missing": false
+            },
+            {
+              "numeric_value": 5,
+              "id": 5,
+              "name": "Brazil",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": -1,
+              "name": "No Data",
+              "missing": true
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 0,
+    "measures": {
+      "count": {
+        "data": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {},
+          "derived": true,
+          "type": {
+            "integer": true,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "valid_count_unweighted": {
+        "data": [
+          4,
+          4,
+          3,
+          3,
+          4,
+          4,
+          3,
+          4,
+          4,
+          4,
+          3,
+          3,
+          4,
+          4,
+          3,
+          3,
+          4,
+          3,
+          4,
+          4,
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {
+            "alias": "Another Numeric arr with four subvariables",
+            "uniform_basis": false,
+            "subreferences": [
+              {
+                "alias": "d4",
+                "name": "My d4 renamed"
+              },
+              {
+                "alias": "d1",
+                "name": "My d1 renamed"
+              },
+              {
+                "alias": "d3",
+                "name": "My d3 renamed"
+              },
+              {
+                "alias": "d2",
+                "name": "My d2 renamed"
+              }
+            ],
+            "description": "Adding a new description",
+            "name": "Another Numeric arr with four subvariables renamed"
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "subvariables": [
+              "0004",
+              "0001",
+              "0003",
+              "0002"
+            ]
+          }
+        }
+      },
+      "sum": {
+        "data": [
+          210.0,
+          260.0,
+          200.0,
+          180.0,
+          220.0,
+          280.0,
+          220.0,
+          230.0,
+          210.0,
+          260.0,
+          200.0,
+          180.0,
+          210.0,
+          260.0,
+          220.0,
+          170.0,
+          160.0,
+          210.0,
+          270.0,
+          210.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {
+            "alias": "Another Numeric arr with four subvariables",
+            "uniform_basis": false,
+            "subreferences": [
+              {
+                "alias": "d4",
+                "name": "My d4 renamed"
+              },
+              {
+                "alias": "d1",
+                "name": "My d1 renamed"
+              },
+              {
+                "alias": "d3",
+                "name": "My d3 renamed"
+              },
+              {
+                "alias": "d2",
+                "name": "My d2 renamed"
+              }
+            ],
+            "description": "Adding a new description",
+            "name": "Another Numeric arr with four subvariables renamed"
+          },
+          "derived": true,
+          "type": {
+            "integer": null,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "subvariables": [
+              "0004",
+              "0001",
+              "0003",
+              "0002"
+            ]
+          }
+        }
+      },
+      "stddev": {
+        "data": [
+          23.6290781313,
+          20.8166599947,
+          5.7735026919,
+          10.0,
+          23.8047614285,
+          24.4948974278,
+          5.7735026919,
+          27.5378527364,
+          23.6290781313,
+          19.1485421551,
+          15.2752523165,
+          10.0,
+          27.5378527364,
+          20.8166599947,
+          5.7735026919,
+          15.2752523165,
+          31.6227766017,
+          0.0,
+          5.0,
+          28.7228132327,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {
+            "alias": "Another Numeric arr with four subvariables",
+            "uniform_basis": false,
+            "subreferences": [
+              {
+                "alias": "d4",
+                "name": "My d4 renamed"
+              },
+              {
+                "alias": "d1",
+                "name": "My d1 renamed"
+              },
+              {
+                "alias": "d3",
+                "name": "My d3 renamed"
+              },
+              {
+                "alias": "d2",
+                "name": "My d2 renamed"
+              }
+            ],
+            "description": "Adding a new description",
+            "name": "Another Numeric arr with four subvariables renamed"
+          },
+          "derived": true,
+          "type": {
+            "integer": null,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "subvariables": [
+              "0004",
+              "0001",
+              "0003",
+              "0002"
+            ]
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          52.5,
+          65.0,
+          66.6666666667,
+          60.0,
+          55.0,
+          70.0,
+          73.3333333333,
+          57.5,
+          52.5,
+          65.0,
+          66.6666666667,
+          60.0,
+          52.5,
+          65.0,
+          73.3333333333,
+          56.6666666667,
+          40.0,
+          70.0,
+          67.5,
+          52.5,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "references": {
+            "alias": "Another Numeric arr with four subvariables",
+            "uniform_basis": false,
+            "subreferences": [
+              {
+                "alias": "d4",
+                "name": "My d4 renamed"
+              },
+              {
+                "alias": "d1",
+                "name": "My d1 renamed"
+              },
+              {
+                "alias": "d3",
+                "name": "My d3 renamed"
+              },
+              {
+                "alias": "d2",
+                "name": "My d2 renamed"
+              }
+            ],
+            "description": "Adding a new description",
+            "name": "Another Numeric arr with four subvariables renamed"
+          },
+          "derived": true,
+          "type": {
+            "integer": true,
+            "class": "numeric",
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "subvariables": [
+              "0004",
+              "0001",
+              "0003",
+              "0002"
+            ]
+          }
+        }
+      }
+    },
+    "n": 20,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 20,
+      "weighted_n": 20
+    },
+    "filtered": {
+      "unweighted_n": 20,
+      "weighted_n": 20
+    },
+    "counts": [
+      4,
+      4,
+      4,
+      4,
+      4,
+      0
+    ],
+    "element": "crunch:cube"
+  }
+}
