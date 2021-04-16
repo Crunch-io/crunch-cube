@@ -204,6 +204,11 @@ class StripeAssembler(object):
         return self._assemble_vector(self._measures.unweighted_counts.blocks)
 
     @lazyproperty
+    def unweighted_valid_counts(self):
+        """1D np.float64 ndarray of unweighted valid count for each row of stripe."""
+        return self._assemble_vector(self._measures.unweighted_valid_counts.blocks)
+
+    @lazyproperty
     def weighted_bases(self):
         """1D np.float64 ndarray of weighted table-proportion denominator per row."""
         return self._assemble_vector(self._measures.weighted_bases.blocks)

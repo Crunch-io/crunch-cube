@@ -1767,6 +1767,21 @@ class _Strand(CubePartition):
         return self._assembler.unweighted_counts
 
     @lazyproperty
+    def unweighted_valid_counts(self):
+        """1D np.float64 ndarray of sum for each row of strand.
+
+        Raises ValueError when accessed on a cube-result that does not contain a sum
+        cube-measure.
+        """
+        try:
+            return self._assembler.unweighted_valid_counts
+        except ValueError:
+            raise ValueError(
+                "`.unweighted_valid_counts` is undefined for a cube-result without a "
+                "valid count unweighted measure"
+            )
+
+    @lazyproperty
     def weighted_bases(self):
         """1D np.float64 ndarray of table-proportion denominator for each row.
 

@@ -325,7 +325,7 @@ class DescribeNumericArrays(object):
             nan_ok=True,
         )
 
-    def it_provides_unweighted_bases_for_num_array_grouped_by_cat(self):
+    def it_provides_unweighted_valid_counts_for_num_array_grouped_by_cat(self):
         slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
 
         assert slice_.unweighted_valid_counts.tolist() == [
@@ -334,7 +334,7 @@ class DescribeNumericArrays(object):
             [3.0, 2.0],
         ]
 
-    def it_provides_unweighted_bases_for_num_array_x_mr(self):
+    def it_provides_unweighted_valid_counts_for_num_array_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_X_MR).partitions[0]
 
         assert slice_.unweighted_valid_counts.tolist() == [
@@ -342,7 +342,7 @@ class DescribeNumericArrays(object):
             [38.0, 14.0, 6.0, 18.0, 38.0],
         ]
 
-    def it_provides_weighted_and_unweighted_bases_for_num_array_x_mr(self):
+    def it_provides_weighted_and_unweighted_valid_counbts_for_num_array_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_WEIGHTED).partitions[0]
 
         assert slice_.unweighted_valid_counts.tolist() == [
@@ -355,3 +355,8 @@ class DescribeNumericArrays(object):
             [0.8, 0.4],
             [0.2, 0.3],
         ]
+
+    def it_provides_unweighted_valid_counts_for_numeric_array_with_no_grouping(self):
+        strand = Cube(NA.NUM_ARR_MEANS_NO_GROUPING).partitions[0]
+
+        assert strand.unweighted_valid_counts.tolist() == [6.0, 6.0]

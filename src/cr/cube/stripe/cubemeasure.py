@@ -46,6 +46,13 @@ class CubeMeasures(object):
         )
 
     @lazyproperty
+    def unweighted_cube_valid_counts(self):
+        """_BaseUnweightedValidCubeCounts subclass object for this stripe."""
+        return _BaseUnweightedCubeValidCounts.factory(
+            self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
+        )
+
+    @lazyproperty
     def weighted_cube_counts(self):
         """_BaseWeightedCubeCounts subclass object for this stripe."""
         return _BaseWeightedCubeCounts.factory(
@@ -333,6 +340,73 @@ class _NumArrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
     def unweighted_counts(self):
         """1D np.int64 ndarray of unweighted-count for each row of stripe."""
         return self._unweighted_counts
+
+
+# === UNWEIGHTED VALID COUNTS ===
+
+
+class _BaseUnweightedCubeValidCounts(_BaseCubeMeasure):
+    """Base class for unweighted-count cube-measure variants."""
+
+    def __init__(self, rows_dimension, unweighted_valid_counts):
+        super(_BaseUnweightedCubeValidCounts, self).__init__(rows_dimension)
+        self._unweighted_valid_counts = unweighted_valid_counts
+
+    @classmethod
+    def factory(cls, cube, rows_dimension, ca_as_0th, slice_idx):
+        """Return _BaseUnweightedCubeCounts subclass instance appropriate to `cube`."""
+        unweighted_valid_counts = cube.unweighted_valid_counts
+        if ca_as_0th:
+            return _CatUnweightedCubeValidCounts(
+                rows_dimension, unweighted_valid_counts[slice_idx]
+            )
+
+        if rows_dimension.dimension_type == DT.NUM_ARRAY:
+            return _NumArrUnweightedCubeValidCounts(
+                rows_dimension, unweighted_valid_counts
+            )
+
+        if rows_dimension.dimension_type == DT.MR:
+            return _MrUnweightedCubeValidCounts(rows_dimension, unweighted_valid_counts)
+
+        return _CatUnweightedCubeValidCounts(rows_dimension, unweighted_valid_counts)
+
+    @lazyproperty
+    def unweighted_valid_counts(self):
+        """1D np.float64 ndarray of unweighted-count for each row of stripe."""
+        raise NotImplementedError(
+            "`%s` must implement `.unweighted_valid_counts`" % type(self).__name__
+        )  # pragma: no cover
+
+
+class _CatUnweightedCubeValidCounts(_BaseUnweightedCubeValidCounts):
+    """Unweighted-valid-counts cube-measure for a non-MR stripe."""
+
+    @lazyproperty
+    def unweighted_valid_counts(self):
+        """1D np.float64 ndarray of unweighted-valid-count for each row of stripe."""
+        return self._unweighted_valid_counts
+
+
+class _MrUnweightedCubeValidCounts(_BaseUnweightedCubeValidCounts):
+    """Unweighted-valid-counts cube-measure for an MR slice.
+
+    Its `._unweighted_valid_counts` is a 2D ndarray with axes (rows, sel/not).
+    """
+
+    @lazyproperty
+    def unweighted_valid_counts(self):
+        """1D np.float64 ndarray of unweighted-valid-count for each row of stripe."""
+        return self._unweighted_valid_counts[:, 0]
+
+
+class _NumArrUnweightedCubeValidCounts(_BaseUnweightedCubeValidCounts):
+    """Unweighted-valid-counts cube-measure for a numeric array stripe."""
+
+    @lazyproperty
+    def unweighted_valid_counts(self):
+        """1D np.int64 ndarray of unweighted-valid-count for each row of stripe."""
+        return self._unweighted_valid_counts
 
 
 # === WEIGHTED COUNTS ===
