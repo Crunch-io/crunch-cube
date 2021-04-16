@@ -1081,13 +1081,6 @@ class _WeightedValidCountsMeasure(_BaseMeasure):
     """Weighted Valid counts for cube."""
 
     @lazyproperty
-    def missing_count(self):
-        """numeric representing count of missing rows reflected in response."""
-        return self._cube_dict["result"]["measures"]["valid_count_weighted"].get(
-            "n_missing", 0
-        )
-
-    @lazyproperty
     def _flat_values(self):
         """Optional 1D np.ndarray of np.float64 weighted valid counts."""
         valid_counts = (
