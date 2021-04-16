@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.20
+- Fix sig letters for mean differences
+
 ### 2.1.19
 - Fix pairwise bug (with empty indices)
 
