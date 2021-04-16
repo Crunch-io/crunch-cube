@@ -1019,7 +1019,21 @@ class Describe_Strand(object):
         assert strand.title == "Registered Voters"
         assert strand.unweighted_bases.tolist() == [15, 15]
         assert strand.unweighted_counts.tolist() == [10, 5]
+        with pytest.raises(ValueError) as e:
+            strand.unweighted_valid_counts
+        assert (
+            str(e.value)
+            == "`.unweighted_valid_counts` is undefined for a cube-result without "
+            "a valid count unweighted measure"
+        )
         assert strand.variable_name == "v7"
+        with pytest.raises(ValueError) as e:
+            strand.weighted_valid_counts
+        assert (
+            str(e.value)
+            == "`.weighted_valid_counts` is undefined for a cube-result without "
+            "a valid count weighted measure"
+        )
         assert strand.weighted_bases == pytest.approx([15.0, 15.0])
 
     def it_provides_values_for_univariate_cat_means_hs(self):
