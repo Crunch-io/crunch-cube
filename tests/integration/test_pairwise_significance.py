@@ -885,6 +885,11 @@ class TestMeanDifferenceSignificance(object):
             [(), (), (), (), ()],
             [(), (), (), (2,), ()],
         ]
+        assert slice_.pairwise_means_indices_alt.tolist() == [
+            [(), (), (), (), ()],
+            [(), (), (), (), ()],
+            [(), (), (), (0, 2), (0, 2)],
+        ]
 
         # Test pruning
         transforms = {
