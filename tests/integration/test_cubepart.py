@@ -133,7 +133,21 @@ class Describe_Slice(object):
             "measure"
         )
         assert slice_.unweighted_counts.tolist() == [[5, 2], [5, 3]]
+        with pytest.raises(ValueError) as e:
+            slice_.unweighted_valid_counts
+        assert (
+            str(e.value)
+            == "`.unweighted_valid_counts` is undefined for a cube-result without "
+            "a valid count unweighted measure"
+        )
         assert slice_.variable_name == "v7"
+        with pytest.raises(ValueError) as e:
+            slice_.weighted_valid_counts
+        assert (
+            str(e.value)
+            == "`.weighted_valid_counts` is undefined for a cube-result without "
+            "a valid count weighted measure"
+        )
 
     def it_provides_values_for_cat_hs_mt_x_cat_hs_mt(self):
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, population=1000).partitions[0]
