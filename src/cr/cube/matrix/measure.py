@@ -47,6 +47,11 @@ class SecondOrderMeasures(object):
         return _ColumnWeightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def columns_base(self):
+        """1D np.float64 ndarray of unweighted-N for each matrix column."""
+        return self._cube_measures.unweighted_cube_counts.columns_base
+
+    @lazyproperty
     def columns_pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix column."""
         return self._cube_measures.unweighted_cube_counts.columns_pruning_base

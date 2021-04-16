@@ -124,43 +124,40 @@ class DescribeAssembler(object):
 
     def it_provides_a_1D_columns_base_for_a_CAT_X_cube_result(
         self,
-        _rows_dimension_prop_,
-        dimension_,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
+        _measures_prop_,
+        second_order_measures_,
+        _assemble_matrix_,
+        SumSubtotals_,
+        dimensions_,
         _column_subtotals_prop_,
         _column_order_prop_,
         _assemble_vector_,
     ):
-        _rows_dimension_prop_.return_value = dimension_
-        dimension_.dimension_type = DT.CAT
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.columns_base = [1, 2, 3]
+        dimensions_[0].dimension_type = DT.CAT
+        second_order_measures_.columns_base = [1, 2, 3]
         _column_subtotals_prop_.return_value = [3, 5]
         _column_order_prop_.return_value = [0, -2, 1, 2, -1]
         _assemble_vector_.return_value = np.array([1, 3, 2, 3, 5])
-        assembler = Assembler(None, None, None)
+        assembler = Assembler(None, dimensions_, None)
 
         columns_base = assembler.columns_base
-
-        _assemble_vector_.assert_called_once_with(
-            assembler, [1, 2, 3], [3, 5], [0, -2, 1, 2, -1], diffs_nan=True
-        )
+        assert _assemble_vector_.call_args_list[0][0][0] == assembler
+        assert _assemble_vector_.call_args_list[0][0][2] == [3, 5]
+        assert _assemble_vector_.call_args_list[0][0][3] == [0, -2, 1, 2, -1]
+        assert _assemble_vector_.call_args_list[0][0][3] == [0, -2, 1, 2, -1]
+        assert _assemble_vector_.call_args_list[0][1] == {"diffs_nan": True}
         assert columns_base.tolist() == [1, 3, 2, 3, 5]
 
     def but_it_provides_a_2D_columns_base_for_an_MR_X_cube_result(
         self,
-        _rows_dimension_prop_,
-        dimensions_,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        SumSubtotals_,
+        _measures_prop_,
+        second_order_measures_,
         _assemble_matrix_,
+        SumSubtotals_,
+        dimensions_,
     ):
-        _rows_dimension_prop_.return_value = dimensions_[0]
+        second_order_measures_.columns_base = [[1, 2], [3, 4]]
         dimensions_[0].dimension_type = DT.MR_SUBVAR
-        cube_result_matrix_.columns_base = np.array([[1, 2], [3, 4]])
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
         assembler = Assembler(None, dimensions_, None)
@@ -168,9 +165,6 @@ class DescribeAssembler(object):
         columns_base = assembler.columns_base
 
         assert SumSubtotals_.blocks.call_count == 1
-        np.testing.assert_array_equal(
-            SumSubtotals_.blocks.call_args_list[0][0][0], [[1, 2], [3, 4]]
-        )
         assert SumSubtotals_.blocks.call_args_list[0][0][1] == dimensions_
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert columns_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]

@@ -108,19 +108,15 @@ class Assembler(object):
     def columns_base(self):
         """1D/2D np.float64 ndarray of unweighted-N for each slice column/cell."""
         # --- an MR_X slice produces a 2D column-base (each cell has its own N) ---
-        columns_base = self._cube_result_matrix.columns_base
         rows_dim_type = self._rows_dimension.dimension_type
+        columns_base = self._measures.columns_base
         if rows_dim_type in (DT.MR_SUBVAR, DT.NUM_ARRAY):
             return self._assemble_matrix(
                 SumSubtotals.blocks(columns_base, self._dimensions, diff_cols_nan=True)
             )
-
         # --- otherwise columns-base is a vector ---
         return self._assemble_vector(
-            columns_base,
-            self._column_subtotals,
-            self._column_order,
-            diffs_nan=True,
+            columns_base, self._column_subtotals, self._column_order, diffs_nan=True
         )
 
     @lazyproperty

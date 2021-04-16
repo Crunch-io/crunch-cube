@@ -483,7 +483,11 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
         dimension_types = cube.dimension_types[-2:]
 
         UnweightedCubeCountsCls = (
-            _MrXMrUnweightedCubeCounts
+            _NumArrayXMrUnweightedCubeCounts
+            if dimension_types == (DT.NUM_ARRAY, DT.MR)
+            else _NumArrayXCatUnweightedCubeCounts
+            if dimension_types[0] == DT.NUM_ARRAY
+            else _MrXMrUnweightedCubeCounts
             if dimension_types == (DT.MR, DT.MR)
             else _MrXCatUnweightedCubeCounts
             if dimension_types[0] == DT.MR
@@ -840,6 +844,38 @@ class _MrXMrUnweightedCubeCounts(_BaseUnweightedCubeCounts):
         """2D np.float64 ndarray of unweighted-count for each valid matrix cell."""
         # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
         return self._unweighted_counts[:, 0, :, 0]
+
+
+class _NumArrayXCatUnweightedCubeCounts(_CatXCatUnweightedCubeCounts):
+    """Unweighted-counts cube-measure for a slice with no NUM ARRAY row dimension."""
+
+    @lazyproperty
+    def column_bases(self):
+        """2D np.float64 ndarray of column-wise unweighted-N for each matrix cell."""
+        return np.broadcast_to(
+            np.sum(self.columns_base, axis=0), self.unweighted_counts.shape
+        )
+
+    @lazyproperty
+    def columns_base(self):
+        """2D ndarray of np.float64 unweighted-N for each matrix column."""
+        return self._unweighted_counts
+
+
+class _NumArrayXMrUnweightedCubeCounts(_CatXMrUnweightedCubeCounts):
+    """Unweighted-counts cube-measure for a slice with NUM_ARRAY x MR dimensions."""
+
+    @lazyproperty
+    def column_bases(self):
+        """2D np.float64 ndarray of column-wise unweighted-N for each matrix cell."""
+        return np.broadcast_to(
+            np.sum(self.columns_base, axis=0), self.unweighted_counts.shape
+        )
+
+    @lazyproperty
+    def columns_base(self):
+        """2D ndarray of np.float64 unweighted-N for each matrix column."""
+        return self._unweighted_counts[:, :, 0]
 
 
 # === UNWEIGHTED VALID COUNTS ===
@@ -1340,11 +1376,7 @@ class BaseCubeResultMatrix(object):
         """Return a base-matrix object of appropriate type for `cube`."""
         dimension_types = cube.dimension_types[-2:]
         MatrixCls = (
-            _NumArrayXMrMatrix
-            if dimension_types == (DT.NUM_ARRAY, DT.MR)
-            else _NumArrayXCatMatrix
-            if dimension_types[0] == DT.NUM_ARRAY
-            else _MrXMrMatrix
+            _MrXMrMatrix
             if dimension_types == (DT.MR, DT.MR)
             else _MrXCatMatrix
             if dimension_types[0] == DT.MR
@@ -1376,13 +1408,6 @@ class BaseCubeResultMatrix(object):
         for its column.
         """
         return self.weighted_counts / self.columns_margin
-
-    @lazyproperty
-    def columns_base(self):
-        """1D/2D np.float64 ndarray of unweighted-N for each matrix column/cell."""
-        raise NotImplementedError(
-            "`%s` must implement `.columns_base`" % type(self).__name__
-        )  # pragma: no cover
 
     @lazyproperty
     def columns_dimension(self):
@@ -1574,11 +1599,6 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
         population (or the population surveyed anyway).
         """
         return self.column_proportions / self._baseline * 100
-
-    @lazyproperty
-    def columns_base(self):
-        """1D ndarray of np.float64 unweighted-N for each matrix column."""
-        return np.sum(self.unweighted_counts, axis=0)
 
     @lazyproperty
     def columns_margin(self):
@@ -1900,17 +1920,6 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
     """
 
     @lazyproperty
-    def columns_base(self):
-        """2D np.float64 ndarray of unweighted-N for this matrix.
-
-        An MR_X matrix has a distinct column-base for each cell. This is because not all
-        responses (subvars) are necessarily presented to each respondent. The
-        unweighted-count for each MR_X cell is the sum of its selected and unselected
-        unweighted counts.
-        """
-        return np.sum(self._unweighted_counts, axis=1)
-
-    @lazyproperty
     def columns_margin(self):
         """2D np.float64 ndarray of weighted-N for each cell of this matrix.
 
@@ -2103,17 +2112,6 @@ class _MrXMrMatrix(_CatXCatMatrix):
     """
 
     @lazyproperty
-    def columns_base(self):
-        """2D np.float64 ndarray of unweighted-N for this matrix.
-
-        An MR_X_MR matrix has a distinct column-base for each cell. This is because not
-        all responses (subvars) are necessarily presented to each respondent. The
-        unweighted-count for each MR_X cell is the sum of its selected and unselected
-        unweighted counts.
-        """
-        return np.sum(self._unweighted_counts[:, :, :, 0], axis=1)
-
-    @lazyproperty
     def columns_margin(self):
         """2D np.float64 ndarray of weighted-N for each cell of matrix.
 
@@ -2255,30 +2253,3 @@ class _MrXMrMatrix(_CatXCatMatrix):
         """2D ndarray of np.float64 table proportion variance for each matrix cell."""
         p = self._weighted_counts[:, 0, :, 0] / self.table_margin
         return p * (1 - p)
-
-
-class _NumArrayXCatMatrix(_CatXCatMatrix):
-    """NUM_ARR_X_CAT slice with means measure instead of counts."""
-
-    @lazyproperty
-    def columns_base(self):
-        """2D np.float64 ndarray of unweighted-N for this matrix.
-
-        In this case the columns base correspond to the unweighted counts that for the
-        numeric arrays cases corresponds to the valid counts measure result.
-        """
-        return self._unweighted_counts
-
-
-class _NumArrayXMrMatrix(_CatXMrMatrix):
-    """NUM_ARR_X_MR slice with means measure instead of counts."""
-
-    @lazyproperty
-    def columns_base(self):
-        """2D np.float64 ndarray of unweighted-N for this matrix.
-
-        A NUM_ARR_X_MR matrix has a distinct column-base for each cell. In this case
-        the column base is the unweighted counts sliced for all the subvar on the NUM
-        ARRAY dimension and all the subvars on the MR (selected) one.
-        """
-        return self._unweighted_counts[:, :, 0]

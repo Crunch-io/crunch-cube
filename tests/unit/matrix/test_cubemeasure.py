@@ -1705,10 +1705,6 @@ class Describe_CatXCatMatrix(object):
             matrix.column_index, np.array([[50.0, 100.0, 150.0], [50.0, 62.5, 75.0]])
         )
 
-    def it_knows_its_columns_base(self):
-        matrix = _CatXCatMatrix(None, None, np.array([[1, 2, 3], [4, 5, 6]]))
-        assert matrix.columns_base.tolist() == [5, 7, 9]
-
     def it_knows_its_columns_margin(self):
         matrix = _CatXCatMatrix(None, np.array([[1, 2, 3], [4, 5, 6]]), None)
         assert matrix.columns_margin.tolist() == [5, 7, 9]
@@ -2012,24 +2008,6 @@ class Describe_CatXMrMatrix(object):
 class Describe_MrXCatMatrix(object):
     """Unit test suite for `cr.cube.matrix._MrXCatMatrix` object."""
 
-    def it_knows_its_columns_base(self):
-        unweighted_counts = np.array(
-            [
-                [  # -- row 0 ---------------
-                    [1, 2, 3],  # -- selected
-                    [4, 5, 6],  # -- not
-                ],
-                [  # -- row 1 ---------------
-                    [7, 8, 9],  # -- selected
-                    [3, 2, 1],  # -- not
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXCatMatrix(None, None, unweighted_counts, None).columns_base,
-            np.array([[5, 7, 9], [10, 10, 10]]),
-        )
-
     def it_knows_its_columns_margin(self):
         weighted_counts = np.array(
             [
@@ -2224,24 +2202,6 @@ class Describe_MrXCatMatrix(object):
 
 class Describe_MrXMrMatrix(object):
     """Unit test suite for `cr.cube.matrix._MrXMrMatrix` object."""
-
-    def it_knows_its_columns_base(self):
-        unweighted_counts = np.array(
-            [
-                [  # -- row 0 ---------------
-                    [[0, 8], [2, 7], [1, 7]],
-                    [[2, 6], [6, 8], [3, 5]],
-                ],
-                [  # -- row 1 ---------------
-                    [[4, 4], [1, 7], [8, 3]],
-                    [[6, 2], [3, 5], [5, 2]],
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXMrMatrix(None, None, unweighted_counts, None).columns_base,
-            np.array([[2, 8, 4], [10, 4, 13]]),
-        )
 
     def it_knows_its_columns_margin(self):
         weighted_counts = np.array(
