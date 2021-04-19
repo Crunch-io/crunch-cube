@@ -509,28 +509,32 @@ class TestOverlapsPairwiseSignificance(TestCase):
             nan_ok=True,
         )
 
-    def test_pairwise_cat_x_mr_gender_x_all_pets_owned(self):
+    def test_pairwise_cat_x_mr_gender_x_all_pets_owned_with_weighted_counts(self):
         slice_ = Cube(OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED).partitions[0]
 
-        assert slice_.column_percentages.tolist() == [
-            [75.0, 20.0, 60.0],
-            [25.0, 80.0, 40.0],
-        ]
+        assert slice_.column_percentages.tolist() == pytest.approx(
+            np.array(
+                [
+                    [66.6667, 14.28571, 50.0],
+                    [33.33333, 85.714286, 50.0],
+                ]
+            )
+        )
 
         # Assert for first column (subvariable)
         assert slice_.pairwise_significance_t_stats(0).tolist() == pytest.approx(
             np.array(
                 [
-                    [0.0, -2.76314, -1.587178],
-                    [0.0, 2.76314, 1.587178],
+                    [0.0, -2.6315597, -1.76353],
+                    [0.0, 2.6315597, 1.76353],
                 ]
             ),
         )
         assert slice_.pairwise_significance_p_vals(0) == pytest.approx(
             np.array(
                 [
-                    [0.0, 0.0103743, 0.1229579],
-                    [0.0, 0.0103743, 0.1229579],
+                    [0.0, 0.01410448, 0.0879948],
+                    [0.0, 0.01410448, 0.0879948],
                 ]
             ),
         )
@@ -539,16 +543,16 @@ class TestOverlapsPairwiseSignificance(TestCase):
         assert slice_.pairwise_significance_t_stats(1).tolist() == pytest.approx(
             np.array(
                 [
-                    [2.76314, 0.0, 9.07697],
-                    [-2.76314, 0.0, -9.07697],
+                    [2.63156, 0.0, 8.10444],
+                    [-2.63156, 0.0, -8.10444],
                 ]
             ),
         )
         assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
             np.array(
                 [
-                    [0.0103743, 0.0, 0.003145e-06],
-                    [0.0103743, 0.0, 0.003145e-06],
+                    [0.01410448, 0, 0.025067e-06],
+                    [0.01410448, 0, 0.025067e-06],
                 ]
             ),
         )
@@ -557,16 +561,16 @@ class TestOverlapsPairwiseSignificance(TestCase):
         assert slice_.pairwise_significance_t_stats(2).tolist() == pytest.approx(
             np.array(
                 [
-                    [1.587178, -9.07697, 0.0],
-                    [-1.587178, 9.07697, 0.0],
+                    [1.763531, -8.104439, 0.0],
+                    [-1.763531, 8.104439, 0.0],
                 ]
             ),
         )
         assert slice_.pairwise_significance_p_vals(2) == pytest.approx(
             np.array(
                 [
-                    [0.1229579, 0.003146e-06, 0.0],
-                    [0.1229579, 0.003146e-06, 0.0],
+                    [0.0879948, 0.025067e-06, 0],
+                    [0.0879948, 0.025067e-06, 0],
                 ]
             ),
         )
@@ -577,10 +581,14 @@ class TestOverlapsPairwiseSignificance(TestCase):
             OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED, transforms=transforms
         ).partitions[0]
 
-        assert slice_.column_percentages.tolist() == [
-            [75.0, 20.0, 60.0],
-            [25.0, 80.0, 40.0],
-        ]
+        assert slice_.column_percentages.tolist() == pytest.approx(
+            np.array(
+                [
+                    [66.6667, 14.28571, 50.0],
+                    [33.33333, 85.714286, 50.0],
+                ]
+            )
+        )
 
         assert slice_.pairwise_indices.tolist() == [
             [(1,), (), (1,)],
@@ -603,10 +611,14 @@ class TestOverlapsPairwiseSignificance(TestCase):
             OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED, transforms=transforms
         ).partitions[0]
 
-        assert slice_.column_percentages.tolist() == [
-            [75.0, 20.0, 60.0],
-            [25.0, 80.0, 40.0],
-        ]
+        assert slice_.column_percentages.tolist() == pytest.approx(
+            np.array(
+                [
+                    [66.6667, 14.28571, 50.0],
+                    [33.33333, 85.714286, 50.0],
+                ]
+            )
+        )
 
         assert slice_.pairwise_indices.tolist() == [
             [(), (), ()],

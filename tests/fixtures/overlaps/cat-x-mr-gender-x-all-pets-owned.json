@@ -35,7 +35,7 @@
                 ]
             }
         ],
-        "weight": null
+        "weight": "http://127.0.0.1:8080/datasets/2d72499978a24736b9018a096d13bd80/variables/e0afa901440841409aa7d73cc02831f9/"
     },
     "query_environment": {
         "filter": []
@@ -43,7 +43,6 @@
     "result": {
         "dimensions": [
             {
-                "derived": false,
                 "references": {
                     "alias": "Gender",
                     "name": "Gender",
@@ -51,27 +50,28 @@
                         "show_numeric_values": false
                     }
                 },
+                "derived": false,
                 "type": {
                     "ordinal": false,
                     "class": "categorical",
                     "categories": [
                         {
                             "numeric_value": null,
+                            "missing": false,
                             "id": 1,
-                            "name": "Male",
-                            "missing": false
+                            "name": "Male"
                         },
                         {
                             "numeric_value": null,
+                            "missing": false,
                             "id": 2,
-                            "name": "Female",
-                            "missing": false
+                            "name": "Female"
                         },
                         {
                             "numeric_value": null,
+                            "missing": true,
                             "id": -1,
-                            "name": "No Data",
-                            "missing": true
+                            "name": "No Data"
                         }
                     ]
                 }
@@ -80,6 +80,8 @@
                 "references": {
                     "alias": "allpets",
                     "uniform_basis": false,
+                    "description": "Do you have any of these animals as pets? Please select all that apply.",
+                    "name": "All pets owned",
                     "subreferences": [
                         {
                             "alias": "allpets_1",
@@ -93,9 +95,7 @@
                             "alias": "allpets_3",
                             "name": "Bird"
                         }
-                    ],
-                    "description": "Do you have any of these animals as pets? Please select all that apply.",
-                    "name": "All pets owned"
+                    ]
                 },
                 "derived": true,
                 "type": {
@@ -148,8 +148,6 @@
                 "references": {
                     "alias": "allpets",
                     "uniform_basis": false,
-                    "description": "Do you have any of these animals as pets? Please select all that apply.",
-                    "name": "All pets owned",
                     "subreferences": [
                         {
                             "alias": "allpets_1",
@@ -163,7 +161,9 @@
                             "alias": "allpets_3",
                             "name": "Bird"
                         }
-                    ]
+                    ],
+                    "description": "Do you have any of these animals as pets? Please select all that apply.",
+                    "name": "All pets owned"
                 },
                 "type": {
                     "ordinal": false,
@@ -201,40 +201,40 @@
         "measures": {
             "count": {
                 "data": [
-                    6,
-                    4,
-                    10,
-                    2,
-                    6,
-                    12,
-                    6,
-                    6,
-                    8,
-                    2,
-                    4,
-                    14,
-                    8,
-                    0,
-                    12,
-                    4,
-                    6,
-                    10,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
+                    4.8,
+                    3.2,
+                    8.0,
+                    1.6,
+                    4.8,
+                    9.6,
+                    4.8,
+                    4.8,
+                    6.4,
+                    2.4,
+                    4.8,
+                    16.8,
+                    9.6,
+                    0.0,
+                    14.4,
+                    4.8,
+                    7.2,
+                    12.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
                 ],
                 "n_missing": 6,
                 "metadata": {
                     "references": {},
                     "derived": true,
                     "type": {
-                        "integer": true,
+                        "integer": false,
                         "missing_rules": {},
                         "missing_reasons": {
                             "No Data": -1
@@ -332,6 +332,8 @@
                     "references": {
                         "alias": "allpets",
                         "uniform_basis": false,
+                        "description": "Do you have any of these animals as pets? Please select all that apply.",
+                        "name": "All pets owned",
                         "subreferences": [
                             {
                                 "alias": "allpets_1",
@@ -345,9 +347,7 @@
                                 "alias": "allpets_3",
                                 "name": "Bird"
                             }
-                        ],
-                        "description": "Do you have any of these animals as pets? Please select all that apply.",
-                        "name": "All pets owned"
+                        ]
                     },
                     "derived": true,
                     "type": {
@@ -454,6 +454,8 @@
                     "references": {
                         "alias": "allpets",
                         "uniform_basis": false,
+                        "description": "Do you have any of these animals as pets? Please select all that apply.",
+                        "name": "All pets owned",
                         "subreferences": [
                             {
                                 "alias": "allpets_1",
@@ -467,9 +469,7 @@
                                 "alias": "allpets_3",
                                 "name": "Bird"
                             }
-                        ],
-                        "description": "Do you have any of these animals as pets? Please select all that apply.",
-                        "name": "All pets owned"
+                        ]
                     },
                     "derived": true,
                     "type": {
@@ -497,7 +497,7 @@
                     "missing": 0
                 },
                 "weighted": {
-                    "selected": 40,
+                    "selected": 40.0,
                     "other": 0,
                     "missing": 0
                 }
@@ -509,7 +509,7 @@
                     "missing": 0
                 },
                 "weighted": {
-                    "selected": 40,
+                    "selected": 40.0,
                     "other": 0,
                     "missing": 0
                 }
@@ -517,11 +517,11 @@
         },
         "unfiltered": {
             "unweighted_n": 40,
-            "weighted_n": 40
+            "weighted_n": 40.0
         },
         "filtered": {
             "unweighted_n": 40,
-            "weighted_n": 40
+            "weighted_n": 40.0
         },
         "counts": [
             6,

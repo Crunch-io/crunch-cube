@@ -529,6 +529,7 @@ class _PairwiseSigTStats(_BaseSecondOrderMeasure):
             [
                 [
                     _PairwiseSignificaneBetweenSubvariablesHelper(
+                        self._cube_measures.weighted_cube_counts.weighted_counts,
                         self._cube_measures.cube_overlaps.overlaps,
                         self._cube_measures.cube_overlaps.valid_overlaps,
                         row_idx,
@@ -567,6 +568,7 @@ class _PairwiseSigPVals(_PairwiseSigTStats):
             [
                 [
                     _PairwiseSignificaneBetweenSubvariablesHelper(
+                        self._cube_measures.weighted_cube_counts.weighted_counts,
                         self._cube_measures.cube_overlaps.overlaps,
                         self._cube_measures.cube_overlaps.valid_overlaps,
                         row_idx,
@@ -1261,7 +1263,8 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
 class _PairwiseSignificaneBetweenSubvariablesHelper(object):
     """Helper for calculating overlaps significance between subvariables."""
 
-    def __init__(self, overlaps, valid_overlaps, row_idx, idx_a, idx_b):
+    def __init__(self, counts, overlaps, valid_overlaps, row_idx, idx_a, idx_b):
+        self._counts = counts
         self._overlaps = overlaps
         self._valid_overlaps = valid_overlaps
         self._row_idx = row_idx
@@ -1312,15 +1315,15 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
         the total of selected counts from that column (to which the cell belongs).
 
         """
-        # ---pa and pb are the selected counts of the
-        # ---cells at [row_idx, A], [row_idx, B],
-        pa = self._overlaps[self._row_idx, self._idx_a, self._idx_a]
-        pb = self._overlaps[self._row_idx, self._idx_b, self._idx_b]
-        # ---Sa and Sb are the totals of the selected
-        # ---counts from columns A and B.
-        Sa, Sb, _ = self._selected_counts
-        # ---pa/Sa and pb/Sb represent the column proportions of selected counts
-        return (pa / Sa, pb / Sb)
+        # ---pa and pb are the column percentages of weighted counts
+        # ---of the cells at positions [row_idx, A] and [row_idx, B]
+        pa = self._counts[self._row_idx, self._idx_a] / np.sum(
+            self._counts[:, self._idx_a], axis=0
+        )
+        pb = self._counts[self._row_idx, self._idx_b] / np.sum(
+            self._counts[:, self._idx_b], axis=0
+        )
+        return (pa, pb)
 
     @lazyproperty
     def _selected_counts(self):
