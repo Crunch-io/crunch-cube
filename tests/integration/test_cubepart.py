@@ -1305,6 +1305,20 @@ class Describe_Strand(object):
         ]
         assert strand.table_base_range.tolist() == [3, 3]
 
+    def it_provides_unweighted_valid_counts_for_mr_mean(self):
+        strand = Cube(CR.MR_MEAN).partitions[0]
+
+        assert strand.unweighted_valid_counts.tolist() == [3, 5, 5]
+
+    def it_provides_unweighted_valid_counts_for_mr_mean_weighted(self):
+        strand = Cube(CR.MR_MEAN_WEIGHTED).partitions[0]
+
+        assert strand.weighted_valid_counts.tolist() == [
+            3.68125,
+            1.3559027778,
+            7.3559027778,
+        ]
+
 
 class Describe_Nub(object):
     """Integration-test suite for `cr.cube.cubepart._Nub` object."""

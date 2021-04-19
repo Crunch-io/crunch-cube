@@ -1,0 +1,401 @@
+{
+  "query": {
+    "measures": {
+      "count": {
+        "function": "cube_count",
+        "args": []
+      },
+      "valid_count_weighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "67095c46e2c3405689fcdba000fa659b"
+          }
+        ]
+      },
+      "mean": {
+        "function": "cube_mean",
+        "args": [
+          {
+            "variable": "67095c46e2c3405689fcdba000fa659b"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "function": "dimension",
+        "args": [
+          {
+            "function": "as_selected",
+            "args": [
+              {
+                "variable": "3QPnyW5KMYriuoG5PCewcD000000"
+              }
+            ]
+          },
+          {
+            "value": "subvariables"
+          }
+        ]
+      },
+      {
+        "function": "as_selected",
+        "args": [
+          {
+            "variable": "3QPnyW5KMYriuoG5PCewcD000000"
+          }
+        ]
+      }
+    ],
+    "weight": "http:\/\/127.0.0.1:8080\/datasets\/03a093a767784455959dc93da9834ae6\/variables\/19d549d65717451f839c52194efbe5c2\/"
+  },
+  "result": {
+    "dimensions": [
+      {
+        "references": {
+          "alias": "allpets",
+          "uniform_basis": false,
+          "description": "Do you have any of these animals as pets? Please select all that apply.",
+          "name": "All pets owned",
+          "subreferences": [
+            {
+              "name": "Cats are Superior",
+              "notes": null,
+              "alias": "allpets_1",
+              "type": "categorical",
+              "categories": [],
+              "description": ""
+            },
+            {
+              "name": "Dog",
+              "notes": null,
+              "alias": "allpets_2",
+              "type": "categorical",
+              "categories": [],
+              "description": ""
+            },
+            {
+              "name": "Bird",
+              "notes": null,
+              "alias": "allpets_3",
+              "type": "categorical",
+              "categories": [],
+              "description": ""
+            }
+          ]
+        },
+        "derived": true,
+        "type": {
+          "subtype": {
+            "class": "variable"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "derived": false,
+                "references": {
+                  "name": "Cats are Superior",
+                  "notes": null,
+                  "alias": "allpets_1",
+                  "type": "categorical",
+                  "categories": [],
+                  "description": ""
+                },
+                "id": "0001"
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "derived": false,
+                "references": {
+                  "name": "Dog",
+                  "notes": null,
+                  "alias": "allpets_2",
+                  "type": "categorical",
+                  "categories": [],
+                  "description": ""
+                },
+                "id": "0002"
+              },
+              "missing": false
+            },
+            {
+              "id": 3,
+              "value": {
+                "derived": false,
+                "references": {
+                  "name": "Bird",
+                  "notes": null,
+                  "alias": "allpets_3",
+                  "type": "categorical",
+                  "categories": [],
+                  "description": ""
+                },
+                "id": "0003"
+              },
+              "missing": false
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "derived": true,
+        "references": {
+          "alias": "allpets",
+          "uniform_basis": false,
+          "subreferences": [
+            {
+              "name": "Cats are Superior",
+              "notes": null,
+              "alias": "allpets_1",
+              "type": "categorical",
+              "categories": [],
+              "description": ""
+            },
+            {
+              "name": "Dog",
+              "notes": null,
+              "alias": "allpets_2",
+              "type": "categorical",
+              "categories": [],
+              "description": ""
+            },
+            {
+              "name": "Bird",
+              "notes": null,
+              "alias": "allpets_3",
+              "type": "categorical",
+              "categories": [],
+              "description": ""
+            }
+          ],
+          "description": "Do you have any of these animals as pets? Please select all that apply.",
+          "name": "All pets owned"
+        },
+        "type": {
+          "ordinal": false,
+          "subvariables": [
+            "0001",
+            "0002",
+            "0003"
+          ],
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "selected": true,
+              "id": 1,
+              "missing": false,
+              "name": "Selected"
+            },
+            {
+              "numeric_value": 0,
+              "missing": false,
+              "id": 0,
+              "name": "Other"
+            },
+            {
+              "numeric_value": null,
+              "missing": true,
+              "id": -1,
+              "name": "No Data"
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 3,
+    "measures": {
+      "count": {
+        "data": [
+          2.5025,
+          1.0725,
+          9.425,
+          3.9758333333,
+          1.4733333333,
+          7.5508333333,
+          3.9758333333,
+          2.21,
+          6.8141666667
+        ],
+        "n_missing": 3,
+        "metadata": {
+          "references": {},
+          "derived": true,
+          "type": {
+            "integer": false,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "valid_count_weighted": {
+        "data": [
+          3.68125,
+          1.89375,
+          7.8177083333,
+          1.3559027778,
+          3.5347222222,
+          3.5020833333,
+          7.3559027778,
+          8.4555555556,
+          6.58125
+        ],
+        "n_missing": 3,
+        "metadata": {
+          "references": {
+            "alias": "Weight-Gender",
+            "api_derivation": {
+              "function": "rake",
+              "args": [
+                {
+                  "variable": "0ba6a6a9a51644169729b568b1c00339",
+                  "targets": [
+                    [
+                      1,
+                      0.5
+                    ],
+                    [
+                      2,
+                      0.5
+                    ],
+                    [
+                      -1,
+                      0
+                    ]
+                  ]
+                }
+              ],
+              "references": {
+                "alias": "Weight-Gender",
+                "name": "Weight-Gender"
+              }
+            },
+            "name": "Weight-Gender",
+            "description": "Raked weighting based on: Gender"
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          1.0714285714,
+          0.8333333333,
+          1.0416666667,
+          1.0955949137,
+          1.0416666667,
+          0.993543759,
+          1.0955949137,
+          1.1111111111,
+          0.9658187599
+        ],
+        "n_missing": 3,
+        "metadata": {
+          "references": {
+            "alias": "Weight-Gender",
+            "api_derivation": {
+              "function": "rake",
+              "args": [
+                {
+                  "variable": "0ba6a6a9a51644169729b568b1c00339",
+                  "targets": [
+                    [
+                      1,
+                      0.5
+                    ],
+                    [
+                      2,
+                      0.5
+                    ],
+                    [
+                      -1,
+                      0
+                    ]
+                  ]
+                }
+              ],
+              "references": {
+                "alias": "Weight-Gender",
+                "name": "Weight-Gender"
+              }
+            },
+            "name": "Weight-Gender",
+            "description": "Raked weighting based on: Gender"
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      }
+    },
+    "n": 20,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 13.0,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 13.0,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 20,
+      "weighted_n": 13.0
+    },
+    "filtered": {
+      "unweighted_n": 20,
+      "weighted_n": 13.0
+    },
+    "counts": [
+      4,
+      4,
+      12,
+      5,
+      3,
+      12,
+      5,
+      6,
+      9
+    ],
+    "element": "crunch:cube"
+  }
+}
