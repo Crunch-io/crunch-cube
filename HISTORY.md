@@ -1,5 +1,21 @@
 # History of Changes
 
+### 2.1.18
+- Fix alt pairwise bug (with no alt alpha)
+
+### 2.1.17
+- Fix overlaps pairwise signs
+- Add overlaps pairwise indices
+
+### 2.1.16
+- Fix overlaps pairwise significance for MR
+
+### 2.1.15
+- Pairwise t test for mean differences
+
+### 2.1.14
+- Improve pairwise t test performance
+
 ### 2.1.13
 - Handle hiding transforms with subvar alias and id
 - Additional share of sum measures

@@ -112,27 +112,14 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.21
+- Fix overlaps pairwise significance
+
 ### 2.1.20
 - Fix sig letters for mean differences
 
 ### 2.1.19
 - Fix pairwise bug (with empty indices)
-
-### 2.1.18
-- Fix alt pairwise bug (with no alt alpha)
-
-### 2.1.17
-- Fix overlaps pairwise signs
-- Add overlaps pairwise indices
-
-### 2.1.16
-- Fix overlaps pairwise significance for MR
-
-### 2.1.15
-- Pairwise t test for mean differences
-
-### 2.1.14
-- Improve pairwise t test performance
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
