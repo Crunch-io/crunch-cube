@@ -1,0 +1,1020 @@
+{
+  "query": {
+    "measures": {
+      "count": {
+        "function": "cube_count",
+        "args": []
+      },
+      "mean": {
+        "function": "cube_mean",
+        "args": [
+          {
+            "variable": "e0f9e39d3cd34c69935e31415d785c75"
+          }
+        ]
+      },
+      "valid_count_unweighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "e0f9e39d3cd34c69935e31415d785c75"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "function": "dimension",
+        "args": [
+          {
+            "function": "as_selected",
+            "args": [
+              {
+                "variable": "505f86734c764752abb735f0d6f26d6f"
+              }
+            ]
+          },
+          {
+            "value": "subvariables"
+          }
+        ]
+      },
+      {
+        "function": "as_selected",
+        "args": [
+          {
+            "variable": "505f86734c764752abb735f0d6f26d6f"
+          }
+        ]
+      },
+      {
+        "function": "dimension",
+        "args": [
+          {
+            "function": "as_selected",
+            "args": [
+              {
+                "variable": "9bacccf3f9b14bb3af7c189650995d57"
+              }
+            ]
+          },
+          {
+            "value": "subvariables"
+          }
+        ]
+      },
+      {
+        "function": "as_selected",
+        "args": [
+          {
+            "variable": "9bacccf3f9b14bb3af7c189650995d57"
+          }
+        ]
+      }
+    ]
+  },
+  "result": {
+    "dimensions": [
+      {
+        "references": {
+          "alias": "C15_06",
+          "is_subvar": false,
+          "name": "When I want something to make me smile",
+          "subreferences": [
+            {
+              "alias": "c15_c15_6_c15_grid1",
+              "is_subvar": true,
+              "name": "BBCOne",
+              "header_order": 28
+            },
+            {
+              "alias": "c15_c15_6_c15_grid2",
+              "is_subvar": true,
+              "name": "BBCTwo",
+              "header_order": 29
+            },
+            {
+              "alias": "c15_c15_6_c15_grid3",
+              "is_subvar": true,
+              "name": "ITV1",
+              "header_order": 30
+            },
+            {
+              "alias": "c15_c15_6_c15_grid4",
+              "is_subvar": true,
+              "name": "Channel4",
+              "header_order": 31
+            },
+            {
+              "alias": "c15_c15_6_c15_grid5",
+              "is_subvar": true,
+              "name": "Five",
+              "header_order": 32
+            },
+            {
+              "alias": "c15_c15_6_c15_grid6",
+              "is_subvar": true,
+              "name": "None of these",
+              "header_order": 33
+            }
+          ]
+        },
+        "derived": true,
+        "type": {
+          "subtype": {
+            "class": "variable"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "c15_c15_6_c15_grid1",
+                  "is_subvar": true,
+                  "name": "BBCOne",
+                  "header_order": 28
+                },
+                "id": "a63e371f7ace4b47b319d6c3208564ac"
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "c15_c15_6_c15_grid2",
+                  "is_subvar": true,
+                  "name": "BBCTwo",
+                  "header_order": 29
+                },
+                "id": "1955f26d9b3646908eb59da55153a254"
+              },
+              "missing": false
+            },
+            {
+              "id": 3,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "c15_c15_6_c15_grid3",
+                  "is_subvar": true,
+                  "name": "ITV1",
+                  "header_order": 30
+                },
+                "id": "9e039fa14f2d4fd29b80764139046994"
+              },
+              "missing": false
+            },
+            {
+              "id": 4,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "c15_c15_6_c15_grid4",
+                  "is_subvar": true,
+                  "name": "Channel4",
+                  "header_order": 31
+                },
+                "id": "6b24d790b44444ea91175a3d88633509"
+              },
+              "missing": false
+            },
+            {
+              "id": 5,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "c15_c15_6_c15_grid5",
+                  "is_subvar": true,
+                  "name": "Five",
+                  "header_order": 32
+                },
+                "id": "6b1de93f73d5427db3fa4d561bb04b64"
+              },
+              "missing": false
+            },
+            {
+              "id": 6,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "c15_c15_6_c15_grid6",
+                  "is_subvar": true,
+                  "name": "None of these",
+                  "header_order": 33
+                },
+                "id": "041e03f159b54b6c8e2b17d2760887aa"
+              },
+              "missing": false
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "derived": true,
+        "references": {
+          "alias": "C15_06",
+          "is_subvar": false,
+          "name": "When I want something to make me smile",
+          "subreferences": [
+            {
+              "alias": "c15_c15_6_c15_grid1",
+              "is_subvar": true,
+              "name": "BBCOne",
+              "header_order": 28
+            },
+            {
+              "alias": "c15_c15_6_c15_grid2",
+              "is_subvar": true,
+              "name": "BBCTwo",
+              "header_order": 29
+            },
+            {
+              "alias": "c15_c15_6_c15_grid3",
+              "is_subvar": true,
+              "name": "ITV1",
+              "header_order": 30
+            },
+            {
+              "alias": "c15_c15_6_c15_grid4",
+              "is_subvar": true,
+              "name": "Channel4",
+              "header_order": 31
+            },
+            {
+              "alias": "c15_c15_6_c15_grid5",
+              "is_subvar": true,
+              "name": "Five",
+              "header_order": 32
+            },
+            {
+              "alias": "c15_c15_6_c15_grid6",
+              "is_subvar": true,
+              "name": "None of these",
+              "header_order": 33
+            }
+          ]
+        },
+        "type": {
+          "ordinal": false,
+          "subvariables": [
+            "a63e371f7ace4b47b319d6c3208564ac",
+            "1955f26d9b3646908eb59da55153a254",
+            "9e039fa14f2d4fd29b80764139046994",
+            "6b24d790b44444ea91175a3d88633509",
+            "6b1de93f73d5427db3fa4d561bb04b64",
+            "041e03f159b54b6c8e2b17d2760887aa"
+          ],
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "selected": true,
+              "id": 1,
+              "missing": false,
+              "name": "Selected"
+            },
+            {
+              "numeric_value": 0,
+              "missing": false,
+              "id": 0,
+              "name": "Other"
+            },
+            {
+              "numeric_value": null,
+              "missing": true,
+              "id": -1,
+              "name": "No Data"
+            }
+          ]
+        }
+      },
+      {
+        "references": {
+          "subreferences": [
+            {
+              "alias": "c15_c15_5_c15_grid1__1",
+              "name": "BBCOne"
+            },
+            {
+              "alias": "c15_c15_5_c15_grid2__1",
+              "name": "BBCTwo"
+            }
+          ],
+          "uniform_basis": false,
+          "name": "combined to relax to",
+          "alias": "combined to relax to"
+        },
+        "derived": true,
+        "type": {
+          "subtype": {
+            "class": "variable"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "c15_c15_5_c15_grid1__1",
+                  "name": "BBCOne"
+                },
+                "id": "00000"
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "c15_c15_5_c15_grid2__1",
+                  "name": "BBCTwo"
+                },
+                "id": "00001"
+              },
+              "missing": false
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "derived": true,
+        "references": {
+          "subreferences": [
+            {
+              "alias": "c15_c15_5_c15_grid1__1",
+              "name": "BBCOne"
+            },
+            {
+              "alias": "c15_c15_5_c15_grid2__1",
+              "name": "BBCTwo"
+            }
+          ],
+          "uniform_basis": false,
+          "name": "combined to relax to",
+          "alias": "combined to relax to"
+        },
+        "type": {
+          "ordinal": false,
+          "subvariables": [
+            "00000",
+            "00001"
+          ],
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "selected": true,
+              "id": 1,
+              "missing": false,
+              "name": "Selected"
+            },
+            {
+              "numeric_value": 0,
+              "missing": false,
+              "id": 0,
+              "name": "Other"
+            },
+            {
+              "numeric_value": null,
+              "missing": true,
+              "id": -1,
+              "name": "No Data"
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 35003,
+    "measures": {
+      "count": {
+        "data": [
+          1234,
+          337,
+          0,
+          739,
+          832,
+          0,
+          833,
+          1841,
+          0,
+          609,
+          2065,
+          0,
+          0,
+          0,
+          35003,
+          0,
+          0,
+          35003,
+          672,
+          271,
+          0,
+          648,
+          295,
+          0,
+          1395,
+          1907,
+          0,
+          700,
+          2602,
+          0,
+          0,
+          0,
+          35003,
+          0,
+          0,
+          35003,
+          911,
+          627,
+          0,
+          581,
+          957,
+          0,
+          1156,
+          1551,
+          0,
+          767,
+          1940,
+          0,
+          0,
+          0,
+          35003,
+          0,
+          0,
+          35003,
+          768,
+          513,
+          0,
+          610,
+          671,
+          0,
+          1299,
+          1665,
+          0,
+          738,
+          2226,
+          0,
+          0,
+          0,
+          35003,
+          0,
+          0,
+          35003,
+          395,
+          230,
+          0,
+          311,
+          314,
+          0,
+          1672,
+          1948,
+          0,
+          1037,
+          2583,
+          0,
+          0,
+          0,
+          35003,
+          0,
+          0,
+          35003,
+          365,
+          914,
+          0,
+          262,
+          1017,
+          0,
+          1702,
+          1264,
+          0,
+          1086,
+          1880,
+          0,
+          0,
+          0,
+          35003,
+          0,
+          0,
+          35003
+        ],
+        "n_missing": 35003,
+        "metadata": {
+          "references": {},
+          "derived": true,
+          "type": {
+            "integer": true,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "valid_count_unweighted": {
+        "data": [
+          1234,
+          337,
+          0,
+          739,
+          832,
+          0,
+          833,
+          1841,
+          0,
+          609,
+          2065,
+          0,
+          0,
+          0,
+          35003,
+          0,
+          0,
+          35003,
+          672,
+          271,
+          0,
+          648,
+          295,
+          0,
+          1395,
+          1907,
+          0,
+          700,
+          2602,
+          0,
+          0,
+          0,
+          35003,
+          0,
+          0,
+          35003,
+          911,
+          627,
+          0,
+          581,
+          957,
+          0,
+          1156,
+          1551,
+          0,
+          767,
+          1940,
+          0,
+          0,
+          0,
+          35003,
+          0,
+          0,
+          35003,
+          768,
+          513,
+          0,
+          610,
+          671,
+          0,
+          1299,
+          1665,
+          0,
+          738,
+          2226,
+          0,
+          0,
+          0,
+          35003,
+          0,
+          0,
+          35003,
+          395,
+          230,
+          0,
+          311,
+          314,
+          0,
+          1672,
+          1948,
+          0,
+          1037,
+          2583,
+          0,
+          0,
+          0,
+          35003,
+          0,
+          0,
+          35003,
+          365,
+          914,
+          0,
+          262,
+          1017,
+          0,
+          1702,
+          1264,
+          0,
+          1086,
+          1880,
+          0,
+          0,
+          0,
+          35003,
+          0,
+          0,
+          35003
+        ],
+        "n_missing": 37079,
+        "metadata": {
+          "references": {},
+          "derived": true,
+          "type": {
+            "integer": true,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          51.8699690402,
+          54.9067357513,
+          {
+            "?": -8
+          },
+          52.1799485861,
+          52.9044444444,
+          {
+            "?": -8
+          },
+          51.9549071618,
+          49.3084994753,
+          {
+            "?": -8
+          },
+          52.8692579505,
+          49.2989493792,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          50.6554841877,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          50.6554841877,
+          52.1111111111,
+          50.4473684211,
+          {
+            "?": -8
+          },
+          51.1685714286,
+          52.5864197531,
+          {
+            "?": -8
+          },
+          51.7873303167,
+          50.2213279678,
+          {
+            "?": -8
+          },
+          53.8850931677,
+          50.1153558052,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          50.6554841877,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          50.6554841877,
+          51.9623430962,
+          52.0316091954,
+          {
+            "?": -8
+          },
+          52.9348534202,
+          51.4335260116,
+          {
+            "?": -8
+          },
+          51.847706422,
+          49.4749373434,
+          {
+            "?": -8
+          },
+          52.0794520548,
+          49.8251533742,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          50.6554841877,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          50.6554841877,
+          48.0100755668,
+          45.9847908745,
+          {
+            "?": -8
+          },
+          49.115755627,
+          45.4985673352,
+          {
+            "?": -8
+          },
+          54.3690095847,
+          51.5220838052,
+          {
+            "?": -8
+          },
+          55.3601108033,
+          51.8675958188,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          50.6554841877,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          50.6554841877,
+          52.3076923077,
+          51.8474576271,
+          {
+            "?": -8
+          },
+          53.6139240506,
+          50.755952381,
+          {
+            "?": -8
+          },
+          51.7975460123,
+          50.0680933852,
+          {
+            "?": -8
+          },
+          52.1186770428,
+          50.3355906697,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          50.6554841877,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          50.6554841877,
+          56.4012345679,
+          50.635193133,
+          {
+            "?": -8
+          },
+          56.6198347107,
+          51.0493096647,
+          {
+            "?": -8
+          },
+          51.0545876887,
+          49.9882352941,
+          {
+            "?": -8
+          },
+          51.5589836661,
+          50.0414141414,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          50.6554841877,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          50.6554841877
+        ],
+        "n_missing": 37079,
+        "metadata": {
+          "references": {
+            "alias": "age",
+            "name": "Age",
+            "header_order": 2550,
+            "description": "Age"
+          },
+          "derived": true,
+          "type": {
+            "integer": true,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "class": "numeric"
+          }
+        }
+      }
+    },
+    "n": 39248,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 39248,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 39248,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 39248,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 39248,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 39248,
+      "weighted_n": 39248
+    },
+    "filtered": {
+      "unweighted_n": 39248,
+      "weighted_n": 39248
+    },
+    "counts": [
+      1234,
+      337,
+      0,
+      739,
+      832,
+      0,
+      833,
+      1841,
+      0,
+      609,
+      2065,
+      0,
+      0,
+      0,
+      35003,
+      0,
+      0,
+      35003,
+      672,
+      271,
+      0,
+      648,
+      295,
+      0,
+      1395,
+      1907,
+      0,
+      700,
+      2602,
+      0,
+      0,
+      0,
+      35003,
+      0,
+      0,
+      35003,
+      911,
+      627,
+      0,
+      581,
+      957,
+      0,
+      1156,
+      1551,
+      0,
+      767,
+      1940,
+      0,
+      0,
+      0,
+      35003,
+      0,
+      0,
+      35003,
+      768,
+      513,
+      0,
+      610,
+      671,
+      0,
+      1299,
+      1665,
+      0,
+      738,
+      2226,
+      0,
+      0,
+      0,
+      35003,
+      0,
+      0,
+      35003,
+      395,
+      230,
+      0,
+      311,
+      314,
+      0,
+      1672,
+      1948,
+      0,
+      1037,
+      2583,
+      0,
+      0,
+      0,
+      35003,
+      0,
+      0,
+      35003,
+      365,
+      914,
+      0,
+      262,
+      1017,
+      0,
+      1702,
+      1264,
+      0,
+      1086,
+      1880,
+      0,
+      0,
+      0,
+      35003,
+      0,
+      0,
+      35003
+    ],
+    "element": "crunch:cube"
+  }
+}

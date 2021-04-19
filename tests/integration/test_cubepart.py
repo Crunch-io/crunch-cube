@@ -2712,6 +2712,44 @@ class Test_Slice(object):
             ],
         )
 
+    def test_mr_x_mr_mean(self):
+        slice_ = Cube(CR.MR_X_MR_MEAN).partitions[0]
+
+        assert slice_.unweighted_valid_counts.tolist() == [
+            [1234.0, 739.0],
+            [672.0, 648.0],
+            [911.0, 581.0],
+            [768.0, 610.0],
+            [395.0, 311.0],
+            [365.0, 262.0],
+        ]
+        with pytest.raises(ValueError) as e:
+            slice_.weighted_valid_counts
+        assert (
+            str(e.value)
+            == "`.weighted_valid_counts` is undefined for a cube-result without a valid"
+            " count weighted measure"
+        )
+
+    def test_mr_x_mr_mean_weigthed(self):
+        slice_ = Cube(CR.MR_X_MR_MEAN_WEIGHTED).partitions[0]
+
+        assert slice_.weighted_valid_counts.tolist() == [
+            [1182.085094479, 690.8741719198],
+            [628.8177247196, 621.0038457352],
+            [945.421065339, 590.9351095987],
+            [782.2253676414, 610.5344665318],
+            [409.1440524812, 321.0926193937],
+            [315.8592487824, 205.9138490701],
+        ]
+        with pytest.raises(ValueError) as e:
+            slice_.unweighted_valid_counts
+        assert (
+            str(e.value)
+            == "`.unweighted_valid_counts` is undefined for a cube-result without a valid"
+            " count unweighted measure"
+        )
+
 
 class Test_Nub(object):
     """Legacy unit-tests for 0D cube."""
