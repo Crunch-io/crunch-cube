@@ -368,3 +368,19 @@ class DescribeNumericArrays(object):
 
         assert strand.unweighted_valid_counts.tolist() == [19.0, 16.0, 17.0, 20.0]
         assert strand.weighted_valid_counts.tolist() == [10.33, 11.22, 18.99, 14.55]
+
+    def it_provides_weighted_and_unweighted_valid_counts_for_num_arr_x_mr_wgtd(self):
+        slice_ = Cube(NA.NUM_ARR_MEANS_X_MR_WEIGHTED).partitions[0]
+
+        assert slice_.unweighted_valid_counts.tolist() == [
+            [4.0, 7.0],
+            [4.0, 7.0],
+            [4.0, 6.0],
+            [2.0, 6.0],
+        ]
+        assert slice_.weighted_valid_counts.tolist() == [
+            [2.33, 7.009],
+            [4.123, 6.777],
+            [4.67, 6.4],
+            [1.898, 6.1],
+        ]
