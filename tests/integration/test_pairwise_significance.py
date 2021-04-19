@@ -509,7 +509,7 @@ class TestOverlapsPairwiseSignificance(TestCase):
             nan_ok=True,
         )
 
-    def test_pairwise_cat_x_mr_gender_x_all_pets_owned(self):
+    def test_pairwise_cat_x_mr_gender_x_all_pets_owned_with_weighted_counts(self):
         slice_ = Cube(OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED).partitions[0]
 
         assert slice_.column_percentages.tolist() == pytest.approx(
