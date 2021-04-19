@@ -2750,6 +2750,22 @@ class Test_Slice(object):
             " count unweighted measure"
         )
 
+    def test_mr_x_cat_mean(self):
+        slice_ = Cube(CR.MR_X_CAT_MEAN).partitions[0]
+
+        assert slice_.unweighted_valid_counts.tolist() == [
+            [2.0, 1.0, 3.0],
+            [2.0, 5.0, 7.0],
+        ]
+
+    def test_mr_x_cat_mean_weighted(self):
+        slice_ = Cube(CR.MR_X_CAT_MEAN_WEIGHTED).partitions[0]
+
+        assert slice_.weighted_valid_counts.tolist() == [
+            [1.89375, 2.7875, 4.68125],
+            [2.8416666667, 1.915625, 4.7572916667000005],
+        ]
+
 
 class Test_Nub(object):
     """Legacy unit-tests for 0D cube."""
