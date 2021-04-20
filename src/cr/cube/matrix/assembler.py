@@ -196,7 +196,7 @@ class Assembler(object):
             """1D ndarray of tuples of int pairwise indices of each column."""
             significance = p_vals < alpha
             if only_larger:
-                significance = np.logical_and(t_stats > 0, significance)
+                significance = np.logical_and(t_stats < 0, significance)
             col_signif = np.empty((len(significance),), dtype=object)
             col_signif[:] = [tuple(np.where(sig_row)[0]) for sig_row in significance]
             return col_signif

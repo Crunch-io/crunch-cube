@@ -639,7 +639,7 @@ class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
                 t_stats.append(np.full(means.shape, np.nan))
             else:
                 combined_variance = variance[:, col - offset] + variance.T
-                diff = means[:, col - offset] - means.T
+                diff = means.T - means[:, col - offset]
                 n = col_bases[:, col - offset] + col_bases.T
                 t_stats.append(diff.T * np.sqrt(n.T / combined_variance.T))
         return t_stats
