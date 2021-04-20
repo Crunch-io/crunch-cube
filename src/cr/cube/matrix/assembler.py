@@ -195,7 +195,7 @@ class Assembler(object):
         assembled_matrix = self._assemble_matrix(
             self._measures.pairwise_means_indices(alpha, only_larger).blocks
         )
-        col_order_map = dict(list(zip(col_order, range(len(col_order)))))
+        col_order_map = dict(zip(col_order, range(len(col_order))))
         updated_assembled_matrix = np.array(
             [
                 # ---Iterate through all pairwise indices and update each of them with
@@ -211,7 +211,7 @@ class Assembler(object):
         return updated_assembled_matrix.reshape(assembled_matrix.shape)
 
     def pairwise_significance_p_vals(self, subvar_idx):
-        """2D optional np.float64 ndarray of overlaps-p_vals matricecs for subvar idx.
+        """2D optional np.float64 ndarray of overlaps-p_vals matrices for subvar idx.
 
         Raises `ValueError if the cube-result does not include `overlaps`
         and `valid_overlaps` cube-measures.
