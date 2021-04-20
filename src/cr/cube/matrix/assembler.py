@@ -188,35 +188,31 @@ class Assembler(object):
 
     def pairwise_means_indices(self, alpha, only_larger):
         """2D optional ndarray of tuple of int column-idxs means pairwise-t threshold.
+
         Raises `ValueError if the cube-result does not include `means` cube-measures.
         """
+        col_order = self._column_order
         assembled_matrix = self._assemble_matrix(
             self._measures.pairwise_means_indices(alpha, only_larger).blocks
         )
+        col_order_map = dict(list(zip(col_order, range(len(col_order)))))
         updated_assembled_matrix = np.array(
             [
-                [
-                    # ---Iterate through all pairwise indices in `orig_indices` and
-                    # ---update each of them with it's position in `self._column_order`
-                    tuple(
-                        np.where(self._column_order == el)[0][0]
-                        for el in orig_indices
-                        if np.in1d(el, self._column_order).any()
-                    )
-                    if orig_indices is not None
-                    # ---If `orig_indices` is an insertion (and therefore `None`), skip
-                    else None
-                    # ---Each `orig_indices` is a tuple (if on base column)
-                    # ---or None (if on subtotal)
-                    for orig_indices in row
-                ]
-                for row in assembled_matrix
-            ]
+                # ---Iterate through all pairwise indices and update each of them with
+                # ---it's position in `self._column_order`
+                tuple(col_order_map[el] for el in indices) if indices is not None
+                # ---If `indices` is an insertion (and therefore `None`), skip
+                else None
+                # ---Each `indices` is a tuple (if on base column)
+                # ---or None (if on subtotal)
+                for indices in assembled_matrix.ravel()
+            ],
+            dtype=object,
         )
-        return updated_assembled_matrix
+        return updated_assembled_matrix.reshape(assembled_matrix.shape)
 
     def pairwise_significance_p_vals(self, subvar_idx):
-        """2D optional np.float64 ndarray of overlaps-p_vals matrices for subvar idx.
+        """2D optional np.float64 ndarray of overlaps-p_vals matricecs for subvar idx.
 
         Raises `ValueError if the cube-result does not include `overlaps`
         and `valid_overlaps` cube-measures.
