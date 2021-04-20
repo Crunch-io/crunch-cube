@@ -136,17 +136,23 @@ class NanSubtotals(_BaseSubtotals):
     Each subtotal value (and intersection value) is `np.nan`.
     """
 
+    filler = np.nan
+
     def _intersection(self, row_subtotal, column_subtotal):
         """Unconditionally return np.nan for each intersection cell."""
-        return np.nan
+        return self.filler
 
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of np.nan values."""
-        return np.full(self._nrows, np.nan)
+        return np.full(self._nrows, self.filler)
 
     def _subtotal_row(self, subtotal):
         """Return (n_cols,) ndarray of np.nan values."""
-        return np.full(self._ncols, np.nan)
+        return np.full(self._ncols, self.filler)
+
+
+class NoneSubtotals(NanSubtotals):
+    filler = None
 
 
 class SumSubtotals(_BaseSubtotals):

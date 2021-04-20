@@ -191,30 +191,11 @@ class Assembler(object):
 
         Raises `ValueError if the cube-result does not include `means` cube-measures.
         """
-
-        def pairwise_indices(p_vals, t_stats):
-            """1D ndarray of tuples of int pairwise indices of each column."""
-            significance = p_vals < alpha
-            if only_larger:
-                significance = np.logical_and(t_stats < 0, significance)
-            col_signif = np.empty((len(significance),), dtype=object)
-            col_signif[:] = [tuple(np.where(sig_row)[0]) for sig_row in significance]
-            return col_signif
-
-        t_stats = [
-            self.pairwise_significance_means_t_stats(col)
-            for col in range(len(self._column_order))
-        ]
-        p_vals = [
-            self.pairwise_significance_means_p_vals(col)
-            for col in range(len(self._column_order))
-        ]
-        indices = np.array([pairwise_indices(p, t) for p, t in zip(p_vals, t_stats)]).T
-        # --- a None value indicates "cannot calculate", which is distinct from
-        # --- () that means "not significance"
-        for idx in self.inserted_column_idxs:
-            indices[:, idx] = None
-        return indices
+        return self._assemble_matrix(
+            self._measures.pairwise_means_indices(
+                self._column_order, alpha, only_larger
+            ).blocks
+        )
 
     def pairwise_significance_p_vals(self, subvar_idx):
         """2D optional np.float64 ndarray of overlaps-p_vals matrices for subvar idx.
@@ -243,7 +224,7 @@ class Assembler(object):
         """
         return self._assemble_matrix(
             self._measures.pairwise_significance_means_p_vals(
-                column_idx, self.inserted_column_idxs
+                column_idx, self._column_order
             ).blocks
         )
 
@@ -254,7 +235,7 @@ class Assembler(object):
         """
         return self._assemble_matrix(
             self._measures.pairwise_significance_means_t_stats(
-                column_idx, self.inserted_column_idxs
+                column_idx, self._column_order
             ).blocks
         )
 
