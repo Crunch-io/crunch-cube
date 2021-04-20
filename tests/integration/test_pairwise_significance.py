@@ -629,13 +629,12 @@ class TestOverlapsPairwiseSignificance(TestCase):
 class TestMeanDifferenceSignificance(object):
     def test_mean_diff_significance_for_numeric_array_grouped_by_cat(self):
         slice_ = Cube(NA.NUM_ARR_MULTI_NUMERIC_MEASURES_GROUPED_BY_CAT).partitions[0]
-
         assert slice_.pairwise_significance_means_t_stats(0) == pytest.approx(
             np.array(
                 [
-                    [0.0, 0.7482866, 4.61524529, 5.29463547],
-                    [0.0, 4.64371041, 7.14738681, 3.67511747],
-                    [0.0, -3.13387218, -6.35310465, -2.3932706],
+                    [-0.0, -0.7482866, -4.61524529, -5.29463547],
+                    [-0.0, -4.64371041, -7.14738681, -3.67511747],
+                    [-0.0, 3.13387218, 6.35310465, 2.3932706],
                 ]
             )
         )
@@ -732,10 +731,10 @@ class TestMeanDifferenceSignificance(object):
         assert slice_.pairwise_significance_means_t_stats(0) == pytest.approx(
             np.array(
                 [
-                    [0.0, -1.3056921, 1.1842639],
-                    [0.0, -1.7117695, 1.6297401],
+                    [-0.0, 1.3056921, -1.1842639],
+                    [-0.0, 1.7117695, -1.6297401],
                     [np.nan, np.nan, np.nan],
-                    [np.nan, 5.8872721, 4.4442801],
+                    [np.nan, -5.8872721, -4.4442801],
                 ]
             ),
             nan_ok=True,
@@ -808,8 +807,8 @@ class TestMeanDifferenceSignificance(object):
             np.array(
                 [
                     [np.nan, np.nan, np.nan, np.nan],
-                    [-14.1421356, 0.0, -3.1066887, np.nan],
-                    [-1.75662013, 0.0, np.nan, np.nan],
+                    [14.1421356, -0.0, 3.1066887, np.nan],
+                    [1.75662013, -0.0, np.nan, np.nan],
                 ]
             ),
             nan_ok=True,
