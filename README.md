@@ -112,6 +112,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.22
+- Fix t_stats sign for mean differences
+
 ### 2.1.21
 - Fix overlaps pairwise significance
 
