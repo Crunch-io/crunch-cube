@@ -200,11 +200,10 @@ class Assembler(object):
             [
                 # ---Iterate through all pairwise indices and update each of them with
                 # ---it's position in `self._column_order`
-                tuple(col_order_map[el] for el in indices) if indices is not None
-                # ---If `indices` is an insertion (and therefore `None`), skip
+                # ---All the insertions (and therefore `None`) are skipped.
+                tuple(col_order_map[el] for el in indices)
+                if indices is not None
                 else None
-                # ---Each `indices` is a tuple (if on base column)
-                # ---or None (if on subtotal)
                 for indices in assembled_matrix.ravel()
             ],
             dtype=object,
