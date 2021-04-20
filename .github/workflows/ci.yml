@@ -31,6 +31,6 @@ jobs:
     - name: Test with tox
       run: tox
     - name: Submit Coverage
-      run: tox -e coverage,coveralls
+      run: tox -e coverage,codecov
     - name: Linter
       run: tox -e lint
