@@ -1,5 +1,11 @@
 # History of Changes
 
+### 2.1.20
+- Fix sig letters for mean differences
+
+### 2.1.19
+- Fix pairwise bug (with empty indices)
+
 ### 2.1.18
 - Fix alt pairwise bug (with no alt alpha)
 
