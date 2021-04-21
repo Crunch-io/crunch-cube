@@ -491,8 +491,8 @@ class TestOverlapsPairwiseSignificance(TestCase):
         assert slice_.pairwise_significance_t_stats(1) == pytest.approx(
             np.array(
                 [
-                    [2.81499441, 0.0, np.nan],
-                    [-2.81499441, 0.0, np.nan],
+                    [3.51874302, 0.0, np.nan],
+                    [-3.51874302, 0.0, np.nan],
                     [0.0, 0.0, np.nan],
                 ],
             ),
@@ -501,8 +501,8 @@ class TestOverlapsPairwiseSignificance(TestCase):
         assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
             np.array(
                 [
-                    [0.01305847, 0.0, np.nan],
-                    [0.01305847, 0.0, np.nan],
+                    [0.00310191, 0.0, np.nan],
+                    [0.00310191, 0.0, np.nan],
                     [1.0, 0.0, np.nan],
                 ],
             ),
@@ -624,6 +624,22 @@ class TestOverlapsPairwiseSignificance(TestCase):
             [(), (), ()],
             [(), (), ()],
         ]
+
+    def test_pairwise_sig_for_realistic_example_mr_x_mr(self):
+        slice_ = Cube(OL.MR_X_MR_REALISTIC_EXAMPLE).partitions[0]
+        assert slice_.pairwise_significance_t_stats(3) == pytest.approx(
+            np.array(
+                [
+                    [61.55, 43.02, -2.26, 0.0, 9.79, -105.35],
+                    [-2.67, 89.18, -21.60, 0.0, -12.43, -58.98],
+                    [-2.43, 3.15, 103.35, 0.0, 44.51, -85.86],
+                    [-86.29, -60.68, -90.81, 0.0, -56.66, -127.32],
+                    [-25.01, -4.42, -12.87, 0.0, 93.79, -53.79],
+                    [-3.52, 0.78, -15.23, 0.0, -4.65, 138.61],
+                ]
+            ),
+            abs=10e-2,
+        )
 
 
 class TestMeanDifferenceSignificance(object):
