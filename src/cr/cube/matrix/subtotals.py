@@ -389,29 +389,103 @@ class ZscoreSubtotals(_BaseSubtotals):
     subtotals to be computed (elsewhere) as `np.nan`.
     """
 
-    def __init__(self, base_values, dimensions, cube_result_matrix):
+    def __init__(
+        self,
+        base_values,
+        base_counts,
+        rows_margin,
+        columns_margin,
+        table_margin,
+        dimensions,
+        diff_cols_nan=True,
+        diff_rows_nan=True,
+    ):
         super(ZscoreSubtotals, self).__init__(base_values, dimensions)
-        self._cube_result_matrix = cube_result_matrix
+        self._base_counts = base_counts
+        self._rows_margin = rows_margin
+        self._columns_margin = columns_margin
+        self._table_margin = table_margin
+        self._diff_cols_nan = diff_cols_nan
+        self._diff_rows_nan = diff_rows_nan
 
     @classmethod
-    def blocks(cls, base_values, dimensions, cube_result_matrix):
+    def blocks(
+        cls,
+        base_values,
+        base_counts,
+        rows_margin,
+        columns_margin,
+        table_margin,
+        dimensions,
+        diff_cols_nan=True,
+        diff_rows_nan=True,
+    ):
         """Return base, row and col insertion, and intersection matrices.
 
         These are in the form ready for assembly.
-        """
-        return cls(base_values, dimensions, cube_result_matrix)._blocks
 
-    @lazyproperty
-    def _base_counts(self):
-        """2D np.float64 ndarray of weighted-count for each cell of base matrix."""
-        return self._cube_result_matrix.weighted_counts
+        Keyword arguments:
+        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg
+        for column bases (default False)
+        `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
+        row bases (default False)
+        """
+        return cls(
+            base_values,
+            base_counts,
+            rows_margin,
+            columns_margin,
+            table_margin,
+            dimensions,
+            diff_cols_nan,
+            diff_rows_nan,
+        )._blocks
+
+    @classmethod
+    def intersections(
+        cls,
+        base_values,
+        base_counts,
+        rows_margin,
+        columns_margin,
+        table_margin,
+        dimensions,
+        diff_cols_nan=True,
+        diff_rows_nan=True,
+    ):
+        """Return (n_row_subtotals, n_col_subtotals) ndarray of intersection values.
+
+        An intersection value arises where a row-subtotal crosses a column-subtotal.
+
+        Keyword arguments:
+        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg
+        for column bases (default False)
+        `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
+        row bases (default False)
+        """
+        return cls(
+            base_values,
+            base_counts,
+            rows_margin,
+            columns_margin,
+            table_margin,
+            dimensions,
+            diff_cols_nan,
+            diff_rows_nan,
+        )._intersections
 
     def _intersection(self, row_subtotal, column_subtotal):
         """Return value for intersection of `row_subtotal` and `column_subtotal`."""
         # --- Cannot calculate if there are any subtrahends ---
+        col_has_subs = len(column_subtotal.subtrahend_idxs) > 0
+        row_has_subs = len(row_subtotal.subtrahend_idxs) > 0
+
         if (
-            len(row_subtotal.subtrahend_idxs) > 0
-            or len(column_subtotal.subtrahend_idxs) > 0
+            # --- Intersections of subtotal differences are undefined ---
+            (col_has_subs and row_has_subs)
+            # --- Also need to respect diff_cols_nan/diff_rows_nan
+            or (col_has_subs and self._diff_cols_nan)
+            or (row_has_subs and self._diff_rows_nan)
         ):
             return np.nan
 
@@ -426,9 +500,7 @@ class ZscoreSubtotals(_BaseSubtotals):
         subtotal_margin = np.sum(row_subtotal_counts)
 
         # --- opposite-margin is scalar because no MR dimensions ---
-        opposite_margin = np.sum(
-            self._cube_result_matrix.columns_margin[column_subtotal.addend_idxs]
-        )
+        opposite_margin = np.sum(self._columns_margin[column_subtotal.addend_idxs])
 
         # --- table_margin is scalar because no MR dimensions ---
         table_margin = self._table_margin
@@ -454,7 +526,7 @@ class ZscoreSubtotals(_BaseSubtotals):
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of zscore `subtotal` value."""
         # --- Cannot calculate if there are any subtrahends ---
-        if len(subtotal.subtrahend_idxs) > 0:
+        if self._diff_cols_nan and len(subtotal.subtrahend_idxs) > 0:
             return np.full(self._nrows, np.nan)
 
         # --- the weighted-counts version of this subtotal-column ---
@@ -464,7 +536,7 @@ class ZscoreSubtotals(_BaseSubtotals):
         subtotal_margin = np.sum(subtotal_counts)
 
         # --- base-rows-margin is 1D because no MR dimensions ---
-        opposing_margin = self._cube_result_matrix.rows_margin
+        opposing_margin = self._rows_margin
 
         # --- table_margin is scalar because no MR dimensions ---
         table_margin = self._table_margin
@@ -490,7 +562,7 @@ class ZscoreSubtotals(_BaseSubtotals):
     def _subtotal_row(self, subtotal):
         """Return (n_cols,) ndarray of z-score `subtotal` value."""
         # --- Cannot calculate if there are any subtrahends ---
-        if len(subtotal.subtrahend_idxs) > 0:
+        if self._diff_rows_nan and len(subtotal.subtrahend_idxs) > 0:
             return np.full(self._ncols, np.nan)
 
         # --- the weighted-counts version of this subtotal-row ---
@@ -500,7 +572,7 @@ class ZscoreSubtotals(_BaseSubtotals):
         subtotal_margin = np.sum(subtotal_counts)
 
         # --- base-cols-margin is 1D because no MR dimensions ---
-        opposing_margin = self._cube_result_matrix.columns_margin
+        opposing_margin = self._columns_margin
 
         # --- table_margin is scalar because no MR dimensions ---
         table_margin = self._table_margin
@@ -522,8 +594,3 @@ class ZscoreSubtotals(_BaseSubtotals):
         # --- result is scalar or 1D, depending on dimensionality of residuals ---
         with np.errstate(divide="ignore", invalid="ignore"):
             return residuals / np.sqrt(variance)
-
-    @lazyproperty
-    def _table_margin(self):
-        """Scalar or ndarray table-margin of cube-result matrix."""
-        return self._cube_result_matrix.table_margin

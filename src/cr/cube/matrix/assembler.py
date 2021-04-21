@@ -26,7 +26,6 @@ from cr.cube.matrix.subtotals import (
     NanSubtotals,
     SumSubtotals,
     TableStdErrSubtotals,
-    ZscoreSubtotals,
 )
 from cr.cube.util import lazyproperty
 
@@ -607,22 +606,7 @@ class Assembler(object):
         deviations above (positive) or below (negative) the population mean a cell's
         value is.
         """
-        # --- punt except on CAT_X_CAT (if any MR dimensions it gets np.nans) ---
-        if (
-            self._rows_dimension.dimension_type == DT.MR_SUBVAR
-            or self._columns_dimension.dimension_type == DT.MR_SUBVAR
-        ):
-            return self._assemble_matrix(
-                NanSubtotals.blocks(self._cube_result_matrix.zscores, self._dimensions)
-            )
-
-        return self._assemble_matrix(
-            ZscoreSubtotals.blocks(
-                self._cube_result_matrix.zscores,
-                self._dimensions,
-                self._cube_result_matrix,
-            )
-        )
+        return self._assemble_matrix(self._measures.zscores.blocks)
 
     def _assemble_matrix(self, blocks):
         """Return 2D ndarray matrix assembled from `blocks`.
