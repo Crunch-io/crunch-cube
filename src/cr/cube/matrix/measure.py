@@ -594,7 +594,7 @@ class _PairwiseSigTStats(_BaseSecondOrderMeasure):
             [
                 [
                     _PairwiseSignificaneBetweenSubvariablesHelper(
-                        self._cube_measures.weighted_cube_counts.weighted_counts,
+                        self._second_order_measures.column_proportions.blocks[0][0],
                         self._cube_measures.cube_overlaps.overlaps,
                         self._cube_measures.cube_overlaps.valid_overlaps,
                         row_idx,
@@ -633,7 +633,7 @@ class _PairwiseSigPVals(_PairwiseSigTStats):
             [
                 [
                     _PairwiseSignificaneBetweenSubvariablesHelper(
-                        self._cube_measures.weighted_cube_counts.weighted_counts,
+                        self._second_order_measures.column_proportions.blocks[0][0],
                         self._cube_measures.cube_overlaps.overlaps,
                         self._cube_measures.cube_overlaps.valid_overlaps,
                         row_idx,
@@ -1242,8 +1242,10 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
 class _PairwiseSignificaneBetweenSubvariablesHelper(object):
     """Helper for calculating overlaps significance between subvariables."""
 
-    def __init__(self, counts, overlaps, valid_overlaps, row_idx, idx_a, idx_b):
-        self._counts = counts
+    def __init__(
+        self, column_proportions, overlaps, valid_overlaps, row_idx, idx_a, idx_b
+    ):
+        self._column_proportions = column_proportions
         self._overlaps = overlaps
         self._valid_overlaps = valid_overlaps
         self._row_idx = row_idx
@@ -1268,7 +1270,8 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
         Sa, Sb, Sab = self._selected_counts
         Na, Nb, Nab = self._valid_counts
         pa, pb, pab = Sa / Na, Sb / Nb, Sab / Nab
-        col_prop_a, col_prop_b = self._column_proportions
+        col_prop_a = self._column_proportions[self._row_idx, self._idx_a]
+        col_prop_b = self._column_proportions[self._row_idx, self._idx_b]
 
         # ---Subtract the selected column from the "variable" column, to get
         # ---the correct sign of the test statistic (hence b-a, and not a-b).
@@ -1284,25 +1287,6 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
         """
         Na, Nb, Nab = self._valid_counts
         return Na + Nb - Nab
-
-    @lazyproperty
-    def _column_proportions(self):
-        """tuple(float64) of column proportions for selected subvariables A and B.
-
-        These values are the same as the ones we present through the api as column
-        proportions. They're obtained by dividing the selected count of a cell, with
-        the total of selected counts from that column (to which the cell belongs).
-
-        """
-        # ---pa and pb are the column percentages of weighted counts
-        # ---of the cells at positions [row_idx, A] and [row_idx, B]
-        pa = self._counts[self._row_idx, self._idx_a] / np.sum(
-            self._counts[:, self._idx_a], axis=0
-        )
-        pb = self._counts[self._row_idx, self._idx_b] / np.sum(
-            self._counts[:, self._idx_b], axis=0
-        )
-        return (pa, pb)
 
     @lazyproperty
     def _selected_counts(self):
