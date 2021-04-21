@@ -918,10 +918,10 @@ class TestMeanDifferenceSignificance(object):
         assert slice_.pairwise_means_indices.tolist() == [
             [None, None, None, None, (), (), (), ()],
             [None, None, None, None, (), (), (), ()],
-            [None, None, None, None, (), (), (), (5,)],
+            [None, None, None, None, (), (), (5,), ()],
         ]
         assert slice_.pairwise_means_indices_alt.tolist() == [
             [None, None, None, None, (), (), (), ()],
             [None, None, None, None, (), (), (), ()],
-            [None, None, None, None, (), (), (), (4, 5)],
+            [None, None, None, None, (), (), (4, 5), (4, 5)],
         ]
