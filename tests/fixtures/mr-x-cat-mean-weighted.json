@@ -1,0 +1,450 @@
+{
+  "query": {
+    "measures": {
+      "count": {
+        "function": "cube_count",
+        "args": []
+      },
+      "valid_count_weighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "67095c46e2c3405689fcdba000fa659b"
+          }
+        ]
+      },
+      "mean": {
+        "function": "cube_mean",
+        "args": [
+          {
+            "variable": "67095c46e2c3405689fcdba000fa659b"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "function": "dimension",
+        "args": [
+          {
+            "function": "as_selected",
+            "args": [
+              {
+                "variable": "f91dddc07d8340069c858ddb24a33c60"
+              }
+            ]
+          },
+          {
+            "value": "subvariables"
+          }
+        ]
+      },
+      {
+        "function": "as_selected",
+        "args": [
+          {
+            "variable": "f91dddc07d8340069c858ddb24a33c60"
+          }
+        ]
+      },
+      {
+        "variable": "0ba6a6a9a51644169729b568b1c00339"
+      }
+    ],
+    "weight": "http:\/\/127.0.0.1:8080\/datasets\/03a093a767784455959dc93da9834ae6\/variables\/19d549d65717451f839c52194efbe5c2\/"
+  },
+  "result": {
+    "dimensions": [
+      {
+        "references": {
+          "subreferences": [
+            {
+              "alias": "Cats are Superior-f91dddc07d8340069c858ddb24a33c60",
+              "name": "Cats are Superior"
+            },
+            {
+              "alias": "Dog, Bird-f91dddc07d8340069c858ddb24a33c60",
+              "name": "Dog, Bird"
+            }
+          ],
+          "uniform_basis": false,
+          "alias": "Combined responses from All pets owned",
+          "description": "Combined responses from All pets owned",
+          "name": "Combined responses from All pets owned"
+        },
+        "derived": true,
+        "type": {
+          "subtype": {
+            "class": "variable"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "Cats are Superior-f91dddc07d8340069c858ddb24a33c60",
+                  "name": "Cats are Superior"
+                },
+                "id": "0001"
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "derived": false,
+                "references": {
+                  "alias": "Dog, Bird-f91dddc07d8340069c858ddb24a33c60",
+                  "name": "Dog, Bird"
+                },
+                "id": "0002"
+              },
+              "missing": false
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "derived": true,
+        "references": {
+          "subreferences": [
+            {
+              "alias": "Cats are Superior-f91dddc07d8340069c858ddb24a33c60",
+              "name": "Cats are Superior"
+            },
+            {
+              "alias": "Dog, Bird-f91dddc07d8340069c858ddb24a33c60",
+              "name": "Dog, Bird"
+            }
+          ],
+          "uniform_basis": false,
+          "description": "Combined responses from All pets owned",
+          "name": "Combined responses from All pets owned",
+          "alias": "Combined responses from All pets owned"
+        },
+        "type": {
+          "ordinal": false,
+          "subvariables": [
+            "0001",
+            "0002"
+          ],
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "selected": true,
+              "id": 1,
+              "missing": false,
+              "name": "Selected"
+            },
+            {
+              "numeric_value": 0,
+              "missing": false,
+              "id": 0,
+              "name": "Other"
+            },
+            {
+              "numeric_value": null,
+              "missing": true,
+              "id": -1,
+              "name": "No Data"
+            }
+          ]
+        }
+      },
+      {
+        "derived": false,
+        "references": {
+          "alias": "Gender",
+          "name": "Gender",
+          "view": {
+            "show_counts": false,
+            "show_numeric_values": false,
+            "transform": {
+              "insertions": [
+                {
+                  "function": "subtotal",
+                  "args": [
+                    2,
+                    1
+                  ],
+                  "name": "both",
+                  "anchor": 2
+                }
+              ]
+            },
+            "include_missing": false,
+            "column_width": null
+          }
+        },
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "missing": false,
+              "id": 1,
+              "name": "Male"
+            },
+            {
+              "numeric_value": 2,
+              "missing": false,
+              "id": 2,
+              "name": "Female"
+            },
+            {
+              "numeric_value": null,
+              "id": -1,
+              "name": "No Data",
+              "missing": true
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 6,
+    "measures": {
+      "count": {
+        "data": [
+          1.0725,
+          1.43,
+          0.0,
+          1.0725,
+          0.0,
+          0.0,
+          4.7125,
+          4.7125,
+          0.0,
+          2.21,
+          3.9325,
+          0.0,
+          0.0,
+          0.7366666667,
+          0.0,
+          4.6475,
+          1.4733333333,
+          0.0
+        ],
+        "n_missing": 6,
+        "metadata": {
+          "references": {},
+          "derived": true,
+          "type": {
+            "integer": false,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "valid_count_weighted": {
+        "data": [
+          1.89375,
+          2.7875,
+          0.0,
+          1.89375,
+          0.0,
+          0.0,
+          3.9270833333,
+          4.890625,
+          0.0,
+          2.8416666667,
+          1.915625,
+          0.0,
+          0.0,
+          7.9208333333,
+          0.0,
+          3.8729166667,
+          2.8416666667,
+          0.0
+        ],
+        "n_missing": 6,
+        "metadata": {
+          "references": {
+            "alias": "Weight-Gender",
+            "api_derivation": {
+              "function": "rake",
+              "args": [
+                {
+                  "variable": "0ba6a6a9a51644169729b568b1c00339",
+                  "targets": [
+                    [
+                      1,
+                      0.5
+                    ],
+                    [
+                      2,
+                      0.5
+                    ],
+                    [
+                      -1,
+                      0
+                    ]
+                  ]
+                }
+              ],
+              "references": {
+                "alias": "Weight-Gender",
+                "name": "Weight-Gender"
+              }
+            },
+            "name": "Weight-Gender",
+            "description": "Raked weighting based on: Gender"
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          0.8333333333,
+          1.25,
+          {
+            "?": -8
+          },
+          0.8333333333,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          0.8333333333,
+          1.25,
+          {
+            "?": -8
+          },
+          0.8333333333,
+          1.25,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          1.25,
+          {
+            "?": -8
+          },
+          0.8333333333,
+          1.25,
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 6,
+        "metadata": {
+          "references": {
+            "alias": "Weight-Gender",
+            "api_derivation": {
+              "function": "rake",
+              "args": [
+                {
+                  "variable": "0ba6a6a9a51644169729b568b1c00339",
+                  "targets": [
+                    [
+                      1,
+                      0.5
+                    ],
+                    [
+                      2,
+                      0.5
+                    ],
+                    [
+                      -1,
+                      0
+                    ]
+                  ]
+                }
+              ],
+              "references": {
+                "alias": "Weight-Gender",
+                "name": "Weight-Gender"
+              }
+            },
+            "name": "Weight-Gender",
+            "description": "Raked weighting based on: Gender"
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "class": "numeric"
+          }
+        }
+      }
+    },
+    "n": 20,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 13.0,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 20,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 13.0,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 20,
+      "weighted_n": 13.0
+    },
+    "filtered": {
+      "unweighted_n": 20,
+      "weighted_n": 13.0
+    },
+    "counts": [
+      3,
+      1,
+      0,
+      3,
+      1,
+      0,
+      6,
+      6,
+      0,
+      3,
+      4,
+      0,
+      1,
+      1,
+      0,
+      8,
+      3,
+      0
+    ],
+    "element": "crunch:cube"
+  }
+}

@@ -324,3 +324,63 @@ class DescribeNumericArrays(object):
             ),
             nan_ok=True,
         )
+
+    def it_provides_unweighted_valid_counts_for_num_array_grouped_by_cat(self):
+        slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
+
+        assert slice_.unweighted_valid_counts.tolist() == [
+            [3.0, 2.0],
+            [3.0, 2.0],
+            [3.0, 2.0],
+        ]
+
+    def it_provides_unweighted_valid_counts_for_num_array_x_mr(self):
+        slice_ = Cube(NA.NUM_ARR_MEANS_X_MR).partitions[0]
+
+        assert slice_.unweighted_valid_counts.tolist() == [
+            [38.0, 14.0, 6.0, 18.0, 38.0],
+            [38.0, 14.0, 6.0, 18.0, 38.0],
+        ]
+
+    def it_provides_weighted_and_unweighted_valid_counbts_for_num_array_x_mr(self):
+        slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_WEIGHTED).partitions[0]
+
+        assert slice_.unweighted_valid_counts.tolist() == [
+            [3.0, 2.0],
+            [3.0, 1.0],
+            [1.0, 1.0],
+        ]
+        assert slice_.weighted_valid_counts.tolist() == [
+            [0.8, 0.7],
+            [0.8, 0.4],
+            [0.2, 0.3],
+        ]
+
+    def it_provides_unweighted_valid_counts_for_numeric_array_with_no_grouping(self):
+        strand = Cube(NA.NUM_ARR_MEANS_NO_GROUPING).partitions[0]
+
+        assert strand.unweighted_valid_counts.tolist() == [6.0, 6.0]
+
+    def it_provides_weighted_and_unweighted_valid_counts_for_num_arr_no_grouping_wgtd(
+        self,
+    ):
+        strand = Cube(NA.NUM_ARR_MEANS_NO_GROUPING_WEIGHTED).partitions[0]
+
+        assert strand.unweighted_valid_counts.tolist() == [19.0, 16.0, 17.0, 20.0]
+        assert strand.weighted_valid_counts.tolist() == [10.33, 11.22, 18.99, 14.55]
+
+    def it_provides_weighted_and_unweighted_valid_counts_for_num_arr_x_mr_wgtd(self):
+        slice_ = Cube(NA.NUM_ARR_MEANS_X_MR_WEIGHTED).partitions[0]
+
+        assert slice_.unweighted_valid_counts.tolist() == [
+            [4.0, 7.0],
+            [4.0, 7.0],
+            [4.0, 6.0],
+            [2.0, 6.0],
+        ]
+        assert slice_.weighted_valid_counts.tolist() == [
+            [2.33, 7.009],
+            [4.123, 6.777],
+            [4.67, 6.4],
+            [1.898, 6.1],
+        ]

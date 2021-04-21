@@ -96,6 +96,7 @@ class CUBE_MEASURE(enum.Enum):
     SUM = "sum"
     VALID_OVERLAP = "valid_overlap"
     VALID_COUNT_UNWEIGHTED = "valid_count_unweighted"
+    VALID_COUNT_WEIGHTED = "valid_count_weighted"
 
 
 NUMERIC_MEASURES = frozenset(
@@ -103,6 +104,8 @@ NUMERIC_MEASURES = frozenset(
         CUBE_MEASURE.SUM,
         CUBE_MEASURE.MEAN,
         CUBE_MEASURE.STDDEV,
+        CUBE_MEASURE.VALID_COUNT_UNWEIGHTED,
+        CUBE_MEASURE.VALID_COUNT_WEIGHTED,
         MEASURE.COL_SHARE_SUM,
         MEASURE.ROW_SHARE_SUM,
         MEASURE.TOTAL_SHARE_SUM,

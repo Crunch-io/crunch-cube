@@ -5,12 +5,7 @@
 import pytest
 import numpy as np
 
-from cr.cube.cube import (
-    Cube,
-    CubeSet,
-    _Measures,
-    _ValidCountsMeasure,
-)
+from cr.cube.cube import Cube, CubeSet, _Measures, _UnweightedValidCountsMeasure
 from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.enums import DIMENSION_TYPE as DT
 
@@ -699,13 +694,13 @@ class DescribeMeasures(object):
         np.testing.assert_equal(population_fraction, expected_value)
 
 
-class Describe_ValidCountsMeasure(object):
+class Describe_UweightedValidCountsMeasure(object):
     @pytest.mark.parametrize(
         "valid_counts, expected_value",
         (({"valid_count_unweighted": {"data": [3, 2, 1]}}, [3, 2, 1]), ({}, None)),
     )
     def it_knows_its_flat_values(self, valid_counts, expected_value):
         cube_dict = {"result": {"measures": valid_counts}}
-        valid_counts = _ValidCountsMeasure(cube_dict, None)
+        valid_counts = _UnweightedValidCountsMeasure(cube_dict, None)
 
         np.testing.assert_equal(valid_counts._flat_values, expected_value)

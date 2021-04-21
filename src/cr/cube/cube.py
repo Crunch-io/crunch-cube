@@ -251,8 +251,8 @@ class Cube(object):
         categories.
         """
         return (
-            self._measures.valid_counts.raw_cube_array
-            if self._measures.valid_counts is not None
+            self._measures.unweighted_valid_counts.raw_cube_array
+            if self._measures.unweighted_valid_counts is not None
             else self._measures.weighted_counts.raw_cube_array
             if self.has_weighted_counts
             else self._measures.unweighted_counts.raw_cube_array
@@ -441,22 +441,32 @@ class Cube(object):
         with the valid counts measure.
         """
         unweighted_counts = (
-            self._measures.valid_counts
-            if self._measures.valid_counts is not None
+            self._measures.unweighted_valid_counts
+            if self._measures.unweighted_valid_counts is not None
             else self._measures.unweighted_counts
         )
         return unweighted_counts.raw_cube_array[self._valid_idxs]
 
     @lazyproperty
+    def unweighted_valid_counts(self):
+        """Optional float64 ndarray of unweighted_valid_counts if the measure exists."""
+        if self._measures.unweighted_valid_counts is None:
+            return None
+        return self._measures.unweighted_valid_counts.raw_cube_array[
+            self._valid_idxs
+        ].astype(np.float64)
+
+    @lazyproperty
     def valid_counts_summary(self):
         """Optional ndarray of summary valid counts"""
-        if not self._measures.valid_counts:
+        if not self._measures.unweighted_valid_counts:
             return None
         # --- In case of ndim >= 2 the sum should be done on the second axes to get
         # --- the correct sequence of valid count (e.g. CA_SUBVAR).
         axis = 1 if len(self._all_dimensions) >= 2 else 0
         return np.sum(
-            self._measures.valid_counts.raw_cube_array[self._valid_idxs], axis=axis
+            self._measures.unweighted_valid_counts.raw_cube_array[self._valid_idxs],
+            axis=axis,
         )
 
     @lazyproperty
@@ -480,8 +490,8 @@ class Cube(object):
         are replaced with the valid counts measure.
         """
         weighted_counts = (
-            self._measures.valid_counts
-            if self._measures.valid_counts is not None
+            self._measures.weighted_valid_counts
+            if self._measures.weighted_valid_counts is not None
             else self._measures.weighted_counts
         )
         return (
@@ -489,6 +499,15 @@ class Cube(object):
             if weighted_counts is not None
             else None
         )
+
+    @lazyproperty
+    def weighted_valid_counts(self):
+        """Optional float64 ndarray of weighted_valid_counts if the measure exists."""
+        if self._measures.weighted_valid_counts is None:
+            return None
+        return self._measures.weighted_valid_counts.raw_cube_array[
+            self._valid_idxs
+        ].astype(np.float64)
 
     @lazyproperty
     def _all_dimensions(self):
@@ -679,8 +698,8 @@ class _Measures(object):
     @lazyproperty
     def missing_count(self):
         """numeric representing count of missing rows in cube response."""
-        if self.valid_counts is not None:
-            return self.valid_counts.missing_count
+        if self.unweighted_valid_counts is not None:
+            return self.unweighted_valid_counts.missing_count
         # The check on the means measure is needed for retro-compatibility with the old
         # fixtures that don't have valid_counts.
         if self.means is not None:
@@ -770,12 +789,12 @@ class _Measures(object):
         )
 
     @lazyproperty
-    def valid_counts(self):
-        """_ValidCountsMeasure object for this cube.
+    def unweighted_valid_counts(self):
+        """_UnweightedValidCountsMeasure object for this cube.
 
-        Can be None when cube doesn't have valid counts.
+        Can be None when cube doesn't have unweighted valid counts.
         """
-        valid_counts = _ValidCountsMeasure(
+        valid_counts = _UnweightedValidCountsMeasure(
             self._cube_dict, self._all_dimensions, self._cube_idx_arg
         )
         return valid_counts if valid_counts.raw_cube_array is not None else None
@@ -801,6 +820,17 @@ class _Measures(object):
             self._cube_dict, self._all_dimensions, self._cube_idx_arg
         )
         return weighted_counts if weighted_counts.raw_cube_array is not None else None
+
+    @lazyproperty
+    def weighted_valid_counts(self):
+        """_WeightedValidCountsMeasure object for this cube.
+
+        Can be None when cube doesn't have weighted valid counts.
+        """
+        valid_counts = _WeightedValidCountsMeasure(
+            self._cube_dict, self._all_dimensions, self._cube_idx_arg
+        )
+        return valid_counts if valid_counts.raw_cube_array is not None else None
 
 
 class _BaseMeasure(object):
@@ -999,8 +1029,8 @@ class _UnweightedCountMeasure(_BaseMeasure):
         return np.array(self._cube_dict["result"]["counts"], dtype=np.float64)
 
 
-class _ValidCountsMeasure(_BaseMeasure):
-    """Valid counts for cube."""
+class _UnweightedValidCountsMeasure(_BaseMeasure):
+    """Unweighted Valid counts for cube."""
 
     @lazyproperty
     def missing_count(self):
@@ -1011,7 +1041,7 @@ class _ValidCountsMeasure(_BaseMeasure):
 
     @lazyproperty
     def _flat_values(self):
-        """Optional 1D np.ndarray of np.float64 valid counts."""
+        """Optional 1D np.ndarray of np.float64 unweighted valid counts."""
         valid_counts = (
             self._cube_dict["result"]["measures"]
             .get("valid_count_unweighted", {})
@@ -1043,3 +1073,17 @@ class _WeightedCountMeasure(_BaseMeasure):
             return None
 
         return np.array(weighted_counts, dtype=np.float64)
+
+
+class _WeightedValidCountsMeasure(_BaseMeasure):
+    """Weighted Valid counts for cube."""
+
+    @lazyproperty
+    def _flat_values(self):
+        """Optional 1D np.ndarray of np.float64 weighted valid counts."""
+        valid_counts = (
+            self._cube_dict["result"]["measures"]
+            .get("valid_count_weighted", {})
+            .get("data", [])
+        )
+        return np.array(valid_counts, dtype=np.float64) if valid_counts else None

@@ -108,19 +108,15 @@ class Assembler(object):
     def columns_base(self):
         """1D/2D np.float64 ndarray of unweighted-N for each slice column/cell."""
         # --- an MR_X slice produces a 2D column-base (each cell has its own N) ---
-        columns_base = self._cube_result_matrix.columns_base
         rows_dim_type = self._rows_dimension.dimension_type
+        columns_base = self._measures.columns_base
         if rows_dim_type in (DT.MR_SUBVAR, DT.NUM_ARRAY):
             return self._assemble_matrix(
                 SumSubtotals.blocks(columns_base, self._dimensions, diff_cols_nan=True)
             )
-
         # --- otherwise columns-base is a vector ---
         return self._assemble_vector(
-            columns_base,
-            self._column_subtotals,
-            self._column_order,
-            diffs_nan=True,
+            columns_base, self._column_subtotals, self._column_order, diffs_nan=True
         )
 
     @lazyproperty
@@ -514,7 +510,8 @@ class Assembler(object):
     def total_share_sum(self):
         """2D optional np.float64 ndarray of total share of sum for each cell.
 
-        Raises `ValueError` if the cube-result does not include a sum cube-measure.
+        Raises `ValueError` if the cube-result does not include a sum
+        cube-measure.
         """
         return self._assemble_matrix(self._measures.total_share_sum.blocks)
 
@@ -524,9 +521,27 @@ class Assembler(object):
         return self._assemble_matrix(self._measures.unweighted_counts.blocks)
 
     @lazyproperty
+    def unweighted_valid_counts(self):
+        """2D np.float64 ndarray of unweighted valid counts for each cell.
+
+        Raises `ValueError` if the cube-result does not include a valid-count-unweighted
+        cube-measure.
+        """
+        return self._assemble_matrix(self._measures.unweighted_valid_counts.blocks)
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float64 ndarray of weighted-count for each cell."""
         return self._assemble_matrix(self._measures.weighted_counts.blocks)
+
+    @lazyproperty
+    def weighted_valid_counts(self):
+        """2D np.float64 ndarray of weighted valid counts for each cell.
+
+        Raises `ValueError` if the cube-result does not include a valid-count-weighted
+        cube-measure.
+        """
+        return self._assemble_matrix(self._measures.weighted_valid_counts.blocks)
 
     @lazyproperty
     def zscores(self):
