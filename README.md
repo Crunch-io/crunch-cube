@@ -113,6 +113,11 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.24
+- Wire up `_Strand` sort-by-value for "univariate-measure" keyword case.
+- This should fix the existing alpha-Sentry error on sort-by-value for
+  FREQUENCY analyses (aka. 1D card, `_Strand`).
+
 ### 2.1.23
 - Valid weighted and unweighted counts per cell measures
 
