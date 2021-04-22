@@ -243,6 +243,11 @@ class _RawDimension(object):
 
     @lazyproperty
     def _is_cat_date(self):
+        """True if dimension is a categorical date, False otherwise.
+
+        A dimension is a categorical date, if it has all the properties of a "normal"
+        categorical dimension, but also a `"date"` field in any of its categories.
+        """
         dimension_dict = self._dimension_dict
         if dimension_dict is None or dimension_dict["type"]["class"] != "categorical":
             return False

@@ -789,9 +789,9 @@ class _Slice(CubePartition):
         """
         proportions = (
             self.row_proportions
-            if self._rows_dimension.dimension_type == DT.CAT_DATE
+            if self.rows_dimension_type == DT.CAT_DATE
             else self.column_proportions
-            if self._columns_dimension.dimension_type == DT.CAT_DATE
+            if self.columns_dimension_type == DT.CAT_DATE
             else self.table_proportions
         )
         return proportions * self._population * self._cube.population_fraction
@@ -814,9 +814,9 @@ class _Slice(CubePartition):
         """
         std_err = (
             self.row_std_err
-            if self._rows_dimension.dimension_type == DT.CAT_DATE
+            if self.rows_dimension_type == DT.CAT_DATE
             else self.column_std_err
-            if self._columns_dimension.dimension_type == DT.CAT_DATE
+            if self.columns_dimension_type == DT.CAT_DATE
             else self.table_std_err
         )
         total_filtered_population = self._population * self._cube.population_fraction
@@ -1539,7 +1539,7 @@ class _Strand(CubePartition):
 
         # ---If the only dimension is a categorical date, we don't need to break up
         # ---the population counts between its elements - it's constant throughout time
-        if self._rows_dimension.dimension_type == DT.CAT_DATE:
+        if self.rows_dimension_type == DT.CAT_DATE:
             return np.full(
                 self.table_proportions.shape,
                 self._population * self._cube.population_fraction,
