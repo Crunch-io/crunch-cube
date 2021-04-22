@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
+from cr.cube.cubepart import _Strand
 from cr.cube.stripe.assembler import StripeAssembler
 
 from ..fixtures import CR
@@ -195,3 +196,31 @@ class DescribeStripeAssembler(object):
         assert assembler.means == pytest.approx(
             [3.72405146, 2.57842929, 2.21859327, 1.86533494]
         )
+
+    @pytest.mark.parametrize(
+        "fixture, direction, expected_value",
+        (
+            (CR.CAT, "ascending", [4, 3, 2, 0, 1]),
+            (CR.CAT, "descending", [1, 0, 2, 3, 4]),
+            (CR.ECON_BLAME_WITH_HS, "ascending", [3, 4, 2, 0, 1, -1]),
+            (CR.ECON_BLAME_WITH_HS, "descending", [-1, 1, 0, 2, 4, 3]),
+            (CR.CAT_MEANS_HS, "descending", [-2, -1, 0, 2, 1]),
+        ),
+    )
+    def it_computes_the_sort_by_value_row_order_to_help(
+        self, fixture, direction, expected_value
+    ):
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "univariate_measure",
+                    "measure": "col_percent",
+                    "direction": direction,
+                }
+            }
+        }
+        cube = Cube(fixture, transforms=transforms)
+        stripe = _Strand(cube, transforms, None, False, 0, None)
+        assembler = stripe._assembler
+
+        assert assembler._row_order.tolist() == expected_value

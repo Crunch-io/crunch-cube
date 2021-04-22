@@ -66,6 +66,7 @@ class COLLATION_METHOD(enum.Enum):
     OPPOSING_ELEMENT = "opposing_element"
     OPPOSING_SUBTOTAL = "opposing_subtotal"
     PAYLOAD_ORDER = "payload_order"
+    UNIVARIATE_MEASURE = "univariate_measure"
 
 
 class MEASURE(enum.Enum):
