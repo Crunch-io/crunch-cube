@@ -242,6 +242,15 @@ class _RawDimension(object):
         return "subreferences" in self._dimension_dict["references"]
 
     @lazyproperty
+    def _is_cat_date(self):
+        dimension_dict = self._dimension_dict
+        if dimension_dict is None or dimension_dict["type"]["class"] != "categorical":
+            return False
+        return any(
+            "date" in cat for cat in dimension_dict["type"].get("categories", [])
+        )
+
+    @lazyproperty
     def _next_raw_dimension(self):
         """_RawDimension for next *dimension_dict* in sequence or None for last.
 
@@ -288,12 +297,18 @@ class _RawDimension(object):
                 else DT.CA_CAT
             )
 
-        # ---what's left is logical or plain-old categorical---
-        return (
-            DT.LOGICAL
-            if self._has_selected_category and self._is_logical_type
-            else DT.CAT
-        )
+        # ---what's left is three different versions of categorical dimension---
+
+        # ---first the logical---
+        if self._has_selected_category and self._is_logical_type:
+            return DT.LOGICAL
+
+        # ---or a categorical date---
+        if self._is_cat_date:
+            return DT.CAT_DATE
+
+        # ---or the plain-old categorical---
+        return DT.CAT
 
 
 class Dimension(object):

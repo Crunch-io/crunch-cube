@@ -259,6 +259,40 @@ class Describe_RawDimension(object):
             raw_dimension._base_type
 
     @pytest.mark.parametrize(
+        ("dimension_dict", "expected_value"),
+        (
+            ({"type": {"class": "categorical", "categories": []}}, False),
+            (
+                {"type": {"class": "categorical", "categories": [{}, {}]}},
+                False,
+            ),
+            (
+                {"type": {"class": "categorical", "categories": [{"foo": "bar"}, {}]}},
+                False,
+            ),
+            (
+                {
+                    "type": {
+                        "class": "categorical",
+                        "categories": [{"date": "2019-01"}, {}],
+                    }
+                },
+                True,
+            ),
+            (
+                {"type": {"class": "enum", "categories": [{"date": "2019-01"}, {}]}},
+                False,
+            ),
+        ),
+    )
+    def and_it_knows_if_it_is_a_categorical_date(self, dimension_dict, expected_value):
+        raw_dimension = _RawDimension(dimension_dict, None)
+
+        is_cat_date = raw_dimension._is_cat_date
+
+        assert is_cat_date == expected_value
+
+    @pytest.mark.parametrize(
         "base_type, cat_type, arr_type, expected_value",
         (
             ("categorical", DT.CAT, None, DT.CAT),
