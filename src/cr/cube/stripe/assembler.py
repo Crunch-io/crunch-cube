@@ -12,8 +12,12 @@ from __future__ import division
 
 import numpy as np
 
-from cr.cube.collator import ExplicitOrderCollator, PayloadOrderCollator
-from cr.cube.enums import COLLATION_METHOD as CM
+from cr.cube.collator import (
+    ExplicitOrderCollator,
+    PayloadOrderCollator,
+    SortByValueCollator,
+)
+from cr.cube.enums import COLLATION_METHOD as CM, MEASURE as M
 from cr.cube.stripe.measure import StripeMeasures
 from cr.cube.util import lazyproperty
 
@@ -273,8 +277,8 @@ class _BaseOrderHelper(object):
         rows-dimension.
         """
         HelperCls = (
-            _SortByValueHelper
-            if rows_dimension.collation_method == CM.OPPOSING_ELEMENT
+            _SortByMeasureHelper
+            if rows_dimension.collation_method == CM.UNIVARIATE_MEASURE
             else _OrderHelper
         )
         return HelperCls(rows_dimension, measures)._display_order
@@ -299,6 +303,11 @@ class _BaseOrderHelper(object):
         """
         return tuple(i for i, N in enumerate(self._measures.pruning_base) if N == 0)
 
+    @lazyproperty
+    def _order_dict(self):
+        """dict specifying ordering details like measure and sort-direction."""
+        return self._rows_dimension.order_dict
+
 
 class _OrderHelper(_BaseOrderHelper):
     """Encapsulates the complexity of the various kinds of row ordering."""
@@ -319,5 +328,54 @@ class _OrderHelper(_BaseOrderHelper):
         return CollatorCls.display_order(self._rows_dimension, self._empty_row_idxs)
 
 
-class _SortByValueHelper(_BaseOrderHelper):
-    """Orders rows by their values."""
+class _SortByMeasureHelper(_BaseOrderHelper):
+    """Orders rows by the value of a specified measure."""
+
+    @lazyproperty
+    def _display_order(self):
+        """tuple of signed int idx for each row of stripe.
+
+        Negative values represent inserted-vector locations. Returned sequence reflects
+        insertion, hiding, pruning, and ordering transforms specified in the
+        rows-dimension.
+        """
+        return SortByValueCollator.display_order(
+            self._rows_dimension,
+            self._element_values,
+            self._subtotal_values,
+            self._empty_row_idxs,
+        )
+
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of measure values that form the basis for sort order.
+
+        There is one value per row and values appear in payload (dimension) element
+        order. These are only the "base" values and do not include insertions.
+        """
+        return self._measure.blocks[0]
+
+    @lazyproperty
+    def _measure(self):
+        """Second-order measure object providing values for sort."""
+        measure_keyname = self._order_dict["measure"]
+        measure_propname = {
+            M.COL_PERCENT.value: "table_proportions",
+            # --- add others as sort-by-value for those measures comes online ---
+        }.get(measure_keyname)
+
+        if measure_propname is None:
+            raise NotImplementedError(
+                "sort-by-value for measure '%s' is not yet supported" % measure_keyname
+            )
+
+        return getattr(self._measures, measure_propname)
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of row-subtotal values that contribute to the sort basis.
+
+        There is one value per row subtotal and values appear in payload (dimension)
+        insertion order.
+        """
+        return self._measure.blocks[1]

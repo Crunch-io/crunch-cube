@@ -9,7 +9,7 @@ from cr.cube.enums import COLLATION_METHOD as CM
 from cr.cube.stripe.assembler import (
     _BaseOrderHelper,
     _OrderHelper,
-    _SortByValueHelper,
+    _SortByMeasureHelper,
     StripeAssembler,
 )
 from cr.cube.stripe.measure import (
@@ -246,7 +246,7 @@ class Describe_BaseOrderHelper(object):
     @pytest.mark.parametrize(
         "collation_method, HelperCls",
         (
-            (CM.OPPOSING_ELEMENT, _SortByValueHelper),
+            (CM.UNIVARIATE_MEASURE, _SortByMeasureHelper),
             (CM.EXPLICIT_ORDER, _OrderHelper),
             (CM.PAYLOAD_ORDER, _OrderHelper),
         ),
