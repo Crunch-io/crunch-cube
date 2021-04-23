@@ -113,6 +113,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.25
+- fix: sort-by-value keyword to "percent"
+
 ### 2.1.24
 - Wire up `_Strand` sort-by-value for "univariate-measure" keyword case.
 - This should fix the existing alpha-Sentry error on sort-by-value for
