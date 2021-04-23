@@ -593,3 +593,155 @@ class ZscoreSubtotals(_BaseSubtotals):
     def _table_margin(self):
         """Scalar np.float64 weighted-N for overall table."""
         return self._weighted_counts.table_margin
+
+
+class PairwiseSigTestSubtotals(_BaseSubtotals):
+    """Computes subtotal values for the pairwise t-test measure."""
+
+    def __init__(
+        self,
+        base_values,
+        dimensions,
+        column_proportions,
+        columns_base,
+        selected_column_idx,
+        diff_cols_nan=True,
+        diff_rows_nan=True,
+    ):
+        super(PairwiseSigTestSubtotals, self).__init__(base_values, dimensions)
+        self._column_proportions = column_proportions
+        self._columns_base = columns_base[0][0]
+        self._columns_base_subtotals = columns_base[0][1]
+        self._selected_column_idx = selected_column_idx
+        self._diff_cols_nan = diff_cols_nan
+        self._diff_rows_nan = diff_rows_nan
+
+    @classmethod
+    def blocks(
+        cls,
+        base_values,
+        dimensions,
+        column_proportions,
+        columns_base,
+        selected_column_idx,
+        diff_cols_nan=True,
+        diff_rows_nan=True,
+    ):
+        """Return base, row and col insertion, and intersection matrices.
+
+        These are in the form ready for assembly.
+
+        Keyword arguments:
+        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg
+        for column bases (default False)
+        `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
+        row bases (default False)
+        """
+        return cls(
+            base_values,
+            dimensions,
+            column_proportions,
+            columns_base,
+            selected_column_idx,
+            diff_cols_nan,
+            diff_rows_nan,
+        )._blocks
+
+    def _intersection(self, row_subtotal, column_subtotal):
+        """Return value for intersection of `row_subtotal` and `column_subtotal`.
+
+        Intersection value for pairwise t_test measures is np.nan.
+        """
+        return np.nan
+
+    def _subtotal_column(self, subtotal, col):
+        """Return (n_rows,) ndarray of zscore `subtotal` value."""
+        # --- Cannot calculate if there are any subtrahends ---
+        if self._diff_cols_nan and len(subtotal.subtrahend_idxs) > 0:
+            return np.full(self._nrows, np.nan)[:, np.newaxis]
+        return col[:, np.newaxis]
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """(n_rows, n_col_subtotals) matrix of subtotal columns."""
+        subtotals = self._column_subtotals
+        if len(subtotals) == 0:
+            return np.empty((self._nrows, 0))
+
+        # --- Base column_proportions values
+        props = self._column_proportions.blocks[0][0]
+        # --- Inserted column column_proportions values
+        props_hs = self._column_proportions.blocks[0][1]
+        var_props_hs = props_hs * (1.0 - props_hs) / self._columns_base_subtotals
+        selected_col_props, selected_var = self._selected_observations(props, props_hs)
+        t_stats = self._t_stats(
+            props_hs, selected_col_props, var_props_hs, selected_var
+        )
+
+        return np.hstack(
+            [
+                self._subtotal_column(subtotal, col)
+                for subtotal, col in zip(subtotals, t_stats.T)
+            ]
+        )
+
+    def _subtotal_row(self, subtotal, row):
+        """Return (n_cols,) ndarray of z-score `subtotal` value."""
+        # --- Cannot calculate if there are any subtrahends ---
+        if self._diff_rows_nan and len(subtotal.subtrahend_idxs) > 0:
+            return np.full(self._ncols, np.nan)
+        return row
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """(n_row_subtotals, n_cols) ndarray of subtotal rows."""
+        subtotals = self._row_subtotals
+        if len(subtotals) == 0:
+            return np.empty((0, self._ncols))
+
+        # --- T-stats subtotal rows are computed considering the inserted row
+        # --- column_proportions values as the base values for the t-statistic formula
+        props = self._column_proportions.blocks[1][0]
+        # --- The eventual column insertions in the case of subtotal rows are the
+        # --- intersections
+        props_hs = self._column_proportions.blocks[1][1]
+        var_props = props * (1.0 - props) / self._columns_base
+        selected_col_props, selected_var = self._selected_observations(props, props_hs)
+        t_stats = self._t_stats(props, selected_col_props, var_props, selected_var)
+
+        return np.vstack(
+            [
+                self._subtotal_row(subtotal, row)
+                for subtotal, row in zip(subtotals, t_stats)
+            ]
+        )
+
+    @staticmethod
+    def _t_stats(props, selected_column_props, var_props, selected_variance):
+        """The t-test measure computation of significance difference between columns.
+
+        This method computes a paired t test on dependent samples comparing each column
+        with the selected one.
+        """
+        diff = props - selected_column_props
+        se_diff = np.sqrt(var_props + selected_variance)
+        return diff / se_diff
+
+    def _selected_observations(self, props, props_hs):
+        """Returns a tuple (column_proportions, variance) for the selected column.
+
+        A paired t-test simply calculates the difference between paired observations
+        (e.g., before and after) and then performs a 1-sample t-test on the differences.
+        This method, calculates the observations of the second sample on which calculate
+        the t-statistics.
+        """
+        var_props = props * (1.0 - props) / self._columns_base
+        var_props_hs = props_hs * (1 - props_hs) / self._columns_base_subtotals
+        col_idx = self._selected_column_idx
+        if col_idx < 0:
+            selected_column_proportions = props_hs[:, [col_idx]]
+            selected_variance = var_props_hs[:, [col_idx]]
+        else:
+            selected_column_proportions = props[:, [col_idx]]
+            selected_variance = var_props[:, [col_idx]]
+        return selected_column_proportions, selected_variance
