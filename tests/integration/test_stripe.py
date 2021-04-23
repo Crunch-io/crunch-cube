@@ -214,7 +214,7 @@ class DescribeStripeAssembler(object):
             "rows_dimension": {
                 "order": {
                     "type": "univariate_measure",
-                    "measure": "col_percent",
+                    "measure": "percent",
                     "direction": direction,
                 }
             }
