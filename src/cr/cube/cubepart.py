@@ -601,18 +601,7 @@ class _Slice(CubePartition):
         column in the same row with a confidence interval meeting the threshold defined
         for this analysis.
         """
-        # If overlaps are defined, calculate significance based on them
-        if (
-            self.dimension_types[-1] == DT.MR
-            and self._cube.overlaps is not None
-            and self._cube.valid_overlaps is not None
-        ):
-            return self._assembler.pairwise_indices(self._alpha, self._only_larger)
-
-        # If overlaps are not defined, default to the legacy way of calculating sig
-        return PairwiseSignificance.pairwise_indices(
-            self, self._alpha, self._only_larger
-        )
+        return self._assembler.pairwise_indices(self._alpha, self._only_larger)
 
     @lazyproperty
     def pairwise_indices_alt(self):
@@ -624,18 +613,7 @@ class _Slice(CubePartition):
         if self._alpha_alt is None:
             return None
 
-        # If overlaps are defined, calculate significance based on them
-        if (
-            self.dimension_types[-1] == DT.MR
-            and self._cube.overlaps is not None
-            and self._cube.valid_overlaps is not None
-        ):
-            return self._assembler.pairwise_indices(self._alpha_alt, self._only_larger)
-
-        # If no overlaps are defined, default to legacy way of calculating pw indices
-        return PairwiseSignificance.pairwise_indices(
-            self, self._alpha_alt, self._only_larger
-        )
+        return self._assembler.pairwise_indices(self._alpha_alt, self._only_larger)
 
     @lazyproperty
     def pairwise_means_indices(self):
@@ -682,48 +660,12 @@ class _Slice(CubePartition):
             )
 
     def pairwise_significance_p_vals(self, column_idx):
-        """2D ndarray of pairwise-significance p-vals matrices for column idx.
-
-        For cubes where the last dimension is categorical, column idxs represent
-        specific categories.
-
-        For cubes where the last dimension is a multiple response, each subvariable
-        pairwise significance matrix is a 2D ndarray of the p-vals for the selected
-        subvariable index (the selected column).
-        """
-
-        # If overlaps are defined, calculate significance based on them
-        if (
-            self.dimension_types[-1] == DT.MR
-            and self._cube.overlaps is not None
-            and self._cube.valid_overlaps is not None
-        ):
-            return self._assembler.pairwise_significance_p_vals(column_idx)
-
-        # If overlaps are not defined, default to the old-way of calculation
-        return PairwiseSignificance(self).values[column_idx].p_vals
+        """2D ndarray of pairwise-significance p-vals matrices for column idx."""
+        return self._assembler.pairwise_significance_p_vals(column_idx)
 
     def pairwise_significance_t_stats(self, column_idx):
-        """return 2D ndarray of pairwise-significance t-stats matrices for subvariable.
-
-        For cubes where the last dimension is categorical, column idxs represent
-        specific categories.
-
-        For cubes where the last dimension is a multiple response, each subvariable
-        pairwise significance matrix is a 2D ndarray of the t-stats for the selected
-        subvariable index (the selected column).
-        """
-
-        # If overlaps are defined, calculate significance based on them
-        if (
-            self.dimension_types[-1] == DT.MR
-            and self._cube.overlaps is not None
-            and self._cube.valid_overlaps is not None
-        ):
-            return self._assembler.pairwise_significance_t_stats(column_idx)
-
-        # If overlaps are not defined, default to the old-way of calculation
-        return PairwiseSignificance(self).values[column_idx].t_stats
+        """return 2D ndarray of pairwise-significance t-stats for selected column."""
+        return self._assembler.pairwise_significance_t_stats(column_idx)
 
     def pairwise_significance_means_p_vals(self, column_idx):
         """Optional 2D ndarray of means significance p-vals matrices for column idx."""

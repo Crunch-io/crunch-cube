@@ -124,16 +124,13 @@ class Assembler(object):
     def columns_base(self):
         """1D/2D np.float64 ndarray of unweighted-N for each slice column/cell."""
         # --- an MR_X slice produces a 2D column-base (each cell has its own N) ---
-        rows_dim_type = self._rows_dimension.dimension_type
         columns_base = self._measures.columns_base
-        if rows_dim_type in (DT.MR_SUBVAR, DT.NUM_ARRAY):
-            return self._assemble_matrix(
-                SumSubtotals.blocks(columns_base, self._dimensions, diff_cols_nan=True)
-            )
+        if self._rows_dimension.dimension_type in (DT.MR_SUBVAR, DT.NUM_ARRAY):
+            return self._assemble_matrix(columns_base.blocks)
         # --- otherwise columns-base is a vector ---
-        return self._assemble_vector(
-            columns_base, self._column_subtotals, self._column_order, diffs_nan=True
-        )
+        base_values = columns_base.blocks[0][0]
+        columns_subtotals = columns_base.blocks[0][1]
+        return np.hstack([base_values, columns_subtotals])[self._column_order]
 
     @lazyproperty
     def columns_dimension_numeric_values(self):
@@ -231,9 +228,32 @@ class Assembler(object):
 
         Raises `ValueError if the cube-result does not include `overlaps` cube-measures.
         """
-        return self._assemble_matrix(
-            self._measures.pairwise_indices(alpha, only_larger).blocks
-        )
+        if self._cube_has_overlaps:
+            # If overlaps are defined, calculate significance based on them
+            return self._assemble_matrix(
+                self._measures.pairwise_indices_for_subvar(alpha, only_larger).blocks
+            )
+
+        def _pairwise_indices(p_vals, t_stats):
+            """1D ndarray containing tuples of int pairwise indices of each column."""
+            significance = p_vals < alpha
+            if only_larger:
+                significance = np.logical_and(t_stats < 0, significance)
+            col_significance = np.empty((len(significance),), dtype=object)
+            col_significance[:] = [
+                tuple(np.where(sig_row)[0]) for sig_row in significance
+            ]
+            return col_significance
+
+        return np.array(
+            [
+                _pairwise_indices(
+                    self.pairwise_significance_p_vals(col),
+                    self.pairwise_significance_t_stats(col),
+                )
+                for col in range(len(self._column_order))
+            ]
+        ).T
 
     def pairwise_means_indices(self, alpha, only_larger):
         """2D optional ndarray of tuple of int column-idxs means pairwise-t threshold.
@@ -256,24 +276,50 @@ class Assembler(object):
             dtype=object,
         )
 
-    def pairwise_significance_p_vals(self, subvar_idx):
+    def pairwise_significance_p_vals(self, column_idx):
         """2D optional np.float64 ndarray of overlaps-p_vals matrices for subvar idx.
 
+        For cubes where the last dimension is categorical, column idxs represent
+        specific categories.
+
+        For cubes where the last dimension is a multiple response, each subvariable
+        pairwise significance matrix is a 2D ndarray of the p-vals for the selected
+        subvariable index (the selected column).
+
         Raises `ValueError if the cube-result does not include `overlaps`
         and `valid_overlaps` cube-measures.
         """
+        if self._cube_has_overlaps:
+            # If overlaps are defined, calculate significance based on them
+            return self._assemble_matrix(
+                self._measures.pairwise_p_vals_for_subvar(column_idx).blocks
+            )
+        base_column_idx = self._column_order[column_idx]
         return self._assemble_matrix(
-            self._measures.pairwise_p_vals_for_subvar(subvar_idx).blocks
+            self._measures.pairwise_p_vals(base_column_idx).blocks
         )
 
-    def pairwise_significance_t_stats(self, subvar_idx):
+    def pairwise_significance_t_stats(self, column_idx):
         """2D optional np.float64 ndarray of overlaps-t_stats matrices for subvar idx.
+
+        For cubes where the last dimension is categorical, column idxs represent
+        specific categories.
+
+        For cubes where the last dimension is a multiple response, each subvariable
+        pairwise significance matrix is a 2D ndarray of the t-stats for the selected
+        subvariable index (the selected column).
 
         Raises `ValueError if the cube-result does not include `overlaps`
         and `valid_overlaps` cube-measures.
         """
+        if self._cube_has_overlaps:
+            # If overlaps are defined, calculate significance based on them
+            return self._assemble_matrix(
+                self._measures.pairwise_t_stats_for_subvar(column_idx).blocks
+            )
+        base_column_idx = self._column_order[column_idx]
         return self._assemble_matrix(
-            self._measures.pairwise_t_stats_for_subvar(subvar_idx).blocks
+            self._measures.pairwise_t_stats(base_column_idx).blocks
         )
 
     def pairwise_significance_means_p_vals(self, column_idx):
@@ -727,6 +773,15 @@ class Assembler(object):
         """
         return BaseCubeResultMatrix.factory(
             self._cube, self._dimensions, self._slice_idx
+        )
+
+    @lazyproperty
+    def _cube_has_overlaps(self):
+        """True if overlaps are defined and the last dimension is MR, False otherwise"""
+        return (
+            self._dimensions[-1].dimension_type == DT.MR
+            and self._cube.overlaps is not None
+            and self._cube.valid_overlaps is not None
         )
 
     def _dimension_labels(self, dimension, order):
