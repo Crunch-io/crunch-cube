@@ -17,7 +17,7 @@ from cr.cube.collator import (
     PayloadOrderCollator,
     SortByValueCollator,
 )
-from cr.cube.enums import COLLATION_METHOD as CM, MEASURE as M
+from cr.cube.enums import COLLATION_METHOD as CM
 from cr.cube.stripe.measure import StripeMeasures
 from cr.cube.util import lazyproperty
 
@@ -360,7 +360,7 @@ class _SortByMeasureHelper(_BaseOrderHelper):
         """Second-order measure object providing values for sort."""
         measure_keyname = self._order_dict["measure"]
         measure_propname = {
-            M.COL_PERCENT.value: "table_proportions",
+            "percent": "table_proportions",
             # --- add others as sort-by-value for those measures comes online ---
         }.get(measure_keyname)
 
