@@ -542,7 +542,9 @@ class _PairwiseIndices(_BaseSecondOrderMeasure):
                 self._cube_measures,
                 col_idx,
             )
-            for col_idx in range(self._cube_measures.cube_overlaps.overlaps.shape[1])
+            for col_idx in range(
+                self._cube_measures.cube_overlaps.selected_bases.shape[1]
+            )
         ]
 
 
@@ -588,12 +590,12 @@ class _PairwiseSigTStats(_BaseSecondOrderMeasure):
     @lazyproperty
     def _n_rows(self):
         """int number of rows in the matrix."""
-        return self._cube_measures.cube_overlaps.overlaps.shape[0]
+        return self._cube_measures.cube_overlaps.valid_bases.shape[0]
 
     @lazyproperty
     def _n_subvars(self):
         """int number of columns (subvariables) in the matrix."""
-        return self._cube_measures.cube_overlaps.overlaps.shape[1]
+        return self._cube_measures.cube_overlaps.valid_bases.shape[1]
 
     @lazyproperty
     def t_stats(self):
@@ -1331,9 +1333,9 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
         be float64 when the overlaps result is weighted.
         """
         return (
-            self._cube_overlaps.overlaps[self._row_idx, self._idx_a, self._idx_a],
-            self._cube_overlaps.overlaps[self._row_idx, self._idx_b, self._idx_b],
-            self._cube_overlaps.overlaps[self._row_idx, self._idx_a, self._idx_b],
+            self._cube_overlaps.selected_bases[self._row_idx, self._idx_a, self._idx_a],
+            self._cube_overlaps.selected_bases[self._row_idx, self._idx_b, self._idx_b],
+            self._cube_overlaps.selected_bases[self._row_idx, self._idx_a, self._idx_b],
         )
 
     @lazyproperty
@@ -1345,7 +1347,7 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
         They can only be float64 when the overlaps result is weighted.
         """
         return (
-            self._cube_overlaps.valid_overlaps[self._row_idx, self._idx_a, self._idx_a],
-            self._cube_overlaps.valid_overlaps[self._row_idx, self._idx_b, self._idx_b],
-            self._cube_overlaps.valid_overlaps[self._row_idx, self._idx_a, self._idx_b],
+            self._cube_overlaps.valid_bases[self._row_idx, self._idx_a, self._idx_a],
+            self._cube_overlaps.valid_bases[self._row_idx, self._idx_b, self._idx_b],
+            self._cube_overlaps.valid_bases[self._row_idx, self._idx_a, self._idx_b],
         )

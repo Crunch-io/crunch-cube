@@ -234,10 +234,11 @@ class _CatXMrOverlaps(_BaseCubeOverlaps):
 
     @lazyproperty
     def tile_repetitions(self):
+        """tuple of number of repetitions of selected base matrix."""
         return (self._overlaps.shape[0], 1, 1)
 
     @lazyproperty
-    def overlaps(self):
+    def selected_bases(self):
         """3D np.float64 ndarray of selected overlaps between MR subvariables, per cat.
 
         For a CAT x MR matrix, the overlaps are calculated for each category, and then
@@ -248,12 +249,16 @@ class _CatXMrOverlaps(_BaseCubeOverlaps):
         of the previous MR_SUBVAR dimension.
 
         From this shape, we only need the "Selected" part of the MR_SEL dimension, so
-        we need to select the 0th element along the 2nd axis [:, :, 0].
+        we need to select the 0th element along the 2nd axis [:, :, 0]. But we also need
+        to add all of the categories together, since that's what's used for the base
+        value in all of the significance calculations. We then tile these bases, since
+        they're the same for each row (all the categories added together). The tiling is
+        done so that the API of this class can be uniform for all users.
         """
         return np.tile(np.sum(self._overlaps[:, :, 0], axis=0), self.tile_repetitions)
 
     @lazyproperty
-    def valid_overlaps(self):
+    def valid_bases(self):
         """3D np.float64 ndarray of valid overlaps between MR subvariables, per cat.
 
         For a CAT x MR matrix, the overlaps are calculated for each category, and then
@@ -275,8 +280,8 @@ class _MrXMrOverlaps(_BaseCubeOverlaps):
     """Overlaps cube-measure for a MR_X_MR slice."""
 
     @lazyproperty
-    def overlaps(self):
-        """3D np.float64 ndarray of selected overlaps between MR subvariables, per cat.
+    def selected_bases(self):
+        """3D np.float64 ndarray of selected overlaps bases between MR subvariables.
 
         For a MR x MR slice, the overlaps are calculated for each MR subvar row, and
         then for each subvariables pair for that row (which will produce a square
@@ -285,13 +290,17 @@ class _MrXMrOverlaps(_BaseCubeOverlaps):
         being the result of the `cube_overlap` measure, and representing the "pairing"
         with each subvar of the last MR_SUBVAR dimension.
 
-        From this shape, we only need the "Selected" part of both MR_SEL dimensions, so
-        we need to select the 0th element along the 1st and 3rd axes [:, 0, :, 0].
+        From this shape, we only need the "Selected" part of the last MR_SEL dimension,
+        but we need both "Selected" and "Other" from the first MR_SEL dimension. We
+        therefore need to select the 0th element along the 3rd axis, but we need to sum
+        the 0th and 1st elements along the 1st axis (first MR_SEL dimension). The sum
+        of the selected and other counts of the first MR_SEL is what's always used to
+        represent bases of such crosstabs (we cannot simply ignore the other counts).
         """
         return np.sum(self._overlaps[:, 0:2, :, 0], axis=1)
 
     @lazyproperty
-    def valid_overlaps(self):
+    def valid_bases(self):
         """3D np.float64 ndarray of valid overlaps between MR subvariables, per row.
 
         For a MR x MR slice, the overlaps are calculated for each row, and then

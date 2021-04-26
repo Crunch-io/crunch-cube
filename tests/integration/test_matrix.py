@@ -1513,7 +1513,7 @@ class DescribeCubemeasure(object):
         )
 
         assert overlaps_measure.__class__.__name__ == "_CatXMrOverlaps"
-        assert overlaps_measure.overlaps.tolist() == [
+        assert overlaps_measure.selected_bases.tolist() == [
             [
                 [1.0, 0.0, 0.0],
                 [0.0, 1.0, 1.0],
@@ -1534,7 +1534,7 @@ class DescribeCubemeasure(object):
             slice_idx=0,
         )
 
-        assert overlaps_measure.valid_overlaps.tolist() == [
+        assert overlaps_measure.valid_bases.tolist() == [
             [
                 [3.0, 3.0, 3.0],
                 [3.0, 5.0, 5.0],
@@ -1556,7 +1556,7 @@ class DescribeCubemeasure(object):
             slice_idx=0,
         )
 
-        assert overlaps_measure.overlaps.tolist() == [
+        assert overlaps_measure.selected_bases.tolist() == [
             [
                 [1.0, 0.0, 0.0],
                 [0.0, 1.0, 1.0],
@@ -1583,7 +1583,7 @@ class DescribeCubemeasure(object):
             slice_idx=0,
         )
 
-        assert overlaps_measure.valid_overlaps.tolist() == [
+        assert overlaps_measure.valid_bases.tolist() == [
             [
                 [3.0, 3.0, 3.0],
                 [3.0, 4.0, 4.0],
@@ -1610,7 +1610,7 @@ class DescribeCubemeasure(object):
             slice_idx=1,
         )
 
-        assert overlaps_measure.overlaps.tolist() == [
+        assert overlaps_measure.selected_bases.tolist() == [
             [
                 [2.0, 0.0, 0.0],
                 [0.0, 1.0, 1.0],
@@ -1637,7 +1637,7 @@ class DescribeCubemeasure(object):
             slice_idx=1,
         )
 
-        assert overlaps_measure.valid_overlaps.tolist() == [
+        assert overlaps_measure.valid_bases.tolist() == [
             [
                 [4.0, 4.0, 4.0],
                 [4.0, 6.0, 6.0],
