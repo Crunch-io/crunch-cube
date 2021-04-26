@@ -8,28 +8,7 @@
         },
         "dimensions": [
             {
-                "function": "dimension",
-                "args": [
-                    {
-                        "function": "as_selected",
-                        "args": [
-                            {
-                                "variable": "7TZobiTCUeRmj3ACO1NKLh00000d"
-                            }
-                        ]
-                    },
-                    {
-                        "value": "subvariables"
-                    }
-                ]
-            },
-            {
-                "function": "as_selected",
-                "args": [
-                    {
-                        "variable": "7TZobiTCUeRmj3ACO1NKLh00000d"
-                    }
-                ]
+                "variable": "7TZobiTCUeRmj3ACO1NKLh00000d.0004"
             },
             {
                 "function": "dimension",
@@ -65,109 +44,13 @@
         "dimensions": [
             {
                 "references": {
-                    "subreferences": [
-                        {
-                            "alias": "bool1",
-                            "name": "Response #1",
-                            "description": "bool1"
-                        },
-                        {
-                            "alias": "bool2",
-                            "name": "Response #2",
-                            "description": "bool2"
-                        },
-                        {
-                            "alias": "bool3",
-                            "name": "Response #3",
-                            "description": "bool3"
-                        }
-                    ],
-                    "uniform_basis": false,
-                    "alias": "mymrset",
-                    "description": "My multiple response set",
-                    "name": "mymrset"
+                    "alias": "bool1",
+                    "name": "Response #1",
+                    "description": "bool1"
                 },
-                "derived": true,
-                "type": {
-                    "subtype": {
-                        "class": "variable"
-                    },
-                    "elements": [
-                        {
-                            "id": 1,
-                            "value": {
-                                "derived": false,
-                                "references": {
-                                    "alias": "bool1",
-                                    "name": "Response #1",
-                                    "description": "bool1"
-                                },
-                                "id": "0004"
-                            },
-                            "missing": false
-                        },
-                        {
-                            "id": 2,
-                            "value": {
-                                "derived": false,
-                                "references": {
-                                    "alias": "bool2",
-                                    "name": "Response #2",
-                                    "description": "bool2"
-                                },
-                                "id": "0005"
-                            },
-                            "missing": false
-                        },
-                        {
-                            "id": 3,
-                            "value": {
-                                "derived": false,
-                                "references": {
-                                    "alias": "bool3",
-                                    "name": "Response #3",
-                                    "description": "bool3"
-                                },
-                                "id": "0006"
-                            },
-                            "missing": false
-                        }
-                    ],
-                    "class": "enum"
-                }
-            },
-            {
-                "derived": true,
-                "references": {
-                    "subreferences": [
-                        {
-                            "alias": "bool1",
-                            "name": "Response #1",
-                            "description": "bool1"
-                        },
-                        {
-                            "alias": "bool2",
-                            "name": "Response #2",
-                            "description": "bool2"
-                        },
-                        {
-                            "alias": "bool3",
-                            "name": "Response #3",
-                            "description": "bool3"
-                        }
-                    ],
-                    "uniform_basis": false,
-                    "description": "My multiple response set",
-                    "name": "mymrset",
-                    "alias": "mymrset"
-                },
+                "derived": false,
                 "type": {
                     "ordinal": false,
-                    "subvariables": [
-                        "0004",
-                        "0005",
-                        "0006"
-                    ],
                     "class": "categorical",
                     "categories": [
                         {
@@ -175,19 +58,19 @@
                             "selected": true,
                             "id": 1,
                             "missing": false,
-                            "name": "Selected"
+                            "name": "1"
                         },
                         {
                             "numeric_value": 0,
-                            "missing": false,
                             "id": 0,
-                            "name": "Other"
+                            "name": "0",
+                            "missing": false
                         },
                         {
                             "numeric_value": null,
-                            "missing": true,
                             "id": -1,
-                            "name": "No Data"
+                            "name": "No Data",
+                            "missing": true
                         }
                     ]
                 }
@@ -322,7 +205,7 @@
                 }
             }
         ],
-        "missing": 0,
+        "missing": 1,
         "measures": {
             "count": {
                 "data": [
@@ -352,63 +235,9 @@
                     0,
                     0,
                     1,
-                    0,
-                    2,
-                    1,
-                    1,
-                    4,
-                    0,
-                    0,
-                    0,
-                    4,
-                    0,
-                    1,
-                    1,
-                    0,
-                    0,
-                    2,
-                    0,
-                    0,
-                    2,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    3,
-                    2,
-                    1,
-                    4,
-                    2,
-                    0,
-                    0,
-                    6,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
                     0
                 ],
-                "n_missing": 0,
+                "n_missing": 1,
                 "metadata": {
                     "references": {},
                     "derived": true,
@@ -485,60 +314,6 @@
             0,
             0,
             1,
-            0,
-            2,
-            1,
-            1,
-            4,
-            0,
-            0,
-            0,
-            4,
-            0,
-            1,
-            1,
-            0,
-            0,
-            2,
-            0,
-            0,
-            2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            3,
-            2,
-            1,
-            4,
-            2,
-            0,
-            0,
-            6,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
         ],
         "element": "crunch:cube"

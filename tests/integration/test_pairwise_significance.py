@@ -491,9 +491,9 @@ class TestOverlapsPairwiseSignificance(TestCase):
         assert slice_.pairwise_significance_t_stats(1) == pytest.approx(
             np.array(
                 [
-                    [3.51874302, 0.0, np.nan],
-                    [-3.51874302, 0.0, np.nan],
-                    [0.0, 0.0, np.nan],
+                    [1.22474487, 0.0, np.nan],
+                    [-1.22474487, np.nan, np.nan],
+                    [np.nan, np.nan, np.nan],
                 ],
             ),
             nan_ok=True,
@@ -501,9 +501,9 @@ class TestOverlapsPairwiseSignificance(TestCase):
         assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
             np.array(
                 [
-                    [0.00310191, 0.0, np.nan],
-                    [0.00310191, 0.0, np.nan],
-                    [1.0, 0.0, np.nan],
+                    [0.28786413, 1.0, np.nan],
+                    [0.27521973, np.nan, np.nan],
+                    [np.nan, np.nan, np.nan],
                 ],
             ),
             nan_ok=True,
@@ -630,16 +630,24 @@ class TestOverlapsPairwiseSignificance(TestCase):
         assert slice_.pairwise_significance_t_stats(3) == pytest.approx(
             np.array(
                 [
-                    [61.55, 43.02, -2.26, 0.0, 9.79, -105.35],
-                    [-2.67, 89.18, -21.60, 0.0, -12.43, -58.98],
-                    [-2.43, 3.15, 103.35, 0.0, 44.51, -85.86],
-                    [-86.29, -60.68, -90.81, 0.0, -56.66, -127.32],
-                    [-25.01, -4.42, -12.87, 0.0, 93.79, -53.79],
-                    [-3.52, 0.78, -15.23, 0.0, -4.65, 138.61],
+                    [13.40, 9.62, -0.49, 0.0, 2.27, -24.08],
+                    [-0.58, 19.94, -4.76, 0.0, -2.88, -13.48],
+                    [-0.53, 0.70, 22.76, 0.0, 10.32, -19.63],
+                    [-18.79, -13.57, -20.00, 0.0, -13.14, -29.10],
+                    [-5.45, -0.99, -2.83, 0.0, 21.75, -12.29],
+                    [-0.76, 0.17, -3.35, 0.0, -1.07, 31.68],
                 ]
             ),
             abs=10e-2,
         )
+
+    def test_pairwise_sig_for_mr_x_mr_vs_mr_single_subvar_x_mr(self):
+        mr_x_mr_slice = Cube(OL.MR_X_MR).partitions[0]
+        t_stats_mr_x_mr = mr_x_mr_slice.pairwise_significance_t_stats(1)
+        mr_subvar_x_mr_slice = Cube(OL.MR_SINGLE_SUBVAR_X_MR).partitions[0]
+        t_stats_mr_subvar_x_mr = mr_subvar_x_mr_slice.pairwise_significance_t_stats(1)
+        # Assert same row stats are the same in both cases (MR x MR and MR_SEL x MR)
+        np.testing.assert_array_equal(t_stats_mr_x_mr[0], t_stats_mr_subvar_x_mr[0])
 
 
 class TestMeanDifferenceSignificance(object):

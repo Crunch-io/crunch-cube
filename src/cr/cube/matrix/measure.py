@@ -542,7 +542,9 @@ class _PairwiseIndices(_BaseSecondOrderMeasure):
                 self._cube_measures,
                 col_idx,
             )
-            for col_idx in range(self._cube_measures.cube_overlaps.overlaps.shape[1])
+            for col_idx in range(
+                self._cube_measures.cube_overlaps.selected_bases.shape[1]
+            )
         ]
 
 
@@ -588,12 +590,12 @@ class _PairwiseSigTStats(_BaseSecondOrderMeasure):
     @lazyproperty
     def _n_rows(self):
         """int number of rows in the matrix."""
-        return self._cube_measures.cube_overlaps.overlaps.shape[0]
+        return self._cube_measures.cube_overlaps.valid_bases.shape[0]
 
     @lazyproperty
     def _n_subvars(self):
         """int number of columns (subvariables) in the matrix."""
-        return self._cube_measures.cube_overlaps.overlaps.shape[1]
+        return self._cube_measures.cube_overlaps.valid_bases.shape[1]
 
     @lazyproperty
     def t_stats(self):
@@ -610,8 +612,7 @@ class _PairwiseSigTStats(_BaseSecondOrderMeasure):
                 [
                     _PairwiseSignificaneBetweenSubvariablesHelper(
                         self._second_order_measures.column_proportions.blocks[0][0],
-                        self._cube_measures.cube_overlaps.overlaps,
-                        self._cube_measures.cube_overlaps.valid_overlaps,
+                        self._cube_measures.cube_overlaps,
                         row_idx,
                         self._selected_subvar_idx,
                         subvar_idx,
@@ -649,8 +650,7 @@ class _PairwiseSigPVals(_PairwiseSigTStats):
                 [
                     _PairwiseSignificaneBetweenSubvariablesHelper(
                         self._second_order_measures.column_proportions.blocks[0][0],
-                        self._cube_measures.cube_overlaps.overlaps,
-                        self._cube_measures.cube_overlaps.valid_overlaps,
+                        self._cube_measures.cube_overlaps,
                         row_idx,
                         self._selected_subvar_idx,
                         subvar_idx,
@@ -1281,12 +1281,9 @@ class _WeightedValidCounts(_BaseSecondOrderMeasure):
 class _PairwiseSignificaneBetweenSubvariablesHelper(object):
     """Helper for calculating overlaps significance between subvariables."""
 
-    def __init__(
-        self, column_proportions, overlaps, valid_overlaps, row_idx, idx_a, idx_b
-    ):
+    def __init__(self, column_proportions, cube_overlaps, row_idx, idx_a, idx_b):
         self._column_proportions = column_proportions
-        self._overlaps = overlaps
-        self._valid_overlaps = valid_overlaps
+        self._cube_overlaps = cube_overlaps
         self._row_idx = row_idx
         self._idx_a = idx_a
         self._idx_b = idx_b
@@ -1336,9 +1333,9 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
         be float64 when the overlaps result is weighted.
         """
         return (
-            self._overlaps.sum(axis=0)[self._idx_a, self._idx_a],
-            self._overlaps.sum(axis=0)[self._idx_b, self._idx_b],
-            self._overlaps.sum(axis=0)[self._idx_a, self._idx_b],
+            self._cube_overlaps.selected_bases[self._row_idx, self._idx_a, self._idx_a],
+            self._cube_overlaps.selected_bases[self._row_idx, self._idx_b, self._idx_b],
+            self._cube_overlaps.selected_bases[self._row_idx, self._idx_a, self._idx_b],
         )
 
     @lazyproperty
@@ -1350,7 +1347,7 @@ class _PairwiseSignificaneBetweenSubvariablesHelper(object):
         They can only be float64 when the overlaps result is weighted.
         """
         return (
-            self._valid_overlaps.sum(axis=0)[self._idx_a, self._idx_a],
-            self._valid_overlaps.sum(axis=0)[self._idx_b, self._idx_b],
-            self._valid_overlaps.sum(axis=0)[self._idx_a, self._idx_b],
+            self._cube_overlaps.valid_bases[self._row_idx, self._idx_a, self._idx_a],
+            self._cube_overlaps.valid_bases[self._row_idx, self._idx_b, self._idx_b],
+            self._cube_overlaps.valid_bases[self._row_idx, self._idx_a, self._idx_b],
         )
