@@ -233,6 +233,10 @@ class _CatXMrOverlaps(_BaseCubeOverlaps):
     """Overlaps cube-measure for a NOT_MR_X_MR slice."""
 
     @lazyproperty
+    def tile_repetitions(self):
+        return (self._overlaps.shape[0], 1, 1)
+
+    @lazyproperty
     def overlaps(self):
         """3D np.float64 ndarray of selected overlaps between MR subvariables, per cat.
 
@@ -246,7 +250,7 @@ class _CatXMrOverlaps(_BaseCubeOverlaps):
         From this shape, we only need the "Selected" part of the MR_SEL dimension, so
         we need to select the 0th element along the 2nd axis [:, :, 0].
         """
-        return self._overlaps[:, :, 0]
+        return np.tile(np.sum(self._overlaps[:, :, 0], axis=0), self.tile_repetitions)
 
     @lazyproperty
     def valid_overlaps(self):
@@ -263,7 +267,8 @@ class _CatXMrOverlaps(_BaseCubeOverlaps):
         dimension (i.e. all except missing), so we need to add the 0th and the 1st
         element along the 2nd axis sum([:, :, 0:2]).
         """
-        return np.sum(self._valid_overlaps[:, :, 0:2], axis=2)
+        valids = np.sum(self._valid_overlaps[:, :, 0:2], axis=2)
+        return np.tile(np.sum(valids, axis=0), self.tile_repetitions)
 
 
 class _MrXMrOverlaps(_BaseCubeOverlaps):
@@ -283,7 +288,7 @@ class _MrXMrOverlaps(_BaseCubeOverlaps):
         From this shape, we only need the "Selected" part of both MR_SEL dimensions, so
         we need to select the 0th element along the 1st and 3rd axes [:, 0, :, 0].
         """
-        return self._overlaps[:, 0, :, 0]
+        return np.sum(self._overlaps[:, 0:2, :, 0], axis=1)
 
     @lazyproperty
     def valid_overlaps(self):
