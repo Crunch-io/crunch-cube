@@ -630,16 +630,25 @@ class TestOverlapsPairwiseSignificance(TestCase):
         assert slice_.pairwise_significance_t_stats(3) == pytest.approx(
             np.array(
                 [
-                    [61.55, 43.02, -2.26, 0.0, 9.79, -105.35],
-                    [-2.67, 89.18, -21.60, 0.0, -12.43, -58.98],
-                    [-2.43, 3.15, 103.35, 0.0, 44.51, -85.86],
-                    [-86.29, -60.68, -90.81, 0.0, -56.66, -127.32],
-                    [-25.01, -4.42, -12.87, 0.0, 93.79, -53.79],
-                    [-3.52, 0.78, -15.23, 0.0, -4.65, 138.61],
+                    [13.40, 9.62, -0.49, 0.0, 2.27, -24.08],
+                    [-0.58, 19.94, -4.76, 0.0, -2.88, -13.48],
+                    [-0.53, 0.70, 22.76, 0.0, 10.32, -19.63],
+                    [-18.79, -13.57, -20.00, 0.0, -13.14, -29.10],
+                    [-5.45, -0.99, -2.83, 0.0, 21.75, -12.29],
+                    [-0.76, 0.17, -3.35, 0.0, -1.07, 31.68],
                 ]
             ),
             abs=10e-2,
         )
+
+    def test_pairwise_sig_for_mr_x_mr_vs_mr_single_subvar_x_mr(self):
+        cube1 = Cube(OL.MR_X_MR_MISMATCH)
+        mr_x_mr_slice = cube1.partitions[0]
+        t_stats_mr_x_mr = mr_x_mr_slice.pairwise_significance_t_stats(3)
+        cube2 = Cube(OL.MR_SUBVAR_X_MR_MISMATCH)
+        mr_subvar_x_mr_slice = cube2.partitions[0]
+        t_stats_mr_subvar_x_mr = mr_subvar_x_mr_slice.pairwise_significance_t_stats(3)
+        np.testing.assert_array_equal(t_stats_mr_x_mr[10], t_stats_mr_subvar_x_mr[1])
 
 
 class TestMeanDifferenceSignificance(object):
