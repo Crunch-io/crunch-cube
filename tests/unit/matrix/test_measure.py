@@ -14,10 +14,12 @@ from cr.cube.matrix.cubemeasure import (
 )
 from cr.cube.matrix.measure import (
     _BaseSecondOrderMeasure,
+    _ColumnComparableCounts,
     _ColumnProportions,
     _ColumnShareSum,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
+    _RowComparableCounts,
     _RowProportions,
     _RowShareSum,
     _RowUnweightedBases,
@@ -182,18 +184,32 @@ class Describe_BaseSecondOrderMeasure(object):
         return instance_mock(request, CubeMeasures)
 
 
+class Describe_ColumnComparableCounts(object):
+    """Unit test suite for `cr.cube.matrix.measure._ColumnComparableCounts` object."""
+
+    def it_computes_its_blocks(self, request):
+        cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+
+        blocks = _ColumnComparableCounts(None, None, cube_measures_).blocks
+
+        SumSubtotals_.blocks.assert_called_once_with(ANY, None, diff_cols_nan=True)
+
+
 class Describe_ColumnProportions(object):
     """Unit test suite for `cr.cube.matrix.measure._ColumnProportions` object."""
 
     def it_computes_its_blocks(self, request):
-        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
-        SumSubtotals_.blocks.return_value = [[5.0, 12.0], [21.0, 32.0]]
+        column_comparable_counts_ = instance_mock(
+            request, _ColumnComparableCounts, blocks=[[5.0, 12.0], [21.0, 32.0]]
+        )
         column_weighted_bases_ = instance_mock(
             request, _ColumnWeightedBases, blocks=[[5.0, 6.0], [7.0, 8.0]]
         )
         second_order_measures_ = instance_mock(
             request,
             SecondOrderMeasures,
+            column_comparable_counts=column_comparable_counts_,
             column_weighted_bases=column_weighted_bases_,
         )
         cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
@@ -203,7 +219,6 @@ class Describe_ColumnProportions(object):
         )
 
         assert column_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
-        SumSubtotals_.blocks.assert_called_once_with(ANY, None, diff_cols_nan=True)
 
 
 class Describe_ColumnUnweightedBases(object):
@@ -426,12 +441,25 @@ class Describe_ColumnWeightedBases(object):
         return property_mock(request, _ColumnWeightedBases, "_weighted_cube_counts")
 
 
+class Describe_RowComparableCounts(object):
+    """Unit test suite for `cr.cube.matrix.measure._RowComparableCounts` object."""
+
+    def it_computes_its_blocks(self, request):
+        cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+
+        blocks = _RowComparableCounts(None, None, cube_measures_).blocks
+
+        SumSubtotals_.blocks.assert_called_once_with(ANY, None, diff_rows_nan=True)
+
+
 class Describe_RowProportions(object):
     """Unit test suite for `cr.cube.matrix.measure._RowProportions` object."""
 
     def it_computes_its_blocks(self, request):
-        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
-        SumSubtotals_.blocks.return_value = [[5.0, 12.0], [21.0, 32.0]]
+        row_comparable_counts_ = instance_mock(
+            request, _RowComparableCounts, blocks=[[5.0, 12.0], [21.0, 32.0]]
+        )
         row_weighted_bases_ = instance_mock(
             request, _RowWeightedBases, blocks=[[5.0, 6.0], [7.0, 8.0]]
         )
@@ -439,13 +467,13 @@ class Describe_RowProportions(object):
             request,
             SecondOrderMeasures,
             row_weighted_bases=row_weighted_bases_,
+            row_comparable_counts=row_comparable_counts_,
         )
         cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
 
         row_proportions = _RowProportions(None, second_order_measures_, cube_measures_)
 
         assert row_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
-        SumSubtotals_.blocks.assert_called_once_with(ANY, None, diff_rows_nan=True)
 
 
 class Describe_RowUnweightedBases(object):
