@@ -113,6 +113,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.26
+- fix: overlaps for MR x MR
+
 ### 2.1.25
 - fix: sort-by-value keyword to "percent"
 
@@ -120,15 +123,6 @@ The detailed description can be found
 - Wire up `_Strand` sort-by-value for "univariate-measure" keyword case.
 - This should fix the existing alpha-Sentry error on sort-by-value for
   FREQUENCY analyses (aka. 1D card, `_Strand`).
-
-### 2.1.23
-- Valid weighted and unweighted counts per cell measures
-
-### 2.1.22
-- Fix t_stats sign for mean differences
-
-### 2.1.21
-- Fix overlaps pairwise significance
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
