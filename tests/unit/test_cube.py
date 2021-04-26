@@ -5,7 +5,14 @@
 import pytest
 import numpy as np
 
-from cr.cube.cube import Cube, CubeSet, _Measures, _UnweightedValidCountsMeasure
+from cr.cube.cube import (
+    Cube,
+    CubeSet,
+    _Measures,
+    _UnweightedValidCountsMeasure,
+    _WeightedCountMeasure,
+    _WeightedValidCountsMeasure,
+)
 from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.enums import DIMENSION_TYPE as DT
 
@@ -633,6 +640,76 @@ class DescribeCube(object):
 
         assert cube._cube_dict == expected_value
 
+    def it_knows_its_weighted_counts_when_no_valid_counts_are_present(
+        self, request, _measures, _measures_prop_, _valid_idxs_prop
+    ):
+        weighted_counts_measure = instance_mock(request, _WeightedCountMeasure)
+        _valid_idxs_prop.return_value = 0
+        weighted_counts_measure.raw_cube_array = [1, 2, 3]
+        _measures.weighted_valid_counts = None
+        _measures.unweighted_valid_counts = None
+        _measures.weighted_counts = weighted_counts_measure
+        _measures_prop_.return_value = _measures
+
+        cube = Cube({}, None)
+
+        weighted_counts = cube.weighted_counts
+
+        assert weighted_counts == 1
+
+    def it_knows_its_weighted_counts_when_valid_counts_unweighted_are_present(
+        self, request, _measures, _measures_prop_, _valid_idxs_prop
+    ):
+
+        unweighted_valid_counts_measure = instance_mock(
+            request, _UnweightedValidCountsMeasure
+        )
+        _valid_idxs_prop.return_value = 0
+        unweighted_valid_counts_measure.raw_cube_array = [1, 2, 3]
+        _measures.weighted_valid_counts = None
+        _measures.weighted_counts = None
+        _measures.unweighted_valid_counts = unweighted_valid_counts_measure
+        _measures_prop_.return_value = _measures
+
+        cube = Cube({}, None)
+
+        weighted_counts = cube.weighted_counts
+
+        assert weighted_counts == 1
+
+    def it_knows_its_weighted_counts_when_valid_counts_weighted_are_present(
+        self, request, _measures, _measures_prop_, _valid_idxs_prop
+    ):
+        weighted_valid_counts_measure = instance_mock(
+            request, _WeightedValidCountsMeasure
+        )
+        _valid_idxs_prop.return_value = 0
+        weighted_valid_counts_measure.raw_cube_array = [1, 2, 3]
+        _measures.weighted_valid_counts = None
+        _measures.weighted_counts = None
+        _measures.weighted_valid_counts = weighted_valid_counts_measure
+        _measures_prop_.return_value = _measures
+
+        cube = Cube({}, None)
+
+        weighted_counts = cube.weighted_counts
+
+        assert weighted_counts == 1
+
+    def it_returns_none_when_weighted_counts_are_not_present_at_all(
+        self, _measures, _measures_prop_
+    ):
+        _measures.unweighted_valid_counts = None
+        _measures.weighted_counts = None
+        _measures.weighted_valid_counts = None
+        _measures_prop_.return_value = _measures
+
+        cube = Cube({}, None)
+
+        weighted_counts = cube.weighted_counts
+
+        assert weighted_counts is None
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -642,6 +719,14 @@ class DescribeCube(object):
     @pytest.fixture
     def _cube_response_prop_(self, request):
         return property_mock(request, Cube, "_cube_response")
+
+    @pytest.fixture
+    def _measures(self, request):
+        return instance_mock(request, _Measures)
+
+    @pytest.fixture
+    def _measures_prop_(self, request):
+        return property_mock(request, Cube, "_measures")
 
     @pytest.fixture
     def _numeric_references_prop_(self, request):
@@ -654,6 +739,10 @@ class DescribeCube(object):
     @pytest.fixture
     def _numeric_array_dimension_prop_(self, request):
         return property_mock(request, Cube, "_numeric_array_dimension")
+
+    @pytest.fixture
+    def _valid_idxs_prop(self, request):
+        return property_mock(request, Cube, "_valid_idxs")
 
     @pytest.fixture
     def dimension_types_prop_(self, request):

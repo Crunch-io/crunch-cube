@@ -492,6 +492,8 @@ class Cube(object):
         weighted_counts = (
             self._measures.weighted_valid_counts
             if self._measures.weighted_valid_counts is not None
+            else self._measures.unweighted_valid_counts
+            if self._measures.unweighted_valid_counts is not None
             else self._measures.weighted_counts
         )
         return (
