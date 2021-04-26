@@ -3979,6 +3979,44 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert slice_.zscores[:, 0] == pytest.approx(np.full(5, np.nan), nan_ok=True)
         assert slice_.pvals[:, 0] == pytest.approx(np.full(5, np.nan), nan_ok=True)
 
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def it_computes_scale_median_for_cat_with_subdiff_x_cat_with_subdiff(self):
+        slice_ = Cube(
+            CR.CAT_HS_MT_X_CAT_HS_MT,
+            transforms={
+                "rows_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"negative": [2]},
+                            "anchor": "top",
+                            "name": "NPS",
+                        }
+                    ]
+                },
+                "columns_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"negative": [2]},
+                            "anchor": "top",
+                            "name": "NPS",
+                        }
+                    ]
+                },
+            },
+        ).partitions[0]
+
+        assert slice_.columns_scale_median == pytest.approx(
+            [np.nan, 1, 1, 1, np.nan, 3], nan_ok=True
+        )
+
+        assert slice_.rows_scale_median == pytest.approx(
+            [np.nan, 2, 1, 2, 2, np.nan, np.nan], nan_ok=True
+        )
+
     def it_computes_sum_for_numarray_with_subdiffs_and_subtot_on_columns(self):
         slice_ = Cube(
             NA.NUM_ARR_SUM_GROUPED_BY_CAT,
