@@ -59,6 +59,17 @@ class Assembler(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def column_comparable_counts(self):
+        """2D np.float64 ndarray of counts comparable in the column dimension.
+
+        Comparable in the "column" dimension means that it's not a column subtotal
+        difference because these are not considered comparable since their bases
+        aren't the same. The values along these subtotal differences are defined as
+        np.nan.
+        """
+        return self._assemble_matrix(self._measures.column_comparable_counts.blocks)
+
+    @lazyproperty
     def column_index(self):
         """2D np.float64 ndarray of column-index "percentage" for each table cell."""
         return self._assemble_matrix(
@@ -244,6 +255,17 @@ class Assembler(object):
     def pvalues(self):
         """2D np.float64/np.nan ndarray of p-value for each matrix cell."""
         return 2 * (1 - norm.cdf(np.abs(self.zscores)))
+
+    @lazyproperty
+    def row_comparable_counts(self):
+        """2D np.float64 ndarray of counts comparable in the row dimension.
+
+        Comparable in the "row" dimension means that it's not a row subtotal
+        difference because these are not considered comparable since their bases
+        aren't the same. The values along these subtotal differences are defined as
+        np.nan.
+        """
+        return self._assemble_matrix(self._measures.row_comparable_counts.blocks)
 
     @lazyproperty
     def row_labels(self):

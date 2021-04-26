@@ -21,9 +21,11 @@ from cr.cube.matrix.cubemeasure import (
 )
 from cr.cube.matrix.measure import (
     _BaseSecondOrderMeasure,
+    _ColumnComparableCounts,
     _ColumnProportions,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
+    _RowComparableCounts,
     _RowUnweightedBases,
     _RowWeightedBases,
     SecondOrderMeasures,
@@ -47,9 +49,11 @@ class DescribeAssembler(object):
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
         (
+            ("column_comparable_counts", _ColumnComparableCounts),
             ("column_proportions", _ColumnProportions),
             ("column_unweighted_bases", _ColumnUnweightedBases),
             ("column_weighted_bases", _ColumnWeightedBases),
+            ("row_comparable_counts", _RowComparableCounts),
             ("row_unweighted_bases", _RowUnweightedBases),
             ("row_weighted_bases", _RowWeightedBases),
             ("table_unweighted_bases", _TableUnweightedBases),
