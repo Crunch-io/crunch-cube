@@ -491,8 +491,8 @@ class TestOverlapsPairwiseSignificance(TestCase):
         assert slice_.pairwise_significance_t_stats(1) == pytest.approx(
             np.array(
                 [
-                    [3.51874302, 0.0, np.nan],
-                    [-3.51874302, 0.0, np.nan],
+                    [1.1785113, 0.0, np.nan],
+                    [-1.20096115, 0.0, np.nan],
                     [0.0, 0.0, np.nan],
                 ],
             ),
@@ -501,8 +501,8 @@ class TestOverlapsPairwiseSignificance(TestCase):
         assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
             np.array(
                 [
-                    [0.00310191, 0.0, np.nan],
-                    [0.00310191, 0.0, np.nan],
+                    [0.32355803, 0.0, np.nan],
+                    [0.29601737, 0.0, np.nan],
                     [1.0, 0.0, np.nan],
                 ],
             ),
