@@ -491,9 +491,9 @@ class TestOverlapsPairwiseSignificance(TestCase):
         assert slice_.pairwise_significance_t_stats(1) == pytest.approx(
             np.array(
                 [
-                    [1.1785113, 0.0, np.nan],
-                    [-1.20096115, 0.0, np.nan],
-                    [0.0, 0.0, np.nan],
+                    [1.22474487, 0.0, np.nan],
+                    [-1.22474487, np.nan, np.nan],
+                    [np.nan, np.nan, np.nan],
                 ],
             ),
             nan_ok=True,
@@ -501,9 +501,9 @@ class TestOverlapsPairwiseSignificance(TestCase):
         assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
             np.array(
                 [
-                    [0.32355803, 0.0, np.nan],
-                    [0.29601737, 0.0, np.nan],
-                    [1.0, 0.0, np.nan],
+                    [0.28786413, 1.0, np.nan],
+                    [0.27521973, np.nan, np.nan],
+                    [np.nan, np.nan, np.nan],
                 ],
             ),
             nan_ok=True,
@@ -642,13 +642,12 @@ class TestOverlapsPairwiseSignificance(TestCase):
         )
 
     def test_pairwise_sig_for_mr_x_mr_vs_mr_single_subvar_x_mr(self):
-        cube1 = Cube(OL.MR_X_MR_MISMATCH)
-        mr_x_mr_slice = cube1.partitions[0]
-        t_stats_mr_x_mr = mr_x_mr_slice.pairwise_significance_t_stats(3)
-        cube2 = Cube(OL.MR_SUBVAR_X_MR_MISMATCH)
-        mr_subvar_x_mr_slice = cube2.partitions[0]
-        t_stats_mr_subvar_x_mr = mr_subvar_x_mr_slice.pairwise_significance_t_stats(3)
-        np.testing.assert_array_equal(t_stats_mr_x_mr[10], t_stats_mr_subvar_x_mr[1])
+        mr_x_mr_slice = Cube(OL.MR_X_MR).partitions[0]
+        t_stats_mr_x_mr = mr_x_mr_slice.pairwise_significance_t_stats(1)
+        mr_subvar_x_mr_slice = Cube(OL.MR_SINGLE_SUBVAR_X_MR).partitions[0]
+        t_stats_mr_subvar_x_mr = mr_subvar_x_mr_slice.pairwise_significance_t_stats(1)
+        # Assert same row stats are the same in both cases (MR x MR and MR_SEL x MR)
+        np.testing.assert_array_equal(t_stats_mr_x_mr[0], t_stats_mr_subvar_x_mr[0])
 
 
 class TestMeanDifferenceSignificance(object):
