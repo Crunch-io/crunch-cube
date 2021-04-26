@@ -499,7 +499,9 @@ class _Slice(CubePartition):
 
         not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
         numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
-        counts = np.nan_to_num(self.counts[not_a_nan_index, :]).astype("int64")
+        counts = np.nan_to_num(
+            self._assembler.column_comparable_counts[not_a_nan_index, :]
+        ).astype("int64")
         scale_median = np.array(
             [
                 self._median(np.repeat(numeric_values, counts[:, i]))
@@ -1036,7 +1038,9 @@ class _Slice(CubePartition):
 
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
         numeric_values = self._columns_dimension_numeric_values[not_a_nan_index]
-        counts = np.nan_to_num(self.counts[:, not_a_nan_index]).astype("int64")
+        counts = np.nan_to_num(
+            self._assembler.row_comparable_counts[:, not_a_nan_index]
+        ).astype("int64")
         scale_median = np.array(
             [
                 self._median(np.repeat(numeric_values, counts[i, :]))

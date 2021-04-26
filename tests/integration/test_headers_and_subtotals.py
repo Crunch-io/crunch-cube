@@ -3979,7 +3979,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert slice_.zscores[:, 0] == pytest.approx(np.full(5, np.nan), nan_ok=True)
         assert slice_.pvals[:, 0] == pytest.approx(np.full(5, np.nan), nan_ok=True)
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_computes_scale_median_for_cat_with_subdiff_x_cat_with_subdiff(self):
         slice_ = Cube(
             CR.CAT_HS_MT_X_CAT_HS_MT,
