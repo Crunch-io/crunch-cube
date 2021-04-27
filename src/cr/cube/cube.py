@@ -733,18 +733,19 @@ class _Measures(object):
         """
 
         # Try and get the new-style complete-cases filtered counts
-        filter_stats = (
-            self._cube_dict["result"]
-            .get("filter_stats", {})
-            .get("filtered_complete", {})
-            .get("weighted")
-        )
-        if filter_stats:
-            # If new format is present in response json, use that for pop fraction
-            numerator = filter_stats["selected"]
-            denominator = numerator + filter_stats["other"]
+        filter_stats = self._cube_dict["result"].get("filter_stats", {})
+        weighted = filter_stats.get("filtered_complete", {}).get("weighted")
+        if weighted:
+            # ---If the filter consists of a single categorical date variable, we need
+            # ---to treat the population fraction as 1, as it's constant accross dates
+            if filter_stats.get("is_cat_date"):
+                return 1
+
+            # ---If new format is present in response json, use that for pop fraction
+            numerator = weighted["selected"]
+            denominator = numerator + weighted["other"]
         else:
-            # If new format is not available, default to old-style calculation
+            # ---If new format is not available, default to old-style calculation
             numerator = self._cube_dict["result"].get("filtered", {}).get("weighted_n")
             denominator = (
                 self._cube_dict["result"].get("unfiltered", {}).get("weighted_n")
