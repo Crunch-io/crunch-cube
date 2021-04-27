@@ -775,9 +775,26 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def population_counts(self):
-        return (
-            self.table_proportions * self._population * self._cube.population_fraction
+        """2D np.float64 ndarray of population counts per cell.
+
+        The (estimated) population count is computed based on the `population` value
+        provided when the Slice is created. It is also adjusted to account for any
+        filters that were applied as part of the query.
+
+        If any of the dimensions (rows or columns) is a categorical date, the
+        appropriate percentages are used, to calculate the population counts, so as to
+        be the total amount among categorical dates.
+
+        Otherwise, table percents are used to calculate population counts.
+        """
+        proportions = (
+            self.row_proportions
+            if self.rows_dimension_type == DT.CAT_DATE
+            else self.column_proportions
+            if self.columns_dimension_type == DT.CAT_DATE
+            else self.table_proportions
         )
+        return proportions * self._population * self._cube.population_fraction
 
     @lazyproperty
     def population_counts_moe(self):
@@ -786,11 +803,24 @@ class _Slice(CubePartition):
         The values are represented as population estimates, analogue to the
         `population_counts` property. This means that the values will be presented by
         actual estimated counts of the population. The values can be np.nan when the
-        corresponding percentage is also np.nan, which happens when the respective
-        table margin is 0.
+        corresponding percentage is also np.nan, which happens when the
+        respective margin is 0.
+
+        When calculating the estimates of categorical dates, the total populatioin is
+        not "divided" between its categories, but rather considered constant for all
+        categorical dates (or waves). Hence, the different standard errors will be
+        applied in these specific cases (like the `row_std_err` or `column_std_err`).
+        If categorical dates are not involved, the standard `table_std_err` is used.
         """
+        std_err = (
+            self.row_std_err
+            if self.rows_dimension_type == DT.CAT_DATE
+            else self.column_std_err
+            if self.columns_dimension_type == DT.CAT_DATE
+            else self.table_std_err
+        )
         total_filtered_population = self._population * self._cube.population_fraction
-        return Z_975 * total_filtered_population * self.table_std_err
+        return Z_975 * total_filtered_population * std_err
 
     @lazyproperty
     def pvals(self):
@@ -1506,6 +1536,15 @@ class _Strand(CubePartition):
         provided when the Strand is created. It is also adjusted to account for any
         filters that were applied as part of the query.
         """
+
+        # ---If the only dimension is a categorical date, we don't need to break up
+        # ---the population counts between its elements - it's constant throughout time
+        if self.rows_dimension_type == DT.CAT_DATE:
+            return np.full(
+                self.table_proportions.shape,
+                self._population * self._cube.population_fraction,
+            )
+
         return (
             self.table_proportions * self._population * self._cube.population_fraction
         )

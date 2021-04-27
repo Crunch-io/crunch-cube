@@ -943,9 +943,97 @@ class Describe_Slice(object):
             )
         )
 
+    def it_uses_row_proportions_for_pop_counts_and_moe_when_row_dim_is_cat_date(self):
+        slice_ = Cube(CR.CAT_DATE_X_CAT, population=100).partitions[0]
+        assert slice_.population_counts == pytest.approx(
+            np.array(
+                [
+                    [72.69, 12.77, 12.37, 0.58, 0.58, 0.78, 0.19, 0.0],
+                    [66.19, 13.64, 11.20, 2.64, 0.61, 2.44, 2.64, 0.61],
+                    [74.44, 7.57, 7.25, 4.10, 0.63, 4.73, 1.26, 0.0],
+                    [80.32, 8.19, 6.01, 1.63, 0.0, 1.63, 1.63, 0.54],
+                ]
+            ),
+            abs=1e-2,
+        )
+        # ---Since CAT DATE is on the row dimension, assert that row proportions are
+        # ---used for the multiplication of the population
+        assert (
+            slice_.population_counts.tolist() == (100 * slice_.row_proportions).tolist()
+        )
+        # ---Assert that each row of population counts sums to total population
+        assert pytest.approx(slice_.population_counts.sum(axis=1)) == [100] * 4
+
+        # ---Assert correct population counts MOE
+        assert slice_.population_counts_moe == pytest.approx(
+            np.array(
+                [
+                    [3.87, 2.89, 2.86, 0.66, 0.66, 0.76, 0.38, 0.0],
+                    [4.18, 3.03, 2.78, 1.42, 0.68, 1.36, 1.42, 0.68],
+                    [4.80, 2.91, 2.85, 2.18, 0.87, 2.33, 1.22, 0.0],
+                    [5.75, 3.97, 3.44, 1.83, 0.0, 1.83, 1.83, 1.06],
+                ]
+            ),
+            abs=10e-2,
+        )
+
+    def it_uses_column_proportions_for_pop_counts_when_column_dim_is_cat_date(self):
+        slice_ = Cube(CR.CAT_HS_X_CAT_DATE, population=100).partitions[0]
+        assert slice_.population_counts == pytest.approx(
+            np.array(
+                [
+                    [73.28, 68.83, 78.54, 81.96],
+                    [72.69, 66.19, 74.44, 80.32],
+                    [12.77, 13.64, 7.57, 8.19],
+                    [12.37, 11.20, 7.25, 6.01],
+                    [25.14, 24.84, 14.82, 14.20],
+                    [0.58, 2.64, 4.10, 1.63],
+                    [0.58, 0.61, 0.63, 0.0],
+                    [0.78, 2.44, 4.73, 1.63],
+                    [0.19, 2.64, 1.26, 1.63],
+                    [0.0, 0.61, 0.0, 0.54],
+                    [0.19, 3.25, 1.26, 2.18],
+                ]
+            ),
+            abs=1e-2,
+        )
+        # ---Since CAT DATE is on the column dimension, assert that column proportions
+        # ---are used for the multiplication of the population
+        assert (
+            slice_.population_counts.tolist()
+            == (100 * slice_.column_proportions).tolist()
+        )
+        # ---Assert that each column of population counts sums to total population
+        base_rows_idx = ~np.in1d(np.arange(11), slice_.inserted_row_idxs)
+        slice_.population_counts[base_rows_idx, :].sum(axis=0).tolist() == [100] * 4
+
+        # ---Assert correct population counts MOE
+        assert slice_.population_counts_moe == pytest.approx(
+            np.array(
+                [
+                    [3.84, 4.09, 4.51, 5.57],
+                    [3.87, 4.18, 4.80, 5.75],
+                    [2.89, 3.03, 2.91, 3.97],
+                    [2.86, 2.78, 2.85, 3.44],
+                    [3.76, 3.82, 3.91, 5.05],
+                    [0.66, 1.42, 2.18, 1.83],
+                    [0.66, 0.68, 0.87, 0.0],
+                    [0.76, 1.36, 2.33, 1.83],
+                    [0.38, 1.42, 1.22, 1.83],
+                    [0.0, 0.68, 0.0, 1.06],
+                    [0.38, 1.57, 1.22, 2.11],
+                ]
+            ),
+            abs=10e-2,
+        )
+
 
 class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
+
+    def it_uses_correct_proportions_for_pop_counts_when_cat_date(self):
+        strand_ = Cube(CR.CAT_DATE, population=100).partitions[0]
+        assert strand_.population_counts.tolist() == [100] * 5
 
     def it_provides_values_for_ca_as_0th(self):
         transforms = {
