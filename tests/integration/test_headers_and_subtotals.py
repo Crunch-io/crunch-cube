@@ -3748,8 +3748,10 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert slice_.counts[:, 0].tolist() == pytest.approx(
             [np.nan, 0, 8, -2, 5], nan_ok=True
         )
-        assert slice_.columns_margin[0] == pytest.approx(11)
-        assert slice_.rows_margin[0] == pytest.approx(-17)
+        assert slice_.columns_margin[0] == pytest.approx(np.nan, nan_ok=True)
+        assert slice_.rows_margin[0] == pytest.approx(np.nan, nan_ok=True)
+        assert slice_.columns_margin_proportion[0] == pytest.approx(11 / 266)
+        assert slice_.rows_margin_proportion[0] == pytest.approx(-17 / 266)
         assert slice_.columns_base[0] == pytest.approx(np.nan, nan_ok=True)
         assert slice_.rows_base[0] == pytest.approx(np.nan, nan_ok=True)
         assert slice_.column_weighted_bases[:, 0] == pytest.approx(
@@ -3866,8 +3868,8 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert slice_.counts[:, 0].tolist() == pytest.approx(
             [np.nan, 0, 8, -2, 5, 3], nan_ok=True
         )
-        assert slice_.columns_margin[0] == pytest.approx(11)
-        assert slice_.rows_margin[0] == pytest.approx(-17)
+        assert slice_.columns_margin[0] == pytest.approx(np.nan, nan_ok=True)
+        assert slice_.rows_margin[0] == pytest.approx(np.nan, nan_ok=True)
         assert slice_.columns_base[0] == pytest.approx(np.nan, nan_ok=True)
         assert slice_.rows_base[0] == pytest.approx(np.nan, nan_ok=True)
         assert slice_.column_weighted_bases[:, 0] == pytest.approx(
@@ -3920,7 +3922,7 @@ class DescribeIntegrated_SubtotalDifferences(object):
         ).partitions[0]
 
         assert slice_.counts[0, :].tolist() == [-178, -495, 0]
-        assert slice_.rows_margin[0] == pytest.approx(-673)
+        assert slice_.rows_margin[0] == pytest.approx(np.nan, nan_ok=True)
         assert slice_.rows_base[0] == pytest.approx(np.nan, nan_ok=True)
         assert slice_.row_weighted_bases[0, :] == pytest.approx(
             np.full(3, np.nan), nan_ok=True
@@ -3959,7 +3961,7 @@ class DescribeIntegrated_SubtotalDifferences(object):
             [1.9215376, -12.3047603, -31.4956882, -88.6847375, -56.4466419]
         )
         assert slice_.columns_margin[:, 0] == pytest.approx(
-            [-26.0504936, -36.2011742, -50.9728015, -102.5360802, -77.5821575]
+            np.full(5, np.nan), nan_ok=True
         )
         assert slice_.columns_base[:, 0] == pytest.approx(
             np.full(5, np.nan), nan_ok=True

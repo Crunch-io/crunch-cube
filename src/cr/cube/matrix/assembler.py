@@ -154,12 +154,34 @@ class Assembler(object):
                 SumSubtotals.blocks(
                     self._cube_result_matrix.columns_margin,
                     self._dimensions,
+                    diff_cols_nan=True,
                 )
             )
 
         # --- otherwise columns-base is a vector ---
         return self._assemble_vector(
             self._cube_result_matrix.columns_margin,
+            self._column_subtotals,
+            self._column_order,
+            diffs_nan=True,
+        )
+
+    @lazyproperty
+    def columns_margin_proportion(self):
+        """1D/2D np.float64 ndarray of weighted-prop for each column of this slice."""
+        # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
+        denominator = self._cube_result_matrix.table_margin
+        if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
+            return self._assemble_matrix(
+                SumSubtotals.blocks(
+                    self._cube_result_matrix.columns_margin / denominator,
+                    self._dimensions,
+                )
+            )
+
+        # --- otherwise columns-base is a vector ---
+        return self._assemble_vector(
+            self._cube_result_matrix.columns_margin / denominator,
             self._column_subtotals,
             self._column_order,
         )
@@ -363,13 +385,36 @@ class Assembler(object):
         if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
-                    self._cube_result_matrix.rows_margin, self._dimensions
+                    self._cube_result_matrix.rows_margin,
+                    self._dimensions,
+                    diff_rows_nan=True,
                 )
             )
 
         # --- otherwise rows-margin is a vector ---
         return self._assemble_vector(
-            self._cube_result_matrix.rows_margin, self._row_subtotals, self._row_order
+            self._cube_result_matrix.rows_margin,
+            self._row_subtotals,
+            self._row_order,
+            diffs_nan=True,
+        )
+
+    @lazyproperty
+    def rows_margin_proportion(self):
+        """1D/2D np.float64 ndarray of weighted-proportion for each slice row/cell."""
+        # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
+        denominator = self._cube_result_matrix.table_margin
+        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
+            return self._assemble_matrix(
+                SumSubtotals.blocks(
+                    self._cube_result_matrix.rows_margin / denominator,
+                    self._dimensions,
+                )
+            )
+
+        # --- otherwise rows-margin is a vector ---
+        return self._assemble_vector(
+            self._cube_result_matrix.rows_margin / denominator, self._row_subtotals, self._row_order
         )
 
     @lazyproperty
