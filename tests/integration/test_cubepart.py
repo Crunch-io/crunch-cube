@@ -133,21 +133,7 @@ class Describe_Slice(object):
             "measure"
         )
         assert slice_.unweighted_counts.tolist() == [[5, 2], [5, 3]]
-        with pytest.raises(ValueError) as e:
-            slice_.unweighted_valid_counts
-        assert (
-            str(e.value)
-            == "`.unweighted_valid_counts` is undefined for a cube-result without "
-            "a valid count unweighted measure"
-        )
         assert slice_.variable_name == "v7"
-        with pytest.raises(ValueError) as e:
-            slice_.weighted_valid_counts
-        assert (
-            str(e.value)
-            == "`.weighted_valid_counts` is undefined for a cube-result without "
-            "a valid count weighted measure"
-        )
 
     def it_provides_values_for_cat_hs_mt_x_cat_hs_mt(self):
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, population=1000).partitions[0]
@@ -1107,21 +1093,7 @@ class Describe_Strand(object):
         assert strand.title == "Registered Voters"
         assert strand.unweighted_bases.tolist() == [15, 15]
         assert strand.unweighted_counts.tolist() == [10, 5]
-        with pytest.raises(ValueError) as e:
-            strand.unweighted_valid_counts
-        assert (
-            str(e.value)
-            == "`.unweighted_valid_counts` is undefined for a cube-result without "
-            "a valid count unweighted measure"
-        )
         assert strand.variable_name == "v7"
-        with pytest.raises(ValueError) as e:
-            strand.weighted_valid_counts
-        assert (
-            str(e.value)
-            == "`.weighted_valid_counts` is undefined for a cube-result without "
-            "a valid count weighted measure"
-        )
         assert strand.weighted_bases == pytest.approx([15.0, 15.0])
 
     def it_provides_values_for_univariate_cat_means_hs(self):
@@ -1396,12 +1368,12 @@ class Describe_Strand(object):
     def it_provides_unweighted_valid_counts_for_mr_mean(self):
         strand = Cube(CR.MR_MEAN).partitions[0]
 
-        assert strand.unweighted_valid_counts.tolist() == [3, 5, 5]
+        assert strand.unweighted_counts.tolist() == [3, 5, 5]
 
     def it_provides_unweighted_valid_counts_for_mr_mean_weighted(self):
         strand = Cube(CR.MR_MEAN_WEIGHTED).partitions[0]
 
-        assert strand.weighted_valid_counts.tolist() == [
+        assert strand.counts.tolist() == [
             3.68125,
             1.3559027778,
             7.3559027778,
@@ -2817,7 +2789,7 @@ class Test_Slice(object):
     def test_mr_x_mr_mean(self):
         slice_ = Cube(CR.MR_X_MR_MEAN).partitions[0]
 
-        assert slice_.unweighted_valid_counts.tolist() == [
+        assert slice_.unweighted_counts.tolist() == [
             [1234.0, 739.0],
             [672.0, 648.0],
             [911.0, 581.0],
@@ -2825,18 +2797,12 @@ class Test_Slice(object):
             [395.0, 311.0],
             [365.0, 262.0],
         ]
-        with pytest.raises(ValueError) as e:
-            slice_.weighted_valid_counts
-        assert (
-            str(e.value)
-            == "`.weighted_valid_counts` is undefined for a cube-result without a valid"
-            " count weighted measure"
-        )
 
     def test_mr_x_mr_mean_weigthed(self):
         slice_ = Cube(CR.MR_X_MR_MEAN_WEIGHTED).partitions[0]
 
-        assert slice_.weighted_valid_counts.tolist() == [
+        # weighted valid counts
+        assert slice_.counts.tolist() == [
             [1182.085094479, 690.8741719198],
             [628.8177247196, 621.0038457352],
             [945.421065339, 590.9351095987],
@@ -2844,18 +2810,12 @@ class Test_Slice(object):
             [409.1440524812, 321.0926193937],
             [315.8592487824, 205.9138490701],
         ]
-        with pytest.raises(ValueError) as e:
-            slice_.unweighted_valid_counts
-        assert (
-            str(e.value)
-            == "`.unweighted_valid_counts` is undefined for a cube-result without a valid"
-            " count unweighted measure"
-        )
 
     def test_mr_x_cat_mean(self):
         slice_ = Cube(CR.MR_X_CAT_MEAN).partitions[0]
 
-        assert slice_.unweighted_valid_counts.tolist() == [
+        # unweighted valid counts
+        assert slice_.unweighted_counts.tolist() == [
             [2.0, 1.0, 3.0],
             [2.0, 5.0, 7.0],
         ]
@@ -2863,7 +2823,8 @@ class Test_Slice(object):
     def test_mr_x_cat_mean_weighted(self):
         slice_ = Cube(CR.MR_X_CAT_MEAN_WEIGHTED).partitions[0]
 
-        assert slice_.weighted_valid_counts.tolist() == [
+        # weighted valid counts
+        assert slice_.counts.tolist() == [
             [1.89375, 2.7875, 4.68125],
             [2.8416666667, 1.915625, 4.7572916667000005],
         ]

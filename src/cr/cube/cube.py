@@ -251,7 +251,9 @@ class Cube(object):
         categories.
         """
         return (
-            self._measures.unweighted_valid_counts.raw_cube_array
+            self._measures.weighted_valid_counts.raw_cube_array
+            if self._measures.weighted_valid_counts is not None
+            else self._measures.unweighted_valid_counts.raw_cube_array
             if self._measures.unweighted_valid_counts is not None
             else self._measures.weighted_counts.raw_cube_array
             if self.has_weighted_counts

@@ -152,25 +152,13 @@ class SecondOrderMeasures(object):
         """_TotalShareSum measure object for this cube-result"""
         return _TotalShareSum(self._dimensions, self, self._cube_measures)
 
-    @lazyproperty
-    def unweighted_counts(self):
+    def unweighted_counts(self, diffs_nan):
         """_UnweightedCounts measure object for this cube-result."""
-        return _UnweightedCounts(self._dimensions, self, self._cube_measures)
+        return _UnweightedCounts(self._dimensions, self, self._cube_measures, diffs_nan)
 
-    @lazyproperty
-    def unweighted_valid_counts(self):
-        """_UnweightedValidCounts measure object for this cube-result."""
-        return _UnweightedValidCounts(self._dimensions, self, self._cube_measures)
-
-    @lazyproperty
-    def weighted_counts(self):
+    def weighted_counts(self, diffs_nan):
         """_WeightedCounts measure object for this cube-result."""
-        return _WeightedCounts(self._dimensions, self, self._cube_measures)
-
-    @lazyproperty
-    def weighted_valid_counts(self):
-        """_WeightedValidCounts measure object for this cube-result."""
-        return _WeightedValidCounts(self._dimensions, self, self._cube_measures)
+        return _WeightedCounts(self._dimensions, self, self._cube_measures, diffs_nan)
 
     @lazyproperty
     def _cube_measures(self):
@@ -1228,6 +1216,14 @@ class _TotalShareSum(_BaseSecondOrderMeasure):
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a matrix."""
 
+    def __init__(
+        self, dimensions, second_order_measures, cube_measures, diff_nans=False
+    ):
+        super(_UnweightedCounts, self).__init__(
+            dimensions, second_order_measures, cube_measures
+        )
+        self._diff_nans = diff_nans
+
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure.
@@ -1236,42 +1232,30 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
         subtotal intersection-cell values.
         """
         return SumSubtotals.blocks(
-            self._unweighted_cube_counts.unweighted_counts, self._dimensions
-        )
-
-
-class _UnweightedValidCounts(_BaseSecondOrderMeasure):
-    """Provides the unweighted valid counts measure for a matrix."""
-
-    @lazyproperty
-    def blocks(self):
-        """2D array of the four 2D "blocks" making up this measure."""
-        return SumSubtotals.blocks(
-            self._cube_measures.unweighted_cube_valid_counts.unweighted_valid_counts,
+            self._unweighted_cube_counts.unweighted_counts,
             self._dimensions,
+            diff_cols_nan=self._diff_nans,
+            diff_rows_nan=self._diff_nans,
         )
 
 
 class _WeightedCounts(_BaseSecondOrderMeasure):
     """Provides the weighted-counts measure for a matrix."""
 
-    @lazyproperty
-    def blocks(self):
-        """2D array of the four 2D "blocks" making up this measure."""
-        return SumSubtotals.blocks(
-            self._weighted_cube_counts.weighted_counts, self._dimensions
+    def __init__(self, dimensions, second_order_measures, cube_measures, diff_nans):
+        super(_WeightedCounts, self).__init__(
+            dimensions, second_order_measures, cube_measures
         )
-
-
-class _WeightedValidCounts(_BaseSecondOrderMeasure):
-    """Provides the weighted valid counts measure for a matrix."""
+        self._diff_nans = diff_nans
 
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
         return SumSubtotals.blocks(
-            self._cube_measures.weighted_cube_valid_counts.weighted_valid_counts,
+            self._weighted_cube_counts.weighted_counts,
             self._dimensions,
+            diff_cols_nan=self._diff_nans,
+            diff_rows_nan=self._diff_nans,
         )
 
 
