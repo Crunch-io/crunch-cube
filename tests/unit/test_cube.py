@@ -693,6 +693,71 @@ class DescribeMeasures(object):
 
         np.testing.assert_equal(population_fraction, expected_value)
 
+    @pytest.mark.parametrize(
+        "cube_dict, expected_value",
+        (
+            (
+                {
+                    "result": {
+                        "filtered": {"weighted_n": 10},
+                        "unfiltered": {"weighted_n": 9},
+                    }
+                },
+                1.1111111111111112,
+            ),
+            ({"result": {}}, 1),
+            ({"result": {"filter_stats": {}}}, 1),
+            ({"result": {"filter_stats": {"filtered_complete": {}}}}, 1),
+            ({"result": {"filter_stats": {"filtered_complete": {"weighted": {}}}}}, 1),
+            (
+                {
+                    "result": {
+                        "filter_stats": {
+                            "filtered_complete": {
+                                "weighted": {"selected": 3, "other": 2}
+                            }
+                        }
+                    }
+                },
+                0.6,
+            ),
+            (
+                {
+                    "result": {
+                        "filter_stats": {
+                            "is_cat_date": False,
+                            "filtered_complete": {
+                                "weighted": {"selected": 3, "other": 2}
+                            },
+                        }
+                    }
+                },
+                0.6,
+            ),
+            (
+                {
+                    "result": {
+                        "filter_stats": {
+                            "is_cat_date": True,
+                            "filtered_complete": {
+                                "weighted": {"selected": 3, "other": 2}
+                            },
+                        }
+                    }
+                },
+                1,
+            ),
+        ),
+    )
+    def and_it_sets_population_fraction_to_one_when_filter_is_a_single_cat_date(
+        self, cube_dict, expected_value
+    ):
+        measures = _Measures(cube_dict, None)
+
+        population_fraction = measures.population_fraction
+
+        assert population_fraction == expected_value
+
 
 class Describe_UweightedValidCountsMeasure(object):
     @pytest.mark.parametrize(
