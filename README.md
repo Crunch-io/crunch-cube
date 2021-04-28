@@ -113,6 +113,10 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.27
+- fix: population counts for cat dates
+- fix: filtered population fraction for a univariate cat date filter
+
 ### 2.1.26
 - fix: overlaps for MR x MR
 
