@@ -288,7 +288,11 @@ class DescribeAssembler(object):
         _assemble_vector_.assert_called_once_with(
             assembler, ANY, [3, 5], [0, -2, 1, 2, -1]
         )
-        assert _assemble_vector_.call_args.args[1].tolist() == [1/6.0, 2/6.0, 3/6.0]
+        assert _assemble_vector_.call_args.args[1].tolist() == [
+            1 / 6.0,
+            2 / 6.0,
+            3 / 6.0,
+        ]
         assert columns_margin == [1, 3, 2, 3, 5]
 
     def but_it_provides_a_2D_columns_margin_proportion_for_an_MR_X_cube_result(
@@ -313,8 +317,8 @@ class DescribeAssembler(object):
 
         SumSubtotals_.blocks.assert_called_once_with(ANY, dimensions_)
         assert SumSubtotals_.blocks.call_args.args[0].tolist() == [
-            pytest.approx([1 / 4, 2 / 6]),
-            pytest.approx([3 / 4, 4 / 6]),
+            pytest.approx([1 / 4.0, 2 / 6.0]),
+            pytest.approx([3 / 4.0, 4 / 6.0]),
         ]
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert columns_margin == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
@@ -524,7 +528,11 @@ class DescribeAssembler(object):
         _assemble_vector_.assert_called_once_with(
             assembler, ANY, [3, 5], [0, -2, 1, 2, -1]
         )
-        assert _assemble_vector_.call_args.args[1].tolist() == [1/6.0, 2/6.0, 3/6.0]
+        assert _assemble_vector_.call_args.args[1].tolist() == [
+            1 / 6.0,
+            2 / 6.0,
+            3 / 6.0,
+        ]
         assert rows_margin == [1, 3, 2, 3, 5]
 
     def but_it_provides_a_2D_rows_margin_proportion_for_an_X_MR_cube_result(
@@ -549,8 +557,8 @@ class DescribeAssembler(object):
 
         SumSubtotals_.blocks.assert_called_once_with(ANY, dimensions_)
         assert SumSubtotals_.blocks.call_args.args[0].tolist() == [
-            pytest.approx([1 / 3, 2 / 7]),
-            pytest.approx([3 / 3, 4 / 7]),
+            pytest.approx([1 / 3.0, 2 / 7.0]),
+            pytest.approx([3 / 3.0, 4 / 7.0]),
         ]
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert rows_margin == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]

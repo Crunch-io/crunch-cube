@@ -414,7 +414,9 @@ class Assembler(object):
 
         # --- otherwise rows-margin is a vector ---
         return self._assemble_vector(
-            self._cube_result_matrix.rows_margin / denominator, self._row_subtotals, self._row_order
+            self._cube_result_matrix.rows_margin / denominator,
+            self._row_subtotals,
+            self._row_order,
         )
 
     @lazyproperty
