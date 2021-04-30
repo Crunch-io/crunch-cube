@@ -190,14 +190,12 @@ class Assembler(object):
         assembled_matrix = self._assemble_matrix(
             self._measures.pairwise_means_indices(alpha, only_larger).blocks
         )
-        col_ord_map = {k: v for v, k in enumerate(self._column_order)}
+        ord_map = {k: v for v, k in enumerate(self._column_order)}
 
         return np.array(
             [
                 [
-                    tuple(col_ord_map[idx] for idx in idxs)
-                    if idxs is not None
-                    else None
+                    tuple(ord_map[idx] for idx in idxs) if idxs is not None else None
                     for idxs in row
                 ]
                 for row in assembled_matrix
