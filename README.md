@@ -113,6 +113,11 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.28
+- fix: pairwise mean indices in case of empty numpy array
+- population fraction for Categorical Dates
+- Omit scale median on the row of a row subtotal difference or the column of a column subtotal difference.
+
 ### 2.1.27
 - fix: population counts for cat dates
 - fix: filtered population fraction for a univariate cat date filter
