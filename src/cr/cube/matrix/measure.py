@@ -153,11 +153,17 @@ class SecondOrderMeasures(object):
         return _TotalShareSum(self._dimensions, self, self._cube_measures)
 
     def unweighted_counts(self, diffs_nan):
-        """_UnweightedCounts measure object for this cube-result."""
+        """_UnweightedCounts measure object for this cube-result.
+
+        diffs_nan indicates if SubtotalDifferences values should be nan or not.
+        """
         return _UnweightedCounts(self._dimensions, self, self._cube_measures, diffs_nan)
 
     def weighted_counts(self, diffs_nan):
-        """_WeightedCounts measure object for this cube-result."""
+        """_WeightedCounts measure object for this cube-result.
+
+        diffs_nan indicates if SubtotalDifferences values should be nan or not.
+        """
         return _WeightedCounts(self._dimensions, self, self._cube_measures, diffs_nan)
 
     @lazyproperty
@@ -1242,7 +1248,9 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
 class _WeightedCounts(_BaseSecondOrderMeasure):
     """Provides the weighted-counts measure for a matrix."""
 
-    def __init__(self, dimensions, second_order_measures, cube_measures, diff_nans):
+    def __init__(
+        self, dimensions, second_order_measures, cube_measures, diff_nans=False
+    ):
         super(_WeightedCounts, self).__init__(
             dimensions, second_order_measures, cube_measures
         )
