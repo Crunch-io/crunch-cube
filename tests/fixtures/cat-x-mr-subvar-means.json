@@ -1,0 +1,468 @@
+{
+  "result": {
+    "dimensions": [
+      {
+        "references": {
+          "alias": "correctly_identified_1_Find_time",
+          "name": "Shelf1"
+        },
+        "type": {
+          "categories": [
+            {
+              "id": 1,
+              "name": "Shelf1"
+            }
+          ],
+          "class": "categorical"
+        }
+      },
+      {
+        "references": {
+          "subreferences": [
+            {
+              "uniform_basis": null,
+              "description": null,
+              "name": "CURRENT",
+              "format": null,
+              "notes": null,
+              "dichotomous": false,
+              "alias": "Ban1a_1__1",
+              "view": null
+            },
+            {
+              "uniform_basis": null,
+              "description": null,
+              "name": "NEW1",
+              "format": null,
+              "notes": null,
+              "dichotomous": false,
+              "alias": "Ban1a_2__1",
+              "view": null
+            },
+            {
+              "uniform_basis": null,
+              "description": null,
+              "name": "NEW2",
+              "format": null,
+              "notes": null,
+              "dichotomous": false,
+              "alias": "Ban1a_3__1",
+              "view": null
+            },
+            {
+              "uniform_basis": null,
+              "description": null,
+              "name": "NEW3",
+              "format": null,
+              "notes": null,
+              "api_derivation": null,
+              "dichotomous": false,
+              "alias": "Ban1a_4__1",
+              "view": null
+            }
+          ],
+          "uniform_basis": false,
+          "name": "Lux Freesia",
+          "alias": "Ban1a_Multi_DP"
+        },
+        "derived": true,
+        "type": {
+          "subtype": {
+            "class": "variable"
+          },
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "derived": false,
+                "references": {
+                  "uniform_basis": null,
+                  "description": null,
+                  "name": "CURRENT",
+                  "format": null,
+                  "notes": null,
+                  "dichotomous": false,
+                  "alias": "Ban1a_1__1",
+                  "view": null
+                },
+                "id": "000001"
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "derived": false,
+                "references": {
+                  "uniform_basis": null,
+                  "description": null,
+                  "name": "NEW1",
+                  "format": null,
+                  "notes": null,
+                  "dichotomous": false,
+                  "alias": "Ban1a_2__1",
+                  "view": null
+                },
+                "id": "000002"
+              },
+              "missing": false
+            },
+            {
+              "id": 3,
+              "value": {
+                "derived": false,
+                "references": {
+                  "uniform_basis": null,
+                  "description": null,
+                  "name": "NEW2",
+                  "format": null,
+                  "notes": null,
+                  "dichotomous": false,
+                  "alias": "Ban1a_3__1",
+                  "view": null
+                },
+                "id": "000003"
+              },
+              "missing": false
+            },
+            {
+              "id": 4,
+              "value": {
+                "derived": false,
+                "references": {
+                  "uniform_basis": null,
+                  "description": null,
+                  "name": "NEW3",
+                  "format": null,
+                  "notes": null,
+                  "api_derivation": null,
+                  "dichotomous": false,
+                  "alias": "Ban1a_4__1",
+                  "view": null
+                },
+                "id": "000004"
+              },
+              "missing": false
+            }
+          ],
+          "class": "enum"
+        }
+      },
+      {
+        "derived": true,
+        "references": {
+          "subreferences": [
+            {
+              "uniform_basis": null,
+              "description": null,
+              "format": null,
+              "notes": null,
+              "dichotomous": false,
+              "alias": "Ban1a_1__1",
+              "view": null,
+              "name": "CURRENT"
+            },
+            {
+              "uniform_basis": null,
+              "description": null,
+              "format": null,
+              "notes": null,
+              "dichotomous": false,
+              "alias": "Ban1a_2__1",
+              "view": null,
+              "name": "NEW1"
+            },
+            {
+              "uniform_basis": null,
+              "description": null,
+              "format": null,
+              "notes": null,
+              "dichotomous": false,
+              "alias": "Ban1a_3__1",
+              "view": null,
+              "name": "NEW2"
+            },
+            {
+              "uniform_basis": null,
+              "description": null,
+              "format": null,
+              "notes": null,
+              "api_derivation": null,
+              "dichotomous": false,
+              "alias": "Ban1a_4__1",
+              "view": null,
+              "name": "NEW3"
+            }
+          ],
+          "uniform_basis": false,
+          "name": "Lux Freesia",
+          "alias": "Ban1a_Multi_DP"
+        },
+        "type": {
+          "ordinal": false,
+          "subvariables": [
+            "000001",
+            "000002",
+            "000003",
+            "000004"
+          ],
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "selected": true,
+              "id": 1,
+              "missing": false,
+              "name": "Selected"
+            },
+            {
+              "numeric_value": 0,
+              "missing": false,
+              "id": 0,
+              "name": "Other"
+            },
+            {
+              "numeric_value": null,
+              "missing": true,
+              "id": -1,
+              "name": "No Data"
+            }
+          ]
+        }
+      }
+    ],
+    "measures": {
+      "valid_count_unweighted": {
+        "data": [
+          70,
+          244,
+          0,
+          85,
+          229,
+          0,
+          77,
+          237,
+          0,
+          82,
+          232,
+          0
+        ],
+        "n_missing": 749,
+        "metadata": {
+          "references": {
+            "alias": "correctly_identified_1_Find_time",
+            "format": {
+              "data": {
+                "digits": 6
+              },
+              "summary": {
+                "digits": 6
+              }
+            },
+            "description": "Shelf1",
+            "name": "Shelf1"
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "sum": {
+        "data": [
+          2266.5601,
+          7357.7922,
+          0.0,
+          2295.5691,
+          7328.7832,
+          0.0,
+          2360.0984,
+          7264.2539,
+          0.0,
+          2702.1247,
+          6922.2276,
+          0.0
+        ],
+        "n_missing": 749,
+        "metadata": {
+          "references": {
+            "alias": "correctly_identified_1_Find_time",
+            "format": {
+              "data": {
+                "digits": 6
+              },
+              "summary": {
+                "digits": 6
+              }
+            },
+            "description": "Shelf1",
+            "name": "Shelf1"
+          },
+          "derived": true,
+          "type": {
+            "integer": null,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "stddev": {
+        "data": [
+          41.850108799,
+          41.1756283477,
+          {
+            "?": -8
+          },
+          28.9294571135,
+          44.9785309676,
+          {
+            "?": -8
+          },
+          47.1296573388,
+          39.2890459697,
+          {
+            "?": -8
+          },
+          45.9971175446,
+          39.5398542181,
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 749,
+        "metadata": {
+          "references": {
+            "alias": "correctly_identified_1_Find_time",
+            "format": {
+              "data": {
+                "digits": 6
+              },
+              "summary": {
+                "digits": 6
+              }
+            },
+            "description": "Shelf1",
+            "name": "Shelf1"
+          },
+          "derived": true,
+          "type": {
+            "integer": null,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          32.37943,
+          30.1548860656,
+          {
+            "?": -8
+          },
+          27.0066952941,
+          32.0034200873,
+          {
+            "?": -8
+          },
+          30.6506285714,
+          30.6508603376,
+          {
+            "?": -8
+          },
+          32.9527402439,
+          29.837187931,
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 749,
+        "metadata": {
+          "references": {
+            "alias": "correctly_identified_1_Find_time",
+            "format": {
+              "data": {
+                "digits": 6
+              },
+              "summary": {
+                "digits": 6
+              }
+            },
+            "description": "Shelf1",
+            "name": "Shelf1"
+          },
+          "derived": true,
+          "type": {
+            "integer": true,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "class": "numeric"
+          }
+        }
+      }
+    },
+    "n": 1063,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 1063,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 1063,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 1063,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 1063,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 1063,
+      "weighted_n": 1063
+    },
+    "filtered": {
+      "unweighted_n": 1063,
+      "weighted_n": 1063
+    },
+    "counts": [
+      264,
+      799,
+      0,
+      272,
+      791,
+      0,
+      248,
+      815,
+      0,
+      279,
+      784,
+      0
+    ]
+  }
+}
