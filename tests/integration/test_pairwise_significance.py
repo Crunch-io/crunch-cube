@@ -949,3 +949,10 @@ class TestMeanDifferenceSignificance(object):
             [None, None, None, None, (), (), (), ()],
             [None, None, None, None, (), (), (4, 5), (4, 5)],
         ]
+
+    def test_mean_indices_cat_x_mr_subvar(self):
+        slice_ = Cube(CR.CAT_X_MR_SUBVAR_MEANS).partitions[0]
+
+        assert slice_.pairwise_means_indices == pytest.approx(
+            np.array([[(), (), (), ()]])
+        )
