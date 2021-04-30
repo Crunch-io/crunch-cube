@@ -50,8 +50,6 @@ class DescribeSecondOrderMeasures(object):
             ("row_weighted_bases", _RowWeightedBases),
             ("table_unweighted_bases", _TableUnweightedBases),
             ("table_weighted_bases", _TableWeightedBases),
-            ("weighted_counts", _WeightedCounts),
-            ("unweighted_counts", _UnweightedCounts),
         ),
     )
     def it_provides_access_to_various_measure_objects(
@@ -76,6 +74,37 @@ class DescribeSecondOrderMeasures(object):
 
         MeasureCls_.assert_called_once_with(dimensions_, measures, cube_measures_)
         assert measure is measure_
+
+    @pytest.mark.parametrize(
+        "measure_prop_name, MeasureCls",
+        (
+            ("weighted_counts", _WeightedCounts),
+            ("unweighted_counts", _UnweightedCounts),
+        ),
+    )
+    def it_provides_access_to_counts_measure_objects(
+        self,
+        request,
+        dimensions_,
+        _cube_measures_prop_,
+        cube_measures_,
+        measure_prop_name,
+        MeasureCls,
+    ):
+        measure_ = instance_mock(request, MeasureCls)
+        MeasureCls_ = class_mock(
+            request,
+            "cr.cube.matrix.measure.%s" % MeasureCls.__name__,
+            return_value=measure_,
+        )
+        _cube_measures_prop_.return_value = cube_measures_
+        measures = SecondOrderMeasures(None, dimensions_, None)
+        measure = getattr(measures, measure_prop_name)
+
+        assert measure(False) is measure_
+        MeasureCls_.assert_called_once_with(
+            dimensions_, measures, cube_measures_, False
+        )
 
     def it_provides_access_to_the_columns_pruning_base(
         self, _cube_measures_prop_, cube_measures_, unweighted_cube_counts_
@@ -1217,11 +1246,11 @@ class Describe_UnweightedCounts(object):
         )
         SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
-        unweighted_counts = _UnweightedCounts(dimensions_, None, None)
+        unweighted_counts = _UnweightedCounts(dimensions_, None, None, False)
 
         blocks = unweighted_counts.blocks
 
-        SumSubtotals_.blocks.assert_called_once_with(ucounts, dimensions_)
+        SumSubtotals_.blocks.assert_called_once_with(ucounts, dimensions_, False, False)
         assert blocks == [[[1], [2]], [[3], [4]]]
 
     # fixture components ---------------------------------------------
@@ -1250,11 +1279,11 @@ class Describe_WeightedCounts(object):
         )
         SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
-        weighted_counts = _WeightedCounts(dimensions_, None, None)
+        weighted_counts = _WeightedCounts(dimensions_, None, None, False)
 
         blocks = weighted_counts.blocks
 
-        SumSubtotals_.blocks.assert_called_once_with(counts, dimensions_)
+        SumSubtotals_.blocks.assert_called_once_with(counts, dimensions_, False, False)
         assert blocks == [[[1], [2]], [[3], [4]]]
 
     # fixture components ---------------------------------------------

@@ -1298,26 +1298,6 @@ class _Slice(CubePartition):
         return self._assembler.unweighted_counts
 
     @lazyproperty
-    def unweighted_valid_counts(self):
-        try:
-            return self._assembler.unweighted_valid_counts
-        except ValueError:
-            raise ValueError(
-                "`.unweighted_valid_counts` is undefined for a cube-result without "
-                "a valid count unweighted measure"
-            )
-
-    @lazyproperty
-    def weighted_valid_counts(self):
-        try:
-            return self._assembler.weighted_valid_counts
-        except ValueError:
-            raise ValueError(
-                "`.weighted_valid_counts` is undefined for a cube-result without "
-                "a valid count weighted measure"
-            )
-
-    @lazyproperty
     def zscores(self):
         """2D np.float64 ndarray of std-res value for each cell of matrix.
 
@@ -1810,21 +1790,6 @@ class _Strand(CubePartition):
         return self._assembler.unweighted_counts
 
     @lazyproperty
-    def unweighted_valid_counts(self):
-        """1D np.float64 ndarray of unweighted valid counts for each row of strand.
-
-        Raises ValueError when accessed on a cube-result that does not contain a
-        unweighted valid count cube-measure.
-        """
-        try:
-            return self._assembler.unweighted_valid_counts
-        except ValueError:
-            raise ValueError(
-                "`.unweighted_valid_counts` is undefined for a cube-result without a "
-                "valid count unweighted measure"
-            )
-
-    @lazyproperty
     def weighted_bases(self):
         """1D np.float64 ndarray of table-proportion denominator for each row.
 
@@ -1833,21 +1798,6 @@ class _Strand(CubePartition):
         were necessarily presented to all respondents.
         """
         return self._assembler.weighted_bases
-
-    @lazyproperty
-    def weighted_valid_counts(self):
-        """1D np.float64 ndarray of weighted valid counts for each row of strand.
-
-        Raises ValueError when accessed on a cube-result that does not contain a
-        weighted valid count cube-measure.
-        """
-        try:
-            return self._assembler.weighted_valid_counts
-        except ValueError:
-            raise ValueError(
-                "`.weighted_valid_counts` is undefined for a cube-result without a "
-                "valid count weighted measure"
-            )
 
     # ---implementation (helpers)-------------------------------------
 

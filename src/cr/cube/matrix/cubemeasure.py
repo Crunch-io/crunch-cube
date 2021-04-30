@@ -51,23 +51,9 @@ class CubeMeasures(object):
         )
 
     @lazyproperty
-    def unweighted_cube_valid_counts(self):
-        """_BaseUnweightedCubeValidCounts subclass object for this cube-result."""
-        return _BaseUnweightedCubeValidCounts.factory(
-            self._cube, self._dimensions, self._slice_idx
-        )
-
-    @lazyproperty
     def weighted_cube_counts(self):
         """_BaseWeightedCounts subclass object for this cube-result."""
         return _BaseWeightedCubeCounts.factory(
-            self._cube, self._dimensions, self._slice_idx
-        )
-
-    @lazyproperty
-    def weighted_cube_valid_counts(self):
-        """_BaseWeightedCubeValidCounts subclass object for this cube-result."""
-        return _BaseWeightedCubeValidCounts.factory(
             self._cube, self._dimensions, self._slice_idx
         )
 
@@ -892,93 +878,6 @@ class _NumArrayXMrUnweightedCubeCounts(_CatXMrUnweightedCubeCounts):
         return self._unweighted_counts[:, :, 0]
 
 
-# === UNWEIGHTED VALID COUNTS ===
-
-
-class _BaseUnweightedCubeValidCounts(_BaseCubeMeasure):
-    """Base class for unweighted valid counts cube-measure variants."""
-
-    def __init__(self, dimensions, unweighted_valid_counts):
-        super(_BaseUnweightedCubeValidCounts, self).__init__(dimensions)
-        self._unweighted_valid_counts = unweighted_valid_counts
-
-    @classmethod
-    def factory(cls, cube, dimensions, slice_idx):
-        """Return _BaseUnweightedValidCounts subclass instance appropriate to `cube`.
-
-        Raises `ValueError` if the cube-result does not include a
-        cube-valid-count-unweighted  measure.
-        """
-        if cube.unweighted_valid_counts is None:
-            raise ValueError(
-                "cube-result does not contain unweighted_valid_counts measure"
-            )
-        dimension_types = cube.dimension_types[-2:]
-        CubeUnweightedValidCountsCls = (
-            _MrXMrCubeUnweightedValidCounts
-            if dimension_types == (DT.MR, DT.MR)
-            else _MrXCatCubeUnweightedValidCounts
-            if dimension_types[0] == DT.MR
-            else _CatXMrCubeUnweightedValidCounts
-            if dimension_types[1] == DT.MR
-            else _CatXCatCubeUnweightedValidCounts
-        )
-        return CubeUnweightedValidCountsCls(
-            dimensions,
-            cube.unweighted_valid_counts[cls._slice_idx_expr(cube, slice_idx)],
-        )
-
-    @lazyproperty
-    def unweighted_valid_counts(self):
-        """2D np.float64 ndarray of valid unweighted counts."""
-        raise NotImplementedError(  # pragma: no cover
-            "`%s` must implement `.unweighted_valid_counts`" % type(self).__name__
-        )
-
-
-class _CatXCatCubeUnweightedValidCounts(_BaseUnweightedCubeValidCounts):
-    """Unweighted bases measure for a slice with no MR dimensions."""
-
-    @lazyproperty
-    def unweighted_valid_counts(self):
-        """2D np.float64 ndarray of unweighted_valid_counts for each matrix cell."""
-        return self._unweighted_valid_counts
-
-
-class _CatXMrCubeUnweightedValidCounts(_BaseUnweightedCubeValidCounts):
-    """Unweighted bases measure for a NOT_MR_X_MR slice.
-
-    Note that the rows-dimensions need not actually be CAT.
-    """
-
-    @lazyproperty
-    def unweighted_valid_counts(self):
-        """2D np.float64 ndarray of unweighted_valid_counts for each matrix cell."""
-        return self._unweighted_valid_counts[:, :, 0]
-
-
-class _MrXCatCubeUnweightedValidCounts(_BaseUnweightedCubeValidCounts):
-    """Unweighted valid counts measure for a MR_X_NOT_MR slice.
-
-    Note that the columns-dimension need not actually be CAT.
-    """
-
-    @lazyproperty
-    def unweighted_valid_counts(self):
-        """2D np.float64 ndarray of unweighted_valid_bases for each matrix cell."""
-        return self._unweighted_valid_counts[:, 0, :]
-
-
-class _MrXMrCubeUnweightedValidCounts(_BaseUnweightedCubeValidCounts):
-    """Unweighted valid counts measure for an MR_X_MR slice."""
-
-    @lazyproperty
-    def unweighted_valid_counts(self):
-        """2D np.float64 ndarray of unweighted_valid_counts for each matrix cell."""
-        # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
-        return self._unweighted_valid_counts[:, 0, :, 0]
-
-
 # === WEIGHTED COUNTS ===
 
 
@@ -1282,93 +1181,6 @@ class _MrXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
         counts contribute to these values.
         """
         return self._weighted_counts[:, 0, :, 0]
-
-
-# === WEIGHTED VALID COUNTS ===
-
-
-class _BaseWeightedCubeValidCounts(_BaseCubeMeasure):
-    """Base class for weighted valid counts cube-measure variants."""
-
-    def __init__(self, dimensions, weighted_valid_counts):
-        super(_BaseWeightedCubeValidCounts, self).__init__(dimensions)
-        self._weighted_valid_counts = weighted_valid_counts
-
-    @classmethod
-    def factory(cls, cube, dimensions, slice_idx):
-        """Return _BaseWeightedCubeValidCounts subclass instance appropriate to `cube`.
-
-        Raises `ValueError` if the cube-result does not include a
-        cube-valid-count-weighted  measure.
-        """
-        if cube.weighted_valid_counts is None:
-            raise ValueError(
-                "cube-result does not contain weighted_valid_counts measure"
-            )
-        dimension_types = cube.dimension_types[-2:]
-        CubeWeightedValidCountsCls = (
-            _MrXMrCubeWeightedValidCounts
-            if dimension_types == (DT.MR, DT.MR)
-            else _MrXCatCubeWeightedValidCounts
-            if dimension_types[0] == DT.MR
-            else _CatXMrCubeWeightedValidCounts
-            if dimension_types[1] == DT.MR
-            else _CatXCatCubeWeightedValidCounts
-        )
-        return CubeWeightedValidCountsCls(
-            dimensions,
-            cube.weighted_valid_counts[cls._slice_idx_expr(cube, slice_idx)],
-        )
-
-    @lazyproperty
-    def weighted_valid_counts(self):
-        """2D np.float64 ndarray of valid weighted counts."""
-        raise NotImplementedError(  # pragma: no cover
-            "`%s` must implement `.weighted_valid_counts`" % type(self).__name__
-        )
-
-
-class _CatXCatCubeWeightedValidCounts(_BaseWeightedCubeValidCounts):
-    """Weighted valid counts measure for a slice with no MR dimensions."""
-
-    @lazyproperty
-    def weighted_valid_counts(self):
-        """2D np.float64 ndarray of weighted_valid_bases for each matrix cell."""
-        return self._weighted_valid_counts
-
-
-class _CatXMrCubeWeightedValidCounts(_BaseWeightedCubeValidCounts):
-    """Weighted valid counts measure for a NOT_MR_X_MR slice.
-
-    Note that the rows-dimensions need not actually be CAT.
-    """
-
-    @lazyproperty
-    def weighted_valid_counts(self):
-        """2D np.float64 ndarray of weighted_valid_counts for each matrix cell."""
-        return self._weighted_valid_counts[:, :, 0]
-
-
-class _MrXCatCubeWeightedValidCounts(_BaseWeightedCubeValidCounts):
-    """Weighted valid counts measure for a MR_X_NOT_MR slice.
-
-    Note that the columns-dimension need not actually be CAT.
-    """
-
-    @lazyproperty
-    def weighted_valid_counts(self):
-        """2D np.float64 ndarray of weighted_valid_counts for each matrix cell."""
-        return self._weighted_valid_counts[:, 0, :]
-
-
-class _MrXMrCubeWeightedValidCounts(_BaseWeightedCubeValidCounts):
-    """Weighted valid counts measure for an MR_X_MR slice."""
-
-    @lazyproperty
-    def weighted_valid_counts(self):
-        """2D np.float64 ndarray of weighted_valid_counts for each matrix cell."""
-        # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
-        return self._weighted_valid_counts[:, 0, :, 0]
 
 
 # === LEGACY MATRIX OBJECTS ===
