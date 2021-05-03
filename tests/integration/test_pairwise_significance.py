@@ -721,6 +721,47 @@ class TestStandardizedResiduals(TestCase):
             nan_ok=True,
         )
 
+    def test_cat_hs_x_cat_hs_hiding_and_pruning_t_tests(self):
+        slice_ = Cube(
+            CR.CAT_HS_X_CAT_HS_EMPTIES,
+            transforms={
+                "rows_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
+                },
+                "columns_dimension": {
+                    "elements": {"2": {"hide": True}},
+                    "prune": True,
+                    "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
+                },
+            },
+        ).partitions[0]
+
+        assert slice_.pairwise_significance_t_stats(2) == pytest.approx(
+            np.array(
+                [
+                    [np.nan, -3.15797218, np.nan, 1.31529737, np.nan],
+                    [1.3255319, 8.61476224, 0.0, 2.24083933, 8.61476224],
+                    [np.nan, 5.75456407, np.nan, -0.97693327, np.nan],
+                    [2.92481931, 0.52514588, 0.0, 4.02292482, 0.52514588],
+                    [-1.81141912, -3.17763277, 0.0, -3.28290825, -3.17763277],
+                    [-0.09211776, -4.20201154, 0.0, -0.16074485, -4.20201154],
+                    [np.nan, 2.89882543, np.nan, 0.95666343, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+        assert slice_.pairwise_indices.tolist() == [
+            [(1,), (), (1,), (1,), ()],
+            [(), (0, 2, 3), (), (2,), (0, 2, 3)],
+            [(), (3,), (), (), (3,)],
+            [(1, 2, 4), (), (), (0, 1, 2, 4), ()],
+            [(3,), (), (1, 3, 4), (), ()],
+            [(1, 4), (), (1, 4), (1, 4), ()],
+            [(), (), (), (), ()],
+        ]
+
 
 class TestOverlapsPairwiseSignificance(TestCase):
     def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_0th_subvar(self):
