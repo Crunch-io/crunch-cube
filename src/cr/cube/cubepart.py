@@ -372,6 +372,18 @@ class _Slice(CubePartition):
         return self._assembler.columns_margin
 
     @lazyproperty
+    def columns_margin_proportion(self):
+        """1D or 2D np.float64 ndarray of weighted-proportion for each column of slice.
+
+        This array is 2D (a distinct margin value for each cell) when the rows dimension
+        is MR, because each MR-subvariable has its own weighted N. This is because not
+        every possible response is necessarily offered to every respondent.
+
+        In all other cases, the array is 1D, containing one value for each column.
+        """
+        return self._assembler.columns_margin_proportion
+
+    @lazyproperty
     def columns_scale_mean(self):
         """Optional 1D np.float64 ndarray of scale mean for each column.
 
@@ -972,6 +984,18 @@ class _Slice(CubePartition):
         In all other cases, the array is 1D, containing one value for each column.
         """
         return self._assembler.rows_margin
+
+    @lazyproperty
+    def rows_margin_proportion(self):
+        """1D or 2D np.float64 ndarray of weighted-proportion for each column of slice.
+
+        This array is 2D (a distinct margin value for each cell) when the columns
+        dimension is MR, because each MR-subvariable has its own weighted N. This is
+        because not every possible response is necessarily offered to every respondent.
+
+        In all other cases, the array is 1D, containing one value for each column.
+        """
+        return self._assembler.rows_margin_proportion
 
     @lazyproperty
     def rows_scale_mean(self):
