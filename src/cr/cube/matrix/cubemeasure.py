@@ -44,6 +44,13 @@ class CubeMeasures(object):
         return _BaseCubeStdDev.factory(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
+    def unconditional_cube_counts(self):
+        """_BaseUnconditionalCubeCounts subclass object for this cube-result."""
+        return _BaseUnconditionalCubeCounts.factory(
+            self._cube, self._dimensions, self._slice_idx
+        )
+
+    @lazyproperty
     def unweighted_cube_counts(self):
         """_BaseUnweightedCubeCounts subclass object for this cube-result."""
         return _BaseUnweightedCubeCounts.factory(
@@ -465,6 +472,206 @@ class _MrXMrCubeSums(_BaseCubeSums):
         """2D np.float64 ndarray of sum for each valid matrix cell."""
         # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
         return self._sums[:, 0, :, 0]
+
+
+# === UNCONDITIONAL COUNTS ===
+
+
+class _BaseUnconditionalCubeCounts(_BaseCubeMeasure):
+    """Base class for unconditional-count cube-measure variants."""
+
+    def __init__(self, dimensions, unconditional_counts):
+        super(_BaseUnconditionalCubeCounts, self).__init__(dimensions)
+        self._unconditional_counts = unconditional_counts
+
+    @classmethod
+    def factory(cls, cube, dimensions, slice_idx):
+        """Return _BaseUnconditionalCubeCounts subclass instance appropriate to `cube`."""
+        dimension_types = cube.dimension_types[-2:]
+
+        UnconditionalCubeCountsCls = (
+            # --- TODO: Verify that NumArray works as Cat (or that it doesn't matter)
+            _MrXMrUnconditionalCubeCounts
+            if dimension_types == (DT.MR, DT.MR)
+            else _MrXCatUnconditionalCubeCounts
+            if dimension_types[0] == DT.MR
+            else _CatXMrUnconditionalCubeCounts
+            if dimension_types[1] == DT.MR
+            else _CatXCatUnconditionalCubeCounts
+        )
+
+        return UnconditionalCubeCountsCls(
+            dimensions, cube.counts_with_missings[cls._slice_idx_expr(cube, slice_idx)]
+        )
+
+    @lazyproperty
+    def baseline(self):
+        """1D or 2D np.float64 ndarray of the denominator for column_index."""
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `.baseline`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def _valid_row_idxs(self):
+        """ndarray-style index for only valid (non-missing) rows.
+
+        Suitable for indexing a raw measure array to include only valid rows.
+        """
+        return np.ix_(self._dimensions[-2].valid_elements.element_idxs)
+
+
+class _CatXCatUnconditionalCubeCounts(_BaseUnconditionalCubeCounts):
+    """Unconditional-counts cube-measure for a slice with no MR dimensions."""
+
+    @lazyproperty
+    def baseline(self):
+        """2D np.float64 ndarray of baseline value for each row in matrix.
+
+        The shape of the return value is (nrows, 1). The baseline value for a row is the
+        proportion of all values that appear in that row. A baseline for a 4 x 3 matrix
+        looks like this:
+
+            [[0.2006734 ]
+             [0.72592593]
+             [0.05521886]
+             [0.01818182]]
+
+        Note that the baseline values sum to 1.0. This is because each represents the
+        portion of all responses that fall in that row. This baseline value is the
+        denominator of the `._column_index` computation.
+
+        Baseline is a straightforward function of the *unconditional row margin*.
+        Unconditional here means that both valid and invalid responses (to the
+        columns-var question) are included. This ensures that the baseline is not
+        distorted by a large number of missing responses to the columns-question.
+        """
+        # --- uncond_row_margin is a 1D ndarray of the weighted total observation count
+        # --- involving each valid row. Counts consider both valid and invalid columns,
+        # --- but are only produced for valid rows.
+        uncond_row_margin = np.sum(self._unconditional_counts, axis=1)[
+            self._valid_row_idxs
+        ]
+        return uncond_row_margin[:, None] / np.sum(uncond_row_margin)
+
+
+class _CatXMrUnconditionalCubeCounts(_BaseUnconditionalCubeCounts):
+    """Unconditional-counts cube-measure for a NOT_MR_X_MR slice.
+
+    Note that the rows-dimension need not actually be CAT, as long as it's not MR.
+    Its `._unconditional_counts` is a 3D ndarray with axes (rows, cols, selected/not).
+    """
+
+    @lazyproperty
+    def baseline(self):
+        """2D np.float64 (or NaN) ndarray of baseline value for each matrix cell.
+
+        Its shape is (nrows, ncols) which corresponds to CAT_X_MR_SUBVAR.
+
+        The baseline value is compared with the column-proportion value for each cell to
+        form the column-index value. The baseline is a function of the unconditional row
+        margin, which is the sum of counts across both valid and missing columns.
+
+        For CAT_X_MR, `uncond_row_margin` sums across the MR_CAT (selected, not,
+        missing) dimension to include missing values (an MR_SUBVAR element is never
+        "missing": true).
+        """
+        # --- counts_with_missings.shape is (nall_rows, ncols, selected/not/missing).
+        # --- axes[1] corresponds to the MR_SUBVAR dimension, in which there are never
+        # --- "missing" subvars (so nall_cols always equals ncols for that dimension
+        # --- type). uncond_row_margin selects only valid rows, retains all columns and
+        # --- reduces the selected/not/missing axis by summing those three counts. Its
+        # --- shape is (nrows, ncols).
+        uncond_row_margin = np.sum(self._unconditional_counts, axis=2)[
+            self._valid_row_idxs
+        ]
+        # --- uncond_table_margin sums across rows, producing 1D array of size ncols,
+        # --- (although all its values are always the same).
+        uncond_table_margin = np.sum(uncond_row_margin, axis=0)
+        # --- division produces a 2D matrix of shape (nrows, ncols) ---
+        return uncond_row_margin / uncond_table_margin
+
+
+class _MrXCatUnconditionalCubeCounts(_BaseUnconditionalCubeCounts):
+    """Unconditional-counts cube-measure for an MR_X_NOT_MR slice.
+
+    Note that the columns-dimension need not actually be CAT, as long as it's not MR.
+    Its `._unconditional_counts` is a 3D ndarray with axes (rows, sel/not, cols).
+    """
+
+    @lazyproperty
+    def baseline(self):
+        """2D np.float64 ndarray of baseline value for each row in matrix.
+
+        `.baseline` is the denominator of the column-index and represents the
+        proportion of the overall row-count present in each row. A cell with
+        a column-proportion exactly equal to this basline will have a column-index of
+        100.
+
+        The shape of the return value is (nrows, 1). A baseline for a 4 x 3 matrix looks
+        something like this:
+
+            [[0.17935204]
+             [0.33454989]
+             [0.50762388]
+             [0.80331259]
+             [0.7996507 ]]
+
+        Baseline is a function of the *unconditional row margin*. Unconditional here
+        means that both valid and invalid responses (to the columns-var question) are
+        included. This ensures that the baseline is not distorted by a large number of
+        missing responses to the columns-question.
+        """
+        # --- unconditional row-margin is a 1D ndarray of size nrows computed by:
+        # --- 1. summing across all columns: np.sum(self._counts_with_missings, axis=2)
+        # --- 2. taking only selected counts: [:, 0]
+        # --- 3. taking only valid rows: [self._valid_row_idxs]
+        uncond_row_margin = np.sum(self._unconditional_counts, axis=2)[:, 0][
+            self._valid_row_idxs
+        ]
+        # --- The "total" (uncond_row_table_margin) is a 1D ndarray of size nrows. Each
+        # --- sum includes only valid rows (MR_SUBVAR, axis 0), selected and unselected
+        # --- but not missing counts ([0:2]) of the MR_CAT axis (axis 1), and all column
+        # --- counts, both valid and missing (axis 2). The rows axis (0) is preserved
+        # --- because each MR subvar has a distinct table margin.
+        uncond_row_table_margin = np.sum(
+            self._unconditional_counts[self._valid_row_idxs][:, 0:2], axis=(1, 2)
+        )
+        # --- inflate shape to (nrows, 1) for later calculation convenience ---
+        return (uncond_row_margin / uncond_row_table_margin)[:, None]
+
+
+class _MrXMrUnconditionalCubeCounts(_BaseUnconditionalCubeCounts):
+    """Unconditional-counts cube-measure for an MR_X_MR slice.
+
+    Its `._unconditional_counts` is a 4D ndarray with axes (rows, sel/not, cols, sel/not).
+    """
+
+    @lazyproperty
+    def baseline(self):
+        """2D np.float64 ndarray of baseline value for each matrix cell.
+
+        The shape is (nrows, ncols) and all values in a given row are the same. So
+        really there are only nrows distinct baseline values, but the returned shape
+        makes calculating column-index in a general way more convenient.
+        """
+        # --- `counts_with_missings` for MR_X_MR is 4D of size (nrows, 3, ncols, 3)
+        # --- (MR_SUBVAR, MR_CAT, MR_SUBVAR, MR_CAT). Unconditional row margin:
+        # --- * Takes all rows and all cols (axes 0 & 2), because MR_SUBVAR dimension
+        # ---   can contain only valid elements (no such thing as "missing": true
+        # ---   subvar).
+        # --- * Sums selected + unselected + missing categories in second MR_CAT
+        # ---   dimension (columns MR, axes[3]). Including missings here fulfills
+        # ---   "unconditional" characteristic of margin.
+        # --- * Takes only those totals associated with selected categories of first
+        # ---    MR_CAT dimension (rows MR). ("counts" for MR are "selected" counts).
+        # --- Produces a 2D (nrows, ncols) array.
+        uncond_row_margin = np.sum(self._unconditional_counts[:, 0:2], axis=3)[:, 0]
+        # --- Unconditional table margin is also 2D (nrows, ncols) but the values for
+        # --- all columns in a row have the same value; basically each row has
+        # --- a distinct table margin.
+        uncond_table_margin = np.sum(self._unconditional_counts[:, 0:2], axis=(1, 3))
+        # --- baseline is produced by dividing uncond_row_margin by uncond_table_margin.
+        return uncond_row_margin / uncond_table_margin
 
 
 # === UNWEIGHTED COUNTS ===

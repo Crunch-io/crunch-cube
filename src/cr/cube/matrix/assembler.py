@@ -72,9 +72,7 @@ class Assembler(object):
     @lazyproperty
     def column_index(self):
         """2D np.float64 ndarray of column-index "percentage" for each table cell."""
-        return self._assemble_matrix(
-            NanSubtotals.blocks(self._cube_result_matrix.column_index, self._dimensions)
-        )
+        return self._assemble_matrix(self._measures.column_index.blocks)
 
     @lazyproperty
     def column_labels(self):
