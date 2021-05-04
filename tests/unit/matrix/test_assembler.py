@@ -31,6 +31,7 @@ from cr.cube.matrix.measure import (
     SecondOrderMeasures,
     _TableUnweightedBases,
     _TableWeightedBases,
+    _Zscores,
 )
 
 from ...unitutil import (
@@ -57,6 +58,7 @@ class DescribeAssembler(object):
             ("row_weighted_bases", _RowWeightedBases),
             ("table_unweighted_bases", _TableUnweightedBases),
             ("table_weighted_bases", _TableWeightedBases),
+            ("zscores", _Zscores),
         ),
     )
     def it_assembles_various_measures(
@@ -761,78 +763,6 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert table_stderrs == [[1, 3, 2], [4, 6, 5]]
 
-    def it_computes_zscores_for_a_CAT_X_CAT_slice(
-        self,
-        request,
-        dimensions_,
-        _rows_dimension_prop_,
-        _columns_dimension_prop_,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        ZscoreSubtotals_,
-        _assemble_matrix_,
-    ):
-        _rows_dimension_prop_.return_value = instance_mock(
-            request, Dimension, dimension_type=DT.CAT
-        )
-        _columns_dimension_prop_.return_value = instance_mock(
-            request, Dimension, dimension_type=DT.CAT
-        )
-        cube_result_matrix_.zscores = [[1, 2], [3, 4]]
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        ZscoreSubtotals_.blocks.return_value = [[[4], [3]], [[2], [1]]]
-        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6]]
-        assembler = Assembler(None, dimensions_, None)
-
-        zscores = assembler.zscores
-
-        ZscoreSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], dimensions_, cube_result_matrix_
-        )
-        _assemble_matrix_.assert_called_once_with(assembler, [[[4], [3]], [[2], [1]]])
-        assert zscores == [[1, 2, 3], [4, 5, 6]]
-
-    @pytest.mark.parametrize(
-        "rows_dim_type, cols_dim_type",
-        (
-            (DT.CAT, DT.MR),
-            (DT.MR, DT.CAT),
-            (DT.MR, DT.MR),
-        ),
-    )
-    def but_it_provides_zscores_with_NaN_subtotals_when_cube_has_an_MR_dimension(
-        self,
-        request,
-        dimensions_,
-        _rows_dimension_prop_,
-        rows_dim_type,
-        _columns_dimension_prop_,
-        cols_dim_type,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        NanSubtotals_,
-        _assemble_matrix_,
-    ):
-        _rows_dimension_prop_.return_value = instance_mock(
-            request, Dimension, dimension_type=rows_dim_type
-        )
-        _columns_dimension_prop_.return_value = instance_mock(
-            request, Dimension, dimension_type=cols_dim_type
-        )
-        cube_result_matrix_.zscores = [[1, 2], [3, 4]]
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        NanSubtotals_.blocks.return_value = [[[1], [np.nan]], [[3], []]]
-        _assemble_matrix_.return_value = [[1, np.nan, 3], [4, np.nan, 6]]
-        assembler = Assembler(None, dimensions_, None)
-
-        zscores = assembler.zscores
-
-        NanSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
-        _assemble_matrix_.assert_called_once_with(
-            assembler, [[[1], [np.nan]], [[3], []]]
-        )
-        assert zscores == [[1, np.nan, 3], [4, np.nan, 6]]
-
     # === implementation methods/properties ===
 
     @pytest.mark.parametrize(
@@ -1082,7 +1012,7 @@ class DescribeAssembler(object):
 
     @pytest.fixture
     def ZscoreSubtotals_(self, request):
-        return class_mock(request, "cr.cube.matrix.assembler.ZscoreSubtotals")
+        return class_mock(request, "cr.cube.matrix.subtotals.ZscoreSubtotals")
 
 
 class Describe_BaseOrderHelper(object):

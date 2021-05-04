@@ -1411,18 +1411,6 @@ class BaseCubeResultMatrix(object):
             "`%s` must implement `.weighted_counts`" % type(self).__name__
         )  # pragma: no cover
 
-    @lazyproperty
-    def zscores(self):
-        """2D ndarray of np.float64 std-res value for each cell of matrix.
-
-        A z-score is also known as a *standard score* and is the number of standard
-        deviations above (positive) or below (negative) the population mean a cell's
-        value is.
-        """
-        raise NotImplementedError(
-            "`%s` must implement `.zscores`" % type(self).__name__
-        )  # pragma: no cover
-
     @staticmethod
     def _cube_slice_expression(cube, slice_idx):
         """return `np.s_` object with correct slicing for the cube type."""
