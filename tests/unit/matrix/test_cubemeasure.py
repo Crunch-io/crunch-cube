@@ -41,6 +41,16 @@ from cr.cube.matrix.cubemeasure import (
     _MrXMrMatrix,
     _MrXMrUnweightedCubeCounts,
     _MrXMrWeightedCubeCounts,
+    _CatXCatCubeUnweightedValidCounts,
+    _MrXMrCubeUnweightedValidCounts,
+    _MrXCatCubeUnweightedValidCounts,
+    _CatXMrCubeUnweightedValidCounts,
+    _BaseUnweightedCubeValidCounts,
+    _MrXMrCubeWeightedValidCounts,
+    _MrXCatCubeWeightedValidCounts,
+    _CatXMrCubeWeightedValidCounts,
+    _CatXCatCubeWeightedValidCounts,
+    _BaseWeightedCubeValidCounts,
 )
 
 from ...unitutil import class_mock, instance_mock, method_mock, property_mock
@@ -1118,6 +1128,189 @@ class Describe_MrXMrUnweightedCubeCounts(object):
         )
 
 
+# === UNWEIGHTED VALID COUNTS ===
+
+
+class Describe_BaseUnweightedCubeValidCounts(object):
+    """Unit test suite for `cubemeasure._BaseUnweightedCubeValidCounts`."""
+
+    @pytest.mark.parametrize(
+        "dimension_types, UnweightedCubeValidCountsCls",
+        (
+            ((DT.MR, DT.MR), _MrXMrCubeUnweightedValidCounts),
+            ((DT.MR, DT.CAT), _MrXCatCubeUnweightedValidCounts),
+            ((DT.CAT, DT.MR), _CatXMrCubeUnweightedValidCounts),
+            ((DT.CAT, DT.CAT), _CatXCatCubeUnweightedValidCounts),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_unweighted_cube_valid_count_objects(
+        self, request, dimension_types, UnweightedCubeValidCountsCls
+    ):
+        cube_ = instance_mock(request, Cube)
+        dimensions_ = (
+            instance_mock(request, Dimension),
+            instance_mock(request, Dimension),
+        )
+        unweighted_cube_valid_counts_ = instance_mock(
+            request, UnweightedCubeValidCountsCls
+        )
+        UnweightedCubeValidCountsCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % UnweightedCubeValidCountsCls.__name__,
+            return_value=unweighted_cube_valid_counts_,
+        )
+        _slice_idx_expr_ = method_mock(
+            request,
+            _BaseUnweightedCubeValidCounts,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
+        )
+        cube_.dimension_types = dimension_types
+        cube_.unweighted_valid_counts = [[1, 2], [3, 4]]
+
+        unweighted_cube_valid_counts = _BaseUnweightedCubeValidCounts.factory(
+            cube_, dimensions_, slice_idx=7
+        )
+
+        _slice_idx_expr_.assert_called_once_with(cube_, 7)
+        UnweightedCubeValidCountsCls_.assert_called_once_with(dimensions_, [3, 4])
+        assert unweighted_cube_valid_counts is unweighted_cube_valid_counts_
+
+
+class Describe_CatXCatUnweightedCubeValidCounts(object):
+    """Unit test suite for `cubemeasure._CatXCatUnweightedCubeValidCounts`."""
+
+    def it_knows_its_unweighted_valid_counts(self, raw_unweighted_valid_counts):
+        unweighted_valid_cube_counts = _CatXCatCubeUnweightedValidCounts(
+            None, raw_unweighted_valid_counts
+        )
+        assert unweighted_valid_cube_counts.unweighted_valid_counts.tolist() == [
+            [1, 2, 3],
+            [4, 5, 6],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_unweighted_valid_counts(self):
+        """(2, 3) ndarray of unweighted cube-valid-counts as received from Cube."""
+        return np.array([[1, 2, 3], [4, 5, 6]])
+
+
+class Describe_CatXMrUnweightedCubeValidCounts(object):
+    """Unit test suite for `cubemeasure._CatXMrCubeUnweightedValidCounts`."""
+
+    def it_knows_its_unweighted_valid_counts(self, raw_unweighted_valid_counts):
+        unweighted_valid_cube_counts = _CatXMrCubeUnweightedValidCounts(
+            None, raw_unweighted_valid_counts
+        )
+        assert unweighted_valid_cube_counts.unweighted_valid_counts.tolist() == [
+            [1, 2, 3],
+            [4, 5, 6],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_unweighted_valid_counts(self):
+        """(2, 3, 2) ndarray of unweighted cube-valid-counts as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1, 6],  # -- col 0 --
+                    [2, 5],  # -- col 1 --
+                    [3, 4],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4, 3],  # -- col 0 --
+                    [5, 2],  # -- col 1 --
+                    [6, 1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXCatUnweightedCubeValidCounts(object):
+    """Unit test suite for `cubemeasure._MrXCatCubeUnweightedValidCounts`."""
+
+    def it_knows_its_unweighted_valid_counts(self, raw_unweighted_valid_counts):
+        unweighted_valid_cube_counts = _MrXCatCubeUnweightedValidCounts(
+            None, raw_unweighted_valid_counts
+        )
+        assert unweighted_valid_cube_counts.unweighted_valid_counts.tolist() == [
+            [1, 2, 3],
+            [7, 8, 9],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_unweighted_valid_counts(self):
+        """(2, 3, 2) ndarray of unweighted valid-cube-counts as received from Cube."""
+        return np.array(
+            # -- axes are (rows, sel/not, cols) --
+            [
+                # -- 0  1  2 -- cols ---
+                [  # -- row 0 ----------
+                    [1, 2, 3],  # -- sel
+                    [4, 5, 6],  # -- not
+                ],
+                [  # -- row 1 ----------
+                    [7, 8, 9],  # -- sel
+                    [0, 4, 2],  # -- not
+                ],
+            ]
+        )
+
+
+class Describe_MrXMrUnweightedCubeValidCounts(object):
+    """Unit test suite for `cubemeasure._MrXMrUnweightedCubeCounts`."""
+
+    def it_knows_its_unweighted_valid_counts(self, raw_unweighted_valid_counts):
+        unweighted_valid_cube_counts = _MrXMrCubeUnweightedValidCounts(
+            None, raw_unweighted_valid_counts
+        )
+        assert unweighted_valid_cube_counts.unweighted_valid_counts.tolist() == [
+            [0, 1],
+            [4, 5],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_unweighted_valid_counts(self):
+        """(2, 2, 2, 2) ndarray of unweighted cube-valid-counts as from Cube."""
+        return np.array(
+            # -- axes are (rows, sel/not, cols, sel/not) --
+            [
+                [  # -- row 0 -------------
+                    # --sel/not--
+                    [  # -- selected ------
+                        [0, 8],  # -- col 0
+                        [1, 7],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [2, 6],  # -- col 0
+                        [3, 5],  # -- col 1
+                    ],
+                ],
+                [  # -- row 1 -------------
+                    [  # -- selected ------
+                        [4, 4],  # -- col 0
+                        [5, 3],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [6, 2],  # -- col 0
+                        [7, 1],  # -- col 1
+                    ],
+                ],
+            ]
+        )
+
+
 # === WEIGHTED COUNTS ===
 
 
@@ -1557,6 +1750,187 @@ class Describe_MrXMrWeightedCubeCounts(object):
                     [  # -- not selected --
                         [6.6, 2.2],  # -- col 0
                         [7.7, 1.1],  # -- col 1
+                    ],
+                ],
+            ]
+        )
+
+
+# === WEIGHTED VALID COUNTS ===
+
+
+class Describe_BaseWeightedCubeValidCounts(object):
+    """Unit test suite for `cubemeasure._BaseWeightedCubeValidCounts`."""
+
+    @pytest.mark.parametrize(
+        "dimension_types, WeightedCubeValidCountsCls",
+        (
+            ((DT.MR, DT.MR), _MrXMrCubeWeightedValidCounts),
+            ((DT.MR, DT.CAT), _MrXCatCubeWeightedValidCounts),
+            ((DT.CAT, DT.MR), _CatXMrCubeWeightedValidCounts),
+            ((DT.CAT, DT.CAT), _CatXCatCubeWeightedValidCounts),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_weighted_cube_valid_count_objects(
+        self, request, dimension_types, WeightedCubeValidCountsCls
+    ):
+        cube_ = instance_mock(request, Cube)
+        dimensions_ = (
+            instance_mock(request, Dimension),
+            instance_mock(request, Dimension),
+        )
+        weighted_cube_valid_counts_ = instance_mock(request, WeightedCubeValidCountsCls)
+        WeightedCubeValidCountsCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % WeightedCubeValidCountsCls.__name__,
+            return_value=weighted_cube_valid_counts_,
+        )
+        _slice_idx_expr_ = method_mock(
+            request,
+            _BaseWeightedCubeValidCounts,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
+        )
+        cube_.dimension_types = dimension_types
+        cube_.weighted_valid_counts = [[1, 2], [3, 4]]
+
+        weighted_cube_valid_counts = _BaseWeightedCubeValidCounts.factory(
+            cube_, dimensions_, slice_idx=7
+        )
+
+        _slice_idx_expr_.assert_called_once_with(cube_, 7)
+        WeightedCubeValidCountsCls_.assert_called_once_with(dimensions_, [3, 4])
+        assert weighted_cube_valid_counts is weighted_cube_valid_counts_
+
+
+class Describe_CatXCatWeightedCubeValidCounts(object):
+    """Unit test suite for `cubemeasure._CatXCatWeightedCubeValidCounts`."""
+
+    def it_knows_its_weighted_valid_counts(self, raw_weighted_valid_counts):
+        weighted_valid_cube_counts = _CatXCatCubeWeightedValidCounts(
+            None, raw_weighted_valid_counts
+        )
+        assert weighted_valid_cube_counts.weighted_valid_counts.tolist() == [
+            [1.1, 2.2, 3.2],
+            [4.4, 5.4, 6.5],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_weighted_valid_counts(self):
+        """(2, 3) ndarray of weighted cube-valid-counts as received from Cube."""
+        return np.array([[1.1, 2.2, 3.2], [4.4, 5.4, 6.5]])
+
+
+class Describe_CatXMrWeightedCubeValidCounts(object):
+    """Unit test suite for `cubemeasure._CatXMrCubeWeightedValidCounts`."""
+
+    def it_knows_its_weighted_valid_counts(self, raw_weighted_valid_counts):
+        weighted_valid_cube_counts = _CatXMrCubeWeightedValidCounts(
+            None, raw_weighted_valid_counts
+        )
+        assert weighted_valid_cube_counts.weighted_valid_counts.tolist() == [
+            [1.1, 2.2, 3.3],
+            [4.3, 5.3, 6.3],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_weighted_valid_counts(self):
+        """(2, 3, 2) ndarray of weighted cube-valid-counts as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1.1, 6.3],  # -- col 0 --
+                    [2.2, 5.3],  # -- col 1 --
+                    [3.3, 4.3],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4.3, 3.3],  # -- col 0 --
+                    [5.3, 2.2],  # -- col 1 --
+                    [6.3, 1.1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXCatWeightedCubeValidCounts(object):
+    """Unit test suite for `cubemeasure._MrXCatCubeWeightedValidCounts`."""
+
+    def it_knows_its_weighted_valid_counts(self, raw_weighted_valid_counts):
+        weighted_valid_cube_counts = _MrXCatCubeWeightedValidCounts(
+            None, raw_weighted_valid_counts
+        )
+        assert weighted_valid_cube_counts.weighted_valid_counts.tolist() == [
+            [1.1, 2.2, 3.3],
+            [7.7, 8.8, 9.9],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_weighted_valid_counts(self):
+        """(2, 3, 2) ndarray of weighted valid-cube-counts as received from Cube."""
+        return np.array(
+            # -- axes are (rows, sel/not, cols) --
+            [
+                # -- 0  1  2 -- cols ---
+                [  # -- row 0 ----------
+                    [1.1, 2.2, 3.3],  # -- sel
+                    [4.4, 5.5, 6.6],  # -- not
+                ],
+                [  # -- row 1 ----------
+                    [7.7, 8.8, 9.9],  # -- sel
+                    [0, 4.4, 2.2],  # -- not
+                ],
+            ]
+        )
+
+
+class Describe_MrXMrWeightedCubeValidCounts(object):
+    """Unit test suite for `cubemeasure._MrXMrWeightedCubeCounts`."""
+
+    def it_knows_its_weighted_valid_counts(self, raw_weighted_valid_counts):
+        weighted_valid_cube_counts = _MrXMrCubeWeightedValidCounts(
+            None, raw_weighted_valid_counts
+        )
+        assert weighted_valid_cube_counts.weighted_valid_counts.tolist() == [
+            [0, 1.1],
+            [4.1, 5.1],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_weighted_valid_counts(self):
+        """(2, 2, 2, 2) ndarray of unweighted cube-valid-counts as from Cube."""
+        return np.array(
+            # -- axes are (rows, sel/not, cols, sel/not) --
+            [
+                [  # -- row 0 -------------
+                    # --sel/not--
+                    [  # -- selected ------
+                        [0, 8.1],  # -- col 0
+                        [1.1, 7.1],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [2.1, 6.1],  # -- col 0
+                        [3.1, 5.1],  # -- col 1
+                    ],
+                ],
+                [  # -- row 1 -------------
+                    [  # -- selected ------
+                        [4.1, 4.1],  # -- col 0
+                        [5.1, 3.1],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [6.1, 2.1],  # -- col 0
+                        [7.1, 1.1],  # -- col 1
                     ],
                 ],
             ]

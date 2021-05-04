@@ -589,14 +589,12 @@ class Assembler(object):
     @lazyproperty
     def unweighted_counts(self):
         """2D np.float64 ndarray of unweighted-count for each cell."""
-        diffs_nan = True if self._cube.unweighted_valid_counts is not None else False
-        return self._assemble_matrix(self._measures.unweighted_counts(diffs_nan).blocks)
+        return self._assemble_matrix(self._measures.unweighted_counts.blocks)
 
     @lazyproperty
     def weighted_counts(self):
         """2D np.float64 ndarray of weighted-count for each cell."""
-        diffs_nan = True if self._cube.weighted_valid_counts is not None else False
-        return self._assemble_matrix(self._measures.weighted_counts(diffs_nan).blocks)
+        return self._assemble_matrix(self._measures.weighted_counts.blocks)
 
     @lazyproperty
     def zscores(self):
