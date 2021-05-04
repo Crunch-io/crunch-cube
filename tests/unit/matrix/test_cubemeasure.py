@@ -1263,6 +1263,13 @@ class Describe_CatXCatWeightedCubeCounts(object):
             [6.6, 5.5, 4.4],
         ]
 
+    def it_knows_its_zscores(self, raw_weighted_counts):
+        weighted_cube_counts = _CatXCatWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.zscores.tolist() == [
+            [0.43874821936960656, 4.3387889766250713e-16, -0.5097793640389925],
+            [-0.4387482193696045, 8.677577953250143e-16, 0.5097793640389934],
+        ]
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
@@ -1335,6 +1342,13 @@ class Describe_CatXMrWeightedCubeCounts(object):
                 ]
             )
         )
+
+    def it_knows_its_zscores(self, raw_weighted_counts):
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.zscores.tolist() == [
+            [-1.7549928774784245, -1.6818357317441646, -1.754992877478425],
+            [1.7549928774784245, 1.6818357317441637, 1.754992877478425],
+        ]
 
     # fixtures -------------------------------------------------------
 
@@ -1422,6 +1436,13 @@ class Describe_MrXCatWeightedCubeCounts(object):
             np.array([[1.1, 2.2, 3.3], [7.7, 8.8, 9.9]])
         )
 
+    def it_knows_its_zscores(self, raw_weighted_counts):
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.zscores.tolist() == [
+            [-0.5097793640389925, 4.3387889766250713e-16, 0.43874821936960656],
+            [1.584572360360167, -1.5634719199411429, 0.19867985355975712],
+        ]
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
@@ -1494,6 +1515,13 @@ class Describe_MrXMrWeightedCubeCounts(object):
         assert weighted_cube_counts.weighted_counts == pytest.approx(
             np.array([[0.0, 1.1], [4.4, 5.5]])
         )
+
+    def it_knows_its_zscores(self, raw_weighted_counts):
+        weighted_cube_counts = _MrXMrWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.zscores.tolist() == [
+            [-1.5856499343441839, -1.2110601416389966],
+            [-1.0832051206181277, -1.2110601416389961],
+        ]
 
     # fixtures -------------------------------------------------------
 
