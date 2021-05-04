@@ -1350,10 +1350,15 @@ class Describe_CatXMrWeightedCubeCounts(object):
             [1.7549928774784245, 1.6818357317441637, 1.754992877478425],
         ]
 
+    def it_does_not_calculate_zscores_when_matrix_is_defective(self):
+        raw_weighted_counts = np.array([[[1, 1], [2, 2]]])
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.zscores.tolist() == [[0, 0]]
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
-    def raw_weighted_counts(self, request):
+    def raw_weighted_counts(self):
         """(2, 3, 2) np.float ndarray of weighted cube-counts as received from Cube."""
         return np.array(
             [
