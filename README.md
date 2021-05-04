@@ -112,6 +112,8 @@ The detailed description can be found
 ---
 
 ## Changes
+### 2.1.29
+- Omit rows/columns margin on subtotal difference.
 
 ### 2.1.28
 - fix: pairwise mean indices in case of empty numpy array
