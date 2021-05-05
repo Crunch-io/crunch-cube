@@ -144,6 +144,11 @@ class SecondOrderMeasures(object):
         return self._cube_measures.unweighted_cube_counts.rows_pruning_base
 
     @lazyproperty
+    def rows_scale_median(self):
+        """_RowsScaleMedian measure object for this cube-result."""
+        return _RowsScaleMedian(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def sums(self):
         """_Sums measure object for this cube-result"""
         return _Sums(self._dimensions, self, self._cube_measures)
@@ -1324,6 +1329,118 @@ class _Zscores(_BaseSecondOrderMeasure):
         if DT.MR_SUBVAR in dimension_types:
             return NanSubtotals.blocks(base_values, self._dimensions)
         return ZscoreSubtotals.blocks(self._weighted_cube_counts, self._dimensions)
+
+
+# === MARGINALS ===
+
+
+class _BaseSecondOrderMarginal(object):
+    """Base class for all second-order measure objects."""
+
+    def __init__(self, dimensions, second_order_measures, cube_measures):
+        self._dimensions = dimensions
+        self._second_order_measures = second_order_measures
+        self._cube_measures = cube_measures
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" making up this measure.
+
+        These are the base-values and the subtotals.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `.blocks`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def direction(self):
+        """String, either "row" or "column", the directionality the marginal."""
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `.direction`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool, indicating whether the marginal can be calculated.
+
+        Defaults to True, but designed to be overridden by subclasses if necessary.
+        """
+        return True
+
+
+class _BaseScaledCountMarginal(_BaseSecondOrderMarginal):
+    """A base class for marginals that depend on the scaled counts."""
+
+    @lazyproperty
+    def _columns_have_numeric_values(self):
+        """Bool indicating whether any numeric values on columns dimension are defined."""
+        return not np.all(np.isnan(self._columns_numeric_values))
+
+    @lazyproperty
+    def _columns_numeric_values(self):
+        """ndarray of numeric_values from the columns dimension"""
+        return np.array(self._dimensions[1].numeric_values)
+
+    def _weighted_median(self, values, counts, axis):
+        """ndarray of float64 the median of values, weighted by counts along axis"""
+        # --- TODO: This should be rewritten so that it doesn't use `np.repeat` because
+        # --- it's inefficient to make the whole array, and also because it doesn't
+        # --- correctly handle fractional counts that could come with weights. Example
+        # --- implementation:
+        # --- https://github.com/nudomarinero/wquantiles/blob/master/wquantiles.py
+        not_a_nan_index = ~np.isnan(values)
+        values = values[not_a_nan_index]
+        counts = np.nan_to_num(counts[:, not_a_nan_index]).astype("int64")
+        scale_median = np.array(
+            [
+                self._median(np.repeat(values, counts[i, :]))
+                for i in range(counts.shape[0])
+            ]
+        )
+        return scale_median
+
+    def _median(self, values):
+        """float64 median of values but without warning when there are no values"""
+        return np.median(values) if values.size != 0 else np.nan
+
+
+class _RowsScaleMedian(_BaseScaledCountMarginal):
+    """Provides the rows scale median marginals for a matrix if available.
+
+    The rows scale median is a 1D np.float64 ndarray, the same dimension as a column, that
+    has the weighted median value of column numeric values.
+
+    The rows scale median is not defined when no columns have numeric values defined.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the rows-scale-median.
+
+        These are the base-values and the subtotals.
+        """
+        if not self.is_defined:
+            raise ValueError("No numeric values are defined on the columns dimension.")
+
+        count_blocks = self._second_order_measures.row_comparable_counts.blocks
+
+        return [
+            self._weighted_median(
+                self._columns_numeric_values, count_blocks[0][0], axis=0
+            ),
+            self._weighted_median(
+                self._columns_numeric_values, count_blocks[1][0], axis=0
+            ),
+        ]
+
+    @lazyproperty
+    def direction(self):
+        return "column"
+
+    @lazyproperty
+    def is_defined(self):
+        """True if any columns have numeric values"""
+        return self._columns_have_numeric_values
 
 
 # === PAIRWISE HELPERS ===

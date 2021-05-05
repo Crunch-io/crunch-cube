@@ -419,6 +419,11 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def rows_scale_median(self):
+        """Optional 1D Row scale median marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.rows_scale_median)
+
+    @lazyproperty
     def sums(self):
         """2D optional np.float64 ndarray of sum for each cell.
 
@@ -605,6 +610,22 @@ class Assembler(object):
         value is.
         """
         return self._assemble_matrix(self._measures.zscores.blocks)
+
+    def _assemble_marginal(self, marginal):
+        """Optional 1D ndarray created from a marginal.
+
+        The assembled marginal is the shape of either a row or column (determined by
+        `marginal.direction`), and with the ordering that's applied to those
+        dimensions.
+
+        It is None when the marginal is not defined (`marginal._is_defined`).
+        """
+        if not marginal.is_defined:
+            return None
+
+        order = self._column_order if marginal.direction == "row" else self._row_order
+
+        return np.hstack(marginal.blocks)[order]
 
     def _assemble_matrix(self, blocks):
         """Return 2D ndarray matrix assembled from `blocks`.
