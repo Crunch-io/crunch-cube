@@ -252,25 +252,6 @@ class Describe_Slice(object):
 
         assert is_empty is expected_value
 
-    def it_provides_the_secondary_pairwise_indices(
-        self,
-        _alpha_alt_prop_,
-        _only_larger_prop_,
-        PairwiseSignificance_,
-        dimension_types_prop_,
-    ):
-        PairwiseSignificance_.pairwise_indices.return_value = [[(0,), (1,)], [(), ()]]
-        _alpha_alt_prop_.return_value = 0.42
-        _only_larger_prop_.return_value = False
-        slice_ = _Slice(None, None, None, None, None)
-
-        pairwise_indices_alt = slice_.pairwise_indices_alt
-
-        PairwiseSignificance_.pairwise_indices.assert_called_once_with(
-            slice_, 0.42, False
-        )
-        assert pairwise_indices_alt == [[(0,), (1,)], [(), ()]]
-
     def but_it_returns_None_when_no_secondary_alpha_specified(
         self, _alpha_alt_prop_, dimension_types_prop_
     ):
