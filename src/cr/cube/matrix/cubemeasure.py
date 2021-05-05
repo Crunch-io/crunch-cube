@@ -961,6 +961,13 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
             "`%s` must implement `.weighted_counts`" % type(self).__name__
         )
 
+    @lazyproperty
+    def zscores(self):
+        """2D np.float64 ndarray of zscores for each valid matrix cell."""
+        raise NotImplementedError(  # pragma: no cover
+            "`%s` must implement `.zscores`" % type(self).__name__
+        )
+
     def _array_type_std_res(self, counts, total, rowsum, colsum):
         """Return 2D np.float64 ndarray of std-res value for each cell of MR matrix.
 

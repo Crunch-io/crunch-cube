@@ -1202,16 +1202,11 @@ class Describe_BaseWeightedCubeCounts(object):
 
         residuals = matrix._array_type_std_res(counts, total, rowsum, colsum)
 
-        np.testing.assert_almost_equal(
-            residuals,
-            np.array(
-                [
-                    [-0.9521905, -0.3555207, -0.2275962, -0.1660169],
-                    [0.0, 0.0, 0.0, 0.0],
-                    [0.2762585, 0.1951985, 0.1485686, 0.1184429],
-                ]
-            ),
-        )
+        assert pytest.approx(residuals) == [
+            [-0.9521905, -0.3555207, -0.2275962, -0.1660169],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.2762585, 0.1951985, 0.1485686, 0.1184429],
+        ]
 
 
 class Describe_CatXCatWeightedCubeCounts(object):
@@ -1269,6 +1264,13 @@ class Describe_CatXCatWeightedCubeCounts(object):
             [0.43874821936960656, 4.3387889766250713e-16, -0.5097793640389925],
             [-0.4387482193696045, 8.677577953250143e-16, 0.5097793640389934],
         ]
+
+    def it_does_not_calculate_zscores_when_matrix_is_defective(self):
+        raw_weighted_counts = np.array([[1, 1], [2, 2]])
+        weighted_cube_counts = _CatXCatWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.zscores == pytest.approx(
+            np.array([[np.nan, np.nan], [np.nan, np.nan]]), nan_ok=True
+        )
 
     # fixtures -------------------------------------------------------
 

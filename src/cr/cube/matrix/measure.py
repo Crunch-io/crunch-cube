@@ -1341,14 +1341,7 @@ class _Zscores(_BaseSecondOrderMeasure):
         dimension_types = tuple(d.dimension_type for d in self._dimensions)
         if DT.MR_SUBVAR in dimension_types:
             return NanSubtotals.blocks(base_values, self._dimensions)
-        return ZscoreSubtotals.blocks(
-            base_values,
-            self._weighted_cube_counts.weighted_counts,
-            self._weighted_cube_counts.rows_margin,
-            self._weighted_cube_counts.columns_margin,
-            self._weighted_cube_counts.table_margin,
-            self._dimensions,
-        )
+        return ZscoreSubtotals.blocks(self._weighted_cube_counts, self._dimensions)
 
 
 # === PAIRWISE HELPERS ===

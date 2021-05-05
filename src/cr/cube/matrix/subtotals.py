@@ -392,34 +392,21 @@ class ZscoreSubtotals(_BaseSubtotals):
     def __init__(
         self,
         base_values,
-        base_counts,
-        rows_margin,
-        columns_margin,
-        table_margin,
         dimensions,
         diff_cols_nan=True,
         diff_rows_nan=True,
     ):
         super(ZscoreSubtotals, self).__init__(base_values, dimensions)
-        self._base_counts = base_counts
-        self._rows_margin = rows_margin
-        self._columns_margin = columns_margin
-        self._table_margin = table_margin
+        self._base_values = base_values.zscores
+        self._base_counts = base_values.weighted_counts
+        self._rows_margin = base_values.rows_margin
+        self._columns_margin = base_values.columns_margin
+        self._table_margin = base_values.table_margin
         self._diff_cols_nan = diff_cols_nan
         self._diff_rows_nan = diff_rows_nan
 
     @classmethod
-    def blocks(
-        cls,
-        base_values,
-        base_counts,
-        rows_margin,
-        columns_margin,
-        table_margin,
-        dimensions,
-        diff_cols_nan=True,
-        diff_rows_nan=True,
-    ):
+    def blocks(cls, base_values, dimensions, diff_cols_nan=True, diff_rows_nan=True):
         """Return base, row and col insertion, and intersection matrices.
 
         These are in the form ready for assembly.
@@ -430,28 +417,11 @@ class ZscoreSubtotals(_BaseSubtotals):
         `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
         row bases (default False)
         """
-        return cls(
-            base_values,
-            base_counts,
-            rows_margin,
-            columns_margin,
-            table_margin,
-            dimensions,
-            diff_cols_nan,
-            diff_rows_nan,
-        )._blocks
+        return cls(base_values, dimensions, diff_cols_nan, diff_rows_nan)._blocks
 
     @classmethod
     def intersections(
-        cls,
-        base_values,
-        base_counts,
-        rows_margin,
-        columns_margin,
-        table_margin,
-        dimensions,
-        diff_cols_nan=True,
-        diff_rows_nan=True,
+        cls, base_values, dimensions, diff_cols_nan=True, diff_rows_nan=True
     ):
         """Return (n_row_subtotals, n_col_subtotals) ndarray of intersection values.
 
@@ -463,16 +433,7 @@ class ZscoreSubtotals(_BaseSubtotals):
         `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
         row bases (default False)
         """
-        return cls(
-            base_values,
-            base_counts,
-            rows_margin,
-            columns_margin,
-            table_margin,
-            dimensions,
-            diff_cols_nan,
-            diff_rows_nan,
-        )._intersections
+        return cls(base_values, dimensions, diff_cols_nan, diff_rows_nan)._intersections
 
     def _intersection(self, row_subtotal, column_subtotal):
         """Return value for intersection of `row_subtotal` and `column_subtotal`."""
