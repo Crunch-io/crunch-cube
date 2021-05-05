@@ -1290,6 +1290,9 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
         subtotal intersection-cell values.
         """
         cube_valid_counts = self._cube_measures.unweighted_cube_valid_counts
+        # --- Use cube-valid-counts as the source when they are available because
+        # --- regular cube-counts give the wrong values for cases like an analysis
+        # --- involving a NUM_ARRAY variable.
         if cube_valid_counts is not None:
             return SumSubtotals.blocks(
                 cube_valid_counts.unweighted_valid_counts,
