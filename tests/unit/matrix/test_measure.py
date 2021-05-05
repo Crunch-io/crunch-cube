@@ -11,6 +11,8 @@ from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import (
     CubeMeasures,
     _BaseUnweightedCubeCounts,
+    _BaseUnweightedCubeValidCounts,
+    _BaseWeightedCubeValidCounts,
     _BaseWeightedCubeCounts,
 )
 from cr.cube.matrix.measure import (
@@ -1272,6 +1274,25 @@ class Describe_UnweightedCounts(object):
         SumSubtotals_.blocks.assert_called_once_with(ucounts, dimensions_)
         assert blocks == [[[1], [2]], [[3], [4]]]
 
+    def it_computes_its_blocks_considering_valid_counts_to_help(
+        self, request, dimensions_, cube_measures_
+    ):
+        counts = np.arange(8).reshape(2, 4).tolist()
+        unweighted_cube_counts_ = instance_mock(
+            request,
+            _BaseUnweightedCubeValidCounts,
+            unweighted_valid_counts=counts,
+        )
+        cube_measures_.unweighted_cube_valid_counts = unweighted_cube_counts_
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        unweighted_counts = _UnweightedCounts(dimensions_, None, cube_measures_)
+
+        blocks = unweighted_counts.blocks
+
+        SumSubtotals_.blocks.assert_called_once_with(counts, dimensions_, True, True)
+        assert blocks == [[[1], [2]], [[3], [4]]]
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -1310,7 +1331,30 @@ class Describe_WeightedCounts(object):
         SumSubtotals_.blocks.assert_called_once_with(counts, dimensions_)
         assert blocks == [[[1], [2]], [[3], [4]]]
 
+    def it_computes_its_blocks_considering_valid_counts_to_help(
+        self, request, dimensions_, cube_measures_
+    ):
+        counts = np.arange(8).reshape(2, 4).tolist()
+        weighted_cube_counts_ = instance_mock(
+            request,
+            _BaseWeightedCubeValidCounts,
+            weighted_valid_counts=counts,
+        )
+        cube_measures_.weighted_cube_valid_counts = weighted_cube_counts_
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        weighted_counts = _WeightedCounts(dimensions_, None, cube_measures_)
+
+        blocks = weighted_counts.blocks
+
+        SumSubtotals_.blocks.assert_called_once_with(counts, dimensions_, True, True)
+        assert blocks == [[[1], [2]], [[3], [4]]]
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_measures_(self, request):
+        return instance_mock(request, CubeMeasures)
 
     @pytest.fixture
     def dimensions_(self, request):
