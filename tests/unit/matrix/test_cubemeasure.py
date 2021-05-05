@@ -11,6 +11,7 @@ from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import (
     _BaseCubeMeans,
     _BaseCubeMeasure,
+    _BaseCubeOverlaps,
     _BaseCubeStdDev,
     _BaseCubeSums,
     BaseCubeResultMatrix,
@@ -59,37 +60,34 @@ from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 class DescribeCubeMeasures(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure.CubeMeasures` object."""
 
-    def it_provides_access_to_the_unweighted_cube_counts_object(
-        self, request, cube_, dimensions_
+    @pytest.mark.parametrize(
+        "cube_measure_, CubeMeasureCls",
+        (
+            ("cube_means", _BaseCubeMeans),
+            ("cube_overlaps", _BaseCubeOverlaps),
+            ("cube_sum", _BaseCubeSums),
+            ("cube_stddev", _BaseCubeStdDev),
+            ("unweighted_cube_counts", _BaseUnweightedCubeCounts),
+            ("unweighted_cube_valid_counts", _BaseUnweightedCubeValidCounts),
+            ("weighted_cube_counts", _BaseWeightedCubeCounts),
+            ("weighted_cube_valid_counts", _BaseWeightedCubeValidCounts),
+        ),
+    )
+    def it_provides_access_to_cube_measures_object(
+        self, request, cube_, dimensions_, cube_measure_, CubeMeasureCls
     ):
-        unweighted_cube_counts_ = instance_mock(request, _BaseUnweightedCubeCounts)
-        _BaseUnweightedCubeCounts_ = class_mock(
-            request, "cr.cube.matrix.cubemeasure._BaseUnweightedCubeCounts"
+        _cube_measure_ = instance_mock(request, CubeMeasureCls)
+        CubeMeasureCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % CubeMeasureCls.__name__,
         )
-        _BaseUnweightedCubeCounts_.factory.return_value = unweighted_cube_counts_
+        CubeMeasureCls_.factory.return_value = _cube_measure_
         cube_measures = CubeMeasures(cube_, dimensions_, slice_idx=37)
 
-        unweighted_cube_counts = cube_measures.unweighted_cube_counts
+        cube_measure = getattr(cube_measures, cube_measure_)
 
-        _BaseUnweightedCubeCounts_.factory.assert_called_once_with(
-            cube_, dimensions_, 37
-        )
-        assert unweighted_cube_counts is unweighted_cube_counts_
-
-    def it_provides_access_to_the_weighted_cube_counts_object(
-        self, request, cube_, dimensions_
-    ):
-        weighted_cube_counts_ = instance_mock(request, _BaseWeightedCubeCounts)
-        _BaseWeightedCubeCounts_ = class_mock(
-            request, "cr.cube.matrix.cubemeasure._BaseWeightedCubeCounts"
-        )
-        _BaseWeightedCubeCounts_.factory.return_value = weighted_cube_counts_
-        cube_measures = CubeMeasures(cube_, dimensions_, slice_idx=4)
-
-        weighted_cube_counts = cube_measures.weighted_cube_counts
-
-        _BaseWeightedCubeCounts_.factory.assert_called_once_with(cube_, dimensions_, 4)
-        assert weighted_cube_counts is weighted_cube_counts_
+        CubeMeasureCls_.factory.assert_called_once_with(cube_, dimensions_, 37)
+        assert cube_measure is _cube_measure_
 
     # fixture components ---------------------------------------------
 
@@ -187,19 +185,25 @@ class Describe_BaseCubeMeans(object):
 class Describe_CatXCatCubeMeans(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeMeans`."""
 
-    def it_knows_its_means(self, request):
-        property_mock(
-            request,
-            _CatXCatCubeMeans,
-            "means",
-            return_value=np.array([[1.1, 2.3, 3.3], [3.4, 1.5, 1.6]]),
-        )
-        cube_means = _CatXCatCubeMeans(None, None)
+    def it_knows_its_means(self, raw_means):
+        cube_means = _CatXCatCubeMeans(None, raw_means)
 
         assert cube_means.means.tolist() == [
             [1.1, 2.3, 3.3],
             [3.4, 1.5, 1.6],
         ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_means(self):
+        """(2, 3) np.float64 ndarray of means as received from Cube."""
+        return np.array(
+            [
+                [1.1, 2.3, 3.3],
+                [3.4, 1.5, 1.6],
+            ]
+        )
 
 
 class Describe_CatXMrCubeMeans(object):
@@ -378,19 +382,25 @@ class Describe_BaseCubeStdDev(object):
 class Describe_CatXCatCubeStdDev(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeStdDev`."""
 
-    def it_knows_its_stddev(self, request):
-        property_mock(
-            request,
-            _CatXCatCubeStdDev,
-            "stddev",
-            return_value=np.array([[1.1, 2.3, 3.3], [3.4, 1.5, 1.6]]),
-        )
-        cube_stddev = _CatXCatCubeStdDev(None, None)
+    def it_knows_its_stddev(self, raw_stddev):
+        cube_stddev = _CatXCatCubeStdDev(None, raw_stddev)
 
         assert cube_stddev.stddev.tolist() == [
             [1.1, 2.3, 3.3],
             [3.4, 1.5, 1.6],
         ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_stddev(self):
+        """(2, 3) np.float64 ndarray of stddev as received from Cube."""
+        return np.array(
+            [
+                [1.1, 2.3, 3.3],
+                [3.4, 1.5, 1.6],
+            ]
+        )
 
 
 class Describe_CatXMrCubeStdDev(object):
@@ -569,19 +579,25 @@ class Describe_BaseCubeSum(object):
 class Describe_CatXCatCubeSums(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeSums`."""
 
-    def it_knows_its_sum(self, request):
-        property_mock(
-            request,
-            _CatXCatCubeSums,
-            "sums",
-            return_value=np.array([[1.1, 2.3, 3.3], [3.4, 1.5, 1.6]]),
-        )
-        cube_sum = _CatXCatCubeSums(None, None)
+    def it_knows_its_sum(self, raw_sums):
+        cube_sum = _CatXCatCubeSums(None, raw_sums)
 
         assert cube_sum.sums.tolist() == [
             [1.1, 2.3, 3.3],
             [3.4, 1.5, 1.6],
         ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_sums(self):
+        """(2, 3) np.float64 ndarray of sums as received from Cube."""
+        return np.array(
+            [
+                [1.1, 2.3, 3.3],
+                [3.4, 1.5, 1.6],
+            ]
+        )
 
 
 class Describe_CatXMrCubeSum(object):
@@ -1144,13 +1160,8 @@ class Describe_BaseUnweightedCubeValidCounts(object):
         ),
     )
     def it_provides_a_factory_for_constructing_unweighted_cube_valid_count_objects(
-        self, request, dimension_types, UnweightedCubeValidCountsCls
+        self, request, cube_, dimensions_, dimension_types, UnweightedCubeValidCountsCls
     ):
-        cube_ = instance_mock(request, Cube)
-        dimensions_ = (
-            instance_mock(request, Dimension),
-            instance_mock(request, Dimension),
-        )
         unweighted_cube_valid_counts_ = instance_mock(
             request, UnweightedCubeValidCountsCls
         )
@@ -1176,6 +1187,26 @@ class Describe_BaseUnweightedCubeValidCounts(object):
         _slice_idx_expr_.assert_called_once_with(cube_, 7)
         UnweightedCubeValidCountsCls_.assert_called_once_with(dimensions_, [3, 4])
         assert unweighted_cube_valid_counts is unweighted_cube_valid_counts_
+
+    def but_it_returns_none_if_cube_does_not_have_valid_counts(
+        self, cube_, dimensions_
+    ):
+        cube_.unweighted_valid_counts = None
+        unweighted_cube_valid_counts = _BaseUnweightedCubeValidCounts.factory(
+            cube_, dimensions_, slice_idx=7
+        )
+
+        assert unweighted_cube_valid_counts is None
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return instance_mock(request, Dimension), instance_mock(request, Dimension)
 
 
 class Describe_CatXCatUnweightedCubeValidCounts(object):
@@ -1327,13 +1358,8 @@ class Describe_BaseWeightedCubeCounts(object):
         ),
     )
     def it_provides_a_factory_for_constructing_weighted_cube_count_objects(
-        self, request, dimension_types, WeightedCubeCountsCls
+        self, request, cube_, dimensions_, dimension_types, WeightedCubeCountsCls
     ):
-        cube_ = instance_mock(request, Cube)
-        dimensions_ = (
-            instance_mock(request, Dimension),
-            instance_mock(request, Dimension),
-        )
         weighted_cube_counts_ = instance_mock(request, WeightedCubeCountsCls)
         WeightedCubeCountsCls_ = class_mock(
             request,
@@ -1357,6 +1383,16 @@ class Describe_BaseWeightedCubeCounts(object):
         _slice_idx_expr_.assert_called_once_with(cube_, 2)
         WeightedCubeCountsCls_.assert_called_once_with(dimensions_, [3, 4])
         assert weighted_cube_counts is weighted_cube_counts_
+
+    def but_it_returns_none_if_cube_does_not_have_valid_counts(
+        self, cube_, dimensions_
+    ):
+        cube_.weighted_valid_counts = None
+        weighted_cube_valid_counts = _BaseWeightedCubeValidCounts.factory(
+            cube_, dimensions_, slice_idx=7
+        )
+
+        assert weighted_cube_valid_counts is None
 
     @pytest.mark.parametrize(
         "columns_margin, expected_value",
@@ -1400,6 +1436,16 @@ class Describe_BaseWeightedCubeCounts(object):
             [0.0, 0.0, 0.0, 0.0],
             [0.2762585, 0.1951985, 0.1485686, 0.1184429],
         ]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return instance_mock(request, Dimension), instance_mock(request, Dimension)
 
 
 class Describe_CatXCatWeightedCubeCounts(object):
