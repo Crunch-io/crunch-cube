@@ -855,7 +855,7 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
         column_proportions = self._second_order_measures.column_proportions
-        columns_base = self._second_order_measures.columns_base.blocks
+        columns_base = self._second_order_measures.columns_base
         return PairwiseSigTestSubtotals.blocks(
             self._t_stats,
             self._dimensions,

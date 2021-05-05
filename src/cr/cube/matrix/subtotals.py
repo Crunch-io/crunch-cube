@@ -610,8 +610,7 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
     ):
         super(PairwiseSigTestSubtotals, self).__init__(base_values, dimensions)
         self._column_proportions = column_proportions
-        self._columns_base = columns_base[0][0]
-        self._columns_base_subtotals = columns_base[0][1]
+        self._columns_base = columns_base
         self._selected_column_idx = selected_column_idx
         self._diff_cols_nan = diff_cols_nan
         self._diff_rows_nan = diff_rows_nan
@@ -672,7 +671,7 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         props = self._column_proportions.blocks[0][0]
         # --- Inserted column column_proportions values
         props_hs = self._column_proportions.blocks[0][1]
-        var_props_hs = props_hs * (1.0 - props_hs) / self._columns_base_subtotals
+        var_props_hs = props_hs * (1.0 - props_hs) / self._columns_base.blocks[0][1]
         selected_col_props, selected_var = self._selected_observations(props, props_hs)
         t_stats = self._t_stats(
             props_hs, selected_col_props, var_props_hs, selected_var
@@ -705,7 +704,7 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         # --- The eventual column insertions in the case of subtotal rows are the
         # --- intersections
         props_hs = self._column_proportions.blocks[1][1]
-        var_props = props * (1.0 - props) / self._columns_base
+        var_props = props * (1.0 - props) / self._columns_base.blocks[0][0]
         selected_col_props, selected_var = self._selected_observations(props, props_hs)
         t_stats = self._t_stats(props, selected_col_props, var_props, selected_var)
 
@@ -735,8 +734,8 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         This method, calculates the observations of the second sample on which calculate
         the t-statistics.
         """
-        var_props = props * (1.0 - props) / self._columns_base
-        var_props_hs = props_hs * (1 - props_hs) / self._columns_base_subtotals
+        var_props = props * (1.0 - props) / self._columns_base.blocks[0][0]
+        var_props_hs = props_hs * (1 - props_hs) / self._columns_base.blocks[0][1]
         col_idx = self._selected_column_idx
         if col_idx < 0:
             selected_column_proportions = props_hs[:, [col_idx]]
