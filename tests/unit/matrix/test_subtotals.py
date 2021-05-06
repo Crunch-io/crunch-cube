@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.dimension import Dimension, _Subtotal
-from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
+from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix, _BaseWeightedCubeCounts
 from cr.cube.matrix.subtotals import (
     _BaseSubtotals,
     NanSubtotals,
@@ -519,18 +519,43 @@ class DescribeTableStdErrSubtotals(object):
 class DescribeZscoreSubtotals(object):
     """Unit test suite for `cr.cube.matrix.ZscoreSubtotals` object."""
 
-    def it_provides_access_to_the_base_counts_to_help(self, cube_result_matrix_):
-        cube_result_matrix_.weighted_counts = [[1, 2], [3, 4]]
-        subtotals = ZscoreSubtotals(None, None, cube_result_matrix_)
-        assert subtotals._base_counts == [[1, 2], [3, 4]]
+    def it_provides_a_blocks_interface_method(self, request, _init_, weighted_counts_):
+        weighted_counts_.weighted_counts = [[1, 2], [2, 3]]
+        weighted_counts_.rows_margin = None
+        weighted_counts_.columns_margin = [3, 4]
+        weighted_counts_.table_margin = 12
+        property_mock(
+            request,
+            ZscoreSubtotals,
+            "_blocks",
+            return_value=np.array([[[1], [2]], [[3], [4]]]),
+        )
 
-    def it_can_compute_a_subtotal_intersection_to_help(
-        self,
-        request,
-        _base_counts_prop_,
-        cube_result_matrix_,
-        _table_margin_prop_,
+        blocks = ZscoreSubtotals.blocks(weighted_counts_, None)
+
+        _init_.assert_called_once_with(ANY, weighted_counts_, None, True, True)
+        assert blocks.tolist() == [[[1], [2]], [[3], [4]]]
+
+    def it_provides_an_intersections_interface_method(
+        self, request, _init_, weighted_counts_
     ):
+        weighted_counts_.weighted_counts = [[1, 2], [2, 3]]
+        weighted_counts_.rows_margin = None
+        weighted_counts_.columns_margin = [3, 4]
+        weighted_counts_.table_margin = 12
+        property_mock(
+            request,
+            ZscoreSubtotals,
+            "_intersections",
+            return_value=np.array([[1, 2], [3, 4]]),
+        )
+
+        intersections = ZscoreSubtotals.intersections(weighted_counts_, None)
+
+        _init_.assert_called_once_with(ANY, weighted_counts_, None, True, True)
+        assert intersections.tolist() == [[1, 2], [3, 4]]
+
+    def it_can_compute_a_subtotal_intersection_to_help(self, request, weighted_counts_):
         row_subtotal_ = instance_mock(
             request,
             _Subtotal,
@@ -543,14 +568,14 @@ class DescribeZscoreSubtotals(object):
             addend_idxs=np.array([0, 1]),
             subtrahend_idxs=np.array([]),
         )
-        _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
-        cube_result_matrix_.columns_margin = np.array([12, 15, 18, 21])
-        _table_margin_prop_.return_value = 66
-        subtotals = ZscoreSubtotals(None, None, cube_result_matrix_)
+        weighted_counts_.weighted_counts = np.arange(12).reshape(3, 4)
+        weighted_counts_.columns_margin = np.array([12, 15, 18, 21])
+        weighted_counts_.rows_margin = np.array([10, 2, 34])
+        weighted_counts_.table_margin = 66
+        subtotals = ZscoreSubtotals(weighted_counts_, None)
 
-        np.testing.assert_almost_equal(
-            subtotals._intersection(row_subtotal_, col_subtotal_),
-            -0.7368146,
+        assert subtotals._intersection(row_subtotal_, col_subtotal_) == pytest.approx(
+            -0.7368146
         )
 
     @pytest.mark.parametrize(
@@ -562,10 +587,7 @@ class DescribeZscoreSubtotals(object):
         ),
     )
     def it_can_compute_a_subtotal_intersection_with_subtrahends(
-        self,
-        request,
-        row_subtrahends,
-        col_subtrahends,
+        self, request, row_subtrahends, col_subtrahends, weighted_counts_
     ):
         row_subtotal_ = instance_mock(
             request,
@@ -580,98 +602,68 @@ class DescribeZscoreSubtotals(object):
             subtrahend_idxs=np.array(col_subtrahends),
         )
 
-        subtotals = ZscoreSubtotals(None, None, None)
+        subtotals = ZscoreSubtotals(weighted_counts_, None)
 
-        np.testing.assert_almost_equal(
-            subtotals._intersection(row_subtotal_, col_subtotal_),
-            np.nan,
+        assert subtotals._intersection(row_subtotal_, col_subtotal_) == pytest.approx(
+            np.nan, nan_ok=True
         )
 
-    def it_can_compute_a_subtotal_column_to_help(
-        self,
-        subtotal_,
-        _base_counts_prop_,
-        _table_margin_prop_,
-        cube_result_matrix_,
-    ):
+    def it_can_compute_a_subtotal_column_to_help(self, subtotal_, weighted_counts_):
         subtotal_.addend_idxs = np.array([0, 1])
         subtotal_.subtrahend_idxs = np.array([])
-        _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
-        cube_result_matrix_.rows_margin = np.array([6, 22, 38])
-        _table_margin_prop_.return_value = 66
-        subtotals = ZscoreSubtotals(None, None, cube_result_matrix_)
+        weighted_counts_.weighted_counts = np.arange(12).reshape(3, 4)
+        weighted_counts_.rows_margin = np.array([6, 22, 38])
+        weighted_counts_.table_margin = 66
+        subtotals = ZscoreSubtotals(weighted_counts_, None)
 
-        np.testing.assert_almost_equal(
-            subtotals._subtotal_column(subtotal_),
-            np.array([-1.2667117, 0.0, 0.7368146]),
+        assert subtotals._subtotal_column(subtotal_) == pytest.approx(
+            [-1.2667117, 0.0, 0.7368146]
         )
 
     def it_can_compute_a_subtotal_column_with_subtrahends(
-        self,
-        request,
-        subtotal_,
+        self, request, subtotal_, weighted_counts_
     ):
         subtotal_.subtrahend_idxs = np.array([0])
         property_mock(request, ZscoreSubtotals, "_nrows", return_value=3)
-        subtotals = ZscoreSubtotals(None, None, None)
+        subtotals = ZscoreSubtotals(weighted_counts_, None)
 
-        np.testing.assert_almost_equal(
-            subtotals._subtotal_column(subtotal_),
-            np.array([np.nan, np.nan, np.nan]),
+        assert subtotals._subtotal_column(subtotal_) == pytest.approx(
+            [np.nan, np.nan, np.nan], nan_ok=True
         )
 
-    def it_can_compute_a_subtotal_row_to_help(
-        self,
-        subtotal_,
-        _base_counts_prop_,
-        _table_margin_prop_,
-        cube_result_matrix_,
-    ):
+    def it_can_compute_a_subtotal_row_to_help(self, subtotal_, weighted_counts_):
         subtotal_.addend_idxs = np.array([0, 1])
         subtotal_.subtrahend_idxs = np.array([])
-        _base_counts_prop_.return_value = np.arange(12).reshape(3, 4)
-        cube_result_matrix_.columns_margin = np.array([12, 15, 18, 21])
-        _table_margin_prop_.return_value = 66
-        subtotals = ZscoreSubtotals(None, None, cube_result_matrix_)
+        weighted_counts_.weighted_counts = np.arange(12).reshape(3, 4)
+        weighted_counts_.columns_margin = np.array([12, 15, 18, 21])
+        weighted_counts_.table_margin = 66
+        subtotals = ZscoreSubtotals(weighted_counts_, None)
 
-        np.testing.assert_almost_equal(
-            subtotals._subtotal_row(subtotal_),
-            np.array([-0.7044435, -0.2161134, 0.2033553, 0.5833346]),
+        assert subtotals._subtotal_row(subtotal_) == pytest.approx(
+            [-0.7044435, -0.2161134, 0.2033553, 0.5833346]
         )
 
     def it_can_compute_a_subtotal_row_with_subtrahends(
-        self,
-        request,
-        subtotal_,
+        self, request, subtotal_, weighted_counts_
     ):
         subtotal_.subtrahend_idxs = np.array([0])
         property_mock(request, ZscoreSubtotals, "_ncols", return_value=4)
-        subtotals = ZscoreSubtotals(None, None, None)
+        subtotals = ZscoreSubtotals(weighted_counts_, None)
 
-        np.testing.assert_almost_equal(
-            subtotals._subtotal_row(subtotal_),
-            np.array([np.nan, np.nan, np.nan, np.nan]),
+        assert subtotals._subtotal_row(subtotal_) == pytest.approx(
+            [np.nan, np.nan, np.nan, np.nan], nan_ok=True
         )
-
-    def it_provides_access_to_the_table_margin_to_help(self, cube_result_matrix_):
-        cube_result_matrix_.table_margin = 42
-        subtotals = ZscoreSubtotals(None, None, cube_result_matrix_)
-        assert subtotals._table_margin == 42
 
     # --- fixture components -----------------------------------------
 
     @pytest.fixture
-    def _base_counts_prop_(self, request):
-        return property_mock(request, ZscoreSubtotals, "_base_counts")
+    def weighted_counts_(self, request):
+        return instance_mock(request, _BaseWeightedCubeCounts)
 
     @pytest.fixture
-    def cube_result_matrix_(self, request):
-        return instance_mock(request, BaseCubeResultMatrix)
+    def _init_(self, request):
+        return initializer_mock(request, ZscoreSubtotals)
 
     @pytest.fixture
     def subtotal_(self, request):
         return instance_mock(request, _Subtotal)
-
-    @pytest.fixture
-    def _table_margin_prop_(self, request):
-        return property_mock(request, ZscoreSubtotals, "_table_margin")

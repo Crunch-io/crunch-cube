@@ -7,8 +7,14 @@ from __future__ import division
 import numpy as np
 from scipy.stats import t
 
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import CubeMeasures
-from cr.cube.matrix.subtotals import SumSubtotals, NanSubtotals, NoneSubtotals
+from cr.cube.matrix.subtotals import (
+    SumSubtotals,
+    NanSubtotals,
+    NoneSubtotals,
+    ZscoreSubtotals,
+)
 from cr.cube.util import lazyproperty
 
 
@@ -175,6 +181,11 @@ class SecondOrderMeasures(object):
         diffs_nan indicates if SubtotalDifferences values should be nan or not.
         """
         return _WeightedCounts(self._dimensions, self, self._cube_measures, diffs_nan)
+
+    @lazyproperty
+    def zscores(self):
+        """_Zscores measure object for this cube-result."""
+        return _Zscores(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def _cube_measures(self):
@@ -1318,6 +1329,19 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
             diff_cols_nan=self._diff_nans,
             diff_rows_nan=self._diff_nans,
         )
+
+
+class _Zscores(_BaseSecondOrderMeasure):
+    """Provides the zscore measure for a matrix."""
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure."""
+        base_values = self._weighted_cube_counts.zscores
+        dimension_types = tuple(d.dimension_type for d in self._dimensions)
+        if DT.MR_SUBVAR in dimension_types:
+            return NanSubtotals.blocks(base_values, self._dimensions)
+        return ZscoreSubtotals.blocks(self._weighted_cube_counts, self._dimensions)
 
 
 # === PAIRWISE HELPERS ===

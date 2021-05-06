@@ -1193,6 +1193,21 @@ class Describe_BaseWeightedCubeCounts(object):
 
         assert weighted_cube_counts.column_bases.tolist() == expected_value
 
+    def it_can_compute_array_type_std_residual_to_help(self):
+        counts = np.array([[0, 2, 4, 6], [8, 10, 12, 14], [16, 18, 20, 22]])
+        total = np.array([51, 63, 75, 87])
+        rowsum = np.array([[1, 5, 9, 13], [17, 21, 25, 29], [33, 37, 41, 45]])
+        colsum = np.array([24, 30, 36, 42])
+        matrix = _BaseWeightedCubeCounts(None, None)
+
+        residuals = matrix._array_type_std_res(counts, total, rowsum, colsum)
+
+        assert pytest.approx(residuals) == [
+            [-0.9521905, -0.3555207, -0.2275962, -0.1660169],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.2762585, 0.1951985, 0.1485686, 0.1184429],
+        ]
+
 
 class Describe_CatXCatWeightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatWeightedCubeCounts`."""
@@ -1242,6 +1257,20 @@ class Describe_CatXCatWeightedCubeCounts(object):
             [3.3, 2.2, 1.1],
             [6.6, 5.5, 4.4],
         ]
+
+    def it_knows_its_zscores(self, raw_weighted_counts):
+        weighted_cube_counts = _CatXCatWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.zscores.tolist() == [
+            [0.43874821936960656, 4.3387889766250713e-16, -0.5097793640389925],
+            [-0.4387482193696045, 8.677577953250143e-16, 0.5097793640389934],
+        ]
+
+    def but_its_zscores_are_NaNs_for_a_deficient_matrix(self):
+        raw_weighted_counts = np.array([[1.1, 1.1], [2.2, 2.2]])
+        weighted_cube_counts = _CatXCatWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.zscores == pytest.approx(
+            np.array([[np.nan, np.nan], [np.nan, np.nan]]), nan_ok=True
+        )
 
     # fixtures -------------------------------------------------------
 
@@ -1316,10 +1345,24 @@ class Describe_CatXMrWeightedCubeCounts(object):
             )
         )
 
+    def it_knows_its_zscores(self, raw_weighted_counts):
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
+        assert pytest.approx(weighted_cube_counts.zscores) == [
+            [-1.7549928774784245, -1.6818357317441646, -1.754992877478425],
+            [1.7549928774784245, 1.6818357317441637, 1.754992877478425],
+        ]
+
+    def but_its_zscores_are_NaNs_for_a_deficient_matrix(self):
+        raw_weighted_counts = np.array([[[1.2, 1.2], [2.1, 2.2]]])
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.zscores == pytest.approx(
+            np.array([[np.nan, np.nan]]), nan_ok=True
+        )
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
-    def raw_weighted_counts(self, request):
+    def raw_weighted_counts(self):
         """(2, 3, 2) np.float ndarray of weighted cube-counts as received from Cube."""
         return np.array(
             [
@@ -1402,6 +1445,13 @@ class Describe_MrXCatWeightedCubeCounts(object):
             np.array([[1.1, 2.2, 3.3], [7.7, 8.8, 9.9]])
         )
 
+    def it_knows_its_zscores(self, raw_weighted_counts):
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.zscores.tolist() == [
+            [-0.5097793640389925, 4.3387889766250713e-16, 0.43874821936960656],
+            [1.584572360360167, -1.5634719199411429, 0.19867985355975712],
+        ]
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
@@ -1475,6 +1525,13 @@ class Describe_MrXMrWeightedCubeCounts(object):
             np.array([[0.0, 1.1], [4.4, 5.5]])
         )
 
+    def it_knows_its_zscores(self, raw_weighted_counts):
+        weighted_cube_counts = _MrXMrWeightedCubeCounts(None, raw_weighted_counts)
+        assert weighted_cube_counts.zscores.tolist() == [
+            [-1.5856499343441839, -1.2110601416389966],
+            [-1.0832051206181277, -1.2110601416389961],
+        ]
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
@@ -1539,34 +1596,6 @@ class DescribeBaseCubeResultMatrix(object):
     def it_knows_its_rows_dimension(self, dimension_):
         matrix = BaseCubeResultMatrix([dimension_, None], None, None)
         assert matrix.rows_dimension == dimension_
-
-    def it_can_compute_array_type_std_residual_to_help(self):
-        counts = np.array([[0, 2, 4, 6], [8, 10, 12, 14], [16, 18, 20, 22]])
-        total = np.array([51, 63, 75, 87])
-        rowsum = np.array([[1, 5, 9, 13], [17, 21, 25, 29], [33, 37, 41, 45]])
-        colsum = np.array([24, 30, 36, 42])
-        matrix = BaseCubeResultMatrix(None, None, None)
-
-        residuals = matrix._array_type_std_res(counts, total, rowsum, colsum)
-
-        np.testing.assert_almost_equal(
-            residuals,
-            np.array(
-                [
-                    [-0.9521905, -0.3555207, -0.2275962, -0.1660169],
-                    [0.0, 0.0, 0.0, 0.0],
-                    [0.2762585, 0.1951985, 0.1485686, 0.1184429],
-                ]
-            ),
-        )
-
-    def but_it_produces_zero_valued_zscores_for_a_deficient_matrix(self):
-        counts = np.array([[0, 2], [0, 10]])
-        matrix = BaseCubeResultMatrix(None, None, None)
-
-        residuals = matrix._array_type_std_res(counts, None, None, None)
-
-        assert residuals.tolist() == [[0, 0], [0, 0]]
 
     @pytest.mark.parametrize(
         "dimension_types, MatrixCls",
@@ -1798,35 +1827,6 @@ class Describe_CatXCatMatrix(object):
 
         assert matrix.weighted_counts.tolist() == [[3, 2, 1], [6, 5, 4]]
 
-    def it_knows_its_zscores(self):
-        weighted_counts = np.array([[3, 2, 1], [6, 5, 4]])
-        matrix = _CatXCatMatrix(None, weighted_counts, None)
-
-        np.testing.assert_almost_equal(
-            matrix.zscores,
-            np.array([[0.41833001, 0.0, -0.48605555], [-0.41833001, 0.0, 0.48605555]]),
-        )
-
-    @pytest.mark.parametrize(
-        "weighted_counts, expected_value",
-        (
-            (
-                np.array([[1, 2], [0, 0]]),
-                np.array([[np.nan, np.nan], [np.nan, np.nan]]),
-            ),
-            (
-                np.array([[0, 2], [0, 4]]),
-                np.array([[np.nan, np.nan], [np.nan, np.nan]]),
-            ),
-        ),
-    )
-    def but_its_zscores_are_NaNs_for_a_deficient_matrix(
-        self, weighted_counts, expected_value
-    ):
-        np.testing.assert_almost_equal(
-            _CatXCatMatrix(None, weighted_counts, None).zscores, expected_value
-        )
-
     def it_knows_its_baseline_to_help(self, request):
         property_mock(
             request, _CatXCatMatrix, "_valid_row_idxs", return_value=np.array([0, 1])
@@ -1963,26 +1963,6 @@ class Describe_CatXMrMatrix(object):
         matrix = _CatXMrMatrix(None, weighted_cube_counts, None, None)
 
         assert matrix.weighted_counts.tolist() == [[1, 2, 3], [4, 5, 6]]
-
-    def it_knows_its_zscores(self, request):
-        _array_type_std_res_ = method_mock(
-            request,
-            _CatXMrMatrix,
-            "_array_type_std_res",
-            return_value=np.array([[1, 2], [3, 4]]),
-        )
-        weighted_cube_counts = np.arange(24).reshape((3, 4, 2))
-        matrix = _CatXMrMatrix(None, weighted_cube_counts, None)
-
-        zscores = matrix.zscores
-
-        self_, counts, total, rowsum, colsum = _array_type_std_res_.call_args.args
-        assert self_ is matrix
-        assert counts.tolist() == [[0, 2, 4, 6], [8, 10, 12, 14], [16, 18, 20, 22]]
-        assert total.tolist() == [51, 63, 75, 87]
-        assert rowsum.tolist() == [[1, 5, 9, 13], [17, 21, 25, 29], [33, 37, 41, 45]]
-        assert colsum.tolist() == [24, 30, 36, 42]
-        assert zscores.tolist() == [[1, 2], [3, 4]]
 
     def it_knows_its_baseline_to_help(self, request):
         property_mock(
@@ -2157,27 +2137,6 @@ class Describe_MrXCatMatrix(object):
             _MrXCatMatrix(None, weighted_counts, None).weighted_counts,
             np.array([[1, 2, 3], [7, 8, 9]]),
         )
-
-    def it_knows_its_zscores(self, request):
-        _array_type_std_res_ = method_mock(
-            request, _MrXCatMatrix, "_array_type_std_res", return_value=[[1, 2], [3, 4]]
-        )
-        weighted_counts = np.arange(24).reshape((3, 2, 4))
-        matrix = _MrXCatMatrix(None, weighted_counts, None)
-
-        zscores = matrix.zscores
-
-        self_, counts, total, rowsum, colsum = _array_type_std_res_.call_args.args
-        assert self_ is matrix
-        np.testing.assert_equal(
-            counts, np.array([[0, 1, 2, 3], [8, 9, 10, 11], [16, 17, 18, 19]])
-        )
-        np.testing.assert_equal(total, np.array([[28], [92], [156]]))
-        np.testing.assert_equal(rowsum, np.array([[6], [38], [70]]))
-        np.testing.assert_equal(
-            colsum, np.array([[4, 6, 8, 10], [20, 22, 24, 26], [36, 38, 40, 42]])
-        )
-        assert zscores == [[1, 2], [3, 4]]
 
     def it_knows_its_baseline_to_help(self, request):
         property_mock(
@@ -2412,31 +2371,6 @@ class Describe_MrXMrMatrix(object):
             _MrXMrMatrix(None, weighted_counts, None, None).weighted_counts,
             np.array([[0, 1], [4, 5]]),
         )
-
-    def it_knows_its_zscores(self, request):
-        _array_type_std_res_ = method_mock(
-            request, _MrXMrMatrix, "_array_type_std_res", return_value=[[1, 2], [3, 4]]
-        )
-        weighted_counts = np.arange(48).reshape((3, 2, 4, 2))
-        matrix = _MrXMrMatrix(None, weighted_counts, None)
-
-        zscores = matrix.zscores
-
-        self_, counts, total, rowsum, colsum = _array_type_std_res_.call_args.args
-        assert self_ is matrix
-        np.testing.assert_equal(
-            counts, np.array([[0, 2, 4, 6], [16, 18, 20, 22], [32, 34, 36, 38]])
-        )
-        np.testing.assert_equal(
-            total, np.array([[18, 26, 34, 42], [82, 90, 98, 106], [146, 154, 162, 170]])
-        )
-        np.testing.assert_equal(
-            rowsum, np.array([[1, 5, 9, 13], [33, 37, 41, 45], [65, 69, 73, 77]])
-        )
-        np.testing.assert_equal(
-            colsum, np.array([[8, 12, 16, 20], [40, 44, 48, 52], [72, 76, 80, 84]])
-        )
-        assert zscores == [[1, 2], [3, 4]]
 
     def it_knows_its_baseline_to_help(self, request):
         property_mock(

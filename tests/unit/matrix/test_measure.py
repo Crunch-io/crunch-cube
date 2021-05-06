@@ -7,6 +7,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import (
     CubeMeasures,
     _BaseUnweightedCubeCounts,
@@ -31,6 +32,7 @@ from cr.cube.matrix.measure import (
     _TotalShareSum,
     _UnweightedCounts,
     _WeightedCounts,
+    _Zscores,
 )
 
 from ...unitutil import ANY, class_mock, instance_mock, property_mock
@@ -50,6 +52,7 @@ class DescribeSecondOrderMeasures(object):
             ("row_weighted_bases", _RowWeightedBases),
             ("table_unweighted_bases", _TableUnweightedBases),
             ("table_weighted_bases", _TableWeightedBases),
+            ("zscores", _Zscores),
         ),
     )
     def it_provides_access_to_various_measure_objects(
@@ -216,13 +219,35 @@ class Describe_BaseSecondOrderMeasure(object):
 class Describe_ColumnComparableCounts(object):
     """Unit test suite for `cr.cube.matrix.measure._ColumnComparableCounts` object."""
 
-    def it_computes_its_blocks(self, request):
-        cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
+    def it_computes_its_blocks(self, request, dimensions_, cube_measures_):
+        counts = np.arange(12).reshape(3, 4).tolist()
+        weighted_cube_counts_ = instance_mock(
+            request, _BaseWeightedCubeCounts, weighted_counts=counts
+        )
+        _weighted_cube_counts = property_mock(
+            request, _BaseSecondOrderMeasure, "_weighted_cube_counts"
+        )
+        _weighted_cube_counts.return_value = weighted_cube_counts_
         SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        col_comparable_counts = _ColumnComparableCounts(
+            dimensions_, None, cube_measures_
+        )
 
-        blocks = _ColumnComparableCounts(None, None, cube_measures_).blocks
+        blocks = col_comparable_counts.blocks
 
-        SumSubtotals_.blocks.assert_called_once_with(ANY, None, diff_cols_nan=True)
+        SumSubtotals_.blocks.assert_called_once_with(counts, dimensions_, True)
+        assert blocks == [[[1], [2]], [[3], [4]]]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_measures_(self, request):
+        return instance_mock(request, CubeMeasures)
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return instance_mock(request, Dimension), instance_mock(request, Dimension)
 
 
 class Describe_ColumnProportions(object):
@@ -473,13 +498,35 @@ class Describe_ColumnWeightedBases(object):
 class Describe_RowComparableCounts(object):
     """Unit test suite for `cr.cube.matrix.measure._RowComparableCounts` object."""
 
-    def it_computes_its_blocks(self, request):
-        cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
+    def it_computes_its_blocks(self, request, dimensions_, cube_measures_):
+        counts = np.arange(12).reshape(3, 4).tolist()
+        weighted_cube_counts_ = instance_mock(
+            request, _BaseWeightedCubeCounts, weighted_counts=counts
+        )
+        _weighted_cube_counts = property_mock(
+            request, _BaseSecondOrderMeasure, "_weighted_cube_counts"
+        )
+        _weighted_cube_counts.return_value = weighted_cube_counts_
         SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        row_comparable_counts = _RowComparableCounts(dimensions_, None, cube_measures_)
 
-        blocks = _RowComparableCounts(None, None, cube_measures_).blocks
+        blocks = row_comparable_counts.blocks
 
-        SumSubtotals_.blocks.assert_called_once_with(ANY, None, diff_rows_nan=True)
+        SumSubtotals_.blocks.assert_called_once_with(
+            counts, dimensions_, diff_rows_nan=True
+        )
+        assert blocks == [[[1], [2]], [[3], [4]]]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_measures_(self, request):
+        return instance_mock(request, CubeMeasures)
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return instance_mock(request, Dimension), instance_mock(request, Dimension)
 
 
 class Describe_RowProportions(object):
@@ -1290,4 +1337,55 @@ class Describe_WeightedCounts(object):
 
     @pytest.fixture
     def dimensions_(self, request):
-        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+        return instance_mock(request, Dimension), instance_mock(request, Dimension)
+
+
+class Describe_Zscores(object):
+    """Unit test suite for `cr.cube.matrix.measure._Zscores` object."""
+
+    def it_computes_zscore_subtotals_blocks(self, request, dimensions_):
+        weighted_cube_counts_ = instance_mock(request, _BaseWeightedCubeCounts)
+        property_mock(
+            request,
+            _Zscores,
+            "_weighted_cube_counts",
+            return_value=weighted_cube_counts_,
+        )
+        ZscoreSubtotals_ = class_mock(request, "cr.cube.matrix.measure.ZscoreSubtotals")
+        ZscoreSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
+        zscores = _Zscores(dimensions_, None, None)
+
+        blocks = zscores.blocks
+
+        ZscoreSubtotals_.blocks.assert_called_once_with(
+            weighted_cube_counts_, dimensions_
+        )
+        assert blocks == [[[1], [2]], [[3], [4]]]
+
+    def but_the_subtotal_blocks_are_NaNs_when_an_MR_dimension_is_present(
+        self, request, dimensions_
+    ):
+        weighted_cube_counts_ = instance_mock(
+            request, _BaseWeightedCubeCounts, zscores=[[1, 2], [3, 4]]
+        )
+        property_mock(
+            request,
+            _Zscores,
+            "_weighted_cube_counts",
+            return_value=weighted_cube_counts_,
+        )
+        NanSubtotals_ = class_mock(request, "cr.cube.matrix.measure.NanSubtotals")
+        NanSubtotals_.blocks.return_value = [[[1], [np.nan]], [[np.nan], [np.nan]]]
+        dimensions_[0].dimension_type = DT.MR_SUBVAR
+        zscores = _Zscores(dimensions_, None, None)
+
+        blocks = zscores.blocks
+
+        NanSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
+        assert blocks == [[[1], [np.nan]], [[np.nan], [np.nan]]]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return instance_mock(request, Dimension), instance_mock(request, Dimension)
