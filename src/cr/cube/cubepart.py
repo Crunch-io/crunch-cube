@@ -1544,7 +1544,6 @@ class _Strand(CubePartition):
         provided when the Strand is created. It is also adjusted to account for any
         filters that were applied as part of the query.
         """
-
         # ---If the only dimension is a categorical date, we don't need to break up
         # ---the population counts between its elements - it's constant throughout time
         if self.rows_dimension_type == DT.CAT_DATE:

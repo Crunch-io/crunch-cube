@@ -65,7 +65,7 @@ class COLLATION_METHOD(enum.Enum):
     EXPLICIT_ORDER = "explicit"
     MARGINAL = "marginal"
     OPPOSING_ELEMENT = "opposing_element"
-    OPPOSING_SUBTOTAL = "opposing_subtotal"
+    OPPOSING_INSERTION = "opposing_insertion"
     PAYLOAD_ORDER = "payload_order"
     UNIVARIATE_MEASURE = "univariate_measure"
 
@@ -74,12 +74,20 @@ class MEASURE(enum.Enum):
     """Enumerated values representing the second-order measures."""
 
     # --- value for each member should match the export measure keyname ---
-    COL_INDEX = "col_index"
-    COL_PERCENT = "col_percent"
-    COL_SHARE_SUM = "col_share_sum"
+    COLUMN_BASE_UNWEIGHTED = "col_base_unweighted"
+    COLUMN_BASE_WEIGHTED = "col_base_weighted"
+    COLUMN_INDEX = "col_index"
+    COLUMN_PERCENT = "col_percent"
+    COLUMN_SHARE_SUM = "col_share_sum"
     MEAN = "mean"
+    POPULATION = "population"
+    ROW_BASE_UNWEIGHTED = "row_base_unweighted"
+    ROW_BASE_WEIGHTED = "row_base_weighted"
+    ROW_PERCENT = "row_percent"
     ROW_SHARE_SUM = "row_share_sum"
     SUM = "sum"
+    TABLE_BASE_UNWEIGHTED = "table_base_unweighted"
+    TABLE_BASE_WEIGHTED = "table_base_weighted"
     TABLE_STDERR = "table_stderr"
     TOTAL_SHARE_SUM = "total_share_sum"
     UNWEIGHTED_COUNT = "count_unweighted"
@@ -108,7 +116,7 @@ NUMERIC_MEASURES = frozenset(
         CUBE_MEASURE.STDDEV,
         CUBE_MEASURE.VALID_COUNT_UNWEIGHTED,
         CUBE_MEASURE.VALID_COUNT_WEIGHTED,
-        MEASURE.COL_SHARE_SUM,
+        MEASURE.COLUMN_SHARE_SUM,
         MEASURE.ROW_SHARE_SUM,
         MEASURE.TOTAL_SHARE_SUM,
     )

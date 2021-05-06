@@ -1712,3 +1712,115 @@ class Describe_BaseOrderHelper(object):
         )
 
         assert column_display_order.tolist() == expected_value
+
+
+class Describe_SortRowsByColumnValueHelper(object):
+    """Integration-test suite for `cr.cube.matrix._SortRowsByColumnValueHelper`."""
+
+    @pytest.mark.parametrize(
+        "fixture, measure, element_id, direction, expected_value",
+        (
+            (CR.MR_X_CAT, "col_base_unweighted", 4, "descending", [4, 3, 2, 1, 0]),
+            (CR.MR_X_CAT, "col_base_unweighted", 4, "ascending", [0, 1, 2, 3, 4]),
+            (CR.MR_X_CAT, "col_base_weighted", 1, "descending", [4, 0, 3, 1, 2]),
+            (CR.MR_X_CAT, "col_base_weighted", 1, "ascending", [2, 1, 3, 0, 4]),
+            (
+                CR.CAT_HS_X_MR_WGTD,
+                "col_percent",
+                1,
+                "descending",
+                [-4, -2, -3, -1, 1, 0, 2, 3, 4],
+            ),
+            (
+                CR.CAT_HS_X_MR_WGTD,
+                "col_percent",
+                1,
+                "ascending",
+                [4, 3, 2, 0, 1, -1, -3, -2, -4],
+            ),
+            (
+                CR.CAT_HS_X_CAT_HS,
+                "count_unweighted",
+                1,
+                "descending",
+                [-2, -1, 1, 4, 2, 3, 0],
+            ),
+            (
+                CR.CAT_HS_X_MR_WGTD,
+                "count_weighted",
+                1,
+                "ascending",
+                [4, 3, 2, 0, 1, -1, -3, -2, -4],
+            ),
+            (CR.CAT_X_CAT_MEAN_WGTD, "mean", 1, "descending", [3, 0, 2, 1, 4]),
+            (CR.MR_X_CAT, "row_base_unweighted", 1, "descending", [4, 3, 2, 1, 0]),
+            (CR.MR_X_CAT, "row_base_weighted", 2, "ascending", [0, 1, 2, 3, 4]),
+            (CR.CA_SUBVAR_X_CA_CAT_HS, "row_percent", 3, "descending", [1, 2, 0]),
+            (
+                CR.MR_X_CAT_2,
+                "table_base_unweighted",
+                1,
+                "ascending",
+                [3, 5, 4, 2, 1, 0],
+            ),
+            (CR.MR_X_CAT_2, "table_base_weighted", 1, "ascending", [3, 5, 4, 2, 1, 0]),
+            (CR.MR_X_CAT, "z_score", 2, "ascending", [3, 2, 1, 0, 4]),
+        ),
+    )
+    def it_can_compute_a_sort_by_column_values_row_order(
+        self, fixture, measure, element_id, direction, expected_value
+    ):
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "opposing_element",
+                    "element_id": element_id,
+                    "measure": measure,
+                    "direction": direction,
+                }
+            }
+        }
+        assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
+
+        assert assembler._row_order.tolist() == expected_value
+
+
+class Describe_SortRowsByInsertedColumnHelper(object):
+    """Integration-test suite for `cr.cube.matrix._SortRowsByInsertedColumnHelper`."""
+
+    @pytest.mark.parametrize(
+        "fixture, measure, direction, fixed, expected_value",
+        (
+            (
+                CR.CAT_HS_X_CAT_HS,
+                "col_percent",
+                "descending",
+                {},
+                [-1, -2, 4, 3, 1, 2, 0],
+            ),
+            (
+                CR.CA_SUBVAR_X_CA_CAT_HS,
+                "col_percent",
+                "ascending",
+                {},
+                [2, 1, 0],
+            ),
+        ),
+    )
+    def it_can_compute_a_sort_by_insertion_values_row_order(
+        self, fixture, measure, direction, fixed, expected_value
+    ):
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "opposing_insertion",
+                    "insertion_id": 1,
+                    "measure": measure,
+                    "direction": direction,
+                    "fixed": fixed,
+                }
+            }
+        }
+        assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
+
+        assert assembler._row_order.tolist() == expected_value

@@ -1816,7 +1816,7 @@ class TestHeadersAndSubtotals(object):
         )
 
     def it_calculates_residuals_for_columns_insertion(self):
-        slice_ = Cube(CR.CA_SUBVAR_HS_X_CAT_HS).partitions[0]
+        slice_ = Cube(CR.CA_SUBVAR_X_CA_CAT_HS).partitions[0]
 
         # Test zscores for 1 column insertion
         assert slice_.inserted_column_idxs == (4,)

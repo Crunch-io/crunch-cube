@@ -266,9 +266,10 @@ class _BaseOrderHelper(object):
         insertion, hiding, pruning, and ordering transforms specified in the
         rows-dimension.
         """
+        order_spec = rows_dimension.order_spec
         HelperCls = (
             _SortByMeasureHelper
-            if rows_dimension.collation_method == CM.UNIVARIATE_MEASURE
+            if order_spec.collation_method == CM.UNIVARIATE_MEASURE
             else _OrderHelper
         )
         return HelperCls(rows_dimension, measures)._display_order
@@ -294,9 +295,12 @@ class _BaseOrderHelper(object):
         return tuple(i for i, N in enumerate(self._measures.pruning_base) if N == 0)
 
     @lazyproperty
-    def _order_dict(self):
-        """dict specifying ordering details like measure and sort-direction."""
-        return self._rows_dimension.order_dict
+    def _order_spec(self):
+        """_OrderSpec object for the stripe dimension.
+
+        Provides access to ordering details like measure and sort-direction.
+        """
+        return self._rows_dimension.order_spec
 
 
 class _OrderHelper(_BaseOrderHelper):
@@ -312,7 +316,7 @@ class _OrderHelper(_BaseOrderHelper):
         """
         CollatorCls = (
             ExplicitOrderCollator
-            if self._rows_dimension.collation_method == CM.EXPLICIT_ORDER
+            if self._order_spec.collation_method == CM.EXPLICIT_ORDER
             else PayloadOrderCollator
         )
         return CollatorCls.display_order(self._rows_dimension, self._empty_row_idxs)
@@ -348,14 +352,23 @@ class _SortByMeasureHelper(_BaseOrderHelper):
     @lazyproperty
     def _measure(self):
         """Second-order measure object providing values for sort."""
-        measure_keyname = self._order_dict["measure"]
+        measure_keyname = self._order_spec.measure_keyname
         measure_propname = {
+            "base_unweighted": "unweighted_bases",
+            "base_weighted": "weighted_bases",
+            "count_unweighted": "unweighted_counts",
+            "count_weighted": "weighted_counts",
+            "mean": "means",
             "percent": "table_proportions",
-            # --- add others as sort-by-value for those measures comes online ---
+            # --- margin-of-error is strictly proportional to stderr ---
+            "percent_moe": "table_proportion_stderrs",
+            "percent_stddev": "table_proportion_stddevs",
+            "percent_stderr": "table_proportion_stderrs",
+            "sum": "sums",
         }.get(measure_keyname)
 
         if measure_propname is None:
-            raise NotImplementedError(
+            raise ValueError(
                 "sort-by-value for measure '%s' is not yet supported" % measure_keyname
             )
 

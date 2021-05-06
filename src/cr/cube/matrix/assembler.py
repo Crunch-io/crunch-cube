@@ -741,12 +741,11 @@ class _BaseOrderHelper(object):
         insertion, hiding, pruning, and ordering transforms specified in the
         rows-dimension.
         """
-        collation_method = dimensions[0].collation_method
-        HelperCls = (
-            _SortRowsByColumnValueHelper
-            if collation_method == CM.OPPOSING_ELEMENT
-            else _RowOrderHelper
-        )
+        order_spec = dimensions[0].order_spec
+        HelperCls = {
+            CM.OPPOSING_ELEMENT: _SortRowsByBaseColumnHelper,
+            CM.OPPOSING_INSERTION: _SortRowsByInsertedColumnHelper,
+        }.get(order_spec.collation_method, _RowOrderHelper)
 
         return HelperCls(dimensions, second_order_measures)._display_order
 
@@ -796,6 +795,36 @@ class _BaseOrderHelper(object):
         )
 
     @lazyproperty
+    def _measure(self):
+        """Second-order measure object providing values for sort.
+
+        This property is not used by some subclasses.
+        """
+        propname_by_measure = {
+            M.COLUMN_BASE_UNWEIGHTED: "column_unweighted_bases",
+            M.COLUMN_BASE_WEIGHTED: "column_weighted_bases",
+            M.COLUMN_PERCENT: "column_proportions",
+            M.MEAN: "means",
+            M.ROW_BASE_UNWEIGHTED: "row_unweighted_bases",
+            M.ROW_BASE_WEIGHTED: "row_weighted_bases",
+            M.ROW_PERCENT: "row_proportions",
+            M.TABLE_BASE_UNWEIGHTED: "table_unweighted_bases",
+            M.TABLE_BASE_WEIGHTED: "table_weighted_bases",
+            M.UNWEIGHTED_COUNT: "unweighted_counts",
+            M.WEIGHTED_COUNT: "weighted_counts",
+            M.Z_SCORE: "zscores",
+        }
+        measure = self._order_spec.measure
+        measure_propname = propname_by_measure.get(measure)
+
+        if measure_propname is None:
+            raise NotImplementedError(
+                "sort-by-value for measure '%s' is not yet supported" % measure
+            )
+
+        return getattr(self._second_order_measures, measure_propname)
+
+    @lazyproperty
     def _order(self):
         """tuple of signed int idx for each sorted vector of measure matrix.
 
@@ -805,6 +834,16 @@ class _BaseOrderHelper(object):
         """
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `._order`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def _order_spec(self):
+        """_OrderSpec object for dimension being sorted.
+
+        Provides access to ordering details like measure and sort-direction.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `._order_spec`" % type(self).__name__
         )
 
     @lazyproperty
@@ -833,12 +872,20 @@ class _ColumnOrderHelper(_BaseOrderHelper):
         """
         CollatorCls = (
             ExplicitOrderCollator
-            if self._columns_dimension.collation_method == CM.EXPLICIT_ORDER
+            if self._order_spec.collation_method == CM.EXPLICIT_ORDER
             else PayloadOrderCollator
         )
         return CollatorCls.display_order(
             self._columns_dimension, self._empty_column_idxs
         )
+
+    @lazyproperty
+    def _order_spec(self):
+        """_OrderSpec object for the columns dimension.
+
+        Provides access to ordering details like measure and sort-direction.
+        """
+        return self._columns_dimension.order_spec
 
     @lazyproperty
     def _prune_subtotals(self):
@@ -868,10 +915,18 @@ class _RowOrderHelper(_BaseOrderHelper):
         """
         CollatorCls = (
             ExplicitOrderCollator
-            if self._rows_dimension.collation_method == CM.EXPLICIT_ORDER
+            if self._order_spec.collation_method == CM.EXPLICIT_ORDER
             else PayloadOrderCollator
         )
         return CollatorCls.display_order(self._rows_dimension, self._empty_row_idxs)
+
+    @lazyproperty
+    def _order_spec(self):
+        """_OrderSpec object for this row dimension.
+
+        Provides access to ordering details like measure and sort-direction.
+        """
+        return self._rows_dimension.order_spec
 
     @lazyproperty
     def _prune_subtotals(self):
@@ -887,7 +942,7 @@ class _RowOrderHelper(_BaseOrderHelper):
         )
 
 
-class _SortRowsByColumnValueHelper(_RowOrderHelper):
+class _SortRowsByBaseColumnHelper(_RowOrderHelper):
     """Orders elements by the values of an opposing base (not a subtotal) vector.
 
     This would be like "order rows in descending order by value of 'Strongly Agree'
@@ -896,21 +951,11 @@ class _SortRowsByColumnValueHelper(_RowOrderHelper):
     """
 
     @lazyproperty
-    def _order(self):
-        """tuple of int element-idx specifying ordering of dimension elements."""
-        return SortByValueCollator.display_order(
-            self._rows_dimension,
-            self._element_values,
-            self._subtotal_values,
-            self._empty_row_idxs,
-        )
-
-    @lazyproperty
     def _column_idx(self):
         """int index of column whose values the sort is based on."""
-        row_element_ids = self._rows_dimension.element_ids
-        sort_column_id = self._order_dict["element_id"]
-        return row_element_ids.index(sort_column_id)
+        column_element_ids = self._columns_dimension.element_ids
+        sort_column_id = self._order_spec.element_id
+        return column_element_ids.index(sort_column_id)
 
     @lazyproperty
     def _element_values(self):
@@ -923,26 +968,14 @@ class _SortRowsByColumnValueHelper(_RowOrderHelper):
         return measure_base_values[:, self._column_idx]
 
     @lazyproperty
-    def _measure(self):
-        """Second-order measure object providing values for sort."""
-        propname_by_keyname = {
-            M.COL_PERCENT.value: "column_proportions",
-            # --- add others as sort-by-value for those measures comes online ---
-        }
-        measure_keyname = self._order_dict["measure"]
-        measure_propname = propname_by_keyname.get(measure_keyname)
-
-        if measure_propname is None:
-            raise NotImplementedError(
-                "sort-by-value for measure '%s' is not yet supported" % measure_keyname
-            )
-
-        return getattr(self._second_order_measures, measure_propname)
-
-    @lazyproperty
-    def _order_dict(self):
-        """dict specifying ordering details like measure and sort-direction."""
-        return self._rows_dimension.order_dict
+    def _order(self):
+        """tuple of int element-idx specifying ordering of dimension elements."""
+        return SortByValueCollator.display_order(
+            self._rows_dimension,
+            self._element_values,
+            self._subtotal_values,
+            self._empty_row_idxs,
+        )
 
     @lazyproperty
     def _subtotal_values(self):
@@ -953,3 +986,49 @@ class _SortRowsByColumnValueHelper(_RowOrderHelper):
         """
         measure_subtotal_rows = self._measure.blocks[1][0]
         return measure_subtotal_rows[:, self._column_idx]
+
+
+class _SortRowsByInsertedColumnHelper(_RowOrderHelper):
+    """Orders rows by the values in an inserted column.
+
+    This would be like "order rows in descending order by value of 'Top 3' subtotal
+    column. An opposing-insertion ordering is only available on a matrix because only
+    a matrix dimension has an opposing dimension.
+    """
+
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of insertion "body" values that form the basis for sort order.
+
+        There is one value per base row and values appear in payload order. These are
+        only the "base" insertion values and do not include intersections.
+        """
+        insertion_base_values = self._measure.blocks[0][1]
+        return insertion_base_values[:, self._insertion_idx]
+
+    @lazyproperty
+    def _insertion_idx(self):
+        """int index of insertion whose values the sort is based on."""
+        return self._columns_dimension.insertion_ids.index(
+            self._order_spec.insertion_id
+        )
+
+    @lazyproperty
+    def _order(self):
+        """tuple of int element-idx specifying ordering of dimension elements."""
+        return SortByValueCollator.display_order(
+            self._rows_dimension,
+            self._element_values,
+            self._subtotal_values,
+            self._empty_row_idxs,
+        )
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of row-subtotal intersection values that contribute to sort basis.
+
+        There is one value per row subtotal and values appear in payload (dimension)
+        insertion order.
+        """
+        intersections = self._measure.blocks[1][1]
+        return intersections[:, self._insertion_idx]

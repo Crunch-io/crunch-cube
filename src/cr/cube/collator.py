@@ -39,6 +39,11 @@ class _BaseCollator(object):
 
     @lazyproperty
     def _element_subvar_ids(self):
+        """something to do with being able to use str ids (aliases) for subvars.
+
+        Added by Slobodan, ask him for details. I expect the "element_ids": field in a
+        explicit-order sort transform can be a list of strs instead of a list of ints.
+        """
         return self._dimension.element_subvar_ids
 
     @lazyproperty
@@ -48,9 +53,9 @@ class _BaseCollator(object):
         return frozenset(empty_idxs + self._dimension.hidden_idxs)
 
     @lazyproperty
-    def _order_dict(self):
-        """dict transforms-payload section specifying ordering."""
-        return self._dimension.order_dict
+    def _order_spec(self):
+        """_OrderSpec object specifying ordering details."""
+        return self._dimension.order_spec
 
     @lazyproperty
     def _subtotals(self):
@@ -230,7 +235,7 @@ class ExplicitOrderCollator(_BaseAnchoredCollator):
         """
 
         def iter_element_order_descriptors():
-            """Generate (idx, element_id) triple for each base-vector value.
+            """Generate (idx, element_id) pair for each base-vector value.
 
             The (idx, id) pairs are generated in position order. The position of an
             element is it's index in the ordered element sequence.
@@ -238,6 +243,11 @@ class ExplicitOrderCollator(_BaseAnchoredCollator):
             # --- OrderedDict mapping element-id to payload-order, like {15:0, 12:1,..}.
             # --- This gives us payload-idx lookup along with duplicate and leftover
             # --- tracking.
+
+            # TODO: this has been crudely hacked to accommodate both subvar aliases or
+            # int element-ids. All that detail should be pushed down and encapsulated in
+            # some code or object that works out the type of the ids and allows this
+            # algorithm to be uniform.
             remaining_element_idxs_by_id = collections.OrderedDict(
                 (id_, (idx, subvar_id))
                 for idx, (id_, subvar_id) in enumerate(
@@ -254,10 +264,14 @@ class ExplicitOrderCollator(_BaseAnchoredCollator):
             # --- yield (idx, id) pair for each element mentioned by id in transform,
             # --- in the order mentioned. Remove each from remaining as we go to track
             # --- dups and leftovers.
-            for element_id in self._order_dict.get("element_ids", []):
+            for element_id in self._order_spec.element_ids:
                 # --- An element-id appearing in transform but not in dimension is
                 # --- ignored. Also, an element-id that appears more than oncce in
                 # --- order-array is only used on first encounter.
+
+                # TODO: this duplication of the same logic for two cases is part of the
+                # same crude hack as above.
+
                 if element_id in remaining_element_idxs_by_subvar_id:
                     (idx, id_) = remaining_element_idxs_by_subvar_id.pop(element_id)
                     if id_ in remaining_element_idxs_by_id:
@@ -394,7 +408,7 @@ class SortByValueCollator(_BaseCollator):
         The items appear in the order specified in the "bottom" fix-grouping of the
         transform; they are not subject to sorting-by-value.
         """
-        return tuple(self._iter_fixed_idxs("bottom"))
+        return tuple(self._iter_fixed_idxs(self._order_spec.bottom_fixed_ids))
 
     @lazyproperty
     def _bottom_subtotal_idxs(self):
@@ -415,17 +429,16 @@ class SortByValueCollator(_BaseCollator):
         Descending is the default direction because it is so much more common than
         ascending in survey analysis.
         """
-        return self._order_dict.get("direction", "descending") != "ascending"
+        return self._order_spec.descending
 
-    def _iter_fixed_idxs(self, top_or_bottom):
-        """Generate the element-idx of each fixed item in the `top_or_bottom` group.
+    def _iter_fixed_idxs(self, fixed_element_ids):
+        """Generate the element-idx of each element represented by `fixed_element_ids`.
 
-        `top_or_bottom` must be one of "top" or "bottom". Any element-id specified in
-        the fixed-group that is not present in the dimension is ignored. This is
-        important because an element (e.g. category) can be removed after the analysis
+        Any element-id specified in the `fixed_element_ids` that is not present in the
+        dimension is ignored. This is important because an element (e.g. category) can
+        be removed after the analysis
         """
         element_idxs_by_id = {id_: idx for idx, id_ in enumerate(self._element_ids)}
-        fixed_element_ids = self._order_dict.get("fixed", {}).get(top_or_bottom, [])
         for fixed_element_id in fixed_element_ids:
             if fixed_element_id not in element_idxs_by_id:
                 continue
@@ -458,7 +471,7 @@ class SortByValueCollator(_BaseCollator):
         The items appear in the order specified in the "top" fix-grouping of the
         transform; they are not subject to sorting-by-value.
         """
-        return tuple(self._iter_fixed_idxs("top"))
+        return tuple(self._iter_fixed_idxs(self._order_spec.top_fixed_ids))
 
     @lazyproperty
     def _top_subtotal_idxs(self):
