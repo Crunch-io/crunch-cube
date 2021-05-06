@@ -536,6 +536,25 @@ class DescribeZscoreSubtotals(object):
         _init_.assert_called_once_with(ANY, weighted_counts_, None, True, True)
         assert blocks.tolist() == [[[1], [2]], [[3], [4]]]
 
+    def it_provides_an_intersections_interface_method(
+        self, request, _init_, weighted_counts_
+    ):
+        weighted_counts_.weighted_counts = [[1, 2], [2, 3]]
+        weighted_counts_.rows_margin = None
+        weighted_counts_.columns_margin = [3, 4]
+        weighted_counts_.table_margin = 12
+        property_mock(
+            request,
+            ZscoreSubtotals,
+            "_intersections",
+            return_value=np.array([[1, 2], [3, 4]]),
+        )
+
+        intersections = ZscoreSubtotals.intersections(weighted_counts_, None)
+
+        _init_.assert_called_once_with(ANY, weighted_counts_, None, True, True)
+        assert intersections.tolist() == [[1, 2], [3, 4]]
+
     def it_can_compute_a_subtotal_intersection_to_help(self, request, weighted_counts_):
         row_subtotal_ = instance_mock(
             request,
