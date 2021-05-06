@@ -20,6 +20,10 @@ from cr.cube.matrix.measure import (
     _ColumnShareSum,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
+    _PairwiseSigPvals,
+    _PairwiseSigTstats,
+    _PairwiseMeansSigPVals,
+    _PairwiseMeansSigTStats,
     _RowComparableCounts,
     _RowProportions,
     _RowShareSum,
@@ -114,6 +118,40 @@ class DescribeSecondOrderMeasures(object):
 
         CubeMeasures_.assert_called_once_with(cube_, dimensions_, 42)
         assert cube_measures is cube_measures_
+
+    @pytest.mark.parametrize(
+        "measure_prop_name, MeasureCls",
+        (
+            ("pairwise_t_stats", _PairwiseSigTstats),
+            ("pairwise_p_vals", _PairwiseSigPvals),
+            ("pairwise_significance_means_p_vals", _PairwiseMeansSigPVals),
+            ("pairwise_significance_means_t_stats", _PairwiseMeansSigTStats),
+        ),
+    )
+    def it_provides_access_to_pairwise_significance_measure_objects(
+        self,
+        request,
+        dimensions_,
+        _cube_measures_prop_,
+        cube_measures_,
+        measure_prop_name,
+        MeasureCls,
+    ):
+        measure_ = instance_mock(request, MeasureCls)
+        MeasureCls_ = class_mock(
+            request,
+            "cr.cube.matrix.measure.%s" % MeasureCls.__name__,
+            return_value=measure_,
+        )
+        _cube_measures_prop_.return_value = cube_measures_
+        measures = SecondOrderMeasures(None, dimensions_, None)
+        measure = getattr(measures, measure_prop_name)
+        col_idx = 0
+
+        assert measure(col_idx) is measure_
+        MeasureCls_.assert_called_once_with(
+            dimensions_, measures, cube_measures_, False
+        )
 
     # fixture components ---------------------------------------------
 
