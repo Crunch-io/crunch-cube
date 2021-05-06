@@ -186,6 +186,11 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def columns_scale_median(self):
+        """Optional 1D column scale median marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.columns_scale_median)
+
+    @lazyproperty
     def inserted_column_idxs(self):
         """tuple of int index of each subtotal column in slice."""
         # --- insertions have a negative idx in their order sequence ---
@@ -615,7 +620,7 @@ class Assembler(object):
         """Optional 1D ndarray created from a marginal.
 
         The assembled marginal is the shape of either a row or column (determined by
-        `marginal.direction`), and with the ordering that's applied to those
+        `marginal.orientation`), and with the ordering that's applied to those
         dimensions.
 
         It is None when the marginal is not defined (`marginal._is_defined`).
@@ -623,7 +628,9 @@ class Assembler(object):
         if not marginal.is_defined:
             return None
 
-        order = self._column_order if marginal.direction == "row" else self._row_order
+        order = (
+            self._row_order if marginal.orientation == "rows" else self._column_order
+        )
 
         return np.hstack(marginal.blocks)[order]
 

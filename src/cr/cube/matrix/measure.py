@@ -68,6 +68,11 @@ class SecondOrderMeasures(object):
         return self._cube_measures.unweighted_cube_counts.columns_pruning_base
 
     @lazyproperty
+    def columns_scale_median(self):
+        """1D np.float64 ndarray of unweighted-N for each matrix column."""
+        return _ScaleMedian("columns", self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def means(self):
         """_Means measure object for this cube-result"""
         return _Means(self._dimensions, self, self._cube_measures)
@@ -145,8 +150,8 @@ class SecondOrderMeasures(object):
 
     @lazyproperty
     def rows_scale_median(self):
-        """_RowsScaleMedian measure object for this cube-result."""
-        return _RowsScaleMedian(self._dimensions, self, self._cube_measures)
+        """_ScaleMedian for rows measure object for this cube-result."""
+        return _ScaleMedian("rows", self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def sums(self):
@@ -1353,10 +1358,10 @@ class _BaseSecondOrderMarginal(object):
         )
 
     @lazyproperty
-    def direction(self):
-        """String, either "row" or "column", the directionality the marginal."""
+    def orientation(self):
+        """String, either "row" or "column", the orientation the marginal."""
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `.direction`" % type(self).__name__
+            "%s must implement `.orientation`" % type(self).__name__
         )
 
     @lazyproperty
@@ -1367,80 +1372,125 @@ class _BaseSecondOrderMarginal(object):
         """
         return True
 
+    def _apply_along_orientation(self, func1d, arr, *args, **kwargs):
+        """Wrapper around `np.apply_along_axis` useful for marginal calculation
+
+        Gets the axis from the `.orientation` property and also returns an empty
+        1d array of floats when the dimension is lenght 0 (rather than failing).
+        """
+        axis = 1 if self.orientation == "rows" else 0
+
+        if arr.shape[1 - axis] == 0:
+            return np.array([], dtype=np.float64)
+
+        return np.apply_along_axis(func1d, axis, arr, *args, **kwargs)
+
 
 class _BaseScaledCountMarginal(_BaseSecondOrderMarginal):
     """A base class for marginals that depend on the scaled counts."""
 
     @lazyproperty
-    def _columns_have_numeric_values(self):
-        """Bool indicating whether any numeric values on columns dimension are defined."""
-        return not np.all(np.isnan(self._columns_numeric_values))
-
-    @lazyproperty
     def _columns_numeric_values(self):
         """ndarray of numeric_values from the columns dimension"""
-        return np.array(self._dimensions[1].numeric_values)
+        return np.array(self._dimensions[1].numeric_values, dtype=np.float64)
 
-    def _weighted_median(self, values, counts, axis):
-        """ndarray of float64 the median of values, weighted by counts along axis"""
-        # --- TODO: This should be rewritten so that it doesn't use `np.repeat` because
-        # --- it's inefficient to make the whole array, and also because it doesn't
-        # --- correctly handle fractional counts that could come with weights. Example
-        # --- implementation:
-        # --- https://github.com/nudomarinero/wquantiles/blob/master/wquantiles.py
-        not_a_nan_index = ~np.isnan(values)
-        values = values[not_a_nan_index]
-        counts = np.nan_to_num(counts[:, not_a_nan_index]).astype("int64")
-        scale_median = np.array(
-            [
-                self._median(np.repeat(values, counts[i, :]))
-                for i in range(counts.shape[0])
-            ]
-        )
-        return scale_median
-
-    def _median(self, values):
-        """float64 median of values but without warning when there are no values"""
-        return np.median(values) if values.size != 0 else np.nan
+    @lazyproperty
+    def _rows_numeric_values(self):
+        """ndarray of numeric_values from the rows dimension"""
+        return np.array(self._dimensions[0].numeric_values, dtype=np.float64)
 
 
-class _RowsScaleMedian(_BaseScaledCountMarginal):
-    """Provides the rows scale median marginals for a matrix if available.
+class _ScaleMedian(_BaseScaledCountMarginal):
+    """Provides the scale median marginals for a matrix if available.
 
-    The rows scale median is a 1D np.float64 ndarray, the same dimension as a column, that
-    has the weighted median value of column numeric values.
+    The rows/columns median is a 1D np.float64 ndarray, the same dimension as the
+    opposing dimension, and has has the weighted median of the opposing dimension's
+    numeric values.
 
-    The rows scale median is not defined when no columns have numeric values defined.
+    It is None when there are no numeric values for the opposing dimension. If
+    there are any numeric values defined, but for a given row/column none of the
+    categories with numeric values have positive counts it will be np.nan.
     """
+
+    def __init__(self, orientation, dimensions, second_order_measures, cube_measures):
+        super(_ScaleMedian, self).__init__(
+            dimensions, second_order_measures, cube_measures
+        )
+        self._orientation = orientation
 
     @lazyproperty
     def blocks(self):
-        """List of the 2 1D ndarray "blocks" of the rows-scale-median.
+        """List of the 2 1D ndarray "blocks" of the scale median.
 
         These are the base-values and the subtotals.
         """
         if not self.is_defined:
             raise ValueError("No numeric values are defined on the columns dimension.")
 
-        count_blocks = self._second_order_measures.row_comparable_counts.blocks
+        values = self._numeric_values
+        sort_order = values.argsort()[~np.isnan(values)]
+        sorted_values = values[sort_order]
+
+        if self.orientation == "rows":
+            # --- Use *row* comparable counts ---
+            counts = self._second_order_measures.row_comparable_counts.blocks
+            # --- Get base values & *row* subtotals, sorting each by *column* ---
+            counts = [counts[0][0][:, sort_order], counts[1][0][:, sort_order]]
+        else:
+            # --- Use *column* comparable counts ---
+            counts = self._second_order_measures.column_comparable_counts.blocks
+            # --- Get base values & *column* subtotals, sorting each by *row* ---
+            counts = [counts[0][0][sort_order, :], counts[0][1][sort_order, :]]
 
         return [
-            self._weighted_median(
-                self._columns_numeric_values, count_blocks[0][0], axis=0
-            ),
-            self._weighted_median(
-                self._columns_numeric_values, count_blocks[1][0], axis=0
-            ),
+            self._apply_along_orientation(
+                self._weighted_median, count, sorted_values=sorted_values
+            )
+            for count in counts
         ]
 
     @lazyproperty
-    def direction(self):
-        return "column"
+    def orientation(self):
+        return self._orientation
 
     @lazyproperty
     def is_defined(self):
-        """True if any columns have numeric values"""
-        return self._columns_have_numeric_values
+        """True if any have numeric values"""
+        return not np.all(np.isnan(self._numeric_values))
+
+    @lazyproperty
+    def _numeric_values(self):
+        return (
+            self._columns_numeric_values
+            if self.orientation == "rows"
+            else self._rows_numeric_values
+        )
+
+    def _weighted_median(self, counts, sorted_values):
+        """Calculate the median given a set of values and their frequency in the data
+
+        `sorted_values` must be sorted in order and the counts must be sorted to match
+        that order.
+        """
+        # --- Convert nans to 0, as we don't want them to contribute to median. Counts
+        # --- can possibly be nans for subtotal differences (and maybe other times).
+        counts = np.nan_to_num(counts)
+        # --- Convert to int, so that it matches old behavior exactly
+        # --- TODO: Should we do this? Seems better to use true weights.
+        counts = counts.astype("int64")
+        cumulative_counts = np.cumsum(counts)
+        # --- If no valid numeric value has counts, median is nan
+        if cumulative_counts[-1] == 0:
+            return np.nan
+        # --- Find the point at which the count that contains 50% of total counts
+        cumulative_prop = cumulative_counts / cumulative_counts[-1]
+        median_idx = np.argmax(cumulative_prop >= 0.5)
+        # --- If it's exactly 50%, take the mean of the two nearest values
+        # --- TODO: Does this behave okay for large numbers (or is precision a problem)?
+        if cumulative_prop[median_idx] == 0.5:
+            return np.mean(sorted_values[[median_idx, median_idx + 1]])
+        else:
+            return sorted_values[median_idx]
 
 
 # === PAIRWISE HELPERS ===
