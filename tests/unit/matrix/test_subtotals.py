@@ -13,6 +13,7 @@ from cr.cube.matrix.subtotals import (
     SumSubtotals,
     TableStdErrSubtotals,
     ZscoreSubtotals,
+    PairwiseSigTestSubtotals,
 )
 
 from ...unitutil import ANY, initializer_mock, instance_mock, method_mock, property_mock
@@ -178,7 +179,7 @@ class Describe_BaseSubtotals(object):
 class DescribeNanSubtotals(object):
     """Unit test suite for `cr.cube.matrix.NanSubtotals` object."""
 
-    def it_can_compute_a_intersection_cell_value_to_help(self, request):
+    def it_can_compute_a_intersection_cell_value_to_help(self):
         assert np.isnan(NanSubtotals(None, None)._intersection(None, None))
 
     def it_can_compute_a_subtotal_column_to_help(self, request):
@@ -198,6 +199,102 @@ class DescribeNanSubtotals(object):
             subtotals._subtotal_row(None),
             np.array([np.nan] * 4),
         )
+
+
+class DescribePairwiseSigTestSubtotals(object):
+    """Unit test suite for `cr.cube.matrix.PairwiseSigTestSubtotals` object."""
+
+    def it_provides_a_blocks_interface_method(self, request, _init_):
+        property_mock(
+            request,
+            PairwiseSigTestSubtotals,
+            "_blocks",
+            return_value=np.array([[[1], [2]], [[3], [4]]]),
+        )
+
+        blocks = PairwiseSigTestSubtotals.blocks(None, None, None, None, 0)
+
+        _init_.assert_called_once_with(ANY, None, None, None, None, 0, True, True)
+        assert blocks.tolist() == [[[1], [2]], [[3], [4]]]
+
+    def it_can_compute_a_intersection_cell_value_to_help(self):
+        assert np.isnan(
+            PairwiseSigTestSubtotals(None, None, None, None, 0)._intersection(
+                None, None
+            )
+        )
+
+    @pytest.mark.parametrize(
+        ("addend_idxs", "subtrahend_idxs", "diff_cols_nan", "expected_value"),
+        (
+            ([1, 2], [], False, [[1], [2]]),
+            ([], [1, 2], False, [[1], [2]]),
+            ([0], [2], True, [[np.nan], [np.nan], [np.nan]]),
+        ),
+    )
+    def it_can_compute_a_subtotal_column_to_help(
+        self,
+        request,
+        subtotal_,
+        addend_idxs,
+        subtrahend_idxs,
+        diff_cols_nan,
+        expected_value,
+    ):
+        subtotal_.addend_idxs = addend_idxs
+        subtotal_.subtrahend_idxs = subtrahend_idxs
+        property_mock(request, PairwiseSigTestSubtotals, "_nrows", return_value=3)
+        subtotals = PairwiseSigTestSubtotals(
+            None, None, None, None, 0, diff_cols_nan, None
+        )
+        column = np.array([1, 2])
+
+        assert subtotals._subtotal_column(subtotal_, column) == pytest.approx(
+            np.array(expected_value), nan_ok=True
+        )
+
+    @pytest.mark.parametrize(
+        ("addend_idxs", "subtrahend_idxs", "diff_rows_nan", "expected_value"),
+        (
+            ([1, 2], [], False, [1, 2]),
+            ([], [1, 2], False, [1, 2]),
+            ([0], [2], True, [np.nan, np.nan, np.nan]),
+        ),
+    )
+    def it_can_compute_a_subtotal_row_to_help(
+        self,
+        request,
+        subtotal_,
+        addend_idxs,
+        subtrahend_idxs,
+        diff_rows_nan,
+        expected_value,
+    ):
+        subtotal_.addend_idxs = addend_idxs
+        subtotal_.subtrahend_idxs = subtrahend_idxs
+        property_mock(request, PairwiseSigTestSubtotals, "_ncols", return_value=3)
+        subtotals = PairwiseSigTestSubtotals(
+            None, None, None, None, 0, None, diff_rows_nan
+        )
+        row = np.array([1, 2])
+
+        assert subtotals._subtotal_row(subtotal_, row) == pytest.approx(
+            expected_value, nan_ok=True
+        )
+
+    # --- fixture components -----------------------------------------
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def _init_(self, request):
+        return initializer_mock(request, PairwiseSigTestSubtotals)
+
+    @pytest.fixture
+    def subtotal_(self, request):
+        return instance_mock(request, _Subtotal)
 
 
 class DescribeSumSubtotals(object):
