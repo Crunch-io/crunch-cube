@@ -606,7 +606,8 @@ class Assembler(object):
         deviations above (positive) or below (negative) the population mean a cell's
         value is.
         """
-        return self._assemble_matrix(self._measures.zscores.blocks)
+        blks = self._measures.zscores.blocks
+        return self._assemble_matrix(blks)
 
     def _assemble_matrix(self, blocks):
         """Return 2D ndarray matrix assembled from `blocks`.

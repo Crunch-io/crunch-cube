@@ -900,6 +900,10 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
             if dimension_types[0] == DT.MR
             else _CatXMrWeightedCubeCounts
             if dimension_types[1] == DT.MR
+            else _CaSubvarXCaCatWeightedCubeCounts
+            if dimension_types[0] == DT.CA_SUBVAR
+            else _CaCatXCaSubvarWeightedCubeCounts
+            if dimension_types[1] == DT.CA_SUBVAR
             else _CatXCatWeightedCubeCounts
         )
         return WeightedCubeCountsCls(
@@ -1054,6 +1058,26 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
 
         with np.errstate(divide="ignore", invalid="ignore"):
             return residuals / np.sqrt(variance_of_residuals)
+
+
+class _CaSubvarXCaCatWeightedCubeCounts(_CatXCatWeightedCubeCounts):
+    @lazyproperty
+    def zscores(self):
+        return np.full(self._weighted_counts.shape, np.nan)
+
+    @lazyproperty
+    def pvals(self):
+        return np.full(self._weighted_counts.shape, np.nan)
+
+
+class _CaCatXCaSubvarWeightedCubeCounts(_CatXCatWeightedCubeCounts):
+    @lazyproperty
+    def zscores(self):
+        return np.full(self._weighted_counts.shape, np.nan)
+
+    @lazyproperty
+    def pvals(self):
+        return np.full(self._weighted_counts.shape, np.nan)
 
 
 class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
@@ -1295,6 +1319,10 @@ class BaseCubeResultMatrix(object):
             if dimension_types[0] == DT.MR
             else _CatXMrMatrix
             if dimension_types[1] == DT.MR
+            else _CaSubvarXCaCatMatrix
+            if dimension_types[0] == DT.CA_SUBVAR
+            else _CaCatXCaSubvarMatrix
+            if dimension_types[1] == DT.CA_SUBVAR
             else _CatXCatMatrix
         )
         return MatrixCls(dimensions, *cls._sliced_counts(cube, slice_idx))
@@ -1601,6 +1629,33 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
         return p * (1 - p)
 
 
+class _CaCatXCaSubvarMatrix(_CatXCatMatrix):
+    """Represents a CA_CAT x CA_SUBVAR slice.
+
+    Its `._counts` is a 2D ndarray of np.float64 with axes
+    (rows-cats, cols-subvars), like:
+
+        [[ 159.41813738,  173.61600253,   58.75655753,  346.74700223],
+         [ 110.96550668,  274.72860719,  107.39903745,  362.20938722],
+         [ 128.52455871,  236.04923962,   64.49275927,  375.7716075 ],
+         [ 116.5823397 ,  202.02792854,   70.53228666,  427.24742476],
+         [ 131.63770813,  213.25470881,   69.33463988,  359.03756006],
+         [   0.        ,    0.        ,    0.        ,    0.        ],
+         [   0.        ,    0.        ,    0.        ,    0.        ],
+         [ 589.01234901,  850.44228815,  369.03611627, 1668.19653824],
+         [4038.18604404, 2883.8839254 , 3773.9424198 , 3100.69593512],
+         [1562.67621006, 2003.00015346, 2323.50903687,  197.0973986 ]])
+    """
+
+    @lazyproperty
+    def columns_margin(self):
+        return np.sum(self._weighted_counts, axis=0)
+
+    @lazyproperty
+    def table_margin(self):
+        return self.columns_margin
+
+
 class _CatXMrMatrix(_CatXCatMatrix):
     """Represents a CAT x MR slice.
 
@@ -1740,6 +1795,37 @@ class _CatXMrMatrix(_CatXCatMatrix):
         """2D ndarray of np.float64 table proportion variance for each matrix cell."""
         p = self._weighted_counts[:, :, 0] / self.table_margin
         return p * (1 - p)
+
+
+class _CaSubvarXCaCatMatrix(_CatXCatMatrix):
+    """Represents a CA_SUBVAR x CA_CAT slice.
+
+    Its `._counts` is a 2D ndarray of np.float64 with axes
+    (rows-subvars, cols-cats), like:
+
+        [[3., 3., 0., 0.],
+         [1., 3., 2., 0.],
+         [0., 2., 1., 3.]]
+    """
+
+    @lazyproperty
+    def rows_margin(self):
+        return np.sum(self._weighted_counts, axis=1)
+
+    @lazyproperty
+    def table_margin(self):
+        return self.rows_margin
+
+    @lazyproperty
+    def _table_proportion_variances(self):
+        p = self._weighted_counts / self.table_margin[:, np.newaxis]
+        return p * (1 - p)
+
+    @lazyproperty
+    def table_stderrs(self):
+        return np.sqrt(
+            self._table_proportion_variances / self.table_margin[:, np.newaxis]
+        )
 
 
 class _MrXCatMatrix(BaseCubeResultMatrix):

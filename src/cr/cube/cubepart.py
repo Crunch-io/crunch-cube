@@ -1262,7 +1262,10 @@ class _Slice(CubePartition):
         # --- of the 1D table-margins broadcast fine, but the MR-X-CAT case needs
         # --- transposition to get the broadcasting right.
         with np.errstate(divide="ignore", invalid="ignore"):
-            if rows_dimension_type == DT.MR_SUBVAR and table_margin.ndim == 1:
+            if (
+                rows_dimension_type in (DT.MR_SUBVAR, DT.CA_SUBVAR)
+                and table_margin.ndim == 1
+            ):
                 return (self.counts.T / table_margin).T
             return self.counts / table_margin
 

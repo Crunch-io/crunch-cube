@@ -1339,7 +1339,7 @@ class _Zscores(_BaseSecondOrderMeasure):
         """2D array of the four 2D "blocks" making up this measure."""
         base_values = self._weighted_cube_counts.zscores
         dimension_types = tuple(d.dimension_type for d in self._dimensions)
-        if DT.MR_SUBVAR in dimension_types:
+        if DT.MR_SUBVAR in dimension_types or DT.CA_SUBVAR in dimension_types:
             return NanSubtotals.blocks(base_values, self._dimensions)
         return ZscoreSubtotals.blocks(self._weighted_cube_counts, self._dimensions)
 
