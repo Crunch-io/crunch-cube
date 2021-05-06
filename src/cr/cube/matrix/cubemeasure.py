@@ -977,7 +977,7 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         # --- if the matrix is "defective", in the sense that it doesn't have at least
         # --- two rows and two columns that are "full" of data, don't calculate zscores.
         if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
-            return np.zeros(counts.shape)
+            return np.full(counts.shape, np.nan)
 
         expected_counts = rowsum * colsum / total
         variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3

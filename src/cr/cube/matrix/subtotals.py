@@ -391,22 +391,20 @@ class ZscoreSubtotals(_BaseSubtotals):
 
     def __init__(
         self,
-        base_values,
+        weighted_counts,
         dimensions,
         diff_cols_nan=True,
         diff_rows_nan=True,
     ):
-        super(ZscoreSubtotals, self).__init__(base_values, dimensions)
-        self._base_values = base_values.zscores
-        self._base_counts = base_values.weighted_counts
-        self._rows_margin = base_values.rows_margin
-        self._columns_margin = base_values.columns_margin
-        self._table_margin = base_values.table_margin
+        super(ZscoreSubtotals, self).__init__(weighted_counts, dimensions)
+        self._weighted_counts = weighted_counts
         self._diff_cols_nan = diff_cols_nan
         self._diff_rows_nan = diff_rows_nan
 
     @classmethod
-    def blocks(cls, base_values, dimensions, diff_cols_nan=True, diff_rows_nan=True):
+    def blocks(
+        cls, weighted_counts, dimensions, diff_cols_nan=True, diff_rows_nan=True
+    ):
         """Return base, row and col insertion, and intersection matrices.
 
         These are in the form ready for assembly.
@@ -417,11 +415,11 @@ class ZscoreSubtotals(_BaseSubtotals):
         `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
         row bases (default False)
         """
-        return cls(base_values, dimensions, diff_cols_nan, diff_rows_nan)._blocks
+        return cls(weighted_counts, dimensions, diff_cols_nan, diff_rows_nan)._blocks
 
     @classmethod
     def intersections(
-        cls, base_values, dimensions, diff_cols_nan=True, diff_rows_nan=True
+        cls, weighted_counts, dimensions, diff_cols_nan=True, diff_rows_nan=True
     ):
         """Return (n_row_subtotals, n_col_subtotals) ndarray of intersection values.
 
@@ -433,7 +431,27 @@ class ZscoreSubtotals(_BaseSubtotals):
         `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
         row bases (default False)
         """
-        return cls(base_values, dimensions, diff_cols_nan, diff_rows_nan)._intersections
+        return cls(
+            weighted_counts, dimensions, diff_cols_nan, diff_rows_nan
+        )._intersections
+
+    @lazyproperty
+    def _base_counts(self):
+        """2D float64 nparray of weighted counts."""
+        return self._weighted_counts.weighted_counts
+
+    @lazyproperty
+    def _blocks(self):
+        """base, row and col insertion, and intersection matrices."""
+        return [
+            [self._weighted_counts.zscores, self._subtotal_columns],
+            [self._subtotal_rows, self._intersections],
+        ]
+
+    @lazyproperty
+    def _columns_margin(self):
+        """2D np.float64 ndarray of weighted-N for each matrix column/cell."""
+        return self._weighted_counts.columns_margin
 
     def _intersection(self, row_subtotal, column_subtotal):
         """Return value for intersection of `row_subtotal` and `column_subtotal`."""
@@ -483,6 +501,21 @@ class ZscoreSubtotals(_BaseSubtotals):
         # --- result is scalar ---
         with np.errstate(divide="ignore", invalid="ignore"):
             return residuals / np.sqrt(variance)
+
+    @lazyproperty
+    def _ncols(self):
+        """int count of columns in base-matrix."""
+        return self._base_counts.shape[1]
+
+    @lazyproperty
+    def _nrows(self):
+        """int count of rows in base-matrix."""
+        return self._base_counts.shape[0]
+
+    @lazyproperty
+    def _rows_margin(self):
+        """2D np.float64 ndarray of weighted-N for each matrix row/cell."""
+        return self._weighted_counts.rows_margin
 
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of zscore `subtotal` value."""
@@ -555,3 +588,8 @@ class ZscoreSubtotals(_BaseSubtotals):
         # --- result is scalar or 1D, depending on dimensionality of residuals ---
         with np.errstate(divide="ignore", invalid="ignore"):
             return residuals / np.sqrt(variance)
+
+    @lazyproperty
+    def _table_margin(self):
+        """Scalar np.float64 weighted-N for overall table."""
+        return self._weighted_counts.table_margin

@@ -1265,8 +1265,8 @@ class Describe_CatXCatWeightedCubeCounts(object):
             [-0.4387482193696045, 8.677577953250143e-16, 0.5097793640389934],
         ]
 
-    def it_does_not_calculate_zscores_when_matrix_is_defective(self):
-        raw_weighted_counts = np.array([[1, 1], [2, 2]])
+    def but_its_zscores_are_NaNs_for_a_deficient_matrix(self):
+        raw_weighted_counts = np.array([[1.1, 1.1], [2.2, 2.2]])
         weighted_cube_counts = _CatXCatWeightedCubeCounts(None, raw_weighted_counts)
         assert weighted_cube_counts.zscores == pytest.approx(
             np.array([[np.nan, np.nan], [np.nan, np.nan]]), nan_ok=True
@@ -1347,15 +1347,17 @@ class Describe_CatXMrWeightedCubeCounts(object):
 
     def it_knows_its_zscores(self, raw_weighted_counts):
         weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
-        assert weighted_cube_counts.zscores.tolist() == [
+        assert pytest.approx(weighted_cube_counts.zscores) == [
             [-1.7549928774784245, -1.6818357317441646, -1.754992877478425],
             [1.7549928774784245, 1.6818357317441637, 1.754992877478425],
         ]
 
-    def it_does_not_calculate_zscores_when_matrix_is_defective(self):
-        raw_weighted_counts = np.array([[[1, 1], [2, 2]]])
+    def but_its_zscores_are_NaNs_for_a_deficient_matrix(self):
+        raw_weighted_counts = np.array([[[1.2, 1.2], [2.1, 2.2]]])
         weighted_cube_counts = _CatXMrWeightedCubeCounts(None, raw_weighted_counts)
-        assert weighted_cube_counts.zscores.tolist() == [[0, 0]]
+        assert weighted_cube_counts.zscores == pytest.approx(
+            np.array([[np.nan, np.nan]]), nan_ok=True
+        )
 
     # fixtures -------------------------------------------------------
 

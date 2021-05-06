@@ -1343,12 +1343,14 @@ class Describe_WeightedCounts(object):
 class Describe_Zscores(object):
     """Unit test suite for `cr.cube.matrix.measure._Zscores` object."""
 
-    def it_computes_zscore_subtotals_blocks_to_help(self, request, dimensions_):
+    def it_computes_zscore_subtotals_blocks(self, request, dimensions_):
         weighted_cube_counts_ = instance_mock(request, _BaseWeightedCubeCounts)
-        _weighted_cube_counts = property_mock(
-            request, _BaseSecondOrderMeasure, "_weighted_cube_counts"
+        property_mock(
+            request,
+            _Zscores,
+            "_weighted_cube_counts",
+            return_value=weighted_cube_counts_,
         )
-        _weighted_cube_counts.return_value = weighted_cube_counts_
         ZscoreSubtotals_ = class_mock(request, "cr.cube.matrix.measure.ZscoreSubtotals")
         ZscoreSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         zscores = _Zscores(dimensions_, None, None)
@@ -1360,14 +1362,18 @@ class Describe_Zscores(object):
         )
         assert blocks == [[[1], [2]], [[3], [4]]]
 
-    def it_computes_nan_subtotals_blocks_to_help(self, request, dimensions_):
+    def but_the_subtotal_blocks_are_NaNs_when_an_MR_dimension_is_present(
+        self, request, dimensions_
+    ):
         weighted_cube_counts_ = instance_mock(
-            request, _BaseWeightedCubeCounts, zscores=[1, 2]
+            request, _BaseWeightedCubeCounts, zscores=[[1, 2], [3, 4]]
         )
-        _weighted_cube_counts = property_mock(
-            request, _BaseSecondOrderMeasure, "_weighted_cube_counts"
+        property_mock(
+            request,
+            _Zscores,
+            "_weighted_cube_counts",
+            return_value=weighted_cube_counts_,
         )
-        _weighted_cube_counts.return_value = weighted_cube_counts_
         NanSubtotals_ = class_mock(request, "cr.cube.matrix.measure.NanSubtotals")
         NanSubtotals_.blocks.return_value = [[[1], [np.nan]], [[np.nan], [np.nan]]]
         dimensions_[0].dimension_type = DT.MR_SUBVAR
@@ -1375,7 +1381,7 @@ class Describe_Zscores(object):
 
         blocks = zscores.blocks
 
-        NanSubtotals_.blocks.assert_called_once_with([1, 2], dimensions_)
+        NanSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
         assert blocks == [[[1], [np.nan]], [[np.nan], [np.nan]]]
 
     # fixture components ---------------------------------------------

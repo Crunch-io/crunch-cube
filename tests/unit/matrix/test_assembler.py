@@ -1010,10 +1010,6 @@ class DescribeAssembler(object):
     def TableStdErrSubtotals_(self, request):
         return class_mock(request, "cr.cube.matrix.assembler.TableStdErrSubtotals")
 
-    @pytest.fixture
-    def ZscoreSubtotals_(self, request):
-        return class_mock(request, "cr.cube.matrix.subtotals.ZscoreSubtotals")
-
 
 class Describe_BaseOrderHelper(object):
     """Unit test suite for `cr.cube.matrix.assembler._BaseOrderHelper` object."""
