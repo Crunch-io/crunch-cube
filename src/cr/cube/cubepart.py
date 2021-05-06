@@ -506,21 +506,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no row element has been assigned a numeric value.
         """
-        if not self._rows_have_numeric_value:
-            return None
-
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
-        numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
-        counts = np.nan_to_num(
-            self._assembler.column_comparable_counts[not_a_nan_index, :]
-        ).astype("int64")
-        scale_median = np.array(
-            [
-                self._median(np.repeat(numeric_values, counts[:, i]))
-                for i in range(counts.shape[1])
-            ]
-        )
-        return scale_median
+        return self._assembler.columns_scale_median
 
     @lazyproperty
     def columns_scale_median_margin(self):
