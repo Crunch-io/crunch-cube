@@ -15,6 +15,8 @@ from cr.cube.matrix.cubemeasure import (
 )
 from cr.cube.matrix.measure import (
     _BaseSecondOrderMeasure,
+    _BaseSecondOrderMarginal,
+    _ScaleMedian,
     _ColumnComparableCounts,
     _ColumnProportions,
     _ColumnShareSum,
@@ -1371,3 +1373,90 @@ class Describe_Zscores(object):
     @pytest.fixture
     def dimensions_(self, request):
         return instance_mock(request, Dimension), instance_mock(request, Dimension)
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+
+# === Marginals ===
+
+
+class Describe_BaseSecondOrderMarginal(object):
+    """Unit test suite for `cr.cube.matrix.measure._BaseSecondOrderMarginal` object."""
+
+    def it_has_default_is_defined(self):
+        marginal = _BaseSecondOrderMarginal(None, None, None)
+        assert marginal.is_defined is True
+
+    def it_provides_apply_along_orientation_to_help(object, request):
+        marg = _BaseSecondOrderMarginal(None, None, None)
+        property_mock(
+            request, _BaseSecondOrderMarginal, "orientation", return_value="rows"
+        )
+        array = np.array([[0, 1, 2], [3, 4, 5]])
+
+        result = marg._apply_along_orientation(np.sum, array)
+
+        assert result.tolist() == [3, 12]
+
+    # TODO: it is okay with 0 row/column arrays
+
+
+class Describe_BaseScaledCountMarginal(object):
+    """Unit test suite for `cr.cube.matrix.measure._BaseScaledCountMarginal` object."""
+
+    # provides opposing numeric values
+    pass
+
+
+class Describe_ScaleMedian(object):
+    """Unit test suite for `cr.cube.matrix.measure._ScaleMedian` object."""
+
+    # TODO: It provides blocks
+    # TODO: It provides orientation
+    # TODO: It provides is_defined
+
+    def it_calculates_weighted_median_simple(self):
+        counts = np.array([1.0, 2.0])
+        values = np.array([10.0, 20.0])
+
+        assert _ScaleMedian._weighted_median(counts, values) == 20.0
+        assert self.old_median_method(counts, values) == 20.0  # these two are equal
+
+    def it_calculates_weighted_median_tie_value(self):
+        counts = np.array([1.0, 2.0, 3.0])
+        values = np.array([10.0, 20.0, 30.0])
+
+        assert _ScaleMedian._weighted_median(counts, values) == 25.0
+        assert self.old_median_method(counts, values) == 25.0  # these two are equal
+
+    def it_calculates_weighted_median_tie_large_numbers(self):
+        counts = np.array([100000000.0, 100000000.0, 200000000.0])
+        values = np.array([10.0, 20.0, 30.0])
+
+        # --- Not sure how large before numeric precision would become a problem but this
+        # --- is okay
+        assert _ScaleMedian._weighted_median(counts, values) == 25.0
+        # --- Takes ~5 seconds on my machine
+        # assert self.old_median_method(counts, values) == 25.0  # these two are equal
+
+    def it_calculates_weighted_median_fractions(self):
+        counts = np.array([1.9, 2.9, 4.1])
+        values = np.array([10.0, 20.0, 30.0])
+
+        assert _ScaleMedian._weighted_median(counts, values) == 20.0
+        assert self.old_median_method(counts, values) == 30.0  # different!
+
+    def it_calculates_weighted_median_nothing_above_1(self):
+        counts = np.array([0.9, 0.1])
+        values = np.array([10.0, 20.0])
+
+        assert _ScaleMedian._weighted_median(counts, values) == 10.0
+        assert np.isnan(self.old_median_method(counts, values))  # different!
+
+    # --- helpers ---
+    @staticmethod
+    def old_median_method(counts, values):
+        counts = np.nan_to_num(counts).astype("int64")
+        if np.sum(counts) == 0:
+            return np.nan
+        else:
+            return np.median(np.repeat(values, counts))

@@ -1376,7 +1376,7 @@ class _BaseSecondOrderMarginal(object):
         """Wrapper around `np.apply_along_axis` useful for marginal calculation
 
         Gets the axis from the `.orientation` property and also returns an empty
-        1d array of floats when the dimension is lenght 0 (rather than failing).
+        1d array of floats when the dimension is length 0 (rather than failing).
         """
         axis = 1 if self.orientation == "rows" else 0
 
@@ -1390,14 +1390,13 @@ class _BaseScaledCountMarginal(_BaseSecondOrderMarginal):
     """A base class for marginals that depend on the scaled counts."""
 
     @lazyproperty
-    def _columns_numeric_values(self):
-        """ndarray of numeric_values from the columns dimension"""
-        return np.array(self._dimensions[1].numeric_values, dtype=np.float64)
-
-    @lazyproperty
-    def _rows_numeric_values(self):
-        """ndarray of numeric_values from the rows dimension"""
-        return np.array(self._dimensions[0].numeric_values, dtype=np.float64)
+    def _opposing_numeric_values(self):
+        """ndarray of numeric_values from the opposing dimension"""
+        return (
+            np.array(self._dimensions[1].numeric_values, dtype=np.float64)
+            if self.orientation == "rows"
+            else np.array(self._dimensions[0].numeric_values, dtype=np.float64)
+        )
 
 
 class _ScaleMedian(_BaseScaledCountMarginal):
@@ -1427,7 +1426,7 @@ class _ScaleMedian(_BaseScaledCountMarginal):
         if not self.is_defined:
             raise ValueError("No numeric values are defined on the columns dimension.")
 
-        values = self._numeric_values
+        values = self._opposing_numeric_values
         sort_order = values.argsort()[~np.isnan(values)]
         sorted_values = values[sort_order]
 
@@ -1456,28 +1455,22 @@ class _ScaleMedian(_BaseScaledCountMarginal):
     @lazyproperty
     def is_defined(self):
         """True if any have numeric values"""
-        return not np.all(np.isnan(self._numeric_values))
+        return not np.all(np.isnan(self._opposing_numeric_values))
 
-    @lazyproperty
-    def _numeric_values(self):
-        return (
-            self._columns_numeric_values
-            if self.orientation == "rows"
-            else self._rows_numeric_values
-        )
-
-    def _weighted_median(self, counts, sorted_values):
+    @staticmethod
+    def _weighted_median(counts, sorted_values):
         """Calculate the median given a set of values and their frequency in the data
 
         `sorted_values` must be sorted in order and the counts must be sorted to match
         that order.
         """
         # --- Convert nans to 0, as we don't want them to contribute to median. Counts
-        # --- can possibly be nans for subtotal differences (and maybe other times).
+        # --- can possibly be nans for subtotal differences along the orientation we're
+        # --- calculating.
         counts = np.nan_to_num(counts)
-        # --- Convert to int, so that it matches old behavior exactly
-        # --- TODO: Should we do this? Seems better to use true weights.
-        counts = counts.astype("int64")
+        # --- TODO: We could convert to int, so that it matches old behavior exactly
+        # --- Should we do this? Seems better to use true weights.
+        # counts = counts.astype("int64")
         cumulative_counts = np.cumsum(counts)
         # --- If no valid numeric value has counts, median is nan
         if cumulative_counts[-1] == 0:
