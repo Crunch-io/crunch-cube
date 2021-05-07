@@ -70,7 +70,7 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def columns_scale_median(self):
         """1D np.float64 ndarray of unweighted-N for each matrix column."""
-        return _ScaleMedian("columns", self._dimensions, self, self._cube_measures)
+        return _ScaleMedian(self._dimensions, self, self._cube_measures, "columns")
 
     @lazyproperty
     def means(self):
@@ -151,7 +151,7 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def rows_scale_median(self):
         """_ScaleMedian for rows measure object for this cube-result."""
-        return _ScaleMedian("rows", self._dimensions, self, self._cube_measures)
+        return _ScaleMedian(self._dimensions, self, self._cube_measures, "rows")
 
     @lazyproperty
     def sums(self):
@@ -1342,10 +1342,16 @@ class _Zscores(_BaseSecondOrderMeasure):
 class _BaseSecondOrderMarginal(object):
     """Base class for all second-order measure objects."""
 
-    def __init__(self, dimensions, second_order_measures, cube_measures):
+    def __init__(self, dimensions, second_order_measures, cube_measures, orientation):
         self._dimensions = dimensions
         self._second_order_measures = second_order_measures
         self._cube_measures = cube_measures
+        if orientation not in ("rows", "columns"):
+            raise ValueError(
+                "'%s' is an invalid orientation, must be 'rows' or 'columns'."
+                % orientation
+            )
+        self._orientation = orientation
 
     @lazyproperty
     def blocks(self):
@@ -1360,9 +1366,7 @@ class _BaseSecondOrderMarginal(object):
     @lazyproperty
     def orientation(self):
         """String, either "row" or "column", the orientation the marginal."""
-        raise NotImplementedError(  # pragma: no cover
-            "%s must implement `.orientation`" % type(self).__name__
-        )
+        return self._orientation
 
     @lazyproperty
     def is_defined(self):
@@ -1411,12 +1415,6 @@ class _ScaleMedian(_BaseScaledCountMarginal):
     categories with numeric values have positive counts it will be np.nan.
     """
 
-    def __init__(self, orientation, dimensions, second_order_measures, cube_measures):
-        super(_ScaleMedian, self).__init__(
-            dimensions, second_order_measures, cube_measures
-        )
-        self._orientation = orientation
-
     @lazyproperty
     def blocks(self):
         """List of the 2 1D ndarray "blocks" of the scale median.
@@ -1424,28 +1422,19 @@ class _ScaleMedian(_BaseScaledCountMarginal):
         These are the base-values and the subtotals.
         """
         if not self.is_defined:
-            raise ValueError("No numeric values are defined on the columns dimension.")
-
-        values = self._opposing_numeric_values
-        sort_order = values.argsort()[~np.isnan(values)]
-        sorted_values = values[sort_order]
-
-        if self.orientation == "rows":
-            # --- Use *row* comparable counts ---
-            counts = self._second_order_measures.row_comparable_counts.blocks
-            # --- Get base values & *row* subtotals, sorting each by *column* ---
-            counts = [counts[0][0][:, sort_order], counts[1][0][:, sort_order]]
-        else:
-            # --- Use *column* comparable counts ---
-            counts = self._second_order_measures.column_comparable_counts.blocks
-            # --- Get base values & *column* subtotals, sorting each by *row* ---
-            counts = [counts[0][0][sort_order, :], counts[0][1][sort_order, :]]
+            raise ValueError(
+                (
+                    "%s-scale-median is undefined if no numeric values are defined on "
+                    + "opposing dimension."
+                )
+                % self.orientation
+            )
 
         return [
             self._apply_along_orientation(
-                self._weighted_median, count, sorted_values=sorted_values
+                self._weighted_median, count, sorted_values=self._sorted_values
             )
-            for count in counts
+            for count in self._sorted_counts
         ]
 
     @lazyproperty
@@ -1456,6 +1445,39 @@ class _ScaleMedian(_BaseScaledCountMarginal):
     def is_defined(self):
         """True if any have numeric values"""
         return not np.all(np.isnan(self._opposing_numeric_values))
+
+    @lazyproperty
+    def _sorted_counts(self):
+        axis = 1 if self.orientation == "rows" else 0
+        return [
+            count.take(self._values_sort_order, axis) for count in self._unsorted_counts
+        ]
+
+    @lazyproperty
+    def _sorted_values(self):
+        return self._opposing_numeric_values[self._values_sort_order]
+
+    @lazyproperty
+    def _unsorted_counts(self):
+        if self.orientation == "rows":
+            # --- Use *row* comparable counts ---
+            counts = self._second_order_measures.row_comparable_counts.blocks
+            # --- Get base values & *row* subtotals
+            return [counts[0][0], counts[1][0]]
+        else:
+            # --- Use *column* comparable counts ---
+            counts = self._second_order_measures.column_comparable_counts.blocks
+            # --- Get base values & *column* subtotals
+            return [counts[0][0], counts[0][1]]
+
+    @lazyproperty
+    def _values_sort_order(self):
+        values = self._opposing_numeric_values
+        sort_idx = values.argsort()
+        nan_idx = np.argwhere(np.isnan(values))
+        # take the sorted indices and remove the nans
+        # `assume_unique=True` preserves the order of the array
+        return np.setdiff1d(sort_idx, nan_idx, assume_unique=True)
 
     @staticmethod
     def _weighted_median(counts, sorted_values):
