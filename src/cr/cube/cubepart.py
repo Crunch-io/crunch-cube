@@ -1371,9 +1371,6 @@ class _Slice(CubePartition):
             )
         )
 
-    def _median(self, values):
-        return np.median(values) if values.size != 0 else np.nan
-
     @lazyproperty
     def _row_variance(self):
         """2D np.float64 ndarray of row-percentage variance for each cell."""
