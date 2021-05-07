@@ -216,18 +216,18 @@ class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
     @classmethod
     def factory(cls, cube, rows_dimension, ca_as_0th, slice_idx):
         """Return _BaseUnweightedCubeCounts subclass instance appropriate to `cube`."""
+        valid_counts = cube.unweighted_valid_counts
+        counts = valid_counts if valid_counts is not None else cube.unweighted_counts
         if ca_as_0th:
-            return _CatUnweightedCubeCounts(
-                rows_dimension, cube.unweighted_counts[slice_idx]
-            )
+            return _CatUnweightedCubeCounts(rows_dimension, counts[slice_idx])
 
         if rows_dimension.dimension_type == DT.NUM_ARRAY:
-            return _NumArrUnweightedCubeCounts(rows_dimension, cube.unweighted_counts)
+            return _NumArrUnweightedCubeCounts(rows_dimension, counts)
 
         if rows_dimension.dimension_type == DT.MR:
-            return _MrUnweightedCubeCounts(rows_dimension, cube.unweighted_counts)
+            return _MrUnweightedCubeCounts(rows_dimension, counts)
 
-        return _CatUnweightedCubeCounts(rows_dimension, cube.unweighted_counts)
+        return _CatUnweightedCubeCounts(rows_dimension, counts)
 
     @lazyproperty
     def bases(self):
@@ -348,13 +348,15 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
     @classmethod
     def factory(cls, cube, rows_dimension, ca_as_0th, slice_idx):
         """Return _BaseWeightedCubeCounts subclass instance appropriate to `cube`."""
+        valid_counts = cube.weighted_valid_counts
+        counts = valid_counts if valid_counts is not None else cube.counts
         if ca_as_0th:
-            return _CatWeightedCubeCounts(rows_dimension, cube.counts[slice_idx])
+            return _CatWeightedCubeCounts(rows_dimension, counts[slice_idx])
 
         if rows_dimension.dimension_type == DT.MR:
-            return _MrWeightedCubeCounts(rows_dimension, cube.counts)
+            return _MrWeightedCubeCounts(rows_dimension, counts)
 
-        return _CatWeightedCubeCounts(rows_dimension, cube.counts)
+        return _CatWeightedCubeCounts(rows_dimension, counts)
 
     @lazyproperty
     def bases(self):

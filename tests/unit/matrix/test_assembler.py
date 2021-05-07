@@ -23,14 +23,23 @@ from cr.cube.matrix.measure import (
     _BaseSecondOrderMeasure,
     _ColumnComparableCounts,
     _ColumnProportions,
+    _ColumnShareSum,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
+    _Means,
     _RowComparableCounts,
+    _RowProportions,
+    _RowShareSum,
     _RowUnweightedBases,
     _RowWeightedBases,
     SecondOrderMeasures,
+    _StdDev,
+    _Sums,
+    _TotalShareSum,
     _TableUnweightedBases,
     _TableWeightedBases,
+    _UnweightedCounts,
+    _WeightedCounts,
     _Zscores,
 )
 
@@ -51,13 +60,22 @@ class DescribeAssembler(object):
         (
             ("column_comparable_counts", _ColumnComparableCounts),
             ("column_proportions", _ColumnProportions),
+            ("column_share_sum", _ColumnShareSum),
             ("column_unweighted_bases", _ColumnUnweightedBases),
             ("column_weighted_bases", _ColumnWeightedBases),
+            ("means", _Means),
             ("row_comparable_counts", _RowComparableCounts),
+            ("row_proportions", _RowProportions),
+            ("row_share_sum", _RowShareSum),
             ("row_unweighted_bases", _RowUnweightedBases),
             ("row_weighted_bases", _RowWeightedBases),
+            ("stddev", _StdDev),
+            ("sums", _Sums),
             ("table_unweighted_bases", _TableUnweightedBases),
             ("table_weighted_bases", _TableWeightedBases),
+            ("total_share_sum", _TotalShareSum),
+            ("weighted_counts", _WeightedCounts),
+            ("unweighted_counts", _UnweightedCounts),
             ("zscores", _Zscores),
         ),
     )
@@ -82,32 +100,6 @@ class DescribeAssembler(object):
         value = getattr(assembler, measure_prop_name)
 
         _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
-        assert value == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-    @pytest.mark.parametrize(
-        "measure_prop_name",
-        ("weighted_counts", "unweighted_counts"),
-    )
-    def it_knows_weighted_and_unweighted_counts(
-        self,
-        cube_,
-        _measures_prop_,
-        second_order_measures_,
-        _assemble_matrix_,
-        measure_prop_name,
-    ):
-        _measures_prop_.return_value = second_order_measures_
-        cube_.weighted_valid_counts = None
-        cube_.unweighted_valid_counts = None
-        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(cube_, None, None)
-        measure_counts = getattr(second_order_measures_, measure_prop_name)
-
-        value = getattr(assembler, measure_prop_name)
-
-        _assemble_matrix_.assert_called_once_with(
-            assembler, measure_counts(False).blocks
-        )
         assert value == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
     def it_knows_the_column_index(

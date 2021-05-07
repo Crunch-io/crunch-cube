@@ -52,6 +52,8 @@ class DescribeSecondOrderMeasures(object):
             ("row_weighted_bases", _RowWeightedBases),
             ("table_unweighted_bases", _TableUnweightedBases),
             ("table_weighted_bases", _TableWeightedBases),
+            ("weighted_counts", _WeightedCounts),
+            ("unweighted_counts", _UnweightedCounts),
             ("zscores", _Zscores),
         ),
     )
@@ -77,37 +79,6 @@ class DescribeSecondOrderMeasures(object):
 
         MeasureCls_.assert_called_once_with(dimensions_, measures, cube_measures_)
         assert measure is measure_
-
-    @pytest.mark.parametrize(
-        "measure_prop_name, MeasureCls",
-        (
-            ("weighted_counts", _WeightedCounts),
-            ("unweighted_counts", _UnweightedCounts),
-        ),
-    )
-    def it_provides_access_to_counts_measure_objects(
-        self,
-        request,
-        dimensions_,
-        _cube_measures_prop_,
-        cube_measures_,
-        measure_prop_name,
-        MeasureCls,
-    ):
-        measure_ = instance_mock(request, MeasureCls)
-        MeasureCls_ = class_mock(
-            request,
-            "cr.cube.matrix.measure.%s" % MeasureCls.__name__,
-            return_value=measure_,
-        )
-        _cube_measures_prop_.return_value = cube_measures_
-        measures = SecondOrderMeasures(None, dimensions_, None)
-        measure = getattr(measures, measure_prop_name)
-
-        assert measure(False) is measure_
-        MeasureCls_.assert_called_once_with(
-            dimensions_, measures, cube_measures_, False
-        )
 
     def it_provides_access_to_the_columns_pruning_base(
         self, _cube_measures_prop_, cube_measures_, unweighted_cube_counts_
@@ -1277,13 +1248,16 @@ class Describe_TableWeightedBases(object):
 class Describe_UnweightedCounts(object):
     """Unit test suite for `cr.cube.matrix.measure._UnweightedCounts` object."""
 
-    def it_computes_its_blocks_to_help(self, request, dimensions_):
+    def it_computes_its_blocks_to_help(self, request, dimensions_, cube_measures_):
         # --- these need to be in list form because the assert-called-with mechanism
         # --- uses equality, which doesn't work on numpy arrays. Normally this would be
         # --- the array itself.
         ucounts = np.arange(12).reshape(3, 4).tolist()
         unweighted_cube_counts_ = instance_mock(
-            request, _BaseUnweightedCubeCounts, unweighted_counts=ucounts
+            request,
+            _BaseUnweightedCubeCounts,
+            unweighted_counts=ucounts,
+            diff_nans=False,
         )
         property_mock(
             request,
@@ -1293,7 +1267,7 @@ class Describe_UnweightedCounts(object):
         )
         SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
-        unweighted_counts = _UnweightedCounts(dimensions_, None, None, False)
+        unweighted_counts = _UnweightedCounts(dimensions_, None, cube_measures_)
 
         blocks = unweighted_counts.blocks
 
@@ -1304,19 +1278,23 @@ class Describe_UnweightedCounts(object):
 
     @pytest.fixture
     def dimensions_(self, request):
-        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+        return instance_mock(request, Dimension), instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def cube_measures_(self, request):
+        return instance_mock(request, CubeMeasures)
 
 
 class Describe_WeightedCounts(object):
     """Unit test suite for `cr.cube.matrix.measure._WeightedCounts` object."""
 
-    def it_computes_its_blocks_to_help(self, request, dimensions_):
+    def it_computes_its_blocks_to_help(self, request, dimensions_, cube_measures_):
         # --- these need to be in list form because the assert-called-with mechanism
         # --- uses equality, which doesn't work on numpy arrays. Normally this would be
         # --- the array itself.
         counts = np.arange(12).reshape(3, 4).tolist()
         weighted_cube_counts_ = instance_mock(
-            request, _BaseWeightedCubeCounts, weighted_counts=counts
+            request, _BaseWeightedCubeCounts, weighted_counts=counts, diff_nans=False
         )
         property_mock(
             request,
@@ -1326,7 +1304,7 @@ class Describe_WeightedCounts(object):
         )
         SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
-        weighted_counts = _WeightedCounts(dimensions_, None, None, False)
+        weighted_counts = _WeightedCounts(dimensions_, None, cube_measures_)
 
         blocks = weighted_counts.blocks
 
@@ -1334,6 +1312,10 @@ class Describe_WeightedCounts(object):
         assert blocks == [[[1], [2]], [[3], [4]]]
 
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_measures_(self, request):
+        return instance_mock(request, CubeMeasures)
 
     @pytest.fixture
     def dimensions_(self, request):
