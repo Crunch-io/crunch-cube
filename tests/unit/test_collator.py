@@ -14,7 +14,7 @@ from cr.cube.collator import (
     PayloadOrderCollator,
     SortByValueCollator,
 )
-from cr.cube.dimension import Dimension, _Subtotal
+from cr.cube.dimension import Dimension, _OrderSpec, _Subtotal
 
 from ..unitutil import (
     ANY,
@@ -53,9 +53,10 @@ class Describe_BaseCollator(object):
 
         assert collator._hidden_idxs == frozenset(expected_value)
 
-    def it_provides_access_to_the_order_transform_dict_to_help(self, dimension_):
-        dimension_.order_dict = {"order": "dict"}
-        assert _BaseCollator(dimension_, None)._order_dict == {"order": "dict"}
+    def it_provides_access_to_the_order_spec_to_help(self, request, dimension_):
+        order_spec_ = instance_mock(request, _OrderSpec)
+        dimension_.order_spec = order_spec_
+        assert _BaseCollator(dimension_, None)._order_spec is order_spec_
 
     def it_provides_access_to_the_dimension_subtotals_to_help(self, dimension_):
         assert _BaseCollator(dimension_, None)._subtotals is dimension_.subtotals
@@ -296,11 +297,12 @@ class DescribeExplicitOrderCollator(object):
             "_element_subvar_ids",
             return_value=element_subvar_ids,
         )
+        order_spec_ = instance_mock(request, _OrderSpec, element_ids=element_id_order)
         property_mock(
             request,
             ExplicitOrderCollator,
-            "_order_dict",
-            return_value={"element_ids": element_id_order},
+            "_order_spec",
+            return_value=order_spec_,
         )
         collator = ExplicitOrderCollator(None, None)
 
@@ -416,13 +418,17 @@ class DescribeSortByValueCollator(object):
 
         assert collator._body_idxs == expected_value
 
-    def it_computes_the_bottom_exclusion_idxs_to_help(self, _iter_fixed_idxs_):
+    def it_computes_the_bottom_exclusion_idxs_to_help(
+        self, request, _iter_fixed_idxs_, _order_spec_prop_, order_spec_
+    ):
         _iter_fixed_idxs_.return_value = (n for n in (4, 0, 5, 2))
+        _order_spec_prop_.return_value = order_spec_
+        order_spec_.bottom_fixed_ids = (0, 1, 2)
         collator = SortByValueCollator(None, None, None, None)
 
         bottom_exclusion_idxs = collator._bottom_fixed_idxs
 
-        _iter_fixed_idxs_.assert_called_once_with(collator, "bottom")
+        _iter_fixed_idxs_.assert_called_once_with(collator, (0, 1, 2))
         assert bottom_exclusion_idxs == (4, 0, 5, 2)
 
     @pytest.mark.parametrize(
@@ -449,41 +455,31 @@ class DescribeSortByValueCollator(object):
         assert collator._bottom_subtotal_idxs == expected_value
 
     @pytest.mark.parametrize(
-        "order_dict, top_or_bottom, expected_value",
-        (
-            ({}, "top", ()),
-            ({}, "bottom", ()),
-            ({"fixed": {}}, "top", ()),
-            ({"fixed": {"foobar": [4, 2]}}, "top", ()),
-            ({"fixed": {"top": [1, 3]}}, "top", (0, 2)),
-            ({"fixed": {"top": [1, 3, 7]}}, "top", (0, 2)),
-            ({"fixed": {"bottom": [4, 2]}}, "bottom", (3, 1)),
-        ),
+        "fixed_element_ids, expected_value",
+        (((), ()), ((1, 3), (0, 2)), ((1, 3, 7), (0, 2)), ((4, 2), (3, 1))),
     )
-    def it_can_iterate_the_fixed_idxs_for_top_or_bottom(
-        self, request, _order_dict_prop_, order_dict, top_or_bottom, expected_value
+    def it_can_iterate_the_fixed_idxs_to_help(
+        self, request, fixed_element_ids, expected_value
     ):
         property_mock(
             request, SortByValueCollator, "_element_ids", return_value=(1, 2, 3, 4, 5)
         )
-        _order_dict_prop_.return_value = order_dict
         collator = SortByValueCollator(None, None, None, None)
 
-        assert tuple(collator._iter_fixed_idxs(top_or_bottom)) == expected_value
+        assert tuple(collator._iter_fixed_idxs(fixed_element_ids)) == expected_value
 
     @pytest.mark.parametrize(
-        "order_dict, expected_value",
+        "descending, expected_value",
         (
-            ({}, True),
-            ({"direction": "foobar"}, True),
-            ({"direction": "descending"}, True),
-            ({"direction": "ascending"}, False),
+            (True, True),
+            (False, False),
         ),
     )
     def it_knows_whether_the_sort_direction_is_descending_to_help(
-        self, _order_dict_prop_, order_dict, expected_value
+        self, _order_spec_prop_, order_spec_, descending, expected_value
     ):
-        _order_dict_prop_.return_value = order_dict
+        _order_spec_prop_.return_value = order_spec_
+        order_spec_.descending = descending
         collator = SortByValueCollator(None, None, None, None)
 
         assert collator._descending == expected_value
@@ -507,13 +503,17 @@ class DescribeSortByValueCollator(object):
 
         assert collator._subtotal_idxs == expected_value
 
-    def it_computes_the_top_exclusion_idxs_to_help(self, _iter_fixed_idxs_):
+    def it_computes_the_top_fixed_idxs_to_help(
+        self, _order_spec_prop_, order_spec_, _iter_fixed_idxs_
+    ):
+        _order_spec_prop_.return_value = order_spec_
+        order_spec_.top_fixed_ids = (4, 2)
         _iter_fixed_idxs_.return_value = (i for i in (1, 2, 4))
         collator = SortByValueCollator(None, None, None, None)
 
         top_exclusion_idxs = collator._top_fixed_idxs
 
-        _iter_fixed_idxs_.assert_called_once_with(collator, "top")
+        _iter_fixed_idxs_.assert_called_once_with(collator, (4, 2))
         assert top_exclusion_idxs == (1, 2, 4)
 
     @pytest.mark.parametrize(
@@ -549,8 +549,12 @@ class DescribeSortByValueCollator(object):
         return method_mock(request, SortByValueCollator, "_iter_fixed_idxs")
 
     @pytest.fixture
-    def _order_dict_prop_(self, request):
-        return property_mock(request, SortByValueCollator, "_order_dict")
+    def order_spec_(self, request):
+        return instance_mock(request, _OrderSpec)
+
+    @pytest.fixture
+    def _order_spec_prop_(self, request):
+        return property_mock(request, SortByValueCollator, "_order_spec")
 
     @pytest.fixture
     def _subtotal_idxs_prop_(self, request):

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension, _Element, _Subtotal
+from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal
 from cr.cube.enums import COLLATION_METHOD as CM
 from cr.cube.stripe.assembler import (
     _BaseOrderHelper,
@@ -13,6 +13,7 @@ from cr.cube.stripe.assembler import (
     StripeAssembler,
 )
 from cr.cube.stripe.measure import (
+    _BaseSecondOrderMeasure,
     _Means,
     _ScaledCounts,
     StripeMeasures,
@@ -255,7 +256,11 @@ class Describe_BaseOrderHelper(object):
         self, request, measures_, collation_method, HelperCls
     ):
         rows_dimension_ = instance_mock(
-            request, Dimension, collation_method=collation_method
+            request,
+            Dimension,
+            order_spec=instance_mock(
+                request, _OrderSpec, collation_method=collation_method
+            ),
         )
         order_helper_ = instance_mock(
             request, HelperCls, _display_order=np.array([-2, 1, -1, 2])
@@ -304,7 +309,11 @@ class Describe_OrderHelper(object):
         self, request, collation_method, collator_class_name
     ):
         rows_dimension_ = instance_mock(
-            request, Dimension, collation_method=collation_method
+            request,
+            Dimension,
+            order_spec=instance_mock(
+                request, _OrderSpec, collation_method=collation_method
+            ),
         )
         CollatorCls_ = class_mock(
             request, "cr.cube.stripe.assembler.%s" % collator_class_name
@@ -317,3 +326,94 @@ class Describe_OrderHelper(object):
 
         CollatorCls_.display_order.assert_called_once_with(rows_dimension_, (2, 4, 6))
         assert display_order == (1, -2, 3, 5, -1)
+
+
+class Describe_SortByMeasureHelper(object):
+    """Unit test suite for `cr.cube.strip.assembler._SortByMeasureHelper`."""
+
+    def it_computes_the_display_order_to_help(self, request, dimension_):
+        property_mock(
+            request,
+            _SortByMeasureHelper,
+            "_element_values",
+            # --- return type is ndarray in real life, but assert_called_once_with()
+            # --- won't match on those, so use list instead.
+            return_value=[16, 3, 12],
+        )
+        property_mock(
+            request,
+            _SortByMeasureHelper,
+            "_subtotal_values",
+            return_value=[15, 19],  # --- ndarray in real life ---
+        )
+        property_mock(request, _SortByMeasureHelper, "_empty_row_idxs", return_value=())
+        SortByValueCollator_ = class_mock(
+            request, "cr.cube.stripe.assembler.SortByValueCollator"
+        )
+        SortByValueCollator_.display_order.return_value = (-1, -2, 0, 2, 1)
+        order_helper = _SortByMeasureHelper(dimension_, None)
+
+        order = order_helper._display_order
+
+        SortByValueCollator_.display_order.assert_called_once_with(
+            dimension_, [16, 3, 12], [15, 19], ()
+        )
+        assert order == (-1, -2, 0, 2, 1)
+
+    def it_extracts_the_element_values_to_help(self, _measure_prop_, measure_):
+        _measure_prop_.return_value = measure_
+        measure_.blocks = [np.arange(5), None]
+        order_helper = _SortByMeasureHelper(None, None)
+
+        assert order_helper._element_values.tolist() == [0, 1, 2, 3, 4]
+
+    def it_retrieves_the_right_measure_object_to_help(
+        self, request, _order_spec_prop_, order_spec_, measure_
+    ):
+        measures_ = instance_mock(request, StripeMeasures, unweighted_bases=measure_)
+        _order_spec_prop_.return_value = order_spec_
+        order_spec_.measure_keyname = "base_unweighted"
+        order_helper = _SortByMeasureHelper(None, measures_)
+
+        assert order_helper._measure is measure_
+
+    def but_it_raises_when_the_sort_measure_is_not_supported(
+        self, request, _order_spec_prop_, order_spec_
+    ):
+        _order_spec_prop_.return_value = order_spec_
+        order_spec_.measure_keyname = "foobar"
+        order_helper = _SortByMeasureHelper(None, None)
+
+        with pytest.raises(ValueError) as e:
+            order_helper._measure
+
+        assert str(e.value) == "sort-by-value for measure 'foobar' is not yet supported"
+
+    def it_extracts_the_subtotal_values_to_help(self, _measure_prop_, measure_):
+        _measure_prop_.return_value = measure_
+        measure_.blocks = [None, np.arange(3)]
+        order_helper = _SortByMeasureHelper(None, None)
+
+        assert order_helper._subtotal_values.tolist() == [0, 1, 2]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def measure_(self, request):
+        return instance_mock(request, _BaseSecondOrderMeasure)
+
+    @pytest.fixture
+    def _measure_prop_(self, request):
+        return property_mock(request, _SortByMeasureHelper, "_measure")
+
+    @pytest.fixture
+    def order_spec_(self, request):
+        return instance_mock(request, _OrderSpec)
+
+    @pytest.fixture
+    def _order_spec_prop_(self, request):
+        return property_mock(request, _SortByMeasureHelper, "_order_spec")

@@ -198,23 +198,39 @@ class DescribeStripeAssembler(object):
         )
 
     @pytest.mark.parametrize(
-        "fixture, direction, expected_value",
+        "fixture, measure, direction, expected_value",
         (
-            (CR.CAT, "ascending", [4, 3, 2, 0, 1]),
-            (CR.CAT, "descending", [1, 0, 2, 3, 4]),
-            (CR.ECON_BLAME_WITH_HS, "ascending", [3, 4, 2, 0, 1, -1]),
-            (CR.ECON_BLAME_WITH_HS, "descending", [-1, 1, 0, 2, 4, 3]),
-            (CR.CAT_MEANS_HS, "descending", [-2, -1, 0, 2, 1]),
+            (CR.CAT, "base_unweighted", "ascending", [0, 1, 2, 3, 4]),
+            (CR.CAT, "base_unweighted", "descending", [4, 3, 2, 1, 0]),
+            (CR.ECON_BLAME_WITH_HS, "base_weighted", "ascending", [0, 1, 2, 3, 4, -1]),
+            (CR.ECON_BLAME_WITH_HS, "base_weighted", "descending", [-1, 4, 3, 2, 1, 0]),
+            (CR.CAT_HS_MT, "count_unweighted", "ascending", [3, 4, 2, 0, 1, -1, -2]),
+            (CR.CAT_HS_MT, "count_unweighted", "descending", [-2, -1, 1, 0, 2, 4, 3]),
+            (CR.MR_WGTD, "count_weighted", "ascending", [6, 7, 8, 5, 3, 1, 2, 0, 4]),
+            (CR.MR_WGTD, "count_weighted", "descending", [4, 0, 2, 1, 3, 5, 8, 7, 6]),
+            (CR.CAT_MEANS_HS, "mean", "ascending", [1, 0, 2, -2, -1]),
+            (CR.CAT_MEANS_HS, "mean", "descending", [-2, -1, 2, 0, 1]),
+            (CR.CAT, "percent", "ascending", [4, 3, 2, 0, 1]),
+            (CR.CAT, "percent", "descending", [1, 0, 2, 3, 4]),
+            (CR.ECON_BLAME_WITH_HS, "percent_moe", "ascending", [3, 4, 2, 0, 1, -1]),
+            (CR.ECON_BLAME_WITH_HS, "percent_moe", "descending", [-1, 1, 0, 2, 4, 3]),
+            (CR.CAT_HS_MT, "percent_stddev", "ascending", [3, 4, 2, 0, 1, -1, -2]),
+            (CR.CAT_HS_MT, "percent_stddev", "descending", [-2, -1, 1, 0, 2, 4, 3]),
+            (CR.ECON_BLAME_WITH_HS, "percent_stderr", "ascending", [3, 4, 2, 0, 1, -1]),
+            (CR.MR_WGTD, "percent_stderr", "descending", [0, 4, 2, 1, 3, 5, 8, 7, 6]),
+            (CR.MR_WGTD, "percent_stderr", "ascending", [6, 7, 8, 5, 3, 1, 2, 4, 0]),
+            (CR.CAT_MEAN, "sum", "ascending", [1, 3, 0, 2, 4]),
+            (CR.CAT_MEAN, "sum", "descending", [4, 2, 0, 3, 1]),
         ),
     )
-    def it_computes_the_sort_by_value_row_order_to_help(
-        self, fixture, direction, expected_value
+    def it_computes_the_sort_by_measure_value_row_order_to_help(
+        self, fixture, measure, direction, expected_value
     ):
         transforms = {
             "rows_dimension": {
                 "order": {
                     "type": "univariate_measure",
-                    "measure": "percent",
+                    "measure": measure,
                     "direction": direction,
                 }
             }

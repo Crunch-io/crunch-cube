@@ -2347,7 +2347,7 @@ class Test_Slice(object):
 
     def test_ca_subvar_x_cat_hs_counts_prune(self):
         transforms = {"rows_dimension": {"prune": True}}
-        slice_ = Cube(CR.CA_SUBVAR_HS_X_CAT_HS, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CA_SUBVAR_X_CA_CAT_HS, transforms=transforms).partitions[0]
         expected = np.array([[3, 3, 0, 0, 6], [1, 3, 2, 0, 4], [0, 2, 1, 3, 2]])
         np.testing.assert_array_equal(slice_.counts, expected)
 

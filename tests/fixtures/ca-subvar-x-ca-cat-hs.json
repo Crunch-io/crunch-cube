@@ -61,25 +61,7 @@
               "description": null,
               "name": "ca_subvar_3"
             }
-          ],
-          "view": {
-            "column_width": null,
-            "include_missing": false,
-            "show_counts": false,
-            "transform": {
-              "insertions": [
-                {
-                  "anchor": "bottom",
-                  "args": [
-                    1,
-                    2
-                  ],
-                  "function": "subtotal",
-                  "name": "AB NET"
-                }
-              ]
-            }
-          }
+          ]
         },
         "type": {
           "class": "enum",

@@ -15,12 +15,13 @@ from cr.cube.dimension import (
     _DimensionFactory,
     _Element,
     _ElementTransforms,
+    _OrderSpec,
     _RawDimension,
     _Subtotal,
     _Subtotals,
     _ValidElements,
 )
-from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
+from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT, MEASURE
 
 from ..unitutil import (
     ANY,
@@ -500,18 +501,6 @@ class DescribeDimension(object):
         assert Dimension(dimension_dict, None).alias == expected_value
 
     @pytest.mark.parametrize(
-        "order_dict, expected_value",
-        (
-            ({}, CM.PAYLOAD_ORDER),
-            ({"type": "explicit"}, CM.EXPLICIT_ORDER),
-            ({"type": "payload_order"}, CM.PAYLOAD_ORDER),
-        ),
-    )
-    def it_knows_its_collation_method(self, request, order_dict, expected_value):
-        property_mock(request, Dimension, "order_dict", return_value=order_dict)
-        assert Dimension(None, None).collation_method == expected_value
-
-    @pytest.mark.parametrize(
         "dimension_dict, expected_value",
         (
             ({"references": {}}, ""),
@@ -538,6 +527,45 @@ class DescribeDimension(object):
         )
         assert Dimension(None, None).hidden_idxs == (1, 3, 5)
 
+    def it_knows_its_insertion_ids(self, request):
+        property_mock(
+            request,
+            Dimension,
+            "subtotals",
+            return_value=tuple(
+                instance_mock(request, _Subtotal, insertion_id=(i + 1))
+                for i in range(6)
+            ),
+        )
+        assert Dimension(None, None).insertion_ids == (1, 2, 3, 4, 5, 6)
+
+    @pytest.mark.parametrize(
+        "dim_refs, dim_xforms, expected_value",
+        (
+            # --- inheritance is alias <- name <- name-transform. If value is omitted
+            # --- (key does not appear in dict), name is inherited. Any present value,
+            # --- including None, overrides further inheritance. A `None` value is
+            # --- normalized to "" such that return type is always str.
+            ({}, {}, ""),
+            ({"alias": "A"}, {}, "A"),
+            ({"alias": "A", "name": "B"}, {}, "B"),
+            ({"alias": "A", "name": None}, {}, ""),
+            ({"alias": "A", "name": "B"}, {"name": "C"}, "C"),
+            ({"alias": "A", "name": "B"}, {"name": None}, ""),
+            ({"name": "B"}, {}, "B"),
+            ({"name": None}, {}, ""),
+            ({"name": "B"}, {"name": "C"}, "C"),
+            ({"name": "B"}, {"name": None}, ""),
+            ({}, {"name": "C"}, "C"),
+            ({}, {"name": ""}, ""),
+            ({}, {"name": None}, ""),
+        ),
+    )
+    def it_knows_its_name(self, dim_refs, dim_xforms, expected_value):
+        dimension_dict = {"references": dim_refs}
+        dimension = Dimension(dimension_dict, None, dimension_transforms=dim_xforms)
+        assert dimension.name == expected_value
+
     def it_knows_the_numeric_values_of_its_elements(
         self, request, valid_elements_prop_
     ):
@@ -547,19 +575,31 @@ class DescribeDimension(object):
         )
         assert Dimension(None, None).numeric_values == (1, 2.2, np.nan)
 
+    def it_provides_access_to_the_order_spec(self, request):
+        order_spec_ = instance_mock(request, _OrderSpec)
+        _OrderSpec_ = class_mock(
+            request, "cr.cube.dimension._OrderSpec", return_value=order_spec_
+        )
+        dimension_transforms = {"dim": "xfrms"}
+        dimension = Dimension(None, None, dimension_transforms)
+
+        order_spec = dimension.order_spec
+
+        _OrderSpec_.assert_called_once_with(dimension, dimension_transforms)
+        assert order_spec is order_spec_
+
     @pytest.mark.parametrize(
-        "dimension_transforms, expected_value",
+        "dim_transforms, expected_value",
         (
-            (None, {}),
-            ({}, {}),
-            ({"foo": "bar"}, {}),
-            ({"order": {"order": "dict"}}, {"order": "dict"}),
+            ({}, False),
+            ({"prune": False}, False),
+            ({"prune": 1}, False),
+            ({"prune": "foobar"}, False),
+            ({"prune": True}, True),
         ),
     )
-    def it_provides_access_to_the_transforms_order_dict(
-        self, dimension_transforms, expected_value
-    ):
-        assert Dimension(None, None, dimension_transforms).order_dict == expected_value
+    def it_knows_whether_it_should_be_pruned(self, dim_transforms, expected_value):
+        assert Dimension(None, None, dim_transforms).prune is expected_value
 
     @pytest.mark.parametrize(
         "selected_categories, expected_value",
@@ -912,64 +952,18 @@ class Describe_AllElements(object):
 class Describe_ValidElements(object):
     """Unit-test suite for `cr.cube.dimension._ValidElements` object."""
 
-    def it_gets_its_Element_objects_from_an_AllElements_object(
-        self, request, all_elements_
-    ):
+    def it_gets_its_Element_objects_from_an_AllElements_object(self, request):
         elements_ = tuple(
             instance_mock(request, _Element, name="element-%s" % idx, missing=missing)
             for idx, missing in enumerate([False, True, False])
         )
+        all_elements_ = instance_mock(request, _AllElements)
         all_elements_.__iter__.return_value = iter(elements_)
         valid_elements = _ValidElements(all_elements_, None)
 
         elements = valid_elements._elements
 
         assert elements == (elements_[0], elements_[2])
-
-    @pytest.mark.parametrize(
-        "explicit_order, expected_value ",
-        ((None, (0, 1, 2)), ((1, 0, 4, 3), (1, 0, 4, 3))),
-    )
-    def it_knows_its_display_order(
-        self, request, all_elements_, explicit_order, expected_value
-    ):
-        _explicit_order_ = property_mock(request, _ValidElements, "_explicit_order")
-        elements_ = tuple(
-            instance_mock(request, _Element, missing=False) for _ in range(3)
-        )
-        all_elements_.__iter__.return_value = iter(elements_)
-        valid_elements = _ValidElements(all_elements_, None)
-        _explicit_order_.return_value = explicit_order
-
-        display_order = valid_elements.display_order
-
-        assert display_order == expected_value
-
-    @pytest.mark.parametrize(
-        "element_transform_dict, expected_value",
-        (
-            ({}, None),
-            ({"order": {"element_ids": [1, 3, 2], "type": "explicit"}}, (0, 2, 1)),
-            ({"order": {"element_ids": [-1, 3, 2], "type": "explicit"}}, (2, 1, 0)),
-            ({"order": {"element_ids": [1, 2, 3], "type": "explicit"}}, (0, 1, 2)),
-        ),
-    )
-    def it_returns_the_correct_explicit_order(
-        self, all_elements_, element_transform_dict, expected_value
-    ):
-        elements_ = tuple(_Element({"id": idx + 1}, None, None) for idx in range(3))
-        all_elements_.__iter__.return_value = iter(elements_)
-        valid_elements = _ValidElements(all_elements_, element_transform_dict)
-
-        _explicit_order_ = valid_elements._explicit_order
-
-        assert _explicit_order_ == expected_value
-
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def all_elements_(self, request):
-        return instance_mock(request, _AllElements)
 
 
 class Describe_Element(object):
@@ -996,32 +990,34 @@ class Describe_Element(object):
         index = element.index
         assert index == 17
 
-    # TODO: add test cases that exercise element-name transform
     @pytest.mark.parametrize(
-        ("element_dict", "expected_value"),
+        ("element_dict", "transform_name", "expected_value"),
         (
-            ({}, ""),
-            ({"name": ""}, ""),
-            ({"name": None}, ""),
-            ({"name": "Bob"}, "Bob"),
-            ({"name": "Hinzufägen"}, "Hinzufägen"),
-            ({"value": ["A", "F"]}, "A-F"),
-            ({"value": [1.2, 3.4]}, "1.2-3.4"),
-            ({"value": 42}, "42"),
-            ({"value": 4.2}, "4.2"),
-            ({"value": "Bill"}, "Bill"),
-            ({"value": "Fähig"}, "Fähig"),
-            ({"value": {"references": {}}}, ""),
-            ({"value": {"references": {"name": "Tom"}}}, "Tom"),
+            ({}, None, ""),
+            ({}, "Garf", "Garf"),
+            ({"name": ""}, None, ""),
+            ({"name": None}, None, ""),
+            ({"name": "Bob"}, None, "Bob"),
+            ({"name": "Hinzufägen"}, None, "Hinzufägen"),
+            ({"value": ["A", "F"]}, None, "A-F"),
+            ({"value": [1.2, 3.4]}, None, "1.2-3.4"),
+            ({"value": 42}, None, "42"),
+            ({"value": 4.2}, None, "4.2"),
+            ({"value": "Bill"}, None, "Bill"),
+            ({"value": "Fähig"}, None, "Fähig"),
+            ({"value": {"references": {}}}, None, ""),
+            ({"value": {"references": {"name": "Tom"}}}, None, "Tom"),
+            ({"value": {"references": {"name": "Tom"}}}, "Harry", "Harry"),
+            ({"value": {"references": {"name": "Tom"}}}, "", ""),
         ),
     )
-    def it_knows_its_label(self, element_dict, expected_value, element_transforms_):
-        element_transforms_.name = None
+    def it_knows_its_label(
+        self, element_dict, transform_name, expected_value, element_transforms_
+    ):
+        element_transforms_.name = transform_name
         element = _Element(element_dict, None, element_transforms_)
 
-        label = element.label
-
-        assert label == expected_value
+        assert element.label == expected_value
 
     @pytest.mark.parametrize(
         ("hide", "expected_value"), ((True, True), (False, False), (None, False))
@@ -1137,6 +1133,146 @@ class DescribeElementTransforms(object):
         assert name == expected_value
 
 
+class Describe_OrderSpec(object):
+    """Unit-test suite for `cr.cube.dimension._OrderSpec` object."""
+
+    @pytest.mark.parametrize(
+        "order_dict, expected_value",
+        (
+            ({}, ()),
+            ({"fixed": {}}, ()),
+            ({"fixed": {"top": [1, 2]}}, ()),
+            ({"fixed": {"bottom": []}}, ()),
+            ({"fixed": {"bottom": [3, 4]}}, (3, 4)),
+            ({"fixed": {"top": [1, 2], "bottom": [3, 4]}}, (3, 4)),
+        ),
+    )
+    def it_knows_its_bottom_fixed_ids(
+        self, _order_dict_prop_, order_dict, expected_value
+    ):
+        _order_dict_prop_.return_value = order_dict
+        assert _OrderSpec(None, None).bottom_fixed_ids == expected_value
+
+    @pytest.mark.parametrize(
+        "order_dict, expected_value",
+        (
+            ({}, CM.PAYLOAD_ORDER),
+            ({"type": "explicit"}, CM.EXPLICIT_ORDER),
+            ({"type": "payload_order"}, CM.PAYLOAD_ORDER),
+        ),
+    )
+    def it_knows_its_collation_method(
+        self, _order_dict_prop_, order_dict, expected_value
+    ):
+        _order_dict_prop_.return_value = order_dict
+        assert _OrderSpec(None, None).collation_method == expected_value
+
+    @pytest.mark.parametrize(
+        "order_dict, expected_value",
+        (
+            ({}, True),
+            ({"direction": "descending"}, True),
+            ({"direction": "foobar"}, True),
+            ({"direction": "ascending"}, False),
+        ),
+    )
+    def it_knows_whether_the_sort_direction_is_descending(
+        self, _order_dict_prop_, order_dict, expected_value
+    ):
+        _order_dict_prop_.return_value = order_dict
+        assert _OrderSpec(None, None).descending == expected_value
+
+    def it_knows_the_sort_vector_element_id(self, _order_dict_prop_):
+        _order_dict_prop_.return_value = {"element_id": 42}
+        assert _OrderSpec(None, None).element_id == 42
+
+    def but_it_raises_when_element_id_not_present(self, _order_dict_prop_):
+        _order_dict_prop_.return_value = {}
+        with pytest.raises(KeyError) as e:
+            _OrderSpec(None, None).element_id
+        assert str(e.value) == "'element_id'"
+
+    @pytest.mark.parametrize(
+        "order_dict, expected_value",
+        (
+            ({}, ()),
+            ({"element_ids": None}, ()),
+            ({"element_ids": []}, ()),
+            ({"element_ids": [4, 2]}, (4, 2)),
+        ),
+    )
+    def it_knows_the_ordered_element_ids_for_an_explicit_sort(
+        self, _order_dict_prop_, order_dict, expected_value
+    ):
+        _order_dict_prop_.return_value = order_dict
+        assert _OrderSpec(None, None).element_ids == expected_value
+
+    def it_knows_the_sort_vector_insertion_id(self, _order_dict_prop_):
+        _order_dict_prop_.return_value = {"insertion_id": 42}
+        assert _OrderSpec(None, None).insertion_id == 42
+
+    def but_it_raises_when_insertion_id_not_present(self, _order_dict_prop_):
+        _order_dict_prop_.return_value = {}
+        with pytest.raises(KeyError) as e:
+            _OrderSpec(None, None).insertion_id
+        assert str(e.value) == "'insertion_id'"
+
+    def it_knows_the_measure_specified_as_the_sort_basis(self, _order_dict_prop_):
+        _order_dict_prop_.return_value = {"measure": "col_percent"}
+        assert _OrderSpec(None, None).measure == MEASURE.COLUMN_PERCENT
+
+    def but_it_raises_when_measure_field_is_not_present(self, _order_dict_prop_):
+        _order_dict_prop_.return_value = {}
+        with pytest.raises(KeyError) as e:
+            _OrderSpec(None, None).measure
+        assert str(e.value) == "'measure'"
+
+    def and_it_raises_when_the_measure_keyword_is_not_recognized(
+        self, _order_dict_prop_
+    ):
+        _order_dict_prop_.return_value = {"measure": "foobar"}
+        with pytest.raises(ValueError) as e:
+            _OrderSpec(None, None).measure
+        # --- `.endswith()` to accommodate a Python 2.7 vs. 3.0 error message difference
+        # --- in Enum module
+        assert str(e.value).endswith(" is not a valid MEASURE")
+
+    @pytest.mark.parametrize(
+        "order_dict, expected_value",
+        (
+            ({}, ()),
+            ({"fixed": {}}, ()),
+            ({"fixed": {"bottom": [1, 2]}}, ()),
+            ({"fixed": {"top": []}}, ()),
+            ({"fixed": {"top": [3, 4]}}, (3, 4)),
+            ({"fixed": {"bottom": [1, 2], "top": [3, 4]}}, (3, 4)),
+        ),
+    )
+    def it_knows_its_top_fixed_ids(self, _order_dict_prop_, order_dict, expected_value):
+        _order_dict_prop_.return_value = order_dict
+        assert _OrderSpec(None, None).top_fixed_ids == expected_value
+
+    @pytest.mark.parametrize(
+        "dim_transforms, expected_value",
+        (
+            ({}, {}),
+            ({"order": None}, {}),
+            ({"order": {}}, {}),
+            ({"order": {"type": "explicit"}}, {"type": "explicit"}),
+        ),
+    )
+    def it_provides_access_to_the_order_dict_to_help(
+        self, dim_transforms, expected_value
+    ):
+        assert _OrderSpec(None, dim_transforms)._order_dict == expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _order_dict_prop_(self, request):
+        return property_mock(request, _OrderSpec, "_order_dict")
+
+
 class Describe_Subtotals(object):
     """Unit-test suite for `cr.cube.dimension._Subtotals` object."""
 
@@ -1163,6 +1299,7 @@ class Describe_Subtotals(object):
             ([], (), ()),
             (["not-a-dict", None], (), ()),
             ([{"function": "hyperdrive"}], (), ()),
+            ([{"function": "subtotal", "hide": True}], (), ()),
             ([{"function": "subtotal", "arghhs": []}], (), ()),
             ([{"function": "subtotal", "anchor": 9, "name": "no args"}], (), ()),
             ([{"function": "subtotal", "anchor": 9, "args": [1, 2]}], (), ()),
@@ -1186,7 +1323,7 @@ class Describe_Subtotals(object):
         ),
     )
     def it_removes_invalid_when_iterating_the_valid_subtotal_insertion_dicts_to_help(
-        self, insertion_dicts, element_ids, expected_value, _element_ids_prop_
+        self, _element_ids_prop_, insertion_dicts, element_ids, expected_value
     ):
         _element_ids_prop_.return_value = element_ids
         subtotals = _Subtotals(insertion_dicts, None)

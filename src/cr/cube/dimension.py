@@ -11,7 +11,7 @@ else:
 
 import numpy as np
 
-from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT
+from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT, MEASURE
 from cr.cube.util import lazyproperty
 
 
@@ -361,14 +361,6 @@ class Dimension(object):
         )
 
     @lazyproperty
-    def collation_method(self):
-        """Member of COLLATION_METHOD specifying ordering of dimension elements."""
-        method_keyword = self.order_dict.get("type")
-        if method_keyword is None:
-            return CM.PAYLOAD_ORDER
-        return CM(method_keyword)
-
-    @lazyproperty
     def description(self):
         """str description of this dimension."""
         # ---First authority in cascade is analysis-specific dimension transform. None
@@ -387,31 +379,6 @@ class Dimension(object):
     def dimension_type(self):
         """Member of DIMENSION_TYPE appropriate to this cube dimension."""
         return self._dimension_type
-
-    @lazyproperty
-    def display_order(self):
-        """Sequence of int element indices specifying display order of elements.
-
-        The sequence includes only valid elements; missing elements do not appear.
-        Further, each index represents the document-order position of the element in the
-        sequence of valid elements; missing elements are skipped in the assignment of
-        indexes. The returned sequence is exhaustive; all valid elements are
-        represented.
-
-        The sequence reflects the resolved cascade of any *explicit* ordering
-        transforms, but does *not* reflect any *sort* transforms, which cannot be
-        resolved by the dimension. Use the `.sort` property to access any sort transform
-        that may apply.
-
-        Example with explicit-order transform:
-
-            (3, 0, 2, 1, 4)
-
-        Example with no explicit-order transform:
-
-            (0, 1, 2, 3, 4)
-        """
-        return self.valid_elements.display_order
 
     @lazyproperty
     def element_ids(self):
@@ -437,21 +404,34 @@ class Dimension(object):
         )
 
     @lazyproperty
+    def insertion_ids(self):
+        """tuple of int insertion-id for each insertion in this dimension.
+
+        Insertion-ids appear in the order insertions are defined in the dimension.
+        """
+        return tuple(s.insertion_id for s in self.subtotals)
+
+    @lazyproperty
     def name(self):
         """str name of this dimension, the empty string ("") if not specified."""
         references = self._dimension_dict["references"]
-        # ---First authority in cascade is analysis-specific dimension transform. None
-        # ---is a legitimate value, indicating suppression of any inherited title.
-        if "name" in self._dimension_transforms_dict:
-            name = self._dimension_transforms_dict["name"]
-        # ---next authority is base dimension name---
-        elif "name" in references:
-            name = references["name"]
-        else:
-            name = references.get("alias")
+
+        def raw_name():
+            """Return dimension-name as specified (`None` is not normalized to "")."""
+            # --- First authority in cascade is analysis-specific dimension transform.
+            # --- None is a legitimate value, indicating suppression of any inherited
+            # --- title.
+            if "name" in self._dimension_transforms_dict:
+                return self._dimension_transforms_dict["name"]
+            # --- next authority is base dimension name ---
+            if "name" in references:
+                return references["name"]
+            # --- default is dimension alias ---
+            return references.get("alias")
 
         # ---Normalize None value to "" so return value is always a str and callers
         # ---don't need to deal with multiple possible return value types.
+        name = raw_name()
         return name if name else ""
 
     @lazyproperty
@@ -472,12 +452,9 @@ class Dimension(object):
         return tuple(element.numeric_value for element in self.valid_elements)
 
     @lazyproperty
-    def order_dict(self):
-        """dict dimension.transforms.order field parsed from JSON payload.
-
-        Value is `{}` if no "order": field is present.
-        """
-        return self._dimension_transforms_dict.get("order", {})
+    def order_spec(self):
+        """_OrderSpec proxy object for dimension.transforms.order dict from payload."""
+        return _OrderSpec(self, self._dimension_transforms_dict)
 
     @lazyproperty
     def prune(self):
@@ -682,66 +659,9 @@ class _ValidElements(_BaseElements):
         self._dimension_transforms_dict = dimension_transforms_dict
 
     @lazyproperty
-    def display_order(self):
-        """Sequence of int element-idx reflecting order in which to display elements.
-
-        This order reflects the application of any explicit element-order transforms,
-        including resolution of any cascade. It does *not* reflect the results of
-        a *sort* transform, which can only be resolved at a higher level, where vector
-        values are known.
-        """
-        return (
-            self._explicit_order
-            if self._explicit_order
-            else tuple(range(len(self._elements)))
-        )
-
-    @lazyproperty
     def _elements(self):
         """tuple containing actual sequence of element objects."""
         return tuple(element for element in self._all_elements if not element.missing)
-
-    @lazyproperty
-    def _explicit_order(self):
-        """Sequence of int element-idx or None, reflecting explicit-order transform.
-
-        This value is None if no explicit-order transform is specified. Otherwise, it is
-        an exhaustive collection of (valid) element offsets, in the order specified (and
-        in some cases implied) by the order transform.
-        """
-        # ---get order transform if any, aborting if no explicit order transform---
-        order_dict = self._dimension_transforms_dict.get("order", {})
-        order_type = order_dict.get("type")
-        ordered_element_ids = order_dict.get("element_ids")
-        if order_type != "explicit" or not isinstance(ordered_element_ids, list):
-            return None
-
-        # ---list like [0, 1, 2, -1], perhaps ["0001", "0002", etc.], reflecting element
-        # ---ids in the order they appear in the cube result. We'll use this to map
-        # ---element-id to its index in the valid-elements sequence.
-        cube_result_order = tuple(element.element_id for element in self)
-        # ---this is a copy of the same, but we're going to mutate this one. This is
-        # ---required to implement the "no-duplicates" behavior.
-        remaining_element_ids = list(cube_result_order)
-
-        # ---we'll collect the results in this---
-        ordered_idxs = []
-        # ---append idx of each element mentioned by id in transform, in order. Remove
-        # ---each element-id from remaining as we go to keep track of dups and leftovers
-        for element_id in ordered_element_ids:
-            # ---An element-id appearing in transform but not in dimension is ignored.
-            # ---Also, a duplicated element-id is only used on first encounter.
-            if element_id not in remaining_element_ids:
-                continue
-            ordered_idxs.append(cube_result_order.index(element_id))
-            remaining_element_ids.remove(element_id)
-
-        # ---any remaining elements are tacked onto the end of the list in the order
-        # ---they originally appeared in the cube-result.
-        for element_id in remaining_element_ids:
-            ordered_idxs.append(cube_result_order.index(element_id))
-
-        return tuple(ordered_idxs)
 
 
 class _Element(object):
@@ -762,9 +682,9 @@ class _Element(object):
 
     @lazyproperty
     def element_subvar_id(self):
-        """str identifier for the subvar ID (from ZZ9), or None if not a subvar."""
+        """Optional str subvar ID (from ZZ9), None if element is not a subvar."""
         value = self._element_dict.get("value")
-        if value is None or not isinstance(value, dict):
+        if not isinstance(value, dict):
             return None
         return value.get("id")
 
@@ -902,6 +822,103 @@ class _ElementTransforms(object):
         # ---etc. becoming the empty string ("").
         name = self._element_transforms_dict["name"]
         return str(name) if name else ""
+
+
+class _OrderSpec(object):
+    """Value object providing convenient access to details of an order transform."""
+
+    def __init__(self, dimension, dimension_transforms_dict):
+        self._dimension = dimension
+        self._dimension_transforms_dict = dimension_transforms_dict
+
+    @lazyproperty
+    def bottom_fixed_ids(self):
+        """Tuple of each element-id appearing in the fixed.bottom field of order dict.
+
+        The element-ids appear in the order specified in the "bottom" fixed.bottom
+        field.
+        """
+        return tuple(self._order_dict.get("fixed", {}).get("bottom", []))
+
+    @lazyproperty
+    def collation_method(self):
+        """Member of COLLATION_METHOD specifying ordering of dimension elements."""
+        method_keyword = self._order_dict.get("type")
+        if method_keyword is None:
+            return CM.PAYLOAD_ORDER
+        return CM(method_keyword)
+
+    @lazyproperty
+    def descending(self):
+        """True if sort direction is descending, False otherwise."""
+        return self._order_dict.get("direction", "descending") != "ascending"
+
+    @lazyproperty
+    def element_id(self):
+        """int element id appearing in an order transform.
+
+        Raises KeyError if the transform dict does not contain an "element_id" field.
+        Note that not all order types use this field but it is a required field in all
+        those that do.
+        """
+        return self._order_dict["element_id"]
+
+    @lazyproperty
+    def element_ids(self):
+        """tuple of int each element id appearing in an explicit order transform.
+
+        This value is `()` if no "element_ids": field is present.
+        """
+        return tuple(self._order_dict.get("element_ids") or [])
+
+    @lazyproperty
+    def insertion_id(self):
+        """int insertion-id in the "insertion_id" field of the transform dict.
+
+        Raises KeyError if this transform dict does not contain an "insertion_id" field.
+        Note that not all order types use the "insertion_id": field but this field is
+        required in all that do.
+        """
+        return self._order_dict["insertion_id"]
+
+    @lazyproperty
+    def measure(self):
+        """Member of enums.MEASURE corresponding to "measure": field in order transform.
+
+        Raises KeyError if the order dict has no "measure": field and ValueError if the
+        value in that field is not a recognized measure keyword. Note that not all order
+        types use the "measure": field.
+        """
+        return MEASURE(self.measure_keyname)
+
+    @lazyproperty
+    def measure_keyname(self):
+        """str value of "measure": field in order transform.
+
+        Raises KeyError if the order dict has no "measure": field. Note that not all
+        order types use the "measure": field, but it is a required field in all that do.
+        Note also that this property is required for the "univariate_measure" sort type
+        because its measure keywords do not correspond directly to members of the
+        MEASURE enumeration.
+        """
+        return self._order_dict["measure"]
+
+    @lazyproperty
+    def top_fixed_ids(self):
+        """Tuple of each element-id appearing in the fixed.top field of order dict.
+
+        The element-ids appear in the order specified in the "top" fixed.top
+        field.
+        """
+        return tuple(self._order_dict.get("fixed", {}).get("top", []))
+
+    @lazyproperty
+    def _order_dict(self):
+        """dict dimension.transforms.order field parsed from JSON payload.
+
+        Value is `{}` if no "order": field is present.
+        """
+        return self._dimension_transforms_dict.get("order") or {}
 
 
 class _Subtotals(Sequence):

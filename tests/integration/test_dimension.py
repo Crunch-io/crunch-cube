@@ -13,7 +13,6 @@ from cr.cube.dimension import (
     _Element,
     _ElementTransforms,
     _Subtotal,
-    _ValidElements,
 )
 from cr.cube.enums import DIMENSION_TYPE as DT
 
@@ -103,16 +102,6 @@ class DescribeIntegratedDimension(object):
             "s?"
         )
 
-    def it_knows_the_display_order_of_its_elements(self, dimension_dict):
-        dimension_transforms = {
-            "order": {"type": "explicit", "element_ids": [3, 5, 42, 8, 2]}
-        }
-        dimension = Dimension(dimension_dict, None, dimension_transforms)
-
-        display_order = dimension.display_order
-
-        assert display_order == (2, 4, 1, 0, 3)
-
     def it_knows_its_transformed_name(self, dimension_dict):
         dimension_transforms = {"name": "barfoo"}
         dimension = Dimension(dimension_dict, None, dimension_transforms)
@@ -192,37 +181,6 @@ class DescribeIntegrated_AllElements(object):
 
         assert len(elements) == 3
         assert elements[1].is_hidden is True
-
-
-class DescribeIntegrated_ValidElements(object):
-    """Integration-test suite for `cr.cube.dimension._ValidElements` object."""
-
-    def it_knows_the_transformed_element_display_order(self, all_elements):
-        dimension_transforms = {
-            "order": {"type": "explicit", "element_ids": [2, 1, 666, 4, 3, 4, 8]}
-        }
-        valid_elements = _ValidElements(all_elements, dimension_transforms)
-
-        display_order = valid_elements.display_order
-
-        assert display_order == (1, 0, 3, 2, 4)
-        assert len(display_order) == len(valid_elements)
-
-    def but_it_returns_the_cube_result_order_when_not_transformed(self, all_elements):
-        dimension_transforms = {}
-        valid_elements = _ValidElements(all_elements, dimension_transforms)
-
-        order = valid_elements.display_order
-
-        assert order == (0, 1, 2, 3, 4)
-
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def all_elements(self):
-        return _AllElements(
-            CR.ECON_BLAME_WITH_HS["value"]["result"]["dimensions"][0]["type"], {}, None
-        )._elements
 
 
 class DescribeIntegrated_Element(object):
