@@ -1289,19 +1289,12 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
         These are the base-values, the column-subtotals, the row-subtotals, and the
         subtotal intersection-cell values.
         """
-        cube_valid_counts = self._cube_measures.unweighted_cube_valid_counts
-        # --- Use cube-valid-counts as the source when they are available because
-        # --- regular cube-counts give the wrong values for cases like an analysis
-        # --- involving a NUM_ARRAY variable.
-        if cube_valid_counts is not None:
-            return SumSubtotals.blocks(
-                cube_valid_counts.unweighted_valid_counts,
-                self._dimensions,
-                diff_cols_nan=True,
-                diff_rows_nan=True,
-            )
+        diff_nans = self._unweighted_cube_counts.diff_nans
         return SumSubtotals.blocks(
-            self._unweighted_cube_counts.unweighted_counts, self._dimensions
+            self._unweighted_cube_counts.unweighted_counts,
+            self._dimensions,
+            diff_cols_nan=diff_nans,
+            diff_rows_nan=diff_nans,
         )
 
 
@@ -1311,16 +1304,12 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        cube_valid_counts = self._cube_measures.weighted_cube_valid_counts
-        if cube_valid_counts is not None:
-            return SumSubtotals.blocks(
-                cube_valid_counts.weighted_valid_counts,
-                self._dimensions,
-                diff_cols_nan=True,
-                diff_rows_nan=True,
-            )
+        diff_nans = self._weighted_cube_counts.diff_nans
         return SumSubtotals.blocks(
-            self._weighted_cube_counts.weighted_counts, self._dimensions
+            self._weighted_cube_counts.weighted_counts,
+            self._dimensions,
+            diff_cols_nan=diff_nans,
+            diff_rows_nan=diff_nans,
         )
 
 

@@ -22,6 +22,7 @@ from cr.cube.stripe.cubemeasure import (
     _MrCubeSums,
     _MrUnweightedCubeCounts,
     _MrWeightedCubeCounts,
+    _NumArrUnweightedCubeCounts,
 )
 
 from ...unitutil import class_mock, instance_mock, property_mock
@@ -248,11 +249,33 @@ class Describe_BaseUnweightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseUnweightedCubeCounts`."""
 
     @pytest.mark.parametrize(
-        "ca_as_0th, rows_dimension_type, UnweightedCubeCountsCls, unweighted_counts",
         (
-            (True, DT.CA_CAT, _CatUnweightedCubeCounts, [[4, 5, 6], [1, 2, 3]]),
-            (False, DT.MR, _MrUnweightedCubeCounts, [1, 2, 3]),
-            (False, DT.CAT, _CatUnweightedCubeCounts, [1, 2, 3]),
+            "ca_as_0th",
+            "rows_dimension_type",
+            "UnweightedCubeCountsCls",
+            "unweighted_counts",
+            "unweighted_valid_counts",
+            "expected_counts",
+        ),
+        (
+            (
+                True,
+                DT.CA_CAT,
+                _CatUnweightedCubeCounts,
+                [[4, 5, 6], [1, 2, 3]],
+                None,
+                [1, 2, 3],
+            ),
+            (False, DT.MR, _MrUnweightedCubeCounts, [1, 2, 3], None, [1, 2, 3]),
+            (False, DT.CAT, _CatUnweightedCubeCounts, [1, 2, 3], None, [1, 2, 3]),
+            (
+                False,
+                DT.NUM_ARRAY,
+                _NumArrUnweightedCubeCounts,
+                [1, 2, 3],
+                [4, 5, 6],
+                [4, 5, 6],
+            ),
         ),
     )
     def it_provides_a_factory_for_constructing_unweighted_cube_count_objects(
@@ -262,8 +285,11 @@ class Describe_BaseUnweightedCubeCounts(object):
         rows_dimension_type,
         UnweightedCubeCountsCls,
         unweighted_counts,
+        unweighted_valid_counts,
+        expected_counts,
     ):
         cube_ = instance_mock(request, Cube, unweighted_counts=unweighted_counts)
+        cube_.unweighted_valid_counts = unweighted_valid_counts
         rows_dimension_ = instance_mock(
             request, Dimension, dimension_type=rows_dimension_type
         )
@@ -278,7 +304,9 @@ class Describe_BaseUnweightedCubeCounts(object):
             cube_, rows_dimension_, ca_as_0th, slice_idx=1
         )
 
-        UnweightedCubeCountsCls_.assert_called_once_with(rows_dimension_, [1, 2, 3])
+        UnweightedCubeCountsCls_.assert_called_once_with(
+            rows_dimension_, expected_counts
+        )
         assert unweighted_cube_counts is unweighted_cube_counts_
 
 
@@ -345,16 +373,47 @@ class Describe_BaseWeightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseWeightedCubeCounts`."""
 
     @pytest.mark.parametrize(
-        "ca_as_0th, rows_dimension_type, WeightedCubeCountsCls, weighted_counts",
+        (
+            "ca_as_0th",
+            "rows_dimension_type",
+            "WeightedCubeCountsCls",
+            "weighted_counts",
+            "weighted_valid_counts",
+            "expected_counts",
+        ),
         (
             (
                 True,
                 DT.CA_CAT,
                 _CatWeightedCubeCounts,
                 [[4.4, 5.5, 6.6], [1.1, 2.2, 3.3]],
+                None,
+                [1.1, 2.2, 3.3],
             ),
-            (False, DT.MR, _MrWeightedCubeCounts, [1.1, 2.2, 3.3]),
-            (False, DT.CAT, _CatWeightedCubeCounts, [1.1, 2.2, 3.3]),
+            (
+                False,
+                DT.MR,
+                _MrWeightedCubeCounts,
+                [1.1, 2.2, 3.3],
+                None,
+                [1.1, 2.2, 3.3],
+            ),
+            (
+                False,
+                DT.CAT,
+                _CatWeightedCubeCounts,
+                [1.1, 2.2, 3.3],
+                None,
+                [1.1, 2.2, 3.3],
+            ),
+            (
+                False,
+                DT.CAT,
+                _CatWeightedCubeCounts,
+                [1.1, 2.2, 3.3],
+                [1.3, 2.1, 5.5],
+                [1.3, 2.1, 5.5],
+            ),
         ),
     )
     def it_provides_a_factory_for_constructing_weighted_cube_count_objects(
@@ -364,8 +423,11 @@ class Describe_BaseWeightedCubeCounts(object):
         rows_dimension_type,
         WeightedCubeCountsCls,
         weighted_counts,
+        weighted_valid_counts,
+        expected_counts,
     ):
         cube_ = instance_mock(request, Cube, counts=weighted_counts)
+        cube_.weighted_valid_counts = weighted_valid_counts
         rows_dimension_ = instance_mock(
             request, Dimension, dimension_type=rows_dimension_type
         )
@@ -380,7 +442,7 @@ class Describe_BaseWeightedCubeCounts(object):
             cube_, rows_dimension_, ca_as_0th, slice_idx=1
         )
 
-        WeightedCubeCountsCls_.assert_called_once_with(rows_dimension_, [1.1, 2.2, 3.3])
+        WeightedCubeCountsCls_.assert_called_once_with(rows_dimension_, expected_counts)
         assert weighted_cube_counts is weighted_cube_counts_
 
 
