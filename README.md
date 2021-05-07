@@ -113,6 +113,11 @@ The detailed description can be found
 
 ## Changes
 
+
+### 2.1.31
+- Implement sort-by-value for all measures that have been consolidated so far.
+- Zscores measure consolidation
+
 ### 2.1.30
 - Fix population counts for categorical array
 
