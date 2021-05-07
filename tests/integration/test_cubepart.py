@@ -1013,6 +1013,47 @@ class Describe_Slice(object):
             abs=10e-2,
         )
 
+    def it_uses_rows_proportions_for_ca_subvar_x_ca_cat_population_counts(self):
+        slice_ = Cube(CR.SIMPLE_CAT_ARRAY, population=100).partitions[0]
+        assert slice_.population_counts == pytest.approx(
+            np.array(
+                [
+                    [50.0, 50.0, 0.0, 0.0],
+                    [16.66666667, 50.0, 33.33333333, 0.0],
+                    [0.0, 33.33333333, 16.66666667, 50.0],
+                ]
+            )
+        )
+        # ---Assert population is equal to total for each subvariable
+        assert slice_.population_counts.sum(axis=1) == pytest.approx(
+            np.array([100, 100, 100])
+        )
+
+    def it_uses_columns_proportions_for_ca_cat_x_ca_subvar_population_counts(self):
+        slice_ = Cube(CR.MR_X_CA_CAT_X_CA_SUBVAR, population=100).partitions[0]
+        assert slice_.population_counts == pytest.approx(
+            np.array(
+                [
+                    [14.28, 10.20, 20.51, 16.36, 16.43, 13.72, 18.18, 29.91, 32, 44.77],
+                    [7.14, 23.46, 17.94, 14.54, 20.54, 9.80, 27.27, 11.11, 35.2, 23.88],
+                    [12.85, 19.38, 10.25, 16.36, 13.69, 15.68, 25, 17.09, 13.6, 14.92],
+                    [15.71, 15.30, 14.10, 5.45, 17.8, 9.8, 18.18, 20.51, 6.4, 5.22],
+                    [12.85, 12.24, 10.25, 5.45, 15.06, 7.84, 6.06, 10.25, 6.4, 5.97],
+                    [5.71, 9.18, 20.51, 9.09, 9.58, 11.76, 3.03, 2.56, 3.2, 1.49],
+                    [8.57, 4.08, 5.12, 7.27, 1.36, 11.76, 1.51, 5.12, 2.4, 2.23],
+                    [17.14, 4.08, 1.28, 3.63, 2.73, 1.96, 0.75, 0.85, 0.8, 0.74],
+                    [1.42, 2.04, 0, 14.54, 1.36, 11.76, 0.0, 0.0, 0.0, 0.74],
+                    [4.28, 0.0, 0.0, 7.27, 1.36, 5.88, 0.0, 2.56, 0.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                ]
+            ),
+            abs=10e2,
+        )
+        # ---Assert population is equal to total for each subvariable
+        assert slice_.population_counts.sum(axis=0) == pytest.approx(
+            np.array([100, 100, 100, 100, 100, 100, 100, 100, 100, 100])
+        )
+
 
 class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
