@@ -47,14 +47,14 @@ class CubeMeasures(object):
     def unweighted_cube_counts(self):
         """_BaseUnweightedCubeCounts subclass object for this cube-result."""
         return _BaseUnweightedCubeCounts.factory(
-            self._cube, self._dimensions, self._slice_idx, diff_nans=False
+            self._cube, self._dimensions, self._slice_idx
         )
 
     @lazyproperty
     def weighted_cube_counts(self):
         """_BaseWeightedCounts subclass object for this cube-result."""
         return _BaseWeightedCubeCounts.factory(
-            self._cube, self._dimensions, self._slice_idx, diff_nans=False
+            self._cube, self._dimensions, self._slice_idx
         )
 
 
@@ -473,18 +473,18 @@ class _MrXMrCubeSums(_BaseCubeSums):
 class _BaseUnweightedCubeCounts(_BaseCubeMeasure):
     """Base class for unweighted-count cube-measure variants."""
 
-    def __init__(self, dimensions, unweighted_counts, diff_nans=False):
+    def __init__(self, dimensions, unweighted_counts, diff_nans):
         super(_BaseUnweightedCubeCounts, self).__init__(dimensions)
         self._unweighted_counts = unweighted_counts
         self._diff_nans = diff_nans
 
     @classmethod
-    def factory(cls, cube, dimensions, slice_idx, diff_nans):
+    def factory(cls, cube, dimensions, slice_idx):
         """Return _BaseUnweightedCubeCounts subclass instance appropriate to `cube`."""
         dimension_types = cube.dimension_types[-2:]
         valid_counts = cube.unweighted_valid_counts
         counts = valid_counts if valid_counts is not None else cube.unweighted_counts
-        diff_nans = True if valid_counts is not None else diff_nans
+        diff_nans = True if valid_counts is not None else False
         UnweightedCubeCountsCls = (
             _NumArrayXMrUnweightedCubeCounts
             if dimension_types == (DT.NUM_ARRAY, DT.MR)
@@ -892,18 +892,18 @@ class _NumArrayXMrUnweightedCubeCounts(_CatXMrUnweightedCubeCounts):
 class _BaseWeightedCubeCounts(_BaseCubeMeasure):
     """Base class for weighted-count cube-measure variants."""
 
-    def __init__(self, dimensions, weighted_counts, diff_nans=False):
+    def __init__(self, dimensions, weighted_counts, diff_nans):
         super(_BaseWeightedCubeCounts, self).__init__(dimensions)
         self._weighted_counts = weighted_counts
         self._diff_nans = diff_nans
 
     @classmethod
-    def factory(cls, cube, dimensions, slice_idx, diff_nans):
+    def factory(cls, cube, dimensions, slice_idx):
         """Return _BaseWeightedCounts subclass instance appropriate to `cube`."""
         dimension_types = cube.dimension_types[-2:]
         valid_counts = cube.weighted_valid_counts
         counts = valid_counts if valid_counts is not None else cube.counts
-        diff_nans = True if valid_counts is not None else diff_nans
+        diff_nans = True if valid_counts is not None else False
         WeightedCubeCountsCls = (
             _MrXMrWeightedCubeCounts
             if dimension_types == (DT.MR, DT.MR)
