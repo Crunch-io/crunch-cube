@@ -112,6 +112,10 @@ The detailed description can be found
 ---
 
 ## Changes
+
+### 2.1.30
+- Fix population counts for categorical array
+
 ### 2.1.29
 - Omit rows/columns margin on subtotal difference.
 
