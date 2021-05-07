@@ -1013,7 +1013,7 @@ class Describe_Slice(object):
             abs=10e-2,
         )
 
-    def it_uses_correct_proportion_for_cat_array_subvariables(self):
+    def it_uses_rows_proportions_for_ca_subvar_x_ca_cat_population_counts(self):
         slice_ = Cube(CR.SIMPLE_CAT_ARRAY, population=100).partitions[0]
         assert slice_.population_counts == pytest.approx(
             np.array(
@@ -1029,7 +1029,7 @@ class Describe_Slice(object):
             np.array([100, 100, 100])
         )
 
-    def it_uses_correct_proportion_for_pets_array(self):
+    def it_uses_columns_proportions_for_ca_cat_x_ca_subvar_population_counts(self):
         slice_ = Cube(CR.MR_X_CA_CAT_X_CA_SUBVAR, population=100).partitions[0]
         assert slice_.population_counts == pytest.approx(
             np.array(
