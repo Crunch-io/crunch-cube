@@ -521,9 +521,7 @@ def test_cat_x_cat_pruning_and_hs():
         [0.1102738, 0.7064704, 0.4111442, 0.17486, np.nan, 0.4784233],
     )
     np.testing.assert_almost_equal(slice_.columns_scale_median, [1, 1, 1, np.nan, 3])
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_median, [2, 1, 2, 2, np.nan, np.nan]
-    )
+    np.testing.assert_almost_equal(slice_.rows_scale_median, [2, 1, 2, 2, np.nan, 2])
     assert slice_.columns_scale_median_margin == 1
     assert slice_.rows_scale_median_margin == 2
 
@@ -546,9 +544,7 @@ def test_cat_x_cat_pruning_and_hs():
         [0.1102738, 0.1933713, 0.7064704, 0.4111442, 0.17486, np.nan, 0.4784233],
     )
     np.testing.assert_almost_equal(slice_.columns_scale_median, [1, 1, 1, 1, np.nan, 3])
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_median, [2, 2, 1, 2, 2, np.nan, np.nan]
-    )
+    np.testing.assert_almost_equal(slice_.rows_scale_median, [2, 2, 1, 2, 2, np.nan, 2])
     assert slice_.columns_scale_median_margin == 1
     assert slice_.rows_scale_median_margin == 2
 
@@ -575,7 +571,7 @@ def test_cat_x_cat_pruning_and_hs():
         [0.1102738, 0.1933713, 0.7064704, 0.4111442, 0.17486, 0.4784233],
     )
     np.testing.assert_almost_equal(slice_.columns_scale_median, [1, 1, 1, 1, 3])
-    np.testing.assert_almost_equal(slice_.rows_scale_median, [2, 2, 1, 2, 2, np.nan])
+    np.testing.assert_almost_equal(slice_.rows_scale_median, [2, 2, 1, 2, 2, 2])
     assert slice_.columns_scale_median_margin == 1
     assert slice_.rows_scale_median_margin == 2
 
@@ -600,7 +596,7 @@ def test_cat_x_cat_pruning_and_hs():
         [0.1102738, 0.7064704, 0.4111442, 0.17486, 0.4784233],
     )
     np.testing.assert_almost_equal(slice_.columns_scale_median, [1, 1, 1, 3])
-    np.testing.assert_almost_equal(slice_.rows_scale_median, [2, 1, 2, 2, np.nan])
+    np.testing.assert_almost_equal(slice_.rows_scale_median, [2, 1, 2, 2, 2])
     assert slice_.columns_scale_median_margin == 1
     assert slice_.rows_scale_median_margin == 2
 
