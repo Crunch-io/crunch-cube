@@ -803,9 +803,9 @@ class _Slice(CubePartition):
         """
         proportions = (
             self.row_proportions
-            if self.rows_dimension_type == DT.CAT_DATE
+            if self.rows_dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
             else self.column_proportions
-            if self.columns_dimension_type == DT.CAT_DATE
+            if self.columns_dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
             else self.table_proportions
         )
         return proportions * self._population * self._cube.population_fraction
