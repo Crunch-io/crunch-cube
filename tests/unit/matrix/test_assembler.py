@@ -33,6 +33,7 @@ from cr.cube.matrix.measure import (
     _RowShareSum,
     _RowUnweightedBases,
     _RowWeightedBases,
+    _ScaleMedian,
     SecondOrderMeasures,
     _StdDev,
     _Sums,
@@ -102,6 +103,33 @@ class DescribeAssembler(object):
 
         _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
         assert value == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+    @pytest.mark.parametrize(
+        "measure_prop_name, MeasureCls",
+        (
+            ("rows_scale_median", _ScaleMedian),
+            ("columns_scale_median", _ScaleMedian),
+        ),
+    )
+    def it_assembles_various_marginals(
+        self,
+        request,
+        _measures_prop_,
+        second_order_measures_,
+        measure_prop_name,
+        MeasureCls,
+    ):
+        _assemble_marginal_ = method_mock(request, Assembler, "_assemble_marginal")
+        _measures_prop_.return_value = second_order_measures_
+        MeasureCls_ = instance_mock(request, MeasureCls)
+        setattr(second_order_measures_, measure_prop_name, MeasureCls_)
+        _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
+        assembler = Assembler(None, None, None)
+
+        value = getattr(assembler, measure_prop_name)
+
+        _assemble_marginal_.assert_called_once_with(assembler, MeasureCls_)
+        assert value == [[1, 2, 3], [4, 5, 6]]
 
     def it_knows_the_column_index(
         self,

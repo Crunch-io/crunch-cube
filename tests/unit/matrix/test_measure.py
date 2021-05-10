@@ -118,6 +118,31 @@ class DescribeSecondOrderMeasures(object):
         CubeMeasures_.assert_called_once_with(cube_, dimensions_, 42)
         assert cube_measures is cube_measures_
 
+    @pytest.mark.parametrize("orientation", ("rows", "columns"))
+    def it_provides_access_to_the_scale_median_measures(
+        self,
+        request,
+        dimensions_,
+        _cube_measures_prop_,
+        cube_measures_,
+        orientation,
+    ):
+        measure_ = instance_mock(request, _ScaleMedian)
+        _ScaleMedian_ = class_mock(
+            request,
+            "cr.cube.matrix.measure._ScaleMedian",
+            return_value=measure_,
+        )
+        _cube_measures_prop_.return_value = cube_measures_
+        measures = SecondOrderMeasures(None, dimensions_, None)
+
+        measure = getattr(measures, "%s_scale_median" % orientation)
+
+        _ScaleMedian_.assert_called_once_with(
+            dimensions_, measures, cube_measures_, orientation
+        )
+        assert measure is measure_
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -1632,6 +1657,24 @@ class Describe_ScaleMedian(object):
 
         assert _ScaleMedian._weighted_median(counts, values) == 10.0
         assert np.isnan(self.old_median_method(counts, values))  # different!
+
+    def it_calculated_weighted_median_nan_count(self):
+        counts = np.array([1, np.nan, 2])
+        values = np.array([10.0, 20.0, 30.0])
+
+        assert _ScaleMedian._weighted_median(counts, values) == 30.0
+
+    def it_calculated_weighted_median_all_nan_count(self):
+        counts = np.array([np.nan, np.nan, np.nan])
+        values = np.array([10.0, 20.0, 30.0])
+
+        assert np.isnan(_ScaleMedian._weighted_median(counts, values))
+
+    def it_calculated_weighted_median_all_zero_count(self):
+        counts = np.array([0, 0, 0])
+        values = np.array([10.0, 20.0, 30.0])
+
+        assert np.isnan(_ScaleMedian._weighted_median(counts, values))
 
     # --- helpers ---
     @staticmethod

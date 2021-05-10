@@ -366,6 +366,21 @@ class Describe_Slice(object):
 
         assert slice_.columns_scale_mean_pairwise_indices_alt is None
 
+    @pytest.mark.parametrize("orientation", ("rows", "columns"))
+    def it_know_the_scale_medians(
+        self, request, _assembler_prop_, assembler_, orientation
+    ):
+        prop_name = "%s_scale_median" % orientation
+        _assembler_prop_.return_value = assembler_
+        setattr(
+            assembler_,
+            prop_name,
+            np.array([[2.2, 3.3], [0.0, 1.1]]),
+        )
+        slice_ = _Slice(None, None, None, None, None)
+
+        assert getattr(slice_, prop_name).tolist() == [[2.2, 3.3], [0.0, 1.1]]
+
     @pytest.mark.parametrize(
         "dimensions_dicts, expected_value",
         (
