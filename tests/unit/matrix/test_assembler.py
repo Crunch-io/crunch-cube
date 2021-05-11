@@ -33,6 +33,7 @@ from cr.cube.matrix.measure import (
     _RowShareSum,
     _RowUnweightedBases,
     _RowWeightedBases,
+    _ScaleMean,
     _ScaleMedian,
     SecondOrderMeasures,
     _StdDev,
@@ -107,6 +108,8 @@ class DescribeAssembler(object):
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
         (
+            ("rows_scale_mean", _ScaleMean),
+            ("columns_scale_mean", _ScaleMean),
             ("rows_scale_median", _ScaleMedian),
             ("columns_scale_median", _ScaleMedian),
         ),

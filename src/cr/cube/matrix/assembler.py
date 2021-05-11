@@ -191,6 +191,11 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def columns_scale_mean(self):
+        """Optional 1D column scale median marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.columns_scale_mean)
+
+    @lazyproperty
     def columns_scale_median(self):
         """Optional 1D column scale median marginal for this cube-result"""
         return self._assemble_marginal(self._measures.columns_scale_median)
@@ -427,6 +432,11 @@ class Assembler(object):
             self._row_subtotals,
             self._row_order,
         )
+
+    @lazyproperty
+    def rows_scale_mean(self):
+        """Optional 1D Row scale median marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.rows_scale_mean)
 
     @lazyproperty
     def rows_scale_median(self):

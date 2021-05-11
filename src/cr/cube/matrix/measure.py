@@ -68,6 +68,11 @@ class SecondOrderMeasures(object):
         return self._cube_measures.unweighted_cube_counts.columns_pruning_base
 
     @lazyproperty
+    def columns_scale_mean(self):
+        """1D np.float64 ndarray of unweighted-N for each matrix column."""
+        return _ScaleMean(self._dimensions, self, self._cube_measures, OR.COLUMNS)
+
+    @lazyproperty
     def columns_scale_median(self):
         """1D np.float64 ndarray of unweighted-N for each matrix column."""
         return _ScaleMedian(self._dimensions, self, self._cube_measures, OR.COLUMNS)
@@ -147,6 +152,11 @@ class SecondOrderMeasures(object):
     def rows_pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix row."""
         return self._cube_measures.unweighted_cube_counts.rows_pruning_base
+
+    @lazyproperty
+    def rows_scale_mean(self):
+        """1D np.float64 ndarray of unweighted-N for each matrix column."""
+        return _ScaleMean(self._dimensions, self, self._cube_measures, OR.ROWS)
 
     @lazyproperty
     def rows_scale_median(self):
@@ -1407,6 +1417,73 @@ class _BaseScaledCountMarginal(_BaseSecondOrderMarginal):
             if self._orientation_is_rows
             else np.array(self._dimensions[0].numeric_values, dtype=np.float64)
         )
+
+
+class _ScaleMean(_BaseScaledCountMarginal):
+    """Provides the scale mean marginals for a matrix if available.
+
+    The rows/columns median is a 1D np.float64 ndarray, the same dimension as the
+    opposing dimension, and has has the weighted mean of the opposing dimension's
+    numeric values.
+
+    It is None when there are no numeric values for the opposing dimension. If
+    there are any numeric values defined, but for a given row/column none of the
+    categories with numeric values have positive counts it will be np.nan.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the scale mean.
+
+        These are the base-values and the subtotals.
+        """
+        if not self.is_defined:
+            raise ValueError(
+                (
+                    "%s-scale-mean is undefined if no numeric values are defined on "
+                    + "opposing dimension."
+                )
+                % self.orientation.value
+            )
+
+        return [
+            self._apply_along_orientation(
+                self._weighted_mean, proportion, values=self._opposing_numeric_values
+            )
+            for proportion in self._proportions
+        ]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if any have numeric values"""
+        return not np.all(np.isnan(self._opposing_numeric_values))
+
+    @lazyproperty
+    def _proportions(self):
+        """List of 2 ndarray matrixes of the relevant proportion blocks"""
+        if self._orientation_is_rows:
+            # --- Use *row* proportions ---
+            props = self._second_order_measures.row_proportions.blocks
+            # --- Get base values & *row* subtotals
+            return [props[0][0], props[1][0]]
+        else:
+            # --- Use *column* proportions ---
+            props = self._second_order_measures.column_proportions.blocks
+            # --- Get base values & *column* subtotals
+            return [props[0][0], props[0][1]]
+
+    @staticmethod
+    def _weighted_mean(proportions, values):
+        """Calculate the weighted mean from proportions and numeric values
+
+        Both proportions and values are 1D ndarrays
+        """
+        inner = np.nansum(values * proportions)
+        # --- denominator isn't necessarily 1 because need to remove the proportions
+        # --- that don't have numeric values defined.
+        not_a_nan_mask = ~np.isnan(values)
+        denominator = np.sum(proportions[not_a_nan_mask])
+        return inner / denominator
 
 
 class _ScaleMedian(_BaseScaledCountMarginal):

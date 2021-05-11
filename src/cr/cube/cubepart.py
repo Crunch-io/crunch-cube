@@ -393,16 +393,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no row element has an assigned numeric value.
         """
-        if not self._rows_have_numeric_value:
-            return None
-
-        inner = np.nansum(
-            self._rows_dimension_numeric_values[:, None] * self.column_proportions,
-            axis=0,
-        )
-        not_a_nan_mask = ~np.isnan(self._rows_dimension_numeric_values)
-        denominator = np.sum(self.column_proportions[not_a_nan_mask, :], axis=0)
-        return inner / denominator
+        return self._assembler.columns_scale_mean
 
     @lazyproperty
     def columns_scale_mean_margin(self):
@@ -993,14 +984,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no column element has an assigned numeric value.
         """
-        if not self._columns_have_numeric_value:
-            return None
-
-        column_numeric_values = self._columns_dimension_numeric_values
-        inner = np.nansum(column_numeric_values * self.row_proportions, axis=1)
-        not_a_nan_index = ~np.isnan(column_numeric_values)
-        denominator = np.sum(self.row_proportions[:, not_a_nan_index], axis=1)
-        return inner / denominator
+        return self._assembler.rows_scale_mean
 
     @lazyproperty
     def rows_scale_mean_margin(self):
