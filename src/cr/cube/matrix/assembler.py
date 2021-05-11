@@ -19,7 +19,12 @@ from cr.cube.collator import (
     PayloadOrderCollator,
     SortByValueCollator,
 )
-from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT, MEASURE as M
+from cr.cube.enums import (
+    COLLATION_METHOD as CM,
+    DIMENSION_TYPE as DT,
+    MEASURE as M,
+    ORIENTATION as OR,
+)
 from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.measure import SecondOrderMeasures
 from cr.cube.matrix.subtotals import (
@@ -629,7 +634,7 @@ class Assembler(object):
             return None
 
         order = (
-            self._row_order if marginal.orientation == "rows" else self._column_order
+            self._row_order if marginal.orientation == OR.ROWS else self._column_order
         )
 
         return np.hstack(marginal.blocks)[order]

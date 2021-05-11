@@ -7,7 +7,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT, ORIENTATION as OR
 from cr.cube.matrix.cubemeasure import (
     CubeMeasures,
     _BaseUnweightedCubeCounts,
@@ -139,7 +139,7 @@ class DescribeSecondOrderMeasures(object):
         measure = getattr(measures, "%s_scale_median" % orientation)
 
         _ScaleMedian_.assert_called_once_with(
-            dimensions_, measures, cube_measures_, orientation
+            dimensions_, measures, cube_measures_, OR(orientation)
         )
         assert measure is measure_
 
@@ -1409,31 +1409,22 @@ class Describe_BaseSecondOrderMarginal(object):
     """Unit test suite for `cr.cube.matrix.measure._BaseSecondOrderMarginal` object."""
 
     def it_has_default_value_for_is_defined(self):
-        marginal = _BaseSecondOrderMarginal(None, None, None, "rows")
+        marginal = _BaseSecondOrderMarginal(None, None, None, None)
         assert marginal.is_defined is True
 
-    @pytest.mark.parametrize("orientation", ("rows", "columns"))
+    @pytest.mark.parametrize("orientation", (OR.ROWS, OR.COLUMNS))
     def it_provides_orientation(self, orientation):
         marginal = _BaseSecondOrderMarginal(None, None, None, orientation)
 
         assert marginal.orientation == orientation
 
-    def but_it_rejects_invalid_orientation(self):
-        with pytest.raises(ValueError) as e:
-            _BaseSecondOrderMarginal(None, None, None, "foo")
-
-        assert (
-            str(e.value)
-            == "'foo' is an invalid orientation, must be 'rows' or 'columns'."
-        )
-
     @pytest.mark.parametrize(
         "orientation, array, expected",
         (
-            ("rows", np.array([[0, 1, 2], [3, 4, 5]]), [3, 12]),
-            ("columns", np.array([[0, 1, 2], [3, 4, 5]]), [3, 5, 7]),
-            ("rows", np.array([]).reshape(0, 6), []),
-            ("columns", np.array([]).reshape(6, 0), []),
+            (OR.ROWS, np.array([[0, 1, 2], [3, 4, 5]]), [3, 12]),
+            (OR.COLUMNS, np.array([[0, 1, 2], [3, 4, 5]]), [3, 5, 7]),
+            (OR.ROWS, np.array([]).reshape(0, 6), []),
+            (OR.COLUMNS, np.array([]).reshape(6, 0), []),
         ),
     )
     def it_can_apply_along_orientation(self, orientation, array, expected):
@@ -1441,11 +1432,28 @@ class Describe_BaseSecondOrderMarginal(object):
         result = marginal._apply_along_orientation(np.sum, array)
         assert result.tolist() == expected
 
+    @pytest.mark.parametrize(
+        "orientation, expected", ((OR.ROWS, True), (OR.COLUMNS, False))
+    )
+    def it_can_tell_if_it_is_rows_or_columns_orientation(self, orientation, expected):
+        marginal = _BaseSecondOrderMarginal(None, None, None, orientation)
+        assert marginal._orientation_is_rows == expected
+
+    def but_it_fails_when_invalid_orientation(self):
+        marginal = _BaseSecondOrderMarginal(None, None, None, "foo")
+
+        with pytest.raises(ValueError) as e:
+            marginal._orientation_is_rows
+
+        assert str(e.value) == "Orientation 'foo' is neither rows nor columns."
+
 
 class Describe_BaseScaledCountMarginal(object):
     """Unit test suite for `cr.cube.matrix.measure._BaseScaledCountMarginal` object."""
 
-    @pytest.mark.parametrize("orientation, expected", (("rows", [1]), ("columns", [0])))
+    @pytest.mark.parametrize(
+        "orientation, expected", ((OR.ROWS, [1]), (OR.COLUMNS, [0]))
+    )
     def it_provides_opposing_numeric_values_to_help(
         self, request, orientation, expected
     ):
@@ -1469,7 +1477,7 @@ class Describe_ScaleMedian(object):
             request, SecondOrderMeasures, row_comparable_counts=row_comparable_counts_
         )
 
-        median = _ScaleMedian(None, second_order_measures_, None, "rows")
+        median = _ScaleMedian(None, second_order_measures_, None, OR.ROWS)
 
         assert median._unsorted_counts == ["a", "c"]
 
@@ -1483,7 +1491,7 @@ class Describe_ScaleMedian(object):
             column_comparable_counts=column_comparable_counts_,
         )
 
-        median = _ScaleMedian(None, second_order_measures_, None, "columns")
+        median = _ScaleMedian(None, second_order_measures_, None, OR.COLUMNS)
 
         assert median._unsorted_counts == ["a", "b"]
 
@@ -1503,7 +1511,7 @@ class Describe_ScaleMedian(object):
             "_opposing_numeric_values",
             return_value=np.array(values),
         )
-        sort_order = _ScaleMedian(None, None, None, "rows")._values_sort_order
+        sort_order = _ScaleMedian(None, None, None, OR.ROWS)._values_sort_order
         assert sort_order.tolist() == expected
 
     @pytest.mark.parametrize(
@@ -1522,7 +1530,7 @@ class Describe_ScaleMedian(object):
             "_opposing_numeric_values",
             return_value=np.array(values),
         )
-        sort_order = _ScaleMedian(None, None, None, "rows")._sorted_values
+        sort_order = _ScaleMedian(None, None, None, OR.ROWS)._sorted_values
         assert sort_order.tolist() == expected
 
     def it_provides_blocks(self, request):
@@ -1537,7 +1545,7 @@ class Describe_ScaleMedian(object):
             "_apply_along_orientation",
             side_effect=("result1", "result2"),
         )
-        median = _ScaleMedian(None, None, None, "rows")
+        median = _ScaleMedian(None, None, None, OR.ROWS)
 
         results = median.blocks
 
@@ -1561,7 +1569,7 @@ class Describe_ScaleMedian(object):
         property_mock(request, _ScaleMedian, "is_defined", return_value=False)
 
         with pytest.raises(ValueError) as e:
-            _ScaleMedian(None, None, None, "rows").blocks
+            _ScaleMedian(None, None, None, OR.ROWS).blocks
 
         assert (
             str(e.value)
@@ -1573,28 +1581,28 @@ class Describe_ScaleMedian(object):
         "orientation, sort_order, base_values, subtotals, expected",
         (
             (
-                "columns",
+                OR.COLUMNS,
                 np.array([2, 1]),
                 np.array([[0, 1], [2, 3], [4, 5]]),
                 np.array([]).reshape(3, 0),
                 [[[4, 5], [2, 3]], [[], []]],
             ),
             (
-                "columns",
+                OR.COLUMNS,
                 np.array([0, 2, 1]),
                 np.array([[0, 1], [2, 3], [4, 5]]),
                 np.array([[6], [7], [8]]),
                 [[[0, 1], [4, 5], [2, 3]], [[6], [8], [7]]],
             ),
             (
-                "rows",
+                OR.ROWS,
                 np.array([3, 1]),
                 np.array([[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]]),
                 np.array([]).reshape(0, 3),
                 [[[3, 1], [7, 5], [11, 9]], []],
             ),
             (
-                "rows",
+                OR.ROWS,
                 np.array([1, 0]),
                 np.array([[0, 1], [2, 3], [4, 5]]),
                 np.array([[6, 7], [8, 9], [10, 11]]),

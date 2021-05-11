@@ -7,7 +7,7 @@ from __future__ import division
 import numpy as np
 from scipy.stats import t
 
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT, ORIENTATION as OR
 from cr.cube.matrix.cubemeasure import CubeMeasures
 from cr.cube.matrix.subtotals import (
     SumSubtotals,
@@ -70,7 +70,7 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def columns_scale_median(self):
         """1D np.float64 ndarray of unweighted-N for each matrix column."""
-        return _ScaleMedian(self._dimensions, self, self._cube_measures, "columns")
+        return _ScaleMedian(self._dimensions, self, self._cube_measures, OR.COLUMNS)
 
     @lazyproperty
     def means(self):
@@ -151,7 +151,7 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def rows_scale_median(self):
         """_ScaleMedian for rows measure object for this cube-result."""
-        return _ScaleMedian(self._dimensions, self, self._cube_measures, "rows")
+        return _ScaleMedian(self._dimensions, self, self._cube_measures, OR.ROWS)
 
     @lazyproperty
     def sums(self):
@@ -1346,11 +1346,6 @@ class _BaseSecondOrderMarginal(object):
         self._dimensions = dimensions
         self._second_order_measures = second_order_measures
         self._cube_measures = cube_measures
-        if orientation not in ("rows", "columns"):
-            raise ValueError(
-                "'%s' is an invalid orientation, must be 'rows' or 'columns'."
-                % orientation
-            )
         self._orientation = orientation
 
     @lazyproperty
@@ -1382,12 +1377,23 @@ class _BaseSecondOrderMarginal(object):
         Gets the axis from the `.orientation` property and also returns an empty
         1d array of floats when the dimension is length 0 (rather than failing).
         """
-        axis = 1 if self.orientation == "rows" else 0
+        axis = 1 if self._orientation_is_rows else 0
 
         if arr.shape[1 - axis] == 0:
             return np.array([], dtype=np.float64)
 
         return np.apply_along_axis(func1d, axis, arr, *args, **kwargs)
+
+    @lazyproperty
+    def _orientation_is_rows(self):
+        if self.orientation == OR.ROWS:
+            return True
+        elif self.orientation == OR.COLUMNS:
+            return False
+        else:
+            raise ValueError(
+                "Orientation '%s' is neither rows nor columns." % self.orientation
+            )
 
 
 class _BaseScaledCountMarginal(_BaseSecondOrderMarginal):
@@ -1398,7 +1404,7 @@ class _BaseScaledCountMarginal(_BaseSecondOrderMarginal):
         """ndarray of numeric_values from the opposing dimension"""
         return (
             np.array(self._dimensions[1].numeric_values, dtype=np.float64)
-            if self.orientation == "rows"
+            if self._orientation_is_rows
             else np.array(self._dimensions[0].numeric_values, dtype=np.float64)
         )
 
@@ -1427,7 +1433,7 @@ class _ScaleMedian(_BaseScaledCountMarginal):
                     "%s-scale-median is undefined if no numeric values are defined on "
                     + "opposing dimension."
                 )
-                % self.orientation
+                % self.orientation.value
             )
 
         return [
@@ -1438,28 +1444,36 @@ class _ScaleMedian(_BaseScaledCountMarginal):
         ]
 
     @lazyproperty
-    def orientation(self):
-        return self._orientation
-
-    @lazyproperty
     def is_defined(self):
         """True if any have numeric values"""
         return not np.all(np.isnan(self._opposing_numeric_values))
 
     @lazyproperty
     def _sorted_counts(self):
-        axis = 1 if self.orientation == "rows" else 0
+        """List of 2 ndarrays count blocks, sorted by `._values_sort_order`
+
+        These values are the `._unsorted_counts` sorted in the same order as the numeric
+        values will be so that they can be used in `_weighted_median()`.
+        """
+        axis = 1 if self._orientation_is_rows else 0
         return [
             count.take(self._values_sort_order, axis) for count in self._unsorted_counts
         ]
 
     @lazyproperty
     def _sorted_values(self):
+        """ndarray of numeric values, sorted for use in `._weighted_median()`"""
         return self._opposing_numeric_values[self._values_sort_order]
 
     @lazyproperty
     def _unsorted_counts(self):
-        if self.orientation == "rows":
+        """List of 2 ndarrays count blocks, in their original payload order
+
+        The counts come from the count measure blocks that are comparable
+        in the correct orientation, and include the base values and the
+        subtotals for the orientation.
+        """
+        if self._orientation_is_rows:
             # --- Use *row* comparable counts ---
             counts = self._second_order_measures.row_comparable_counts.blocks
             # --- Get base values & *row* subtotals
@@ -1472,6 +1486,12 @@ class _ScaleMedian(_BaseScaledCountMarginal):
 
     @lazyproperty
     def _values_sort_order(self):
+        """ndarray of indexes of the order to sort numeric values in
+
+        Provides the sort order (removing np.nan values) of numeric values for the
+        opposing dimension to use when sorting both the numeric values themselves and
+        also the the counts so that the order between these remains consistent.
+        """
         values = self._opposing_numeric_values
         sort_idx = values.argsort()
         nan_idx = np.argwhere(np.isnan(values))
@@ -1480,20 +1500,20 @@ class _ScaleMedian(_BaseScaledCountMarginal):
         return np.setdiff1d(sort_idx, nan_idx, assume_unique=True)
 
     @staticmethod
-    def _weighted_median(counts, sorted_values):
+    def _weighted_median(sorted_counts, sorted_values):
         """Calculate the median given a set of values and their frequency in the data
 
-        `sorted_values` must be sorted in order and the counts must be sorted to match
-        that order.
+        `sorted_values` must be sorted in order and the `sorted_counts` must be sorted to
+        match that order.
         """
         # --- Convert nans to 0, as we don't want them to contribute to median. Counts
         # --- can possibly be nans for subtotal differences along the orientation we're
         # --- calculating.
-        counts = np.nan_to_num(counts)
+        sorted_counts = np.nan_to_num(sorted_counts)
         # --- TODO: We could convert to int, so that it matches old behavior exactly
         # --- Should we do this? Seems better to use true weights.
-        # counts = counts.astype("int64")
-        cumulative_counts = np.cumsum(counts)
+        # sorted_counts = sorted_counts.astype("int64")
+        cumulative_counts = np.cumsum(sorted_counts)
         # --- If no valid numeric value has counts, median is nan
         if cumulative_counts[-1] == 0:
             return np.nan

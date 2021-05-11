@@ -121,3 +121,10 @@ NUMERIC_MEASURES = frozenset(
         MEASURE.TOTAL_SHARE_SUM,
     )
 )
+
+
+class ORIENTATION(enum.Enum):
+    """Enumerated values representing orientation of a marginal."""
+
+    ROWS = "rows"
+    COLUMNS = "columns"
