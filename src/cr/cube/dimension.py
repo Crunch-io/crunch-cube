@@ -873,13 +873,13 @@ class _OrderSpec(object):
 
     @lazyproperty
     def insertion_id(self):
-        """int insertion-id in the "insertion_id" field of the transform dict.
+        """int insertion-id in the "id" field of the transform dict.
 
-        Raises KeyError if this transform dict does not contain an "insertion_id" field.
-        Note that not all order types use the "insertion_id": field but this field is
-        required in all that do.
+        Raises KeyError if this transform dict does not contain an "id" field. Note that
+        not all order types use the "id": field but this field is required in all that
+        do.
         """
-        return self._order_dict["insertion_id"]
+        return self._order_dict["id"]
 
     @lazyproperty
     def measure(self):
@@ -1073,7 +1073,7 @@ class _Subtotal(object):
     @lazyproperty
     def insertion_id(self):
         """int unique identifier of this subtotal within this dimension's insertions."""
-        return self._subtotal_dict.get("insertion_id", self._fallback_insertion_id)
+        return self._subtotal_dict.get("id", self._fallback_insertion_id)
 
     @lazyproperty
     def label(self):
