@@ -465,11 +465,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no row element has been assigned a numeric value.
         """
-        return (
-            np.sqrt(self._columns_scale_mean_variance)
-            if self._rows_have_numeric_value
-            else None
-        )
+        return self._assembler.columns_scale_mean_stddev
 
     @lazyproperty
     def columns_scale_mean_stderr(self):
@@ -1025,11 +1021,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no column elements have an assigned numeric value.
         """
-        return (
-            np.sqrt(self._rows_scale_mean_variance)
-            if self._columns_have_numeric_value
-            else None
-        )
+        return self._assembler.rows_scale_mean_stddev
 
     @lazyproperty
     def rows_scale_mean_stderr(self):

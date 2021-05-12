@@ -69,12 +69,17 @@ class SecondOrderMeasures(object):
 
     @lazyproperty
     def columns_scale_mean(self):
-        """1D np.float64 ndarray of unweighted-N for each matrix column."""
+        """_ScaleMean for columns measure object for this cube-result."""
         return _ScaleMean(self._dimensions, self, self._cube_measures, OR.COLUMNS)
 
     @lazyproperty
+    def columns_scale_mean_stddev(self):
+        """_ScaleMeanStddev for columns measure object for this cube-result."""
+        return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, OR.COLUMNS)
+
+    @lazyproperty
     def columns_scale_median(self):
-        """1D np.float64 ndarray of unweighted-N for each matrix column."""
+        """_ScaleMedian for columns measure object for this cube-result."""
         return _ScaleMedian(self._dimensions, self, self._cube_measures, OR.COLUMNS)
 
     @lazyproperty
@@ -155,8 +160,13 @@ class SecondOrderMeasures(object):
 
     @lazyproperty
     def rows_scale_mean(self):
-        """1D np.float64 ndarray of unweighted-N for each matrix column."""
+        """_ScaleMean for rows measure object for this cube-result."""
         return _ScaleMean(self._dimensions, self, self._cube_measures, OR.ROWS)
+
+    @lazyproperty
+    def rows_scale_mean_stddev(self):
+        """_ScaleMeanStddev for rpws measure object for this cube-result."""
+        return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, OR.ROWS)
 
     @lazyproperty
     def rows_scale_median(self):
@@ -1395,6 +1405,24 @@ class _BaseSecondOrderMarginal(object):
         return np.apply_along_axis(func1d, axis, arr, *args, **kwargs)
 
     @lazyproperty
+    def _counts(self):
+        """List of 2 ndarrays count blocks, in their original payload order
+
+        The counts come from the count measure blocks that are comparable in the correct
+        orientation, and include the base values and the subtotals for the orientation.
+        """
+        if self._orientation_is_rows:
+            # --- Use *row* comparable counts ---
+            counts = self._second_order_measures.row_comparable_counts.blocks
+            # --- Get base values & *row* subtotals
+            return [counts[0][0], counts[1][0]]
+        else:
+            # --- Use *column* comparable counts ---
+            counts = self._second_order_measures.column_comparable_counts.blocks
+            # --- Get base values & *column* subtotals
+            return [counts[0][0], counts[0][1]]
+
+    @lazyproperty
     def _orientation_is_rows(self):
         if self.orientation == OR.ROWS:
             return True
@@ -1529,37 +1557,16 @@ class _ScaleMedian(_BaseScaledCountMarginal):
     def _sorted_counts(self):
         """List of 2 ndarrays count blocks, sorted by `._values_sort_order`
 
-        These values are the `._unsorted_counts` sorted in the same order as the numeric
+        These values are the `._counts` sorted in the same order as the numeric
         values will be so that they can be used in `_weighted_median()`.
         """
         axis = 1 if self._orientation_is_rows else 0
-        return [
-            count.take(self._values_sort_order, axis) for count in self._unsorted_counts
-        ]
+        return [count.take(self._values_sort_order, axis) for count in self._counts]
 
     @lazyproperty
     def _sorted_values(self):
         """ndarray of numeric values, sorted for use in `._weighted_median()`"""
         return self._opposing_numeric_values[self._values_sort_order]
-
-    @lazyproperty
-    def _unsorted_counts(self):
-        """List of 2 ndarrays count blocks, in their original payload order
-
-        The counts come from the count measure blocks that are comparable
-        in the correct orientation, and include the base values and the
-        subtotals for the orientation.
-        """
-        if self._orientation_is_rows:
-            # --- Use *row* comparable counts ---
-            counts = self._second_order_measures.row_comparable_counts.blocks
-            # --- Get base values & *row* subtotals
-            return [counts[0][0], counts[1][0]]
-        else:
-            # --- Use *column* comparable counts ---
-            counts = self._second_order_measures.column_comparable_counts.blocks
-            # --- Get base values & *column* subtotals
-            return [counts[0][0], counts[0][1]]
 
     @lazyproperty
     def _values_sort_order(self):
@@ -1603,6 +1610,95 @@ class _ScaleMedian(_BaseScaledCountMarginal):
             return np.mean(sorted_values[[median_idx, median_idx + 1]])
         else:
             return sorted_values[median_idx]
+
+
+class _ScaleMeanStddev(_BaseScaledCountMarginal):
+    """Provides the std. dev of the marginal scale means."""
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the scale mean standard deviation.
+
+        These are the base-values and the subtotals.
+        """
+        if not self.is_defined:
+            raise ValueError(
+                (
+                    "%s-scale-mean-standard-deviation is undefined if no numeric values "
+                    + "are defined on opposing dimension."
+                )
+                % self.orientation.value
+            )
+
+        return [
+            self._stddev_func(count, self._opposing_numeric_values, scale_means)
+            for count, scale_means in zip(self._counts, self._scale_means)
+        ]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if any have numeric values"""
+        return not np.all(np.isnan(self._opposing_numeric_values))
+
+    @staticmethod
+    def _columns_weighted_mean_stddev(counts, values, scale_mean):
+        """Calculate the scale mean std dev for columns orientation"""
+        if counts.shape[1] == 0:
+            return np.array([], dtype=float)
+        # --- Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is
+        # --- the mean of the data.
+        not_a_nan_index = ~np.isnan(values)
+        row_dim_numeric_values = values[not_a_nan_index]
+        numerator = (
+            counts[not_a_nan_index, :]
+            * pow(
+                np.broadcast_to(
+                    row_dim_numeric_values, counts[not_a_nan_index, :].T.shape
+                )
+                - scale_mean.reshape(-1, 1),
+                2,
+            ).T
+        )
+        denominator = np.sum(counts[not_a_nan_index, :], axis=0)
+        variance = np.nansum(numerator, axis=0) / denominator
+        return np.sqrt(variance)
+
+    @staticmethod
+    def _rows_weighted_mean_stddev(counts, values, scale_mean):
+        """Calculate the scale mean std dev for rows orientation"""
+        if counts.shape[0] == 0:
+            return np.array([], dtype=float)
+        # --- Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is
+        # --- the mean of the data.
+        not_a_nan_index = ~np.isnan(values)
+        col_dim_numeric = values[not_a_nan_index]
+
+        numerator = counts[:, not_a_nan_index] * pow(
+            np.broadcast_to(col_dim_numeric, counts[:, not_a_nan_index].shape)
+            - scale_mean.reshape(-1, 1),
+            2,
+        )
+        denominator = np.sum(counts[:, not_a_nan_index], axis=1)
+        variance = np.nansum(numerator, axis=1) / denominator
+        return np.sqrt(variance)
+
+    @lazyproperty
+    def _scale_means(self):
+        """list of 2 np.ndarray blocks of the scale mean for this orientation"""
+        return (
+            self._second_order_measures.rows_scale_mean.blocks
+            if self._orientation_is_rows
+            else self._second_order_measures.columns_scale_mean.blocks
+        )
+
+    @lazyproperty
+    def _stddev_func(self):
+        """function for calculating standard deviation along this orientation."""
+        return (
+            self._rows_weighted_mean_stddev
+            if self._orientation_is_rows
+            else self._columns_weighted_mean_stddev
+        )
 
 
 # === PAIRWISE HELPERS ===

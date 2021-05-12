@@ -34,6 +34,7 @@ from cr.cube.matrix.measure import (
     _RowUnweightedBases,
     _RowWeightedBases,
     _ScaleMean,
+    _ScaleMeanStddev,
     _ScaleMedian,
     SecondOrderMeasures,
     _StdDev,
@@ -110,6 +111,8 @@ class DescribeAssembler(object):
         (
             ("rows_scale_mean", _ScaleMean),
             ("columns_scale_mean", _ScaleMean),
+            ("rows_scale_mean_stddev", _ScaleMeanStddev),
+            ("columns_scale_mean_stddev", _ScaleMeanStddev),
             ("rows_scale_median", _ScaleMedian),
             ("columns_scale_median", _ScaleMedian),
         ),

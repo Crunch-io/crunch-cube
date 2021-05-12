@@ -343,6 +343,8 @@ class Describe_Slice(object):
         (
             "rows_scale_mean",
             "columns_scale_mean",
+            "rows_scale_mean_stddev",
+            "columns_scale_mean_stddev",
             "rows_scale_median",
             "columns_scale_median",
         ),

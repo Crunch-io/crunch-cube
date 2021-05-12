@@ -28,6 +28,7 @@ from cr.cube.matrix.measure import (
     _RowUnweightedBases,
     _RowWeightedBases,
     _ScaleMean,
+    _ScaleMeanStddev,
     _ScaleMedian,
     SecondOrderMeasures,
     _Sums,
@@ -126,6 +127,8 @@ class DescribeSecondOrderMeasures(object):
             ("columns", "columns_scale_median", _ScaleMedian),
             ("rows", "rows_scale_mean", _ScaleMean),
             ("columns", "columns_scale_mean", _ScaleMean),
+            ("rows", "rows_scale_mean_stddev", _ScaleMeanStddev),
+            ("columns", "columns_scale_mean_stddev", _ScaleMeanStddev),
         ),
     )
     def it_provides_access_to_the_scale_median_measures(
@@ -1458,6 +1461,34 @@ class Describe_BaseSecondOrderMarginal(object):
 
         assert str(e.value) == "Orientation 'foo' is neither rows nor columns."
 
+    def it_gets_the_right_counts_for_rows(self, request):
+        row_comparable_counts_ = instance_mock(
+            request, _BaseSecondOrderMarginal, blocks=[["a", "b"], ["c", "d"]]
+        )
+        second_order_measures_ = instance_mock(
+            request, SecondOrderMeasures, row_comparable_counts=row_comparable_counts_
+        )
+
+        median = _BaseSecondOrderMarginal(None, second_order_measures_, None, OR.ROWS)
+
+        assert median._counts == ["a", "c"]
+
+    def it_gets_the_right_counts_for_columns(self, request):
+        column_comparable_counts_ = instance_mock(
+            request, _BaseSecondOrderMarginal, blocks=[["a", "b"], ["c", "d"]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            column_comparable_counts=column_comparable_counts_,
+        )
+
+        median = _BaseSecondOrderMarginal(
+            None, second_order_measures_, None, OR.COLUMNS
+        )
+
+        assert median._counts == ["a", "b"]
+
 
 class Describe_BaseScaledCountMarginal(object):
     """Unit test suite for `cr.cube.matrix.measure._BaseScaledCountMarginal` object."""
@@ -1546,7 +1577,7 @@ class Describe_ScaleMean(object):
 
         assert mean._proportions == ["a", "c"]
 
-    def it_gets_the_right_unsorted_counts_for_columns(self, request):
+    def it_gets_the_right_counts_for_columns(self, request):
         column_proportions_ = instance_mock(
             request, _ColumnProportions, blocks=[["a", "b"], ["c", "d"]]
         )
@@ -1573,34 +1604,105 @@ class Describe_ScaleMean(object):
         assert mean == pytest.approx(expected, nan_ok=True)
 
 
+class Describe_ScaleMeanStddev(object):
+    """Unit test suite for `cr.cube.matrix.measure._ScaleMeanStddev` object."""
+
+    def it_provides_blocks_for_rows(self, request):
+        pass
+
+    def but_blocks_raises_if_undefined(self, request):
+        property_mock(request, _ScaleMeanStddev, "is_defined", return_value=False)
+
+        with pytest.raises(ValueError) as e:
+            _ScaleMeanStddev(None, None, None, OR.ROWS).blocks
+
+        assert (
+            str(e.value)
+            == "rows-scale-mean-standard-deviation is undefined if no numeric values are "
+            + "defined on opposing dimension."
+        )
+
+    def it_gets_the_right_scale_mean_for_columns(self, request):
+        columns_scale_mean_ = instance_mock(request, _ScaleMean, blocks=["a", "b"])
+        second_order_measures_ = instance_mock(
+            request, SecondOrderMeasures, columns_scale_mean=columns_scale_mean_
+        )
+
+        stddev = _ScaleMeanStddev(None, second_order_measures_, None, OR.COLUMNS)
+
+        assert stddev._scale_means == ["a", "b"]
+
+    def it_gets_the_right_scale_mean_for_rows(self, request):
+        rows_scale_mean_ = instance_mock(request, _ScaleMean, blocks=["a", "b"])
+        second_order_measures_ = instance_mock(
+            request, SecondOrderMeasures, rows_scale_mean=rows_scale_mean_
+        )
+
+        stddev = _ScaleMeanStddev(None, second_order_measures_, None, OR.ROWS)
+
+        assert stddev._scale_means == ["a", "b"]
+
+    @pytest.mark.parametrize(
+        "counts, values, scale_mean, expected",
+        (
+            (
+                np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]),
+                np.array([7.0, 8.0, 9.0]),
+                np.array([10.0, 11.0]),
+                np.array([1.8257418, 2.977694]),
+            ),
+            (
+                np.array([[1.0, 2.0, 3.0, 3.5], [4.0, 5.0, 6.0, 6.5]]),
+                np.array([7.0, 8.0, 9.0, np.nan]),
+                np.array([10.0, 11.0]),
+                np.array([1.8257418, 2.977694]),
+            ),
+            (
+                np.array([]).reshape(0, 3),
+                np.array([7.0, 8.0, 9.0]),
+                np.array([]),
+                np.array([]),
+            ),
+        ),
+    )
+    def it_can_calculate_stddev_for_rows(self, counts, values, scale_mean, expected):
+        result = _ScaleMeanStddev._rows_weighted_mean_stddev(counts, values, scale_mean)
+
+        assert result.tolist() == pytest.approx(expected, nan_ok=True)
+
+    @pytest.mark.parametrize(
+        "counts, values, scale_mean, expected",
+        (
+            (
+                np.array([[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]]),
+                np.array([7.0, 8.0, 9.0]),
+                np.array([10.0, 11.0]),
+                np.array([1.8257418, 2.977694]),
+            ),
+            (
+                np.array([[1.0, 4.0], [2.0, 5.0], [3.0, 6.0], [3.5, 6.5]]),
+                np.array([7.0, 8.0, 9.0, np.nan]),
+                np.array([10.0, 11.0]),
+                np.array([1.8257418, 2.977694]),
+            ),
+            (
+                np.array([]).reshape(3, 0),
+                np.array([7.0, 8.0, 9.0]),
+                np.array([]),
+                np.array([]),
+            ),
+        ),
+    )
+    def it_can_calculate_stddev_for_columns(self, counts, values, scale_mean, expected):
+        result = _ScaleMeanStddev._columns_weighted_mean_stddev(
+            counts, values, scale_mean
+        )
+
+        assert result.tolist() == pytest.approx(expected, nan_ok=True)
+
+
 class Describe_ScaleMedian(object):
     """Unit test suite for `cr.cube.matrix.measure._ScaleMedian` object."""
-
-    def it_gets_the_right_unsorted_counts_for_rows(self, request):
-        row_comparable_counts_ = instance_mock(
-            request, _RowComparableCounts, blocks=[["a", "b"], ["c", "d"]]
-        )
-        second_order_measures_ = instance_mock(
-            request, SecondOrderMeasures, row_comparable_counts=row_comparable_counts_
-        )
-
-        median = _ScaleMedian(None, second_order_measures_, None, OR.ROWS)
-
-        assert median._unsorted_counts == ["a", "c"]
-
-    def it_gets_the_right_unsorted_counts_for_columns(self, request):
-        column_comparable_counts_ = instance_mock(
-            request, _ColumnComparableCounts, blocks=[["a", "b"], ["c", "d"]]
-        )
-        second_order_measures_ = instance_mock(
-            request,
-            SecondOrderMeasures,
-            column_comparable_counts=column_comparable_counts_,
-        )
-
-        median = _ScaleMedian(None, second_order_measures_, None, OR.COLUMNS)
-
-        assert median._unsorted_counts == ["a", "b"]
 
     @pytest.mark.parametrize(
         "values, expected",
@@ -1726,7 +1828,7 @@ class Describe_ScaleMedian(object):
         property_mock(
             request,
             _ScaleMedian,
-            "_unsorted_counts",
+            "_counts",
             return_value=[base_values, subtotals],
         )
 
