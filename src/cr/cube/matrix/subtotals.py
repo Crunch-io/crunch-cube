@@ -653,6 +653,25 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         """
         return np.nan
 
+    def _selected_observations(self, props, props_hs):
+        """Returns a tuple (column_proportions, variance) for the selected column.
+
+        A paired t-test simply calculates the difference between paired observations
+        (e.g., before and after) and then performs a 1-sample t-test on the differences.
+        This method, calculates the observations of the second sample on which calculate
+        the t-statistics.
+        """
+        var_props = props * (1.0 - props) / self._columns_base.blocks[0][0]
+        var_props_hs = props_hs * (1 - props_hs) / self._columns_base.blocks[0][1]
+        col_idx = self._selected_column_idx
+        if col_idx < 0:
+            selected_column_proportions = props_hs[:, [col_idx]]
+            selected_variance = var_props_hs[:, [col_idx]]
+        else:
+            selected_column_proportions = props[:, [col_idx]]
+            selected_variance = var_props[:, [col_idx]]
+        return selected_column_proportions, selected_variance
+
     def _subtotal_column(self, subtotal, col):
         """Return (n_rows,) ndarray of zscore `subtotal` value."""
         # --- Cannot calculate if there are any subtrahends ---
@@ -698,8 +717,8 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         if len(subtotals) == 0:
             return np.empty((0, self._ncols))
 
-        # --- T-stats subtotal rows are computed considering the inserted row
-        # --- column_proportions values as the base values for the t-statistic formula
+        # --- T-stats subtotal rows are computed considering the column_proportions
+        # --- row insertions values as the base values for the t-statistic formula
         props = self._column_proportions.blocks[1][0]
         # --- The eventual column insertions in the case of subtotal rows are the
         # --- intersections
@@ -725,22 +744,3 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         diff = props - selected_column_props
         se_diff = np.sqrt(var_props + selected_variance)
         return diff / se_diff
-
-    def _selected_observations(self, props, props_hs):
-        """Returns a tuple (column_proportions, variance) for the selected column.
-
-        A paired t-test simply calculates the difference between paired observations
-        (e.g., before and after) and then performs a 1-sample t-test on the differences.
-        This method, calculates the observations of the second sample on which calculate
-        the t-statistics.
-        """
-        var_props = props * (1.0 - props) / self._columns_base.blocks[0][0]
-        var_props_hs = props_hs * (1 - props_hs) / self._columns_base.blocks[0][1]
-        col_idx = self._selected_column_idx
-        if col_idx < 0:
-            selected_column_proportions = props_hs[:, [col_idx]]
-            selected_variance = var_props_hs[:, [col_idx]]
-        else:
-            selected_column_proportions = props[:, [col_idx]]
-            selected_variance = var_props[:, [col_idx]]
-        return selected_column_proportions, selected_variance
