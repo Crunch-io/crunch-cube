@@ -22,6 +22,7 @@ from cr.cube.matrix.cubemeasure import (
     _CatXCatMatrix,
 )
 from cr.cube.matrix.measure import (
+    _BaseMarginal,
     _BaseSecondOrderMeasure,
     _ColumnComparableCounts,
     _ColumnProportions,
@@ -1561,11 +1562,26 @@ class Describe_SortRowsByMarginalHelper(object):
             request, _SortRowsByMarginalHelper, "_empty_row_idxs"
         )
 
-        assert _SortRowsByMarginalHelper(None, None)._order
+        _SortRowsByMarginalHelper(None, None)._order
 
         SortByValueCollator_.display_order.assert_called_once_with(
             _rows_dimension_(),
             _element_values_(),
             _subtotal_values_(),
             _empty_row_idxs_(),
+        )
+
+    def it_provides_the_element_values_to_help(self, request, _marginal_prop_):
+        assert _SortRowsByMarginalHelper(None, None)._element_values == "a"
+
+    def it_provides_the_subtotal_values_to_help(self, request, _marginal_prop_):
+        assert _SortRowsByMarginalHelper(None, None)._subtotal_values == "b"
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _marginal_prop_(self, request):
+        marginal_ = instance_mock(request, _BaseMarginal, blocks=["a", "b"])
+        return property_mock(
+            request, _SortRowsByMarginalHelper, "_marginal", return_value=marginal_
         )

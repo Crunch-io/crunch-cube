@@ -1098,7 +1098,11 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
 
     @lazyproperty
     def _element_values(self):
-        raise ValueError("_element_values not implemented yet ")
+        return self._marginal.blocks[0]
+
+    @lazyproperty
+    def _marginal(self):
+        raise ValueError("Not yet implemented")
 
     @lazyproperty
     def _order(self):
@@ -1112,4 +1116,4 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
 
     @lazyproperty
     def _subtotal_values(self):
-        raise ValueError("_subtotal_values not implemented yet ")
+        return self._marginal.blocks[1]
