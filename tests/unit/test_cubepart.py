@@ -349,7 +349,7 @@ class Describe_Slice(object):
             "columns_scale_median",
         ),
     )
-    def it_know_the_scale_marginals(
+    def it_knows_the_scale_marginals(
         self, request, _assembler_prop_, assembler_, measure
     ):
         _assembler_prop_.return_value = assembler_
@@ -442,10 +442,6 @@ class Describe_Slice(object):
     @pytest.fixture
     def _assembler_prop_(self, request):
         return property_mock(request, _Slice, "_assembler")
-
-    @pytest.fixture
-    def _columns_dimension_numeric_values_prop_(self, request):
-        return property_mock(request, _Slice, "_columns_dimension_numeric_values")
 
     @pytest.fixture
     def cube_(self, request):

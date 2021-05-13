@@ -1372,25 +1372,6 @@ class _Slice(CubePartition):
         return not np.all(np.isnan(self._rows_dimension_numeric_values))
 
     @lazyproperty
-    def _rows_scale_mean_variance(self):
-        """Optional 1D np.float64 ndarray of scale-mean variance for each row."""
-        if not self._columns_have_numeric_value:
-            return None
-
-        # --- Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is
-        # --- the mean of the data.
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
-        col_dim_numeric = self._columns_dimension_numeric_values[not_a_nan_index]
-
-        numerator = self.counts[:, not_a_nan_index] * pow(
-            np.broadcast_to(col_dim_numeric, self.counts[:, not_a_nan_index].shape)
-            - self.rows_scale_mean.reshape(-1, 1),
-            2,
-        )
-        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
-        return np.nansum(numerator, axis=1) / denominator
-
-    @lazyproperty
     def _table_proportion_variance(self):
         """2D ndarray of np.float64 table-proportion variance for each matrix cell."""
         p = self.table_proportions

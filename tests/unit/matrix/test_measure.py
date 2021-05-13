@@ -7,15 +7,15 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
-from cr.cube.enums import DIMENSION_TYPE as DT, ORIENTATION as OR
+from cr.cube.enums import DIMENSION_TYPE as DT, MARGINAL_ORIENTATION as MO
 from cr.cube.matrix.cubemeasure import (
     CubeMeasures,
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
 )
 from cr.cube.matrix.measure import (
+    _BaseMarginal,
     _BaseSecondOrderMeasure,
-    _BaseSecondOrderMarginal,
     _BaseScaledCountMarginal,
     _ColumnComparableCounts,
     _ColumnProportions,
@@ -131,7 +131,7 @@ class DescribeSecondOrderMeasures(object):
             ("columns", "columns_scale_mean_stddev", _ScaleMeanStddev),
         ),
     )
-    def it_provides_access_to_the_scale_median_measures(
+    def it_provides_access_to_the_scale_marginals(
         self,
         request,
         dimensions_,
@@ -141,21 +141,21 @@ class DescribeSecondOrderMeasures(object):
         measure,
         MarginalCls,
     ):
-        measure_ = instance_mock(request, MarginalCls)
+        marginal_ = instance_mock(request, MarginalCls)
         MarginalCls_ = class_mock(
             request,
             "cr.cube.matrix.measure.%s" % MarginalCls.__name__,
-            return_value=measure_,
+            return_value=marginal_,
         )
         _cube_measures_prop_.return_value = cube_measures_
         measures = SecondOrderMeasures(None, dimensions_, None)
 
-        measure = getattr(measures, measure)
+        marginal = getattr(measures, measure)
 
         MarginalCls_.assert_called_once_with(
-            dimensions_, measures, cube_measures_, OR(orientation)
+            dimensions_, measures, cube_measures_, MO(orientation)
         )
-        assert measure is measure_
+        assert marginal is marginal_
 
     # fixture components ---------------------------------------------
 
@@ -1413,79 +1413,59 @@ class Describe_Zscores(object):
     @pytest.fixture
     def dimensions_(self, request):
         return instance_mock(request, Dimension), instance_mock(request, Dimension)
-        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
 
 
 # === Marginals ===
 
 
-class Describe_BaseSecondOrderMarginal(object):
-    """Unit test suite for `cr.cube.matrix.measure._BaseSecondOrderMarginal` object."""
+class Describe_BaseMarginal(object):
+    """Unit test suite for `cr.cube.matrix.measure._BaseMarginal` object."""
 
-    def it_has_default_value_for_is_defined(self):
-        marginal = _BaseSecondOrderMarginal(None, None, None, None)
+    def it_is_defined_by_default(self):
+        marginal = _BaseMarginal(None, None, None, None)
         assert marginal.is_defined is True
 
-    @pytest.mark.parametrize("orientation", (OR.ROWS, OR.COLUMNS))
-    def it_provides_orientation(self, orientation):
-        marginal = _BaseSecondOrderMarginal(None, None, None, orientation)
+    @pytest.mark.parametrize("orientation", (MO.ROWS, MO.COLUMNS))
+    def it_knows_the_orientation_of_the_marginal(self, orientation):
+        marginal = _BaseMarginal(None, None, None, orientation)
 
         assert marginal.orientation == orientation
 
     @pytest.mark.parametrize(
         "orientation, array, expected",
         (
-            (OR.ROWS, np.array([[0, 1, 2], [3, 4, 5]]), [3, 12]),
-            (OR.COLUMNS, np.array([[0, 1, 2], [3, 4, 5]]), [3, 5, 7]),
-            (OR.ROWS, np.array([]).reshape(0, 6), []),
-            (OR.COLUMNS, np.array([]).reshape(6, 0), []),
+            (MO.ROWS, np.array([[0, 1, 2], [3, 4, 5]]), [3, 12]),
+            (MO.COLUMNS, np.array([[0, 1, 2], [3, 4, 5]]), [3, 5, 7]),
+            (MO.ROWS, np.array([]).reshape(0, 6), []),
+            (MO.COLUMNS, np.array([]).reshape(6, 0), []),
         ),
     )
-    def it_can_apply_along_orientation(self, orientation, array, expected):
-        marginal = _BaseSecondOrderMarginal(None, None, None, orientation)
+    def it_can_apply_along_orientation_to_help(self, orientation, array, expected):
+        marginal = _BaseMarginal(None, None, None, orientation)
         result = marginal._apply_along_orientation(np.sum, array)
         assert result.tolist() == expected
 
-    @pytest.mark.parametrize(
-        "orientation, expected", ((OR.ROWS, True), (OR.COLUMNS, False))
-    )
-    def it_can_tell_if_it_is_rows_or_columns_orientation(self, orientation, expected):
-        marginal = _BaseSecondOrderMarginal(None, None, None, orientation)
-        assert marginal._orientation_is_rows == expected
-
-    def but_it_fails_when_invalid_orientation(self):
-        marginal = _BaseSecondOrderMarginal(None, None, None, "foo")
-
-        with pytest.raises(ValueError) as e:
-            marginal._orientation_is_rows
-
-        assert str(e.value) == "Orientation 'foo' is neither rows nor columns."
-
     def it_gets_the_right_counts_for_rows(self, request):
         row_comparable_counts_ = instance_mock(
-            request, _BaseSecondOrderMarginal, blocks=[["a", "b"], ["c", "d"]]
+            request, _BaseMarginal, blocks=[["a", "b"], ["c", "d"]]
         )
         second_order_measures_ = instance_mock(
             request, SecondOrderMeasures, row_comparable_counts=row_comparable_counts_
         )
-
-        median = _BaseSecondOrderMarginal(None, second_order_measures_, None, OR.ROWS)
+        median = _BaseMarginal(None, second_order_measures_, None, MO.ROWS)
 
         assert median._counts == ["a", "c"]
 
     def it_gets_the_right_counts_for_columns(self, request):
         column_comparable_counts_ = instance_mock(
-            request, _BaseSecondOrderMarginal, blocks=[["a", "b"], ["c", "d"]]
+            request, _BaseMarginal, blocks=[["a", "b"], ["c", "d"]]
         )
         second_order_measures_ = instance_mock(
             request,
             SecondOrderMeasures,
             column_comparable_counts=column_comparable_counts_,
         )
-
-        median = _BaseSecondOrderMarginal(
-            None, second_order_measures_, None, OR.COLUMNS
-        )
+        median = _BaseMarginal(None, second_order_measures_, None, MO.COLUMNS)
 
         assert median._counts == ["a", "b"]
 
@@ -1494,7 +1474,7 @@ class Describe_BaseScaledCountMarginal(object):
     """Unit test suite for `cr.cube.matrix.measure._BaseScaledCountMarginal` object."""
 
     @pytest.mark.parametrize(
-        "orientation, expected", ((OR.ROWS, [1]), (OR.COLUMNS, [0]))
+        "orientation, expected", ((MO.ROWS, [1]), (MO.COLUMNS, [0]))
     )
     def it_provides_opposing_numeric_values_to_help(
         self, request, orientation, expected
@@ -1523,7 +1503,7 @@ class Describe_ScaleMean(object):
             "_apply_along_orientation",
             side_effect=("result1", "result2"),
         )
-        mean = _ScaleMean(None, None, None, OR.ROWS)
+        mean = _ScaleMean(None, None, None, MO.ROWS)
 
         results = mean.blocks
 
@@ -1547,12 +1527,11 @@ class Describe_ScaleMean(object):
         property_mock(request, _ScaleMean, "is_defined", return_value=False)
 
         with pytest.raises(ValueError) as e:
-            _ScaleMean(None, None, None, OR.ROWS).blocks
+            _ScaleMean(None, None, None, MO.ROWS).blocks
 
-        assert (
-            str(e.value)
-            == "rows-scale-mean is undefined if no numeric values are defined on opposing "
-            + "dimension."
+        assert str(e.value) == (
+            "rows-scale-mean is undefined if no numeric values are defined on opposing "
+            "dimension."
         )
 
     @pytest.mark.parametrize(
@@ -1562,7 +1541,7 @@ class Describe_ScaleMean(object):
         property_mock(
             request, _ScaleMean, "_opposing_numeric_values", return_value=values
         )
-        mean = _ScaleMean(None, None, None, OR.ROWS)
+        mean = _ScaleMean(None, None, None, MO.ROWS)
         assert mean.is_defined == expected
 
     def it_gets_the_right_proportions_for_rows(self, request):
@@ -1573,7 +1552,7 @@ class Describe_ScaleMean(object):
             request, SecondOrderMeasures, row_proportions=row_proportions_
         )
 
-        mean = _ScaleMean(None, second_order_measures_, None, OR.ROWS)
+        mean = _ScaleMean(None, second_order_measures_, None, MO.ROWS)
 
         assert mean._proportions == ["a", "c"]
 
@@ -1587,7 +1566,7 @@ class Describe_ScaleMean(object):
             column_proportions=column_proportions_,
         )
 
-        mean = _ScaleMean(None, second_order_measures_, None, OR.COLUMNS)
+        mean = _ScaleMean(None, second_order_measures_, None, MO.COLUMNS)
 
         assert mean._proportions == ["a", "b"]
 
@@ -1614,7 +1593,7 @@ class Describe_ScaleMeanStddev(object):
         property_mock(request, _ScaleMeanStddev, "is_defined", return_value=False)
 
         with pytest.raises(ValueError) as e:
-            _ScaleMeanStddev(None, None, None, OR.ROWS).blocks
+            _ScaleMeanStddev(None, None, None, MO.ROWS).blocks
 
         assert (
             str(e.value)
@@ -1628,7 +1607,7 @@ class Describe_ScaleMeanStddev(object):
             request, SecondOrderMeasures, columns_scale_mean=columns_scale_mean_
         )
 
-        stddev = _ScaleMeanStddev(None, second_order_measures_, None, OR.COLUMNS)
+        stddev = _ScaleMeanStddev(None, second_order_measures_, None, MO.COLUMNS)
 
         assert stddev._scale_means == ["a", "b"]
 
@@ -1638,7 +1617,7 @@ class Describe_ScaleMeanStddev(object):
             request, SecondOrderMeasures, rows_scale_mean=rows_scale_mean_
         )
 
-        stddev = _ScaleMeanStddev(None, second_order_measures_, None, OR.ROWS)
+        stddev = _ScaleMeanStddev(None, second_order_measures_, None, MO.ROWS)
 
         assert stddev._scale_means == ["a", "b"]
 
@@ -1704,44 +1683,6 @@ class Describe_ScaleMeanStddev(object):
 class Describe_ScaleMedian(object):
     """Unit test suite for `cr.cube.matrix.measure._ScaleMedian` object."""
 
-    @pytest.mark.parametrize(
-        "values, expected",
-        (
-            ([100], [0]),
-            ([2.1, 42, -20], [2, 0, 1]),
-            ([0, np.nan, 2], [0, 2]),
-            ([25, 10, np.nan, 5, np.nan], [3, 1, 0]),
-        ),
-    )
-    def it_gets_the_right_sort_order(self, request, values, expected):
-        property_mock(
-            request,
-            _ScaleMedian,
-            "_opposing_numeric_values",
-            return_value=np.array(values),
-        )
-        sort_order = _ScaleMedian(None, None, None, OR.ROWS)._values_sort_order
-        assert sort_order.tolist() == expected
-
-    @pytest.mark.parametrize(
-        "values, expected",
-        (
-            ([100], [100]),
-            ([2.1, 42, -20], [-20, 2.1, 42]),
-            ([0, np.nan, 2], [0, 2]),
-            ([25, 10, np.nan, 5, np.nan], [5, 10, 25]),
-        ),
-    )
-    def it_sorts_the_values_to_help(self, request, values, expected):
-        property_mock(
-            request,
-            _ScaleMedian,
-            "_opposing_numeric_values",
-            return_value=np.array(values),
-        )
-        sort_order = _ScaleMedian(None, None, None, OR.ROWS)._sorted_values
-        assert sort_order.tolist() == expected
-
     def it_provides_blocks(self, request):
         property_mock(request, _ScaleMedian, "is_defined", return_value=True)
         property_mock(request, _ScaleMedian, "_sorted_values")
@@ -1754,7 +1695,7 @@ class Describe_ScaleMedian(object):
             "_apply_along_orientation",
             side_effect=("result1", "result2"),
         )
-        median = _ScaleMedian(None, None, None, OR.ROWS)
+        median = _ScaleMedian(None, None, None, MO.ROWS)
 
         results = median.blocks
 
@@ -1778,7 +1719,7 @@ class Describe_ScaleMedian(object):
         property_mock(request, _ScaleMedian, "is_defined", return_value=False)
 
         with pytest.raises(ValueError) as e:
-            _ScaleMedian(None, None, None, OR.ROWS).blocks
+            _ScaleMedian(None, None, None, MO.ROWS).blocks
 
         assert (
             str(e.value)
@@ -1787,31 +1728,69 @@ class Describe_ScaleMedian(object):
         )
 
     @pytest.mark.parametrize(
+        "values, expected",
+        (
+            ([100], [0]),
+            ([2.1, 42, -20], [2, 0, 1]),
+            ([0, np.nan, 2], [0, 2]),
+            ([25, 10, np.nan, 5, np.nan], [3, 1, 0]),
+        ),
+    )
+    def it_gets_the_right_sort_order(self, request, values, expected):
+        property_mock(
+            request,
+            _ScaleMedian,
+            "_opposing_numeric_values",
+            return_value=np.array(values),
+        )
+        sort_order = _ScaleMedian(None, None, None, MO.ROWS)._values_sort_order
+        assert sort_order.tolist() == expected
+
+    @pytest.mark.parametrize(
+        "values, expected",
+        (
+            ([100], [100]),
+            ([2.1, 42, -20], [-20, 2.1, 42]),
+            ([0, np.nan, 2], [0, 2]),
+            ([25, 10, np.nan, 5, np.nan], [5, 10, 25]),
+        ),
+    )
+    def it_sorts_the_values_to_help(self, request, values, expected):
+        property_mock(
+            request,
+            _ScaleMedian,
+            "_opposing_numeric_values",
+            return_value=np.array(values),
+        )
+        sort_order = _ScaleMedian(None, None, None, MO.ROWS)._sorted_values
+        assert sort_order.tolist() == expected
+
+    @pytest.mark.parametrize(
         "orientation, sort_order, base_values, subtotals, expected",
         (
             (
-                OR.COLUMNS,
+                MO.COLUMNS,
                 np.array([2, 1]),
                 np.array([[0, 1], [2, 3], [4, 5]]),
                 np.array([]).reshape(3, 0),
                 [[[4, 5], [2, 3]], [[], []]],
             ),
             (
-                OR.COLUMNS,
+                MO.COLUMNS,
                 np.array([0, 2, 1]),
                 np.array([[0, 1], [2, 3], [4, 5]]),
                 np.array([[6], [7], [8]]),
                 [[[0, 1], [4, 5], [2, 3]], [[6], [8], [7]]],
             ),
             (
-                OR.ROWS,
+                MO.ROWS,
                 np.array([3, 1]),
                 np.array([[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]]),
                 np.array([]).reshape(0, 3),
                 [[[3, 1], [7, 5], [11, 9]], []],
             ),
             (
-                OR.ROWS,
+                MO.ROWS,
                 np.array([1, 0]),
                 np.array([[0, 1], [2, 3], [4, 5]]),
                 np.array([[6, 7], [8, 9], [10, 11]]),
@@ -1832,72 +1811,25 @@ class Describe_ScaleMedian(object):
             return_value=[base_values, subtotals],
         )
 
-        results = _ScaleMedian(None, None, None, orientation)._sorted_counts
+        results = list(_ScaleMedian(None, None, None, orientation)._sorted_counts)
 
         assert results[0].tolist() == expected[0]
         assert results[1].tolist() == expected[1]
 
-    def it_calculates_weighted_median_simple(self):
-        counts = np.array([1.0, 2.0])
-        values = np.array([10.0, 20.0])
-
-        assert _ScaleMedian._weighted_median(counts, values) == 20.0
-        assert self.old_median_method(counts, values) == 20.0  # these two are equal
-
-    def it_calculates_weighted_median_tie_value(self):
-        counts = np.array([1.0, 2.0, 3.0])
-        values = np.array([10.0, 20.0, 30.0])
-
-        assert _ScaleMedian._weighted_median(counts, values) == 25.0
-        assert self.old_median_method(counts, values) == 25.0  # these two are equal
-
-    def it_calculates_weighted_median_tie_large_numbers(self):
-        counts = np.array([100000000.0, 100000000.0, 200000000.0])
-        values = np.array([10.0, 20.0, 30.0])
-
-        # --- Not sure how large before numeric precision would become a problem but this
-        # --- is okay
-        assert _ScaleMedian._weighted_median(counts, values) == 25.0
-        # --- Takes ~5 seconds on my machine
-        # assert self.old_median_method(counts, values) == 25.0  # these two are equal
-
-    def it_calculates_weighted_median_fractions(self):
-        counts = np.array([1.9, 2.9, 4.1])
-        values = np.array([10.0, 20.0, 30.0])
-
-        assert _ScaleMedian._weighted_median(counts, values) == 20.0
-        assert self.old_median_method(counts, values) == 30.0  # different!
-
-    def it_calculates_weighted_median_nothing_above_1(self):
-        counts = np.array([0.9, 0.1])
-        values = np.array([10.0, 20.0])
-
-        assert _ScaleMedian._weighted_median(counts, values) == 10.0
-        assert np.isnan(self.old_median_method(counts, values))  # different!
-
-    def it_calculated_weighted_median_nan_count(self):
-        counts = np.array([1, np.nan, 2])
-        values = np.array([10.0, 20.0, 30.0])
-
-        assert _ScaleMedian._weighted_median(counts, values) == 30.0
-
-    def it_calculated_weighted_median_all_nan_count(self):
-        counts = np.array([np.nan, np.nan, np.nan])
-        values = np.array([10.0, 20.0, 30.0])
-
-        assert np.isnan(_ScaleMedian._weighted_median(counts, values))
-
-    def it_calculated_weighted_median_all_zero_count(self):
-        counts = np.array([0, 0, 0])
-        values = np.array([10.0, 20.0, 30.0])
-
-        assert np.isnan(_ScaleMedian._weighted_median(counts, values))
-
-    # --- helpers ---
-    @staticmethod
-    def old_median_method(counts, values):
-        counts = np.nan_to_num(counts).astype("int64")
-        if np.sum(counts) == 0:
-            return np.nan
-        else:
-            return np.median(np.repeat(values, counts))
+    @pytest.mark.parametrize(
+        "counts, values, expected",
+        (
+            ([1.0, 2.0], [10.0, 20.0], 20.0),
+            ([1.0, 2.0, 3.0], [10.0, 20.0, 30.0], 25.0),
+            ([100000000.0, 100000000.0, 200000000.0], [10.0, 20.0, 30.0], 25.0),
+            ([1.9, 2.9, 4.1], [10.0, 20.0, 30.0], 20.0),
+            ([0.9, 0.1], [10.0, 20.0], 10.0),
+            ([1.0, np.nan, 2.0], [10.0, 20.0, 30.0], 30.0),
+            ([np.nan, np.nan, np.nan], [10.0, 20.0, 30.0], np.nan),
+            ([0.0, 0.0, 0.0], [10.0, 20.0, 30.0], np.nan),
+        ),
+    )
+    def it_calculates_weighted_median(self, counts, values, expected):
+        assert _ScaleMedian._weighted_median(
+            np.array(counts), np.array(values)
+        ) == pytest.approx(expected, nan_ok=True)

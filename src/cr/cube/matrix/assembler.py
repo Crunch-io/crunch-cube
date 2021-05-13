@@ -23,7 +23,7 @@ from cr.cube.enums import (
     COLLATION_METHOD as CM,
     DIMENSION_TYPE as DT,
     MEASURE as M,
-    ORIENTATION as OR,
+    MARGINAL_ORIENTATION as MO,
 )
 from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.measure import SecondOrderMeasures
@@ -654,7 +654,7 @@ class Assembler(object):
             return None
 
         order = (
-            self._row_order if marginal.orientation == OR.ROWS else self._column_order
+            self._row_order if marginal.orientation == MO.ROWS else self._column_order
         )
 
         return np.hstack(marginal.blocks)[order]

@@ -1814,7 +1814,7 @@ class Describe_SortRowsByInsertedColumnHelper(object):
             "rows_dimension": {
                 "order": {
                     "type": "opposing_insertion",
-                    "id": 1,
+                    "insertion_id": 1,
                     "measure": measure,
                     "direction": direction,
                     "fixed": fixed,

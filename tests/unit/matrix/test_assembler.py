@@ -125,16 +125,20 @@ class DescribeAssembler(object):
         measure_prop_name,
         MeasureCls,
     ):
-        _assemble_marginal_ = method_mock(request, Assembler, "_assemble_marginal")
+        _assemble_marginal_ = method_mock(
+            request,
+            Assembler,
+            "_assemble_marginal",
+            return_value=[[1, 2, 3], [4, 5, 6]],
+        )
         _measures_prop_.return_value = second_order_measures_
-        MeasureCls_ = instance_mock(request, MeasureCls)
-        setattr(second_order_measures_, measure_prop_name, MeasureCls_)
-        _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
+        measure_ = instance_mock(request, MeasureCls)
+        setattr(second_order_measures_, measure_prop_name, measure_)
         assembler = Assembler(None, None, None)
 
         value = getattr(assembler, measure_prop_name)
 
-        _assemble_marginal_.assert_called_once_with(assembler, MeasureCls_)
+        _assemble_marginal_.assert_called_once_with(assembler, measure_)
         assert value == [[1, 2, 3], [4, 5, 6]]
 
     def it_knows_the_column_index(

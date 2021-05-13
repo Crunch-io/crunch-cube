@@ -1208,14 +1208,14 @@ class Describe_OrderSpec(object):
         assert _OrderSpec(None, None).element_ids == expected_value
 
     def it_knows_the_sort_vector_insertion_id(self, _order_dict_prop_):
-        _order_dict_prop_.return_value = {"id": 42}
+        _order_dict_prop_.return_value = {"insertion_id": 42}
         assert _OrderSpec(None, None).insertion_id == 42
 
     def but_it_raises_when_insertion_id_not_present(self, _order_dict_prop_):
         _order_dict_prop_.return_value = {}
         with pytest.raises(KeyError) as e:
             _OrderSpec(None, None).insertion_id
-        assert str(e.value) == "'id'"
+        assert str(e.value) == "'insertion_id'"
 
     def it_knows_the_measure_specified_as_the_sort_basis(self, _order_dict_prop_):
         _order_dict_prop_.return_value = {"measure": "col_percent"}

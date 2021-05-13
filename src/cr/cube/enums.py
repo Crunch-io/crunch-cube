@@ -123,7 +123,7 @@ NUMERIC_MEASURES = frozenset(
 )
 
 
-class ORIENTATION(enum.Enum):
+class MARGINAL_ORIENTATION(enum.Enum):
     """Enumerated values representing orientation of a marginal."""
 
     ROWS = "rows"

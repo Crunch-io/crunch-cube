@@ -7,7 +7,7 @@ from __future__ import division
 import numpy as np
 from scipy.stats import t
 
-from cr.cube.enums import DIMENSION_TYPE as DT, ORIENTATION as OR
+from cr.cube.enums import DIMENSION_TYPE as DT, MARGINAL_ORIENTATION as MO
 from cr.cube.matrix.cubemeasure import CubeMeasures
 from cr.cube.matrix.subtotals import (
     SumSubtotals,
@@ -70,17 +70,17 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def columns_scale_mean(self):
         """_ScaleMean for columns measure object for this cube-result."""
-        return _ScaleMean(self._dimensions, self, self._cube_measures, OR.COLUMNS)
+        return _ScaleMean(self._dimensions, self, self._cube_measures, MO.COLUMNS)
 
     @lazyproperty
     def columns_scale_mean_stddev(self):
         """_ScaleMeanStddev for columns measure object for this cube-result."""
-        return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, OR.COLUMNS)
+        return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, MO.COLUMNS)
 
     @lazyproperty
     def columns_scale_median(self):
         """_ScaleMedian for columns measure object for this cube-result."""
-        return _ScaleMedian(self._dimensions, self, self._cube_measures, OR.COLUMNS)
+        return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.COLUMNS)
 
     @lazyproperty
     def means(self):
@@ -161,17 +161,17 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def rows_scale_mean(self):
         """_ScaleMean for rows measure object for this cube-result."""
-        return _ScaleMean(self._dimensions, self, self._cube_measures, OR.ROWS)
+        return _ScaleMean(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def rows_scale_mean_stddev(self):
         """_ScaleMeanStddev for rpws measure object for this cube-result."""
-        return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, OR.ROWS)
+        return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def rows_scale_median(self):
         """_ScaleMedian for rows measure object for this cube-result."""
-        return _ScaleMedian(self._dimensions, self, self._cube_measures, OR.ROWS)
+        return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def sums(self):
@@ -1359,8 +1359,8 @@ class _Zscores(_BaseSecondOrderMeasure):
 # === MARGINALS ===
 
 
-class _BaseSecondOrderMarginal(object):
-    """Base class for all second-order measure objects."""
+class _BaseMarginal(object):
+    """Base class for all (second-order) marginal objects."""
 
     def __init__(self, dimensions, second_order_measures, cube_measures, orientation):
         self._dimensions = dimensions
@@ -1397,7 +1397,7 @@ class _BaseSecondOrderMarginal(object):
         Gets the axis from the `.orientation` property and also returns an empty
         1d array of floats when the dimension is length 0 (rather than failing).
         """
-        axis = 1 if self._orientation_is_rows else 0
+        axis = 1 if self.orientation == MO.ROWS else 0
 
         if arr.shape[1 - axis] == 0:
             return np.array([], dtype=np.float64)
@@ -1411,7 +1411,7 @@ class _BaseSecondOrderMarginal(object):
         The counts come from the count measure blocks that are comparable in the correct
         orientation, and include the base values and the subtotals for the orientation.
         """
-        if self._orientation_is_rows:
+        if self.orientation == MO.ROWS:
             # --- Use *row* comparable counts ---
             counts = self._second_order_measures.row_comparable_counts.blocks
             # --- Get base values & *row* subtotals
@@ -1422,19 +1422,8 @@ class _BaseSecondOrderMarginal(object):
             # --- Get base values & *column* subtotals
             return [counts[0][0], counts[0][1]]
 
-    @lazyproperty
-    def _orientation_is_rows(self):
-        if self.orientation == OR.ROWS:
-            return True
-        elif self.orientation == OR.COLUMNS:
-            return False
-        else:
-            raise ValueError(
-                "Orientation '%s' is neither rows nor columns." % self.orientation
-            )
 
-
-class _BaseScaledCountMarginal(_BaseSecondOrderMarginal):
+class _BaseScaledCountMarginal(_BaseMarginal):
     """A base class for marginals that depend on the scaled counts."""
 
     @lazyproperty
@@ -1442,7 +1431,7 @@ class _BaseScaledCountMarginal(_BaseSecondOrderMarginal):
         """ndarray of numeric_values from the opposing dimension"""
         return (
             np.array(self._dimensions[1].numeric_values, dtype=np.float64)
-            if self._orientation_is_rows
+            if self.orientation == MO.ROWS
             else np.array(self._dimensions[0].numeric_values, dtype=np.float64)
         )
 
@@ -1467,11 +1456,8 @@ class _ScaleMean(_BaseScaledCountMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                (
-                    "%s-scale-mean is undefined if no numeric values are defined on "
-                    + "opposing dimension."
-                )
-                % self.orientation.value
+                "%s-scale-mean is undefined if no numeric values are defined on "
+                "opposing dimension." % self.orientation.value
             )
 
         return [
@@ -1489,7 +1475,7 @@ class _ScaleMean(_BaseScaledCountMarginal):
     @lazyproperty
     def _proportions(self):
         """List of 2 ndarray matrixes of the relevant proportion blocks"""
-        if self._orientation_is_rows:
+        if self.orientation == MO.ROWS:
             # --- Use *row* proportions ---
             props = self._second_order_measures.row_proportions.blocks
             # --- Get base values & *row* subtotals
@@ -1534,11 +1520,8 @@ class _ScaleMedian(_BaseScaledCountMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                (
-                    "%s-scale-median is undefined if no numeric values are defined on "
-                    + "opposing dimension."
-                )
-                % self.orientation.value
+                "%s-scale-median is undefined if no numeric values are defined on "
+                "opposing dimension." % self.orientation.value
             )
 
         return [
@@ -1560,8 +1543,8 @@ class _ScaleMedian(_BaseScaledCountMarginal):
         These values are the `._counts` sorted in the same order as the numeric
         values will be so that they can be used in `_weighted_median()`.
         """
-        axis = 1 if self._orientation_is_rows else 0
-        return [count.take(self._values_sort_order, axis) for count in self._counts]
+        axis = 1 if self.orientation == MO.ROWS else 0
+        return (count.take(self._values_sort_order, axis) for count in self._counts)
 
     @lazyproperty
     def _sorted_values(self):
@@ -1623,11 +1606,8 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                (
-                    "%s-scale-mean-standard-deviation is undefined if no numeric values "
-                    + "are defined on opposing dimension."
-                )
-                % self.orientation.value
+                "%s-scale-mean-standard-deviation is undefined if no numeric values "
+                "are defined on opposing dimension." % self.orientation.value
             )
 
         return [
@@ -1687,7 +1667,7 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
         """list of 2 np.ndarray blocks of the scale mean for this orientation"""
         return (
             self._second_order_measures.rows_scale_mean.blocks
-            if self._orientation_is_rows
+            if self.orientation == MO.ROWS
             else self._second_order_measures.columns_scale_mean.blocks
         )
 
@@ -1696,7 +1676,7 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
         """function for calculating standard deviation along this orientation."""
         return (
             self._rows_weighted_mean_stddev
-            if self._orientation_is_rows
+            if self.orientation == MO.ROWS
             else self._columns_weighted_mean_stddev
         )
 
