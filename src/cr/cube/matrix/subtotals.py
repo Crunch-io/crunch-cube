@@ -602,15 +602,13 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         self,
         base_values,
         dimensions,
-        column_proportions,
-        columns_base,
+        second_order_measures,
         selected_column_idx,
         diff_cols_nan=True,
         diff_rows_nan=True,
     ):
         super(PairwiseSigTestSubtotals, self).__init__(base_values, dimensions)
-        self._column_proportions = column_proportions
-        self._columns_base = columns_base
+        self._second_order_measures = second_order_measures
         self._selected_column_idx = selected_column_idx
         self._diff_cols_nan = diff_cols_nan
         self._diff_rows_nan = diff_rows_nan
@@ -620,8 +618,7 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         cls,
         base_values,
         dimensions,
-        column_proportions,
-        columns_base,
+        second_order_measures,
         selected_column_idx,
         diff_cols_nan=True,
         diff_rows_nan=True,
@@ -639,12 +636,21 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         return cls(
             base_values,
             dimensions,
-            column_proportions,
-            columns_base,
+            second_order_measures,
             selected_column_idx,
             diff_cols_nan,
             diff_rows_nan,
         )._blocks
+
+    @lazyproperty
+    def _columns_base(self):
+        """Columns base measure blocks"""
+        return self._second_order_measures.columns_base
+
+    @lazyproperty
+    def _column_proportions(self):
+        """Column proportions measure blocks"""
+        return self._second_order_measures.column_proportions
 
     def _intersection(self, row_subtotal, column_subtotal):
         """Return value for intersection of `row_subtotal` and `column_subtotal`.

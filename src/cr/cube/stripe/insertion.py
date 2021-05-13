@@ -59,6 +59,10 @@ class SumSubtotals(_BaseSubtotals):
 
     This sums together both addends AND subtrahends because some measures such as
     bases are additive even across subtrahends of subtotals.
+
+    `diff_nans` Overrides subtotal differences in the columns direction (default False)
+    This param will be passed through the measure classes and it will be True when the
+    measure doesn't allow subtotal differences; e.g. ColumnsBase
     """
 
     def __init__(self, base_values, rows_dimension, diffs_nan=False):

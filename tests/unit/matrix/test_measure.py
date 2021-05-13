@@ -186,13 +186,14 @@ class DescribeSecondOrderMeasures(object):
             return_value=measure_,
         )
         _cube_measures_prop_.return_value = cube_measures_
-        measures = SecondOrderMeasures(None, dimensions_, None)
-        measure = getattr(measures, measure_prop_name)
+        second_order_measures = SecondOrderMeasures(None, dimensions_, None)
         col_idx = 0
 
-        assert measure(col_idx) is measure_
+        pairwise_sig_measure = getattr(second_order_measures, measure_prop_name)
+
+        assert pairwise_sig_measure(col_idx) is measure_
         MeasureCls_.assert_called_once_with(
-            dimensions_, measures, cube_measures_, False
+            dimensions_, second_order_measures, cube_measures_, False
         )
 
     # fixture components ---------------------------------------------

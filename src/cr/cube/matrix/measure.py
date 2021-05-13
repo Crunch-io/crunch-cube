@@ -102,14 +102,14 @@ class SecondOrderMeasures(object):
         )
 
     def pairwise_p_vals_for_subvar(self, subvar_idx):
-        """_PairwiseSubvarSigPVals measure object for this cube-result"""
-        return _PairwiseSubvarSigPVals(
+        """_PairwiseSigPValsForSubvar measure object for this cube-result"""
+        return _PairwiseSigPValsForSubvar(
             self._dimensions, self, self._cube_measures, subvar_idx
         )
 
     def pairwise_t_stats_for_subvar(self, subvar_idx):
-        """_PairwiseSubvarSigTStats measure object for this cube-result"""
-        return _PairwiseSubvarSigTStats(
+        """_PairwiseSigTStatsForSubvar measure object for this cube-result"""
+        return _PairwiseSigTStatsForSubvar(
             self._dimensions, self, self._cube_measures, subvar_idx
         )
 
@@ -648,7 +648,7 @@ class _PairwiseSubvarIndices(_BaseSecondOrderMeasure):
         significance test contains `p_vals` and `t_stats` significance tests.
         """
         return [
-            _PairwiseSubvarSigPVals(
+            _PairwiseSigPValsForSubvar(
                 self._dimensions,
                 self._second_order_measures,
                 self._cube_measures,
@@ -680,7 +680,7 @@ class _PairwiseMeansIndices(_PairwiseSubvarIndices):
         ]
 
 
-class _PairwiseSubvarSigTStats(_BaseSecondOrderMeasure):
+class _PairwiseSigTStatsForSubvar(_BaseSecondOrderMeasure):
     """Provides pairwise significance t-stats measure for matrix and selected subvar.
 
     Pairwise significance is calculated for each selected subvar (column) separately.
@@ -689,7 +689,7 @@ class _PairwiseSubvarSigTStats(_BaseSecondOrderMeasure):
     def __init__(
         self, dimensions, second_order_measures, cube_measures, selected_subvar_idx
     ):
-        super(_PairwiseSubvarSigTStats, self).__init__(
+        super(_PairwiseSigTStatsForSubvar, self).__init__(
             dimensions, second_order_measures, cube_measures
         )
         self._selected_subvar_idx = selected_subvar_idx
@@ -736,7 +736,7 @@ class _PairwiseSubvarSigTStats(_BaseSecondOrderMeasure):
         )
 
 
-class _PairwiseSubvarSigPVals(_PairwiseSubvarSigTStats):
+class _PairwiseSigPValsForSubvar(_PairwiseSigTStatsForSubvar):
     """Provides pairwise significance p-vals measure for matrix and selected subvar.
 
     Pairwise significance is calculated for each selected subvar (column) separately.
@@ -854,13 +854,10 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        column_proportions = self._second_order_measures.column_proportions
-        columns_base = self._second_order_measures.columns_base
         return PairwiseSigTestSubtotals.blocks(
             self._t_stats,
             self._dimensions,
-            column_proportions,
-            columns_base,
+            self._second_order_measures,
             self._selected_column_idx,
         )
 

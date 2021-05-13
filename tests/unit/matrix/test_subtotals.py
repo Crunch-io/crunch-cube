@@ -214,7 +214,7 @@ class DescribePairwiseSigTestSubtotals(object):
 
         blocks = PairwiseSigTestSubtotals.blocks(None, None, None, None, 0)
 
-        _init_.assert_called_once_with(ANY, None, None, None, None, 0, True, True)
+        _init_.assert_called_once_with(ANY, None, None, None, None, 0, True)
         assert blocks.tolist() == [[[1], [2]], [[3], [4]]]
 
     def it_can_compute_a_intersection_cell_value_to_help(self):
@@ -244,14 +244,12 @@ class DescribePairwiseSigTestSubtotals(object):
         subtotal_.addend_idxs = addend_idxs
         subtotal_.subtrahend_idxs = subtrahend_idxs
         property_mock(request, PairwiseSigTestSubtotals, "_nrows", return_value=3)
-        subtotals = PairwiseSigTestSubtotals(
-            None, None, None, None, 0, diff_cols_nan, None
-        )
+        subtotals = PairwiseSigTestSubtotals(None, None, None, 0, diff_cols_nan, None)
         column = np.array([1, 2])
 
-        assert subtotals._subtotal_column(subtotal_, column) == pytest.approx(
-            np.array(expected_value), nan_ok=True
-        )
+        subtotal_column = subtotals._subtotal_column(subtotal_, column)
+
+        assert subtotal_column == pytest.approx(np.array(expected_value), nan_ok=True)
 
     @pytest.mark.parametrize(
         ("addend_idxs", "subtrahend_idxs", "diff_rows_nan", "expected_value"),
@@ -273,14 +271,12 @@ class DescribePairwiseSigTestSubtotals(object):
         subtotal_.addend_idxs = addend_idxs
         subtotal_.subtrahend_idxs = subtrahend_idxs
         property_mock(request, PairwiseSigTestSubtotals, "_ncols", return_value=3)
-        subtotals = PairwiseSigTestSubtotals(
-            None, None, None, None, 0, None, diff_rows_nan
-        )
+        subtotals = PairwiseSigTestSubtotals(None, None, None, 0, None, diff_rows_nan)
         row = np.array([1, 2])
 
-        assert subtotals._subtotal_row(subtotal_, row) == pytest.approx(
-            expected_value, nan_ok=True
-        )
+        subtotal_row = subtotals._subtotal_row(subtotal_, row)
+
+        assert subtotal_row == pytest.approx(expected_value, nan_ok=True)
 
     # --- fixture components -----------------------------------------
 

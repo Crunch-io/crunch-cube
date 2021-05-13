@@ -264,7 +264,7 @@ class TestStandardizedResiduals(TestCase):
                         "function": "subtotal",
                         "args": [1],
                         "kwargs": {"negative": [2]},
-                        "anchor": "top",
+                        "anchor": 2,
                         "name": "NPS",
                     },
                     {
@@ -281,7 +281,7 @@ class TestStandardizedResiduals(TestCase):
                         "function": "subtotal",
                         "args": [1],
                         "kwargs": {"negative": [2]},
-                        "anchor": "top",
+                        "anchor": 3,
                         "name": "NPS",
                     },
                     {
@@ -302,36 +302,36 @@ class TestStandardizedResiduals(TestCase):
         slice_ = Cube(CR.CAT_4_X_CAT_4, transforms=transforms).partitions[0]
 
         # Col idx 0 is subdiff and the pairwise sig test is nan for all the cells.
-        assert slice_.pairwise_significance_t_stats(0) == pytest.approx(
+        assert slice_.pairwise_significance_t_stats(4) == pytest.approx(
             np.full((6, 7), np.nan), nan_ok=True
         )
-        assert slice_.pairwise_significance_p_vals(0) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals(4) == pytest.approx(
             np.full((6, 7), np.nan), nan_ok=True
         )
         # Pairwise sig test for subdiffs cols and rows is always nan
-        assert slice_.pairwise_significance_t_stats(1)[0] == pytest.approx(
+        assert slice_.pairwise_significance_t_stats(4)[0] == pytest.approx(
             np.full(7, np.nan), nan_ok=True
         )
-        assert slice_.pairwise_significance_p_vals(1)[0] == pytest.approx(
+        assert slice_.pairwise_significance_p_vals(4)[0] == pytest.approx(
             np.full(7, np.nan), nan_ok=True
         )
-        assert slice_.pairwise_significance_t_stats(1)[:, 0] == pytest.approx(
+        assert slice_.pairwise_significance_t_stats(4)[:, 0] == pytest.approx(
             np.full(6, np.nan), nan_ok=True
         )
-        assert slice_.pairwise_significance_p_vals(1)[:, 0] == pytest.approx(
+        assert slice_.pairwise_significance_p_vals(4)[:, 0] == pytest.approx(
             np.full(6, np.nan), nan_ok=True
         )
 
-        # Testing select a base col (1)
+        # Testing select a base col (6)
         assert slice_.pairwise_significance_t_stats(6) == pytest.approx(
             np.array(
                 [
+                    [-0.55871701, 0, -0.74078354, -1.25032293, np.nan, -0.3386318, 0],
+                    [0.10980533, 0.51340149, np.nan, 1.70444964, np.nan, np.nan, 0.0],
+                    [0.388913, -0.576564, -0.4578510, -0.755029, np.nan, -0.0596157, 0],
                     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                    [np.nan, -0.5587170, 0.0, -0.7407835, -1.2503229, -0.3386318, 0],
-                    [np.nan, 0.10980533, 0.51340149, np.nan, 1.70444964, np.nan, 0],
-                    [np.nan, 0.388913, -0.576564, -0.457851, -0.755029, -0.0596157, 0],
-                    [np.nan, -0.963876, 0.0541259, -0.335548, -0.5508537, -0.547228, 0],
-                    [np.nan, 1.1518654, 0.5864119, 1.6783064, 2.5512164, 1.0520486, 0],
+                    [-0.963876, 0.0541259, -0.335548, -0.550853, np.nan, -0.547228, 0],
+                    [1.1518654, 0.5864119, 1.6783064, 2.5512164, np.nan, 1.0520486, 0],
                 ]
             ),
             nan_ok=True,
@@ -340,27 +340,27 @@ class TestStandardizedResiduals(TestCase):
         assert slice_.pairwise_significance_p_vals(6) == pytest.approx(
             np.array(
                 [
+                    [0.57732344, 1.0, 0.45967235, 0.21325265, np.nan, 0.73527115, 1.0],
+                    [0.9127344, 0.60863044, np.nan, 0.09049967, np.nan, np.nan, 1.0],
+                    [0.6979817, 0.5653320, 0.6475443, 0.4514907, np.nan, 0.952526, 1.0],
                     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                    [np.nan, 0.57732344, 1.0, 0.45967235, 0.21325265, 0.73527115, 1.0],
-                    [np.nan, 0.9127344, 0.60863044, np.nan, 0.09049967, np.nan, 1.0],
-                    [np.nan, 0.697981, 0.565332, 0.647544, 0.451490, 0.952526, 1.0],
-                    [np.nan, 0.336911, 0.956926, 0.737554, 0.582605, 0.584881, 1.0],
-                    [np.nan, 0.251506, 0.558718, 0.094811, 0.011801, 0.294149, 1.0],
+                    [0.336911, 0.956926, 0.7375545, 0.5826056, np.nan, 0.5848814, 1.0],
+                    [0.2515066, 0.5587188, 0.0948110, 0.011801, np.nan, 0.2941494, 1.0],
                 ]
             ),
             nan_ok=True,
             rel=1e-4,
         )
-        # Testing select a insertion col (3)
-        assert slice_.pairwise_significance_t_stats(3) == pytest.approx(
+        # Testing select a insertion col (2)
+        assert slice_.pairwise_significance_t_stats(2) == pytest.approx(
             np.array(
                 [
+                    [0.1026676, 0.7053229, 0.0, -0.7137068, np.nan, 0.491043, 0.740783],
+                    [-0.931539, -0.399469, np.nan, 0.9168681, np.nan, np.nan, -1.04567],
+                    [0.9177602, -0.2291987, 0, -0.4160589, np.nan, 0.4881588, 0.457851],
                     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                    [np.nan, 0.1026676, 0.7053229, 0, -0.713706, 0.4910434, 0.7407835],
-                    [np.nan, -0.931539, -0.399469, np.nan, 0.916868, np.nan, -1.045673],
-                    [np.nan, 0.917760, -0.229198, 0, -0.416058, 0.4881588, 0.4578510],
-                    [np.nan, -0.806757, 0.382009, 0, -0.301685, -0.27842, 0.335548],
-                    [np.nan, -0.292654, -0.881680, 0.0, 1.248377, -0.691992, -1.678306],
+                    [-0.8067579, 0.3820092, 0, -0.301685, np.nan, -0.278420, 0.3355484],
+                    [-0.2926544, -0.881680, 0, 1.2483777, np.nan, -0.691992, -1.678306],
                 ]
             ),
             nan_ok=True,
@@ -369,12 +369,12 @@ class TestStandardizedResiduals(TestCase):
         assert slice_.pairwise_significance_p_vals(3) == pytest.approx(
             np.array(
                 [
+                    [0.4947681, 0.2331252, 0.4761649, 1.0, np.nan, 0.263834, 0.213252],
+                    [0.10994145, 0.27542668, np.nan, 1.0, np.nan, np.nan, 0.09049967],
+                    [0.2425046, 0.8997754, 0.6777724, 1.0, np.nan, 0.410087, 0.451490],
                     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
-                    [np.nan, 0.91832, 0.481442, 1.0, 0.476164, 0.623803, 0.459672],
-                    [np.nan, 0.352654, 0.689979, np.nan, 0.360215, np.nan, 0.296943],
-                    [np.nan, 0.359807, 0.818952, 1.0, 0.677772, 0.625842, 0.647544],
-                    [np.nan, 0.420727, 0.702866, 1.0, 0.763176, 0.780907, 0.737554],
-                    [np.nan, 0.770078, 0.379023, 1.0, 0.213219, 0.489550, 0.094811],
+                    [0.6487982, 0.5590300, 0.7631765, 1.0, np.nan, 0.956186, 0.582605],
+                    [0.1852366, 0.0703843, 0.2132196, 1.0, np.nan, 0.073881, 0.011801],
                 ]
             ),
             nan_ok=True,
