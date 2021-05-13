@@ -135,15 +135,7 @@ class TestStandardizedResiduals(TestCase):
 
     def test_ca_subvar_hs_x_cat_hs_pairwise_t_tests(self):
         slice_ = Cube(CR.CA_SUBVAR_X_CA_CAT_HS).partitions[0]
-        actual = slice_.pairwise_significance_tests[1]
 
-        np.testing.assert_array_almost_equal(
-            actual.t_stats, load_python_expression("ca-subvar-x-ca-cat-hs-pw-tstats")
-        )
-        np.testing.assert_array_almost_equal(
-            actual.p_vals, load_python_expression("ca-subvar-x-ca-cat-hs-pw-pvals")
-        )
-        # check new api also
         np.testing.assert_array_almost_equal(
             slice_.pairwise_significance_t_stats(1),
             load_python_expression("ca-subvar-x-ca-cat-hs-pw-tstats"),
@@ -180,15 +172,7 @@ class TestStandardizedResiduals(TestCase):
 
     def test_cat_x_cat_pairwise_t_tests(self):
         slice_ = Cube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).partitions[0]
-        actual = slice_.pairwise_significance_tests[2]
 
-        np.testing.assert_almost_equal(
-            actual.t_stats, load_python_expression("cat-x-cat-pw-tstats")
-        )
-        np.testing.assert_almost_equal(
-            actual.p_vals, load_python_expression("cat-x-cat-pw-pvals")
-        )
-        # test new api also
         np.testing.assert_almost_equal(
             slice_.pairwise_significance_t_stats(2),
             load_python_expression("cat-x-cat-pw-tstats"),
@@ -200,21 +184,6 @@ class TestStandardizedResiduals(TestCase):
 
     def test_cat_x_cat_hs_pairwise_t_tests(self):
         slice_ = Cube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).partitions[0]
-        t_stats = slice_.pairwise_significance_tests[0].t_stats
-        p_vals = slice_.pairwise_significance_tests[0].p_vals
-
-        np.testing.assert_almost_equal(
-            t_stats, load_python_expression("cat-x-cat-hs-pw-tstats")
-        )
-        np.testing.assert_almost_equal(
-            p_vals, load_python_expression("cat-x-cat-hs-pw-pvals")
-        )
-        # test new api also
-        for i in range(10):
-            np.testing.assert_almost_equal(
-                slice_.pairwise_significance_t_stats(i),
-                slice_.pairwise_significance_tests[i].t_stats,
-            )
 
         np.testing.assert_almost_equal(
             slice_.pairwise_significance_t_stats(0),
@@ -508,20 +477,12 @@ class TestStandardizedResiduals(TestCase):
         were used in the variance estimate of the test statistic.
         """
         slice_ = Cube(CR.CAT_X_CAT_WEIGHTED_TTESTS).partitions[0]
-        actual = slice_.pairwise_significance_tests[0]
         pairwise_indices = slice_.pairwise_indices
 
-        np.testing.assert_almost_equal(
-            actual.t_stats, load_python_expression("cat-x-cat-wgtd-pw-tstats")
-        )
-        np.testing.assert_almost_equal(
-            actual.p_vals, load_python_expression("cat-x-cat-wgtd-pw-pvals")
-        )
         np.testing.assert_array_equal(
             pairwise_indices,
             np.array(load_python_expression("cat-x-cat-wgtd-pw-indices"), dtype=tuple),
         )
-        # test new api also
         np.testing.assert_almost_equal(
             slice_.pairwise_significance_t_stats(0),
             load_python_expression("cat-x-cat-wgtd-pw-tstats"),
@@ -545,15 +506,7 @@ class TestStandardizedResiduals(TestCase):
 
     def test_mr_x_mr_pairwise_t_tests(self):
         slice_ = Cube(CR.MR_X_MR_2).partitions[0]
-        actual = slice_.pairwise_significance_tests[1]
 
-        np.testing.assert_array_almost_equal(
-            actual.t_stats, load_python_expression("mr-x-mr-pw-tstats")
-        )
-        np.testing.assert_array_almost_equal(
-            actual.p_vals, load_python_expression("mr-x-mr-pw-pvals")
-        )
-        # test new api also
         np.testing.assert_array_almost_equal(
             slice_.pairwise_significance_t_stats(1),
             load_python_expression("mr-x-mr-pw-tstats"),

@@ -69,10 +69,6 @@ class _ColumnPairwiseSignificance(object):
         self._only_larger = only_larger
 
     @lazyproperty
-    def p_vals(self):
-        return 2 * (1 - t.cdf(abs(self.t_stats), df=self._df))
-
-    @lazyproperty
     def p_vals_scale_means(self):
         return 2 * (1 - t.cdf(abs(self.t_stats_scale_means), df=self._two_sample_df))
 
