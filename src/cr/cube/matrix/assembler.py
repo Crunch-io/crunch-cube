@@ -22,8 +22,9 @@ from cr.cube.collator import (
 from cr.cube.enums import (
     COLLATION_METHOD as CM,
     DIMENSION_TYPE as DT,
-    MEASURE as M,
+    MARGINAL,
     MARGINAL_ORIENTATION as MO,
+    MEASURE as M,
 )
 from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.measure import SecondOrderMeasures
@@ -1102,7 +1103,21 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
 
     @lazyproperty
     def _marginal(self):
-        raise ValueError("Not yet implemented")
+        """Marginal object providing values for sort."""
+        propname_by_marginal = {
+            MARGINAL.SCALE_MEAN: "rows_scale_mean",
+            MARGINAL.SCALE_MEAN_STDDEV: "rows_scale_mean_stddev",
+            MARGINAL.SCALE_MEDIAN: "rows_scale_median",
+        }
+        marginal = self._order_spec.marginal
+        marginal_propname = propname_by_marginal.get(marginal)
+
+        if marginal_propname is None:
+            raise NotImplementedError(
+                "sort-by-value for marginal '%s' is not yet supported" % marginal
+            )
+
+        return getattr(self._second_order_measures, marginal_propname)
 
     @lazyproperty
     def _order(self):

@@ -7,7 +7,12 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal, _Subtotals
-from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT, MEASURE as M
+from cr.cube.enums import (
+    COLLATION_METHOD as CM,
+    DIMENSION_TYPE as DT,
+    MARGINAL,
+    MEASURE as M,
+)
 from cr.cube.matrix.assembler import (
     Assembler,
     _BaseOrderHelper,
@@ -1573,6 +1578,34 @@ class Describe_SortRowsByMarginalHelper(object):
 
     def it_provides_the_element_values_to_help(self, request, _marginal_prop_):
         assert _SortRowsByMarginalHelper(None, None)._element_values == "a"
+
+    @pytest.mark.parametrize(
+        "marginal, marginal_prop_name",
+        (
+            (MARGINAL.SCALE_MEAN, "rows_scale_mean"),
+            (MARGINAL.SCALE_MEAN_STDDEV, "rows_scale_mean_stddev"),
+            (MARGINAL.SCALE_MEDIAN, "rows_scale_median"),
+        ),
+    )
+    def it_provides_the_marginal_to_help(self, request, marginal, marginal_prop_name):
+        second_order_measures_ = instance_mock(request, SecondOrderMeasures)
+        setattr(second_order_measures_, marginal_prop_name, "foo")
+        _order_spec_ = instance_mock(request, _OrderSpec, marginal=marginal)
+        dimensions_ = [instance_mock(request, Dimension, order_spec=_order_spec_)]
+        order_helper = _SortRowsByMarginalHelper(dimensions_, second_order_measures_)
+
+        assert order_helper._marginal == "foo"
+
+    def but_it_raises_on_unknown_marginal(self, request):
+        second_order_measures_ = instance_mock(request, SecondOrderMeasures)
+        _order_spec_ = instance_mock(request, _OrderSpec, marginal="bar")
+        dimensions_ = [instance_mock(request, Dimension, order_spec=_order_spec_)]
+        order_helper = _SortRowsByMarginalHelper(dimensions_, second_order_measures_)
+
+        with pytest.raises(NotImplementedError) as e:
+            order_helper._marginal
+
+        assert str(e.value) == ("sort-by-value for marginal 'bar' is not yet supported")
 
     def it_provides_the_subtotal_values_to_help(self, request, _marginal_prop_):
         assert _SortRowsByMarginalHelper(None, None)._subtotal_values == "b"

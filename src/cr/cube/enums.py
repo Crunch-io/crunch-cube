@@ -70,6 +70,21 @@ class COLLATION_METHOD(enum.Enum):
     UNIVARIATE_MEASURE = "univariate_measure"
 
 
+class MARGINAL(enum.Enum):
+    """Enumerated values representing the (second-order) marginals."""
+
+    SCALE_MEAN = "scale_mean"
+    SCALE_MEAN_STDDEV = "scale_mean_stddev"
+    SCALE_MEDIAN = "scale_median"
+
+
+class MARGINAL_ORIENTATION(enum.Enum):
+    """Enumerated values representing orientation of a marginal."""
+
+    ROWS = "rows"
+    COLUMNS = "columns"
+
+
 class MEASURE(enum.Enum):
     """Enumerated values representing the second-order measures."""
 
@@ -121,10 +136,3 @@ NUMERIC_MEASURES = frozenset(
         MEASURE.TOTAL_SHARE_SUM,
     )
 )
-
-
-class MARGINAL_ORIENTATION(enum.Enum):
-    """Enumerated values representing orientation of a marginal."""
-
-    ROWS = "rows"
-    COLUMNS = "columns"

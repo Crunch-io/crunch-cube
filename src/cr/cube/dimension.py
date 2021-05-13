@@ -880,6 +880,16 @@ class _OrderSpec(object):
         return self._order_dict["insertion_id"]
 
     @lazyproperty
+    def marginal(self):
+        """Member of enums.MARGINAL corresponding to "marginal": field in order transform.
+
+        Raises KeyError if the order dict has no "marginal": field and ValueError if the
+        value in that field is not a recognized marginal keyword. Note that not all order
+        types use the "marginal": field.
+        """
+        raise NotImplementedError()
+
+    @lazyproperty
     def measure(self):
         """Member of enums.MEASURE corresponding to "measure": field in order transform.
 
