@@ -1539,3 +1539,33 @@ class Describe_SortRowsByInsertedColumnHelper(object):
     @pytest.fixture
     def _order_spec_prop_(self, request):
         return property_mock(request, _SortRowsByInsertedColumnHelper, "_order_spec")
+
+
+class Describe_SortRowsByMarginalHelper(object):
+    """Unit test suite for `cr.cube.matrix.assembler._SortRowsByMarginalHelper`."""
+
+    def it_provides_the_order(self, request):
+        SortByValueCollator_ = class_mock(
+            request, "cr.cube.matrix.assembler.SortByValueCollator"
+        )
+        _rows_dimension_ = property_mock(
+            request, _SortRowsByMarginalHelper, "_rows_dimension"
+        )
+        _element_values_ = property_mock(
+            request, _SortRowsByMarginalHelper, "_element_values"
+        )
+        _subtotal_values_ = property_mock(
+            request, _SortRowsByMarginalHelper, "_subtotal_values"
+        )
+        _empty_row_idxs_ = property_mock(
+            request, _SortRowsByMarginalHelper, "_empty_row_idxs"
+        )
+
+        assert _SortRowsByMarginalHelper(None, None)._order
+
+        SortByValueCollator_.display_order.assert_called_once_with(
+            _rows_dimension_(),
+            _element_values_(),
+            _subtotal_values_(),
+            _empty_row_idxs_(),
+        )

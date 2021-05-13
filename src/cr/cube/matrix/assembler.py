@@ -1096,4 +1096,20 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
     a matrix dimension has an opposing dimension.
     """
 
-    pass
+    @lazyproperty
+    def _element_values(self):
+        raise ValueError("_element_values not implemented yet ")
+
+    @lazyproperty
+    def _order(self):
+        """tuple of int element-idx specifying ordering of dimension elements."""
+        return SortByValueCollator.display_order(
+            self._rows_dimension,
+            self._element_values,
+            self._subtotal_values,
+            self._empty_row_idxs,
+        )
+
+    @lazyproperty
+    def _subtotal_values(self):
+        raise ValueError("_subtotal_values not implemented yet ")
