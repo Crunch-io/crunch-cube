@@ -798,6 +798,7 @@ class _BaseOrderHelper(object):
         HelperCls = {
             CM.OPPOSING_ELEMENT: _SortRowsByBaseColumnHelper,
             CM.OPPOSING_INSERTION: _SortRowsByInsertedColumnHelper,
+            CM.MARGINAL: _SortRowsByMarginalHelper,
         }.get(order_spec.collation_method, _RowOrderHelper)
 
         return HelperCls(dimensions, second_order_measures)._display_order
@@ -1085,3 +1086,14 @@ class _SortRowsByInsertedColumnHelper(_RowOrderHelper):
         """
         intersections = self._measure.blocks[1][1]
         return intersections[:, self._insertion_idx]
+
+
+class _SortRowsByMarginalHelper(_RowOrderHelper):
+    """Orders elements by the values of an opposing marginal vector.
+
+    This would be like "order rows in descending order by value of rows scale mean.
+    column. An opposing-marginal ordering is only available on a matrix, because only
+    a matrix dimension has an opposing dimension.
+    """
+
+    pass

@@ -15,6 +15,7 @@ from cr.cube.matrix.assembler import (
     _RowOrderHelper,
     _SortRowsByBaseColumnHelper,
     _SortRowsByInsertedColumnHelper,
+    _SortRowsByMarginalHelper,
 )
 from cr.cube.matrix.cubemeasure import (
     BaseCubeResultMatrix,
@@ -1069,6 +1070,7 @@ class Describe_BaseOrderHelper(object):
         (
             (CM.OPPOSING_ELEMENT, _SortRowsByBaseColumnHelper),
             (CM.EXPLICIT_ORDER, _RowOrderHelper),
+            (CM.MARGINAL, _SortRowsByMarginalHelper),
             (CM.PAYLOAD_ORDER, _RowOrderHelper),
         ),
     )
