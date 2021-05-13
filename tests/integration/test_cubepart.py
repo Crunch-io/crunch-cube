@@ -603,7 +603,6 @@ class Describe_Slice(object):
         actual = np.round(slice_.column_percentages, 1).tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_can_sort_by_rows_scale_mean(self):
         """Responds to order:opposing_element sort-by-value.
 

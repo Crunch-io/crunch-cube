@@ -11,7 +11,12 @@ else:
 
 import numpy as np
 
-from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT, MEASURE
+from cr.cube.enums import (
+    COLLATION_METHOD as CM,
+    DIMENSION_TYPE as DT,
+    MARGINAL,
+    MEASURE,
+)
 from cr.cube.util import lazyproperty
 
 
@@ -887,7 +892,16 @@ class _OrderSpec(object):
         value in that field is not a recognized marginal keyword. Note that not all order
         types use the "marginal": field.
         """
-        raise NotImplementedError()
+        return MARGINAL(self.marginal_keyname)
+
+    @lazyproperty
+    def marginal_keyname(self):
+        """str value of "marginal": field in order transform.
+
+        Raises KeyError if the order dict has no "marginal": field. Note that not all
+        order types use the "measure": field, but it is a required field in all that do.
+        """
+        return self._order_dict["marginal"]
 
     @lazyproperty
     def measure(self):
