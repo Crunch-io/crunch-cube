@@ -113,6 +113,8 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.32
+- Fix scale_std_dev and scale_std_err for stripes when total counts is 0.
 
 ### 2.1.31
 - Implement sort-by-value for all measures that have been consolidated so far.
