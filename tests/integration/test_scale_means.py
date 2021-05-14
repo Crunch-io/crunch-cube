@@ -552,3 +552,13 @@ def test_univariate_with_hs_scale_means_row():
     # Test with H&S
     strand = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
     assert strand.scale_mean == pytest.approx(2.1735206)
+
+
+def test_univariate_ca_subvar_with_empty_total_counts():
+    strand = Cube(SM.UNIVARIATE_CA_SUBVAR).partitions[0]
+
+    # --- scale_meanm, scale_std_dev and scale_std_err can be None when
+    # --- _total_weighted_count is 0.
+    assert strand.scale_mean is None
+    assert strand.scale_std_dev is None
+    assert strand.scale_std_err is None

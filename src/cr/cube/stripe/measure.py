@@ -253,8 +253,9 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
         units of scaled-counts and indicates the dispersion of the scaled-count
         distribution from its mean (scale-mean).
         """
-        # --- value is None when no row-element has been assigned a numeric value ---
-        if self._numeric_values.size == 0:
+        # --- value is None when no row-element has been assigned a numeric value
+        # --- or when scale variance is not available
+        if self._numeric_values.size == 0 or self._scale_variance is None:
             return None
 
         return np.sqrt(self._scale_variance)
@@ -265,8 +266,9 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
 
         This value is `None` when no rows have a numeric-value assigned.
         """
-        # --- value is None when no row-element has been assigned a numeric value ---
-        if self._numeric_values.size == 0:
+        # --- value is None when no row-element has been assigned a numeric value
+        # --- or when scale variance is not available
+        if self._numeric_values.size == 0 or self._scale_variance is None:
             return None
 
         return np.sqrt(self._scale_variance / self._total_weighted_count)
@@ -288,7 +290,12 @@ class _ScaledCounts(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def _scale_variance(self):
-        """np.float64 variance of scaled weighted-counts."""
+        """Optional np.float64 variance of scaled weighted-counts."""
+        if self.scale_mean is None:
+            # --- Scale mean can be None when _total_weighted_count is 0. Therefore the
+            # --- scale variance has to be None to indicate that this measure is not
+            # --- available.
+            return None
         return (
             np.sum(
                 self._weighted_counts * pow((self._numeric_values - self.scale_mean), 2)
