@@ -1226,22 +1226,6 @@ class Describe_OrderSpec(object):
         _order_dict_prop_.return_value = {"marginal": "scale_mean"}
         assert _OrderSpec(None, None).marginal == MARGINAL.SCALE_MEAN
 
-    def but_it_raises_when_marginal_field_is_not_present(self, _order_dict_prop_):
-        _order_dict_prop_.return_value = {}
-        with pytest.raises(KeyError) as e:
-            _OrderSpec(None, None).marginal
-        assert str(e.value) == "'marginal'"
-
-    def and_it_raises_when_the_marginal_keyword_is_not_recognized(
-        self, _order_dict_prop_
-    ):
-        _order_dict_prop_.return_value = {"marginal": "foobar"}
-        with pytest.raises(ValueError) as e:
-            _OrderSpec(None, None).marginal
-        # --- `.endswith()` to accommodate a Python 2.7 vs. 3.0 error message difference
-        # --- in Enum module
-        assert str(e.value).endswith(" is not a valid MARGINAL")
-
     def it_knows_the_measure_specified_as_the_sort_basis(self, _order_dict_prop_):
         _order_dict_prop_.return_value = {"measure": "col_percent"}
         assert _OrderSpec(None, None).measure == MEASURE.COLUMN_PERCENT

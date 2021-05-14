@@ -604,11 +604,7 @@ class Describe_Slice(object):
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
     def it_can_sort_by_rows_scale_mean(self):
-        """Responds to order:opposing_element sort-by-value.
-
-        So far, this is limited to column-percents (column-proportions) measure, but
-        others will follow.
-        """
+        """Responds to order of marginal sort-by-value."""
         transforms = {
             "rows_dimension": {
                 "order": {
@@ -619,32 +615,19 @@ class Describe_Slice(object):
                 }
             }
         }
-        slice_ = _Slice(Cube(CR.CAT_X_CAT_FILT), 0, transforms, None, 0)
-        payload_order_slice_ = _Slice(Cube(CR.CAT_X_CAT_FILT), 0, None, None, 0)
-        sorted_medians = slice_.rows_scale_mean.tolist()
-        payload_order_medians = payload_order_slice_.rows_scale_mean.tolist()
-        payload_order_insertions_idxs = payload_order_slice_.inserted_row_idxs
 
-        # --- insertions go last ---
-        assert payload_order_insertions_idxs == (3,)
-        assert (
-            sorted_medians[5] == payload_order_medians[payload_order_insertions_idxs[0]]
-        )
-        # --- We fixed top to be id=2, and bottom to be id=1 ---
-        assert sorted_medians[0] == payload_order_medians[1]
-        assert sorted_medians[4] == payload_order_medians[0]
-        # --- other 3 are sorted in order ---
-        assert sorted_medians[1:4] == sorted(
-            payload_order_medians[2:3] + payload_order_medians[4:6]
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, transforms, None, 0)
+
+        # --- scale means should be in order
+        assert slice_.rows_scale_mean.tolist() == pytest.approx(
+            [1.8888889, 1.6223404, 1.8077994, 1.7142857]
         )
         # --- also check that counts get sorted too ---
         assert slice_.counts.tolist() == [
-            [59.0, 132.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [3.0, 6.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [6.0, 29.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [3.0, 14.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [7.0, 30.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [127.0, 55.0, 13.0, 1.0, 29.0],
+            [247.0, 80.0, 19.0, 4.0, 26.0],
+            [253.0, 17.0, 41.0, 1.0, 47.0],
+            [46.0, 21.0, 3.0, 0.0, 7.0],
         ]
 
     def it_ignores_hidden_subtotals(self):

@@ -1099,18 +1099,22 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
 
     @lazyproperty
     def _element_values(self):
+        """Sequence of body values that form the basis for sort order.
+
+        There is one value per row and values appear in payload (dimension) element
+        order. These are only the "base" values and do not include insertions.
+        """
         return self._marginal.blocks[0]
 
     @lazyproperty
     def _marginal(self):
         """Marginal object providing values for sort."""
-        propname_by_marginal = {
+        marginal = self._order_spec.marginal
+        marginal_propname = {
             MARGINAL.SCALE_MEAN: "rows_scale_mean",
             MARGINAL.SCALE_MEAN_STDDEV: "rows_scale_mean_stddev",
             MARGINAL.SCALE_MEDIAN: "rows_scale_median",
-        }
-        marginal = self._order_spec.marginal
-        marginal_propname = propname_by_marginal.get(marginal)
+        }.get(marginal)
 
         if marginal_propname is None:
             raise NotImplementedError(
@@ -1131,4 +1135,9 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
 
     @lazyproperty
     def _subtotal_values(self):
+        """Sequence of row-subtotal values that contribute to the sort basis.
+
+        There is one value per row subtotal and values appear in payload (dimension)
+        insertion order.
+        """
         return self._marginal.blocks[1]

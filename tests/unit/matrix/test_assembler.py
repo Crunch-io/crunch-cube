@@ -1576,7 +1576,10 @@ class Describe_SortRowsByMarginalHelper(object):
             _empty_row_idxs_(),
         )
 
-    def it_provides_the_element_values_to_help(self, request, _marginal_prop_):
+    def it_provides_the_element_values_to_help(self, _marginal_prop_, marginal_):
+        marginal_.blocks = ["a", "b"]
+        _marginal_prop_.return_value = marginal_
+
         assert _SortRowsByMarginalHelper(None, None)._element_values == "a"
 
     @pytest.mark.parametrize(
@@ -1587,34 +1590,57 @@ class Describe_SortRowsByMarginalHelper(object):
             (MARGINAL.SCALE_MEDIAN, "rows_scale_median"),
         ),
     )
-    def it_provides_the_marginal_to_help(self, request, marginal, marginal_prop_name):
-        second_order_measures_ = instance_mock(request, SecondOrderMeasures)
+    def it_provides_the_marginal_to_help(
+        self,
+        second_order_measures_,
+        marginal,
+        marginal_prop_name,
+        _order_spec_,
+        _order_spec_prop_,
+    ):
         setattr(second_order_measures_, marginal_prop_name, "foo")
-        _order_spec_ = instance_mock(request, _OrderSpec, marginal=marginal)
-        dimensions_ = [instance_mock(request, Dimension, order_spec=_order_spec_)]
-        order_helper = _SortRowsByMarginalHelper(dimensions_, second_order_measures_)
+        _order_spec_.marginal = marginal
+        _order_spec_prop_.return_value = _order_spec_
+        order_helper = _SortRowsByMarginalHelper(None, second_order_measures_)
 
         assert order_helper._marginal == "foo"
 
-    def but_it_raises_on_unknown_marginal(self, request):
-        second_order_measures_ = instance_mock(request, SecondOrderMeasures)
-        _order_spec_ = instance_mock(request, _OrderSpec, marginal="bar")
-        dimensions_ = [instance_mock(request, Dimension, order_spec=_order_spec_)]
-        order_helper = _SortRowsByMarginalHelper(dimensions_, second_order_measures_)
+    def but_it_raises_on_unknown_marginal(
+        self, second_order_measures_, _order_spec_, _order_spec_prop_
+    ):
+        _order_spec_.marginal = "bar"
+        _order_spec_prop_.return_value = _order_spec_
+        order_helper = _SortRowsByMarginalHelper(None, second_order_measures_)
 
         with pytest.raises(NotImplementedError) as e:
             order_helper._marginal
 
-        assert str(e.value) == ("sort-by-value for marginal 'bar' is not yet supported")
+        assert str(e.value) == "sort-by-value for marginal 'bar' is not yet supported"
 
-    def it_provides_the_subtotal_values_to_help(self, request, _marginal_prop_):
+    def it_provides_the_subtotal_values_to_help(self, _marginal_prop_, marginal_):
+        marginal_.blocks = ["a", "b"]
+        _marginal_prop_.return_value = marginal_
+
         assert _SortRowsByMarginalHelper(None, None)._subtotal_values == "b"
 
     # fixture components ---------------------------------------------
 
     @pytest.fixture
+    def marginal_(self, request):
+        return instance_mock(request, _BaseMarginal)
+
+    @pytest.fixture
     def _marginal_prop_(self, request):
-        marginal_ = instance_mock(request, _BaseMarginal, blocks=["a", "b"])
-        return property_mock(
-            request, _SortRowsByMarginalHelper, "_marginal", return_value=marginal_
-        )
+        return property_mock(request, _SortRowsByMarginalHelper, "_marginal")
+
+    @pytest.fixture
+    def _order_spec_(self, request):
+        return instance_mock(request, _OrderSpec)
+
+    @pytest.fixture
+    def _order_spec_prop_(self, request):
+        return property_mock(request, _SortRowsByMarginalHelper, "_order_spec")
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
