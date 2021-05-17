@@ -19,7 +19,13 @@ from cr.cube.collator import (
     PayloadOrderCollator,
     SortByValueCollator,
 )
-from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT, MEASURE as M
+from cr.cube.enums import (
+    COLLATION_METHOD as CM,
+    DIMENSION_TYPE as DT,
+    MARGINAL,
+    MARGINAL_ORIENTATION as MO,
+    MEASURE as M,
+)
 from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.measure import SecondOrderMeasures
 from cr.cube.matrix.subtotals import (
@@ -184,6 +190,21 @@ class Assembler(object):
             self._column_subtotals,
             self._column_order,
         )
+
+    @lazyproperty
+    def columns_scale_mean(self):
+        """Optional 1D column scale mean marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.columns_scale_mean)
+
+    @lazyproperty
+    def columns_scale_mean_stddev(self):
+        """Optional 1D column scale mean std dev marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.columns_scale_mean_stddev)
+
+    @lazyproperty
+    def columns_scale_median(self):
+        """Optional 1D column scale median marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.columns_scale_median)
 
     @lazyproperty
     def inserted_column_idxs(self):
@@ -419,6 +440,21 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def rows_scale_mean(self):
+        """Optional 1D Row scale median marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.rows_scale_mean)
+
+    @lazyproperty
+    def rows_scale_mean_stddev(self):
+        """Optional 1D row scale mean std dev marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.rows_scale_mean_stddev)
+
+    @lazyproperty
+    def rows_scale_median(self):
+        """Optional 1D Row scale median marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.rows_scale_median)
+
+    @lazyproperty
     def sums(self):
         """2D optional np.float64 ndarray of sum for each cell.
 
@@ -606,6 +642,24 @@ class Assembler(object):
         """
         return self._assemble_matrix(self._measures.zscores.blocks)
 
+    def _assemble_marginal(self, marginal):
+        """Optional 1D ndarray created from a marginal.
+
+        The assembled marginal is the shape of either a row or column (determined by
+        `marginal.orientation`), and with the ordering that's applied to those
+        dimensions.
+
+        It is None when the marginal is not defined (`marginal._is_defined`).
+        """
+        if not marginal.is_defined:
+            return None
+
+        order = (
+            self._row_order if marginal.orientation == MO.ROWS else self._column_order
+        )
+
+        return np.hstack(marginal.blocks)[order]
+
     def _assemble_matrix(self, blocks):
         """Return 2D ndarray matrix assembled from `blocks`.
 
@@ -745,6 +799,7 @@ class _BaseOrderHelper(object):
         HelperCls = {
             CM.OPPOSING_ELEMENT: _SortRowsByBaseColumnHelper,
             CM.OPPOSING_INSERTION: _SortRowsByInsertedColumnHelper,
+            CM.MARGINAL: _SortRowsByMarginalHelper,
         }.get(order_spec.collation_method, _RowOrderHelper)
 
         return HelperCls(dimensions, second_order_measures)._display_order
@@ -1032,3 +1087,57 @@ class _SortRowsByInsertedColumnHelper(_RowOrderHelper):
         """
         intersections = self._measure.blocks[1][1]
         return intersections[:, self._insertion_idx]
+
+
+class _SortRowsByMarginalHelper(_RowOrderHelper):
+    """Orders elements by the values of an opposing marginal vector.
+
+    This would be like "order rows in descending order by value of rows scale mean.
+    column. An opposing-marginal ordering is only available on a matrix, because only
+    a matrix dimension has an opposing dimension.
+    """
+
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of body values that form the basis for sort order.
+
+        There is one value per row and values appear in payload (dimension) element
+        order. These are only the "base" values and do not include insertions.
+        """
+        return self._marginal.blocks[0]
+
+    @lazyproperty
+    def _marginal(self):
+        """Marginal object providing values for sort."""
+        marginal = self._order_spec.marginal
+        marginal_propname = {
+            MARGINAL.SCALE_MEAN: "rows_scale_mean",
+            MARGINAL.SCALE_MEAN_STDDEV: "rows_scale_mean_stddev",
+            MARGINAL.SCALE_MEDIAN: "rows_scale_median",
+        }.get(marginal)
+
+        if marginal_propname is None:
+            raise NotImplementedError(
+                "sort-by-value for marginal '%s' is not yet supported" % marginal
+            )
+
+        return getattr(self._second_order_measures, marginal_propname)
+
+    @lazyproperty
+    def _order(self):
+        """tuple of int element-idx specifying ordering of dimension elements."""
+        return SortByValueCollator.display_order(
+            self._rows_dimension,
+            self._element_values,
+            self._subtotal_values,
+            self._empty_row_idxs,
+        )
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of row-subtotal values that contribute to the sort basis.
+
+        There is one value per row subtotal and values appear in payload (dimension)
+        insertion order.
+        """
+        return self._marginal.blocks[1]

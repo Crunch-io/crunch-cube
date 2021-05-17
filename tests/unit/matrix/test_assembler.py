@@ -7,7 +7,12 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal, _Subtotals
-from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT, MEASURE as M
+from cr.cube.enums import (
+    COLLATION_METHOD as CM,
+    DIMENSION_TYPE as DT,
+    MARGINAL,
+    MEASURE as M,
+)
 from cr.cube.matrix.assembler import (
     Assembler,
     _BaseOrderHelper,
@@ -15,12 +20,14 @@ from cr.cube.matrix.assembler import (
     _RowOrderHelper,
     _SortRowsByBaseColumnHelper,
     _SortRowsByInsertedColumnHelper,
+    _SortRowsByMarginalHelper,
 )
 from cr.cube.matrix.cubemeasure import (
     BaseCubeResultMatrix,
     _CatXCatMatrix,
 )
 from cr.cube.matrix.measure import (
+    _BaseMarginal,
     _BaseSecondOrderMeasure,
     _ColumnComparableCounts,
     _ColumnProportions,
@@ -33,6 +40,9 @@ from cr.cube.matrix.measure import (
     _RowShareSum,
     _RowUnweightedBases,
     _RowWeightedBases,
+    _ScaleMean,
+    _ScaleMeanStddev,
+    _ScaleMedian,
     SecondOrderMeasures,
     _StdDev,
     _Sums,
@@ -102,6 +112,41 @@ class DescribeAssembler(object):
 
         _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
         assert value == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+    @pytest.mark.parametrize(
+        "measure_prop_name, MeasureCls",
+        (
+            ("rows_scale_mean", _ScaleMean),
+            ("columns_scale_mean", _ScaleMean),
+            ("rows_scale_mean_stddev", _ScaleMeanStddev),
+            ("columns_scale_mean_stddev", _ScaleMeanStddev),
+            ("rows_scale_median", _ScaleMedian),
+            ("columns_scale_median", _ScaleMedian),
+        ),
+    )
+    def it_assembles_various_marginals(
+        self,
+        request,
+        _measures_prop_,
+        second_order_measures_,
+        measure_prop_name,
+        MeasureCls,
+    ):
+        _assemble_marginal_ = method_mock(
+            request,
+            Assembler,
+            "_assemble_marginal",
+            return_value=[[1, 2, 3], [4, 5, 6]],
+        )
+        _measures_prop_.return_value = second_order_measures_
+        measure_ = instance_mock(request, MeasureCls)
+        setattr(second_order_measures_, measure_prop_name, measure_)
+        assembler = Assembler(None, None, None)
+
+        value = getattr(assembler, measure_prop_name)
+
+        _assemble_marginal_.assert_called_once_with(assembler, measure_)
+        assert value == [[1, 2, 3], [4, 5, 6]]
 
     def it_knows_the_column_index(
         self,
@@ -1031,6 +1076,7 @@ class Describe_BaseOrderHelper(object):
         (
             (CM.OPPOSING_ELEMENT, _SortRowsByBaseColumnHelper),
             (CM.EXPLICIT_ORDER, _RowOrderHelper),
+            (CM.MARGINAL, _SortRowsByMarginalHelper),
             (CM.PAYLOAD_ORDER, _RowOrderHelper),
         ),
     )
@@ -1499,3 +1545,102 @@ class Describe_SortRowsByInsertedColumnHelper(object):
     @pytest.fixture
     def _order_spec_prop_(self, request):
         return property_mock(request, _SortRowsByInsertedColumnHelper, "_order_spec")
+
+
+class Describe_SortRowsByMarginalHelper(object):
+    """Unit test suite for `cr.cube.matrix.assembler._SortRowsByMarginalHelper`."""
+
+    def it_provides_the_order(self, request):
+        SortByValueCollator_ = class_mock(
+            request, "cr.cube.matrix.assembler.SortByValueCollator"
+        )
+        _rows_dimension_ = property_mock(
+            request, _SortRowsByMarginalHelper, "_rows_dimension"
+        )
+        _element_values_ = property_mock(
+            request, _SortRowsByMarginalHelper, "_element_values"
+        )
+        _subtotal_values_ = property_mock(
+            request, _SortRowsByMarginalHelper, "_subtotal_values"
+        )
+        _empty_row_idxs_ = property_mock(
+            request, _SortRowsByMarginalHelper, "_empty_row_idxs"
+        )
+
+        _SortRowsByMarginalHelper(None, None)._order
+
+        SortByValueCollator_.display_order.assert_called_once_with(
+            _rows_dimension_(),
+            _element_values_(),
+            _subtotal_values_(),
+            _empty_row_idxs_(),
+        )
+
+    def it_provides_the_element_values_to_help(self, _marginal_prop_, marginal_):
+        marginal_.blocks = ["a", "b"]
+        _marginal_prop_.return_value = marginal_
+
+        assert _SortRowsByMarginalHelper(None, None)._element_values == "a"
+
+    @pytest.mark.parametrize(
+        "marginal, marginal_prop_name",
+        (
+            (MARGINAL.SCALE_MEAN, "rows_scale_mean"),
+            (MARGINAL.SCALE_MEAN_STDDEV, "rows_scale_mean_stddev"),
+            (MARGINAL.SCALE_MEDIAN, "rows_scale_median"),
+        ),
+    )
+    def it_provides_the_marginal_to_help(
+        self,
+        second_order_measures_,
+        marginal,
+        marginal_prop_name,
+        _order_spec_,
+        _order_spec_prop_,
+    ):
+        setattr(second_order_measures_, marginal_prop_name, "foo")
+        _order_spec_.marginal = marginal
+        _order_spec_prop_.return_value = _order_spec_
+        order_helper = _SortRowsByMarginalHelper(None, second_order_measures_)
+
+        assert order_helper._marginal == "foo"
+
+    def but_it_raises_on_unknown_marginal(
+        self, second_order_measures_, _order_spec_, _order_spec_prop_
+    ):
+        _order_spec_.marginal = "bar"
+        _order_spec_prop_.return_value = _order_spec_
+        order_helper = _SortRowsByMarginalHelper(None, second_order_measures_)
+
+        with pytest.raises(NotImplementedError) as e:
+            order_helper._marginal
+
+        assert str(e.value) == "sort-by-value for marginal 'bar' is not yet supported"
+
+    def it_provides_the_subtotal_values_to_help(self, _marginal_prop_, marginal_):
+        marginal_.blocks = ["a", "b"]
+        _marginal_prop_.return_value = marginal_
+
+        assert _SortRowsByMarginalHelper(None, None)._subtotal_values == "b"
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def marginal_(self, request):
+        return instance_mock(request, _BaseMarginal)
+
+    @pytest.fixture
+    def _marginal_prop_(self, request):
+        return property_mock(request, _SortRowsByMarginalHelper, "_marginal")
+
+    @pytest.fixture
+    def _order_spec_(self, request):
+        return instance_mock(request, _OrderSpec)
+
+    @pytest.fixture
+    def _order_spec_prop_(self, request):
+        return property_mock(request, _SortRowsByMarginalHelper, "_order_spec")
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)

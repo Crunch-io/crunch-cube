@@ -311,34 +311,6 @@ class Describe_Slice(object):
 
         assert _Slice(None, None, None, None, None).row_proportions == [[1, 2], [3, 4]]
 
-    def it_knows_the_scale_means_column(
-        self, request, _columns_dimension_numeric_values_prop_
-    ):
-        _columns_dimension_numeric_values_prop_.return_value = np.array([1, np.nan, 3])
-        property_mock(
-            request,
-            _Slice,
-            "row_proportions",
-            return_value=(
-                (np.array([[20, 30, 12], [10, 8, 4]]).T / np.array([62, 22])).T
-            ),
-        )
-        slice_ = _Slice(None, None, None, None, None)
-
-        rows_scale_means = slice_.rows_scale_mean
-
-        np.testing.assert_almost_equal(rows_scale_means, [1.75, 1.57142857])
-
-    def but_the_scale_means_column_is_None_if_columns_have_no_numeric_values(
-        self, _columns_dimension_numeric_values_prop_
-    ):
-        _columns_dimension_numeric_values_prop_.return_value = np.array(
-            [np.nan, np.nan, np.nan]
-        )
-        slice_ = _Slice(None, None, None, None, None)
-
-        assert slice_.rows_scale_mean is None
-
     def it_provides_the_secondary_scale_mean_pairwise_indices(
         self, _alpha_alt_prop_, _only_larger_prop_, PairwiseSignificance_
     ):
@@ -365,6 +337,30 @@ class Describe_Slice(object):
         slice_ = _Slice(None, None, None, None, None)
 
         assert slice_.columns_scale_mean_pairwise_indices_alt is None
+
+    @pytest.mark.parametrize(
+        "measure",
+        (
+            "rows_scale_mean",
+            "columns_scale_mean",
+            "rows_scale_mean_stddev",
+            "columns_scale_mean_stddev",
+            "rows_scale_median",
+            "columns_scale_median",
+        ),
+    )
+    def it_knows_the_scale_marginals(
+        self, request, _assembler_prop_, assembler_, measure
+    ):
+        _assembler_prop_.return_value = assembler_
+        setattr(
+            assembler_,
+            measure,
+            np.array([[2.2, 3.3], [0.0, 1.1]]),
+        )
+        slice_ = _Slice(None, None, None, None, None)
+
+        assert getattr(slice_, measure).tolist() == [[2.2, 3.3], [0.0, 1.1]]
 
     @pytest.mark.parametrize(
         "dimensions_dicts, expected_value",
@@ -446,10 +442,6 @@ class Describe_Slice(object):
     @pytest.fixture
     def _assembler_prop_(self, request):
         return property_mock(request, _Slice, "_assembler")
-
-    @pytest.fixture
-    def _columns_dimension_numeric_values_prop_(self, request):
-        return property_mock(request, _Slice, "_columns_dimension_numeric_values")
 
     @pytest.fixture
     def cube_(self, request):

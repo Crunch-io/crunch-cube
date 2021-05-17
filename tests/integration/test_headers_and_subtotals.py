@@ -4015,7 +4015,7 @@ class DescribeIntegrated_SubtotalDifferences(object):
         )
 
         assert slice_.rows_scale_median == pytest.approx(
-            [np.nan, 2, 1, 2, 2, np.nan, np.nan], nan_ok=True
+            [np.nan, 2, 1, 2, 2, np.nan, 2], nan_ok=True
         )
 
     def it_computes_sum_for_numarray_with_subdiffs_and_subtot_on_columns(self):

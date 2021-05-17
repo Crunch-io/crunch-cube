@@ -11,7 +11,12 @@ else:
 
 import numpy as np
 
-from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT, MEASURE
+from cr.cube.enums import (
+    COLLATION_METHOD as CM,
+    DIMENSION_TYPE as DT,
+    MARGINAL,
+    MEASURE,
+)
 from cr.cube.util import lazyproperty
 
 
@@ -876,10 +881,27 @@ class _OrderSpec(object):
         """int insertion-id in the "insertion_id" field of the transform dict.
 
         Raises KeyError if this transform dict does not contain an "insertion_id" field.
-        Note that not all order types use the "insertion_id": field but this field is
-        required in all that do.
         """
         return self._order_dict["insertion_id"]
+
+    @lazyproperty
+    def marginal(self):
+        """Member of enums.MARGINAL corresponding to "marginal": field in order transform.
+
+        Raises KeyError if the order dict has no "marginal": field and ValueError if the
+        value in that field is not a recognized marginal keyword. Note that not all order
+        types use the "marginal": field.
+        """
+        return MARGINAL(self.marginal_keyname)
+
+    @lazyproperty
+    def marginal_keyname(self):
+        """str value of "marginal": field in order transform.
+
+        Raises KeyError if the order dict has no "marginal": field. Note that not all
+        order types use the "measure": field, but it is a required field in all that do.
+        """
+        return self._order_dict["marginal"]
 
     @lazyproperty
     def measure(self):
@@ -1073,7 +1095,7 @@ class _Subtotal(object):
     @lazyproperty
     def insertion_id(self):
         """int unique identifier of this subtotal within this dimension's insertions."""
-        return self._subtotal_dict.get("insertion_id", self._fallback_insertion_id)
+        return self._subtotal_dict.get("id", self._fallback_insertion_id)
 
     @lazyproperty
     def label(self):

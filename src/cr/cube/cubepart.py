@@ -393,16 +393,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no row element has an assigned numeric value.
         """
-        if not self._rows_have_numeric_value:
-            return None
-
-        inner = np.nansum(
-            self._rows_dimension_numeric_values[:, None] * self.column_proportions,
-            axis=0,
-        )
-        not_a_nan_mask = ~np.isnan(self._rows_dimension_numeric_values)
-        denominator = np.sum(self.column_proportions[not_a_nan_mask, :], axis=0)
-        return inner / denominator
+        return self._assembler.columns_scale_mean
 
     @lazyproperty
     def columns_scale_mean_margin(self):
@@ -474,11 +465,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no row element has been assigned a numeric value.
         """
-        return (
-            np.sqrt(self._columns_scale_mean_variance)
-            if self._rows_have_numeric_value
-            else None
-        )
+        return self._assembler.columns_scale_mean_stddev
 
     @lazyproperty
     def columns_scale_mean_stderr(self):
@@ -506,21 +493,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no row element has been assigned a numeric value.
         """
-        if not self._rows_have_numeric_value:
-            return None
-
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
-        numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
-        counts = np.nan_to_num(
-            self._assembler.column_comparable_counts[not_a_nan_index, :]
-        ).astype("int64")
-        scale_median = np.array(
-            [
-                self._median(np.repeat(numeric_values, counts[:, i]))
-                for i in range(counts.shape[1])
-            ]
-        )
-        return scale_median
+        return self._assembler.columns_scale_median
 
     @lazyproperty
     def columns_scale_median_margin(self):
@@ -1007,14 +980,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no column element has an assigned numeric value.
         """
-        if not self._columns_have_numeric_value:
-            return None
-
-        column_numeric_values = self._columns_dimension_numeric_values
-        inner = np.nansum(column_numeric_values * self.row_proportions, axis=1)
-        not_a_nan_index = ~np.isnan(column_numeric_values)
-        denominator = np.sum(self.row_proportions[:, not_a_nan_index], axis=1)
-        return inner / denominator
+        return self._assembler.rows_scale_mean
 
     @lazyproperty
     def rows_scale_mean_margin(self):
@@ -1055,11 +1021,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no column elements have an assigned numeric value.
         """
-        return (
-            np.sqrt(self._rows_scale_mean_variance)
-            if self._columns_have_numeric_value
-            else None
-        )
+        return self._assembler.rows_scale_mean_stddev
 
     @lazyproperty
     def rows_scale_mean_stderr(self):
@@ -1087,21 +1049,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no column element has an assigned numeric value.
         """
-        if not self._columns_have_numeric_value:
-            return None
-
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
-        numeric_values = self._columns_dimension_numeric_values[not_a_nan_index]
-        counts = np.nan_to_num(
-            self._assembler.row_comparable_counts[:, not_a_nan_index]
-        ).astype("int64")
-        scale_median = np.array(
-            [
-                self._median(np.repeat(numeric_values, counts[i, :]))
-                for i in range(counts.shape[0])
-            ]
-        )
-        return scale_median
+        return self._assembler.rows_scale_median
 
     @lazyproperty
     def rows_scale_median_margin(self):
@@ -1399,9 +1347,6 @@ class _Slice(CubePartition):
             )
         )
 
-    def _median(self, values):
-        return np.median(values) if values.size != 0 else np.nan
-
     @lazyproperty
     def _row_variance(self):
         """2D np.float64 ndarray of row-percentage variance for each cell."""
@@ -1425,25 +1370,6 @@ class _Slice(CubePartition):
     def _rows_have_numeric_value(self):
         """True when one or more row elements have an assigned numeric-value."""
         return not np.all(np.isnan(self._rows_dimension_numeric_values))
-
-    @lazyproperty
-    def _rows_scale_mean_variance(self):
-        """Optional 1D np.float64 ndarray of scale-mean variance for each row."""
-        if not self._columns_have_numeric_value:
-            return None
-
-        # --- Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is
-        # --- the mean of the data.
-        not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
-        col_dim_numeric = self._columns_dimension_numeric_values[not_a_nan_index]
-
-        numerator = self.counts[:, not_a_nan_index] * pow(
-            np.broadcast_to(col_dim_numeric, self.counts[:, not_a_nan_index].shape)
-            - self.rows_scale_mean.reshape(-1, 1),
-            2,
-        )
-        denominator = np.sum(self.counts[:, not_a_nan_index], axis=1)
-        return np.nansum(numerator, axis=1) / denominator
 
     @lazyproperty
     def _table_proportion_variance(self):

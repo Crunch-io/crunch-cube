@@ -21,7 +21,12 @@ from cr.cube.dimension import (
     _Subtotals,
     _ValidElements,
 )
-from cr.cube.enums import COLLATION_METHOD as CM, DIMENSION_TYPE as DT, MEASURE
+from cr.cube.enums import (
+    COLLATION_METHOD as CM,
+    DIMENSION_TYPE as DT,
+    MARGINAL,
+    MEASURE,
+)
 
 from ..unitutil import (
     ANY,
@@ -1217,6 +1222,10 @@ class Describe_OrderSpec(object):
             _OrderSpec(None, None).insertion_id
         assert str(e.value) == "'insertion_id'"
 
+    def it_knows_the_marginal_specified_as_the_sort_basis(self, _order_dict_prop_):
+        _order_dict_prop_.return_value = {"marginal": "scale_mean"}
+        assert _OrderSpec(None, None).marginal == MARGINAL.SCALE_MEAN
+
     def it_knows_the_measure_specified_as_the_sort_basis(self, _order_dict_prop_):
         _order_dict_prop_.return_value = {"measure": "col_percent"}
         assert _OrderSpec(None, None).measure == MEASURE.COLUMN_PERCENT
@@ -1496,7 +1505,7 @@ class Describe_Subtotal(object):
         assert subtotal.addend_ids == expected_value
 
     def it_knows_its_insertion_id_when_it_has_been_assigned_one(self):
-        assert _Subtotal({"insertion_id": 42}, None, None).insertion_id == 42
+        assert _Subtotal({"id": 42}, None, None).insertion_id == 42
 
     def and_it_uses_its_fallback_insertion_id_when_not_assigned_one(self):
         assert _Subtotal({}, None, 24).insertion_id == 24

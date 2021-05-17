@@ -7,7 +7,7 @@ from __future__ import division
 import numpy as np
 from scipy.stats import t
 
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT, MARGINAL_ORIENTATION as MO
 from cr.cube.matrix.cubemeasure import CubeMeasures
 from cr.cube.matrix.subtotals import (
     SumSubtotals,
@@ -66,6 +66,21 @@ class SecondOrderMeasures(object):
     def columns_pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix column."""
         return self._cube_measures.unweighted_cube_counts.columns_pruning_base
+
+    @lazyproperty
+    def columns_scale_mean(self):
+        """_ScaleMean for columns measure object for this cube-result."""
+        return _ScaleMean(self._dimensions, self, self._cube_measures, MO.COLUMNS)
+
+    @lazyproperty
+    def columns_scale_mean_stddev(self):
+        """_ScaleMeanStddev for columns measure object for this cube-result."""
+        return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, MO.COLUMNS)
+
+    @lazyproperty
+    def columns_scale_median(self):
+        """_ScaleMedian for columns measure object for this cube-result."""
+        return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.COLUMNS)
 
     @lazyproperty
     def means(self):
@@ -142,6 +157,21 @@ class SecondOrderMeasures(object):
     def rows_pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix row."""
         return self._cube_measures.unweighted_cube_counts.rows_pruning_base
+
+    @lazyproperty
+    def rows_scale_mean(self):
+        """_ScaleMean for rows measure object for this cube-result."""
+        return _ScaleMean(self._dimensions, self, self._cube_measures, MO.ROWS)
+
+    @lazyproperty
+    def rows_scale_mean_stddev(self):
+        """_ScaleMeanStddev for rpws measure object for this cube-result."""
+        return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, MO.ROWS)
+
+    @lazyproperty
+    def rows_scale_median(self):
+        """_ScaleMedian for rows measure object for this cube-result."""
+        return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def sums(self):
@@ -1324,6 +1354,331 @@ class _Zscores(_BaseSecondOrderMeasure):
         if DT.MR_SUBVAR in dimension_types:
             return NanSubtotals.blocks(base_values, self._dimensions)
         return ZscoreSubtotals.blocks(self._weighted_cube_counts, self._dimensions)
+
+
+# === MARGINALS ===
+
+
+class _BaseMarginal(object):
+    """Base class for all (second-order) marginal objects."""
+
+    def __init__(self, dimensions, second_order_measures, cube_measures, orientation):
+        self._dimensions = dimensions
+        self._second_order_measures = second_order_measures
+        self._cube_measures = cube_measures
+        self._orientation = orientation
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" making up this measure.
+
+        These are the base-values and the subtotals.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `.blocks`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def orientation(self):
+        """String, either "row" or "column", the orientation the marginal."""
+        return self._orientation
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool, indicating whether the marginal can be calculated.
+
+        Defaults to True, but designed to be overridden by subclasses if necessary.
+        """
+        return True
+
+    def _apply_along_orientation(self, func1d, arr, *args, **kwargs):
+        """Wrapper around `np.apply_along_axis` useful for marginal calculation
+
+        Gets the axis from the `.orientation` property and also returns an empty
+        1d array of floats when the dimension is length 0 (rather than failing).
+        """
+        axis = 1 if self.orientation == MO.ROWS else 0
+
+        if arr.shape[1 - axis] == 0:
+            return np.array([], dtype=np.float64)
+
+        return np.apply_along_axis(func1d, axis, arr, *args, **kwargs)
+
+    @lazyproperty
+    def _counts(self):
+        """List of 2 ndarrays count blocks, in their original payload order
+
+        The counts come from the count measure blocks that are comparable in the correct
+        orientation, and include the base values and the subtotals for the orientation.
+        """
+        if self.orientation == MO.ROWS:
+            # --- Use *row* comparable counts ---
+            counts = self._second_order_measures.row_comparable_counts.blocks
+            # --- Get base values & *row* subtotals
+            return [counts[0][0], counts[1][0]]
+        else:
+            # --- Use *column* comparable counts ---
+            counts = self._second_order_measures.column_comparable_counts.blocks
+            # --- Get base values & *column* subtotals
+            return [counts[0][0], counts[0][1]]
+
+
+class _BaseScaledCountMarginal(_BaseMarginal):
+    """A base class for marginals that depend on the scaled counts."""
+
+    @lazyproperty
+    def _opposing_numeric_values(self):
+        """ndarray of numeric_values from the opposing dimension"""
+        return (
+            np.array(self._dimensions[1].numeric_values, dtype=np.float64)
+            if self.orientation == MO.ROWS
+            else np.array(self._dimensions[0].numeric_values, dtype=np.float64)
+        )
+
+
+class _ScaleMean(_BaseScaledCountMarginal):
+    """Provides the scale mean marginals for a matrix if available.
+
+    The rows/columns median is a 1D np.float64 ndarray, the same dimension as the
+    opposing dimension, and has has the weighted mean of the opposing dimension's
+    numeric values.
+
+    It is None when there are no numeric values for the opposing dimension. If
+    there are any numeric values defined, but for a given row/column none of the
+    categories with numeric values have positive counts it will be np.nan.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the scale mean.
+
+        These are the base-values and the subtotals.
+        """
+        if not self.is_defined:
+            raise ValueError(
+                "%s-scale-mean is undefined if no numeric values are defined on "
+                "opposing dimension." % self.orientation.value
+            )
+
+        return [
+            self._apply_along_orientation(
+                self._weighted_mean, proportion, values=self._opposing_numeric_values
+            )
+            for proportion in self._proportions
+        ]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if any have numeric values"""
+        return not np.all(np.isnan(self._opposing_numeric_values))
+
+    @lazyproperty
+    def _proportions(self):
+        """List of 2 ndarray matrixes of the relevant proportion blocks"""
+        if self.orientation == MO.ROWS:
+            # --- Use *row* proportions ---
+            props = self._second_order_measures.row_proportions.blocks
+            # --- Get base values & *row* subtotals
+            return [props[0][0], props[1][0]]
+        else:
+            # --- Use *column* proportions ---
+            props = self._second_order_measures.column_proportions.blocks
+            # --- Get base values & *column* subtotals
+            return [props[0][0], props[0][1]]
+
+    @staticmethod
+    def _weighted_mean(proportions, values):
+        """Calculate the weighted mean from proportions and numeric values
+
+        Both proportions and values are 1D ndarrays
+        """
+        inner = np.nansum(values * proportions)
+        # --- denominator isn't necessarily 1 because need to remove the proportions
+        # --- that don't have numeric values defined.
+        not_a_nan_mask = ~np.isnan(values)
+        denominator = np.sum(proportions[not_a_nan_mask])
+        return inner / denominator
+
+
+class _ScaleMedian(_BaseScaledCountMarginal):
+    """Provides the scale median marginals for a matrix if available.
+
+    The rows/columns median is a 1D np.float64 ndarray, the same dimension as the
+    opposing dimension, and has has the weighted median of the opposing dimension's
+    numeric values.
+
+    It is None when there are no numeric values for the opposing dimension. If
+    there are any numeric values defined, but for a given row/column none of the
+    categories with numeric values have positive counts it will be np.nan.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the scale median.
+
+        These are the base-values and the subtotals.
+        """
+        if not self.is_defined:
+            raise ValueError(
+                "%s-scale-median is undefined if no numeric values are defined on "
+                "opposing dimension." % self.orientation.value
+            )
+
+        return [
+            self._apply_along_orientation(
+                self._weighted_median, count, sorted_values=self._sorted_values
+            )
+            for count in self._sorted_counts
+        ]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if any have numeric values"""
+        return not np.all(np.isnan(self._opposing_numeric_values))
+
+    @lazyproperty
+    def _sorted_counts(self):
+        """List of 2 ndarrays count blocks, sorted by `._values_sort_order`
+
+        These values are the `._counts` sorted in the same order as the numeric
+        values will be so that they can be used in `_weighted_median()`.
+        """
+        axis = 1 if self.orientation == MO.ROWS else 0
+        return (count.take(self._values_sort_order, axis) for count in self._counts)
+
+    @lazyproperty
+    def _sorted_values(self):
+        """ndarray of numeric values, sorted for use in `._weighted_median()`"""
+        return self._opposing_numeric_values[self._values_sort_order]
+
+    @lazyproperty
+    def _values_sort_order(self):
+        """ndarray of indexes of the order to sort numeric values in
+
+        Provides the sort order (removing np.nan values) of numeric values for the
+        opposing dimension to use when sorting both the numeric values themselves and
+        also the the counts so that the order between these remains consistent.
+        """
+        values = self._opposing_numeric_values
+        sort_idx = values.argsort()
+        nan_idx = np.argwhere(np.isnan(values))
+        # take the sorted indices and remove the nans
+        # `assume_unique=True` preserves the order of the array
+        return np.setdiff1d(sort_idx, nan_idx, assume_unique=True)
+
+    @staticmethod
+    def _weighted_median(sorted_counts, sorted_values):
+        """Calculate the median given a set of values and their frequency in the data
+
+        `sorted_values` must be sorted in order and the `sorted_counts` must be sorted to
+        match that order.
+        """
+        # --- Convert nans to 0, as we don't want them to contribute to median. Counts
+        # --- can possibly be nans for subtotal differences along the orientation we're
+        # --- calculating.
+        sorted_counts = np.nan_to_num(sorted_counts)
+        # --- TODO: We could convert to int, so that it matches old behavior exactly
+        # --- Should we do this? Seems better to use true weights.
+        # sorted_counts = sorted_counts.astype("int64")
+        cumulative_counts = np.cumsum(sorted_counts)
+        # --- If no valid numeric value has counts, median is nan
+        if cumulative_counts[-1] == 0:
+            return np.nan
+        # --- Find the point at which the count that contains 50% of total counts
+        cumulative_prop = cumulative_counts / cumulative_counts[-1]
+        median_idx = np.argmax(cumulative_prop >= 0.5)
+        # --- If it's exactly 50%, take the mean of the two nearest values
+        # --- TODO: Does this behave okay for large numbers (or is precision a problem)?
+        if cumulative_prop[median_idx] == 0.5:
+            return np.mean(sorted_values[[median_idx, median_idx + 1]])
+        else:
+            return sorted_values[median_idx]
+
+
+class _ScaleMeanStddev(_BaseScaledCountMarginal):
+    """Provides the std. dev of the marginal scale means."""
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the scale mean standard deviation.
+
+        These are the base-values and the subtotals.
+        """
+        if not self.is_defined:
+            raise ValueError(
+                "%s-scale-mean-standard-deviation is undefined if no numeric values "
+                "are defined on opposing dimension." % self.orientation.value
+            )
+
+        return [
+            self._stddev_func(count, self._opposing_numeric_values, scale_means)
+            for count, scale_means in zip(self._counts, self._scale_means)
+        ]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if any have numeric values"""
+        return not np.all(np.isnan(self._opposing_numeric_values))
+
+    @staticmethod
+    def _columns_weighted_mean_stddev(counts, values, scale_mean):
+        """Calculate the scale mean std dev for columns orientation"""
+        if counts.shape[1] == 0:
+            return np.array([], dtype=float)
+        # --- Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is
+        # --- the mean of the data.
+        not_a_nan_index = ~np.isnan(values)
+        row_dim_numeric_values = values[not_a_nan_index]
+        numerator = (
+            counts[not_a_nan_index, :]
+            * pow(
+                np.broadcast_to(
+                    row_dim_numeric_values, counts[not_a_nan_index, :].T.shape
+                )
+                - scale_mean.reshape(-1, 1),
+                2,
+            ).T
+        )
+        denominator = np.sum(counts[not_a_nan_index, :], axis=0)
+        variance = np.nansum(numerator, axis=0) / denominator
+        return np.sqrt(variance)
+
+    @staticmethod
+    def _rows_weighted_mean_stddev(counts, values, scale_mean):
+        """Calculate the scale mean std dev for rows orientation"""
+        if counts.shape[0] == 0:
+            return np.array([], dtype=float)
+        # --- Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is
+        # --- the mean of the data.
+        not_a_nan_index = ~np.isnan(values)
+        col_dim_numeric = values[not_a_nan_index]
+
+        numerator = counts[:, not_a_nan_index] * pow(
+            np.broadcast_to(col_dim_numeric, counts[:, not_a_nan_index].shape)
+            - scale_mean.reshape(-1, 1),
+            2,
+        )
+        denominator = np.sum(counts[:, not_a_nan_index], axis=1)
+        variance = np.nansum(numerator, axis=1) / denominator
+        return np.sqrt(variance)
+
+    @lazyproperty
+    def _scale_means(self):
+        """list of 2 np.ndarray blocks of the scale mean for this orientation"""
+        return (
+            self._second_order_measures.rows_scale_mean.blocks
+            if self.orientation == MO.ROWS
+            else self._second_order_measures.columns_scale_mean.blocks
+        )
+
+    @lazyproperty
+    def _stddev_func(self):
+        """function for calculating standard deviation along this orientation."""
+        return (
+            self._rows_weighted_mean_stddev
+            if self.orientation == MO.ROWS
+            else self._columns_weighted_mean_stddev
+        )
 
 
 # === PAIRWISE HELPERS ===

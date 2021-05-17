@@ -48,11 +48,11 @@
                 "references": {"alias": "profile_marital_stat_r", "description": "Status", "name": "Status", "notes": ""},
                 "type": {
                     "categories": [
-                        {"id": 1, "name": "Married"},
-                        {"id": 2, "name": "As married"},
-                        {"id": 3, "name": "Divorced"},
-                        {"id": 4, "name": "Widowed"},
-                        {"id": 5, "name": "Never"},
+                        {"id": 1, "name": "Married", "numeric_value": 1},
+                        {"id": 2, "name": "As married", "numeric_value": 2},
+                        {"id": 3, "name": "Divorced", "numeric_value": 3},
+                        {"id": 4, "name": "Widowed", "numeric_value": 4},
+                        {"id": 5, "name": "Never", "numeric_value": 5},
                         {"id": 99, "missing": true, "name": "not asked"},
                         {"id": 98, "missing": true, "name": "skipped"},
                         {"id": -1, "missing": true, "name": "No Data"}

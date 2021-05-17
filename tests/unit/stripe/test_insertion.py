@@ -12,14 +12,7 @@ from cr.cube.stripe.insertion import (
     SumSubtotals,
 )
 
-from ...unitutil import (
-    ANY,
-    call,
-    initializer_mock,
-    instance_mock,
-    method_mock,
-    property_mock,
-)
+from ...unitutil import ANY, initializer_mock, instance_mock, property_mock
 
 
 class Describe_BaseSubtotals(object):
@@ -88,7 +81,7 @@ class DescribeSumSubtotals(object):
             "addend_idxs",
             return_value=np.array(addend_idxs, dtype=int),
         )
-        subtrahend_idxs_ = property_mock(
+        property_mock(
             request,
             _Subtotal,
             "subtrahend_idxs",

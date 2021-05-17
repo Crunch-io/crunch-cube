@@ -35,21 +35,16 @@ def test_ca_itmes_x_cat_var_scale_means():
 
     # Testing that the scale means (row and col) are equal on the 2 diverse
     # datasets
-    np.testing.assert_array_almost_equal(
-        slice_._rows_scale_mean_variance, slice2_._columns_scale_mean_variance
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
+        slice2_.columns_scale_mean_stddev
     )
 
-    np.testing.assert_array_almost_equal(
-        slice2_._columns_scale_mean_variance,
-        [2.56410909, 5.17893869, 4.75445248, 4.81611278],
-    )
-    np.testing.assert_array_almost_equal(
-        slice_._rows_scale_mean_variance,
+    assert slice2_._columns_scale_mean_variance == pytest.approx(
         [2.56410909, 5.17893869, 4.75445248, 4.81611278],
     )
 
-    assert slice2_._rows_scale_mean_variance is None
-    assert slice_._columns_scale_mean_variance is None
+    assert slice2_.rows_scale_mean_stddev is None
+    assert slice_.columns_scale_mean_stddev is None
 
 
 def test_ca_x_mr():
@@ -131,24 +126,17 @@ def test_cat_x_cat():
 def test_cat_hs_x_cat_hs_var_scale_means():
     slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
 
-    assert slice_._rows_scale_mean_variance is not None
-    assert slice_._columns_scale_mean_variance is not None
+    assert slice_.rows_scale_mean_stddev is not None
+    assert slice_.columns_scale_mean_stddev is not None
 
-    np.testing.assert_almost_equal(
-        slice_._rows_scale_mean_variance,
-        [0.88930748, 0.93655622, 1.36425875, 0.96388566, 3.55555556, 2.55601211],
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
+        [0.943031, 0.9677583, 1.1680149, 0.9817768, 1.8856181, 1.5987533]
     )
-    np.testing.assert_almost_equal(
-        slice_._columns_scale_mean_variance,
-        [
-            0.51774691,
-            0.51796281,
-            0.99555556,
-            0.84071826,
-            1.12549449,
-            1.19867769,
-            2.4775,
-        ],
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [0.7195463, 0.7196963, 0.9977753, 0.9169069, 1.0608933, 1.0948414, 1.5740076]
+    )
+    assert slice_._columns_scale_mean_variance == pytest.approx(
+        [0.51774691, 0.51796281, 0.99555556, 0.84071826, 1.12549449, 1.19867769, 2.4775]
     )
 
 
@@ -294,14 +282,20 @@ def test_cat_x_cat_scale_means_margin():
 
 def test_cat_x_ca_subvar_scale_means():
     slice_ = Cube(CR.FRUIT_X_PETS_ARRAY_SUBVARS_FIRST).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_._columns_scale_mean_variance, [0.2054321, 0.24, 0.22558594]
+    assert slice_._columns_scale_mean_variance == pytest.approx(
+        [0.2054321, 0.24, 0.22558594]
     )
-    assert slice_._rows_scale_mean_variance is None
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [0.4532462, 0.4898979, 0.4749589]
+    )
+    assert slice_.rows_scale_mean_stddev is None
 
     slice_ = Cube(CR.FRUIT_X_PETS_ARRAY_SUBVARS_FIRST).partitions[1]
-    np.testing.assert_almost_equal(
-        slice_._columns_scale_mean_variance, [0.2283737, 0.21, 0.21606648]
+    assert slice_._columns_scale_mean_variance == pytest.approx(
+        [0.2283737, 0.21, 0.21606648]
+    )
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [0.4778846, 0.4582576, 0.4648295]
     )
     assert slice_.rows_scale_mean is None
 
@@ -312,24 +306,27 @@ def test_cat_x_cat_pruning_and_hs_var_scale_means():
         "rows_dimension": {"insertions": {}},
     }
     slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_._columns_scale_mean_variance,
-        [1.4459092, 2.14619102, 2.40430987, np.nan, 0.87972883],
+    assert slice_._columns_scale_mean_variance == pytest.approx(
+        [1.4459092, 2.14619102, 2.40430987, np.nan, 0.87972883], nan_ok=True
     )
-    np.testing.assert_almost_equal(
-        slice_._rows_scale_mean_variance,
-        [0.72358198, 0.9991, 1.87633763, 0.4859843, np.nan, 0.66666667],
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [1.2024596, 1.4649884, 1.5505837, np.nan, 0.9379386], nan_ok=True
+    )
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
+        [0.8506362, 0.9995499, 1.3697947, 0.6971257, np.nan, 0.8164966], nan_ok=True
     )
 
     # Just H&S
     slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_._columns_scale_mean_variance,
-        [1.4459092, 1.8494177, 2.14619102, 2.40430987, np.nan, 0.87972883],
-    ),
-    np.testing.assert_almost_equal(
-        slice_._rows_scale_mean_variance,
-        [0.72358198, 1.08423566, 0.9991, 1.87633763, 0.4859843, np.nan, 0.66666667],
+    assert slice_._columns_scale_mean_variance == pytest.approx(
+        [1.4459092, 1.8494177, 2.14619102, 2.40430987, np.nan, 0.87972883], nan_ok=True
+    )
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [1.2024596, 1.359933, 1.4649884, 1.5505837, np.nan, 0.9379386], nan_ok=True
+    )
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
+        [0.8506362, 1.0412664, 0.9995499, 1.3697947, 0.6971257, np.nan, 0.8164966],
+        nan_ok=True,
     )
 
     # Just pruning
@@ -338,13 +335,14 @@ def test_cat_x_cat_pruning_and_hs_var_scale_means():
         "columns_dimension": {"prune": True},
     }
     slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_._columns_scale_mean_variance,
-        [1.4459092, 1.8494177, 2.14619102, 2.40430987, 0.87972883],
+    assert slice_._columns_scale_mean_variance == pytest.approx(
+        [1.4459092, 1.8494177, 2.14619102, 2.40430987, 0.87972883]
     )
-    np.testing.assert_almost_equal(
-        slice_._rows_scale_mean_variance,
-        [0.72358198, 1.08423566, 0.9991, 1.87633763, 0.4859843, 0.66666667],
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [1.2024596, 1.359933, 1.4649884, 1.5505837, 0.9379386]
+    )
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
+        [0.8506362, 1.0412664, 0.9995499, 1.3697947, 0.6971257, 0.8164966]
     )
 
     # Pruning and H&S
@@ -353,23 +351,26 @@ def test_cat_x_cat_pruning_and_hs_var_scale_means():
         "columns_dimension": {"insertions": {}, "prune": True},
     }
     slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_._columns_scale_mean_variance,
-        [1.4459092, 2.14619102, 2.40430987, 0.87972883],
-    ),
-    np.testing.assert_almost_equal(
-        slice_._rows_scale_mean_variance,
-        [0.72358198, 0.9991, 1.87633763, 0.4859843, 0.66666667],
+    assert slice_._columns_scale_mean_variance == pytest.approx(
+        [1.4459092, 2.14619102, 2.40430987, 0.87972883]
+    )
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [1.2024596, 1.4649884, 1.5505837, 0.9379386]
+    )
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
+        [0.8506362, 0.9995499, 1.3697947, 0.6971257, 0.8164966]
     )
 
 
 def test_cat_nps_numval_x_cat_var_scale_means():
     slice_ = Cube(SM.CAT_NPS_NUMVAL_X_CAT).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_._columns_scale_mean_variance,
+    assert slice_._columns_scale_mean_variance == pytest.approx(
         [1905.11600238, 2111.67820069, 1655.65636907, 981.86821176],
     )
-    assert slice_._rows_scale_mean_variance is None
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [43.6476346, 45.9529999, 40.6897575, 31.3347764],
+    )
+    assert slice_.rows_scale_mean_stddev is None
 
 
 def test_cat_single_element_x_cat():
@@ -493,19 +494,18 @@ def test_mr_x_cat():
     assert slice_.columns_scale_mean_margin is None
 
 
-def test_rows_and_new_rows_scale_mean_variance_for_fruit_x_pets_array():
+def test_rows_and_new_rows_scale_mean_stddev_for_fruit_x_pets_array():
     slice_ = Cube(CR.FRUIT_X_PETS_ARRAY).partitions[0]
 
     assert slice_._columns_scale_mean_variance is None
-    np.testing.assert_almost_equal(
-        slice_._rows_scale_mean_variance, np.array([0.2496, 0.24489796, 0.24952741])
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
+        [0.4995998, 0.4948717, 0.4995272]
     )
 
     slice_ = Cube(CR.FRUIT_X_PETS_ARRAY).partitions[1]
 
-    np.testing.assert_almost_equal(
-        slice_._rows_scale_mean_variance,
-        np.array([0.24142661, 0.24852071, 0.24717067]),
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
+        [0.4913518, 0.4985185, 0.4971626]
     )
 
 

@@ -603,6 +603,33 @@ class Describe_Slice(object):
         actual = np.round(slice_.column_percentages, 1).tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
+    def it_can_sort_by_rows_scale_mean(self):
+        """Responds to order of marginal sort-by-value."""
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "marginal",
+                    "marginal": "scale_mean",
+                    "direction": "ascending",
+                    "fixed": {"top": [2], "bottom": [1]},
+                }
+            }
+        }
+
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, transforms, None, 0)
+
+        # --- scale means should be in order
+        assert slice_.rows_scale_mean.tolist() == pytest.approx(
+            [1.8888889, 1.6223404, 1.8077994, 1.7142857]
+        )
+        # --- also check that counts get sorted too ---
+        assert slice_.counts.tolist() == [
+            [127.0, 55.0, 13.0, 1.0, 29.0],
+            [247.0, 80.0, 19.0, 4.0, 26.0],
+            [253.0, 17.0, 41.0, 1.0, 47.0],
+            [46.0, 21.0, 3.0, 0.0, 7.0],
+        ]
+
     def it_ignores_hidden_subtotals(self):
         """A subtotal with `"hide": True` does not appear.
 

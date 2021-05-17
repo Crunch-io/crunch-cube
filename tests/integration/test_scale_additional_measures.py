@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from cr.cube.cube import Cube
 
@@ -183,31 +184,30 @@ def test_cat_x_ca_cat_x_items():
 
 def test_cat_x_cat():
     slice_ = Cube(SM.CAT_X_CAT).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_mean_stddev,
-        [1.83663364, 1.85424071, 1.85212099, 1.78435798, 1.78496323, 1.8552804],
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
+        [1.83663364, 1.85424071, 1.85212099, 1.78435798, 1.78496323, 1.8552804]
     )
-    np.testing.assert_almost_equal(
-        slice_.columns_scale_mean_stddev,
-        [2.35648861, 2.32601576, 2.3064134, 2.14673544],
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [2.35648861, 2.32601576, 2.3064134, 2.14673544]
     )
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_mean_stderr,
-        [0.2476516, 0.1651889, 0.0748065, 0.1013447, 0.0892482, 0.1525031],
+    assert slice_.rows_scale_mean_stderr == pytest.approx(
+        [0.2476516, 0.1651889, 0.0748065, 0.1013447, 0.0892482, 0.1525031]
     )
-    np.testing.assert_almost_equal(
-        slice_.columns_scale_mean_stderr, [0.1135081, 0.1046524, 0.1345128, 0.1031655]
+    assert slice_.columns_scale_mean_stderr == pytest.approx(
+        [0.1135081, 0.1046524, 0.1345128, 0.1031655]
     )
-    np.testing.assert_almost_equal(slice_.columns_scale_median, [2, 2, 2, 4])
-    np.testing.assert_almost_equal(slice_.rows_scale_median, [0, 2, 2, 2, 4, 2])
+    assert slice_.columns_scale_median == pytest.approx([2, 2, 2, 4])
+    assert slice_.rows_scale_median == pytest.approx([0, 2, 2, 2, 4, 2])
     # Test Scale Variance
     np.testing.assert_almost_equal(
         slice_._columns_scale_mean_variance,
         [5.55303858, 5.41034929, 5.31954278, 4.60847303],
     )
-    np.testing.assert_almost_equal(
-        slice_._rows_scale_mean_variance,
-        [3.37322314, 3.43820862, 3.43035216, 3.1839334, 3.18609375, 3.44206538],
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [2.3564886, 2.3260158, 2.3064134, 2.1467354]
+    )
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
+        [1.8366336, 1.8542407, 1.8521209, 1.7843579, 1.7849632, 1.8552804]
     )
     assert slice_.columns_scale_median_margin == 4
     assert slice_.rows_scale_median_margin == 2
@@ -504,50 +504,48 @@ def test_cat_x_cat_pruning_and_hs():
         "rows_dimension": {"insertions": {}},
     }
     slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.columns_scale_mean_stddev,
-        [1.2024596, 1.4649884, 1.5505837, np.nan, 0.9379386],
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [1.2024596, 1.4649884, 1.5505837, np.nan, 0.9379386], nan_ok=True
     )
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_mean_stddev,
-        [0.8506362, 0.9995499, 1.3697947, 0.6971257, np.nan, 0.8164966],
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
+        [0.8506362, 0.9995499, 1.3697947, 0.6971257, np.nan, 0.8164966], nan_ok=True
     )
-    np.testing.assert_almost_equal(
-        slice_.columns_scale_mean_stderr,
-        [0.1994903, 0.2543296, 0.3564133, np.nan, 0.5440022],
+    assert slice_.columns_scale_mean_stderr == pytest.approx(
+        [0.1994903, 0.2543296, 0.3564133, np.nan, 0.5440022], nan_ok=True
     )
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_mean_stderr,
-        [0.1102738, 0.7064704, 0.4111442, 0.17486, np.nan, 0.4784233],
+    assert slice_.rows_scale_mean_stderr == pytest.approx(
+        [0.1102738, 0.7064704, 0.4111442, 0.17486, np.nan, 0.4784233], nan_ok=True
     )
-    np.testing.assert_almost_equal(slice_.columns_scale_median, [1, 1, 1, np.nan, 3])
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_median, [2, 1, 2, 2, np.nan, np.nan]
+    assert slice_.columns_scale_median == pytest.approx(
+        [1, 1, 1, np.nan, 3], nan_ok=True
+    )
+    assert slice_.rows_scale_median == pytest.approx(
+        [2, 1, 2, 2, np.nan, 2], nan_ok=True
     )
     assert slice_.columns_scale_median_margin == 1
     assert slice_.rows_scale_median_margin == 2
 
     # Just H&S
     slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.columns_scale_mean_stddev,
-        [1.2024596, 1.359933, 1.4649884, 1.5505837, np.nan, 0.9379386],
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [1.2024596, 1.359933, 1.4649884, 1.5505837, np.nan, 0.9379386], nan_ok=True
     )
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_mean_stddev,
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
         [0.8506362, 1.0412664, 0.9995499, 1.3697947, 0.6971257, np.nan, 0.8164966],
+        nan_ok=True,
     )
-    np.testing.assert_almost_equal(
-        slice_.columns_scale_mean_stderr,
-        [0.1994903, 0.163112, 0.2543296, 0.3564133, np.nan, 0.5440022],
+    assert slice_.columns_scale_mean_stderr == pytest.approx(
+        [0.1994903, 0.163112, 0.2543296, 0.3564133, np.nan, 0.5440022], nan_ok=True
     )
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_mean_stderr,
+    assert slice_.rows_scale_mean_stderr == pytest.approx(
         [0.1102738, 0.1933713, 0.7064704, 0.4111442, 0.17486, np.nan, 0.4784233],
+        nan_ok=True,
     )
-    np.testing.assert_almost_equal(slice_.columns_scale_median, [1, 1, 1, 1, np.nan, 3])
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_median, [2, 2, 1, 2, 2, np.nan, np.nan]
+    assert slice_.columns_scale_median == pytest.approx(
+        [1, 1, 1, 1, np.nan, 3], nan_ok=True
+    )
+    assert slice_.rows_scale_median == pytest.approx(
+        [2, 2, 1, 2, 2, np.nan, 2], nan_ok=True
     )
     assert slice_.columns_scale_median_margin == 1
     assert slice_.rows_scale_median_margin == 2
@@ -558,24 +556,20 @@ def test_cat_x_cat_pruning_and_hs():
         "columns_dimension": {"prune": True},
     }
     slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.columns_scale_mean_stddev,
-        [1.2024596, 1.359933, 1.4649884, 1.5505837, 0.9379386],
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [1.2024596, 1.359933, 1.4649884, 1.5505837, 0.9379386], nan_ok=True
     )
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_mean_stddev,
-        [0.8506362, 1.0412664, 0.9995499, 1.3697947, 0.6971257, 0.8164966],
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
+        [0.8506362, 1.0412664, 0.9995499, 1.3697947, 0.6971257, 0.8164966], nan_ok=True
     )
-    np.testing.assert_almost_equal(
-        slice_.columns_scale_mean_stderr,
-        [0.1994903, 0.163112, 0.2543296, 0.3564133, 0.5440022],
+    assert slice_.columns_scale_mean_stderr == pytest.approx(
+        [0.1994903, 0.163112, 0.2543296, 0.3564133, 0.5440022], nan_ok=True
     )
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_mean_stderr,
-        [0.1102738, 0.1933713, 0.7064704, 0.4111442, 0.17486, 0.4784233],
+    assert slice_.rows_scale_mean_stderr == pytest.approx(
+        [0.1102738, 0.1933713, 0.7064704, 0.4111442, 0.17486, 0.4784233], nan_ok=True
     )
-    np.testing.assert_almost_equal(slice_.columns_scale_median, [1, 1, 1, 1, 3])
-    np.testing.assert_almost_equal(slice_.rows_scale_median, [2, 2, 1, 2, 2, np.nan])
+    assert slice_.columns_scale_median == pytest.approx([1, 1, 1, 1, 3], nan_ok=True)
+    assert slice_.rows_scale_median == pytest.approx([2, 2, 1, 2, 2, 2], nan_ok=True)
     assert slice_.columns_scale_median_margin == 1
     assert slice_.rows_scale_median_margin == 2
 
@@ -585,22 +579,20 @@ def test_cat_x_cat_pruning_and_hs():
         "columns_dimension": {"insertions": {}, "prune": True},
     }
     slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
-    np.testing.assert_almost_equal(
-        slice_.columns_scale_mean_stddev, [1.2024596, 1.4649884, 1.5505837, 0.9379386]
+    assert slice_.columns_scale_mean_stddev == pytest.approx(
+        [1.2024596, 1.4649884, 1.5505837, 0.9379386], nan_ok=True
     )
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_mean_stddev,
-        [0.8506362, 0.9995499, 1.3697947, 0.6971257, 0.8164966],
+    assert slice_.rows_scale_mean_stddev == pytest.approx(
+        [0.8506362, 0.9995499, 1.3697947, 0.6971257, 0.8164966], nan_ok=True
     )
-    np.testing.assert_almost_equal(
-        slice_.columns_scale_mean_stderr, [0.1994903, 0.2543296, 0.3564133, 0.5440022]
+    assert slice_.columns_scale_mean_stderr == pytest.approx(
+        [0.1994903, 0.2543296, 0.3564133, 0.5440022], nan_ok=True
     )
-    np.testing.assert_almost_equal(
-        slice_.rows_scale_mean_stderr,
-        [0.1102738, 0.7064704, 0.4111442, 0.17486, 0.4784233],
+    assert slice_.rows_scale_mean_stderr == pytest.approx(
+        [0.1102738, 0.7064704, 0.4111442, 0.17486, 0.4784233], nan_ok=True
     )
-    np.testing.assert_almost_equal(slice_.columns_scale_median, [1, 1, 1, 3])
-    np.testing.assert_almost_equal(slice_.rows_scale_median, [2, 1, 2, 2, np.nan])
+    assert slice_.columns_scale_median == pytest.approx([1, 1, 1, 3], nan_ok=True)
+    assert slice_.rows_scale_median == pytest.approx([2, 1, 2, 2, 2], nan_ok=True)
     assert slice_.columns_scale_median_margin == 1
     assert slice_.rows_scale_median_margin == 2
 
