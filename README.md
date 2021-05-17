@@ -113,6 +113,10 @@ The detailed description can be found
 
 ## Changes
 
+### 2.1.33
+- Support sort-by-value for "scale_mean", "scale_mean_stddev" & "scale_median"
+- Scale medians calculation now considers fractional counts from weights
+
 ### 2.1.32
 - Fix scale_std_dev and scale_std_err for stripes when total counts is 0.
 
