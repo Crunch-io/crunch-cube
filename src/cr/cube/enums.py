@@ -103,6 +103,7 @@ class MEASURE(enum.Enum):
     SUM = "sum"
     TABLE_BASE_UNWEIGHTED = "table_base_unweighted"
     TABLE_BASE_WEIGHTED = "table_base_weighted"
+    TABLE_PERCENT = "table_percent"
     TABLE_STDERR = "table_stderr"
     TOTAL_SHARE_SUM = "total_share_sum"
     UNWEIGHTED_COUNT = "count_unweighted"

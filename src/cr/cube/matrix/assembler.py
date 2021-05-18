@@ -357,7 +357,7 @@ class Assembler(object):
         """2D np.float64 ndarray of row-proportion for each matrix cell.
 
         This is the proportion of the weighted-count for cell to the weighted-N of the
-        row the cell appears in (aka. row-margin). Always a number between 0.0 and
+        row the cell appears in (aka. row-margin). Generally a number between 0.0 and
         1.0 inclusive, but subtotal differences can be between -1.0 and 1.0 inclusive.
         """
         return self._assemble_matrix(self._measures.row_proportions.blocks)
@@ -602,6 +602,16 @@ class Assembler(object):
 
         # --- CAT_X_CAT produces scalar table-margin ---
         return base_table_margin
+
+    @lazyproperty
+    def table_proportions(self):
+        """2D np.float64 ndarray of table-proportion for each matrix cell.
+
+        This is the proportion of the weighted-count for cell to the weighted-N of the
+        row the cell appears in (aka. table-margin). Generally a number between 0.0 and
+        1.0 inclusive, but subtotal differences can be between -1.0 and 1.0 inclusive.
+        """
+        return self._assemble_matrix(self._measures.table_proportions.blocks)
 
     @lazyproperty
     def table_margin_unpruned(self):
@@ -912,6 +922,7 @@ class _BaseOrderHelper(object):
             M.ROW_BASE_UNWEIGHTED: "row_unweighted_bases",
             M.ROW_BASE_WEIGHTED: "row_weighted_bases",
             M.ROW_PERCENT: "row_proportions",
+            M.TABLE_PERCENT: "table_proportions",
             M.TABLE_BASE_UNWEIGHTED: "table_unweighted_bases",
             M.TABLE_BASE_WEIGHTED: "table_weighted_bases",
             M.UNWEIGHTED_COUNT: "unweighted_counts",

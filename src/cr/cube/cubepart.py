@@ -1145,16 +1145,7 @@ class _Slice(CubePartition):
     @lazyproperty
     def table_proportions(self):
         """2D ndarray of np.float64 fraction of table count each cell contributes."""
-        table_margin = self.table_margin
-        rows_dimension_type = self._rows_dimension.dimension_type
-
-        # --- table-margin can be scalar, 2D, or two cases of 1D. A scalar, 2D, and one
-        # --- of the 1D table-margins broadcast fine, but the MR-X-CAT case needs
-        # --- transposition to get the broadcasting right.
-        with np.errstate(divide="ignore", invalid="ignore"):
-            if rows_dimension_type == DT.MR_SUBVAR and table_margin.ndim == 1:
-                return (self.counts.T / table_margin).T
-            return self.counts / table_margin
+        return self._assembler.table_proportions
 
     @lazyproperty
     def table_proportions_moe(self):

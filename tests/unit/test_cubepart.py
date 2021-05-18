@@ -4,7 +4,6 @@
 
 from __future__ import division
 
-import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
@@ -226,19 +225,33 @@ class DescribeCubePartition(object):
 class Describe_Slice(object):
     """Unit test suite for `cr.cube.cubepart._Slice` object."""
 
-    def it_knows_the_column_unweighted_bases(self, _assembler_prop_, assembler_):
+    @pytest.mark.parametrize(
+        "measure_name",
+        (
+            "column_unweighted_bases",
+            "column_weighted_bases",
+            "columns_scale_mean_stddev",
+            "columns_scale_mean",
+            "columns_scale_median",
+            "row_proportions",
+            "row_unweighted_bases",
+            "row_weighted_bases",
+            "rows_margin",
+            "rows_scale_mean",
+            "rows_scale_mean_stddev",
+            "rows_scale_median",
+            "table_proportions",
+            "table_unweighted_bases",
+            "table_weighted_bases",
+        ),
+    )
+    def it_knows_assembled_measures(self, _assembler_prop_, assembler_, measure_name):
         _assembler_prop_.return_value = assembler_
-        assembler_.column_unweighted_bases = np.array([[0, 1], [2, 3]])
-        slice_ = _Slice(None, None, None, None, None)
+        setattr(assembler_, measure_name, [[1, 2], [3, 4]])
 
-        assert slice_.column_unweighted_bases.tolist() == [[0, 1], [2, 3]]
+        results = getattr(_Slice(None, None, None, None, None), measure_name)
 
-    def it_knows_the_column_weighted_bases(self, _assembler_prop_, assembler_):
-        _assembler_prop_.return_value = assembler_
-        assembler_.column_weighted_bases = np.array([[0.0, 1.1], [2.2, 3.3]])
-        slice_ = _Slice(None, None, None, None, None)
-
-        assert slice_.column_weighted_bases.tolist() == [[0.0, 1.1], [2.2, 3.3]]
+        assert results == [[1, 2], [3, 4]]
 
     @pytest.mark.parametrize(
         ("shape", "expected_value"),
@@ -266,32 +279,6 @@ class Describe_Slice(object):
 
         assert population_fraction == 0.5
 
-    def it_knows_the_row_unweighted_bases(self, _assembler_prop_, assembler_):
-        _assembler_prop_.return_value = assembler_
-        assembler_.row_unweighted_bases = np.array([[3, 2], [1, 0]])
-        slice_ = _Slice(None, None, None, None, None)
-
-        assert slice_.row_unweighted_bases.tolist() == [[3, 2], [1, 0]]
-
-    def it_knows_the_row_weighted_bases(self, _assembler_prop_, assembler_):
-        _assembler_prop_.return_value = assembler_
-        assembler_.row_weighted_bases = np.array([[3.3, 2.2], [1.1, 0.0]])
-        slice_ = _Slice(None, None, None, None, None)
-
-        assert slice_.row_weighted_bases.tolist() == [[3.3, 2.2], [1.1, 0.0]]
-
-    def it_knows_the_rows_margin(self, _assembler_prop_, assembler_):
-        _assembler_prop_.return_value = assembler_
-        assembler_.rows_margin = [[1, 2], [3, 4]]
-
-        assert _Slice(None, None, None, None, None).rows_margin == [[1, 2], [3, 4]]
-
-    def it_knows_the_row_proportion(self, _assembler_prop_, assembler_):
-        _assembler_prop_.return_value = assembler_
-        assembler_.row_proportions = [[1, 2], [3, 4]]
-
-        assert _Slice(None, None, None, None, None).row_proportions == [[1, 2], [3, 4]]
-
     def it_provides_the_secondary_scale_mean_pairwise_indices(
         self, _alpha_alt_prop_, _only_larger_prop_, PairwiseSignificance_
     ):
@@ -318,30 +305,6 @@ class Describe_Slice(object):
         slice_ = _Slice(None, None, None, None, None)
 
         assert slice_.columns_scale_mean_pairwise_indices_alt is None
-
-    @pytest.mark.parametrize(
-        "measure",
-        (
-            "rows_scale_mean",
-            "columns_scale_mean",
-            "rows_scale_mean_stddev",
-            "columns_scale_mean_stddev",
-            "rows_scale_median",
-            "columns_scale_median",
-        ),
-    )
-    def it_knows_the_scale_marginals(
-        self, request, _assembler_prop_, assembler_, measure
-    ):
-        _assembler_prop_.return_value = assembler_
-        setattr(
-            assembler_,
-            measure,
-            np.array([[2.2, 3.3], [0.0, 1.1]]),
-        )
-        slice_ = _Slice(None, None, None, None, None)
-
-        assert getattr(slice_, measure).tolist() == [[2.2, 3.3], [0.0, 1.1]]
 
     @pytest.mark.parametrize(
         "dimensions_dicts, expected_value",
@@ -380,20 +343,6 @@ class Describe_Slice(object):
         slice_ = _Slice(None, None, None, None, None)
 
         assert slice_.selected_category_labels == expected_value
-
-    def it_knows_the_table_unweighted_bases(self, _assembler_prop_, assembler_):
-        _assembler_prop_.return_value = assembler_
-        assembler_.table_unweighted_bases = np.array([[2, 3], [0, 1]])
-        slice_ = _Slice(None, None, None, None, None)
-
-        assert slice_.table_unweighted_bases.tolist() == [[2, 3], [0, 1]]
-
-    def it_knows_the_table_weighted_bases(self, _assembler_prop_, assembler_):
-        _assembler_prop_.return_value = assembler_
-        assembler_.table_weighted_bases = np.array([[2.2, 3.3], [0.0, 1.1]])
-        slice_ = _Slice(None, None, None, None, None)
-
-        assert slice_.table_weighted_bases.tolist() == [[2.2, 3.3], [0.0, 1.1]]
 
     def it_constructs_its_assembler_instance_to_help(
         self, request, cube_, _dimensions_prop_, dimension_, assembler_

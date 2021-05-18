@@ -197,6 +197,11 @@ class SecondOrderMeasures(object):
         return _StdDev(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def table_proportions(self):
+        """_TableProportions measure object for this cube-result."""
+        return _TableProportions(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def table_unweighted_bases(self):
         """_TableUnweightedBases measure object for this cube-result."""
         return _TableUnweightedBases(self._dimensions, self, self._cube_measures)
@@ -997,7 +1002,7 @@ class _RowProportions(_BaseSecondOrderMeasure):
         These are the base-values, the column-subtotals, the row-subtotals, and the
         subtotal intersection-cell values.
 
-        Row-proportions are counts divided by the row comparable counts.
+        Row-proportions are row comparable counts divided by the row weighted bases.
         """
         count_blocks = self._second_order_measures.row_comparable_counts.blocks
         weighted_base_blocks = self._second_order_measures.row_weighted_bases.blocks
@@ -1216,6 +1221,43 @@ class _StdDev(_BaseSecondOrderMeasure):
         return NanSubtotals.blocks(
             self._cube_measures.cube_stddev.stddev, self._dimensions
         )
+
+
+class _TableProportions(_BaseSecondOrderMeasure):
+    """Provides the table-proportions measure for a matrix.
+
+    Table-proportions is a 2D np.float64 ndarray of the proportion of its count
+    contributed by the weighted count of each matrix cell.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values.
+
+        Table-proportions are weighted counts divided by the table weighted bases.
+        """
+        count_blocks = self._second_order_measures.weighted_counts.blocks
+        weighted_base_blocks = self._second_order_measures.table_weighted_bases.blocks
+
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return [
+                [
+                    # --- base values ---
+                    count_blocks[0][0] / weighted_base_blocks[0][0],
+                    # --- inserted columns ---
+                    count_blocks[0][1] / weighted_base_blocks[0][1],
+                ],
+                [
+                    # --- inserted rows ---
+                    count_blocks[1][0] / weighted_base_blocks[1][0],
+                    # --- intersections ---
+                    count_blocks[1][1] / weighted_base_blocks[1][1],
+                ],
+            ]
 
 
 class _TableUnweightedBases(_BaseSecondOrderMeasure):

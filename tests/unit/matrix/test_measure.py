@@ -36,6 +36,7 @@ from cr.cube.matrix.measure import (
     _ScaleMedian,
     SecondOrderMeasures,
     _Sums,
+    _TableProportions,
     _TableUnweightedBases,
     _TableWeightedBases,
     _TotalShareSum,
@@ -59,6 +60,7 @@ class DescribeSecondOrderMeasures(object):
             ("row_proportions", _RowProportions),
             ("row_unweighted_bases", _RowUnweightedBases),
             ("row_weighted_bases", _RowWeightedBases),
+            ("table_proportions", _TableProportions),
             ("table_unweighted_bases", _TableUnweightedBases),
             ("table_weighted_bases", _TableWeightedBases),
             ("weighted_counts", _WeightedCounts),
@@ -933,6 +935,28 @@ class Describe_RowShareSum(object):
             np.array([[0.3962264, 0.6037735]])
         )
         SumSubtotals_.blocks.assert_called_once_with(ANY, None, True, True)
+
+
+class Describe_TableProportions(object):
+    """Unit test suite for `cr.cube.matrix.measure._TableProportions` object."""
+
+    def it_computes_its_blocks(self, request):
+        weighted_counts_ = instance_mock(
+            request, _WeightedCounts, blocks=[[5.0, 12.0], [21.0, 32.0]]
+        )
+        table_weighted_bases_ = instance_mock(
+            request, _TableWeightedBases, blocks=[[5.0, 6.0], [7.0, 8.0]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            table_weighted_bases=table_weighted_bases_,
+            weighted_counts=weighted_counts_,
+        )
+
+        table_proportions = _TableProportions(None, second_order_measures_, None)
+
+        assert table_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
 
 
 class Describe_TotalShareSum(object):
