@@ -78,7 +78,7 @@ class AllDimensions(_BaseDimensions):
         # So, all this logic will be deleted.
         dimension_types = tuple(d.dimension_type for d in self._dimensions)
         dim_order = tuple(range(len(self._dimensions)))
-        if len(self._dimensions) >= 2 and DT.NUM_ARRAY in dimension_types:
+        if len(self._dimensions) >= 2 and dimension_types[0] == DT.NUM_ARRAY:
             return (
                 dim_order[-2:] + (dim_order[0],)
                 if len(self._dimensions) == 3

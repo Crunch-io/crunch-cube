@@ -449,3 +449,47 @@ class DescribeNumericArrays(object):
             [4.67, 6.4],
             [1.898, 6.1],
         ]
+
+    def it_provides_means_for_cat_x_numeric_array(self):
+        transforms = {"num_array_position": "column"}
+        slice_ = Cube(
+            NA.NUM_ARRAY_MEANS_COV_GROUPED_BY_CAT, transforms=transforms
+        ).partitions[0]
+
+        expected_means = [
+            # -----------------Numeric Array Subvars---------------------------
+            # Avocado    B. Sprout     Carrot      Daikon    Eggplant   Fennel
+            [72.0705882, 62.6666666, 78.5061728, 70.0609756, 68.2682926, 86.95],  # yes
+            [73.608695, 62.127118, 75.085470, 70.504424, 68.0892857, 86.491071],  # no
+        ]
+        assert slice_.means == pytest.approx(np.array(expected_means))
+        assert slice_.columns_base.tolist() == [
+            200.0,
+            199.0,
+            198.0,
+            195.0,
+            194.0,
+            192.0,
+        ]
+
+    def it_provides_means_for_mr_x_numeric_array(self):
+        transforms = {"num_array_position": "column"}
+        slice_ = Cube(NA.NUM_ARR_COVARIANCE_X_MR, transforms=transforms).partitions[0]
+        expected_means = [
+            # -----------------Numeric Array Subvars---------------------------
+            # Avocado     B.Sprout      Carrot      Daikon    Eggplant     Fennel
+            [72.5647058, 63.9642857, 76.3658536, 69.4337349, 68.9746835, 87.2133333],
+            [73.312, 61.9186991, 76.3145161, 73.6829268, 67.614754, 87.1610169],
+            [72.9053254, 62.3090909, 76.5722891, 71.8765432, 68.4409937, 86.8679245],
+        ]
+
+        assert slice_.means == pytest.approx(np.array(expected_means), nan_ok=True)
+        assert slice_.columns_base == pytest.approx(
+            np.array(
+                [
+                    [193.0, 191.0, 190.0, 188.0, 186.0, 183.0],
+                    [191.0, 190.0, 190.0, 187.0, 186.0, 182.0],
+                    [199.0, 198.0, 197.0, 194.0, 193.0, 190.0],
+                ]
+            )
+        )

@@ -556,7 +556,10 @@ class Cube(object):
             # ---In case of numeric arrays, we need to inflate the row dimension
             # ---according to the mean subvariables. For each subvar the row dimension
             # ---will have a new element related to the subvar metadata.
-            dimensions.insert(0, self._numeric_array_dimension)
+            if self._num_array_position == "column":
+                dimensions.append(self._numeric_array_dimension)
+            else:
+                dimensions.insert(0, self._numeric_array_dimension)
         return cube_dict
 
     @lazyproperty
@@ -646,6 +649,10 @@ class Cube(object):
                 },
             )
         return rows_dimension
+
+    @lazyproperty
+    def _num_array_position(self):
+        return self._transforms_dict.get("num_array_position", "row")
 
     @lazyproperty
     def _slice_idxs(self):

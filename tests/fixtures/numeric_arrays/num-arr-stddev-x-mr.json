@@ -5,7 +5,15 @@
         "function": "cube_valid_count",
         "args": [
           {
-            "variable": "dcae56175f4c4d95bd51dad94728aaf9"
+            "variable": "63b73c60079d4240a47a158391610292"
+          }
+        ]
+      },
+      "covariance": {
+        "function": "cube_covariance",
+        "args": [
+          {
+            "variable": "63b73c60079d4240a47a158391610292"
           }
         ]
       },
@@ -13,7 +21,15 @@
         "function": "cube_stddev",
         "args": [
           {
-            "variable": "dcae56175f4c4d95bd51dad94728aaf9"
+            "variable": "63b73c60079d4240a47a158391610292"
+          }
+        ]
+      },
+      "mean": {
+        "function": "cube_mean",
+        "args": [
+          {
+            "variable": "63b73c60079d4240a47a158391610292"
           }
         ]
       }
@@ -26,7 +42,7 @@
             "function": "as_selected",
             "args": [
               {
-                "variable": "2929df830f2f44e9b2df6ca808a6d619"
+                "variable": "8684dc8c3ec84a3098efbad670c64c00"
               }
             ]
           },
@@ -39,7 +55,7 @@
         "function": "as_selected",
         "args": [
           {
-            "variable": "2929df830f2f44e9b2df6ca808a6d619"
+            "variable": "8684dc8c3ec84a3098efbad670c64c00"
           }
         ]
       }
@@ -89,7 +105,7 @@
                   "description": null
                 },
                 "derived": false,
-                "id": "4QUIV3Vk8ugFondcoPjPUM000000"
+                "id": "1kMxBSZZWreIX76Pk1bQkP000000"
               },
               "missing": false
             },
@@ -102,7 +118,7 @@
                   "description": null
                 },
                 "derived": false,
-                "id": "4QUIV3Vk8ugFondcoPjPUM000001"
+                "id": "1kMxBSZZWreIX76Pk1bQkP000001"
               },
               "missing": false
             },
@@ -115,7 +131,7 @@
                   "description": null
                 },
                 "derived": false,
-                "id": "4QUIV3Vk8ugFondcoPjPUM000002"
+                "id": "1kMxBSZZWreIX76Pk1bQkP000002"
               },
               "missing": false
             }
@@ -150,9 +166,9 @@
         "type": {
           "ordinal": false,
           "subvariables": [
-            "4QUIV3Vk8ugFondcoPjPUM000000",
-            "4QUIV3Vk8ugFondcoPjPUM000001",
-            "4QUIV3Vk8ugFondcoPjPUM000002"
+            "1kMxBSZZWreIX76Pk1bQkP000000",
+            "1kMxBSZZWreIX76Pk1bQkP000001",
+            "1kMxBSZZWreIX76Pk1bQkP000002"
           ],
           "class": "categorical",
           "categories": [
@@ -217,6 +233,241 @@
           "references": {
             "alias": "Movies",
             "uniform_basis": false,
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the P."
+              }
+            ],
+            "name": "Movies",
+            "view": {
+              "summary_statistic": "sum"
+            }
+          },
+          "type": {
+            "integer": false,
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          }
+        }
+      },
+      "covariance": {
+        "data": [
+          2.0,
+          9.0,
+          -4.0,
+          9.0,
+          40.5,
+          -18.0,
+          -4.0,
+          -18.0,
+          8.0,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          18.0,
+          12.0,
+          -3.0,
+          12.0,
+          8.0,
+          -2.0,
+          -3.0,
+          -2.0,
+          0.5,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          18.0,
+          12.0,
+          -3.0,
+          12.0,
+          8.0,
+          -2.0,
+          -3.0,
+          -2.0,
+          0.5,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 1,
+        "metadata": {
+          "derived": false,
+          "references": {
+            "alias": "Movies",
+            "uniform_basis": false,
+            "view": {
+              "summary_statistic": "sum"
+            },
             "name": "Movies",
             "subreferences": [
               {
@@ -234,17 +485,17 @@
             ]
           },
           "type": {
-            "integer": false,
             "subvariables": [
               "S1",
               "S2",
               "S3"
             ],
             "class": "numeric",
+            "missing_rules": {},
             "missing_reasons": {
-              "No Data": -1
-            },
-            "missing_rules": {}
+              "No Data": -1,
+              "NaN": -8
+            }
           }
         }
       },
@@ -328,7 +579,6 @@
           "references": {
             "alias": "Movies",
             "uniform_basis": false,
-            "name": "Movies",
             "subreferences": [
               {
                 "alias": "Dark Knight",
@@ -342,10 +592,95 @@
                 "alias": "Meets the Par.",
                 "name": "Meets the P."
               }
-            ]
+            ],
+            "name": "Movies",
+            "view": {
+              "summary_statistic": "sum"
+            }
           },
           "type": {
             "integer": null,
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "missing_rules": {}
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          6.0,
+          9.0,
+          4.0,
+          1.0,
+          5.0,
+          1.0,
+          3.0,
+          2.0,
+          {
+            "?": -8
+          },
+          5.0,
+          {
+            "?": -8
+          },
+          4.0,
+          4.0,
+          7.0,
+          1.0,
+          3.0,
+          2.0,
+          {
+            "?": -8
+          },
+          5.0,
+          {
+            "?": -8
+          },
+          4.0,
+          4.0,
+          7.0,
+          1.0,
+          3.0,
+          2.0,
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 1,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "uniform_basis": false,
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the P."
+              }
+            ],
+            "name": "Movies",
+            "view": {
+              "summary_statistic": "sum"
+            }
+          },
+          "type": {
+            "integer": true,
             "subvariables": [
               "S1",
               "S2",
@@ -386,7 +721,8 @@
           "other": 0,
           "missing": 0
         }
-      }
+      },
+      "is_cat_date": false
     },
     "unfiltered": {
       "unweighted_n": 4,
