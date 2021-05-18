@@ -24,6 +24,13 @@ class CubeMeasures(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def cube_covariance(self):
+        """_BaseCubeCovariance subclass object for this cube-result."""
+        return _BaseCubeCovariance.factory(
+            self._cube, self._dimensions, self._slice_idx
+        )
+
+    @lazyproperty
     def cube_means(self):
         """_BaseCubeMeans subclass object for this cube-result."""
         return _BaseCubeMeans.factory(self._cube, self._dimensions, self._slice_idx)
@@ -86,6 +93,70 @@ class _BaseCubeMeasure(object):
         # --- for other 3D cubes we just select the 2D "table" portion associated with
         # --- the `slice_idx`-th table dimension element.
         return np.s_[slice_idx]
+
+
+# === COVARIANCE ===
+
+
+class _BaseCubeCovariance(_BaseCubeMeasure):
+    """Base class for covariance cube-measure variants."""
+
+    def __init__(self, dimensions, covariance):
+        super(_BaseCubeCovariance, self).__init__(dimensions)
+        self._covariance = covariance
+
+    @classmethod
+    def factory(cls, cube, dimensions, slice_idx):
+        """Return _BaseCubeCovariance subclass instance appropriate to `cube`."""
+        if cube.covariance is None:
+            raise ValueError("cube-result does not contain cube-covariance measure")
+        dimension_types = cube.dimension_types[-2:]
+        CubeCovarianceCls = (
+            _MrXNumArrayCubeCovariance
+            if dimension_types == (DT.MR, DT.NUM_ARRAY)
+            else _CatXNumArrayCubeCovariance
+            if dimension_types[-1] == DT.NUM_ARRAY
+            else _EmptyCubeCovariance
+        )
+        return CubeCovarianceCls(
+            dimensions, cube.covariance[cls._slice_idx_expr(cube, slice_idx)]
+        )
+
+    @lazyproperty
+    def covariance(self):
+        """2D np.float64 ndarray of cube covariance."""
+        raise NotImplementedError(  # pragma: no cover
+            "`%s` must implement `.covariance`" % type(self).__name__
+        )
+
+
+class _CatXNumArrayCubeCovariance(_BaseCubeCovariance):
+    """Covariance cube-measure for a slice with cat x numeric array dimensions."""
+
+    @lazyproperty
+    def covariance(self):
+        """2D np.float64 ndarray of covariance for each valid matrix cell."""
+        return self._covariance
+
+
+class _EmptyCubeCovariance(_BaseCubeCovariance):
+    """Covariance cube-measure for a slice without a num array on the col dimension."""
+
+    @lazyproperty
+    def covariance(self):
+        """2D np.float64 ndarray of covariance for each valid matrix cell."""
+        # --- Covariance exists only when a numeric array is on the column dimension,
+        # --- in all other cases it's 0.
+        return 0
+
+
+class _MrXNumArrayCubeCovariance(_BaseCubeCovariance):
+    """Covariance cube-measure for a slice with mr x numeric array dimensions."""
+
+    @lazyproperty
+    def covariance(self):
+        """2D np.float64 ndarray of covariance for each valid matrix cell."""
+        return self._covariance[:, 0, :]
 
 
 # === MEANS ===
