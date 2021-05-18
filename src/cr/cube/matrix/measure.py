@@ -360,10 +360,12 @@ class _ColumnsBase(_BaseSecondOrderMeasure):
 class _ColumnComparableCounts(_BaseSecondOrderMeasure):
     """Provides the column-comparable count measure for a matrix.
 
-    Column-comparable Counts is a 2D np.float64 ndarray of the counts, with values in the
-    column of a subtotal difference overridden as np.nan because they do not share the
-    same base and so are "not comparable" when calculating other measures along the
-    column, like column proportions.
+    Column-comparable Counts is a 2D np.float64 ndarray of the counts, defined only when
+    the row dimension is not array. The values in the column of a subtotal difference
+    overridden as np.nan because they do not share the same base and so are "not
+    comparable" when calculating other measures along the column, like rows_margin.
+
+    Raises a ValueError when the row is an array.
     """
 
     @lazyproperty
@@ -377,7 +379,7 @@ class _ColumnComparableCounts(_BaseSecondOrderMeasure):
         for columns of subtotal differences.
         """
         return SumSubtotals.blocks(
-            self._weighted_cube_counts.weighted_counts,
+            self._weighted_cube_counts.column_comparable_counts,
             self._dimensions,
             diff_cols_nan=True,
         )
@@ -420,7 +422,7 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
         Column-proportions are counts divided by the column base, except that they are
         undefined for columns with subtotal differences.
         """
-        count_blocks = self._second_order_measures.column_comparable_counts.blocks
+        count_blocks = self._second_order_measures.weighted_counts.blocks
         weighted_base_blocks = self._second_order_measures.column_weighted_bases.blocks
 
         # --- do not propagate divide-by-zero warnings to stderr ---
@@ -965,10 +967,12 @@ class _PairwiseSigPvals(_PairwiseSigTstats):
 class _RowComparableCounts(_BaseSecondOrderMeasure):
     """Provides the row-comparable count measure for a matrix.
 
-    row-comparable Counts is a 2D np.float64 ndarray of the counts, with values in the
-    row of a subtotal difference overridden as np.nan because they do not share the
-    same base and so are "not comparable" when calculating other measures along the
-    row, like row proportions.
+    row-comparable Counts is a 2D np.float64 ndarray of the counts, defined only when
+    the column dimension is not array. The values in the row of a subtotal difference
+    overridden as np.nan because they do not share the same base and so are "not
+    comparable" when calculating other measures along the row, like columns_margin.
+
+    Raises a ValueError when the column is an array.
     """
 
     @lazyproperty
@@ -982,7 +986,7 @@ class _RowComparableCounts(_BaseSecondOrderMeasure):
         for rows of subtotal differences.
         """
         return SumSubtotals.blocks(
-            self._weighted_cube_counts.weighted_counts,
+            self._weighted_cube_counts.row_comparable_counts,
             self._dimensions,
             diff_rows_nan=True,
         )
@@ -1004,7 +1008,7 @@ class _RowProportions(_BaseSecondOrderMeasure):
 
         Row-proportions are row comparable counts divided by the row weighted bases.
         """
-        count_blocks = self._second_order_measures.row_comparable_counts.blocks
+        count_blocks = self._second_order_measures.weighted_counts.blocks
         weighted_base_blocks = self._second_order_measures.row_weighted_bases.blocks
 
         # --- do not propagate divide-by-zero warnings to stderr ---

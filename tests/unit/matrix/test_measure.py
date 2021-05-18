@@ -276,7 +276,7 @@ class Describe_ColumnComparableCounts(object):
     def it_computes_its_blocks(self, request, dimensions_, cube_measures_):
         counts = np.arange(12).reshape(3, 4).tolist()
         weighted_cube_counts_ = instance_mock(
-            request, _BaseWeightedCubeCounts, weighted_counts=counts
+            request, _BaseWeightedCubeCounts, column_comparable_counts=counts
         )
         _weighted_cube_counts = property_mock(
             request, _BaseSecondOrderMeasure, "_weighted_cube_counts"
@@ -308,8 +308,8 @@ class Describe_ColumnProportions(object):
     """Unit test suite for `cr.cube.matrix.measure._ColumnProportions` object."""
 
     def it_computes_its_blocks(self, request):
-        column_comparable_counts_ = instance_mock(
-            request, _ColumnComparableCounts, blocks=[[5.0, 12.0], [21.0, 32.0]]
+        weighted_counts_ = instance_mock(
+            request, _WeightedCounts, blocks=[[5.0, 12.0], [21.0, 32.0]]
         )
         column_weighted_bases_ = instance_mock(
             request, _ColumnWeightedBases, blocks=[[5.0, 6.0], [7.0, 8.0]]
@@ -317,7 +317,7 @@ class Describe_ColumnProportions(object):
         second_order_measures_ = instance_mock(
             request,
             SecondOrderMeasures,
-            column_comparable_counts=column_comparable_counts_,
+            weighted_counts=weighted_counts_,
             column_weighted_bases=column_weighted_bases_,
         )
         cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
@@ -555,7 +555,7 @@ class Describe_RowComparableCounts(object):
     def it_computes_its_blocks(self, request, dimensions_, cube_measures_):
         counts = np.arange(12).reshape(3, 4).tolist()
         weighted_cube_counts_ = instance_mock(
-            request, _BaseWeightedCubeCounts, weighted_counts=counts
+            request, _BaseWeightedCubeCounts, row_comparable_counts=counts
         )
         _weighted_cube_counts = property_mock(
             request, _BaseSecondOrderMeasure, "_weighted_cube_counts"
@@ -587,8 +587,8 @@ class Describe_RowProportions(object):
     """Unit test suite for `cr.cube.matrix.measure._RowProportions` object."""
 
     def it_computes_its_blocks(self, request):
-        row_comparable_counts_ = instance_mock(
-            request, _RowComparableCounts, blocks=[[5.0, 12.0], [21.0, 32.0]]
+        weighted_counts_ = instance_mock(
+            request, _WeightedCounts, blocks=[[5.0, 12.0], [21.0, 32.0]]
         )
         row_weighted_bases_ = instance_mock(
             request, _RowWeightedBases, blocks=[[5.0, 6.0], [7.0, 8.0]]
@@ -597,7 +597,7 @@ class Describe_RowProportions(object):
             request,
             SecondOrderMeasures,
             row_weighted_bases=row_weighted_bases_,
-            row_comparable_counts=row_comparable_counts_,
+            weighted_counts=weighted_counts_,
         )
         cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
 
