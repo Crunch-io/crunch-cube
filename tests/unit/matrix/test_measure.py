@@ -290,7 +290,9 @@ class Describe_ColumnComparableCounts(object):
 
         blocks = col_comparable_counts.blocks
 
-        SumSubtotals_.blocks.assert_called_once_with(counts, dimensions_, True)
+        SumSubtotals_.blocks.assert_called_once_with(
+            counts, dimensions_, diff_rows_nan=True
+        )
         assert blocks == [[[1], [2]], [[3], [4]]]
 
     # fixture components ---------------------------------------------
@@ -568,7 +570,7 @@ class Describe_RowComparableCounts(object):
         blocks = row_comparable_counts.blocks
 
         SumSubtotals_.blocks.assert_called_once_with(
-            counts, dimensions_, diff_rows_nan=True
+            counts, dimensions_, diff_cols_nan=True
         )
         assert blocks == [[[1], [2]], [[3], [4]]]
 
@@ -1509,17 +1511,6 @@ class Describe_BaseMarginal(object):
         assert result.tolist() == expected
 
     def it_gets_the_right_counts_for_rows(self, request):
-        row_comparable_counts_ = instance_mock(
-            request, _BaseMarginal, blocks=[["a", "b"], ["c", "d"]]
-        )
-        second_order_measures_ = instance_mock(
-            request, SecondOrderMeasures, row_comparable_counts=row_comparable_counts_
-        )
-        median = _BaseMarginal(None, second_order_measures_, None, MO.ROWS)
-
-        assert median._counts == ["a", "c"]
-
-    def it_gets_the_right_counts_for_columns(self, request):
         column_comparable_counts_ = instance_mock(
             request, _BaseMarginal, blocks=[["a", "b"], ["c", "d"]]
         )
@@ -1527,6 +1518,19 @@ class Describe_BaseMarginal(object):
             request,
             SecondOrderMeasures,
             column_comparable_counts=column_comparable_counts_,
+        )
+        median = _BaseMarginal(None, second_order_measures_, None, MO.ROWS)
+
+        assert median._counts == ["a", "c"]
+
+    def it_gets_the_right_counts_for_columns(self, request):
+        row_comparable_counts_ = instance_mock(
+            request, _BaseMarginal, blocks=[["a", "b"], ["c", "d"]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            row_comparable_counts=row_comparable_counts_,
         )
         median = _BaseMarginal(None, second_order_measures_, None, MO.COLUMNS)
 

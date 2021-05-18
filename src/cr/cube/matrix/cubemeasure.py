@@ -946,7 +946,7 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         Cells in a column don't share a base when they go across array subvariables.
         Raises when counts are not comparable.
         """
-        if self._dimensions_are_array[0]:
+        if self._dimensions_are_array[1]:
             raise ValueError(
                 "column_comparable_counts not defined across subvariables."
             )
@@ -979,7 +979,7 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         Cells in a row don't share a base when they go across array subvariables.
         Raises when counts are not comparable.
         """
-        if self._dimensions_are_array[1]:
+        if self._dimensions_are_array[0]:
             raise ValueError("row_comparable_counts not defined across subvariables.")
 
         return self.weighted_counts

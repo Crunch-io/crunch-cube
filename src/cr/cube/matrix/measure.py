@@ -360,28 +360,22 @@ class _ColumnsBase(_BaseSecondOrderMeasure):
 class _ColumnComparableCounts(_BaseSecondOrderMeasure):
     """Provides the column-comparable count measure for a matrix.
 
-    Column-comparable Counts is a 2D np.float64 ndarray of the counts, defined only when
-    the row dimension is not array. The values in the column of a subtotal difference
+    Column-Comparable-Counts is a 2D np.float64 ndarray of the counts, defined only when
+    the row dimension is not an array. The values in a subtotal difference column are
     overridden as np.nan because they do not share the same base and so are "not
-    comparable" when calculating other measures along the column, like rows_margin.
+    comparable" when calculating other measures along the column (across the rows),
+    like rows_margin.
 
     Raises a ValueError when the row is an array.
     """
 
     @lazyproperty
     def blocks(self):
-        """Nested list of the four 2D ndarray "blocks" making up this measure.
-
-        These are the base-values, the column-subtotals, the row-subtotals, and the
-        subtotal intersection-cell values.
-
-        Column-comparable counts are the same as counts, exccept that they are undefined
-        for columns of subtotal differences.
-        """
+        """Nested list of the four 2D ndarray "blocks" making up this measure."""
         return SumSubtotals.blocks(
             self._weighted_cube_counts.column_comparable_counts,
             self._dimensions,
-            diff_cols_nan=True,
+            diff_rows_nan=True,
         )
 
 
@@ -967,28 +961,22 @@ class _PairwiseSigPvals(_PairwiseSigTstats):
 class _RowComparableCounts(_BaseSecondOrderMeasure):
     """Provides the row-comparable count measure for a matrix.
 
-    row-comparable Counts is a 2D np.float64 ndarray of the counts, defined only when
-    the column dimension is not array. The values in the row of a subtotal difference
+    Row-Comparable-Counts is a 2D np.float64 ndarray of the counts, defined only when
+    the column dimension is not an array. The values in a subtotal difference row are
     overridden as np.nan because they do not share the same base and so are "not
-    comparable" when calculating other measures along the row, like columns_margin.
+    comparable" when calculating other measures along the row (across the columns),
+    like columns_margin.
 
     Raises a ValueError when the column is an array.
     """
 
     @lazyproperty
     def blocks(self):
-        """Nested list of the four 2D ndarray "blocks" making up this measure.
-
-        These are the base-values, the column-subtotals, the row-subtotals, and the
-        subtotal intersection-cell values.
-
-        Row-comparable counts are the same as counts, exccept that they are undefined
-        for rows of subtotal differences.
-        """
+        """Nested list of the four 2D ndarray "blocks" making up this measure."""
         return SumSubtotals.blocks(
             self._weighted_cube_counts.row_comparable_counts,
             self._dimensions,
-            diff_rows_nan=True,
+            diff_cols_nan=True,
         )
 
 
@@ -1632,13 +1620,13 @@ class _BaseMarginal(object):
         orientation, and include the base values and the subtotals for the orientation.
         """
         if self.orientation == MO.ROWS:
-            # --- Use *row* comparable counts ---
-            counts = self._second_order_measures.row_comparable_counts.blocks
+            # --- Use *column* comparable counts (going across rows) ---
+            counts = self._second_order_measures.column_comparable_counts.blocks
             # --- Get base values & *row* subtotals
             return [counts[0][0], counts[1][0]]
         else:
-            # --- Use *column* comparable counts ---
-            counts = self._second_order_measures.column_comparable_counts.blocks
+            # --- Use *row* comparable counts (going across columns) ---
+            counts = self._second_order_measures.row_comparable_counts.blocks
             # --- Get base values & *column* subtotals
             return [counts[0][0], counts[0][1]]
 

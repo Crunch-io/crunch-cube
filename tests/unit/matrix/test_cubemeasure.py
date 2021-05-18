@@ -1358,17 +1358,15 @@ class Describe_BaseWeightedCubeCounts(object):
 
         assert weighted_cube_counts.column_bases.tolist() == expected_value
 
-    def it_computes_the_column_comparable_counts_if_row_is_not_array(
+    def it_computes_the_column_comparable_counts_if_column_is_not_array(
         self, weighted_counts_prop_
     ):
         weighted_counts_prop_.return_value = [[1, 2], [3, 4]]
-        weighted_cube_counts = _BaseWeightedCubeCounts(
-            None, None, None, False, (False, True)
-        )
+        weighted_cube_counts = _BaseWeightedCubeCounts(None, None, None, False, (True, False))
 
         assert weighted_cube_counts.column_comparable_counts == [[1, 2], [3, 4]]
 
-    def but_it_raises_on_column_comparable_count_if_row_is_array(self):
+    def but_it_raises_on_column_comparable_count_if_column_is_array(self):
         weighted_counts = _BaseWeightedCubeCounts(None, None, None, False, (True, True))
 
         with pytest.raises(ValueError) as e:
@@ -1378,17 +1376,15 @@ class Describe_BaseWeightedCubeCounts(object):
             str(e.value) == "column_comparable_counts not defined across subvariables."
         )
 
-    def it_computes_the_row_comparable_counts_if_column_is_not_array(
+    def it_computes_the_row_comparable_counts_if_row_is_not_array(
         self, weighted_counts_prop_
     ):
         weighted_counts_prop_.return_value = [[1, 2], [3, 4]]
-        weighted_cube_counts = _BaseWeightedCubeCounts(
-            None, None, None, False, (True, False)
-        )
+        weighted_cube_counts = _BaseWeightedCubeCounts(None, None, None, False, (False, True))
 
         assert weighted_cube_counts.row_comparable_counts == [[1, 2], [3, 4]]
 
-    def but_it_raises_on_row_comparable_count_if_column_is_array(self):
+    def but_it_raises_on_row_comparable_count_if_row_is_array(self):
         weighted_counts = _BaseWeightedCubeCounts(None, None, None, False, (True, True))
 
         with pytest.raises(ValueError) as e:
