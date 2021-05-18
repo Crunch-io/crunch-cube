@@ -70,6 +70,13 @@ class SecondOrderMeasures(object):
         return _ColumnsBase(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def columns_margin(self):
+        """_SummedCountMargin for columns measure object for this cube-result."""
+        return _SummedCountMargin(
+            self._dimensions, self, self._cube_measures, MO.COLUMNS
+        )
+
+    @lazyproperty
     def columns_pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix column."""
         return self._cube_measures.unweighted_cube_counts.columns_pruning_base
@@ -165,6 +172,11 @@ class SecondOrderMeasures(object):
     def row_weighted_bases(self):
         """_RowWeightedBases measure object for this cube-result."""
         return _RowWeightedBases(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def rows_margin(self):
+        """_SummedCountMargin rows measure object for this cube-result."""
+        return _SummedCountMargin(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def rows_pruning_base(self):
@@ -1887,6 +1899,29 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
             if self.orientation == MO.ROWS
             else self._columns_weighted_mean_stddev
         )
+
+
+class _SummedCountMargin(_BaseMarginal):
+    """The 'summed-count-margin' (often called the rows-margin/columns-margin)"""
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin.
+
+        These are the base-values and the subtotals.
+        """
+        return [
+            self._apply_along_orientation(np.sum, counts) for counts in self._counts
+        ]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if counts are defined."""
+        try:
+            self._counts
+            return True
+        except ValueError:
+            return False
 
 
 # === PAIRWISE HELPERS ===

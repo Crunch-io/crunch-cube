@@ -35,6 +35,7 @@ from cr.cube.matrix.measure import (
     _ScaleMeanStddev,
     _ScaleMedian,
     SecondOrderMeasures,
+    _SummedCountMargin,
     _Sums,
     _TableProportions,
     _TableUnweightedBases,
@@ -1900,3 +1901,41 @@ class Describe_ScaleMedian(object):
         assert _ScaleMedian._weighted_median(
             np.array(counts), np.array(values)
         ) == pytest.approx(expected, nan_ok=True)
+
+
+class Describe_SummedCountMargin(object):
+    """Unit test suite for `cr.cube.matrix.measure._SummedCountMargin` object."""
+
+    def it_provides_blocks(self, request):
+        property_mock(
+            request, _SummedCountMargin, "_counts", return_value=("count1", "count2")
+        )
+        _apply_along_orientation_ = method_mock(
+            request,
+            _SummedCountMargin,
+            "_apply_along_orientation",
+            side_effect=("result1", "result2"),
+        )
+        summed_count = _SummedCountMargin(None, None, None, MO.ROWS)
+
+        results = summed_count.blocks
+
+        assert results == ["result1", "result2"]
+        assert _apply_along_orientation_.call_args_list == [
+            call(
+                summed_count,
+                np.sum,
+                "count1",
+            ),
+            call(
+                summed_count,
+                np.sum,
+                "count2",
+            ),
+        ]
+
+    @pytest.mark.parametrize("values, expected", (([0, 1], True), (ValueError, False)))
+    def it_can_tell_if_it_is_defined(self, request, values, expected):
+        property_mock(request, _SummedCountMargin, "_counts", side_effect=values)
+        summed_count = _SummedCountMargin(None, None, None, MO.ROWS)
+        assert summed_count.is_defined == expected

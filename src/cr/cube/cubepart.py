@@ -414,11 +414,12 @@ class _Slice(CubePartition):
         if not self._rows_have_numeric_value:
             return None
 
-        rows_margin = self.rows_margin
-        # TODO: This is a hack for X_MR slices, where rows-margin is 2D. Figure out a
-        # better way to do this, perhaps using ranges.
-        if rows_margin.ndim > 1:
-            rows_margin = rows_margin[:, 0]
+        # rows_margin = self.rows_margin
+        # TODO: This is a hack for X_Array slices, where rows-margin is undefined.
+        # I think this probably shouldn't be defined across arrays, but to minimize
+        # test damage, we use the first column of the weighted bases, which is
+        # equal to the rows_margin for CAT_X_CAT and always exists for others.
+        rows_margin = self.row_weighted_bases[:, 0]
 
         scale_total = np.nansum(self._rows_dimension_numeric_values * rows_margin)
         not_a_nan_mask = ~np.isnan(self._rows_dimension_numeric_values)
@@ -514,11 +515,12 @@ class _Slice(CubePartition):
         if not self._rows_have_numeric_value:
             return None
 
-        rows_margin = self.rows_margin
-
-        # --- hack to accommodate 2D rows-margin of an X_MR slice ---
-        if len(rows_margin.shape) > 1:
-            rows_margin = rows_margin[:, 0]
+        # rows_margin = self.rows_margin
+        # TODO: This is a hack for X_Array slices, where rows-margin is undefined.
+        # I think this probably shouldn't be defined across arrays, but to minimize
+        # test damage, we use the first column of the weighted bases, which is
+        # equal to the rows_margin for CAT_X_CAT and always exists for others.
+        rows_margin = self.row_weighted_bases[:, 0]
 
         not_a_nan_mask = ~np.isnan(self._rows_dimension_numeric_values)
         numeric_values = self._rows_dimension_numeric_values[not_a_nan_mask]
@@ -942,11 +944,12 @@ class _Slice(CubePartition):
         if not self._columns_have_numeric_value:
             return None
 
-        columns_margin = self.columns_margin
-        # TODO: This is a hack for MR_X slices, where columns-margin is 2D. Figure out
-        # a better way to do this, perhaps using ranges.
-        if len(columns_margin.shape) > 1:
-            columns_margin = columns_margin[0]
+        # columns_margin = self.columns_margin
+        # TODO: This is a hack for X_Array slices, where columns-margin is undefined.
+        # I think this measure probably also shouldn't be defined across arrays, but to
+        # minimize test damage, we use the first row of the row weighted bases, which is
+        # equal to the columnss_margin for CAT_X_CAT and always exists for others.
+        columns_margin = self.column_weighted_bases[0, :]
 
         scale_total = np.nansum(self._columns_dimension_numeric_values * columns_margin)
         not_a_nan_mask = ~np.isnan(self._columns_dimension_numeric_values)
@@ -1012,11 +1015,12 @@ class _Slice(CubePartition):
         if not self._columns_have_numeric_value:
             return None
 
-        columns_margin = self.columns_margin
-
-        # --- hack to accommodate the 2D columns-margin of an MR_X slice ---
-        if len(columns_margin.shape) > 1:
-            columns_margin = columns_margin[0]
+        # columns_margin = self.columns_margin
+        # TODO: This is a hack for X_Array slices, where columns-margin is undefined.
+        # I think this measure probably also shouldn't be defined across arrays, but to
+        # minimize test damage, we use the first row of the row weighted bases, which is
+        # equal to the columnss_margin for CAT_X_CAT and always exists for others.
+        columns_margin = self.column_weighted_bases[0, :]
 
         not_a_nan_index = ~np.isnan(self._columns_dimension_numeric_values)
         numeric_values = self._columns_dimension_numeric_values[not_a_nan_index]

@@ -43,6 +43,7 @@ from cr.cube.matrix.measure import (
     _ScaleMedian,
     SecondOrderMeasures,
     _StdDev,
+    _SummedCountMargin,
     _Sums,
     _TotalShareSum,
     _TableProportions,
@@ -128,17 +129,13 @@ class DescribeAssembler(object):
     def it_assembles_various_marginals(
         self,
         request,
+        _assemble_marginal_,
         _measures_prop_,
         second_order_measures_,
         measure_prop_name,
         MeasureCls,
     ):
-        _assemble_marginal_ = method_mock(
-            request,
-            Assembler,
-            "_assemble_marginal",
-            return_value=[[1, 2, 3], [4, 5, 6]],
-        )
+        _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
         measure_ = instance_mock(request, MeasureCls)
         setattr(second_order_measures_, measure_prop_name, measure_)
@@ -216,29 +213,25 @@ class DescribeAssembler(object):
 
     def it_provides_a_1D_columns_margin_for_a_CAT_X_cube_result(
         self,
+        request,
         _rows_dimension_prop_,
         dimension_,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        _column_subtotals_prop_,
-        _column_order_prop_,
-        _assemble_vector_,
+        _measures_prop_,
+        _assemble_marginal_,
+        second_order_measures_,
+        summed_count_margin_,
     ):
         _rows_dimension_prop_.return_value = dimension_
         dimension_.dimension_type = DT.CAT
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.columns_margin = [1, 2, 3]
-        _column_subtotals_prop_.return_value = [3, 5]
-        _column_order_prop_.return_value = [0, -2, 1, 2, -1]
-        _assemble_vector_.return_value = np.array([1, 3, 2, 3, 5])
+        _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.columns_margin = summed_count_margin_
         assembler = Assembler(None, None, None)
 
         columns_margin = assembler.columns_margin
 
-        _assemble_vector_.assert_called_once_with(
-            assembler, [1, 2, 3], [3, 5], [0, -2, 1, 2, -1], diffs_nan=True
-        )
-        assert columns_margin.tolist() == [1, 3, 2, 3, 5]
+        _assemble_marginal_.assert_called_once_with(assembler, summed_count_margin_)
+        assert columns_margin == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_columns_margin_for_an_MR_X_cube_result(
         self,
@@ -448,29 +441,25 @@ class DescribeAssembler(object):
 
     def it_provides_a_1D_rows_margin_for_an_X_CAT_cube_result(
         self,
+        request,
         _columns_dimension_prop_,
         dimension_,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        _row_subtotals_prop_,
-        _row_order_prop_,
-        _assemble_vector_,
+        _measures_prop_,
+        _assemble_marginal_,
+        second_order_measures_,
+        summed_count_margin_,
     ):
         _columns_dimension_prop_.return_value = dimension_
         dimension_.dimension_type = DT.CAT
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.rows_margin = [1, 2, 3]
-        _row_subtotals_prop_.return_value = [3, 5]
-        _row_order_prop_.return_value = [0, -2, 1, 2, -1]
-        _assemble_vector_.return_value = [1, 3, 2, 3, 5]
+        _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.rows_margin = summed_count_margin_
         assembler = Assembler(None, None, None)
 
         rows_margin = assembler.rows_margin
 
-        _assemble_vector_.assert_called_once_with(
-            assembler, [1, 2, 3], [3, 5], [0, -2, 1, 2, -1], diffs_nan=True
-        )
-        assert rows_margin == [1, 3, 2, 3, 5]
+        _assemble_marginal_.assert_called_once_with(assembler, summed_count_margin_)
+        assert rows_margin == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_rows_margin_for_an_X_MR_cube_result(
         self,
@@ -910,6 +899,10 @@ class DescribeAssembler(object):
     # fixture components ---------------------------------------------
 
     @pytest.fixture
+    def _assemble_marginal_(self, request):
+        return method_mock(request, Assembler, "_assemble_marginal")
+
+    @pytest.fixture
     def _assemble_matrix_(self, request):
         return method_mock(request, Assembler, "_assemble_matrix")
 
@@ -980,6 +973,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def subtotals_(self, request):
         return instance_mock(request, _Subtotals)
+
+    @pytest.fixture
+    def summed_count_margin_(self, request):
+        return instance_mock(request, _SummedCountMargin)
 
     @pytest.fixture
     def SumSubtotals_(self, request):

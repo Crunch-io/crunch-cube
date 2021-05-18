@@ -154,12 +154,7 @@ class Assembler(object):
             return self.column_weighted_bases
 
         # --- otherwise columns-base is a vector ---
-        return self._assemble_vector(
-            self._cube_result_matrix.columns_margin,
-            self._column_subtotals,
-            self._column_order,
-            diffs_nan=True,
-        )
+        return self._assemble_marginal(self._measures.columns_margin)
 
     @lazyproperty
     def columns_margin_proportion(self):
@@ -434,12 +429,7 @@ class Assembler(object):
             return self.row_weighted_bases
 
         # --- otherwise rows-margin is a vector ---
-        return self._assemble_vector(
-            self._cube_result_matrix.rows_margin,
-            self._row_subtotals,
-            self._row_order,
-            diffs_nan=True,
-        )
+        return self._assemble_marginal(self._measures.rows_margin)
 
     @lazyproperty
     def rows_margin_proportion(self):
