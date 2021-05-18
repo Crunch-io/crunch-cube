@@ -148,14 +148,10 @@ class Assembler(object):
     def columns_margin(self):
         """1D/2D np.float64 ndarray of weighted-N for each column of this slice."""
         # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
+        # --- This is really just another way to call the columns_weighted_bases ---
+        # --- TODO: Should this error for 2D margins? ---
         if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
-            return self._assemble_matrix(
-                SumSubtotals.blocks(
-                    self._cube_result_matrix.columns_margin,
-                    self._dimensions,
-                    diff_cols_nan=True,
-                )
-            )
+            return self.column_weighted_bases
 
         # --- otherwise columns-base is a vector ---
         return self._assemble_vector(
@@ -432,14 +428,10 @@ class Assembler(object):
         because each cell has a distinct margin in such a slice.
         """
         # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
+        # --- This is really just another way to call the row_weighted_bases ---
+        # --- TODO: Should this error for 2D margins? ---
         if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
-            return self._assemble_matrix(
-                SumSubtotals.blocks(
-                    self._cube_result_matrix.rows_margin,
-                    self._dimensions,
-                    diff_rows_nan=True,
-                )
-            )
+            return self.row_weighted_bases
 
         # --- otherwise rows-margin is a vector ---
         return self._assemble_vector(

@@ -242,28 +242,20 @@ class DescribeAssembler(object):
 
     def but_it_provides_a_2D_columns_margin_for_an_MR_X_cube_result(
         self,
+        request,
         _rows_dimension_prop_,
         dimensions_,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        SumSubtotals_,
-        _assemble_matrix_,
     ):
         _rows_dimension_prop_.return_value = dimensions_[0]
         dimensions_[0].dimension_type = DT.MR_SUBVAR
-        cube_result_matrix_.columns_margin = [[1, 2], [3, 4]]
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
-        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        property_mock(
+            request, Assembler, "column_weighted_bases", return_value=[[1, 2], [3, 4]]
+        )
         assembler = Assembler(None, dimensions_, None)
 
         columns_margin = assembler.columns_margin
 
-        SumSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], dimensions_, diff_cols_nan=True
-        )
-        _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
-        assert columns_margin == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        assert columns_margin == [[1, 2], [3, 4]]
 
     def it_provides_a_1D_columns_margin_proportion_for_a_CAT_X_cube_result(
         self,
@@ -482,28 +474,20 @@ class DescribeAssembler(object):
 
     def but_it_provides_a_2D_rows_margin_for_an_X_MR_cube_result(
         self,
+        request,
         _columns_dimension_prop_,
         dimensions_,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        SumSubtotals_,
-        _assemble_matrix_,
     ):
         _columns_dimension_prop_.return_value = dimensions_[1]
         dimensions_[1].dimension_type = DT.MR_SUBVAR
-        cube_result_matrix_.rows_margin = [[1, 2], [3, 4]]
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
-        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        property_mock(
+            request, Assembler, "row_weighted_bases", return_value=[[1, 2], [3, 4]]
+        )
         assembler = Assembler(None, dimensions_, None)
 
         rows_margin = assembler.rows_margin
 
-        SumSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], dimensions_, diff_rows_nan=True
-        )
-        _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
-        assert rows_margin == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        assert rows_margin == [[1, 2], [3, 4]]
 
     def it_provides_a_1D_rows_margin_proportion_for_an_X_CAT_cube_result(
         self,
