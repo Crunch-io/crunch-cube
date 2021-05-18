@@ -892,11 +892,19 @@ class _NumArrayXMrUnweightedCubeCounts(_CatXMrUnweightedCubeCounts):
 class _BaseWeightedCubeCounts(_BaseCubeMeasure):
     """Base class for weighted-count cube-measure variants."""
 
-    def __init__(self, dimensions, weighted_counts, counts_with_missings, diff_nans):
+    def __init__(
+        self,
+        dimensions,
+        weighted_counts,
+        counts_with_missings,
+        diff_nans,
+        dimensions_are_array,
+    ):
         super(_BaseWeightedCubeCounts, self).__init__(dimensions)
         self._weighted_counts = weighted_counts
         self._counts_with_missings = counts_with_missings
         self._diff_nans = diff_nans
+        self._dimensions_are_array = dimensions_are_array
 
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
@@ -906,6 +914,9 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         counts = valid_counts if valid_counts is not None else cube.counts
         counts_with_missings = cube.counts_with_missings
         diff_nans = True if valid_counts is not None else False
+        dimensions_are_array = tuple(
+            dim_type in DT.ARRAY_TYPES for dim_type in dimension_types
+        )
         WeightedCubeCountsCls = (
             _MrXMrWeightedCubeCounts
             if dimension_types == (DT.MR, DT.MR)
@@ -920,12 +931,27 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
             counts[cls._slice_idx_expr(cube, slice_idx)],
             counts_with_missings[cls._slice_idx_expr(cube, slice_idx)],
             diff_nans,
+            dimensions_are_array,
         )
 
     @lazyproperty
     def column_bases(self):
         """2D np.float64 ndarray of column-proportion denominator for each cell."""
         return np.broadcast_to(self.columns_margin, self.weighted_counts.shape)
+
+    @lazyproperty
+    def column_comparable_counts(self):
+        """2D np.float64 ndarray of weighted-count for cells in columns that share a base
+
+        Cells in a column don't share a base when they go across array subvariables.
+        Raises when counts are not comparable.
+        """
+        if self._dimensions_are_array[0]:
+            raise ValueError(
+                "column_comparable_counts not defined across subvariables."
+            )
+
+        return self.weighted_counts
 
     @lazyproperty
     def columns_margin(self):
@@ -945,6 +971,18 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `.row_bases`" % type(self).__name__
         )
+
+    @lazyproperty
+    def row_comparable_counts(self):
+        """2D np.float64 ndarray of weighted-count for cells in columns that share a base
+
+        Cells in a row don't share a base when they go across array subvariables.
+        Raises when counts are not comparable.
+        """
+        if self._dimensions_are_array[1]:
+            raise ValueError("row_comparable_counts not defined across subvariables.")
+
+        return self.weighted_counts
 
     @lazyproperty
     def rows_margin(self):
