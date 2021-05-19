@@ -73,6 +73,7 @@ class COLLATION_METHOD(enum.Enum):
 class MARGINAL(enum.Enum):
     """Enumerated values representing the (second-order) marginals."""
 
+    MARGIN = "margin"
     SCALE_MEAN = "scale_mean"
     SCALE_MEAN_STDDEV = "scale_mean_stddev"
     SCALE_MEDIAN = "scale_median"

@@ -1523,6 +1523,7 @@ class Describe_SortRowsByMarginalHelper(object):
     @pytest.mark.parametrize(
         "marginal, marginal_prop_name",
         (
+            (MARGINAL.MARGIN, "rows_margin"),
             (MARGINAL.SCALE_MEAN, "rows_scale_mean"),
             (MARGINAL.SCALE_MEAN_STDDEV, "rows_scale_mean_stddev"),
             (MARGINAL.SCALE_MEDIAN, "rows_scale_median"),
