@@ -322,7 +322,7 @@ class _Slice(CubePartition):
 
         `std_error = sqrt(variance/N)`
         """
-        return np.sqrt(self._column_variances / self.columns_margin)
+        return np.sqrt(self._column_variances / self.column_weighted_bases)
 
     @lazyproperty
     def column_unweighted_bases(self):
@@ -829,12 +829,7 @@ class _Slice(CubePartition):
     @lazyproperty
     def row_std_err(self):
         """2D np.float64 ndarray of standard errors for row percentages."""
-        rows_margin = (
-            self.rows_margin  # --- no need to cast (MR dim involved)
-            if len(self.rows_margin.shape) > 1
-            else self.rows_margin[:, np.newaxis]  # --- cast to actual vector column
-        )
-        return np.sqrt(self._row_variance / rows_margin)
+        return np.sqrt(self._row_variance / self.row_weighted_bases)
 
     @lazyproperty
     def row_unweighted_bases(self):
