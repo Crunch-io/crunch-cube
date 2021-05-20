@@ -820,7 +820,7 @@ class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
         except ValueError:
             covariance = 0
         combined_variance = (variance[:, col_idx] + variance.T).T - (2 * covariance)
-        return diff.T * np.sqrt(n.T / combined_variance)
+        return diff.T * np.sqrt(n.T / abs(combined_variance))
 
 
 class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
