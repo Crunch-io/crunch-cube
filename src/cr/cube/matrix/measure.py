@@ -925,7 +925,7 @@ class _PairwiseSigPvals(_PairwiseSigTstats):
             ],
             [
                 self._p_vals(t_stats[1][0], columns_base),
-                np.full(t_stats[1][1].shape, np.nan),
+                self._p_vals(t_stats[1][1], col_base_subtotals),
             ],
         ]
 

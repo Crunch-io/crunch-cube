@@ -599,29 +599,15 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
     """Computes subtotal values for the pairwise t-test measure."""
 
     def __init__(
-        self,
-        base_values,
-        dimensions,
-        second_order_measures,
-        selected_column_idx,
-        diff_cols_nan=True,
-        diff_rows_nan=True,
+        self, base_values, dimensions, second_order_measures, selected_column_idx
     ):
         super(PairwiseSigTestSubtotals, self).__init__(base_values, dimensions)
         self._second_order_measures = second_order_measures
         self._selected_column_idx = selected_column_idx
-        self._diff_cols_nan = diff_cols_nan
-        self._diff_rows_nan = diff_rows_nan
 
     @classmethod
     def blocks(
-        cls,
-        base_values,
-        dimensions,
-        second_order_measures,
-        selected_column_idx,
-        diff_cols_nan=True,
-        diff_rows_nan=True,
+        cls, base_values, dimensions, second_order_measures, selected_column_idx
     ):
         """Return base, row and col insertion, and intersection matrices.
 
@@ -634,12 +620,7 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         row bases (default False)
         """
         return cls(
-            base_values,
-            dimensions,
-            second_order_measures,
-            selected_column_idx,
-            diff_cols_nan,
-            diff_rows_nan,
+            base_values, dimensions, second_order_measures, selected_column_idx
         )._blocks
 
     @lazyproperty
@@ -652,12 +633,37 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         """Column proportions measure blocks"""
         return self._second_order_measures.column_proportions
 
-    def _intersection(self, row_subtotal, column_subtotal):
-        """Return value for intersection of `row_subtotal` and `column_subtotal`.
+    @lazyproperty
+    def _intersections(self):
+        """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
 
-        Intersection value for pairwise t_test measures is np.nan.
+        An intersection value arises where a row-subtotal crosses a column-subtotal.
         """
-        return np.nan
+        # --- In case of no intersections returns the original empty column proportions
+        # --- block.
+        if len(self._row_subtotals) == 0 or len(self._column_subtotals) == 0:
+            return self._column_proportions.blocks[1][1]
+        col_idx = self._selected_column_idx
+        # --- Base col proportions, for insertions are the inserted rows
+        props = self._column_proportions.blocks[1][0]
+        # --- The HS proportions are the column proportion intersections
+        props_hs = self._column_proportions.blocks[1][1]
+        columns_base = self._columns_base.blocks[0][1]
+        if col_idx < 0:
+            selected_column_proportions = props_hs[:, col_idx][:, np.newaxis]
+            columns_base_selection = columns_base[col_idx]
+        else:
+            selected_column_proportions = props[:, col_idx][:, np.newaxis]
+            columns_base_selection = self._columns_base.blocks[0][0][col_idx]
+        var_props = props_hs * (1 - props_hs) / columns_base
+        selected_variance = (
+            selected_column_proportions
+            * (1 - selected_column_proportions)
+            / columns_base_selection
+        )
+        return self._t_stats(
+            props_hs, selected_column_proportions, var_props, selected_variance
+        )
 
     def _selected_observations(self, props, props_hs):
         """Returns a tuple (column_proportions, variance) for the selected column.
@@ -678,13 +684,6 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
             selected_variance = var_props[:, [col_idx]]
         return selected_column_proportions, selected_variance
 
-    def _subtotal_column(self, subtotal, col):
-        """Return (n_rows,) ndarray of zscore `subtotal` value."""
-        # --- Cannot calculate if there are any subtrahends ---
-        if self._diff_cols_nan and len(subtotal.subtrahend_idxs) > 0:
-            return np.full(self._nrows, np.nan)[:, np.newaxis]
-        return col[:, np.newaxis]
-
     @lazyproperty
     def _subtotal_columns(self):
         """(n_rows, n_col_subtotals) matrix of subtotal columns."""
@@ -698,23 +697,7 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         props_hs = self._column_proportions.blocks[0][1]
         var_props_hs = props_hs * (1.0 - props_hs) / self._columns_base.blocks[0][1]
         selected_col_props, selected_var = self._selected_observations(props, props_hs)
-        t_stats = self._t_stats(
-            props_hs, selected_col_props, var_props_hs, selected_var
-        )
-
-        return np.hstack(
-            [
-                self._subtotal_column(subtotal, col)
-                for subtotal, col in zip(subtotals, t_stats.T)
-            ]
-        )
-
-    def _subtotal_row(self, subtotal, row):
-        """Return (n_cols,) ndarray of z-score `subtotal` value."""
-        # --- Cannot calculate if there are any subtrahends ---
-        if self._diff_rows_nan and len(subtotal.subtrahend_idxs) > 0:
-            return np.full(self._ncols, np.nan)
-        return row
+        return self._t_stats(props_hs, selected_col_props, var_props_hs, selected_var)
 
     @lazyproperty
     def _subtotal_rows(self):
@@ -731,14 +714,7 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         props_hs = self._column_proportions.blocks[1][1]
         var_props = props * (1.0 - props) / self._columns_base.blocks[0][0]
         selected_col_props, selected_var = self._selected_observations(props, props_hs)
-        t_stats = self._t_stats(props, selected_col_props, var_props, selected_var)
-
-        return np.vstack(
-            [
-                self._subtotal_row(subtotal, row)
-                for subtotal, row in zip(subtotals, t_stats)
-            ]
-        )
+        return self._t_stats(props, selected_col_props, var_props, selected_var)
 
     @staticmethod
     def _t_stats(props, selected_column_props, var_props, selected_variance):
@@ -748,5 +724,5 @@ class PairwiseSigTestSubtotals(_BaseSubtotals):
         with the selected one.
         """
         diff = props - selected_column_props
-        se_diff = np.sqrt(var_props + selected_variance)
+        se_diff = np.sqrt(abs(var_props + selected_variance))
         return diff / se_diff

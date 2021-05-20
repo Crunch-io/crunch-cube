@@ -7,13 +7,14 @@ import pytest
 
 from cr.cube.dimension import Dimension, _Subtotal
 from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix, _BaseWeightedCubeCounts
+from cr.cube.matrix.measure import _ColumnsBase, _ColumnProportions
 from cr.cube.matrix.subtotals import (
     _BaseSubtotals,
     NanSubtotals,
+    PairwiseSigTestSubtotals,
     SumSubtotals,
     TableStdErrSubtotals,
     ZscoreSubtotals,
-    PairwiseSigTestSubtotals,
 )
 
 from ...unitutil import ANY, initializer_mock, instance_mock, method_mock, property_mock
@@ -212,77 +213,105 @@ class DescribePairwiseSigTestSubtotals(object):
             return_value=np.array([[[1], [2]], [[3], [4]]]),
         )
 
-        blocks = PairwiseSigTestSubtotals.blocks(None, None, None, None, 0)
+        blocks = PairwiseSigTestSubtotals.blocks(None, None, None, 0)
 
-        _init_.assert_called_once_with(ANY, None, None, None, None, 0, True)
+        _init_.assert_called_once_with(ANY, None, None, None, 0)
         assert blocks.tolist() == [[[1], [2]], [[3], [4]]]
 
-    def it_can_compute_a_intersection_cell_value_to_help(self):
-        assert np.isnan(
-            PairwiseSigTestSubtotals(None, None, None, None, 0)._intersection(
-                None, None
-            )
+    def it_provides_intersections(
+        self, request, _column_proportions_prop, _columns_base_prop, subtotal_
+    ):
+        _column_subtotals = property_mock(
+            request, PairwiseSigTestSubtotals, "_column_subtotals"
+        )
+        _column_subtotals.return_value = [subtotal_]
+        _row_subtotals = property_mock(
+            request, PairwiseSigTestSubtotals, "_row_subtotals"
+        )
+        _row_subtotals.return_value = [subtotal_]
+        ColProportionMeasure = instance_mock(request, _ColumnProportions)
+        ColsBaseMeasure = instance_mock(request, _ColumnsBase)
+        ColProportionMeasure.blocks = np.array(
+            [
+                [[[0.1, 0.2], [0.1, 0.2]], [[0.2, 0.3], [0.3, 0.2]]],
+                [[[0.3, 0.4], [0.3, 0.4]], [[0.1, 0.1], [0.1, 0.1]]],
+            ]
+        )
+        ColsBaseMeasure.blocks = np.array([[[1], [2]], [[], []]], dtype=object)
+        _column_proportions_prop.return_value = ColProportionMeasure
+        _columns_base_prop.return_value = ColsBaseMeasure
+
+        intersections = PairwiseSigTestSubtotals(None, None, None, 0)._intersections
+
+        assert intersections == pytest.approx(
+            np.array([[-0.39605902, -0.39605902], [-0.39605902, -0.39605902]])
         )
 
-    @pytest.mark.parametrize(
-        ("addend_idxs", "subtrahend_idxs", "diff_cols_nan", "expected_value"),
-        (
-            ([1, 2], [], False, [[1], [2]]),
-            ([], [1, 2], False, [[1], [2]]),
-            ([0], [2], True, [[np.nan], [np.nan], [np.nan]]),
-        ),
-    )
-    def it_can_compute_a_subtotal_column_to_help(
-        self,
-        request,
-        subtotal_,
-        addend_idxs,
-        subtrahend_idxs,
-        diff_cols_nan,
-        expected_value,
+    def it_provides_subtotal_columns(
+        self, request, _column_proportions_prop, _columns_base_prop, subtotal_
     ):
-        subtotal_.addend_idxs = addend_idxs
-        subtotal_.subtrahend_idxs = subtrahend_idxs
-        property_mock(request, PairwiseSigTestSubtotals, "_nrows", return_value=3)
-        subtotals = PairwiseSigTestSubtotals(None, None, None, 0, diff_cols_nan, None)
-        column = np.array([1, 2])
+        _column_subtotals = property_mock(
+            request, PairwiseSigTestSubtotals, "_column_subtotals"
+        )
+        _column_subtotals.return_value = [subtotal_]
+        ColProportionMeasure = instance_mock(request, _ColumnProportions)
+        ColsBaseMeasure = instance_mock(request, _ColumnsBase)
+        ColProportionMeasure.blocks = np.array(
+            [
+                [[[0.1, 0.2], [0.1, 0.2]], [[0.2, 0.3], [0.3, 0.2]]],
+                [[[0.3, 0.4], [0.3, 0.4]], [[0.1, 0.1], [0.1, 0.1]]],
+            ]
+        )
+        ColsBaseMeasure.blocks = np.array([[[1], [2]], [[], []]], dtype=object)
+        _column_proportions_prop.return_value = ColProportionMeasure
+        _columns_base_prop.return_value = ColsBaseMeasure
 
-        subtotal_column = subtotals._subtotal_column(subtotal_, column)
+        subtotal_columns = PairwiseSigTestSubtotals(
+            None, None, None, 0
+        )._subtotal_columns
 
-        assert subtotal_column == pytest.approx(np.array(expected_value), nan_ok=True)
+        assert subtotal_columns == pytest.approx(
+            np.array([[0.24253563, 0.45291081], [0.45291081, 0.24253563]])
+        )
 
-    @pytest.mark.parametrize(
-        ("addend_idxs", "subtrahend_idxs", "diff_rows_nan", "expected_value"),
-        (
-            ([1, 2], [], False, [1, 2]),
-            ([], [1, 2], False, [1, 2]),
-            ([0], [2], True, [np.nan, np.nan, np.nan]),
-        ),
-    )
-    def it_can_compute_a_subtotal_row_to_help(
-        self,
-        request,
-        subtotal_,
-        addend_idxs,
-        subtrahend_idxs,
-        diff_rows_nan,
-        expected_value,
+    def it_provides_subtotal_rows(
+        self, request, _column_proportions_prop, _columns_base_prop, subtotal_
     ):
-        subtotal_.addend_idxs = addend_idxs
-        subtotal_.subtrahend_idxs = subtrahend_idxs
-        property_mock(request, PairwiseSigTestSubtotals, "_ncols", return_value=3)
-        subtotals = PairwiseSigTestSubtotals(None, None, None, 0, None, diff_rows_nan)
-        row = np.array([1, 2])
+        _row_subtotals = property_mock(
+            request, PairwiseSigTestSubtotals, "_row_subtotals"
+        )
+        _row_subtotals.return_value = [subtotal_]
+        ColProportionMeasure = instance_mock(request, _ColumnProportions)
+        ColsBaseMeasure = instance_mock(request, _ColumnsBase)
+        ColProportionMeasure.blocks = np.array(
+            [
+                [[[0.1, 0.2], [0.1, 0.2]], [[0.2, 0.3], [0.3, 0.2]]],
+                [[[0.3, 0.4], [0.3, 0.4]], [[0.1, 0.1], [0.1, 0.1]]],
+            ]
+        )
+        ColsBaseMeasure.blocks = np.array([[[1], [2]], [[], []]], dtype=object)
+        _column_proportions_prop.return_value = ColProportionMeasure
+        _columns_base_prop.return_value = ColsBaseMeasure
 
-        subtotal_row = subtotals._subtotal_row(subtotal_, row)
+        subtotal_rows = PairwiseSigTestSubtotals(None, None, None, 0)._subtotal_rows
 
-        assert subtotal_row == pytest.approx(expected_value, nan_ok=True)
+        assert subtotal_rows == pytest.approx(
+            np.array([[0.0, 0.1490712], [0.0, 0.1490712]])
+        )
 
     # --- fixture components -----------------------------------------
 
     @pytest.fixture
+    def _column_proportions_prop(self, request):
+        return property_mock(request, PairwiseSigTestSubtotals, "_column_proportions")
+
+    @pytest.fixture
+    def _columns_base_prop(self, request):
+        return property_mock(request, PairwiseSigTestSubtotals, "_columns_base")
+
+    @pytest.fixture
     def dimensions_(self, request):
-        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+        return instance_mock(request, Dimension), instance_mock(request, Dimension)
 
     @pytest.fixture
     def _init_(self, request):
@@ -290,7 +319,7 @@ class DescribePairwiseSigTestSubtotals(object):
 
     @pytest.fixture
     def subtotal_(self, request):
-        return instance_mock(request, _Subtotal)
+        return instance_mock(request, _Subtotal, addend_idxs=[1, 2], subtrahend_idxs=[])
 
 
 class DescribeSumSubtotals(object):
