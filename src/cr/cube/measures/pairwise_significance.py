@@ -19,11 +19,6 @@ class PairwiseSignificance(object):
         self._only_larger = only_larger
 
     @classmethod
-    def pairwise_indices(cls, slice_, alpha, only_larger):
-        """ -> 2D ndarray of tuples of pairwise indices."""
-        return cls(slice_, alpha, only_larger)._pairwise_indices
-
-    @classmethod
     def scale_mean_pairwise_indices(cls, slice_, alpha, only_larger):
         """-> 1D ndarray of tuples of column-indices meeting pairwise-t threshold.
 
@@ -59,12 +54,6 @@ class PairwiseSignificance(object):
         ]
 
     @lazyproperty
-    def _pairwise_indices(self):
-        """2D ndarray containing tuples of int pairwise indices."""
-        A = np.array([col_pw_sig.pairwise_indices for col_pw_sig in self.values]).T
-        return np.array([[tuple(cell) for cell in row] for row in A], dtype=tuple)
-
-    @lazyproperty
     def _scale_mean_pairwise_indices(self):
         """Sequence of pairwise indices tuples like `((), (0, 3), (0,), (2,))`."""
         return tuple(sig.scale_mean_pairwise_indices for sig in self.values)
@@ -80,23 +69,8 @@ class _ColumnPairwiseSignificance(object):
         self._only_larger = only_larger
 
     @lazyproperty
-    def p_vals(self):
-        return 2 * (1 - t.cdf(abs(self.t_stats), df=self._df))
-
-    @lazyproperty
     def p_vals_scale_means(self):
         return 2 * (1 - t.cdf(abs(self.t_stats_scale_means), df=self._two_sample_df))
-
-    @lazyproperty
-    def pairwise_indices(self):
-        significance = self.p_vals < self._alpha
-        if self._only_larger:
-            significance = np.logical_and(self.t_stats < 0, significance)
-        # --- the overall array is collapsed into an empty list in a later step if we
-        # --- don't explicitly specify its shape and type here.
-        A = np.empty((len(significance),), dtype=object)
-        A[:] = [tuple(np.where(sig_row)[0]) for sig_row in significance]
-        return A
 
     @lazyproperty
     def scale_mean_pairwise_indices(self):

@@ -59,7 +59,20 @@ class SumSubtotals(_BaseSubtotals):
 
     This sums together both addends AND subtrahends because some measures such as
     bases are additive even across subtrahends of subtotals.
+
+    `diff_nans` Overrides subtotal differences in the columns direction (default False)
+    This param will be passed through the measure classes and it will be True when the
+    measure doesn't allow subtotal differences; e.g. ColumnsBase
     """
+
+    def __init__(self, base_values, rows_dimension, diffs_nan=False):
+        super(SumSubtotals, self).__init__(base_values, rows_dimension)
+        self._diff_nans = diffs_nan
+
+    @classmethod
+    def subtotal_values(cls, base_values, rows_dimension, diffs_nan=False):
+        """Return (n_row_subtotals,) ndarray of subtotal values."""
+        return cls(base_values, rows_dimension, diffs_nan)._subtotal_values
 
     @lazyproperty
     def _subtotal_values(self):
@@ -73,6 +86,8 @@ class SumSubtotals(_BaseSubtotals):
 
     def _subtotal_value(self, subtotal):
         """Return scalar value of `subtotal` row."""
+        if self._diff_nans and len(subtotal.subtrahend_idxs) > 0:
+            return np.nan
         base_values = self._base_values
 
         addend_sum = np.sum(base_values[subtotal.addend_idxs])

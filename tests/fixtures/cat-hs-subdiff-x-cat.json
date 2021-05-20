@@ -1,0 +1,488 @@
+{
+  "query": {
+    "measures": {
+      "count": {
+        "function": "cube_count",
+        "args": []
+      }
+    },
+    "dimensions": [
+      {
+        "variable": "7072c01ef8aa42b3af67685eb01fb514"
+      },
+      {
+        "variable": "26ac881e72f44374a2e4cf6e87d1b443"
+      }
+    ],
+    "weight": "http://127.0.0.1:8080/datasets/3e1f99bdd53b490ea36cb365eeef6477/variables/ceec7b24e2c64ccf9463a8fd275424a3/"
+  },
+  "query_environment": {
+    "filter": []
+  },
+  "result": {
+    "dimensions": [
+      {
+        "derived": false,
+        "references": {
+          "alias": "ideo5",
+          "name": "Ideology",
+          "description": "In general, how would you describe your own political viewpoint?",
+          "header_order": 1298,
+          "view": {
+            "show_counts": false,
+            "column_width": null,
+            "transform": {
+              "insertions": [
+                {
+                  "function": "subtotal",
+                  "name": "NET liberal",
+                  "args": [
+                    1,
+                    2
+                  ],
+                  "anchor": "top",
+                  "kwargs": {
+                    "negative": [
+                      4,
+                      5
+                    ]
+                  },
+                  "id": "net_liberal"
+                }
+              ]
+            },
+            "include_missing": false,
+            "show_numeric_values": false
+          }
+        },
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "id": 1,
+              "name": "Very liberal",
+              "missing": false
+            },
+            {
+              "numeric_value": 2,
+              "id": 2,
+              "name": "Liberal",
+              "missing": false
+            },
+            {
+              "numeric_value": 3,
+              "id": 3,
+              "name": "Moderate",
+              "missing": false
+            },
+            {
+              "numeric_value": 4,
+              "id": 4,
+              "name": "Conservative",
+              "missing": false
+            },
+            {
+              "numeric_value": 5,
+              "id": 5,
+              "name": "Very conservative",
+              "missing": false
+            },
+            {
+              "numeric_value": 6,
+              "id": 6,
+              "name": "Not sure",
+              "missing": false
+            },
+            {
+              "numeric_value": null,
+              "id": -1,
+              "name": "No Data",
+              "missing": true
+            }
+          ]
+        }
+      },
+      {
+        "references": {
+          "alias": "catchuptv_hours_weekly",
+          "format": {
+            "summary": {
+              "digits": 0
+            }
+          },
+          "description": "In a typical week, approximately, how many hours would you spend watching TV (on any device)?",
+          "header_order": 97,
+          "name": "TV - hours watched in typical week"
+        },
+        "derived": false,
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "missing": false,
+              "id": 1,
+              "name": "Less than 1 hour per week"
+            },
+            {
+              "numeric_value": 2,
+              "missing": false,
+              "id": 2,
+              "name": "1-5 hours per week"
+            },
+            {
+              "numeric_value": 3,
+              "missing": false,
+              "id": 3,
+              "name": "6-10 hours per week"
+            },
+            {
+              "numeric_value": 4,
+              "missing": false,
+              "id": 4,
+              "name": "11-15 hours per week"
+            },
+            {
+              "numeric_value": 5,
+              "missing": false,
+              "id": 5,
+              "name": "16-20 hours per week"
+            },
+            {
+              "numeric_value": 6,
+              "missing": false,
+              "id": 6,
+              "name": "21-25 hours per week"
+            },
+            {
+              "numeric_value": 7,
+              "missing": false,
+              "id": 7,
+              "name": "26-30 hours per week"
+            },
+            {
+              "numeric_value": 8,
+              "missing": false,
+              "id": 8,
+              "name": "31-35 hours per week"
+            },
+            {
+              "numeric_value": 9,
+              "missing": false,
+              "id": 9,
+              "name": "36-40 hours per week"
+            },
+            {
+              "numeric_value": 10,
+              "missing": false,
+              "id": 10,
+              "name": "41-45 hours per week"
+            },
+            {
+              "numeric_value": 11,
+              "missing": false,
+              "id": 11,
+              "name": "46-50 hours per week"
+            },
+            {
+              "numeric_value": 12,
+              "missing": false,
+              "id": 12,
+              "name": "More than 50 hours per week"
+            },
+            {
+              "numeric_value": 96,
+              "missing": false,
+              "id": 96,
+              "name": "Don't know"
+            },
+            {
+              "numeric_value": 97,
+              "missing": false,
+              "id": 97,
+              "name": "Not applicable - I don't watch on-demand or recorded TV"
+            },
+            {
+              "numeric_value": null,
+              "missing": true,
+              "id": -1,
+              "name": "No Data"
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 21189,
+    "measures": {
+      "count": {
+        "data": [
+          633.164202,
+          1123.16137,
+          724.31833,
+          400.318903,
+          290.643729,
+          162.505895,
+          117.752541,
+          64.494245,
+          33.466064,
+          30.800446,
+          18.7755,
+          42.838778,
+          226.571611,
+          697.036403,
+          1967.388709,
+          971.702564,
+          1599.080555,
+          1089.361294,
+          533.253198,
+          399.844371,
+          235.556725,
+          153.398173,
+          77.288629,
+          76.941435,
+          23.097564,
+          32.040411,
+          46.751338,
+          488.786714,
+          1076.159476,
+          3150.134092,
+          1883.852144,
+          2861.27467,
+          1766.884548,
+          855.373359,
+          704.829408,
+          407.843915,
+          258.620101,
+          102.800331,
+          129.568776,
+          19.662274,
+          20.939392,
+          93.640505,
+          1202.672605,
+          2327.17514,
+          5573.865103,
+          1619.222503,
+          2185.464824,
+          1290.080166,
+          591.367206,
+          437.537651,
+          271.769636,
+          177.908757,
+          116.012955,
+          94.987012,
+          47.635553,
+          33.315724,
+          34.17535,
+          900.345409,
+          2407.522111,
+          4837.564417,
+          1106.999914,
+          1148.572485,
+          703.578632,
+          347.933986,
+          216.537343,
+          168.257853,
+          92.979854,
+          49.078717,
+          42.675352,
+          23.536853,
+          29.567601,
+          40.087964,
+          554.402465,
+          1498.099133,
+          2632.265501,
+          469.147032,
+          588.783404,
+          334.292947,
+          114.037559,
+          114.595764,
+          65.68717,
+          54.617238,
+          18.451552,
+          34.324446,
+          3.892387,
+          4.36622,
+          43.133252,
+          713.715715,
+          741.332831,
+          1596.150714,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.822999,
+          53.952605
+        ],
+        "n_missing": 21189,
+        "metadata": {
+          "references": {},
+          "derived": true,
+          "type": {
+            "integer": false,
+            "missing_rules": {},
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      }
+    },
+    "n": 64858,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 64858,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 63346.422298,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 64858,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 63346.422298,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "is_cat_date": false
+    },
+    "unfiltered": {
+      "unweighted_n": 64858,
+      "weighted_n": 63346.422298
+    },
+    "filtered": {
+      "unweighted_n": 64858,
+      "weighted_n": 63346.422298
+    },
+    "counts": [
+      642,
+      1142,
+      704,
+      413,
+      308,
+      161,
+      121,
+      63,
+      31,
+      25,
+      22,
+      34,
+      221,
+      733,
+      2066,
+      1015,
+      1643,
+      1095,
+      542,
+      402,
+      223,
+      156,
+      80,
+      63,
+      24,
+      29,
+      44,
+      448,
+      1153,
+      3415,
+      1890,
+      2805,
+      1685,
+      830,
+      670,
+      381,
+      239,
+      97,
+      132,
+      21,
+      23,
+      87,
+      1071,
+      2480,
+      5894,
+      1758,
+      2291,
+      1350,
+      619,
+      476,
+      295,
+      178,
+      104,
+      92,
+      34,
+      27,
+      34,
+      876,
+      2691,
+      5487,
+      1194,
+      1223,
+      717,
+      356,
+      232,
+      171,
+      101,
+      48,
+      43,
+      25,
+      24,
+      41,
+      556,
+      1698,
+      3040,
+      366,
+      420,
+      236,
+      90,
+      94,
+      53,
+      37,
+      14,
+      24,
+      3,
+      2,
+      33,
+      502,
+      593,
+      1246,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      40
+    ],
+    "element": "crunch:cube"
+  }
+}
