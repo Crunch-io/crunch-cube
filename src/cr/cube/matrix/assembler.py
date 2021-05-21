@@ -346,6 +346,17 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def cell_population_fractions(self):
+        proportions = (
+            self.row_proportions
+            if self._rows_dimension.dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
+            else self.column_proportions
+            if self._columns_dimension.dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
+            else self.table_proportions
+        )
+        return proportions
+
+    @lazyproperty
     def pvalues(self):
         """2D np.float64/np.nan ndarray of p-value for each matrix cell."""
         return 2 * (1 - norm.cdf(np.abs(self.zscores)))

@@ -334,6 +334,27 @@ class _BaseSecondOrderMeasure(object):
         return self._cube_measures.weighted_cube_counts
 
 
+class _CellPopulationFractions(_BaseSecondOrderMeasure):
+    """Provides the cell-specific fraction of population
+
+    If any of the dimensions (rows or columns) is a categorical date, the
+    appropriate percentages are used, to calculate the population counts, so as to
+    be the total amount among categorical dates.
+
+    Otherwise, table percents are used to calculate population counts.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        return (
+            self._second_order_measures.row_proportions.blocks
+            if self._dimensions[0].dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
+            else self._second_order_measures.column_proportions.blocks
+            if self._dimensions[1].dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
+            else self._second_order_measures.table_proportions.blocks
+        )
+
+
 class _ColumnsBase(_BaseSecondOrderMeasure):
     """Provides the columns-base measure for a matrix."""
 
