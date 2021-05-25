@@ -1000,6 +1000,11 @@ class _PopulationProportions(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values.
+        """
         return (
             self._second_order_measures.row_proportions.blocks
             if self._dimensions[-2].dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
