@@ -231,22 +231,13 @@ class Assembler(object):
                 self._measures.pairwise_indices_for_subvar(alpha, only_larger).blocks
             )
 
-        def _pairwise_indices(p_vals, t_stats):
-            """1D ndarray containing tuples of int pairwise indices of each column."""
-            significance = p_vals < alpha
-            if only_larger:
-                significance = np.logical_and(t_stats < 0, significance)
-            col_significance = np.empty((len(significance),), dtype=object)
-            col_significance[:] = [
-                tuple(np.where(sig_row)[0]) for sig_row in significance
-            ]
-            return col_significance
-
         return np.array(
             [
-                _pairwise_indices(
+                self._pairwise_indices(
                     self.pairwise_significance_p_vals(col),
                     self.pairwise_significance_t_stats(col),
+                    alpha,
+                    only_larger,
                 )
                 for col in range(len(self._column_order))
             ]
@@ -257,21 +248,17 @@ class Assembler(object):
 
         Raises `ValueError if the cube-result does not include `means` cube-measures.
         """
-        assembled_matrix = self._assemble_matrix(
-            self._measures.pairwise_means_indices(alpha, only_larger).blocks
-        )
-        ord_map = {k: v for v, k in enumerate(self._column_order)}
-
         return np.array(
             [
-                [
-                    tuple(ord_map[idx] for idx in idxs) if idxs is not None else None
-                    for idxs in row
-                ]
-                for row in assembled_matrix
-            ],
-            dtype=object,
-        )
+                self._pairwise_indices(
+                    self.pairwise_significance_means_p_vals(col),
+                    self.pairwise_significance_means_t_stats(col),
+                    alpha,
+                    only_larger,
+                )
+                for col in range(len(self._column_order))
+            ]
+        ).T
 
     def pairwise_significance_p_vals(self, column_idx):
         """2D optional np.float64 ndarray of overlaps-p_vals matrices for subvar idx.
@@ -797,6 +784,16 @@ class Assembler(object):
     def _measures(self):
         """SecondOrderMeasures collection object for this cube-result."""
         return SecondOrderMeasures(self._cube, self._dimensions, self._slice_idx)
+
+    @staticmethod
+    def _pairwise_indices(p_vals, t_stats, alpha, only_larger):
+        """1D ndarray containing tuples of int pairwise indices of each column."""
+        significance = p_vals < alpha
+        if only_larger:
+            significance = np.logical_and(t_stats < 0, significance)
+        col_significance = np.empty((len(significance),), dtype=object)
+        col_significance[:] = [tuple(np.where(sig_row)[0]) for sig_row in significance]
+        return col_significance
 
     @lazyproperty
     def _row_order(self):

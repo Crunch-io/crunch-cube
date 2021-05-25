@@ -100,12 +100,6 @@ class SecondOrderMeasures(object):
             self._dimensions, self, self._cube_measures, alpha, only_larger
         )
 
-    def pairwise_means_indices(self, alpha, only_larger):
-        """_PairwiseIndices measure object for this cube-result"""
-        return _PairwiseMeansIndices(
-            self._dimensions, self, self._cube_measures, alpha, only_larger
-        )
-
     def pairwise_p_vals_for_subvar(self, subvar_idx):
         """_PairwiseSigPValsForSubvar measure object for this cube-result"""
         return _PairwiseSigPValsForSubvar(
@@ -682,26 +676,6 @@ class _PairwiseSubvarIndices(_BaseSecondOrderMeasure):
             for col_idx in range(
                 self._cube_measures.cube_overlaps.selected_bases.shape[1]
             )
-        ]
-
-
-class _PairwiseMeansIndices(_PairwiseSubvarIndices):
-    """Provides pairwise means significance indices measure for matrix."""
-
-    @lazyproperty
-    def _values(self):
-        """list of _PairwiseMeansSigPVals tests objects.
-        Result has as many elements as there are columns in the slice. Each
-        significance test contains `p_vals` and `t_stats` significance tests.
-        """
-        return [
-            _PairwiseMeansSigPVals(
-                self._dimensions,
-                self._second_order_measures,
-                self._cube_measures,
-                col_idx,
-            )
-            for col_idx in range(self._cube_measures.cube_means.means.shape[1])
         ]
 
 
