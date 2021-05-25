@@ -940,7 +940,7 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         Cells in a column don't share a base when they go across array subvariables.
         Raises when counts are not comparable.
         """
-        if self._column_is_array:
+        if self._dimensions[1].dimension_type in DT.ARRAY_TYPES:
             raise ValueError(
                 "column_comparable_counts not defined across subvariables."
             )
@@ -973,7 +973,7 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         Cells in a row don't share a base when they go across array subvariables.
         Raises when counts are not comparable.
         """
-        if self._row_is_array:
+        if self._dimensions[0].dimension_type in DT.ARRAY_TYPES:
             raise ValueError("row_comparable_counts not defined across subvariables.")
 
         return self.weighted_counts
@@ -1035,24 +1035,6 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         expected_counts = rowsum * colsum / total
         variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
         return (counts - expected_counts) / np.sqrt(variance)
-
-    @lazyproperty
-    def _column_is_array(self):
-        """Bool indicating whether the column is an array variable type
-
-        `_dimensions` is already apparent dimensions, so the columns is the last dimension.
-        (order is rows, column if 2D or tabs, rows, columns if 3D)
-        """
-        return self._dimensions[-1].dimension_type in DT.ARRAY_TYPES
-
-    @lazyproperty
-    def _row_is_array(self):
-        """Bool indicating whether the row is an array variable type
-
-        `_dimensions` is already apparent dimensions, so the rows is the 2nd to last
-        dimension. (order is rows, column if 2D or tabs, rows, columns if 3D)
-        """
-        return self._dimensions[-2].dimension_type in DT.ARRAY_TYPES
 
     @lazyproperty
     def _valid_row_idxs(self):

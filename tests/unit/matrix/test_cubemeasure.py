@@ -1351,17 +1351,17 @@ class Describe_BaseWeightedCubeCounts(object):
         assert weighted_cube_counts.column_bases.tolist() == expected_value
 
     def it_computes_the_column_comparable_counts_if_column_is_not_array(
-        self, _column_is_array_prop, weighted_counts_prop_
+        self, dimensions_, weighted_counts_prop_
     ):
-        _column_is_array_prop.return_value = False
+        dimensions_[1].dimension_type = DT.CAT
         weighted_counts_prop_.return_value = [[1, 2], [3, 4]]
-        weighted_cube_counts = _BaseWeightedCubeCounts(None, None, None, False)
+        weighted_cube_counts = _BaseWeightedCubeCounts(dimensions_, None, None, False)
 
         assert weighted_cube_counts.column_comparable_counts == [[1, 2], [3, 4]]
 
-    def but_it_raises_on_column_comparable_count_if_column_is_array(self, _column_is_array_prop):
-        _column_is_array_prop.return_value = True
-        weighted_counts = _BaseWeightedCubeCounts(None, None, None, False)
+    def but_it_raises_on_column_comparable_count_if_column_is_array(self, dimensions_):
+        dimensions_[1].dimension_type = DT.NUM_ARRAY
+        weighted_counts = _BaseWeightedCubeCounts(dimensions_, None, None, False)
 
         with pytest.raises(ValueError) as e:
             weighted_counts.column_comparable_counts
@@ -1371,17 +1371,17 @@ class Describe_BaseWeightedCubeCounts(object):
         )
 
     def it_computes_the_row_comparable_counts_if_row_is_not_array(
-        self, _row_is_array_prop, weighted_counts_prop_
+        self, dimensions_, weighted_counts_prop_
     ):
-        _row_is_array_prop.return_value = False
+        dimensions_[0].dimension_type = DT.CAT
         weighted_counts_prop_.return_value = [[1, 2], [3, 4]]
-        weighted_cube_counts = _BaseWeightedCubeCounts(None, None, None, False)
+        weighted_cube_counts = _BaseWeightedCubeCounts(dimensions_, None, None, False)
 
         assert weighted_cube_counts.row_comparable_counts == [[1, 2], [3, 4]]
 
-    def but_it_raises_on_row_comparable_count_if_row_is_array(self, _row_is_array_prop):
-        _row_is_array_prop.return_value = True
-        weighted_counts = _BaseWeightedCubeCounts(None, None, None, False)
+    def but_it_raises_on_row_comparable_count_if_row_is_array(self, dimensions_):
+        dimensions_[0].dimension_type = DT.NUM_ARRAY
+        weighted_counts = _BaseWeightedCubeCounts(dimensions_, None, None, False)
 
         with pytest.raises(ValueError) as e:
             weighted_counts.row_comparable_counts
@@ -1403,28 +1403,6 @@ class Describe_BaseWeightedCubeCounts(object):
             [0.2762585, 0.1951985, 0.1485686, 0.1184429],
         ]
 
-    @pytest.mark.parametrize(
-        "dim_types, expected_col, expected_row",
-        (
-            ((DT.CAT, DT.CAT), False, False),
-            ((DT.NUM_ARRAY, DT.CAT), False, True),
-            ((DT.MR_SUBVAR, DT.MR_SUBVAR), True, True),
-            ((DT.CAT, DT.CAT, DT.CAT), False, False),
-            ((DT.CAT, DT.CA_SUBVAR, DT.CA_CAT), False, True),
-            ((DT.MR_SUBVAR, DT.CA_CAT, DT.CA_SUBVAR), True, False),
-        ),
-    )
-    def it_can_determine_if_row_and_col_are_array(
-        self, request, dim_types, expected_col, expected_row
-    ):
-        dimensions_ = [
-            instance_mock(request, Dimension, dimension_type=dt) for dt in dim_types
-        ]
-        weighted_counts = _BaseWeightedCubeCounts(dimensions_, None, None, False)
-
-        assert weighted_counts._column_is_array == expected_col
-        assert weighted_counts._row_is_array == expected_row
-
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -1432,16 +1410,8 @@ class Describe_BaseWeightedCubeCounts(object):
         return instance_mock(request, Cube)
 
     @pytest.fixture
-    def _column_is_array_prop(self, request):
-        return property_mock(request, _BaseWeightedCubeCounts, "_column_is_array")
-
-    @pytest.fixture
     def dimensions_(self, request):
         return instance_mock(request, Dimension), instance_mock(request, Dimension)
-
-    @pytest.fixture
-    def _row_is_array_prop(self, request):
-        return property_mock(request, _BaseWeightedCubeCounts, "_row_is_array")
 
     @pytest.fixture
     def weighted_counts_prop_(self, request):
