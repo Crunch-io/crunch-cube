@@ -40,6 +40,11 @@ class SecondOrderMeasures(object):
         return _ColumnComparableCounts(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def column_index(self):
+        """_ColumnIndex measure object for this cube-result."""
+        return _ColumnIndex(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def column_proportions(self):
         """_ColumnProportions measure object for this cube-result."""
         return _ColumnProportions(self._dimensions, self, self._cube_measures)
@@ -377,6 +382,26 @@ class _ColumnComparableCounts(_BaseSecondOrderMeasure):
             self._dimensions,
             diff_cols_nan=True,
         )
+
+
+class _ColumnIndex(_BaseSecondOrderMeasure):
+    """Provides the column-index measure for a matrix."""
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        Column-index answers the question "are respondents in this row-category more or
+        less likely than the overall table population to choose the answer represented
+        by this column?". For example, if the row is "Hispanic" and the column is
+        home-ownership, a value of 100 indicates hispanics are no less and no more
+        likely to own their home than the overall population. If that value was 150, it
+        would indicate hispanics are 50% more likely to own their home than the general
+        population (or the population surveyed anyway).
+        """
+        proportions = self._second_order_measures.column_proportions.blocks[0][0]
+        baseline = self._weighted_cube_counts.baseline
+        return NanSubtotals.blocks(100 * (proportions / baseline), self._dimensions)
 
 
 class _ColumnProportions(_BaseSecondOrderMeasure):
