@@ -346,15 +346,13 @@ class Assembler(object):
         )
 
     @lazyproperty
-    def cell_population_fractions(self):
-        proportions = (
-            self.row_proportions
-            if self._rows_dimension.dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
-            else self.column_proportions
-            if self._columns_dimension.dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
-            else self.table_proportions
-        )
-        return proportions
+    def population_proportions(self):
+        """2D np.float64 ndarray of proportions
+
+        The proportion used to calculate proportion counts depends on the dimension
+        types.
+        """
+        return self._assemble_matrix(self._measures.population_proportions.blocks)
 
     @lazyproperty
     def pvalues(self):

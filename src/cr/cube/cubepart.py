@@ -723,9 +723,11 @@ class _Slice(CubePartition):
 
         `._population` and `_cube.population_fraction` are both scalars and so do not
         affect sort order.
+
+        The proportion used depends on the dimension types, so get from assembler.
         """
         return (
-            self._assembler.cell_population_fractions
+            self._assembler.population_proportions
             * self._population
             * self._cube.population_fraction
         )
