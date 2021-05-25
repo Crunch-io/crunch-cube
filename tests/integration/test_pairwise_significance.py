@@ -1172,6 +1172,11 @@ class TestMeanDifferenceSignificance(object):
             ),
             nan_ok=True,
         )
+        assert slice_.pairwise_means_indices.tolist() == [
+            [(), (), (), (0, 2)],
+            [(1, 2), (), (1,), ()],
+            [(), (), (), ()],
+        ]
 
         # Hiding rows and columns
         slice_ = Cube(
@@ -1188,10 +1193,29 @@ class TestMeanDifferenceSignificance(object):
                 },
             },
         ).partitions[0]
+
         assert slice_.pairwise_means_indices.tolist() == [
             [(2,), (), ()],
             [(), (), ()],
         ]
+        assert slice_.pairwise_significance_means_t_stats(1) == pytest.approx(
+            np.array(
+                [
+                    [np.nan, np.nan, np.nan],
+                    [np.nan, 0, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+        assert slice_.pairwise_significance_means_p_vals(1) == pytest.approx(
+            np.array(
+                [
+                    [np.nan, np.nan, np.nan],
+                    [np.nan, 1.0, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
 
     def test_mean_diff_significance_indices_for_cat_x_cat(self):
         transforms = {"pairwise_indices": {"alpha": [0.05, 0.01]}}
