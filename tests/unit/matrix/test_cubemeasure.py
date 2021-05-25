@@ -1374,6 +1374,21 @@ class Describe_BaseWeightedCubeCounts(object):
 class Describe_CatXCatWeightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatWeightedCubeCounts`."""
 
+    def it_knows_its_baseline(self, request, counts_with_missings):
+        property_mock(
+            request,
+            _BaseWeightedCubeCounts,
+            "_valid_row_idxs",
+            return_value=(np.array([0, 1]),),
+        )
+        weighted_cube_counts = _CatXCatWeightedCubeCounts(
+            None, None, counts_with_missings, None
+        )
+
+        assert weighted_cube_counts.baseline == pytest.approx(
+            np.array([[0.28571429], [0.71428571]])
+        )
+
     def it_knows_its_columns_margin(self, raw_weighted_counts):
         weighted_cube_counts = _CatXCatWeightedCubeCounts(
             None, raw_weighted_counts, None, None
@@ -1457,9 +1472,29 @@ class Describe_CatXCatWeightedCubeCounts(object):
         """(2, 3) np.float64 ndarray of weighted cube-counts as received from Cube."""
         return np.array([[3.3, 2.2, 1.1], [6.6, 5.5, 4.4]])
 
+    @pytest.fixture
+    def counts_with_missings(self):
+        """(2, 3) np.float64 ndarray of cube-counts with missings received from Cube."""
+        return np.array([[3.3, 2.2, 1.1], [6.6, 5.5, 4.4]])
+
 
 class Describe_CatXMrWeightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrWeightedCubeCounts`."""
+
+    def it_knows_its_baseline(self, request, counts_with_missings):
+        property_mock(
+            request,
+            _BaseWeightedCubeCounts,
+            "_valid_row_idxs",
+            return_value=(np.array([0, 1]),),
+        )
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(
+            None, None, counts_with_missings, None
+        )
+
+        assert weighted_cube_counts.baseline == pytest.approx(
+            np.array([[0.33, 0.33, 0.33], [0.67, 0.67, 0.67]])
+        )
 
     def it_knows_its_columns_margin(self, raw_weighted_counts):
         weighted_cube_counts = _CatXMrWeightedCubeCounts(
@@ -1570,9 +1605,35 @@ class Describe_CatXMrWeightedCubeCounts(object):
             ]
         )
 
+    @pytest.fixture
+    def counts_with_missings(self):
+        """(3, 3, 3) ndarray of wgtd cube-counts w/missings received from Cube."""
+        return np.array(
+            [
+                [[12.0, 16.0, 5.0], [12.0, 13.0, 8.0], [12.0, 11.0, 10.0]],
+                [[28.0, 24.0, 15.0], [22.0, 32.0, 13.0], [26.0, 21.0, 20.0]],
+                [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]],
+            ]
+        )
+
 
 class Describe_MrXCatWeightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatWeightedCubeCounts`."""
+
+    def it_knows_its_baseline(self, request, counts_with_missings):
+        property_mock(
+            request,
+            _BaseWeightedCubeCounts,
+            "_valid_row_idxs",
+            return_value=(np.array([0, 1]),),
+        )
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(
+            None, None, counts_with_missings, None
+        )
+
+        assert weighted_cube_counts.baseline == pytest.approx(
+            np.array([[0.34163701], [0.7025641]])
+        )
 
     def it_knows_its_columns_margin(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(
@@ -1670,9 +1731,40 @@ class Describe_MrXCatWeightedCubeCounts(object):
             ]
         )
 
+    @pytest.fixture
+    def counts_with_missings(self):
+        """(2, 2, 3) np.float ndarray of cube-counts w/missings received from Cube."""
+        return np.array(
+            [  # --   0    1    2  cols ------
+                [  # -- row 0 ----------------
+                    [1.1, 3, 2.2, 3.3],  # -- sel
+                    [4.4, 2, 5.5, 6.6],  # -- not
+                ],
+                [  # -- row 1 ----------------
+                    [7.7, 1, 8.8, 9.9],  # -- sel
+                    [0.0, 5, 4.4, 2.2],  # -- not
+                ],
+            ]
+        )
+
 
 class Describe_MrXMrWeightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrWeightedCubeCounts`."""
+
+    def it_knows_its_baseline(self, request, counts_with_missings):
+        property_mock(
+            request,
+            _BaseWeightedCubeCounts,
+            "_valid_row_idxs",
+            return_value=(np.array([0, 1]),),
+        )
+        weighted_cube_counts = _MrXMrWeightedCubeCounts(
+            None, None, counts_with_missings, None
+        )
+
+        assert weighted_cube_counts.baseline == pytest.approx(
+            np.array([[0.45355191, 0.5], [0.47368421, 0.50226244]])
+        )
 
     def it_knows_its_columns_margin(self, raw_weighted_counts):
         weighted_cube_counts = _MrXMrWeightedCubeCounts(
@@ -1767,6 +1859,34 @@ class Describe_MrXMrWeightedCubeCounts(object):
                     [  # -- not selected --
                         [6.6, 2.2],  # -- col 0
                         [7.7, 1.1],  # -- col 1
+                    ],
+                ],
+            ]
+        )
+
+    @pytest.fixture
+    def counts_with_missings(self):
+        """(2, 2, 2, 2) np.float ndarray of cube-counts w/missings as from Cube."""
+        return np.array(
+            [  # ------ sel/not (col) -----
+                [  # -- row 0 -------------
+                    [  # -- selected ------
+                        [0.0, 0.33, 8.8],  # -- col 0
+                        [1.1, 2.2, 7.7],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [2.2, 2.2, 6.6],  # -- col 0
+                        [3.3, 2.2, 5.5],  # -- col 1
+                    ],
+                ],
+                [  # -- row 1 -------------
+                    [  # -- selected ------
+                        [4.4, 1.1, 4.4],  # -- col 0
+                        [5.5, 2.3, 3.3],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [6.6, 2.2, 2.2],  # -- col 0
+                        [7.7, 2.2, 1.1],  # -- col 1
                     ],
                 ],
             ]
