@@ -22,14 +22,12 @@ from cr.cube.matrix.assembler import (
     _SortRowsByInsertedColumnHelper,
     _SortRowsByMarginalHelper,
 )
-from cr.cube.matrix.cubemeasure import (
-    BaseCubeResultMatrix,
-    _CatXCatMatrix,
-)
+from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.measure import (
     _BaseMarginal,
     _BaseSecondOrderMeasure,
     _ColumnComparableCounts,
+    _ColumnIndex,
     _ColumnProportions,
     _ColumnShareSum,
     _ColumnUnweightedBases,
@@ -70,6 +68,7 @@ class DescribeAssembler(object):
         "measure_prop_name, MeasureCls",
         (
             ("column_comparable_counts", _ColumnComparableCounts),
+            ("column_index", _ColumnIndex),
             ("column_proportions", _ColumnProportions),
             ("column_share_sum", _ColumnShareSum),
             ("column_unweighted_bases", _ColumnUnweightedBases),
@@ -147,30 +146,6 @@ class DescribeAssembler(object):
 
         _assemble_marginal_.assert_called_once_with(assembler, measure_)
         assert value == [[1, 2, 3], [4, 5, 6]]
-
-    def it_knows_the_column_index(
-        self,
-        request,
-        _cube_result_matrix_prop_,
-        dimensions_,
-        NanSubtotals_,
-        _assemble_matrix_,
-    ):
-        cube_result_matrix_ = instance_mock(
-            request, _CatXCatMatrix, column_index=[[1, 2], [3, 4]]
-        )
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        NanSubtotals_.blocks.return_value = [[[1], [np.nan]], [[3], []]]
-        _assemble_matrix_.return_value = [[1, np.nan, 3], [4, np.nan, 6]]
-        assembler = Assembler(None, dimensions_, None)
-
-        column_index = assembler.column_index
-
-        NanSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
-        _assemble_matrix_.assert_called_once_with(
-            assembler, [[[1], [np.nan]], [[3], []]]
-        )
-        assert column_index == [[1, np.nan, 3], [4, np.nan, 6]]
 
     def it_knows_the_column_labels(
         self,
@@ -916,7 +891,6 @@ class DescribeAssembler(object):
 
     def it_knows_the_row_order_to_help(
         self,
-        request,
         _BaseOrderHelper_,
         dimensions_,
         _measures_prop_,
@@ -1000,10 +974,6 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _measures_prop_(self, request):
         return property_mock(request, Assembler, "_measures")
-
-    @pytest.fixture
-    def NanSubtotals_(self, request):
-        return class_mock(request, "cr.cube.matrix.assembler.NanSubtotals")
 
     @pytest.fixture
     def _row_order_prop_(self, request):
