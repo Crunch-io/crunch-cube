@@ -953,6 +953,7 @@ class _BaseOrderHelper(object):
             M.COLUMN_BASE_WEIGHTED: "column_weighted_bases",
             M.COLUMN_PERCENT: "column_proportions",
             M.MEAN: "means",
+            M.POPULATION: "population_proportions",
             M.ROW_BASE_UNWEIGHTED: "row_unweighted_bases",
             M.ROW_BASE_WEIGHTED: "row_weighted_bases",
             M.ROW_PERCENT: "row_proportions",
