@@ -414,7 +414,6 @@ class _Slice(CubePartition):
         if not self._rows_have_numeric_value:
             return None
 
-        # rows_margin = self.rows_margin
         # TODO: This is a hack for X_Array slices, where rows-margin is undefined.
         # I think this probably shouldn't be defined across arrays, but to minimize
         # test damage, we use the first column of the weighted bases, which is
@@ -515,7 +514,6 @@ class _Slice(CubePartition):
         if not self._rows_have_numeric_value:
             return None
 
-        # rows_margin = self.rows_margin
         # TODO: This is a hack for X_Array slices, where rows-margin is undefined.
         # I think this probably shouldn't be defined across arrays, but to minimize
         # test damage, we use the first column of the weighted bases, which is
@@ -939,7 +937,6 @@ class _Slice(CubePartition):
         if not self._columns_have_numeric_value:
             return None
 
-        # columns_margin = self.columns_margin
         # TODO: This is a hack for X_Array slices, where columns-margin is undefined.
         # I think this measure probably also shouldn't be defined across arrays, but to
         # minimize test damage, we use the first row of the row weighted bases, which is
@@ -1010,7 +1007,6 @@ class _Slice(CubePartition):
         if not self._columns_have_numeric_value:
             return None
 
-        # columns_margin = self.columns_margin
         # TODO: This is a hack for X_Array slices, where columns-margin is undefined.
         # I think this measure probably also shouldn't be defined across arrays, but to
         # minimize test damage, we use the first row of the row weighted bases, which is

@@ -898,13 +898,11 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         weighted_counts,
         counts_with_missings,
         diff_nans,
-        dimensions_are_array,
     ):
         super(_BaseWeightedCubeCounts, self).__init__(dimensions)
         self._weighted_counts = weighted_counts
         self._counts_with_missings = counts_with_missings
         self._diff_nans = diff_nans
-        self._dimensions_are_array = dimensions_are_array
 
     @classmethod
     def factory(cls, cube, dimensions, slice_idx):
@@ -914,9 +912,6 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         counts = valid_counts if valid_counts is not None else cube.counts
         counts_with_missings = cube.counts_with_missings
         diff_nans = True if valid_counts is not None else False
-        dimensions_are_array = tuple(
-            dim_type in DT.ARRAY_TYPES for dim_type in dimension_types
-        )
         WeightedCubeCountsCls = (
             _MrXMrWeightedCubeCounts
             if dimension_types == (DT.MR, DT.MR)
@@ -931,7 +926,6 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
             counts[cls._slice_idx_expr(cube, slice_idx)],
             counts_with_missings[cls._slice_idx_expr(cube, slice_idx)],
             diff_nans,
-            dimensions_are_array,
         )
 
     @lazyproperty
@@ -946,7 +940,7 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         Cells in a column don't share a base when they go across array subvariables.
         Raises when counts are not comparable.
         """
-        if self._dimensions_are_array[1]:
+        if self._column_is_array:
             raise ValueError(
                 "column_comparable_counts not defined across subvariables."
             )
@@ -979,7 +973,7 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         Cells in a row don't share a base when they go across array subvariables.
         Raises when counts are not comparable.
         """
-        if self._dimensions_are_array[0]:
+        if self._row_is_array:
             raise ValueError("row_comparable_counts not defined across subvariables.")
 
         return self.weighted_counts
@@ -1041,6 +1035,24 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         expected_counts = rowsum * colsum / total
         variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
         return (counts - expected_counts) / np.sqrt(variance)
+
+    @lazyproperty
+    def _column_is_array(self):
+        """Bool indicating whether the column is an array variable type
+
+        `_dimensions` is already apparent dimensions, so the columns is the last dimension.
+        (order is rows, column if 2D or tabs, rows, columns if 3D)
+        """
+        return self._dimensions[-1].dimension_type in DT.ARRAY_TYPES
+
+    @lazyproperty
+    def _row_is_array(self):
+        """Bool indicating whether the row is an array variable type
+
+        `_dimensions` is already apparent dimensions, so the rows is the 2nd to last
+        dimension. (order is rows, column if 2D or tabs, rows, columns if 3D)
+        """
+        return self._dimensions[-2].dimension_type in DT.ARRAY_TYPES
 
     @lazyproperty
     def _valid_row_idxs(self):

@@ -1219,7 +1219,6 @@ class Describe_BaseWeightedCubeCounts(object):
             "counts_with_missings",
             "weighted_valid_counts",
             "diff_nans",
-            "dimensions_are_array",
             "expected_counts",
             "expected_counts_with_missings",
         ),
@@ -1231,7 +1230,6 @@ class Describe_BaseWeightedCubeCounts(object):
                 [[1, 2], [3, 4]],
                 None,
                 False,
-                (True, True),
                 [3, 4],
                 [3, 4],
             ),
@@ -1242,7 +1240,6 @@ class Describe_BaseWeightedCubeCounts(object):
                 [[1, 2], [3, 4]],
                 None,
                 False,
-                (True, False),
                 [3, 4],
                 [3, 4],
             ),
@@ -1253,7 +1250,6 @@ class Describe_BaseWeightedCubeCounts(object):
                 [[1, 2], [3, 4]],
                 None,
                 False,
-                (False, True),
                 [3, 4],
                 [3, 4],
             ),
@@ -1264,7 +1260,6 @@ class Describe_BaseWeightedCubeCounts(object):
                 [[1, 2], [3, 4]],
                 None,
                 False,
-                (False, False),
                 [3, 4],
                 [3, 4],
             ),
@@ -1275,7 +1270,6 @@ class Describe_BaseWeightedCubeCounts(object):
                 [[1, 2], [5, 4]],
                 [[1, 2], [5, 4]],
                 True,
-                (False, False),
                 [5, 4],
                 [5, 4],
             ),
@@ -1292,7 +1286,6 @@ class Describe_BaseWeightedCubeCounts(object):
         counts_with_missings,
         weighted_valid_counts,
         diff_nans,
-        dimensions_are_array,
         expected_counts,
         expected_counts_with_missings,
     ):
@@ -1326,7 +1319,6 @@ class Describe_BaseWeightedCubeCounts(object):
             expected_counts,
             expected_counts_with_missings,
             diff_nans,
-            dimensions_are_array,
         )
         assert weighted_cube_counts is weighted_cube_counts_
 
@@ -1354,20 +1346,22 @@ class Describe_BaseWeightedCubeCounts(object):
             "weighted_counts",
             return_value=np.array([[0, 0], [0, 0], [0, 0]]),
         )
-        weighted_cube_counts = _BaseWeightedCubeCounts(None, None, None, False, None)
+        weighted_cube_counts = _BaseWeightedCubeCounts(None, None, None, False)
 
         assert weighted_cube_counts.column_bases.tolist() == expected_value
 
     def it_computes_the_column_comparable_counts_if_column_is_not_array(
-        self, weighted_counts_prop_
+        self, _column_is_array_prop, weighted_counts_prop_
     ):
+        _column_is_array_prop.return_value = False
         weighted_counts_prop_.return_value = [[1, 2], [3, 4]]
-        weighted_cube_counts = _BaseWeightedCubeCounts(None, None, None, False, (True, False))
+        weighted_cube_counts = _BaseWeightedCubeCounts(None, None, None, False)
 
         assert weighted_cube_counts.column_comparable_counts == [[1, 2], [3, 4]]
 
-    def but_it_raises_on_column_comparable_count_if_column_is_array(self):
-        weighted_counts = _BaseWeightedCubeCounts(None, None, None, False, (True, True))
+    def but_it_raises_on_column_comparable_count_if_column_is_array(self, _column_is_array_prop):
+        _column_is_array_prop.return_value = True
+        weighted_counts = _BaseWeightedCubeCounts(None, None, None, False)
 
         with pytest.raises(ValueError) as e:
             weighted_counts.column_comparable_counts
@@ -1377,15 +1371,17 @@ class Describe_BaseWeightedCubeCounts(object):
         )
 
     def it_computes_the_row_comparable_counts_if_row_is_not_array(
-        self, weighted_counts_prop_
+        self, _row_is_array_prop, weighted_counts_prop_
     ):
+        _row_is_array_prop.return_value = False
         weighted_counts_prop_.return_value = [[1, 2], [3, 4]]
-        weighted_cube_counts = _BaseWeightedCubeCounts(None, None, None, False, (False, True))
+        weighted_cube_counts = _BaseWeightedCubeCounts(None, None, None, False)
 
         assert weighted_cube_counts.row_comparable_counts == [[1, 2], [3, 4]]
 
-    def but_it_raises_on_row_comparable_count_if_row_is_array(self):
-        weighted_counts = _BaseWeightedCubeCounts(None, None, None, False, (True, True))
+    def but_it_raises_on_row_comparable_count_if_row_is_array(self, _row_is_array_prop):
+        _row_is_array_prop.return_value = True
+        weighted_counts = _BaseWeightedCubeCounts(None, None, None, False)
 
         with pytest.raises(ValueError) as e:
             weighted_counts.row_comparable_counts
@@ -1397,7 +1393,7 @@ class Describe_BaseWeightedCubeCounts(object):
         total = np.array([51, 63, 75, 87])
         rowsum = np.array([[1, 5, 9, 13], [17, 21, 25, 29], [33, 37, 41, 45]])
         colsum = np.array([24, 30, 36, 42])
-        matrix = _BaseWeightedCubeCounts(None, None, None, False, None)
+        matrix = _BaseWeightedCubeCounts(None, None, None, False)
 
         residuals = matrix._array_type_std_res(counts, total, rowsum, colsum)
 
@@ -1407,6 +1403,28 @@ class Describe_BaseWeightedCubeCounts(object):
             [0.2762585, 0.1951985, 0.1485686, 0.1184429],
         ]
 
+    @pytest.mark.parametrize(
+        "dim_types, expected_col, expected_row",
+        (
+            ((DT.CAT, DT.CAT), False, False),
+            ((DT.NUM_ARRAY, DT.CAT), False, True),
+            ((DT.MR_SUBVAR, DT.MR_SUBVAR), True, True),
+            ((DT.CAT, DT.CAT, DT.CAT), False, False),
+            ((DT.CAT, DT.CA_SUBVAR, DT.CA_CAT), False, True),
+            ((DT.MR_SUBVAR, DT.CA_CAT, DT.CA_SUBVAR), True, False),
+        ),
+    )
+    def it_can_determine_if_row_and_col_are_array(
+        self, request, dim_types, expected_col, expected_row
+    ):
+        dimensions_ = [
+            instance_mock(request, Dimension, dimension_type=dt) for dt in dim_types
+        ]
+        weighted_counts = _BaseWeightedCubeCounts(dimensions_, None, None, False)
+
+        assert weighted_counts._column_is_array == expected_col
+        assert weighted_counts._row_is_array == expected_row
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -1414,8 +1432,16 @@ class Describe_BaseWeightedCubeCounts(object):
         return instance_mock(request, Cube)
 
     @pytest.fixture
+    def _column_is_array_prop(self, request):
+        return property_mock(request, _BaseWeightedCubeCounts, "_column_is_array")
+
+    @pytest.fixture
     def dimensions_(self, request):
         return instance_mock(request, Dimension), instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _row_is_array_prop(self, request):
+        return property_mock(request, _BaseWeightedCubeCounts, "_row_is_array")
 
     @pytest.fixture
     def weighted_counts_prop_(self, request):
@@ -1433,7 +1459,7 @@ class Describe_CatXCatWeightedCubeCounts(object):
             return_value=(np.array([0, 1]),),
         )
         weighted_cube_counts = _CatXCatWeightedCubeCounts(
-            None, None, counts_with_missings, None, None
+            None, None, counts_with_missings, None
         )
 
         assert weighted_cube_counts.baseline == pytest.approx(
@@ -1442,7 +1468,7 @@ class Describe_CatXCatWeightedCubeCounts(object):
 
     def it_knows_its_columns_margin(self, raw_weighted_counts):
         weighted_cube_counts = _CatXCatWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
 
         assert weighted_cube_counts.columns_margin == pytest.approx(
@@ -1457,7 +1483,7 @@ class Describe_CatXCatWeightedCubeCounts(object):
             return_value=np.array([8.8, 9.9]),
         )
         weighted_cube_counts = _CatXCatWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
 
         assert weighted_cube_counts.row_bases == pytest.approx(
@@ -1466,7 +1492,7 @@ class Describe_CatXCatWeightedCubeCounts(object):
 
     def it_knows_its_rows_margin(self, raw_weighted_counts):
         weighted_cube_counts = _CatXCatWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.rows_margin.tolist() == [6.6, 16.5]
 
@@ -1475,7 +1501,7 @@ class Describe_CatXCatWeightedCubeCounts(object):
             request, _CatXCatWeightedCubeCounts, "table_margin", return_value=9.9
         )
         weighted_cube_counts = _CatXCatWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
 
         assert weighted_cube_counts.table_bases.tolist() == [
@@ -1485,13 +1511,13 @@ class Describe_CatXCatWeightedCubeCounts(object):
 
     def it_knows_its_table_margin(self, raw_weighted_counts):
         weighted_cube_counts = _CatXCatWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.table_margin == 23.1
 
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _CatXCatWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.weighted_counts.tolist() == [
             [3.3, 2.2, 1.1],
@@ -1500,7 +1526,7 @@ class Describe_CatXCatWeightedCubeCounts(object):
 
     def it_knows_its_zscores(self, raw_weighted_counts):
         weighted_cube_counts = _CatXCatWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.zscores.tolist() == [
             [0.43874821936960656, 4.3387889766250713e-16, -0.5097793640389925],
@@ -1510,7 +1536,7 @@ class Describe_CatXCatWeightedCubeCounts(object):
     def but_its_zscores_are_NaNs_for_a_deficient_matrix(self):
         raw_weighted_counts = np.array([[1.1, 1.1], [2.2, 2.2]])
         weighted_cube_counts = _CatXCatWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.zscores == pytest.approx(
             np.array([[np.nan, np.nan], [np.nan, np.nan]]), nan_ok=True
@@ -1540,7 +1566,7 @@ class Describe_CatXMrWeightedCubeCounts(object):
             return_value=(np.array([0, 1]),),
         )
         weighted_cube_counts = _CatXMrWeightedCubeCounts(
-            None, None, counts_with_missings, None, None
+            None, None, counts_with_missings, None
         )
 
         assert weighted_cube_counts.baseline == pytest.approx(
@@ -1549,7 +1575,7 @@ class Describe_CatXMrWeightedCubeCounts(object):
 
     def it_knows_its_columns_margin(self, raw_weighted_counts):
         weighted_cube_counts = _CatXMrWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.columns_margin == pytest.approx(
             np.array([5.5, 7.7, 9.9])
@@ -1562,7 +1588,7 @@ class Describe_CatXMrWeightedCubeCounts(object):
             "rows_margin",
             return_value=np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]),
         )
-        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, None, None, None, None)
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, None, None, None)
 
         assert weighted_cube_counts.row_bases.tolist() == [
             [1.1, 2.2, 3.3],
@@ -1571,7 +1597,7 @@ class Describe_CatXMrWeightedCubeCounts(object):
 
     def it_knows_its_rows_margin(self, raw_weighted_counts):
         weighted_cube_counts = _CatXMrWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.rows_margin == pytest.approx(
             np.array([[7.7, 7.7, 7.7], [7.7, 7.7, 7.7]])
@@ -1590,7 +1616,7 @@ class Describe_CatXMrWeightedCubeCounts(object):
             "weighted_counts",
             return_value=np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]),
         )
-        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, None, None, None, None)
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, None, None, None)
 
         assert weighted_cube_counts.table_bases.tolist() == [
             [9.8, 7.6, 5.4],
@@ -1599,13 +1625,13 @@ class Describe_CatXMrWeightedCubeCounts(object):
 
     def it_knows_its_table_margin(self, raw_weighted_counts):
         weighted_cube_counts = _CatXMrWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.table_margin == pytest.approx([15.4, 15.4, 15.4])
 
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _CatXMrWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
 
         assert weighted_cube_counts.weighted_counts == pytest.approx(
@@ -1619,7 +1645,7 @@ class Describe_CatXMrWeightedCubeCounts(object):
 
     def it_knows_its_zscores(self, raw_weighted_counts):
         weighted_cube_counts = _CatXMrWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert pytest.approx(weighted_cube_counts.zscores) == [
             [-1.7549928774784245, -1.6818357317441646, -1.754992877478425],
@@ -1629,7 +1655,7 @@ class Describe_CatXMrWeightedCubeCounts(object):
     def but_its_zscores_are_NaNs_for_a_deficient_matrix(self):
         raw_weighted_counts = np.array([[[1.2, 1.2], [2.1, 2.2]]])
         weighted_cube_counts = _CatXMrWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.zscores == pytest.approx(
             np.array([[np.nan, np.nan]]), nan_ok=True
@@ -1679,7 +1705,7 @@ class Describe_MrXCatWeightedCubeCounts(object):
             return_value=(np.array([0, 1]),),
         )
         weighted_cube_counts = _MrXCatWeightedCubeCounts(
-            None, None, counts_with_missings, None, None
+            None, None, counts_with_missings, None
         )
 
         assert weighted_cube_counts.baseline == pytest.approx(
@@ -1688,7 +1714,7 @@ class Describe_MrXCatWeightedCubeCounts(object):
 
     def it_knows_its_columns_margin(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.columns_margin == pytest.approx(
             np.array([[5.5, 7.7, 9.9], [7.7, 13.2, 12.1]])
@@ -1707,7 +1733,7 @@ class Describe_MrXCatWeightedCubeCounts(object):
             "weighted_counts",
             return_value=np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
         )
-        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, None, None, None, None)
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, None, None, None)
 
         assert weighted_cube_counts.row_bases == pytest.approx(
             np.array([[1.1, 1.1], [2.2, 2.2], [3.3, 3.3]])
@@ -1715,7 +1741,7 @@ class Describe_MrXCatWeightedCubeCounts(object):
 
     def it_knows_its_rows_margin(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.rows_margin == pytest.approx(np.array([6.6, 26.4]))
 
@@ -1732,7 +1758,7 @@ class Describe_MrXCatWeightedCubeCounts(object):
             "weighted_counts",
             return_value=np.arange(6).reshape(2, 3),
         )
-        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, None, None, None, None)
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, None, None, None)
 
         assert weighted_cube_counts.table_bases.tolist() == [
             [9.8, 9.8, 9.8],
@@ -1741,7 +1767,7 @@ class Describe_MrXCatWeightedCubeCounts(object):
 
     def it_knows_its_table_margin(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.table_margin == pytest.approx(
             np.array([23.1, 33.0])
@@ -1749,7 +1775,7 @@ class Describe_MrXCatWeightedCubeCounts(object):
 
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.weighted_counts.tolist() == pytest.approx(
             np.array([[1.1, 2.2, 3.3], [7.7, 8.8, 9.9]])
@@ -1757,7 +1783,7 @@ class Describe_MrXCatWeightedCubeCounts(object):
 
     def it_knows_its_zscores(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.zscores.tolist() == [
             [-0.5097793640389925, 4.3387889766250713e-16, 0.43874821936960656],
@@ -1810,7 +1836,7 @@ class Describe_MrXMrWeightedCubeCounts(object):
             return_value=(np.array([0, 1]),),
         )
         weighted_cube_counts = _MrXMrWeightedCubeCounts(
-            None, None, counts_with_missings, None, None
+            None, None, counts_with_missings, None
         )
 
         assert weighted_cube_counts.baseline == pytest.approx(
@@ -1819,7 +1845,7 @@ class Describe_MrXMrWeightedCubeCounts(object):
 
     def it_knows_its_columns_margin(self, raw_weighted_counts):
         weighted_cube_counts = _MrXMrWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.columns_margin == pytest.approx(
             np.array([[2.2, 4.4], [11.0, 13.2]])
@@ -1832,7 +1858,7 @@ class Describe_MrXMrWeightedCubeCounts(object):
             "rows_margin",
             return_value=np.array([[1.1, 2.2], [5.5, 6.6]]),
         )
-        weighted_cube_counts = _MrXMrWeightedCubeCounts(None, None, None, None, None)
+        weighted_cube_counts = _MrXMrWeightedCubeCounts(None, None, None, None)
 
         assert weighted_cube_counts.row_bases == pytest.approx(
             np.array([[1.1, 2.2], [5.5, 6.6]])
@@ -1840,7 +1866,7 @@ class Describe_MrXMrWeightedCubeCounts(object):
 
     def it_knows_its_rows_margin(self, raw_weighted_counts):
         weighted_cube_counts = _MrXMrWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.rows_margin == pytest.approx(
             np.array([[8.8, 8.8], [8.8, 8.8]])
@@ -1853,7 +1879,7 @@ class Describe_MrXMrWeightedCubeCounts(object):
             "table_margin",
             return_value=np.array([[3.3, 2.2, 1.1], [7.7, 6.6, 5.5]]),
         )
-        weighted_cube_counts = _MrXMrWeightedCubeCounts(None, None, None, None, None)
+        weighted_cube_counts = _MrXMrWeightedCubeCounts(None, None, None, None)
 
         assert weighted_cube_counts.table_bases == pytest.approx(
             np.array([[3.3, 2.2, 1.1], [7.7, 6.6, 5.5]])
@@ -1861,7 +1887,7 @@ class Describe_MrXMrWeightedCubeCounts(object):
 
     def it_knows_its_table_margin(self, raw_weighted_counts):
         weighted_cube_counts = _MrXMrWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.table_margin == pytest.approx(
             np.array([[17.6, 17.6], [17.6, 17.6]])
@@ -1869,7 +1895,7 @@ class Describe_MrXMrWeightedCubeCounts(object):
 
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _MrXMrWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
 
         assert weighted_cube_counts.weighted_counts == pytest.approx(
@@ -1878,7 +1904,7 @@ class Describe_MrXMrWeightedCubeCounts(object):
 
     def it_knows_its_zscores(self, raw_weighted_counts):
         weighted_cube_counts = _MrXMrWeightedCubeCounts(
-            None, raw_weighted_counts, None, None, None
+            None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.zscores.tolist() == [
             [-1.5856499343441839, -1.2110601416389966],
