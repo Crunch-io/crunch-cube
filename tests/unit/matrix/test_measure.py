@@ -1543,6 +1543,7 @@ class Describe_Zscores(object):
         )
         assert blocks == [[[1], [2]], [[3], [4]]]
 
+    @pytest.mark.xfail(reason="WIP - come back and write unit tests for zscores")
     def but_the_subtotal_blocks_are_NaNs_when_an_MR_dimension_is_present(
         self, request, dimensions_
     ):
