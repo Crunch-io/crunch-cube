@@ -11,3 +11,12 @@ repos:
     rev: stable
     hooks:
     - id: black
+
+-   repo:  https://github.com/milin/giticket
+    rev: v1.2
+    hooks:
+    - id: giticket
+      args:
+       - '--regex=\d{8,}'
+       - '--mode=regex_match'
+       - '--format=[{ticket}]: {commit_msg}'
