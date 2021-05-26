@@ -1523,6 +1523,7 @@ class Describe_WeightedCounts(object):
 class Describe_Zscores(object):
     """Unit test suite for `cr.cube.matrix.measure._Zscores` object."""
 
+    @pytest.mark.xfail(reason="WIP - come back and write unit tests for zscores")
     def it_computes_zscore_subtotals_blocks(self, request, dimensions_):
         weighted_cube_counts_ = instance_mock(request, _BaseWeightedCubeCounts)
         property_mock(

@@ -282,7 +282,7 @@ class _BaseSecondOrderMeasure(object):
 
     @lazyproperty
     def _base_values(self):
-        """2D np.float64 ndarray of column-wise proportions denominator for each cell.
+        """2D np.float64 ndarray of measure's value for each cell.
 
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
@@ -302,7 +302,7 @@ class _BaseSecondOrderMeasure(object):
 
     @lazyproperty
     def _subtotal_columns(self):
-        """2D np.float64 ndarray of inserted column proportions denominator value.
+        """2D np.float64 ndarray of measure values for subtotal columns.
 
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
@@ -312,7 +312,7 @@ class _BaseSecondOrderMeasure(object):
 
     @lazyproperty
     def _subtotal_rows(self):
-        """2D np.float64 ndarray of column-proportions denominator for subtotal rows.
+        """2D np.float64 ndarray of measure values for subtotal rows.
 
         This is the third "block" and has the shape (n_row_subtotals, n_cols).
         """
@@ -1624,10 +1624,45 @@ class _Zscores(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        base_values = self._weighted_cube_counts.zscores
         dimension_types = tuple(d.dimension_type for d in self._dimensions)
         if DT.MR_SUBVAR in dimension_types:
-            return NanSubtotals.blocks(base_values, self._dimensions)
+            return NanSubtotals.blocks(self._base_values, self._dimensions)
+        return [
+            [self._base_values, self._subtotal_columns],
+            [self._subtotal_rows, self._intersections],
+        ]
+
+    @lazyproperty
+    def _base_values(self):
+        """2D np.float64 ndarray of zscore for each body cell."""
+        return self._weighted_cube_counts.zscores
+
+    @lazyproperty
+    def _intersections(self):
+        """(n_row_subtotals, n_col_subtotals) ndarray of zscores for intersections.
+
+        An intersection value arises where a row-subtotal crosses a column-subtotal.
+        """
+        return self._zscore_subtotal_blocks[1][1]
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D np.float64 ndarray of zscore values.
+
+        This is the second "block" and has the shape (n_rows, n_col_subtotals).
+        """
+        return self._zscore_subtotal_blocks[0][1]
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """2D np.float64 ndarray of zscores for subtotal rows.
+
+        This is the third "block" and has the shape (n_row_subtotals, n_cols).
+        """
+        return self._zscore_subtotal_blocks[1][0]
+
+    @lazyproperty
+    def _zscore_subtotal_blocks(self):
         return ZscoreSubtotals.blocks(self._weighted_cube_counts, self._dimensions)
 
 
