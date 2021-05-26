@@ -148,22 +148,15 @@ class Assembler(object):
     def columns_margin(self):
         """1D/2D np.float64 ndarray of weighted-N for each column of this slice."""
         # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
+        # --- This is really just another way to call the columns_weighted_bases ---
+        # --- TODO: Should column_margin only be defined when it's 1D? This would
+        # --- require changes to exporter to use the bases to give a
+        # --- "column_margin_range"
         if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
-            return self._assemble_matrix(
-                SumSubtotals.blocks(
-                    self._cube_result_matrix.columns_margin,
-                    self._dimensions,
-                    diff_cols_nan=True,
-                )
-            )
+            return self.column_weighted_bases
 
         # --- otherwise columns-base is a vector ---
-        return self._assemble_vector(
-            self._cube_result_matrix.columns_margin,
-            self._column_subtotals,
-            self._column_order,
-            diffs_nan=True,
-        )
+        return self._assemble_marginal(self._measures.columns_margin)
 
     @lazyproperty
     def columns_margin_proportion(self):
@@ -383,7 +376,7 @@ class Assembler(object):
         """2D np.float64 ndarray of row-proportion for each matrix cell.
 
         This is the proportion of the weighted-count for cell to the weighted-N of the
-        row the cell appears in (aka. row-margin). Always a number between 0.0 and
+        row the cell appears in (aka. row-margin). Generally a number between 0.0 and
         1.0 inclusive, but subtotal differences can be between -1.0 and 1.0 inclusive.
         """
         return self._assemble_matrix(self._measures.row_proportions.blocks)
@@ -458,22 +451,14 @@ class Assembler(object):
         because each cell has a distinct margin in such a slice.
         """
         # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
+        # --- This is really just another way to call the row_weighted_bases ---
+        # --- TODO: Should rows_margin only be defined when it's 1D? This would
+        # --- require changes to exporter to use the bases to give a "rows_margin_range"
         if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
-            return self._assemble_matrix(
-                SumSubtotals.blocks(
-                    self._cube_result_matrix.rows_margin,
-                    self._dimensions,
-                    diff_rows_nan=True,
-                )
-            )
+            return self.row_weighted_bases
 
         # --- otherwise rows-margin is a vector ---
-        return self._assemble_vector(
-            self._cube_result_matrix.rows_margin,
-            self._row_subtotals,
-            self._row_order,
-            diffs_nan=True,
-        )
+        return self._assemble_marginal(self._measures.rows_margin)
 
     @lazyproperty
     def rows_margin_proportion(self):
@@ -628,6 +613,16 @@ class Assembler(object):
 
         # --- CAT_X_CAT produces scalar table-margin ---
         return base_table_margin
+
+    @lazyproperty
+    def table_proportions(self):
+        """2D np.float64 ndarray of table-proportion for each matrix cell.
+
+        This is the proportion of the weighted-count for cell to the weighted-N of the
+        row the cell appears in (aka. table-margin). Generally a number between 0.0 and
+        1.0 inclusive, but subtotal differences can be between -1.0 and 1.0 inclusive.
+        """
+        return self._assemble_matrix(self._measures.table_proportions.blocks)
 
     @lazyproperty
     def table_margin_unpruned(self):
@@ -952,6 +947,7 @@ class _BaseOrderHelper(object):
             M.ROW_BASE_UNWEIGHTED: "row_unweighted_bases",
             M.ROW_BASE_WEIGHTED: "row_weighted_bases",
             M.ROW_PERCENT: "row_proportions",
+            M.TABLE_PERCENT: "table_proportions",
             M.TABLE_BASE_UNWEIGHTED: "table_unweighted_bases",
             M.TABLE_BASE_WEIGHTED: "table_weighted_bases",
             M.UNWEIGHTED_COUNT: "unweighted_counts",
@@ -1200,6 +1196,7 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
         """Marginal object providing values for sort."""
         marginal = self._order_spec.marginal
         marginal_propname = {
+            MARGINAL.MARGIN: "rows_margin",
             MARGINAL.SCALE_MEAN: "rows_scale_mean",
             MARGINAL.SCALE_MEAN_STDDEV: "rows_scale_mean_stddev",
             MARGINAL.SCALE_MEDIAN: "rows_scale_median",

@@ -310,10 +310,6 @@ class DescribePairwiseSigTestSubtotals(object):
         return property_mock(request, PairwiseSigTestSubtotals, "_columns_base")
 
     @pytest.fixture
-    def dimensions_(self, request):
-        return instance_mock(request, Dimension), instance_mock(request, Dimension)
-
-    @pytest.fixture
     def _init_(self, request):
         return initializer_mock(request, PairwiseSigTestSubtotals)
 

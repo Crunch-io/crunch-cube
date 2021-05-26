@@ -1870,33 +1870,33 @@ class TestHeadersAndSubtotals(object):
             ],
         )
 
-        # Test col std dev
+        # Test row std dev
         np.testing.assert_almost_equal(
-            slice_.column_std_dev,
+            slice_.row_std_dev,
             [
-                [0.4330127, 0.48412292, 0.0, 0.0, 0.5],
-                [0.4330127, 0.48412292, 0.47140452, 0.0, 0.47140452],
-                [0.0, 0.4330127, 0.47140452, 0.0, 0.372678],
+                [0.5, 0.5, 0.0, 0.0, 0.0],
+                [0.372678, 0.5, 0.4714045, 0.0, 0.4714045],
+                [0.0, 0.4714045, 0.372678, 0.5, 0.4714045],
             ],
         )
 
-        # Test col std err
+        # Test row std err
         np.testing.assert_almost_equal(
-            slice_.column_std_err,
+            slice_.row_std_err,
             [
-                [0.21650635, 0.1711633, 0.0, 0.0, 0.14433757],
-                [0.21650635, 0.1711633, 0.27216553, 0.0, 0.13608276],
-                [0.0, 0.15309311, 0.27216553, 0.0, 0.10758287],
+                [0.2041241, 0.2041241, 0.0, 0.0, 0.0],
+                [0.1521452, 0.2041241, 0.1924501, 0.0, 0.1924501],
+                [0.0, 0.1924501, 0.1521452, 0.2041241, 0.1924501],
             ],
         )
 
-        # Test col MoE
+        # Test row MoE
         np.testing.assert_almost_equal(
-            slice_.column_proportions_moe,
+            slice_.row_proportions_moe,
             [
-                [0.42434465, 0.3354739, 0.0, 0.0, 0.28289644],
-                [0.42434465, 0.3354739, 0.53343463, 0.0, 0.26671732],
-                [0.0, 0.30005698, 0.53343463, 0.0, 0.21085855],
+                [0.400076, 0.400076, 0.0, 0.0, 0.0],
+                [0.298199, 0.400076, 0.3771952, 0.0, 0.3771952],
+                [0.0, 0.3771952, 0.298199, 0.400076, 0.3771952],
             ],
         )
 
@@ -3922,7 +3922,6 @@ class DescribeIntegrated_SubtotalDifferences(object):
         ).partitions[0]
 
         assert slice_.counts[0, :].tolist() == [-178, -495, 0]
-        assert slice_.rows_margin[0] == pytest.approx(np.nan, nan_ok=True)
         assert slice_.rows_base[0] == pytest.approx(np.nan, nan_ok=True)
         assert slice_.row_weighted_bases[0, :] == pytest.approx(
             np.full(3, np.nan), nan_ok=True

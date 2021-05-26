@@ -70,6 +70,13 @@ class SecondOrderMeasures(object):
         return _ColumnsBase(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def columns_margin(self):
+        """_SummedCountMargin for columns measure object for this cube-result."""
+        return _SummedCountMargin(
+            self._dimensions, self, self._cube_measures, MO.COLUMNS
+        )
+
+    @lazyproperty
     def columns_pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix column."""
         return self._cube_measures.unweighted_cube_counts.columns_pruning_base
@@ -167,6 +174,11 @@ class SecondOrderMeasures(object):
         return _RowWeightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def rows_margin(self):
+        """_SummedCountMargin rows measure object for this cube-result."""
+        return _SummedCountMargin(self._dimensions, self, self._cube_measures, MO.ROWS)
+
+    @lazyproperty
     def rows_pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix row."""
         return self._cube_measures.unweighted_cube_counts.rows_pruning_base
@@ -195,6 +207,11 @@ class SecondOrderMeasures(object):
     def stddev(self):
         """_StdDev measure object for this cube-result"""
         return _StdDev(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def table_proportions(self):
+        """_TableProportions measure object for this cube-result."""
+        return _TableProportions(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def table_unweighted_bases(self):
@@ -355,27 +372,36 @@ class _ColumnsBase(_BaseSecondOrderMeasure):
 class _ColumnComparableCounts(_BaseSecondOrderMeasure):
     """Provides the column-comparable count measure for a matrix.
 
-    Column-comparable Counts is a 2D np.float64 ndarray of the counts, with values in the
-    column of a subtotal difference overridden as np.nan because they do not share the
-    same base and so are "not comparable" when calculating other measures along the
-    column, like column proportions.
+    Column-Comparable-Counts is a 2D np.float64 ndarray of the counts, defined only when
+    the row dimension is not an array. The values in a subtotal difference column are
+    overridden as np.nan because they do not share the same base and so are "not
+    comparable" when calculating other measures along the column (across the rows),
+    like rows_margin.
+
+    Raises a ValueError when the row is an array.
     """
 
     @lazyproperty
     def blocks(self):
-        """Nested list of the four 2D ndarray "blocks" making up this measure.
+        """Nested list of the four 2D ndarray "blocks" making up this measure."""
+        if not self.is_defined:
+            raise ValueError(
+                "column_comparable_counts not defined across subvariables."
+            )
 
-        These are the base-values, the column-subtotals, the row-subtotals, and the
-        subtotal intersection-cell values.
-
-        Column-comparable counts are the same as counts, exccept that they are undefined
-        for columns of subtotal differences.
-        """
         return SumSubtotals.blocks(
             self._weighted_cube_counts.weighted_counts,
             self._dimensions,
-            diff_cols_nan=True,
+            diff_rows_nan=True,
         )
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool indicating whether column comparable counts are defined
+
+        We cannot sum counts across subvariable dimensions.
+        """
+        return not self._dimensions[1].dimension_type in DT.ARRAY_TYPES
 
 
 class _ColumnIndex(_BaseSecondOrderMeasure):
@@ -415,7 +441,7 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
         Column-proportions are counts divided by the column base, except that they are
         undefined for columns with subtotal differences.
         """
-        count_blocks = self._second_order_measures.column_comparable_counts.blocks
+        count_blocks = self._second_order_measures.weighted_counts.blocks
         weighted_base_blocks = self._second_order_measures.column_weighted_bases.blocks
 
         # --- do not propagate divide-by-zero warnings to stderr ---
@@ -960,27 +986,34 @@ class _PairwiseSigPvals(_PairwiseSigTstats):
 class _RowComparableCounts(_BaseSecondOrderMeasure):
     """Provides the row-comparable count measure for a matrix.
 
-    row-comparable Counts is a 2D np.float64 ndarray of the counts, with values in the
-    row of a subtotal difference overridden as np.nan because they do not share the
-    same base and so are "not comparable" when calculating other measures along the
-    row, like row proportions.
+    Row-Comparable-Counts is a 2D np.float64 ndarray of the counts, defined only when
+    the column dimension is not an array. The values in a subtotal difference row are
+    overridden as np.nan because they do not share the same base and so are "not
+    comparable" when calculating other measures along the row (across the columns),
+    like columns_margin.
+
+    Raises a ValueError when the column is an array.
     """
 
     @lazyproperty
     def blocks(self):
-        """Nested list of the four 2D ndarray "blocks" making up this measure.
+        """Nested list of the four 2D ndarray "blocks" making up this measure."""
+        if not self.is_defined:
+            raise ValueError("row_comparable_counts not defined across subvariables.")
 
-        These are the base-values, the column-subtotals, the row-subtotals, and the
-        subtotal intersection-cell values.
-
-        Row-comparable counts are the same as counts, exccept that they are undefined
-        for rows of subtotal differences.
-        """
         return SumSubtotals.blocks(
             self._weighted_cube_counts.weighted_counts,
             self._dimensions,
-            diff_rows_nan=True,
+            diff_cols_nan=True,
         )
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool indicating whether row comparable counts are defined
+
+        We cannot sum counts across subvariable dimensions.
+        """
+        return not self._dimensions[0].dimension_type in DT.ARRAY_TYPES
 
 
 class _RowProportions(_BaseSecondOrderMeasure):
@@ -997,9 +1030,9 @@ class _RowProportions(_BaseSecondOrderMeasure):
         These are the base-values, the column-subtotals, the row-subtotals, and the
         subtotal intersection-cell values.
 
-        Row-proportions are counts divided by the row comparable counts.
+        Row-proportions are row comparable counts divided by the row weighted bases.
         """
-        count_blocks = self._second_order_measures.row_comparable_counts.blocks
+        count_blocks = self._second_order_measures.weighted_counts.blocks
         weighted_base_blocks = self._second_order_measures.row_weighted_bases.blocks
 
         # --- do not propagate divide-by-zero warnings to stderr ---
@@ -1216,6 +1249,43 @@ class _StdDev(_BaseSecondOrderMeasure):
         return NanSubtotals.blocks(
             self._cube_measures.cube_stddev.stddev, self._dimensions
         )
+
+
+class _TableProportions(_BaseSecondOrderMeasure):
+    """Provides the table-proportions measure for a matrix.
+
+    Table-proportions is a 2D np.float64 ndarray of the proportion of its count
+    contributed by the weighted count of each matrix cell.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values.
+
+        Table-proportions are weighted counts divided by the table weighted bases.
+        """
+        count_blocks = self._second_order_measures.weighted_counts.blocks
+        weighted_base_blocks = self._second_order_measures.table_weighted_bases.blocks
+
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return [
+                [
+                    # --- base values ---
+                    count_blocks[0][0] / weighted_base_blocks[0][0],
+                    # --- inserted columns ---
+                    count_blocks[0][1] / weighted_base_blocks[0][1],
+                ],
+                [
+                    # --- inserted rows ---
+                    count_blocks[1][0] / weighted_base_blocks[1][0],
+                    # --- intersections ---
+                    count_blocks[1][1] / weighted_base_blocks[1][1],
+                ],
+            ]
 
 
 class _TableUnweightedBases(_BaseSecondOrderMeasure):
@@ -1586,15 +1656,25 @@ class _BaseMarginal(object):
         orientation, and include the base values and the subtotals for the orientation.
         """
         if self.orientation == MO.ROWS:
-            # --- Use *row* comparable counts ---
-            counts = self._second_order_measures.row_comparable_counts.blocks
+            # --- Use *column* comparable counts (going across rows) ---
+            counts = self._second_order_measures.column_comparable_counts.blocks
             # --- Get base values & *row* subtotals
             return [counts[0][0], counts[1][0]]
         else:
-            # --- Use *column* comparable counts ---
-            counts = self._second_order_measures.column_comparable_counts.blocks
+            # --- Use *row* comparable counts (going across columns) ---
+            counts = self._second_order_measures.row_comparable_counts.blocks
             # --- Get base values & *column* subtotals
             return [counts[0][0], counts[0][1]]
+
+    @lazyproperty
+    def _counts_are_defined(self):
+        """Bool indicating whether counts are defined for this orientation
+
+        Counts are undefined across subvariable dimensions.
+        """
+        if self.orientation == MO.ROWS:
+            return self._second_order_measures.column_comparable_counts.is_defined
+        return self._second_order_measures.row_comparable_counts.is_defined
 
 
 class _BaseScaledCountMarginal(_BaseMarginal):
@@ -1853,6 +1933,25 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
             if self.orientation == MO.ROWS
             else self._columns_weighted_mean_stddev
         )
+
+
+class _SummedCountMargin(_BaseMarginal):
+    """The 'summed-count-margin' (often called the rows-margin/columns-margin)"""
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin.
+
+        These are the base-values and the subtotals.
+        """
+        return [
+            self._apply_along_orientation(np.sum, counts) for counts in self._counts
+        ]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if counts are defined."""
+        return self._counts_are_defined
 
 
 # === PAIRWISE HELPERS ===

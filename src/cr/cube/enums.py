@@ -73,6 +73,7 @@ class COLLATION_METHOD(enum.Enum):
 class MARGINAL(enum.Enum):
     """Enumerated values representing the (second-order) marginals."""
 
+    MARGIN = "margin"
     SCALE_MEAN = "scale_mean"
     SCALE_MEAN_STDDEV = "scale_mean_stddev"
     SCALE_MEDIAN = "scale_median"
@@ -103,6 +104,7 @@ class MEASURE(enum.Enum):
     SUM = "sum"
     TABLE_BASE_UNWEIGHTED = "table_base_unweighted"
     TABLE_BASE_WEIGHTED = "table_base_weighted"
+    TABLE_PERCENT = "table_percent"
     TABLE_STDERR = "table_stderr"
     TOTAL_SHARE_SUM = "total_share_sum"
     UNWEIGHTED_COUNT = "count_unweighted"

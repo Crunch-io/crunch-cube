@@ -892,7 +892,13 @@ class _NumArrayXMrUnweightedCubeCounts(_CatXMrUnweightedCubeCounts):
 class _BaseWeightedCubeCounts(_BaseCubeMeasure):
     """Base class for weighted-count cube-measure variants."""
 
-    def __init__(self, dimensions, weighted_counts, counts_with_missings, diff_nans):
+    def __init__(
+        self,
+        dimensions,
+        weighted_counts,
+        counts_with_missings,
+        diff_nans,
+    ):
         super(_BaseWeightedCubeCounts, self).__init__(dimensions)
         self._weighted_counts = weighted_counts
         self._counts_with_missings = counts_with_missings

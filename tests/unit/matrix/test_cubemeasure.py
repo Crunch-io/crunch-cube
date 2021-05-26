@@ -1308,12 +1308,17 @@ class Describe_BaseWeightedCubeCounts(object):
         cube_.counts_with_missings = counts_with_missings
 
         weighted_cube_counts = _BaseWeightedCubeCounts.factory(
-            cube_, dimensions_, slice_idx=2
+            cube_,
+            dimensions_,
+            slice_idx=2,
         )
 
         _slice_idx_expr_.assert_called_with(cube_, 2)
         WeightedCubeCountsCls_.assert_called_once_with(
-            dimensions_, expected_counts, expected_counts_with_missings, diff_nans
+            dimensions_,
+            expected_counts,
+            expected_counts_with_missings,
+            diff_nans,
         )
         assert weighted_cube_counts is weighted_cube_counts_
 
@@ -2298,6 +2303,24 @@ class Describe_MrXCatMatrix(object):
             _MrXCatMatrix(None, None, unweighted_counts, None).columns_pruning_base,
             np.array([15, 17, 19]),
         )
+
+    def it_knows_its_rows_margin(self):
+        weighted_counts = np.array(
+            [
+                [  # -- row 0 ------------
+                    [1, 2, 3],  # -- selected --
+                    [4, 5, 6],  # -- not --
+                ],
+                [  # -- row 1 ------------
+                    [7, 8, 9],  # -- selected --
+                    [3, 2, 1],  # -- not --
+                    # --------------------
+                ],
+            ]
+        )
+        cube = _MrXCatMatrix(None, weighted_counts, None, None)
+
+        assert cube.rows_margin.tolist() == [6, 24]
 
     def it_knows_its_rows_pruning_base(self):
         unweighted_counts = np.array(
