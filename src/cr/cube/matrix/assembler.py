@@ -799,7 +799,11 @@ class Assembler(object):
         return tuple(
             element_index
             for element_index, derived in enumerate(
-                np.array([e.derived for e in dimension.valid_elements])[order]
+                np.array(
+                    [e.derived for e in dimension.valid_elements]
+                    # ---Subtotals are not real elements and hence not derived
+                    + [False for _ in dimension.subtotals]
+                )[order]
             )
             if derived
         )

@@ -542,6 +542,35 @@ class Describe_Slice(object):
         assert slice_.inserted_row_idxs == ()
         assert slice_.inserted_column_idxs == ()
 
+    def it_provides_empty_derived_indexes_for_categorical(self):
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "anchor": "top",
+                        "args": [1, 2],
+                        "function": "subtotal",
+                        "name": "T",
+                    },
+                    {
+                        "anchor": 1,
+                        "args": [1, 2],
+                        "function": "subtotal",
+                        "name": "MIDDLE",
+                    },
+                    {
+                        "anchor": "bottom",
+                        "args": [2, 1],
+                        "function": "subtotal",
+                        "name": "BOTTOM",
+                    },
+                ]
+            }
+        }
+        slice_ = Cube(MRI.CAT_HS_TOP_BTM, transforms=transforms).partitions[0]
+        assert slice_.derived_row_idxs == ()
+        assert slice_.inserted_row_idxs == (0, 2, 4)
+
     @pytest.mark.parametrize(
         "fixture, expectation",
         (

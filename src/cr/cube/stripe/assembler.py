@@ -56,9 +56,11 @@ class StripeAssembler(object):
         return tuple(
             element_idx
             for element_idx, derived in enumerate(
-                np.array([e.derived for e in self._rows_dimension.valid_elements])[
-                    self._row_order
-                ]
+                np.array(
+                    [e.derived for e in self._rows_dimension.valid_elements]
+                    # ---Subtotals are not data elements, and hence not derived
+                    + [False for _ in self._rows_dimension.subtotals]
+                )[self._row_order]
             )
             if derived
         )
