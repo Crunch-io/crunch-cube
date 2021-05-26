@@ -1639,12 +1639,32 @@ class _Zscores(_BaseSecondOrderMeasure):
     @lazyproperty
     def _base_values(self):
         """2D np.float64 ndarray of zscore for each body cell."""
-        return self._zscore_calculation(
+        return self._calculate_zscores(
             self._second_order_measures.weighted_counts.blocks[0][0],
             self._second_order_measures.table_weighted_bases.blocks[0][0],
             self._second_order_measures.row_weighted_bases.blocks[0][0],
             self._second_order_measures.column_weighted_bases.blocks[0][0],
         )
+
+    def _calculate_zscores(self, counts, table_bases, row_bases, column_bases):
+        """2D np.float64 ndarray of zscore value for each cell of the matrix.
+
+        A z-score is also known as a *standard score* and is the number of standard
+        deviations above (positive) or below (negative) the population mean a cell's
+        value is.
+        """
+        if self._is_defective:
+            return np.full(counts.shape, np.nan)
+
+        expected_counts = row_bases * column_bases / table_bases
+        variance = (
+            row_bases
+            * column_bases
+            * (table_bases - row_bases)
+            * (table_bases - column_bases)
+            / table_bases ** 3
+        )
+        return (counts - expected_counts) / np.sqrt(variance)
 
     @lazyproperty
     def _intersections(self):
@@ -1652,7 +1672,7 @@ class _Zscores(_BaseSecondOrderMeasure):
 
         An intersection value arises where a row-subtotal crosses a column-subtotal.
         """
-        return self._zscore_calculation(
+        return self._calculate_zscores(
             self._second_order_measures.weighted_counts.blocks[1][1],
             self._second_order_measures.table_weighted_bases.blocks[1][1],
             self._second_order_measures.row_weighted_bases.blocks[1][1],
@@ -1661,8 +1681,12 @@ class _Zscores(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def _is_defective(self):
-        # --- if the matrix is "defective", in the sense that it doesn't have at least
-        # --- two rows and two columns that are "full" of data, don't calculate zscores.
+        """Bool indicating whether the matrix is defective
+
+        Consider it "defective" if it doesn't have at least two rows and two columns
+        in the base values that are "full" of data. In this case we won't calculate
+        zscores for any block.
+        """
         counts = self._second_order_measures.weighted_counts.blocks[0][0]
         return not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2
 
@@ -1672,7 +1696,7 @@ class _Zscores(_BaseSecondOrderMeasure):
 
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
-        return self._zscore_calculation(
+        return self._calculate_zscores(
             self._second_order_measures.weighted_counts.blocks[0][1],
             self._second_order_measures.table_weighted_bases.blocks[0][1],
             self._second_order_measures.row_weighted_bases.blocks[0][1],
@@ -1685,25 +1709,12 @@ class _Zscores(_BaseSecondOrderMeasure):
 
         This is the third "block" and has the shape (n_row_subtotals, n_cols).
         """
-        return self._zscore_calculation(
+        return self._calculate_zscores(
             self._second_order_measures.weighted_counts.blocks[1][0],
             self._second_order_measures.table_weighted_bases.blocks[1][0],
             self._second_order_measures.row_weighted_bases.blocks[1][0],
             self._second_order_measures.column_weighted_bases.blocks[1][0],
         )
-
-    def _zscore_calculation(self, counts, total, rowsum, colsum):
-        """Return 2D np.float64 ndarray of std-res value for each cell of MR matrix.
-
-        This is a utility method used by a matrix with one or more MR dimensions. The
-        caller forms the input arrays based on which of its dimensions are MR.
-        """
-        if self._is_defective:
-            return np.full(counts.shape, np.nan)
-
-        expected_counts = rowsum * colsum / total
-        variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
-        return (counts - expected_counts) / np.sqrt(variance)
 
 
 # === MARGINALS ===
