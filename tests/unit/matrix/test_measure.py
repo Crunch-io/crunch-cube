@@ -26,6 +26,7 @@ from cr.cube.matrix.measure import (
     _PairwiseSigTstats,
     _PairwiseMeansSigPVals,
     _PairwiseMeansSigTStats,
+    _PopulationProportions,
     _RowComparableCounts,
     _RowProportions,
     _RowShareSum,
@@ -58,6 +59,7 @@ class DescribeSecondOrderMeasures(object):
             ("column_proportions", _ColumnProportions),
             ("column_unweighted_bases", _ColumnUnweightedBases),
             ("column_weighted_bases", _ColumnWeightedBases),
+            ("population_proportions", _PopulationProportions),
             ("row_proportions", _RowProportions),
             ("row_unweighted_bases", _RowUnweightedBases),
             ("row_weighted_bases", _RowWeightedBases),
@@ -577,6 +579,40 @@ class Describe_ColumnWeightedBases(object):
     @pytest.fixture
     def _weighted_cube_counts_prop_(self, request):
         return property_mock(request, _ColumnWeightedBases, "_weighted_cube_counts")
+
+
+class Describe_PopulationProportions(object):
+    """Unit test suite for `cr.cube.matrix.measure._PopulationProportions` object."""
+
+    @pytest.mark.parametrize(
+        "dimension_types, expected",
+        (
+            ((DT.CAT, DT.CAT), "table"),
+            ((DT.CAT_DATE, DT.CAT), "row"),
+            ((DT.CAT, DT.CAT_DATE), "column"),
+            ((DT.CA_SUBVAR, DT.CA_CAT), "row"),
+            ((DT.CA_CAT, DT.CA_SUBVAR), "column"),
+            ((DT.CAT, DT.CAT_DATE, DT.CAT), "row"),
+            ((DT.CAT, DT.CA_SUBVAR, DT.CA_CAT), "row"),
+        ),
+    )
+    def it_computes_its_blocks(object, request, dimension_types, expected):
+        dimensions_ = [
+            instance_mock(request, Dimension, dimension_type=dt)
+            for dt in dimension_types
+        ]
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            row_proportions=instance_mock(request, _RowProportions, blocks="row"),
+            column_proportions=instance_mock(request, _RowProportions, blocks="column"),
+            table_proportions=instance_mock(request, _RowProportions, blocks="table"),
+        )
+
+        assert (
+            _PopulationProportions(dimensions_, second_order_measures_, None).blocks
+            == expected
+        )
 
 
 class Describe_RowComparableCounts(object):

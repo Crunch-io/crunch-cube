@@ -717,23 +717,20 @@ class _Slice(CubePartition):
         """2D np.float64 ndarray of population counts per cell.
 
         The (estimated) population count is computed based on the `population` value
-        provided when the Slice is created. It is also adjusted to account for any
-        filters that were applied as part of the query.
+        provided when the Slice is created (`._population`). It is also adjusted to
+        account for any filters that were applied as part of the query
+        (`._cube.population_fraction`).
 
-        If any of the dimensions (rows or columns) is a categorical date, the
-        appropriate percentages are used, to calculate the population counts, so as to
-        be the total amount among categorical dates.
+        `._population` and `_cube.population_fraction` are both scalars and so do not
+        affect sort order.
 
-        Otherwise, table percents are used to calculate population counts.
+        The proportion used depends on the dimension types, so get from assembler.
         """
-        proportions = (
-            self.row_proportions
-            if self.rows_dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
-            else self.column_proportions
-            if self.columns_dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
-            else self.table_proportions
+        return (
+            self._assembler.population_proportions
+            * self._population
+            * self._cube.population_fraction
         )
-        return proportions * self._population * self._cube.population_fraction
 
     @lazyproperty
     def population_counts_moe(self):

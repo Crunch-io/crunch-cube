@@ -149,6 +149,11 @@ class SecondOrderMeasures(object):
         )
 
     @lazyproperty
+    def population_proportions(self):
+        """_PopulationProportions measure object for this cube-result."""
+        return _PopulationProportions(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def row_comparable_counts(self):
         """_RowComparableCounts measure object for this cube-result."""
         return _RowComparableCounts(self._dimensions, self, self._cube_measures)
@@ -980,6 +985,32 @@ class _PairwiseSigPvals(_PairwiseSigTstats):
             columns_base[:, [col_idx]]
             if columns_base.ndim >= 2
             else columns_base[col_idx]
+        )
+
+
+class _PopulationProportions(_BaseSecondOrderMeasure):
+    """Provides the cell-specific fraction of population
+
+    If any of the dimensions (rows or columns) is a categorical date or array
+    subvariables, the appropriate percentages are used, to calculate the population
+    counts, so as to be the total amount among categorical dates.
+
+    Otherwise, table percents are used to calculate population counts.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values.
+        """
+        return (
+            self._second_order_measures.row_proportions.blocks
+            if self._dimensions[-2].dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
+            else self._second_order_measures.column_proportions.blocks
+            if self._dimensions[-1].dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
+            else self._second_order_measures.table_proportions.blocks
         )
 
 

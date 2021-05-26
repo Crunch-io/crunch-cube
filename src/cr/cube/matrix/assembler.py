@@ -346,6 +346,15 @@ class Assembler(object):
         )
 
     @lazyproperty
+    def population_proportions(self):
+        """2D np.float64 ndarray of proportions
+
+        The proportion used to calculate proportion counts depends on the dimension
+        types.
+        """
+        return self._assemble_matrix(self._measures.population_proportions.blocks)
+
+    @lazyproperty
     def pvalues(self):
         """2D np.float64/np.nan ndarray of p-value for each matrix cell."""
         return 2 * (1 - norm.cdf(np.abs(self.zscores)))
@@ -944,6 +953,7 @@ class _BaseOrderHelper(object):
             M.COLUMN_BASE_WEIGHTED: "column_weighted_bases",
             M.COLUMN_PERCENT: "column_proportions",
             M.MEAN: "means",
+            M.POPULATION: "population_proportions",
             M.ROW_BASE_UNWEIGHTED: "row_unweighted_bases",
             M.ROW_BASE_WEIGHTED: "row_weighted_bases",
             M.ROW_PERCENT: "row_proportions",
