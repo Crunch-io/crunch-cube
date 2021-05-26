@@ -211,7 +211,7 @@ class Assembler(object):
         categories of CAT dimensions, are not derived. Subtotals are also not derived
         in this sense, because they're not even part of the data (elements).
         """
-        return self._dimension_derivations(self._columns_dimension, self._column_order)
+        return self._derived_element_idxs(self._columns_dimension, self._column_order)
 
     @lazyproperty
     def derived_row_idxs(self):
@@ -224,7 +224,7 @@ class Assembler(object):
         categories of CAT dimensions, are not derived. Subtotals are also not derived
         in this sense, because they're not even part of the data (elements).
         """
-        return self._dimension_derivations(self._rows_dimension, self._row_order)
+        return self._derived_element_idxs(self._rows_dimension, self._row_order)
 
     @lazyproperty
     def inserted_column_idxs(self):
@@ -794,7 +794,7 @@ class Assembler(object):
             and self._cube.valid_overlaps is not None
         )
 
-    def _dimension_derivations(self, dimension, order):
+    def _derived_element_idxs(self, dimension, order):
         """Return tuple(int) of derived elements' indices for a dimension."""
         return tuple(
             element_index
