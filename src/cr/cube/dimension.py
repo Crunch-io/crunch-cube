@@ -694,6 +694,17 @@ class _Element(object):
         return value.get("id")
 
     @lazyproperty
+    def derived(self):
+        """True if element is derived, False otherwise.
+
+        Multiple Response subvariable insertions are considered derived elements.
+        """
+        value = self._element_dict.get("value")
+        if not value or not isinstance(value, dict):
+            return False
+        return value.get("derived", False)
+
+    @lazyproperty
     def fill(self):
         """str RGB color like "#af032d" or None if not specified.
 

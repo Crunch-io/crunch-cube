@@ -201,6 +201,32 @@ class Assembler(object):
         return self._assemble_marginal(self._measures.columns_scale_median)
 
     @lazyproperty
+    def derived_column_idxs(self):
+        """tuple(int) of derived column elements' indexes, can be empty.
+
+        An element is derived if it's a subvariable of a multiple response dimension,
+        which has been produced by the zz9, and inserted into the response data.
+
+        All other elements, including regular MR and CA subvariables, as well as
+        categories of CAT dimensions, are not derived. Subtotals are also not derived
+        in this sense, because they're not even part of the data (elements).
+        """
+        return self._derived_element_idxs(self._columns_dimension, self._column_order)
+
+    @lazyproperty
+    def derived_row_idxs(self):
+        """tuple(int) of derived row elements' indexes, can be empty.
+
+        An element is derived if it's a subvariable of a multiple response dimension,
+        which has been produced by the zz9, and inserted into the response data.
+
+        All other elements, including regular MR and CA subvariables, as well as
+        categories of CAT dimensions, are not derived. Subtotals are also not derived
+        in this sense, because they're not even part of the data (elements).
+        """
+        return self._derived_element_idxs(self._rows_dimension, self._row_order)
+
+    @lazyproperty
     def inserted_column_idxs(self):
         """tuple of int index of each subtotal column in slice."""
         # --- insertions have a negative idx in their order sequence ---
@@ -766,6 +792,20 @@ class Assembler(object):
             self._dimensions[-1].dimension_type == DT.MR
             and self._cube.overlaps is not None
             and self._cube.valid_overlaps is not None
+        )
+
+    def _derived_element_idxs(self, dimension, order):
+        """Return tuple(int) of derived elements' indices for a dimension."""
+        return tuple(
+            element_index
+            for element_index, derived in enumerate(
+                np.array(
+                    [e.derived for e in dimension.valid_elements]
+                    # ---Subtotals are not real elements and hence not derived
+                    + [False for _ in dimension.subtotals]
+                )[order]
+            )
+            if derived
         )
 
     def _dimension_labels(self, dimension, order):

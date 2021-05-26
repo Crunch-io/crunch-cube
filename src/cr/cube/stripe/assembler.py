@@ -43,6 +43,29 @@ class StripeAssembler(object):
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def derived_row_idxs(self):
+        """tuple of int index of each derived row-element in this stripe.
+
+        An element is derived if it's a subvariable of a multiple response dimension,
+        which has been produced by the zz9, and inserted into the response data.
+
+        All other elements, including regular MR and CA subvariables, as well as
+        categories of CAT dimensions, are not derived. Subtotals are also not derived
+        in this sense, because they're not even part of the data (elements).
+        """
+        return tuple(
+            element_idx
+            for element_idx, derived in enumerate(
+                np.array(
+                    [e.derived for e in self._rows_dimension.valid_elements]
+                    # ---Subtotals are not data elements, and hence not derived
+                    + [False for _ in self._rows_dimension.subtotals]
+                )[self._row_order]
+            )
+            if derived
+        )
+
+    @lazyproperty
     def inserted_row_idxs(self):
         """tuple of int index of each inserted row in this stripe.
 

@@ -1,0 +1,324 @@
+{
+    "query": {
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "dimensions": [
+            {
+                "function": "dimension",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "variable": "1EhKxk8Betvqk192C8USZl00000d"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "subvariables"
+                    }
+                ]
+            },
+            {
+                "function": "as_selected",
+                "args": [
+                    {
+                        "variable": "1EhKxk8Betvqk192C8USZl00000d"
+                    }
+                ]
+            }
+        ],
+        "weight": "http://127.0.0.1:8080/datasets/46f40904adca43df91c38b4cf6fb899b/variables/1c7239005db04209b0ae57018107180e/"
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "dimensions": [
+            {
+                "references": {
+                    "uniform_basis": false,
+                    "description": "My multiple response set",
+                    "subreferences": [
+                        {
+                            "alias": "A&B",
+                            "name": "A&B",
+                            "anchor": "top"
+                        },
+                        {
+                            "alias": "bool1",
+                            "name": "Response #1",
+                            "description": "bool1"
+                        },
+                        {
+                            "alias": "bool2",
+                            "name": "Response #2",
+                            "description": "bool2"
+                        },
+                        {
+                            "alias": "bool3",
+                            "name": "Response #3",
+                            "description": "bool3"
+                        }
+                    ],
+                    "name": "mymrset",
+                    "alias": "mymrset",
+                    "view": {
+                        "show_counts": false,
+                        "include_noneoftheabove": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "function": "any_selected",
+                                    "anchor": "top",
+                                    "name": "A&B",
+                                    "kwargs": {
+                                        "variable": "mymrset",
+                                        "subvariable_ids": [
+                                            "bool1",
+                                            "bool2"
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "include_missing": false,
+                        "column_width": null
+                    }
+                },
+                "derived": true,
+                "type": {
+                    "subtype": {
+                        "class": "variable"
+                    },
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "derived": true,
+                                "references": {
+                                    "alias": "A&B",
+                                    "name": "A&B",
+                                    "anchor": "top"
+                                },
+                                "id": "A&B"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "bool1",
+                                    "name": "Response #1",
+                                    "description": "bool1"
+                                },
+                                "id": "0004"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "bool2",
+                                    "name": "Response #2",
+                                    "description": "bool2"
+                                },
+                                "id": "0005"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "alias": "bool3",
+                                    "name": "Response #3",
+                                    "description": "bool3"
+                                },
+                                "id": "0006"
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "class": "enum"
+                }
+            },
+            {
+                "derived": true,
+                "references": {
+                    "uniform_basis": false,
+                    "description": "My multiple response set",
+                    "subreferences": [
+                        {
+                            "alias": "A&B",
+                            "name": "A&B",
+                            "anchor": "top"
+                        },
+                        {
+                            "alias": "bool1",
+                            "name": "Response #1",
+                            "description": "bool1"
+                        },
+                        {
+                            "alias": "bool2",
+                            "name": "Response #2",
+                            "description": "bool2"
+                        },
+                        {
+                            "alias": "bool3",
+                            "name": "Response #3",
+                            "description": "bool3"
+                        }
+                    ],
+                    "name": "mymrset",
+                    "alias": "mymrset",
+                    "view": {
+                        "show_counts": false,
+                        "include_noneoftheabove": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "function": "any_selected",
+                                    "kwargs": {
+                                        "variable": "mymrset",
+                                        "subvariable_ids": [
+                                            "bool1",
+                                            "bool2"
+                                        ]
+                                    },
+                                    "anchor": "top",
+                                    "name": "A&B"
+                                }
+                            ]
+                        },
+                        "include_missing": false,
+                        "column_width": null
+                    }
+                },
+                "type": {
+                    "ordinal": false,
+                    "subvariables": [
+                        "A&B",
+                        "0004",
+                        "0005",
+                        "0006"
+                    ],
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "selected": true,
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected"
+                        },
+                        {
+                            "numeric_value": 0,
+                            "missing": false,
+                            "id": 0,
+                            "name": "Other"
+                        },
+                        {
+                            "numeric_value": null,
+                            "missing": true,
+                            "id": -1,
+                            "name": "No Data"
+                        }
+                    ]
+                }
+            }
+        ],
+        "missing": 0,
+        "measures": {
+            "count": {
+                "data": [
+                    3.0,
+                    0.0,
+                    0.0,
+                    2.4,
+                    0.6,
+                    0.0,
+                    2.1,
+                    0.9,
+                    0.0,
+                    0.0,
+                    3.0,
+                    0.0
+                ],
+                "n_missing": 0,
+                "metadata": {
+                    "references": {},
+                    "derived": true,
+                    "type": {
+                        "integer": false,
+                        "missing_rules": {},
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "class": "numeric"
+                    }
+                }
+            }
+        },
+        "n": 6,
+        "filter_stats": {
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 6,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 3.0,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered": {
+                "unweighted": {
+                    "selected": 6,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 3.0,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "is_cat_date": false
+        },
+        "unfiltered": {
+            "unweighted_n": 6,
+            "weighted_n": 3.0
+        },
+        "filtered": {
+            "unweighted_n": 6,
+            "weighted_n": 3.0
+        },
+        "counts": [
+            5,
+            1,
+            0,
+            3,
+            2,
+            1,
+            4,
+            2,
+            0,
+            0,
+            6,
+            0
+        ],
+        "element": "crunch:cube"
+    }
+}
