@@ -554,6 +554,16 @@ class _Slice(CubePartition):
         return self._assembler.inserted_row_idxs
 
     @lazyproperty
+    def derived_column_idxs(self):
+        """tuple of int index of each subtotal column in slice."""
+        return self._assembler.derived_column_idxs
+
+    @lazyproperty
+    def derived_row_idxs(self):
+        """tuple of int index of each subtotal column in slice."""
+        return self._assembler.derived_row_idxs
+
+    @lazyproperty
     def is_empty(self):
         return any(s == 0 for s in self.shape)
 
