@@ -1350,44 +1350,6 @@ class Describe_BaseWeightedCubeCounts(object):
 
         assert weighted_cube_counts.column_bases.tolist() == expected_value
 
-    def it_computes_the_column_comparable_counts_if_column_is_not_array(
-        self, dimensions_, weighted_counts_prop_
-    ):
-        dimensions_[1].dimension_type = DT.CAT
-        weighted_counts_prop_.return_value = [[1, 2], [3, 4]]
-        weighted_cube_counts = _BaseWeightedCubeCounts(dimensions_, None, None, False)
-
-        assert weighted_cube_counts.column_comparable_counts == [[1, 2], [3, 4]]
-
-    def but_it_raises_on_column_comparable_count_if_column_is_array(self, dimensions_):
-        dimensions_[1].dimension_type = DT.NUM_ARRAY
-        weighted_counts = _BaseWeightedCubeCounts(dimensions_, None, None, False)
-
-        with pytest.raises(ValueError) as e:
-            weighted_counts.column_comparable_counts
-
-        assert (
-            str(e.value) == "column_comparable_counts not defined across subvariables."
-        )
-
-    def it_computes_the_row_comparable_counts_if_row_is_not_array(
-        self, dimensions_, weighted_counts_prop_
-    ):
-        dimensions_[0].dimension_type = DT.CAT
-        weighted_counts_prop_.return_value = [[1, 2], [3, 4]]
-        weighted_cube_counts = _BaseWeightedCubeCounts(dimensions_, None, None, False)
-
-        assert weighted_cube_counts.row_comparable_counts == [[1, 2], [3, 4]]
-
-    def but_it_raises_on_row_comparable_count_if_row_is_array(self, dimensions_):
-        dimensions_[0].dimension_type = DT.NUM_ARRAY
-        weighted_counts = _BaseWeightedCubeCounts(dimensions_, None, None, False)
-
-        with pytest.raises(ValueError) as e:
-            weighted_counts.row_comparable_counts
-
-        assert str(e.value) == "row_comparable_counts not defined across subvariables."
-
     def it_can_compute_array_type_std_residual_to_help(self):
         counts = np.array([[0, 2, 4, 6], [8, 10, 12, 14], [16, 18, 20, 22]])
         total = np.array([51, 63, 75, 87])
@@ -1412,10 +1374,6 @@ class Describe_BaseWeightedCubeCounts(object):
     @pytest.fixture
     def dimensions_(self, request):
         return instance_mock(request, Dimension), instance_mock(request, Dimension)
-
-    @pytest.fixture
-    def weighted_counts_prop_(self, request):
-        return property_mock(request, _BaseWeightedCubeCounts, "weighted_counts")
 
 
 class Describe_CatXCatWeightedCubeCounts(object):

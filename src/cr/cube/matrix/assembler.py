@@ -149,7 +149,9 @@ class Assembler(object):
         """1D/2D np.float64 ndarray of weighted-N for each column of this slice."""
         # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
         # --- This is really just another way to call the columns_weighted_bases ---
-        # --- TODO: Should this error for 2D margins? ---
+        # --- TODO: Should column_margin only be defined when it's 1D? This would
+        # --- require changes to exporter to use the bases to give a
+        # --- "column_margin_range"
         if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
             return self.column_weighted_bases
 
@@ -424,7 +426,8 @@ class Assembler(object):
         """
         # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
         # --- This is really just another way to call the row_weighted_bases ---
-        # --- TODO: Should this error for 2D margins? ---
+        # --- TODO: Should rows_margin only be defined when it's 1D? This would
+        # --- require changes to exporter to use the bases to give a "rows_margin_range"
         if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
             return self.row_weighted_bases
 

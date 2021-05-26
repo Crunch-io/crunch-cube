@@ -934,20 +934,6 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         return np.broadcast_to(self.columns_margin, self.weighted_counts.shape)
 
     @lazyproperty
-    def column_comparable_counts(self):
-        """2D np.float64 ndarray of weighted-count for cells in columns that share a base
-
-        Cells in a column don't share a base when they go across array subvariables.
-        Raises when counts are not comparable.
-        """
-        if self._dimensions[1].dimension_type in DT.ARRAY_TYPES:
-            raise ValueError(
-                "column_comparable_counts not defined across subvariables."
-            )
-
-        return self.weighted_counts
-
-    @lazyproperty
     def columns_margin(self):
         """1D ndarray of np.float64 weighted-N for each matrix column."""
         raise NotImplementedError(  # pragma: no cover
@@ -965,18 +951,6 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         raise NotImplementedError(  # pragma: no cover
             "%s must implement `.row_bases`" % type(self).__name__
         )
-
-    @lazyproperty
-    def row_comparable_counts(self):
-        """2D np.float64 ndarray of weighted-count for cells in columns that share a base
-
-        Cells in a row don't share a base when they go across array subvariables.
-        Raises when counts are not comparable.
-        """
-        if self._dimensions[0].dimension_type in DT.ARRAY_TYPES:
-            raise ValueError("row_comparable_counts not defined across subvariables.")
-
-        return self.weighted_counts
 
     @lazyproperty
     def rows_margin(self):

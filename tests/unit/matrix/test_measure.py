@@ -274,20 +274,21 @@ class Describe_BaseSecondOrderMeasure(object):
 class Describe_ColumnComparableCounts(object):
     """Unit test suite for `cr.cube.matrix.measure._ColumnComparableCounts` object."""
 
-    def it_computes_its_blocks(self, request, dimensions_, cube_measures_):
+    def it_computes_its_blocks(self, request, is_defined_prop_, dimensions_):
+        is_defined_prop_.return_value = True
         counts = np.arange(12).reshape(3, 4).tolist()
         weighted_cube_counts_ = instance_mock(
-            request, _BaseWeightedCubeCounts, column_comparable_counts=counts
+            request, _BaseWeightedCubeCounts, weighted_counts=counts
         )
-        _weighted_cube_counts = property_mock(
-            request, _BaseSecondOrderMeasure, "_weighted_cube_counts"
+        property_mock(
+            request,
+            _BaseSecondOrderMeasure,
+            "_weighted_cube_counts",
+            return_value=weighted_cube_counts_,
         )
-        _weighted_cube_counts.return_value = weighted_cube_counts_
         SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
-        col_comparable_counts = _ColumnComparableCounts(
-            dimensions_, None, cube_measures_
-        )
+        col_comparable_counts = _ColumnComparableCounts(dimensions_, None, None)
 
         blocks = col_comparable_counts.blocks
 
@@ -296,15 +297,41 @@ class Describe_ColumnComparableCounts(object):
         )
         assert blocks == [[[1], [2]], [[3], [4]]]
 
-    # fixture components ---------------------------------------------
+    def but_blocks_raises_when_is_not_defined(self, is_defined_prop_):
+        is_defined_prop_.return_value = False
 
-    @pytest.fixture
-    def cube_measures_(self, request):
-        return instance_mock(request, CubeMeasures)
+        with pytest.raises(ValueError) as e:
+            _ColumnComparableCounts(None, None, None).blocks
+
+        assert (
+            str(e.value) == "column_comparable_counts not defined across subvariables."
+        )
+
+    @pytest.mark.parametrize(
+        "dim_types, expected",
+        (
+            ((DT.CAT, DT.CAT), True),
+            ((DT.NUM_ARRAY, DT.CAT), True),
+            ((DT.CAT, DT.MR_SUBVAR), False),
+            ((DT.CAT, DT.NUM_ARRAY), False),
+        ),
+    )
+    def it_knows_when_it_is_defined(self, dimensions_, dim_types, expected):
+        dimensions_[0].dimension_type = dim_types[0]
+        dimensions_[1].dimension_type = dim_types[1]
+        col_comparable_counts = _ColumnComparableCounts(dimensions_, None, None)
+
+        assert col_comparable_counts.is_defined == expected
+
+    # fixture components ---------------------------------------------
 
     @pytest.fixture
     def dimensions_(self, request):
         return instance_mock(request, Dimension), instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def is_defined_prop_(self, request):
+        return property_mock(request, _ColumnComparableCounts, "is_defined")
 
 
 class Describe_ColumnProportions(object):
@@ -555,18 +582,21 @@ class Describe_ColumnWeightedBases(object):
 class Describe_RowComparableCounts(object):
     """Unit test suite for `cr.cube.matrix.measure._RowComparableCounts` object."""
 
-    def it_computes_its_blocks(self, request, dimensions_, cube_measures_):
+    def it_computes_its_blocks(self, request, is_defined_prop_, dimensions_):
+        is_defined_prop_.return_value = True
         counts = np.arange(12).reshape(3, 4).tolist()
         weighted_cube_counts_ = instance_mock(
-            request, _BaseWeightedCubeCounts, row_comparable_counts=counts
+            request, _BaseWeightedCubeCounts, weighted_counts=counts
         )
-        _weighted_cube_counts = property_mock(
-            request, _BaseSecondOrderMeasure, "_weighted_cube_counts"
+        property_mock(
+            request,
+            _BaseSecondOrderMeasure,
+            "_weighted_cube_counts",
+            return_value=weighted_cube_counts_,
         )
-        _weighted_cube_counts.return_value = weighted_cube_counts_
         SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
-        row_comparable_counts = _RowComparableCounts(dimensions_, None, cube_measures_)
+        row_comparable_counts = _RowComparableCounts(dimensions_, None, None)
 
         blocks = row_comparable_counts.blocks
 
@@ -575,15 +605,39 @@ class Describe_RowComparableCounts(object):
         )
         assert blocks == [[[1], [2]], [[3], [4]]]
 
-    # fixture components ---------------------------------------------
+    def but_blocks_raises_when_is_not_defined(self, is_defined_prop_):
+        is_defined_prop_.return_value = False
 
-    @pytest.fixture
-    def cube_measures_(self, request):
-        return instance_mock(request, CubeMeasures)
+        with pytest.raises(ValueError) as e:
+            _RowComparableCounts(None, None, None).blocks
+
+        assert str(e.value) == "row_comparable_counts not defined across subvariables."
+
+    @pytest.mark.parametrize(
+        "dim_types, expected",
+        (
+            ((DT.CAT, DT.CAT), True),
+            ((DT.CAT, DT.NUM_ARRAY), True),
+            ((DT.MR_SUBVAR, DT.CAT), False),
+            ((DT.CA_SUBVAR, DT.CA_CAT), False),
+        ),
+    )
+    def it_knows_when_it_is_defined(self, dimensions_, dim_types, expected):
+        dimensions_[0].dimension_type = dim_types[0]
+        dimensions_[1].dimension_type = dim_types[1]
+        row_comparable_counts = _RowComparableCounts(dimensions_, None, None)
+
+        assert row_comparable_counts.is_defined == expected
+
+    # fixture components ---------------------------------------------
 
     @pytest.fixture
     def dimensions_(self, request):
         return instance_mock(request, Dimension), instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def is_defined_prop_(self, request):
+        return property_mock(request, _RowComparableCounts, "is_defined")
 
 
 class Describe_RowProportions(object):
@@ -1511,31 +1565,43 @@ class Describe_BaseMarginal(object):
         result = marginal._apply_along_orientation(np.sum, array)
         assert result.tolist() == expected
 
-    def it_gets_the_right_counts_for_rows(self, request):
-        column_comparable_counts_ = instance_mock(
-            request, _BaseMarginal, blocks=[["a", "b"], ["c", "d"]]
-        )
-        second_order_measures_ = instance_mock(
-            request,
-            SecondOrderMeasures,
-            column_comparable_counts=column_comparable_counts_,
-        )
-        median = _BaseMarginal(None, second_order_measures_, None, MO.ROWS)
+    def it_gets_the_right_counts_for_rows(self, measure_, second_order_measures_):
+        measure_.blocks = [["a", "b"], ["c", "d"]]
+        second_order_measures_.column_comparable_counts = measure_
+        marginal = _BaseMarginal(None, second_order_measures_, None, MO.ROWS)
 
-        assert median._counts == ["a", "c"]
+        assert marginal._counts == ["a", "c"]
 
-    def it_gets_the_right_counts_for_columns(self, request):
-        row_comparable_counts_ = instance_mock(
-            request, _BaseMarginal, blocks=[["a", "b"], ["c", "d"]]
-        )
-        second_order_measures_ = instance_mock(
-            request,
-            SecondOrderMeasures,
-            row_comparable_counts=row_comparable_counts_,
-        )
-        median = _BaseMarginal(None, second_order_measures_, None, MO.COLUMNS)
+    def it_gets_the_right_counts_for_columns(self, measure_, second_order_measures_):
+        measure_.blocks = [["a", "b"], ["c", "d"]]
+        second_order_measures_.row_comparable_counts = measure_
+        marginal = _BaseMarginal(None, second_order_measures_, None, MO.COLUMNS)
 
-        assert median._counts == ["a", "b"]
+        assert marginal._counts == ["a", "b"]
+
+    def it_knows_when_counts_are_defined_columns(self, second_order_measures_):
+        marginal = _BaseMarginal(None, second_order_measures_, None, MO.COLUMNS)
+
+        actual = marginal._counts_are_defined
+
+        assert actual == second_order_measures_.row_comparable_counts.is_defined
+
+    def it_knows_when_counts_are_defined_rows(self, second_order_measures_):
+        marginal = _BaseMarginal(None, second_order_measures_, None, MO.ROWS)
+
+        actual = marginal._counts_are_defined
+
+        assert actual == second_order_measures_.column_comparable_counts.is_defined
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def measure_(self, request):
+        return instance_mock(request, _BaseSecondOrderMeasure)
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
 
 
 class Describe_BaseScaledCountMarginal(object):
@@ -1934,8 +2000,7 @@ class Describe_SummedCountMargin(object):
             ),
         ]
 
-    @pytest.mark.parametrize("values, expected", (([0, 1], True), (ValueError, False)))
-    def it_can_tell_if_it_is_defined(self, request, values, expected):
-        property_mock(request, _SummedCountMargin, "_counts", side_effect=values)
-        summed_count = _SummedCountMargin(None, None, None, MO.ROWS)
-        assert summed_count.is_defined == expected
+    def it_can_tell_if_it_is_defined(self, request):
+        property_mock(request, _BaseMarginal, "_counts_are_defined")
+        summed_count = _SummedCountMargin(None, None, None, None)
+        assert summed_count.is_defined == summed_count._counts_are_defined

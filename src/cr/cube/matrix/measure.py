@@ -384,11 +384,24 @@ class _ColumnComparableCounts(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """Nested list of the four 2D ndarray "blocks" making up this measure."""
+        if not self.is_defined:
+            raise ValueError(
+                "column_comparable_counts not defined across subvariables."
+            )
+
         return SumSubtotals.blocks(
-            self._weighted_cube_counts.column_comparable_counts,
+            self._weighted_cube_counts.weighted_counts,
             self._dimensions,
             diff_rows_nan=True,
         )
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool indicating whether counts row comparable counts are defined
+
+        We cannot sum counts across subvariable dimensions.
+        """
+        return not self._dimensions[1].dimension_type in DT.ARRAY_TYPES
 
 
 class _ColumnIndex(_BaseSecondOrderMeasure):
@@ -985,11 +998,22 @@ class _RowComparableCounts(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """Nested list of the four 2D ndarray "blocks" making up this measure."""
+        if not self.is_defined:
+            raise ValueError("row_comparable_counts not defined across subvariables.")
+
         return SumSubtotals.blocks(
-            self._weighted_cube_counts.row_comparable_counts,
+            self._weighted_cube_counts.weighted_counts,
             self._dimensions,
             diff_cols_nan=True,
         )
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool indicating whether counts row comparable counts are defined
+
+        We cannot sum counts across subvariable dimensions.
+        """
+        return not self._dimensions[0].dimension_type in DT.ARRAY_TYPES
 
 
 class _RowProportions(_BaseSecondOrderMeasure):
@@ -1642,6 +1666,17 @@ class _BaseMarginal(object):
             # --- Get base values & *column* subtotals
             return [counts[0][0], counts[0][1]]
 
+    @lazyproperty
+    def _counts_are_defined(self):
+        """Bool indicating whether counts are defined for this orientation
+
+        Counts are undefined across subvariable dimensions.
+        """
+        if self.orientation == MO.ROWS:
+            return self._second_order_measures.column_comparable_counts.is_defined
+        else:
+            return self._second_order_measures.row_comparable_counts.is_defined
+
 
 class _BaseScaledCountMarginal(_BaseMarginal):
     """A base class for marginals that depend on the scaled counts."""
@@ -1917,11 +1952,7 @@ class _SummedCountMargin(_BaseMarginal):
     @lazyproperty
     def is_defined(self):
         """True if counts are defined."""
-        try:
-            self._counts
-            return True
-        except ValueError:
-            return False
+        return self._counts_are_defined
 
 
 # === PAIRWISE HELPERS ===

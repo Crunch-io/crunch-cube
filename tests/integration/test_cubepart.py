@@ -469,6 +469,38 @@ class Describe_Slice(object):
             column_proportions, load_python_expression(expectation)
         )
 
+    def it_knows_the_margins_of_mr_x_mr(self):
+        slice_ = _Slice(
+            Cube(CR.MR_X_MR), slice_idx=0, transforms={}, population=None, mask_size=0
+        )
+
+        assert (
+            slice_._assembler._assemble_marginal(
+                slice_._assembler._measures.rows_margin
+            )
+            is None
+        )
+        assert (
+            slice_._assembler._assemble_marginal(
+                slice_._assembler._measures.columns_margin
+            )
+            is None
+        )
+        # --- Long term, we may decide that this should be None (or an error) so that
+        # --- margins are only defined when they are 1D
+        assert slice_.rows_margin.tolist() == [
+            pytest.approx([22.9672704, 13.2946141, 20.1898744, 22.9672704]),
+            pytest.approx([28.5502091, 45.7789165, 35.6664538, 45.7789165]),
+            pytest.approx([70.8068712, 53.0615517, 86.9728287, 86.9728287]),
+            pytest.approx([100.714223, 95.8683881, 119.404410, 130.6784687]),
+        ]
+        assert slice_.columns_margin.tolist() == [
+            pytest.approx([22.9672704, 28.5502091, 70.8068712, 100.7142239]),
+            pytest.approx([13.2946141, 45.7789165, 53.0615517, 95.8683881]),
+            pytest.approx([20.1898744, 35.6664538, 86.9728287, 119.4044104]),
+            pytest.approx([22.9672704, 45.7789165, 86.9728287, 130.6784687]),
+        ]
+
     @pytest.mark.parametrize(
         "fixture, row_order, col_order, expectation",
         (
