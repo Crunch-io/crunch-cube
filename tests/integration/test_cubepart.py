@@ -13,7 +13,8 @@ from cr.cube.enums import DIMENSION_TYPE as DT
 
 # ---mnemonic: CR = 'cube-response'---
 # ---mnemonic: TR = 'transforms'---
-from ..fixtures import CR, TR
+# ---mnemonic: MRI = 'multiple-response insertions'---
+from ..fixtures import CR, TR, MRI
 from ..util import load_python_expression
 
 
@@ -430,6 +431,116 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(
             slice_.zscores, load_python_expression("mr-x-cat-hs-zscores")
         )
+
+    @pytest.mark.parametrize(
+        "fixture, dim_key, derived_rows, derived_cols, inserted_rows, inserted_cols",
+        (
+            (MRI.CAT_X_MR, "rows_dimension", (), (0,), (3,), ()),
+            (MRI.MR_X_CAT, "columns_dimension", (0,), (), (), (3,)),
+            (MRI.MR_X_MR, None, (0,), (0,), (), ()),
+        ),
+    )
+    def it_provides_derived_indexes_for_multiple_responses_with_insertions(
+        self, fixture, dim_key, derived_rows, derived_cols, inserted_rows, inserted_cols
+    ):
+        transforms = (
+            {
+                dim_key: {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "name": "colors",
+                            "args": [1, 2, 3],
+                            "anchor": 3,
+                            "kwargs": {"positive": [1, 2, 3]},
+                            "id": 1,
+                        }
+                    ]
+                }
+            }
+            if dim_key is not None
+            else None
+        )
+        slice_ = Cube(fixture, transforms=transforms).partitions[0]
+        assert slice_.derived_row_idxs == derived_rows
+        assert slice_.derived_column_idxs == derived_cols
+        assert slice_.inserted_row_idxs == inserted_rows
+        assert slice_.inserted_column_idxs == inserted_cols
+
+    def it_provides_derived_indexes_for_mr_x_cat_with_transforms(self):
+        transforms = {
+            "rows_dimension": {
+                "elements": {"2": {"hide": True}},
+                "order": {"type": "explicit", "element_ids": [2, 3]},
+            },
+            "columns_dimension": {
+                "insertions": [
+                    {
+                        "function": "subtotal",
+                        "name": "colors",
+                        "args": [1, 2, 3],
+                        "anchor": 3,
+                        "kwargs": {"positive": [1, 2, 3]},
+                        "id": 1,
+                    }
+                ]
+            },
+        }
+        slice_ = Cube(MRI.MR_X_CAT, transforms=transforms).partitions[0]
+        # ---Derived subvar comes after subvars with ids 2 and 3 (but 2 is hidden),
+        # ---therefore the index of the derived subvar is 1
+        assert slice_.derived_row_idxs == (1,)
+        assert slice_.derived_column_idxs == ()
+        assert slice_.inserted_row_idxs == ()
+        assert slice_.inserted_column_idxs == (3,)
+
+    def it_provides_derived_indexes_for_cat_x_mr_with_transforms(self):
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "function": "subtotal",
+                        "name": "colors",
+                        "args": [1, 2, 3],
+                        "anchor": 3,
+                        "kwargs": {"positive": [1, 2, 3]},
+                        "id": 1,
+                    }
+                ]
+            },
+            "columns_dimension": {
+                "elements": {"2": {"hide": True}},
+                "order": {"type": "explicit", "element_ids": [2, 3]},
+            },
+        }
+        slice_ = Cube(MRI.CAT_X_MR, transforms=transforms).partitions[0]
+        assert slice_.derived_row_idxs == ()
+        # ---Derived subvar comes after subvars with ids 2 and 3 (but 2 is hidden),
+        # ---therefore the index of the derived subvar is 1
+        assert slice_.derived_column_idxs == (1,)
+        assert slice_.inserted_row_idxs == (3,)
+        assert slice_.inserted_column_idxs == ()
+
+    def it_provides_derived_indexes_for_mr_x_mr_with_transforms(self):
+        transforms = {
+            "rows_dimension": {
+                "order": {"type": "explicit", "element_ids": [2, 3]},
+            },
+            "columns_dimension": {
+                "elements": {"2": {"hide": True}},
+                "order": {"type": "explicit", "element_ids": [2, 3]},
+            },
+        }
+        slice_ = Cube(MRI.MR_X_MR, transforms=transforms).partitions[0]
+        # ---Derived subvar comes after subvars with ids 2 and 3,
+        # ---therefore the index of the derived subvar is 2
+        assert slice_.derived_row_idxs == (2,)
+        # ---Derived subvar comes after subvars with ids 2 and 3 (but 2 is hidden),
+        # ---therefore the index of the derived subvar is 1
+        assert slice_.derived_column_idxs == (1,)
+        # ---There can be no insertions on MR dimensions
+        assert slice_.inserted_row_idxs == ()
+        assert slice_.inserted_column_idxs == ()
 
     @pytest.mark.parametrize(
         "fixture, expectation",
