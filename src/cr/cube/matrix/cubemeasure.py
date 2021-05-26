@@ -9,7 +9,6 @@ unweighted-counts, weighted-counts (aka. counts), means, and others.
 from __future__ import division
 
 import numpy as np
-from scipy.stats.contingency import expected_freq
 
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
@@ -1098,27 +1097,9 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
         deviations above (positive) or below (negative) the population mean a cell's
         value is.
         """
-        counts = self.weighted_counts
-
-        # --- If the matrix is "defective", in the sense that it doesn't have at least
-        # --- two rows and two columns that are "full" of data, don't calculate zscores.
-        if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
-            return np.full(counts.shape, np.nan)
-
-        residuals = counts - expected_freq(counts)
-
-        # --- variance of the residuals ---
-        rows_margin = self.rows_margin
-        columns_margin = self.columns_margin
-        table_margin = self.table_margin
-        variance_of_residuals = (
-            np.outer(rows_margin, columns_margin)
-            * np.outer(table_margin - rows_margin, table_margin - columns_margin)
-            / table_margin ** 3
+        return self._array_type_std_res(
+            self.weighted_counts, self.table_bases, self.row_bases, self.column_bases
         )
-
-        with np.errstate(divide="ignore", invalid="ignore"):
-            return residuals / np.sqrt(variance_of_residuals)
 
 
 class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
@@ -1213,9 +1194,9 @@ class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
         """2D np.float64 ndarray of z-score for each matrix cell."""
         return self._array_type_std_res(
             self.weighted_counts,
-            self.table_margin,
-            np.sum(self._weighted_counts, axis=2),
-            np.sum(self.weighted_counts, axis=0),
+            self.table_bases,
+            self.row_bases,
+            self.column_bases,
         )
 
 
@@ -1317,9 +1298,9 @@ class _MrXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
         """2D np.float64 ndarray of z-score for each matrix cell."""
         return self._array_type_std_res(
             self.weighted_counts,
-            self.table_margin[:, np.newaxis],
-            np.sum(self.weighted_counts, axis=1)[:, None],
-            np.sum(self._weighted_counts, axis=1),
+            self.table_bases,
+            self.row_bases,
+            self.column_bases,
         )
 
 
@@ -1426,9 +1407,9 @@ class _MrXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
         """
         return self._array_type_std_res(
             self.weighted_counts,
-            self.table_margin,
-            np.sum(self._weighted_counts, axis=3)[:, 0, :],
-            np.sum(self._weighted_counts, axis=1)[:, :, 0],
+            self.table_bases,
+            self.row_bases,
+            self.column_bases,
         )
 
 

@@ -1457,8 +1457,12 @@ class Describe_CatXCatWeightedCubeCounts(object):
             None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.zscores.tolist() == [
-            [0.43874821936960656, 4.3387889766250713e-16, -0.5097793640389925],
-            [-0.4387482193696045, 8.677577953250143e-16, 0.5097793640389934],
+            pytest.approx(
+                [0.43874821936960656, 4.3387889766250713e-16, -0.5097793640389925]
+            ),
+            pytest.approx(
+                [-0.4387482193696045, 8.677577953250143e-16, 0.5097793640389934]
+            ),
         ]
 
     def but_its_zscores_are_NaNs_for_a_deficient_matrix(self):
