@@ -113,6 +113,12 @@ The detailed description can be found
 
 ## Changes
 
+### 2.2.0
+- Can now get indices of MR (pre-query) insertions
+- Support for sorting by value margins, column index and table percentages.
+- rows_margin & columns_margin are now 2D when summing across array subvariables,
+  not just for MR variables.
+
 ### 2.1.34
 - Support subtotal differences for hypothesis testing.
 
