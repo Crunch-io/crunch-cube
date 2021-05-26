@@ -1618,7 +1618,12 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
 
 
 class _Zscores(_BaseSecondOrderMeasure):
-    """Provides the zscore measure for a matrix."""
+    """Provides the zscore measure for a matrix.
+
+    A z-score is also known as a *standard score* and is the number of standard
+    deviations above (positive) or below (negative) the population mean each cell's
+    value is.
+    """
 
     @lazyproperty
     def blocks(self):
