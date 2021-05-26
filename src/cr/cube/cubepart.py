@@ -555,12 +555,12 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def derived_column_idxs(self):
-        """tuple of int index of each subtotal column in slice."""
+        """tuple of int index of each derived column-element in slice."""
         return self._assembler.derived_column_idxs
 
     @lazyproperty
     def derived_row_idxs(self):
-        """tuple of int index of each subtotal column in slice."""
+        """tuple of int index of each derived row-element in slice."""
         return self._assembler.derived_row_idxs
 
     @lazyproperty
@@ -1365,6 +1365,11 @@ class _Strand(CubePartition):
         The values are int when the underlying cube-result has no weighting.
         """
         return self._assembler.weighted_counts
+
+    @lazyproperty
+    def derived_row_idxs(self):
+        """tuple of int index of each derived row-element in this strand."""
+        return self._assembler.derived_row_idxs
 
     @lazyproperty
     def inserted_row_idxs(self):

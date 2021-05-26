@@ -1558,6 +1558,20 @@ class Describe_Strand(object):
             7.3559027778,
         ]
 
+    def it_provides_derived_indexes_for_univariate_mr_with_transforms(self):
+        transforms = {
+            "rows_dimension": {
+                "elements": {"2": {"hide": True}},
+                "order": {"type": "explicit", "element_ids": [2, 3]},
+            },
+        }
+        slice_ = Cube(MRI.UNIVARIATE_MR, transforms=transforms).partitions[0]
+        # ---Derived subvar comes after subvars with ids 2 and 3,
+        # ---therefore the index of the derived subvar is 2
+        assert slice_.derived_row_idxs == (1,)
+        # ---There can be no insertions on MR dimensions
+        assert slice_.inserted_row_idxs == ()
+
 
 class Describe_Nub(object):
     """Integration-test suite for `cr.cube.cubepart._Nub` object."""
