@@ -501,6 +501,36 @@ class Describe_Slice(object):
             pytest.approx([22.9672704, 45.7789165, 86.9728287, 130.6784687]),
         ]
 
+    def it_knows_comparable_counts_are_undefined_across_subvars(self):
+        mr_x_mr_slice_ = _Slice(
+            Cube(CR.MR_X_MR), slice_idx=0, transforms={}, population=None, mask_size=0
+        )
+
+        with pytest.raises(ValueError) as e:
+            mr_x_mr_slice_._assembler.row_comparable_counts
+        assert str(e.value) == "row_comparable_counts not defined across subvariables."
+        with pytest.raises(ValueError) as e:
+            mr_x_mr_slice_._assembler.column_comparable_counts
+        assert (
+            str(e.value) == "column_comparable_counts not defined across subvariables."
+        )
+
+        ca_cat_x_ca_subvar_slice_ = _Slice(
+            Cube(CR.SIMPLE_CAT_ARRAY),
+            slice_idx=0,
+            transforms={},
+            population=None,
+            mask_size=0,
+        )
+
+        with pytest.raises(ValueError) as e:
+            ca_cat_x_ca_subvar_slice_._assembler.row_comparable_counts
+        assert str(e.value) == "row_comparable_counts not defined across subvariables."
+        assert (
+            ca_cat_x_ca_subvar_slice_._assembler.column_comparable_counts.tolist()
+            == ca_cat_x_ca_subvar_slice_.counts.tolist()
+        )
+
     @pytest.mark.parametrize(
         "fixture, row_order, col_order, expectation",
         (

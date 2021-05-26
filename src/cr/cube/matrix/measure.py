@@ -397,7 +397,7 @@ class _ColumnComparableCounts(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def is_defined(self):
-        """Bool indicating whether counts row comparable counts are defined
+        """Bool indicating whether column comparable counts are defined
 
         We cannot sum counts across subvariable dimensions.
         """
@@ -1009,7 +1009,7 @@ class _RowComparableCounts(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def is_defined(self):
-        """Bool indicating whether counts row comparable counts are defined
+        """Bool indicating whether row comparable counts are defined
 
         We cannot sum counts across subvariable dimensions.
         """
@@ -1674,8 +1674,7 @@ class _BaseMarginal(object):
         """
         if self.orientation == MO.ROWS:
             return self._second_order_measures.column_comparable_counts.is_defined
-        else:
-            return self._second_order_measures.row_comparable_counts.is_defined
+        return self._second_order_measures.row_comparable_counts.is_defined
 
 
 class _BaseScaledCountMarginal(_BaseMarginal):
