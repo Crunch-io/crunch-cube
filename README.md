@@ -113,6 +113,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.2.1
+- Bug fix for sort-by-col-index
+
 ### 2.2.0
 - Can now get indices of MR (pre-query) insertions
 - Support for sorting by value margins, column index and table percentages.
