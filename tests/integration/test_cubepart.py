@@ -1433,6 +1433,53 @@ class Describe_Slice(object):
             np.array([100, 100, 100, 100, 100, 100, 100, 100, 100, 100])
         )
 
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def it_has_bases_that_dont_sum_across_ca_subvars(self):
+        slice_ = Cube(CR.ca_cat_x_ca_subvar).partitions[0]
+        column_bases = [
+            [1641.0, 1639.0, 0.0],
+            [1641.0, 1639.0, 0.0],
+            [1641.0, 1639.0, 0.0],
+            [1641.0, 1639.0, 0.0],
+            [1641.0, 1639.0, 0.0],
+        ]
+
+        # --- column and table bases are the same (don't add across the subvars)
+        assert slice_.column_weighted_bases.tolist() == column_bases
+        assert slice_.table_weighted_bases.tolist() == column_bases
+        # --- and row bases are the same as the counts
+        assert slice_.row_weighted_bases.tolist() == slice_.counts.tolist()
+
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def it_has_bases_that_dont_sum_across_ca_subvars_with_insertions(self):
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "anchor": "top",
+                        "args": [0, 2],
+                        "function": "subtotal",
+                        "name": "A",
+                    }
+                ],
+            },
+        }
+        slice_ = Cube(CR.ca_cat_x_ca_subvar, transforms=transforms).partitions[0]
+        column_bases = [
+            [1641.0, 1639.0, 0.0],
+            [1641.0, 1639.0, 0.0],
+            [1641.0, 1639.0, 0.0],
+            [1641.0, 1639.0, 0.0],
+            [1641.0, 1639.0, 0.0],
+            [1641.0, 1639.0, 0.0],
+        ]
+
+        # --- column and table bases are the same (don't add across the subvars)
+        assert slice_.column_weighted_bases.tolist() == column_bases
+        assert slice_.table_weighted_bases.tolist() == column_bases
+        # --- and row bases are the same as the counts
+        assert slice_.row_weighted_bases.tolist() == slice_.counts.tolist()
+
 
 class Describe_Strand(object):
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
