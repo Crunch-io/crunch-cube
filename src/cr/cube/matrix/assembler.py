@@ -951,6 +951,7 @@ class _BaseOrderHelper(object):
         propname_by_measure = {
             M.COLUMN_BASE_UNWEIGHTED: "column_unweighted_bases",
             M.COLUMN_BASE_WEIGHTED: "column_weighted_bases",
+            M.COLUMN_INDEX: "column_index",
             M.COLUMN_PERCENT: "column_proportions",
             M.MEAN: "means",
             M.POPULATION: "population_proportions",

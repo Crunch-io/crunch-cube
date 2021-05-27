@@ -773,6 +773,34 @@ class Describe_Slice(object):
         expected = load_python_expression(expectation)
         np.testing.assert_almost_equal(actual, expected)
 
+    def it_can_sort_by_column_index(self):
+        """Responds to order:opposing_element sort-by-column-index."""
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "opposing_element",
+                    "element_id": 1,
+                    "measure": "col_index",
+                    "direction": "ascending",
+                    # --- element-ids are 1, 2, 3, 999 ---
+                    "fixed": {"top": [999], "bottom": [1]},
+                }
+            }
+        }
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, transforms, None, 0)
+
+        expected = [
+            # --- row-element 999 is a top-exclusion, so it appears first ---
+            [101.6, 128.0, 69.2, 184.6, 66.1],
+            # --- 2 and 3 appear in ascending order by first col (col-id 1) ---
+            [87.3, 147.1, 79.1, 77.1, 123.1],  # --- 2 - Enough ---
+            [109.0, 28.5, 156.4, 48.3, 125.0],  # --- 3 - Not Enough ---
+            # --- row-element 1 is a bottom-exclusion, so it appears last ---
+            [87.9, 156.2, 50.8, 0.0, 82.6],  # --- 1 - Plenty ---
+        ]
+        actual = np.round(slice_.column_index, 1).tolist()
+        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+
     def it_can_sort_by_column_percent(self):
         """Responds to order:opposing_element sort-by-value.
 
