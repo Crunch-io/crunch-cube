@@ -663,9 +663,7 @@ class _ColumnWeightedBases(_BaseSecondOrderMeasure):
         if subtotal_rows.shape[0] == 0:
             return subtotal_rows
 
-        return np.broadcast_to(
-            self._weighted_cube_counts.columns_margin, subtotal_rows.shape
-        )
+        return np.broadcast_to(self._base_values[0, :], subtotal_rows.shape)
 
 
 class _Means(_BaseSecondOrderMeasure):
@@ -1257,9 +1255,7 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
         if subtotal_columns.shape[1] == 0:
             return subtotal_columns
 
-        return np.broadcast_to(
-            self._weighted_cube_counts.rows_margin[:, None], subtotal_columns.shape
-        )
+        return np.broadcast_to(self._base_values[:, 0][:, None], subtotal_columns.shape)
 
     @lazyproperty
     def _subtotal_rows(self):
