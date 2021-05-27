@@ -14,7 +14,6 @@ from cr.cube.matrix.subtotals import (
     NanSubtotals,
     NoneSubtotals,
     PairwiseSigTestSubtotals,
-    ZscoreSubtotals,
 )
 from cr.cube.stripe.insertion import SumSubtotals as StripeSumSubtotals
 from cr.cube.util import lazyproperty
@@ -282,7 +281,7 @@ class _BaseSecondOrderMeasure(object):
 
     @lazyproperty
     def _base_values(self):
-        """2D np.float64 ndarray of column-wise proportions denominator for each cell.
+        """2D np.float64 ndarray of measure's value for each cell.
 
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
@@ -302,7 +301,7 @@ class _BaseSecondOrderMeasure(object):
 
     @lazyproperty
     def _subtotal_columns(self):
-        """2D np.float64 ndarray of inserted column proportions denominator value.
+        """2D np.float64 ndarray of measure values for subtotal columns.
 
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
@@ -312,7 +311,7 @@ class _BaseSecondOrderMeasure(object):
 
     @lazyproperty
     def _subtotal_rows(self):
-        """2D np.float64 ndarray of column-proportions denominator for subtotal rows.
+        """2D np.float64 ndarray of measure values for subtotal rows.
 
         This is the third "block" and has the shape (n_row_subtotals, n_cols).
         """
@@ -1619,16 +1618,103 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
 
 
 class _Zscores(_BaseSecondOrderMeasure):
-    """Provides the zscore measure for a matrix."""
+    """Provides the zscore measure for a matrix.
+
+    A z-score is also known as a *standard score* and is the number of standard
+    deviations above (positive) or below (negative) the population mean each cell's
+    value is.
+    """
 
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        base_values = self._weighted_cube_counts.zscores
         dimension_types = tuple(d.dimension_type for d in self._dimensions)
         if DT.MR_SUBVAR in dimension_types:
-            return NanSubtotals.blocks(base_values, self._dimensions)
-        return ZscoreSubtotals.blocks(self._weighted_cube_counts, self._dimensions)
+            return NanSubtotals.blocks(self._base_values, self._dimensions)
+        return [
+            [self._base_values, self._subtotal_columns],
+            [self._subtotal_rows, self._intersections],
+        ]
+
+    @lazyproperty
+    def _base_values(self):
+        """2D np.float64 ndarray of zscore for each body cell."""
+        return self._calculate_zscores(
+            self._second_order_measures.weighted_counts.blocks[0][0],
+            self._second_order_measures.table_weighted_bases.blocks[0][0],
+            self._second_order_measures.row_weighted_bases.blocks[0][0],
+            self._second_order_measures.column_weighted_bases.blocks[0][0],
+        )
+
+    def _calculate_zscores(self, counts, table_bases, row_bases, column_bases):
+        """2D np.float64 ndarray of zscore value for each cell of the matrix.
+
+        A z-score is also known as a *standard score* and is the number of standard
+        deviations above (positive) or below (negative) the population mean a cell's
+        value is.
+        """
+        if self._is_defective:
+            return np.full(counts.shape, np.nan)
+
+        expected_counts = row_bases * column_bases / table_bases
+        variance = (
+            row_bases
+            * column_bases
+            * (table_bases - row_bases)
+            * (table_bases - column_bases)
+            / table_bases ** 3
+        )
+        return (counts - expected_counts) / np.sqrt(variance)
+
+    @lazyproperty
+    def _intersections(self):
+        """(n_row_subtotals, n_col_subtotals) ndarray of zscores for intersections.
+
+        An intersection value arises where a row-subtotal crosses a column-subtotal.
+        """
+        return self._calculate_zscores(
+            self._second_order_measures.weighted_counts.blocks[1][1],
+            self._second_order_measures.table_weighted_bases.blocks[1][1],
+            self._second_order_measures.row_weighted_bases.blocks[1][1],
+            self._second_order_measures.column_weighted_bases.blocks[1][1],
+        )
+
+    @lazyproperty
+    def _is_defective(self):
+        """Bool indicating whether the matrix is defective
+
+        Consider it "defective" if it doesn't have at least two rows and two columns
+        in the base values that are "full" of data. In this case we won't calculate
+        zscores for any block.
+        """
+        counts = self._second_order_measures.weighted_counts.blocks[0][0]
+        return not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D np.float64 ndarray of zscore values.
+
+        This is the second "block" and has the shape (n_rows, n_col_subtotals).
+        """
+        return self._calculate_zscores(
+            self._second_order_measures.weighted_counts.blocks[0][1],
+            self._second_order_measures.table_weighted_bases.blocks[0][1],
+            self._second_order_measures.row_weighted_bases.blocks[0][1],
+            self._second_order_measures.column_weighted_bases.blocks[0][1],
+        )
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """2D np.float64 ndarray of zscores for subtotal rows.
+
+        This is the third "block" and has the shape (n_row_subtotals, n_cols).
+        """
+        return self._calculate_zscores(
+            self._second_order_measures.weighted_counts.blocks[1][0],
+            self._second_order_measures.table_weighted_bases.blocks[1][0],
+            self._second_order_measures.row_weighted_bases.blocks[1][0],
+            self._second_order_measures.column_weighted_bases.blocks[1][0],
+        )
 
 
 # === MARGINALS ===

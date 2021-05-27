@@ -1523,52 +1523,137 @@ class Describe_WeightedCounts(object):
 class Describe_Zscores(object):
     """Unit test suite for `cr.cube.matrix.measure._Zscores` object."""
 
-    def it_computes_zscore_subtotals_blocks(self, request, dimensions_):
-        weighted_cube_counts_ = instance_mock(request, _BaseWeightedCubeCounts)
-        property_mock(
-            request,
-            _Zscores,
-            "_weighted_cube_counts",
-            return_value=weighted_cube_counts_,
-        )
-        ZscoreSubtotals_ = class_mock(request, "cr.cube.matrix.measure.ZscoreSubtotals")
-        ZscoreSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
-        zscores = _Zscores(dimensions_, None, None)
-
-        blocks = zscores.blocks
-
-        ZscoreSubtotals_.blocks.assert_called_once_with(
-            weighted_cube_counts_, dimensions_
-        )
-        assert blocks == [[[1], [2]], [[3], [4]]]
-
-    def but_the_subtotal_blocks_are_NaNs_when_an_MR_dimension_is_present(
-        self, request, dimensions_
+    def it_computes_its_blocks_for_non_mr_dimensions(
+        self, request, _base_values_prop_, dimensions_
     ):
-        weighted_cube_counts_ = instance_mock(
-            request, _BaseWeightedCubeCounts, zscores=[[1, 2], [3, 4]]
-        )
-        property_mock(
-            request,
-            _Zscores,
-            "_weighted_cube_counts",
-            return_value=weighted_cube_counts_,
-        )
+        _base_values_prop_.return_value = "A"
+        property_mock(request, _Zscores, "_subtotal_columns", return_value="B")
+        property_mock(request, _Zscores, "_subtotal_rows", return_value="C")
+        property_mock(request, _Zscores, "_intersections", return_value="D")
+
+        blocks = _Zscores(dimensions_, None, None).blocks
+
+        assert blocks == [["A", "B"], ["C", "D"]]
+
+    def it_computes_its_blocks_if_mr_in_dimensions(
+        self, request, _base_values_prop_, dimensions_
+    ):
+        dimensions_[0].dimension_type = DT.MR_SUBVAR
+        _base_values_prop_.return_value = [[1, 2], [3, 4]]
         NanSubtotals_ = class_mock(request, "cr.cube.matrix.measure.NanSubtotals")
         NanSubtotals_.blocks.return_value = [[[1], [np.nan]], [[np.nan], [np.nan]]]
-        dimensions_[0].dimension_type = DT.MR_SUBVAR
-        zscores = _Zscores(dimensions_, None, None)
 
-        blocks = zscores.blocks
+        blocks = _Zscores(dimensions_, None, None).blocks
 
         NanSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
         assert blocks == [[[1], [np.nan]], [[np.nan], [np.nan]]]
 
+    def it_can_calculate_a_zscore(self, _is_defective_prop_):
+        _is_defective_prop_.return_value = False
+        zscores = _Zscores(None, None, None)
+
+        actual = zscores._calculate_zscores(
+            np.array([[3.3, 2.2, 1.1], [6.6, 5.5, 4.4]]),
+            np.array([[23.1, 23.1, 23.1], [23.1, 23.1, 23.1]]),
+            np.array([[6.6, 6.6, 6.6], [16.5, 16.5, 16.5]]),
+            np.array([[9.9, 7.7, 5.5], [9.9, 7.7, 5.5]]),
+        )
+
+        assert actual.tolist() == [
+            pytest.approx([0.4387482, 4.33878897e-16, -0.5097793]),
+            pytest.approx([-0.4387482, 8.67757795e-16, 0.5097793]),
+        ]
+
+    def but_it_does_not_calculate_zscore_if_defective(self, _is_defective_prop_):
+        _is_defective_prop_.return_value = True
+        counts = np.array([[3.3, 2.2, 1.1], [6.6, 5.5, 4.4]])
+        zscores = _Zscores(None, None, None)
+
+        actual = zscores._calculate_zscores(counts, None, None, None)
+
+        assert actual == pytest.approx(np.full(counts.shape, np.nan), nan_ok=True)
+
+    @pytest.mark.parametrize(
+        "counts, expected",
+        (
+            ([[1, 2], [4]], True),
+            ([[], []], True),
+            ([[1, 2], [4, 5]], False),
+            ([[1, 0, 0], [4, 0, 0]], True),
+        ),
+    )
+    def it_knows_if_it_is_defective(
+        self, request, second_order_measures_, counts, expected
+    ):
+        counts = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        expected = False
+        weighted_counts_ = instance_mock(
+            request, _WeightedCounts, blocks=[[np.array(counts), None], [None, None]]
+        )
+        second_order_measures_.weighted_counts = weighted_counts_
+        zscores = _Zscores(None, second_order_measures_, None)
+
+        assert zscores._is_defective == expected
+
+    @pytest.mark.parametrize(
+        "prop_name, index",
+        (
+            ("_base_values", 1),
+            ("_subtotal_columns", 2),
+            ("_subtotal_rows", 3),
+            ("_intersections", 4),
+        ),
+    )
+    def it_provides_the_block_components_to_help(
+        self, request, _calculate_zscores_, second_order_measures_, prop_name, index
+    ):
+        _calculate_zscores_.return_value = [[1, 2], [3, 4]]
+        weighted_counts_ = instance_mock(
+            request, _WeightedCounts, blocks=[["w1", "w2"], ["w3", "w4"]]
+        )
+        table_weighted_bases_ = instance_mock(
+            request, _TableWeightedBases, blocks=[["t1", "t2"], ["t3", "t4"]]
+        )
+        row_weighted_bases_ = instance_mock(
+            request, _RowWeightedBases, blocks=[["r1", "r2"], ["r3", "r4"]]
+        )
+        column_weighted_bases_ = instance_mock(
+            request, _WeightedCounts, blocks=[["c1", "c2"], ["c3", "c4"]]
+        )
+        second_order_measures_.weighted_counts = weighted_counts_
+        second_order_measures_.table_weighted_bases = table_weighted_bases_
+        second_order_measures_.row_weighted_bases = row_weighted_bases_
+        second_order_measures_.column_weighted_bases = column_weighted_bases_
+        zscores = _Zscores(None, second_order_measures_, None)
+
+        actual = getattr(zscores, prop_name)
+
+        assert actual == [[1, 2], [3, 4]]
+        _calculate_zscores_.assert_called_once_with(
+            zscores, "w%s" % index, "t%s" % index, "r%s" % index, "c%s" % index
+        )
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _base_values_prop_(self, request):
+        return property_mock(request, _Zscores, "_base_values")
 
     @pytest.fixture
     def dimensions_(self, request):
         return instance_mock(request, Dimension), instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _calculate_zscores_(self, request):
+        return method_mock(request, _Zscores, "_calculate_zscores")
+
+    @pytest.fixture
+    def _is_defective_prop_(self, request):
+        return property_mock(request, _Zscores, "_is_defective")
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
 
 
 # === Marginals ===

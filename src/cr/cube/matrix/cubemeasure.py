@@ -9,7 +9,6 @@ unweighted-counts, weighted-counts (aka. counts), means, and others.
 from __future__ import division
 
 import numpy as np
-from scipy.stats.contingency import expected_freq
 
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
@@ -989,28 +988,6 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         )
 
     @lazyproperty
-    def zscores(self):
-        """2D np.float64 ndarray of zscores for each valid matrix cell."""
-        raise NotImplementedError(  # pragma: no cover
-            "`%s` must implement `.zscores`" % type(self).__name__
-        )
-
-    def _array_type_std_res(self, counts, total, rowsum, colsum):
-        """Return 2D np.float64 ndarray of std-res value for each cell of MR matrix.
-
-        This is a utility method used by a matrix with one or more MR dimensions. The
-        caller forms the input arrays based on which of its dimensions are MR.
-        """
-        # --- if the matrix is "defective", in the sense that it doesn't have at least
-        # --- two rows and two columns that are "full" of data, don't calculate zscores.
-        if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
-            return np.full(counts.shape, np.nan)
-
-        expected_counts = rowsum * colsum / total
-        variance = rowsum * colsum * (total - rowsum) * (total - colsum) / total ** 3
-        return (counts - expected_counts) / np.sqrt(variance)
-
-    @lazyproperty
     def _valid_row_idxs(self):
         """ndarray-style index for only valid (non-missing) rows.
 
@@ -1089,36 +1066,6 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
         If cube is unweighted, this is the same as unweighted_counts.
         """
         return self._weighted_counts
-
-    @lazyproperty
-    def zscores(self):
-        """2D ndarray of np.float64 std-res value for each cell of matrix.
-
-        A z-score is also known as a *standard score* and is the number of standard
-        deviations above (positive) or below (negative) the population mean a cell's
-        value is.
-        """
-        counts = self.weighted_counts
-
-        # --- If the matrix is "defective", in the sense that it doesn't have at least
-        # --- two rows and two columns that are "full" of data, don't calculate zscores.
-        if not np.all(counts.shape) or np.linalg.matrix_rank(counts) < 2:
-            return np.full(counts.shape, np.nan)
-
-        residuals = counts - expected_freq(counts)
-
-        # --- variance of the residuals ---
-        rows_margin = self.rows_margin
-        columns_margin = self.columns_margin
-        table_margin = self.table_margin
-        variance_of_residuals = (
-            np.outer(rows_margin, columns_margin)
-            * np.outer(table_margin - rows_margin, table_margin - columns_margin)
-            / table_margin ** 3
-        )
-
-        with np.errstate(divide="ignore", invalid="ignore"):
-            return residuals / np.sqrt(variance_of_residuals)
 
 
 class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
@@ -1207,16 +1154,6 @@ class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
         If cube is unweighted, this is the same as unweighted_counts.
         """
         return self._weighted_counts[:, :, 0]
-
-    @lazyproperty
-    def zscores(self):
-        """2D np.float64 ndarray of z-score for each matrix cell."""
-        return self._array_type_std_res(
-            self.weighted_counts,
-            self.table_margin,
-            np.sum(self._weighted_counts, axis=2),
-            np.sum(self.weighted_counts, axis=0),
-        )
 
 
 class _MrXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
@@ -1312,16 +1249,6 @@ class _MrXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
         """
         return self._weighted_counts[:, 0, :]
 
-    @lazyproperty
-    def zscores(self):
-        """2D np.float64 ndarray of z-score for each matrix cell."""
-        return self._array_type_std_res(
-            self.weighted_counts,
-            self.table_margin[:, np.newaxis],
-            np.sum(self.weighted_counts, axis=1)[:, None],
-            np.sum(self._weighted_counts, axis=1),
-        )
-
 
 class _MrXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
     """Weighted-counts cube-measure for an MR_X_MR slice.
@@ -1415,21 +1342,6 @@ class _MrXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
         counts contribute to these values.
         """
         return self._weighted_counts[:, 0, :, 0]
-
-    @lazyproperty
-    def zscores(self):
-        """2D ndarray of np.float64 std-res value for each cell of matrix.
-
-        A z-score is also known as a *standard score* and is the number of standard
-        deviations above (positive) or below (negative) the population mean each cell's
-        value is.
-        """
-        return self._array_type_std_res(
-            self.weighted_counts,
-            self.table_margin,
-            np.sum(self._weighted_counts, axis=3)[:, 0, :],
-            np.sum(self._weighted_counts, axis=1)[:, :, 0],
-        )
 
 
 # === LEGACY MATRIX OBJECTS ===
