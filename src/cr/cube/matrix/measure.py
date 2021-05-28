@@ -76,6 +76,13 @@ class SecondOrderMeasures(object):
         )
 
     @lazyproperty
+    def columns_margin_proportion(self):
+        """_ProportionMargin for measure object for this cube-result."""
+        return _ProportionMargin(
+            self._dimensions, self, self._cube_measures, MO.COLUMNS
+        )
+
+    @lazyproperty
     def columns_pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix column."""
         return self._cube_measures.unweighted_cube_counts.columns_pruning_base
@@ -181,6 +188,11 @@ class SecondOrderMeasures(object):
     def rows_margin(self):
         """_SummedCountMargin rows measure object for this cube-result."""
         return _SummedCountMargin(self._dimensions, self, self._cube_measures, MO.ROWS)
+
+    @lazyproperty
+    def rows_margin_proportion(self):
+        """_ProportionMargin for measure object for this cube-result."""
+        return _ProportionMargin(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def rows_pruning_base(self):
@@ -1805,6 +1817,48 @@ class _BaseScaledCountMarginal(_BaseMarginal):
             if self.orientation == MO.ROWS
             else np.array(self._dimensions[0].numeric_values, dtype=np.float64)
         )
+
+
+class _ProportionMargin(_BaseMarginal):
+    """The 'proportion-margin' (aka rows-margin-proportion/columns-margin-proportion)"""
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin.
+
+        These are the base-values and the subtotals.
+        """
+        return [
+            numerator / self._cube_measures.weighted_cube_counts.table_margin
+            for numerator in self._proportion_numerators
+        ]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if counts are defined."""
+        return self._counts_are_defined
+
+    @lazyproperty
+    def _proportion_numerators(self):
+        """ndarray of counts to be used as numerator for the margin proportions
+
+        We want the numerator to exist even along subtotal differences, so we cannot
+        use the already defined `rows/columns` margin.
+        """
+        counts = self._second_order_measures.weighted_counts.blocks
+
+        if self.orientation == MO.ROWS:
+            # --- Try getting the column comparable counts, to check for the error
+            self._second_order_measures.column_comparable_counts.blocks
+            # --- Now get only the base values and relevant subtotals
+            counts = [counts[0][0], counts[1][0]]
+        else:
+            # --- Try getting the row comparable counts, to check for the error
+            self._second_order_measures.row_comparable_counts
+            # --- Now get only the base values and relevant subtotals
+            counts = [counts[0][0], counts[0][1]]
+
+        return [self._apply_along_orientation(np.sum, count) for count in counts]
 
 
 class _ScaleMean(_BaseScaledCountMarginal):

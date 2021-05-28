@@ -34,6 +34,7 @@ from cr.cube.matrix.measure import (
     _ColumnWeightedBases,
     _Means,
     _PopulationProportions,
+    _ProportionMargin,
     _RowComparableCounts,
     _RowProportions,
     _RowShareSum,
@@ -254,35 +255,25 @@ class DescribeAssembler(object):
 
     def it_provides_a_1D_columns_margin_proportion_for_a_CAT_X_cube_result(
         self,
+        request,
         _rows_dimension_prop_,
         dimension_,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        _column_subtotals_prop_,
-        _column_order_prop_,
-        _assemble_vector_,
+        _assemble_marginal_,
+        _measures_prop_,
+        second_order_measures_,
     ):
         _rows_dimension_prop_.return_value = dimension_
         dimension_.dimension_type = DT.CAT
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.table_margin = 6.0
-        cube_result_matrix_.columns_margin = np.array([1, 2, 3])
-        _column_subtotals_prop_.return_value = [3, 5]
-        _column_order_prop_.return_value = [0, -2, 1, 2, -1]
-        _assemble_vector_.return_value = [1, 3, 2, 3, 5]
+        _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
+        _measures_prop_.return_value = second_order_measures_
+        measure_ = instance_mock(request, _ProportionMargin)
+        second_order_measures_.columns_margin_proportion = measure_
         assembler = Assembler(None, None, None)
 
-        columns_margin = assembler.columns_margin_proportion
+        columns_margin_proportion = assembler.columns_margin_proportion
 
-        _assemble_vector_.assert_called_once_with(
-            assembler, ANY, [3, 5], [0, -2, 1, 2, -1]
-        )
-        assert _assemble_vector_.call_args.args[1].tolist() == [
-            1 / 6.0,
-            2 / 6.0,
-            3 / 6.0,
-        ]
-        assert columns_margin == [1, 3, 2, 3, 5]
+        _assemble_marginal_.assert_called_once_with(assembler, measure_)
+        assert columns_margin_proportion == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_columns_margin_proportion_for_an_MR_X_cube_result(
         self,
@@ -482,35 +473,25 @@ class DescribeAssembler(object):
 
     def it_provides_a_1D_rows_margin_proportion_for_an_X_CAT_cube_result(
         self,
+        request,
         _columns_dimension_prop_,
         dimension_,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        _row_subtotals_prop_,
-        _row_order_prop_,
-        _assemble_vector_,
+        _assemble_marginal_,
+        _measures_prop_,
+        second_order_measures_,
     ):
         _columns_dimension_prop_.return_value = dimension_
         dimension_.dimension_type = DT.CAT
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.table_margin = 6.0
-        cube_result_matrix_.rows_margin = np.array([1, 2, 3])
-        _row_subtotals_prop_.return_value = [3, 5]
-        _row_order_prop_.return_value = [0, -2, 1, 2, -1]
-        _assemble_vector_.return_value = [1, 3, 2, 3, 5]
+        _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
+        _measures_prop_.return_value = second_order_measures_
+        measure_ = instance_mock(request, _ProportionMargin)
+        second_order_measures_.rows_margin_proportion = measure_
         assembler = Assembler(None, None, None)
 
-        rows_margin = assembler.rows_margin_proportion
+        rows_margin_proportion = assembler.rows_margin_proportion
 
-        _assemble_vector_.assert_called_once_with(
-            assembler, ANY, [3, 5], [0, -2, 1, 2, -1]
-        )
-        assert _assemble_vector_.call_args.args[1].tolist() == [
-            1 / 6.0,
-            2 / 6.0,
-            3 / 6.0,
-        ]
-        assert rows_margin == [1, 3, 2, 3, 5]
+        _assemble_marginal_.assert_called_once_with(assembler, measure_)
+        assert rows_margin_proportion == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_rows_margin_proportion_for_an_X_MR_cube_result(
         self,

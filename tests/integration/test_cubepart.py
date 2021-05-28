@@ -860,6 +860,42 @@ class Describe_Slice(object):
             [46.0, 21.0, 3.0, 0.0, 7.0],
         ]
 
+    def it_can_sort_by_rows_margin(self):
+        """Responds to order of marginal sort-by-value."""
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "marginal",
+                    "marginal": "margin",
+                    "direction": "descending",
+                }
+            }
+        }
+
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_4), 0, transforms, None, 0)
+
+        # --- scale means should be in order
+        assert slice_.rows_margin.tolist() == pytest.approx([74.0, 68.0, 67.0, 57.0])
+
+    def it_can_sort_by_rows_margin_proportion(self):
+        """Responds to order of marginal sort-by-value."""
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "marginal",
+                    "marginal": "table_proportion",
+                    "direction": "ascending",
+                }
+            }
+        }
+
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_4), 0, transforms, None, 0)
+
+        # --- scale means should be in order
+        assert slice_.rows_margin_proportion.tolist() == pytest.approx(
+            [0.2142857, 0.2518796, 0.2556391, 0.2781954]
+        )
+
     def it_ignores_hidden_subtotals(self):
         """A subtotal with `"hide": True` does not appear.
 

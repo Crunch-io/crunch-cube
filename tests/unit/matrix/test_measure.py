@@ -27,6 +27,7 @@ from cr.cube.matrix.measure import (
     _PairwiseMeansSigPVals,
     _PairwiseMeansSigTStats,
     _PopulationProportions,
+    _ProportionMargin,
     _RowComparableCounts,
     _RowProportions,
     _RowShareSum,
@@ -132,6 +133,10 @@ class DescribeSecondOrderMeasures(object):
     @pytest.mark.parametrize(
         "orientation, measure, MarginalCls",
         (
+            ("rows", "rows_margin", _SummedCountMargin),
+            ("columns", "columns_margin", _SummedCountMargin),
+            ("rows", "rows_margin_proportion", _ProportionMargin),
+            ("columns", "columns_margin_proportion", _ProportionMargin),
             ("rows", "rows_scale_median", _ScaleMedian),
             ("columns", "columns_scale_median", _ScaleMedian),
             ("rows", "rows_scale_mean", _ScaleMean),
@@ -140,7 +145,7 @@ class DescribeSecondOrderMeasures(object):
             ("columns", "columns_scale_mean_stddev", _ScaleMeanStddev),
         ),
     )
-    def it_provides_access_to_the_scale_marginals(
+    def it_provides_access_to_the_marginals(
         self,
         request,
         dimensions_,
@@ -1741,6 +1746,112 @@ class Describe_BaseScaledCountMarginal(object):
         )
 
         assert marginal._opposing_numeric_values == expected
+
+
+class Describe_ProportionMargin(object):
+    """Unit test suite for `cr.cube.matrix.measure._ProportionMargin` object."""
+
+    def it_provides_blocks(self, request, cube_measures_, weighted_cube_counts_):
+        property_mock(
+            request,
+            _ProportionMargin,
+            "_proportion_numerators",
+            return_value=[2.0, 3.0],
+        )
+        cube_measures_.weighted_cube_counts = weighted_cube_counts_
+        weighted_cube_counts_.table_margin = 5.0
+        proportion = _ProportionMargin(None, None, cube_measures_, None)
+
+        assert proportion.blocks == [0.4, 0.6]
+
+    def it_can_tell_if_it_is_defined(self, request):
+        property_mock(request, _BaseMarginal, "_counts_are_defined")
+        summed_count = _ProportionMargin(None, None, None, None)
+        assert summed_count.is_defined == summed_count._counts_are_defined
+
+    def it_provides_the_right_numerator_for_rows(
+        self, second_order_measures_, weighted_counts_, _apply_along_orientation_
+    ):
+        second_order_measures_.weighted_counts = weighted_counts_
+        weighted_counts_.blocks = [[1, 2], [3, 4]]
+        margin = _ProportionMargin(None, second_order_measures_, None, MO.ROWS)
+
+        margin._proportion_numerators
+
+        assert _apply_along_orientation_.call_args_list == [
+            call(margin, np.sum, 1),
+            call(margin, np.sum, 3),
+        ]
+
+    def but_it_raises_if_column_counts_are_not_comparable(
+        self, request, second_order_measures_, weighted_counts_
+    ):
+        second_order_measures_.weighted_counts = weighted_counts_
+        second_order_measures_.column_comparable_counts = instance_mock(
+            request,
+            _ColumnComparableCounts,
+        )
+        property_mock(
+            request, _ColumnComparableCounts, "blocks", side_effect=ValueError
+        )
+        margin = _ProportionMargin(None, second_order_measures_, None, MO.ROWS)
+
+        with pytest.raises(ValueError):
+            margin._proportion_numerators
+
+    def it_provides_the_right_numerator_for_columns(
+        self, second_order_measures_, weighted_counts_, _apply_along_orientation_
+    ):
+        second_order_measures_.weighted_counts = weighted_counts_
+        weighted_counts_.blocks = [[1, 2], [3, 4]]
+        margin = _ProportionMargin(None, second_order_measures_, None, MO.COLUMNS)
+
+        margin._proportion_numerators
+
+        assert _apply_along_orientation_.call_args_list == [
+            call(margin, np.sum, 1),
+            call(margin, np.sum, 2),
+        ]
+
+    def but_it_raises_if_row_counts_are_not_comparable(
+        self, request, second_order_measures_, weighted_counts_
+    ):
+        second_order_measures_.weighted_counts = weighted_counts_
+        second_order_measures_.row_comparable_counts = instance_mock(
+            request,
+            _RowComparableCounts,
+        )
+        property_mock(request, _RowComparableCounts, "blocks", side_effect=ValueError)
+        margin = _ProportionMargin(None, second_order_measures_, None, MO.ROWS)
+
+        with pytest.raises(ValueError):
+            margin._proportion_numerators
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _apply_along_orientation_(self, request):
+        return method_mock(
+            request,
+            _ProportionMargin,
+            "_apply_along_orientation",
+        )
+
+    @pytest.fixture
+    def cube_measures_(self, request):
+        return instance_mock(request, CubeMeasures)
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
+
+    @pytest.fixture
+    def weighted_cube_counts_(self, request):
+        return instance_mock(request, _BaseWeightedCubeCounts)
+
+    @pytest.fixture
+    def weighted_counts_(self, request):
+        return instance_mock(request, _WeightedCounts)
 
 
 class Describe_ScaleMean(object):
