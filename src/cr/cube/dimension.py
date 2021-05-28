@@ -903,7 +903,11 @@ class _OrderSpec(object):
         value in that field is not a recognized marginal keyword. Note that not all order
         types use the "marginal": field.
         """
-        return MARGINAL(self.marginal_keyname)
+        return (
+            MARGINAL(self.marginal_keyname)
+            if self.marginal_keyname in MARGINAL.members()
+            else None
+        )
 
     @lazyproperty
     def marginal_keyname(self):
@@ -918,11 +922,13 @@ class _OrderSpec(object):
     def measure(self):
         """Member of enums.MEASURE corresponding to "measure": field in order transform.
 
-        Raises KeyError if the order dict has no "measure": field and ValueError if the
-        value in that field is not a recognized measure keyword. Note that not all order
-        types use the "measure": field.
+        Returns None if `measure_keyname` is not a MEASURE member.
         """
-        return MEASURE(self.measure_keyname)
+        return (
+            MEASURE(self.measure_keyname)
+            if self.measure_keyname in MEASURE.members()
+            else None
+        )
 
     @lazyproperty
     def measure_keyname(self):

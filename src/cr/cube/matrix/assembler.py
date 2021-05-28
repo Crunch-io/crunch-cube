@@ -927,6 +927,8 @@ class _BaseOrderHelper(object):
     def _measure(self):
         """Second-order measure object providing values for sort.
 
+        Returns None when the measure in the `order_spec` is not enable for sorting.
+
         This property is not used by some subclasses.
         """
         propname_by_measure = {
@@ -950,9 +952,8 @@ class _BaseOrderHelper(object):
         measure_propname = propname_by_measure.get(measure)
 
         if measure_propname is None:
-            raise NotImplementedError(
-                "sort-by-value for measure '%s' is not yet supported" % measure
-            )
+            # --- Drives the fallback to the PayloadOrder VS SortByValueOrder
+            return None
 
         return getattr(self._second_order_measures, measure_propname)
 
@@ -1002,6 +1003,7 @@ class _ColumnOrderHelper(_BaseOrderHelper):
         insertion, hiding, pruning, and ordering transforms specified in the
         rows-dimension.
         """
+
         CollatorCls = (
             ExplicitOrderCollator
             if self._order_spec.collation_method == CM.EXPLICIT_ORDER
@@ -1102,6 +1104,12 @@ class _SortRowsByBaseColumnHelper(_RowOrderHelper):
     @lazyproperty
     def _order(self):
         """tuple of int element-idx specifying ordering of dimension elements."""
+        if self._measure is None:
+            # ---Fallback to PayloadOrderCollator if the measure is not available for
+            # ---the sort-row-by-basecol
+            return PayloadOrderCollator.display_order(
+                self._rows_dimension, self._empty_row_idxs
+            )
         return SortByValueCollator.display_order(
             self._rows_dimension,
             self._element_values,
@@ -1148,6 +1156,12 @@ class _SortRowsByInsertedColumnHelper(_RowOrderHelper):
     @lazyproperty
     def _order(self):
         """tuple of int element-idx specifying ordering of dimension elements."""
+        if self._measure is None:
+            # ---Fallback to PayloadOrderCollator if the measure is not available for
+            # ---the sort-row-by-inserted-col
+            return PayloadOrderCollator.display_order(
+                self._rows_dimension, self._empty_row_idxs
+            )
         return SortByValueCollator.display_order(
             self._rows_dimension,
             self._element_values,
@@ -1197,15 +1211,19 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
         }.get(marginal)
 
         if marginal_propname is None:
-            raise NotImplementedError(
-                "sort-by-value for marginal '%s' is not yet supported" % marginal
-            )
+            return None
 
         return getattr(self._second_order_measures, marginal_propname)
 
     @lazyproperty
     def _order(self):
         """tuple of int element-idx specifying ordering of dimension elements."""
+        if self._marginal is None:
+            # ---Fallback to PayloadOrderCollator if the marginal is not available for
+            # ---the sort-row-by-marginal
+            return PayloadOrderCollator.display_order(
+                self._rows_dimension, self._empty_row_idxs
+            )
         return SortByValueCollator.display_order(
             self._rows_dimension,
             self._element_values,

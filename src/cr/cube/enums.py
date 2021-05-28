@@ -80,6 +80,11 @@ class MARGINAL(enum.Enum):
     SCALE_MEAN_STDDEV = "scale_mean_stddev"
     SCALE_MEDIAN = "scale_median"
 
+    @classmethod
+    def members(cls):
+        """Frozenset of member names of the marginals"""
+        return frozenset([m.value for m in cls])
+
 
 class MARGINAL_ORIENTATION(enum.Enum):
     """Enumerated values representing orientation of a marginal."""
@@ -112,6 +117,11 @@ class MEASURE(enum.Enum):
     UNWEIGHTED_COUNT = "count_unweighted"
     WEIGHTED_COUNT = "count_weighted"
     Z_SCORE = "z_score"
+
+    @classmethod
+    def members(cls):
+        """Frozenset of member names of the second-order measures"""
+        return frozenset([m.value for m in cls])
 
 
 class CUBE_MEASURE(enum.Enum):
