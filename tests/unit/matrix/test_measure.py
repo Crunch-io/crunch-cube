@@ -43,6 +43,7 @@ from cr.cube.matrix.measure import (
     _TableUnweightedBases,
     _TableWeightedBases,
     _TotalShareSum,
+    _UnweightedBaseMargin,
     _UnweightedCounts,
     _WeightedCounts,
     _Zscores,
@@ -2236,3 +2237,84 @@ class Describe_SummedCountMargin(object):
         property_mock(request, _BaseMarginal, "_counts_are_defined")
         summed_count = _SummedCountMargin(None, None, None, None)
         assert summed_count.is_defined == summed_count._counts_are_defined
+
+
+class Describe_UnweightedBaseMargin(object):
+    """Unit test suite for `cr.cube.matrix.measure._UnweightedBaseMargin` object."""
+
+    def it_provides_blocks_for_rows(
+        self,
+        request,
+        is_defined_prop_,
+        orientation_prop_,
+        second_order_measures_,
+        blocks_,
+    ):
+        is_defined_prop_.return_value = True
+        orientation_prop_.return_value = MO.ROWS
+        row_unweighted_bases_ = instance_mock(
+            request, _RowUnweightedBases, blocks=blocks_
+        )
+        second_order_measures_.row_unweighted_bases = row_unweighted_bases_
+        margin_ = _UnweightedBaseMargin(None, second_order_measures_, None, None)
+
+        actual = margin_.blocks
+
+        assert actual[0].tolist() == [0, 2]
+        assert actual[1].tolist() == [6]
+
+    def it_provides_blocks_for_columns(
+        self,
+        request,
+        is_defined_prop_,
+        orientation_prop_,
+        second_order_measures_,
+        blocks_,
+    ):
+        is_defined_prop_.return_value = True
+        orientation_prop_.return_value = MO.COLUMNS
+        column_unweighted_bases_ = instance_mock(
+            request, _RowUnweightedBases, blocks=blocks_
+        )
+        second_order_measures_.column_unweighted_bases = column_unweighted_bases_
+        margin_ = _UnweightedBaseMargin(None, second_order_measures_, None, None)
+
+        actual = margin_.blocks
+
+        assert actual[0].tolist() == [0, 1]
+        assert actual[1].tolist() == [4]
+
+    def but_blocks_raises_if_undefined(self, is_defined_prop_):
+        is_defined_prop_.return_value = False
+        margin_ = _UnweightedBaseMargin(None, None, None, None)
+
+        with pytest.raises(ValueError) as e:
+            margin_.blocks
+
+        assert str(e.value) == "Cannot calculate base across subvariables dimension."
+
+    def it_can_tell_if_it_is_defined(self, request):
+        property_mock(request, _BaseMarginal, "_counts_are_defined")
+        summed_count = _SummedCountMargin(None, None, None, None)
+        assert summed_count.is_defined == summed_count._counts_are_defined
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def blocks_(self):
+        return [
+            [np.array([[0, 1], [2, 3]]), np.array([[4], [5]])],
+            [np.array([[6, 7]]), np.array([8])],
+        ]
+
+    @pytest.fixture
+    def is_defined_prop_(self, request):
+        return property_mock(request, _UnweightedBaseMargin, "is_defined")
+
+    @pytest.fixture
+    def orientation_prop_(self, request):
+        return property_mock(request, _UnweightedBaseMargin, "orientation")
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)

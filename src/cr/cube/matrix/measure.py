@@ -185,6 +185,13 @@ class SecondOrderMeasures(object):
         return _RowWeightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def rows_base(self):
+        """1D np.float64 ndarray of unweighted-N for each matrix column."""
+        return _UnweightedBaseMargin(
+            self._dimensions, self, self._cube_measures, MO.ROWS
+        )
+
+    @lazyproperty
     def rows_margin(self):
         """_SummedCountMargin rows measure object for this cube-result."""
         return _SummedCountMargin(self._dimensions, self, self._cube_measures, MO.ROWS)
@@ -2118,6 +2125,35 @@ class _SummedCountMargin(_BaseMarginal):
         return [
             self._apply_along_orientation(np.sum, counts) for counts in self._counts
         ]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if counts are defined."""
+        return self._counts_are_defined
+
+
+class _UnweightedBaseMargin(_BaseMarginal):
+    """The unweighted bases margin (sum of unweighted counts)"""
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin.
+
+        These are the base-values and the subtotals.
+        """
+        if not self.is_defined:
+            raise ValueError("Cannot calculate base across subvariables dimension.")
+
+        # --- Since we know we're not an array variable, we can trust that
+        # --- the 2D array for the unweighted bases measure is the same in
+        # --- the direction we need. Therefore, we can just grab the first
+        # --- row/column of that.
+        if self.orientation == MO.ROWS:
+            bases = self._second_order_measures.row_unweighted_bases.blocks
+            return [bases[0][0][:, 0], bases[1][0][:, 0]]
+        else:
+            bases = self._second_order_measures.column_unweighted_bases.blocks
+            return [bases[0][0][0, :], bases[0][1][0, :]]
 
     @lazyproperty
     def is_defined(self):

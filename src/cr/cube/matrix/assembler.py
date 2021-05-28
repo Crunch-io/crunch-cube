@@ -409,23 +409,14 @@ class Assembler(object):
     @lazyproperty
     def rows_base(self):
         """1D/2D np.float64 ndarray of unweighted-N for each slice row/cell."""
-        # --- an X_MR slice produces a 2D row-base (each cell has its own N) ---
-        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
-            return self._assemble_matrix(
-                SumSubtotals.blocks(
-                    self._cube_result_matrix.rows_base,
-                    self._dimensions,
-                    diff_rows_nan=True,
-                )
-            )
+        # --- an X_ARRAY slice produces a 2D row-base (each cell has its own N) ---
+        # --- TODO: Should rows_base only be defined when it's 1D? This would
+        # --- require changes to exporter to use the bases to give a "rows_base_range"
+        if self._columns_dimension.dimension_type in DT.ARRAY_TYPES:
+            return self.row_unweighted_bases
 
         # --- otherwise rows-base is a vector ---
-        return self._assemble_vector(
-            self._cube_result_matrix.rows_base,
-            self._row_subtotals,
-            self._row_order,
-            diffs_nan=True,
-        )
+        return self._assemble_marginal(self._measures.rows_base)
 
     @lazyproperty
     def rows_dimension_fills(self):
