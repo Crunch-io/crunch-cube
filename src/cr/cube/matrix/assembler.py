@@ -1194,6 +1194,7 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
         """Marginal object providing values for sort."""
         marginal = self._order_spec.marginal
         marginal_propname = {
+            MARGINAL.BASE: "rows_base",
             MARGINAL.MARGIN: "rows_margin",
             MARGINAL.MARGIN_PROPORTION: "rows_margin_proportion",
             MARGINAL.SCALE_MEAN: "rows_scale_mean",

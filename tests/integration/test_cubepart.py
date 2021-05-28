@@ -896,6 +896,23 @@ class Describe_Slice(object):
             [0.2142857, 0.2518796, 0.2556391, 0.2781954]
         )
 
+    def it_can_sort_by_rows_base(self):
+        """Responds to order of marginal sort-by-value."""
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "marginal",
+                    "marginal": "base",
+                    "direction": "ascending",
+                }
+            }
+        }
+
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_4), 0, transforms, None, 0)
+
+        # --- base should be in order
+        assert slice_.rows_base.tolist() == pytest.approx([57.0, 67.0, 68.0, 74.0])
+
     def it_ignores_hidden_subtotals(self):
         """A subtotal with `"hide": True` does not appear.
 
