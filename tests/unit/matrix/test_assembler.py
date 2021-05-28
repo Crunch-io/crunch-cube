@@ -1255,20 +1255,6 @@ class Describe_SortRowsByBaseColumnHelper(object):
 
         assert order_helper._element_values.tolist() == [2, 7, 12, 17]
 
-    def but_it_raises_when_an_unsupported_sort_by_value_measure_is_requested(
-        self, _order_spec_prop_, order_spec_
-    ):
-        _order_spec_prop_.return_value = order_spec_
-        order_spec_.measure = M.TOTAL_SHARE_SUM
-        order_helper = _SortRowsByBaseColumnHelper(None, None)
-
-        with pytest.raises(NotImplementedError) as e:
-            order_helper._measure
-
-        assert str(e.value) == (
-            "sort-by-value for measure 'MEASURE.TOTAL_SHARE_SUM' is not yet supported"
-        )
-
     def it_computes_the_sorted_element_order_to_help(self, request, dimension_):
         property_mock(
             request,
@@ -1292,6 +1278,9 @@ class Describe_SortRowsByBaseColumnHelper(object):
         )
         property_mock(
             request, _SortRowsByBaseColumnHelper, "_empty_row_idxs", return_value=()
+        )
+        property_mock(
+            request, _SortRowsByBaseColumnHelper, "_measure", return_value="measure"
         )
         SortByValueCollator_ = class_mock(
             request, "cr.cube.matrix.assembler.SortByValueCollator"
@@ -1395,6 +1384,9 @@ class Describe_SortRowsByInsertedColumnHelper(object):
         property_mock(
             request, _SortRowsByInsertedColumnHelper, "_empty_row_idxs", return_value=()
         )
+        property_mock(
+            request, _SortRowsByInsertedColumnHelper, "_measure", return_value="measure"
+        )
         SortByValueCollator_ = class_mock(
             request, "cr.cube.matrix.assembler.SortByValueCollator"
         )
@@ -1458,6 +1450,9 @@ class Describe_SortRowsByMarginalHelper(object):
         SortByValueCollator_ = class_mock(
             request, "cr.cube.matrix.assembler.SortByValueCollator"
         )
+        property_mock(
+            request, _SortRowsByMarginalHelper, "_marginal", return_value="marginal"
+        )
         _rows_dimension_ = property_mock(
             request, _SortRowsByMarginalHelper, "_rows_dimension"
         )
@@ -1509,18 +1504,6 @@ class Describe_SortRowsByMarginalHelper(object):
         order_helper = _SortRowsByMarginalHelper(None, second_order_measures_)
 
         assert order_helper._marginal == "foo"
-
-    def but_it_raises_on_unknown_marginal(
-        self, second_order_measures_, _order_spec_, _order_spec_prop_
-    ):
-        _order_spec_.marginal = "bar"
-        _order_spec_prop_.return_value = _order_spec_
-        order_helper = _SortRowsByMarginalHelper(None, second_order_measures_)
-
-        with pytest.raises(NotImplementedError) as e:
-            order_helper._marginal
-
-        assert str(e.value) == "sort-by-value for marginal 'bar' is not yet supported"
 
     def it_provides_the_subtotal_values_to_help(self, _marginal_prop_, marginal_):
         marginal_.blocks = ["a", "b"]
