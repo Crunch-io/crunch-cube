@@ -1765,7 +1765,7 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
 
         Only selected values contribute to the rows-base.
         """
-        return np.sum(self._unweighted_counts[:, 0, :], axis=1)
+        return np.sum(self._unweighted_counts[:, 0, :], axis=1) * 2
 
     @lazyproperty
     def rows_margin(self):

@@ -2235,6 +2235,26 @@ class Describe_MrXCatMatrix(object):
             np.array([15, 17, 19]),
         )
 
+    def it_knows_its_rows_base(self):
+        unweighted_counts = np.array(
+            [
+                [  # -- row 0 ------------
+                    [1, 2, 3],  # -- selected --
+                    [4, 5, 6],  # -- not --
+                ],
+                [  # -- row 1 ------------
+                    [7, 8, 9],  # -- selected --
+                    [3, 2, 1],  # -- not --
+                    # --------------------
+                ],
+            ]
+        )
+        cube = _MrXCatMatrix(None, None, unweighted_counts, None)
+
+        assert cube.rows_base.tolist() == [12, 48]
+
+
+
     def it_knows_its_rows_margin(self):
         weighted_counts = np.array(
             [

@@ -880,10 +880,6 @@ class DescribeAssembler(object):
         return method_mock(request, Assembler, "_assemble_matrix")
 
     @pytest.fixture
-    def _assemble_vector_(self, request):
-        return method_mock(request, Assembler, "_assemble_vector")
-
-    @pytest.fixture
     def base_margin_(self, request):
         return instance_mock(request, _UnweightedBaseMargin)
 
@@ -894,10 +890,6 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _column_order_prop_(self, request):
         return property_mock(request, Assembler, "_column_order")
-
-    @pytest.fixture
-    def _column_subtotals_prop_(self, request):
-        return property_mock(request, Assembler, "_column_subtotals")
 
     @pytest.fixture
     def _columns_dimension_prop_(self, request):
@@ -934,10 +926,6 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _row_order_prop_(self, request):
         return property_mock(request, Assembler, "_row_order")
-
-    @pytest.fixture
-    def _row_subtotals_prop_(self, request):
-        return property_mock(request, Assembler, "_row_subtotals")
 
     @pytest.fixture
     def _rows_dimension_prop_(self, request):
