@@ -1433,7 +1433,6 @@ class Describe_Slice(object):
             np.array([100, 100, 100, 100, 100, 100, 100, 100, 100, 100])
         )
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_has_bases_that_dont_sum_across_ca_subvars(self):
         slice_ = Cube(CR.ca_cat_x_ca_subvar).partitions[0]
         column_bases = [
@@ -1450,7 +1449,7 @@ class Describe_Slice(object):
         # --- and row bases are the same as the counts
         assert slice_.row_weighted_bases.tolist() == slice_.counts.tolist()
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
+    # @pytest.mark.xfail(reason="WIP", strict=True)
     def it_has_bases_that_dont_sum_across_ca_subvars_with_insertions(self):
         transforms = {
             "rows_dimension": {

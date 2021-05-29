@@ -976,6 +976,16 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         )
 
     @lazyproperty
+    def _column_dimension_is_array(self):
+        """Bool indicating whether column dimension is an array"""
+        return self._dimensions[1].dimension_type in DT.ARRAY_TYPES
+
+    @lazyproperty
+    def _row_dimension_is_array(self):
+        """Bool indicating whether row dimension is an array"""
+        return self._dimensions[0].dimension_type in DT.ARRAY_TYPES
+
+    @lazyproperty
     def _valid_row_idxs(self):
         """ndarray-style index for only valid (non-missing) rows.
 
@@ -1020,31 +1030,69 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
     @lazyproperty
     def column_bases(self):
         """2D ndarray of np.float64 column-proportion denominator for each cell."""
-        return np.broadcast_to(
-            np.sum(self._weighted_counts, axis=0), self.weighted_counts.shape
+        # --- Never add across subvariables. If rows dimension is an array, then the
+        # --- column_bases is the same as the counts.
+        return (
+            self.weighted_counts
+            if self._row_dimension_is_array
+            else np.broadcast_to(
+                np.sum(self._weighted_counts, axis=0), self.weighted_counts.shape
+            )
         )
 
     @lazyproperty
     def row_bases(self):
         """2D np.float64 ndarray of row-proportion denominator for each matrix cell."""
-        return np.broadcast_to(
-            np.sum(self._weighted_counts, axis=1)[:, None], self._weighted_counts.shape
+        # --- Never add across subvariables. If columns dimension is an array, then the
+        # --- rows_bases is the same as the counts.
+        return (
+            self.weighted_counts
+            if self._column_dimension_is_array
+            else np.broadcast_to(
+                np.sum(self._weighted_counts, axis=1)[:, None],
+                self._weighted_counts.shape,
+            )
         )
 
     @lazyproperty
     def table_bases(self):
         """2D np.float64 ndarray of table-proportion denominator for each cell."""
-        return np.broadcast_to(self.table_margin, self._weighted_counts.shape)
+        # --- Never add across subvariables.
+        # --- It's hard to imagine a situation where both dimensions are subvariables
+        # --- so that case may never actually happen. (I don't think we support
+        # --- cat arrays by numeric arrays or 2 numeric arrays)
+        return (
+            self.weighted_counts
+            if self._row_dimension_is_array and self._column_dimension_is_array
+            else self.row_bases
+            if self._row_dimension_is_array
+            else self.column_bases
+            if self._column_dimension_is_array
+            else np.broadcast_to(self.table_margin, self._weighted_counts.shape)
+        )
 
     @lazyproperty
     def table_margin(self):
-        """Scalar np.float64 weighted-N for overall table.
+        """Scalar, 1D or 2D np.float64 weighted-N for overall table.
 
         This is the weighted count of respondents who provided a valid response to
-        both questions. Because both dimensions are CAT, the table-margin value is the
-        same for all cells of the matrix.
+        both questions. When both dimensions are not ARRAY, the table-margin value is the
+        same for all cells of the matrix. Otherwise, since we cannot add across
+        subvariables, it can be 1D or even 2D (though I don't think this case ever
+        happens in production).
         """
-        return np.sum(self._weighted_counts)
+        # --- TODO: Long term I think it'd be better to not have the margin
+        # --- be this unknown dimension thing, but it's used for calculating
+        # --- the table weighted base subtotals
+        return (
+            self.table_bases
+            if self._row_dimension_is_array and self._column_dimension_is_array
+            else self.table_bases[:, 0]
+            if self._row_dimension_is_array
+            else self.table_bases[0, :]
+            if self._column_dimension_is_array
+            else np.sum(self._weighted_counts)
+        )
 
     @lazyproperty
     def weighted_counts(self):

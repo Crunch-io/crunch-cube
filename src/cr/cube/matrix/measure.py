@@ -624,8 +624,8 @@ class _ColumnWeightedBases(_BaseSecondOrderMeasure):
         """
         # --- the strategy here is to broadcast one row of the subtotal-columns to the
         # --- shape of the intersections. This works in the X_CAT case because each row
-        # --- of subtotal-columns is the same. In the X_MR case there can be no subtotal
-        # --- columns so an empty row is broadcast to shape.
+        # --- of subtotal-columns is the same. In the X_ARRAY case there can be no
+        # --- subtotal columns so an empty row is broadcast to shape.
         shape = SumSubtotals.intersections(
             self._base_values, self._dimensions, diff_cols_nan=True
         ).shape
@@ -1230,7 +1230,7 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
         """
         # --- to broadcast one column of the subtotal-rows to the shape of the
         # --- intersections. This works in the CAT_X case because each column of
-        # --- subtotal-rows is the same. In the MR_X case there can be no subtotal rows
+        # --- subtotal-rows is the same. In the ARRAY_X case there can be no subtotal rows
         # --- so an empty column is broadcast.
         shape = SumSubtotals.intersections(self._base_values, self._dimensions).shape
         intersection_column = self._subtotal_rows[:, 0]
@@ -1265,7 +1265,7 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
         """
         # --- Summing works on rows because row-proportion denominators add along this
         # --- axis. This wouldn't work on MR-rows but there can be no subtotals on an
-        # --- MR dimension (MR_X slice) so that case never arises.
+        # --- ARRAY dimension (ARRAY_X slice) so that case never arises.
         return SumSubtotals.subtotal_rows(
             self._base_values, self._dimensions, diff_rows_nan=True
         )
@@ -1468,12 +1468,12 @@ class _TableWeightedBases(_BaseSecondOrderMeasure):
         This is the fourth and final "block" required by the assembler.
         """
         # --- There are only two cases. Note that intersections can only occur when
-        # --- there are *both* row-subtotals and column-subtotals. Since an MR dimension
-        # --- can have no subtotals, this rules out all but the CAT_X_CAT case. We need
-        # --- the shape of the intersections array for both cases, and we get it from
-        # --- SumSubtotals. Note that in general, the summed values it returns are wrong
-        # --- for this case, but the shape and dtype are right and when empty, it gives
-        # --- the right answer directly.
+        # --- there are *both* row-subtotals and column-subtotals. Since an ARRAY
+        # --- dimension can have no subtotals, this rules out all but the CAT_X_CAT case.
+        # --- We need the shape of the intersections array for both cases, and we get it
+        # --- from SumSubtotals. Note that in general, the summed values it returns are
+        # --- wrong for this case, but the shape and dtype are right and when empty, it
+        # --- gives the right answer directly.
         intersections = SumSubtotals.intersections(self._base_values, self._dimensions)
         shape = intersections.shape
 
@@ -1506,8 +1506,8 @@ class _TableWeightedBases(_BaseSecondOrderMeasure):
         # --- Case 1: in the "no-row-subtotals" case, short-circuit with an (nrows, 0)
         # --- array return value, both because that is the right answer, but also
         # --- because the non-empty table-base value cannot be broadcast into that
-        # --- shape. Note that because an X_MR cube can have no column subtotals, this
-        # --- automatically takes care of the CAT_X_MR and MR_X_MR cases.
+        # --- shape. Note that because an X_ARRAY cube can have no column subtotals, this
+        # --- automatically takes care of the CAT_X_ARRAY and ARRAY_X_ARRAY cases.
         if subtotal_columns.shape[1] == 0:
             return subtotal_columns
 
@@ -1515,14 +1515,14 @@ class _TableWeightedBases(_BaseSecondOrderMeasure):
         shape = subtotal_columns.shape
 
         # TODO: Resolve this abstraction leakage from _BaseWeightedCounts where the
-        # table-margin (for MR_X_CAT) is a (column) vector instead of a scalar and
+        # table-margin (for ARRAY_X_CAT) is a (column) vector instead of a scalar and
         # therefore cannot be directly broadcast. When `.table_margin` becomes a min-max
         # range, we might need something like `.table_margin_column` that is (nrows, 1)
         # such that this "rotation" is performed in `_MrXCatWeightedCounts`. This same
         # shape diversity happens with `._subtotal_rows` below, but since that vector is
         # a row it is handled without special-casing.
 
-        # --- Case 2: in the "vector table-base" (MR_X_CAT) case, rotate the vector into
+        # --- Case 2: in the "vector table-base" (ARRAY_X_CAT) case, rotate the vector into
         # --- a "column" and broadcast it into the subtotal-columns shape.
         if isinstance(table_margin, np.ndarray):
             return np.broadcast_to(table_margin[:, None], shape)
@@ -1547,14 +1547,14 @@ class _TableWeightedBases(_BaseSecondOrderMeasure):
         # --- Case 1: in the "no-row-subtotals" case, short-circuit with a (0, ncols)
         # --- array return value, both because that is the right answer, but also
         # --- because the non-empty table-base value cannot be broadcast into that
-        # --- shape. Note that because an MR_X cube can have no row subtotals, this
-        # --- automatically takes care of the MR_X_CAT and MR_X_MR case.
+        # --- shape. Note that because an ARRAY_X cube can have no row subtotals, this
+        # --- automatically takes care of the ARRAY_X_CAT and ARRAY_X_ARRAY case.
         if subtotal_rows.shape[0] == 0:
             return subtotal_rows
 
         # --- Case 2 & 3: in the "scalar table-base" (CAT_X_CAT) case, fill the
         # --- subtotal-rows shape with the scalar value. The same numpy operation also
-        # --- works for the vector table-base (CAT_X_MR) case because the vector
+        # --- works for the vector table-base (CAT_X_ARRAY) case because the vector
         # --- table-base is a "row" of base values.
         return np.broadcast_to(
             self._weighted_cube_counts.table_margin, subtotal_rows.shape

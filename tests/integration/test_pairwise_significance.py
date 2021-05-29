@@ -138,11 +138,11 @@ class TestStandardizedResiduals(TestCase):
 
         np.testing.assert_array_almost_equal(
             slice_.pairwise_significance_t_stats(1),
-            load_python_expression("ca-subvar-x-ca-cat-hs-pw-tstats"),
+            np.full((3, 5), np.nan),
         )
         np.testing.assert_array_almost_equal(
             slice_.pairwise_significance_p_vals(1),
-            load_python_expression("ca-subvar-x-ca-cat-hs-pw-pvals"),
+            np.full((3, 5), np.nan),
         )
 
     def test_cat_nps_numval_x_cat_scale_means_pariwise_t_tests(self):

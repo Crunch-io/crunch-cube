@@ -450,7 +450,6 @@ class DescribeNumericArrays(object):
             [1.898, 6.1],
         ]
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_has_bases_that_dont_sum_across_num_array_subvars_x_cat(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT).partitions[0]
 
@@ -463,7 +462,6 @@ class DescribeNumericArrays(object):
         # --- Can't sum across subvariables so column bases are the same as counts ---
         assert slice_.column_weighted_bases == pytest.approx(slice_.counts)
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_has_bases_that_dont_sum_across_num_array_subvars_x_cat_with_insertion(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS).partitions[0]
 

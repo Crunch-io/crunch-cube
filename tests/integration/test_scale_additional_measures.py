@@ -16,7 +16,7 @@ def test_ca_cat_x_items():
         slice_.columns_scale_mean_stderr, [0.0394328, 0.0579909, 0.0537937, 0.0544237]
     )
     np.testing.assert_almost_equal(slice_.columns_scale_median, [1, 5, 5, 5])
-    assert slice_.columns_scale_median_margin == 4
+    assert slice_.columns_scale_median_margin == 1.0
     assert slice_.rows_scale_median_margin is None
     assert slice_.rows_scale_mean_stddev is None
     assert slice_.rows_scale_mean_stderr is None
@@ -32,7 +32,7 @@ def test_ca_items_x_cat():
         slice_.rows_scale_mean_stderr, [0.0394328, 0.0579909, 0.0537937, 0.0544237]
     )
     np.testing.assert_almost_equal(slice_.rows_scale_median, [1, 5, 5, 5])
-    assert slice_.rows_scale_median_margin == 4
+    assert slice_.rows_scale_median_margin == 1.0
     assert slice_.columns_scale_median_margin is None
     assert slice_.columns_scale_mean_stddev is None
     assert slice_.columns_scale_mean_stderr is None
@@ -106,7 +106,7 @@ def test_cat_x_ca_cat_x_items():
         slice_.columns_scale_mean_stderr, [0.216994, 0.3202223, 0.302742, 0.3055608]
     )
     np.testing.assert_almost_equal(slice_.columns_scale_median, [1, 1, 2.5, 1])
-    assert slice_.columns_scale_median_margin == 1
+    assert slice_.columns_scale_median_margin == 1.0
     assert slice_.rows_scale_median_margin is None
     assert slice_.rows_scale_mean_stddev is None
     assert slice_.rows_scale_mean_stderr is None
@@ -120,7 +120,7 @@ def test_cat_x_ca_cat_x_items():
         slice_.columns_scale_mean_stderr, [0.1491812, 0.2097098, 0.1895173, 0.1889004]
     )
     np.testing.assert_almost_equal(slice_.columns_scale_median, [1, 5, 5, 5])
-    assert slice_.columns_scale_median_margin == 4
+    assert slice_.columns_scale_median_margin == 1.0
     assert slice_.rows_scale_median_margin is None
     assert slice_.rows_scale_mean_stddev is None
     assert slice_.rows_scale_mean_stderr is None
@@ -134,7 +134,7 @@ def test_cat_x_ca_cat_x_items():
         slice_.columns_scale_mean_stderr, [0.0618017, 0.0902944, 0.0852329, 0.0857562]
     )
     np.testing.assert_almost_equal(slice_.columns_scale_median, [1, 5, 5, 5])
-    assert slice_.columns_scale_median_margin == 4
+    assert slice_.columns_scale_median_margin == 1.0
     assert slice_.rows_scale_median_margin is None
     assert slice_.rows_scale_mean_stddev is None
     assert slice_.rows_scale_mean_stderr is None
@@ -148,7 +148,7 @@ def test_cat_x_ca_cat_x_items():
         slice_.columns_scale_mean_stderr, [0.0896791, 0.1385273, 0.1251814, 0.1308704]
     )
     np.testing.assert_almost_equal(slice_.columns_scale_median, [1, 5, 5, 5])
-    assert slice_.columns_scale_median_margin == 4
+    assert slice_.columns_scale_median_margin == 1.0
     assert slice_.rows_scale_median_margin is None
     assert slice_.rows_scale_mean_stddev is None
     assert slice_.rows_scale_mean_stderr is None
