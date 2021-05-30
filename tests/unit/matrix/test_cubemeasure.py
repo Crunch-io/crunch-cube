@@ -1587,12 +1587,31 @@ class Describe_CatXMrWeightedCubeCounts(object):
             np.array([[0.33, 0.33, 0.33], [0.67, 0.67, 0.67]])
         )
 
-    def it_knows_its_column_bases(self, raw_weighted_counts):
+    def it_knows_its_column_bases_x_non_array(
+        self, raw_weighted_counts, _row_dimension_is_array_prop_
+    ):
+        _row_dimension_is_array_prop_.return_value = False
         weighted_cube_counts = _CatXMrWeightedCubeCounts(
             None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.column_bases == pytest.approx(
             np.array([[5.5, 7.7, 9.9], [5.5, 7.7, 9.9]])
+        )
+
+    def it_knows_its_column_bases_x_array(
+        self, raw_weighted_counts, _row_dimension_is_array_prop_
+    ):
+        _row_dimension_is_array_prop_.return_value = True
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(
+            None, raw_weighted_counts, None, None
+        )
+        assert weighted_cube_counts.column_bases == pytest.approx(
+            np.array(
+                [
+                    [1.1, 2.2, 3.3],
+                    [4.4, 5.5, 6.6],
+                ]
+            )
         )
 
     def it_knows_its_row_bases(self, raw_weighted_counts):
@@ -1624,11 +1643,25 @@ class Describe_CatXMrWeightedCubeCounts(object):
             [9.8, 7.6, 5.4],
         ]
 
-    def it_knows_its_table_margin(self, raw_weighted_counts):
+    def it_knows_its_table_margin_non_array_x(
+        self, raw_weighted_counts, _row_dimension_is_array_prop_
+    ):
+        _row_dimension_is_array_prop_.return_value = False
         weighted_cube_counts = _CatXMrWeightedCubeCounts(
             None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.table_margin == pytest.approx([15.4, 15.4, 15.4])
+
+    def it_knows_its_table_margin_array_x(self, request, _row_dimension_is_array_prop_):
+        _row_dimension_is_array_prop_.return_value = True
+        property_mock(
+            request,
+            _CatXMrWeightedCubeCounts,
+            "weighted_counts",
+            return_value=[[7.7, 7.7, 7.7], [7.7, 7.7, 7.7]],
+        )
+        weighted_cube_counts = _CatXMrWeightedCubeCounts(None, None, None, None)
+        assert weighted_cube_counts.table_margin == [[7.7, 7.7, 7.7], [7.7, 7.7, 7.7]]
 
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _CatXMrWeightedCubeCounts(
@@ -1676,6 +1709,12 @@ class Describe_CatXMrWeightedCubeCounts(object):
             ]
         )
 
+    @pytest.fixture
+    def _row_dimension_is_array_prop_(self, request):
+        return property_mock(
+            request, _BaseWeightedCubeCounts, "_row_dimension_is_array"
+        )
+
 
 class Describe_MrXCatWeightedCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatWeightedCubeCounts`."""
@@ -1703,13 +1742,27 @@ class Describe_MrXCatWeightedCubeCounts(object):
             np.array([[5.5, 7.7, 9.9], [7.7, 13.2, 12.1]])
         )
 
-    def it_knows_its_row_bases(self, raw_weighted_counts):
+    def it_knows_its_row_bases_x_nonarray(
+        self, raw_weighted_counts, _column_dimension_is_array_prop_
+    ):
+        _column_dimension_is_array_prop_.return_value = False
         weighted_cube_counts = _MrXCatWeightedCubeCounts(
             None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.row_bases == pytest.approx(
             np.array([[6.6, 6.6, 6.6], [26.4, 26.4, 26.4]])
         )
+
+    def it_knows_its_row_bases_x_array(self, request, _column_dimension_is_array_prop_):
+        _column_dimension_is_array_prop_.return_value = True
+        property_mock(
+            request,
+            _MrXCatWeightedCubeCounts,
+            "weighted_counts",
+            return_value=[[1.1, 2.2, 3.3], [7.7, 8.8, 9.9]],
+        )
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, None, None, None)
+        assert weighted_cube_counts.row_bases == [[1.1, 2.2, 3.3], [7.7, 8.8, 9.9]]
 
     def it_knows_its_table_bases(self, request):
         property_mock(
@@ -1731,13 +1784,29 @@ class Describe_MrXCatWeightedCubeCounts(object):
             [7.6, 7.6, 7.6],
         ]
 
-    def it_knows_its_table_margin(self, raw_weighted_counts):
+    def it_knows_its_table_margin_x_nonarray(
+        self, raw_weighted_counts, _column_dimension_is_array_prop_
+    ):
+        _column_dimension_is_array_prop_.return_value = False
         weighted_cube_counts = _MrXCatWeightedCubeCounts(
             None, raw_weighted_counts, None, None
         )
         assert weighted_cube_counts.table_margin == pytest.approx(
             np.array([23.1, 33.0])
         )
+
+    def it_knows_its_table_margin_x_array(
+        self, request, _column_dimension_is_array_prop_
+    ):
+        _column_dimension_is_array_prop_.return_value = True
+        property_mock(
+            request,
+            _MrXCatWeightedCubeCounts,
+            "weighted_counts",
+            return_value=[[1.1, 2.2, 3.3], [7.7, 8.8, 9.9]],
+        )
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, None, None, None)
+        assert weighted_cube_counts.table_margin == [[1.1, 2.2, 3.3], [7.7, 8.8, 9.9]]
 
     def it_knows_its_weighted_counts(self, raw_weighted_counts):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(
@@ -1779,6 +1848,12 @@ class Describe_MrXCatWeightedCubeCounts(object):
                     [0.0, 5, 4.4, 2.2],  # -- not
                 ],
             ]
+        )
+
+    @pytest.fixture
+    def _column_dimension_is_array_prop_(self, request):
+        return property_mock(
+            request, _BaseWeightedCubeCounts, "_column_dimension_is_array"
         )
 
 

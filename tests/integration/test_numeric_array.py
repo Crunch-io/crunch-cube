@@ -477,7 +477,6 @@ class DescribeNumericArrays(object):
         # --- Can't sum across subvariables so column bases are the same as counts ---
         assert slice_.column_weighted_bases.tolist() == slice_.counts.tolist()
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_has_bases_that_dont_sum_across_num_array_subvars_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_X_MR_WEIGHTED).partitions[0]
         counts = np.array([[2.33, 7.009], [4.123, 6.777], [4.67, 6.4], [1.898, 6.1]])

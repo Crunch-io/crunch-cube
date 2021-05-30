@@ -1142,6 +1142,10 @@ class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
     @lazyproperty
     def column_bases(self):
         """2D np.float64 ndarray of column-proportion denominator for each cell."""
+        # --- Never add across subvariables. If rows dimension is an array, then the
+        # --- column_bases is the same as the counts.
+        if self._row_dimension_is_array:
+            return self.weighted_counts
         # --- only selected counts contribute to the columns bases, which is summed
         # --- across the rows (axis 0).
         return np.broadcast_to(
@@ -1164,10 +1168,18 @@ class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def table_margin(self):
-        """1D np.float64 ndarray of weighted-N for each column of matrix.
+        """1D or 2D np.float64 ndarray of weighted-N for each column of matrix.
 
         Because the matrix is X_MR, each column has a distinct table margin.
+        If the first dimension is an array also then it is the same as the counts.
         """
+        # --- TODO: Long term I think it'd be better to not have the margin
+        # --- be this unknown dimension thing, but it's used for calculating
+        # --- the table weighted base subtotals
+        # --- Never add across subvariables. If rows dimension is an array, then the
+        # --- table_margin is the same as the counts (and also the row_bases).
+        if self._row_dimension_is_array:
+            return self.weighted_counts
         # --- weighted-counts is (rows, cols, selected/not) so axis 1 is preserved to
         # --- provide a distinct value for each MR subvar.
         return np.sum(self._weighted_counts, axis=(0, 2))
@@ -1237,24 +1249,39 @@ class _MrXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
     @lazyproperty
     def row_bases(self):
         """2D np.float64 ndarray of row-proportion denominator for each matrix cell."""
+        # --- Never add across subvariables. If column dimension is an array, then the
+        # --- row_bases is the same as the counts.
+        if self._column_dimension_is_array:
+            return self.weighted_counts
+
         return np.broadcast_to(
             np.sum(self.weighted_counts, axis=1)[:, None], self.weighted_counts.shape
         )
 
     @lazyproperty
     def table_bases(self):
-        """2D np.float64 ndarray of table-proportion denominator for each cell."""
+        """1D or 2D np.float64 ndarray of table-proportion denominator for each cell."""
+        # --- TODO: Long term I think it'd be better to not have the margin
+        # --- be this unknown dimension thing, but it's used for calculating
+        # --- the table weighted base subtotals
         return np.broadcast_to(self.table_margin[:, None], self.weighted_counts.shape)
 
     @lazyproperty
     def table_margin(self):
-        """1D np.float64 ndarray of weighted-N for each row of matrix.
+        """1D or 2D np.float64 ndarray of weighted-N for each row of matrix.
 
         Since the rows-dimension is MR, each row has a distinct table margin, since not
         all of the multiple responses were necessarily offered to all respondents. The
         table-margin for each row indicates the weighted number of respondents who were
         offered that option.
+
+        If the columns-dimension is an array, then the
         """
+        # --- Never add across subvariables. If columns dimension is an array, then the
+        # --- table_margin is the same as the counts (and also column_bases).
+        if self._column_dimension_is_array:
+            return self.weighted_counts
+
         return np.sum(self._weighted_counts, axis=(1, 2))
 
     @lazyproperty
