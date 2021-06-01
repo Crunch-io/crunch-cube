@@ -1757,13 +1757,16 @@ class Describe_ProportionMargin(object):
             request,
             _ProportionMargin,
             "_proportion_numerators",
-            return_value=[2.0, 3.0],
+            return_value=[np.array([2.0, 3.0]), np.array([], dtype=float)],
         )
         cube_measures_.weighted_cube_counts = weighted_cube_counts_
         weighted_cube_counts_.table_margin = 5.0
-        proportion = _ProportionMargin(None, None, cube_measures_, None)
 
-        assert proportion.blocks == [0.4, 0.6]
+        proportions = _ProportionMargin(None, None, cube_measures_, None).blocks
+
+        assert len(proportions) == 2
+        assert proportions[0] == pytest.approx([0.4, 0.6])
+        assert proportions[1].shape == (0,)
 
     def it_can_tell_if_it_is_defined(self, request):
         property_mock(request, _BaseMarginal, "_counts_are_defined")

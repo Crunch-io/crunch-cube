@@ -1835,10 +1835,15 @@ class _ProportionMargin(_BaseMarginal):
 
         These are the base-values and the subtotals.
         """
-        return [
-            numerator / self._cube_measures.weighted_cube_counts.table_margin
-            for numerator in self._proportion_numerators
-        ]
+        denominator = self._cube_measures.weighted_cube_counts.table_margin
+        base_values = self._proportion_numerators[0] / denominator
+        # --- if insertion numerator is empty (eg no insertions) don't divide ---
+        insertions = (
+            self._proportion_numerators[1]
+            if self._proportion_numerators[1].shape == (0,)
+            else self._proportion_numerators[1] / denominator
+        )
+        return [base_values, insertions]
 
     @lazyproperty
     def is_defined(self):

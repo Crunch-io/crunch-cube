@@ -152,7 +152,7 @@ class Assembler(object):
         # --- TODO: Should column_margin only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a
         # --- "column_margin_range"
-        if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
+        if not self._measures.columns_margin.is_defined:
             return self.column_weighted_bases
 
         # --- otherwise columns-base is a vector ---
@@ -164,11 +164,10 @@ class Assembler(object):
         # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
         # --- TODO: Should colums_margin_proportion only be defined when it's 1D? This
         # --- requires changes to exporter to use the bases to give a "rows_margin_range"
-        if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
-            denominator = self._cube_result_matrix.table_margin
+        if not self._measures.columns_margin_proportion.is_defined:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
-                    self._cube_result_matrix.columns_margin / denominator,
+                    self.columns_margin / self.table_weighted_bases,
                     self._dimensions,
                 )
             )
@@ -452,7 +451,7 @@ class Assembler(object):
         # --- This is really just another way to call the row_weighted_bases ---
         # --- TODO: Should rows_margin only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a "rows_margin_range"
-        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
+        if not self._measures.rows_margin.is_defined:
             return self.row_weighted_bases
 
         # --- otherwise rows-margin is a vector ---
@@ -464,11 +463,10 @@ class Assembler(object):
         # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
         # --- TODO: Should rows_margin_proportion only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a "rows_margin_range"
-        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
-            denominator = self._cube_result_matrix.table_margin
+        if not self._measures.rows_margin_proportion.is_defined:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
-                    self._cube_result_matrix.rows_margin / denominator,
+                    self.rows_margin / self.table_weighted_bases,
                     self._dimensions,
                 )
             )

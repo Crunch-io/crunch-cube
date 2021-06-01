@@ -571,6 +571,41 @@ class Describe_Slice(object):
         assert slice_.derived_row_idxs == ()
         assert slice_.inserted_row_idxs == (0, 2, 4)
 
+    def it_knows_the_rows_base_cat_x_hs_mr(self):
+        slice_ = slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
+
+        rows_base = slice_.rows_base
+
+        assert rows_base.tolist() == [
+            [15.0, 15.0, 13.0, 20.0, 32.0],
+            [24.0, 34.0, 37.0, 50.0, 69.0],
+            [39.0, 49.0, 50.0, 70.0, 101.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0],
+            [57.0, 75.0, 81.0, 159.0, 167.0],
+            [69.0, 86.0, 111.0, 221.0, 208.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0],
+            [126.0, 161.0, 192.0, 380.0, 375.0],
+        ]
+
+    def it_knows_the_rows_base_mr_x_cat_hs(self):
+        slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
+
+        rows_base = slice_.rows_base
+
+        assert rows_base.tolist() == [26.0, 76.0, 118.0, 369.0, 385.0]
+
+    def it_knows_the_rows_base_mr_x_mr(self):
+        slice_ = Cube(CR.MR_X_MR).partitions[0]
+
+        rows_base = slice_.rows_base
+
+        assert rows_base.tolist() == [
+            [12.0, 7.0, 10.0, 12.0],
+            [18.0, 29.0, 22.0, 29.0],
+            [26.0, 20.0, 34.0, 34.0],
+            [44.0, 45.0, 53.0, 61.0],
+        ]
+
     @pytest.mark.parametrize(
         "fixture, expectation",
         (
@@ -593,6 +628,23 @@ class Describe_Slice(object):
     @pytest.mark.parametrize(
         "fixture, expectation",
         (
+            (CR.CAT_HS_X_MR, "cat-hs-x-mr-row-margin-proportions"),
+            (CR.MR_X_CAT_HS_MT, "mr-x-cat-hs-row-margin-proportions"),
+            (CR.MR_X_MR, "mr-x-mr-row-margin-proportions"),
+        ),
+    )
+    def it_knows_the_rows_margin_proportion(self, fixture, expectation):
+        slice_ = _Slice(
+            Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
+        )
+
+        rows_margin_proportions = slice_.rows_margin_proportion
+
+        assert rows_margin_proportions.tolist() == load_python_expression(expectation)
+
+    @pytest.mark.parametrize(
+        "fixture, expectation",
+        (
             (CR.CAT_HS_X_MR, "cat-hs-x-mr-column-proportions"),
             (CR.MR_X_CAT_HS_MT, "mr-x-cat-hs-column-proportions"),
             (CR.MR_X_MR, "mr-x-mr-column-proportions"),
@@ -608,6 +660,23 @@ class Describe_Slice(object):
         np.testing.assert_almost_equal(
             column_proportions, load_python_expression(expectation)
         )
+
+    @pytest.mark.parametrize(
+        "fixture, expectation",
+        (
+            (CR.CAT_HS_X_MR, "cat-hs-x-mr-columns-margin-proportions"),
+            (CR.MR_X_CAT_HS_MT, "mr-x-cat-hs-columns-margin-proportions"),
+            (CR.MR_X_MR, "mr-x-mr-columns-margin-proportions"),
+        ),
+    )
+    def it_knows_the_column_margin_proportions(self, fixture, expectation):
+        slice_ = _Slice(
+            Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
+        )
+
+        columns_margin_proportion = slice_.columns_margin_proportion
+
+        assert columns_margin_proportion.tolist() == load_python_expression(expectation)
 
     def it_knows_the_margins_of_mr_x_mr(self):
         slice_ = _Slice(

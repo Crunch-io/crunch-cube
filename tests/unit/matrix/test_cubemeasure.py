@@ -2253,8 +2253,6 @@ class Describe_MrXCatMatrix(object):
 
         assert cube.rows_base.tolist() == [12, 48]
 
-
-
     def it_knows_its_rows_margin(self):
         weighted_counts = np.array(
             [
