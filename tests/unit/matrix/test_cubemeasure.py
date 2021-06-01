@@ -1933,10 +1933,6 @@ class DescribeBaseCubeResultMatrix(object):
     def cube_(self, request):
         return instance_mock(request, Cube)
 
-    @pytest.fixture
-    def dimension_(self, request):
-        return instance_mock(request, Dimension)
-
 
 class Describe_CatXCatMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXCatMatrix` object."""

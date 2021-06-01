@@ -1374,15 +1374,6 @@ class BaseCubeResultMatrix(object):
         return MatrixCls(dimensions, *cls._sliced_counts(cube, slice_idx))
 
     @lazyproperty
-    def column_proportions(self):
-        """2D ndarray of np.float64 between 0.0 and 1.0.
-
-        The value represents the ratio of each cell count to the total count (margin)
-        for its column.
-        """
-        return self.weighted_counts / self.columns_margin
-
-    @lazyproperty
     def table_base(self):
         """Scalar, 1D, or 2D ndarray of np.float64 unweighted-N for this slice.
 
