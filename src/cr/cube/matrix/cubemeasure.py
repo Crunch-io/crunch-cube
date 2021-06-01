@@ -1032,13 +1032,11 @@ class _CatXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
         """2D ndarray of np.float64 column-proportion denominator for each cell."""
         # --- Never add across subvariables. If rows dimension is an array, then the
         # --- column_bases is the same as the counts.
-        return (
-            self.weighted_counts
-            if self._row_dimension_is_array
-            else np.broadcast_to(
+       if self._row_dimension_is_array:
+           return self.weighted_counts
+       return np.broadcast_to(
                 np.sum(self._weighted_counts, axis=0), self.weighted_counts.shape
             )
-        )
 
     @lazyproperty
     def row_bases(self):
