@@ -935,7 +935,7 @@ class Describe_Slice(object):
             "rows_dimension": {
                 "order": {
                     "type": "marginal",
-                    "marginal": "margin",
+                    "marginal": "weighted_base",
                     "direction": "descending",
                 }
             }
@@ -971,7 +971,7 @@ class Describe_Slice(object):
             "rows_dimension": {
                 "order": {
                     "type": "marginal",
-                    "marginal": "base",
+                    "marginal": "unweighted_base",
                     "direction": "ascending",
                 }
             }
