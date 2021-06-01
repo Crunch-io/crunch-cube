@@ -1835,34 +1835,6 @@ class Describe_MrXMrWeightedCubeCounts(object):
 class DescribeBaseCubeResultMatrix(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure.BaseCubeResultMatrix` object."""
 
-    def it_knows_its_column_proportions(self, request):
-        property_mock(
-            request,
-            BaseCubeResultMatrix,
-            "weighted_counts",
-            return_value=np.array([[1, 2, 3], [4, 5, 6]]),
-        )
-        property_mock(
-            request,
-            BaseCubeResultMatrix,
-            "columns_margin",
-            return_value=np.array([5, 7, 9]),
-        )
-        matrix = BaseCubeResultMatrix(None, None, None)
-
-        np.testing.assert_almost_equal(
-            matrix.column_proportions,
-            np.array([[0.2, 0.2857143, 0.3333333], [0.8, 0.7142857, 0.6666667]]),
-        )
-
-    def it_knows_its_columns_dimension(self, dimension_):
-        matrix = BaseCubeResultMatrix([None, dimension_], None, None)
-        assert matrix.columns_dimension == dimension_
-
-    def it_knows_its_rows_dimension(self, dimension_):
-        matrix = BaseCubeResultMatrix([dimension_, None], None, None)
-        assert matrix.rows_dimension == dimension_
-
     @pytest.mark.parametrize(
         "dimension_types, MatrixCls",
         (
@@ -1961,72 +1933,9 @@ class DescribeBaseCubeResultMatrix(object):
     def cube_(self, request):
         return instance_mock(request, Cube)
 
-    @pytest.fixture
-    def dimension_(self, request):
-        return instance_mock(request, Dimension)
-
 
 class Describe_CatXCatMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXCatMatrix` object."""
-
-    def it_knows_its_columns_margin(self):
-        matrix = _CatXCatMatrix(None, np.array([[1, 2, 3], [4, 5, 6]]), None)
-        assert matrix.columns_margin.tolist() == [5, 7, 9]
-
-    @pytest.mark.parametrize(
-        ("unweighted_counts", "expected"),
-        (
-            # --- 1 "row", 0 cols ---
-            ([[]], []),
-            # --- 1 row, 1 col ---
-            ([[1]], [1]),
-            # --- 1 row, 3 cols ---
-            ([[1, 2, 3]], [1, 2, 3]),
-            # --- 3 rows, 0 cols ---
-            ([[], [], []], []),
-            # --- 3 rows, 1 col ---
-            ([[1], [2], [3]], [6]),
-            # --- 3 rows, 3 cols ---
-            ([[1, 2, 3], [4, 5, 6]], [5, 7, 9]),
-        ),
-    )
-    def it_knows_its_columns_pruning_base(self, unweighted_counts, expected):
-        matrix = _CatXCatMatrix(None, None, np.array(unweighted_counts))
-
-        columns_pruning_base = matrix.columns_pruning_base
-
-        assert columns_pruning_base.shape == (len(expected),)
-        assert columns_pruning_base.tolist() == expected
-
-    @pytest.mark.parametrize(
-        ("unweighted_counts", "expected"),
-        (
-            ([[1, 2, 3]], [6]),
-            ([[1, 2, 3], [4, 5, 6]], [6, 15]),
-            ([[1], [2], [3]], [1, 2, 3]),
-        ),
-    )
-    def it_knows_its_rows_base(self, unweighted_counts, expected):
-        matrix = _CatXCatMatrix(None, None, unweighted_counts)
-        assert matrix.rows_base.tolist() == expected
-
-    def it_knows_its_rows_margin(self):
-        weighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
-        matrix = _CatXCatMatrix(None, weighted_counts, None)
-
-        assert matrix.rows_margin.tolist() == [6, 15]
-
-    @pytest.mark.parametrize(
-        ("unweighted_counts", "expected"),
-        (
-            ([[1, 2, 3]], [6]),
-            ([[1, 2, 3], [4, 5, 6]], [6, 15]),
-            ([[1], [2], [3]], [1, 2, 3]),
-        ),
-    )
-    def it_knows_its_rows_pruning_base(self, unweighted_counts, expected):
-        matrix = _CatXCatMatrix(None, None, unweighted_counts)
-        assert matrix.rows_pruning_base.tolist() == expected
 
     def it_knows_its_table_base(self):
         unweighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
@@ -2072,41 +1981,6 @@ class Describe_CatXCatMatrix(object):
 
 class Describe_CatXMrMatrix(object):
     """Unit test suite for `cr.cube.matrix._CatXMrMatrix` object."""
-
-    def it_knows_its_columns_pruning_base(self):
-        unweighted_cube_counts = np.array(
-            [
-                [[1, 6], [2, 5], [3, 5]],  # --- row 0 ---
-                [[5, 3], [6, 3], [7, 2]],  # --- row 1 ---
-            ]
-        )
-        matrix = _CatXMrMatrix(None, None, unweighted_cube_counts, None)
-
-        assert matrix.columns_pruning_base.tolist() == [15, 16, 17]
-
-    def it_knows_its_rows_base(self):
-        unweighted_cube_counts = np.array(
-            [[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]]
-        )
-        matrix = _CatXMrMatrix(None, None, unweighted_cube_counts, None)
-
-        assert matrix.rows_base.tolist() == [[7, 7, 7], [8, 8, 8]]
-
-    def it_knows_its_rows_margin(self):
-        weighted_cube_counts = np.array(
-            [[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]]
-        )
-        matrix = _CatXMrMatrix(None, weighted_cube_counts, None, None)
-
-        assert matrix.rows_margin.tolist() == [[7, 7, 7], [8, 8, 8]]
-
-    def it_knows_its_rows_pruning_base(self):
-        unweighted_cube_counts = np.array(
-            [[[1, 6], [2, 5], [3, 4]], [[5, 3], [6, 2], [7, 1]]]
-        )
-        matrix = _CatXMrMatrix(None, None, unweighted_cube_counts, None)
-
-        assert matrix.rows_pruning_base.tolist() == [21, 24]
 
     def it_knows_its_table_base(self):
         unweighted_cube_counts = np.array(
@@ -2198,79 +2072,6 @@ class Describe_CatXMrMatrix(object):
 
 class Describe_MrXCatMatrix(object):
     """Unit test suite for `cr.cube.matrix._MrXCatMatrix` object."""
-
-    def it_knows_its_columns_margin(self):
-        weighted_counts = np.array(
-            [
-                [  # -- row 0 ---------------
-                    [1, 2, 3],  # -- selected
-                    [4, 5, 6],  # -- not
-                ],
-                [  # -- row 1 ---------------
-                    [7, 8, 9],  # -- selected
-                    [3, 2, 1],  # -- not
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXCatMatrix(None, weighted_counts, None, None).columns_margin,
-            np.array([[5, 7, 9], [10, 10, 10]]),
-        )
-
-    def it_knows_its_columns_pruning_base(self):
-        unweighted_counts = np.array(
-            [
-                [  # -- row 0 ---------------
-                    [1, 2, 3],  # -- selected
-                    [4, 5, 6],  # -- not
-                ],
-                [  # -- row 1 ---------------
-                    [7, 8, 9],  # -- selected
-                    [3, 2, 1],  # -- not
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXCatMatrix(None, None, unweighted_counts, None).columns_pruning_base,
-            np.array([15, 17, 19]),
-        )
-
-    def it_knows_its_rows_margin(self):
-        weighted_counts = np.array(
-            [
-                [  # -- row 0 ------------
-                    [1, 2, 3],  # -- selected --
-                    [4, 5, 6],  # -- not --
-                ],
-                [  # -- row 1 ------------
-                    [7, 8, 9],  # -- selected --
-                    [3, 2, 1],  # -- not --
-                    # --------------------
-                ],
-            ]
-        )
-        cube = _MrXCatMatrix(None, weighted_counts, None, None)
-
-        assert cube.rows_margin.tolist() == [6, 24]
-
-    def it_knows_its_rows_pruning_base(self):
-        unweighted_counts = np.array(
-            [
-                [  # -- row 0 ------------
-                    [1, 2, 3],  # -- selected --
-                    [4, 5, 6],  # -- not --
-                ],
-                [  # -- row 1 ------------
-                    [7, 8, 9],  # -- selected --
-                    [3, 2, 1],  # -- not --
-                    # --------------------
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXCatMatrix(None, None, unweighted_counts, None).rows_pruning_base,
-            np.array([21, 30]),
-        )
 
     def it_knows_its_table_base(self):
         unweighted_counts = np.array(
@@ -2377,96 +2178,6 @@ class Describe_MrXCatMatrix(object):
 
 class Describe_MrXMrMatrix(object):
     """Unit test suite for `cr.cube.matrix._MrXMrMatrix` object."""
-
-    def it_knows_its_columns_margin(self):
-        weighted_counts = np.array(
-            [
-                [  # -- row 0 ---------------
-                    [[0, 8], [2, 7], [1, 7]],
-                    [[2, 6], [6, 8], [3, 5]],
-                ],
-                [  # -- row 1 ---------------
-                    [[4, 4], [1, 7], [8, 3]],
-                    [[6, 2], [3, 5], [5, 2]],
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXMrMatrix(None, weighted_counts, None, None).columns_margin,
-            np.array([[2, 8, 4], [10, 4, 13]]),
-        )
-
-    def it_knows_its_columns_pruning_base(self):
-        unweighted_counts = np.array(
-            [
-                [  # -- row 0 ---------------
-                    [[0, 8], [2, 7], [1, 7]],
-                    [[2, 6], [6, 8], [3, 5]],
-                ],
-                [  # -- row 1 ---------------
-                    [[4, 4], [1, 7], [8, 3]],
-                    [[6, 2], [3, 5], [5, 2]],
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXMrMatrix(None, None, unweighted_counts, None).columns_pruning_base,
-            np.array([12, 12, 17]),
-        )
-
-    def it_knows_its_rows_base(self):
-        unweighted_counts = np.array(
-            [
-                [  # -- row 0 ---------------
-                    [[0, 8], [2, 7], [1, 7]],
-                    [[2, 6], [6, 8], [3, 5]],
-                ],
-                [  # -- row 1 ---------------
-                    [[4, 4], [1, 7], [8, 3]],
-                    [[6, 2], [3, 5], [5, 2]],
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXMrMatrix(None, None, unweighted_counts, None).rows_base,
-            np.array([[8, 9, 8], [8, 8, 11]]),
-        )
-
-    def it_knows_its_rows_margin(self):
-        weighted_counts = np.array(
-            [
-                [  # -- row 0 ---------------
-                    [[0, 8], [2, 7], [1, 7]],
-                    [[2, 6], [6, 8], [3, 5]],
-                ],
-                [  # -- row 1 ---------------
-                    [[4, 4], [1, 7], [8, 3]],
-                    [[6, 2], [3, 5], [5, 2]],
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXMrMatrix(None, weighted_counts, None, None).rows_margin,
-            np.array([[8, 9, 8], [8, 8, 11]]),
-        )
-
-    def it_knows_its_rows_pruning_base(self):
-        unweighted_counts = np.array(
-            [
-                [  # -- row 0 ---------------
-                    [[0, 8], [2, 7], [1, 7]],
-                    [[2, 6], [6, 8], [3, 5]],
-                ],
-                [  # -- row 1 ---------------
-                    [[4, 4], [1, 7], [8, 3]],
-                    [[6, 2], [3, 5], [5, 2]],
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXMrMatrix(None, None, unweighted_counts, None).rows_pruning_base,
-            np.array([25, 27]),
-        )
 
     def it_knows_its_table_base(self):
         unweighted_counts = np.array(

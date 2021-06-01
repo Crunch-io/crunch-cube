@@ -76,6 +76,13 @@ class SecondOrderMeasures(object):
         )
 
     @lazyproperty
+    def columns_margin_proportion(self):
+        """_MarginProportion for measure object for this cube-result."""
+        return _MarginProportion(
+            self._dimensions, self, self._cube_measures, MO.COLUMNS
+        )
+
+    @lazyproperty
     def columns_pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix column."""
         return self._cube_measures.unweighted_cube_counts.columns_pruning_base
@@ -178,9 +185,21 @@ class SecondOrderMeasures(object):
         return _RowWeightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def rows_base(self):
+        """1D np.float64 ndarray of unweighted-N for each matrix column."""
+        return _UnweightedBaseMargin(
+            self._dimensions, self, self._cube_measures, MO.ROWS
+        )
+
+    @lazyproperty
     def rows_margin(self):
         """_SummedCountMargin rows measure object for this cube-result."""
         return _SummedCountMargin(self._dimensions, self, self._cube_measures, MO.ROWS)
+
+    @lazyproperty
+    def rows_margin_proportion(self):
+        """_MarginProportion for measure object for this cube-result."""
+        return _MarginProportion(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def rows_pruning_base(self):
@@ -1807,6 +1826,53 @@ class _BaseScaledCountMarginal(_BaseMarginal):
         )
 
 
+class _MarginProportion(_BaseMarginal):
+    """The 'proportion-margin' (aka rows-margin-proportion/columns-margin-proportion)"""
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin.
+
+        These are the base-values and the subtotals.
+        """
+        denominator = self._cube_measures.weighted_cube_counts.table_margin
+        base_values = self._proportion_numerators[0] / denominator
+        # --- if insertion numerator is empty (eg no insertions) don't divide ---
+        insertions = (
+            self._proportion_numerators[1]
+            if self._proportion_numerators[1].shape == (0,)
+            else self._proportion_numerators[1] / denominator
+        )
+        return [base_values, insertions]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if counts are defined."""
+        return self._counts_are_defined
+
+    @lazyproperty
+    def _proportion_numerators(self):
+        """ndarray of counts to be used as numerator for the margin proportions
+
+        We want the numerator to exist even along subtotal differences, so we cannot
+        use the already defined `rows/columns` margin.
+        """
+        counts = self._second_order_measures.weighted_counts.blocks
+
+        if self.orientation == MO.ROWS:
+            # --- Try getting the column comparable counts, to check for the error
+            self._second_order_measures.column_comparable_counts.blocks
+            # --- Now get only the base values and relevant subtotals
+            counts = [counts[0][0], counts[1][0]]
+        else:
+            # --- Try getting the row comparable counts, to check for the error
+            self._second_order_measures.row_comparable_counts
+            # --- Now get only the base values and relevant subtotals
+            counts = [counts[0][0], counts[0][1]]
+
+        return [self._apply_along_orientation(np.sum, count) for count in counts]
+
+
 class _ScaleMean(_BaseScaledCountMarginal):
     """Provides the scale mean marginals for a matrix if available.
 
@@ -2064,6 +2130,35 @@ class _SummedCountMargin(_BaseMarginal):
         return [
             self._apply_along_orientation(np.sum, counts) for counts in self._counts
         ]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if counts are defined."""
+        return self._counts_are_defined
+
+
+class _UnweightedBaseMargin(_BaseMarginal):
+    """The unweighted bases margin (sum of unweighted counts)"""
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin.
+
+        These are the base-values and the subtotals.
+        """
+        if not self.is_defined:
+            raise ValueError("Cannot calculate base across subvariables dimension.")
+
+        # --- Since we know we're not an array variable, we can trust that
+        # --- the 2D array for the unweighted bases measure is the same in
+        # --- the direction we need. Therefore, we can just grab the first
+        # --- row/column of that.
+        if self.orientation == MO.ROWS:
+            bases = self._second_order_measures.row_unweighted_bases.blocks
+            return [bases[0][0][:, 0], bases[1][0][:, 0]]
+        else:
+            bases = self._second_order_measures.column_unweighted_bases.blocks
+            return [bases[0][0][0, :], bases[0][1][0, :]]
 
     @lazyproperty
     def is_defined(self):

@@ -152,7 +152,7 @@ class Assembler(object):
         # --- TODO: Should column_margin only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a
         # --- "column_margin_range"
-        if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
+        if not self._measures.columns_margin.is_defined:
             return self.column_weighted_bases
 
         # --- otherwise columns-base is a vector ---
@@ -162,21 +162,18 @@ class Assembler(object):
     def columns_margin_proportion(self):
         """1D/2D np.float64 ndarray of weighted-prop for each column of this slice."""
         # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
-        denominator = self._cube_result_matrix.table_margin
-        if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
+        # --- TODO: Should colums_margin_proportion only be defined when it's 1D? This
+        # --- requires changes to exporter to use the bases to give a "rows_margin_range"
+        if not self._measures.columns_margin_proportion.is_defined:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
-                    self._cube_result_matrix.columns_margin / denominator,
+                    self.columns_margin / self.table_weighted_bases,
                     self._dimensions,
                 )
             )
 
         # --- otherwise columns-base is a vector ---
-        return self._assemble_vector(
-            self._cube_result_matrix.columns_margin / denominator,
-            self._column_subtotals,
-            self._column_order,
-        )
+        return self._assemble_marginal(self._measures.columns_margin_proportion)
 
     @lazyproperty
     def columns_scale_mean(self):
@@ -411,23 +408,14 @@ class Assembler(object):
     @lazyproperty
     def rows_base(self):
         """1D/2D np.float64 ndarray of unweighted-N for each slice row/cell."""
-        # --- an X_MR slice produces a 2D row-base (each cell has its own N) ---
-        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
-            return self._assemble_matrix(
-                SumSubtotals.blocks(
-                    self._cube_result_matrix.rows_base,
-                    self._dimensions,
-                    diff_rows_nan=True,
-                )
-            )
+        # --- an X_ARRAY slice produces a 2D row-base (each cell has its own N) ---
+        # --- TODO: Should rows_base only be defined when it's 1D? This would
+        # --- require changes to exporter to use the bases to give a "rows_base_range"
+        if self._columns_dimension.dimension_type in DT.ARRAY_TYPES:
+            return self.row_unweighted_bases
 
         # --- otherwise rows-base is a vector ---
-        return self._assemble_vector(
-            self._cube_result_matrix.rows_base,
-            self._row_subtotals,
-            self._row_order,
-            diffs_nan=True,
-        )
+        return self._assemble_marginal(self._measures.rows_base)
 
     @lazyproperty
     def rows_dimension_fills(self):
@@ -463,7 +451,7 @@ class Assembler(object):
         # --- This is really just another way to call the row_weighted_bases ---
         # --- TODO: Should rows_margin only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a "rows_margin_range"
-        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
+        if not self._measures.rows_margin.is_defined:
             return self.row_weighted_bases
 
         # --- otherwise rows-margin is a vector ---
@@ -473,21 +461,18 @@ class Assembler(object):
     def rows_margin_proportion(self):
         """1D/2D np.float64 ndarray of weighted-proportion for each slice row/cell."""
         # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
-        denominator = self._cube_result_matrix.table_margin
-        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
+        # --- TODO: Should rows_margin_proportion only be defined when it's 1D? This would
+        # --- require changes to exporter to use the bases to give a "rows_margin_range"
+        if not self._measures.rows_margin_proportion.is_defined:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
-                    self._cube_result_matrix.rows_margin / denominator,
+                    self.rows_margin / self.table_weighted_bases,
                     self._dimensions,
                 )
             )
 
         # --- otherwise rows-margin is a vector ---
-        return self._assemble_vector(
-            self._cube_result_matrix.rows_margin / denominator,
-            self._row_subtotals,
-            self._row_order,
-        )
+        return self._assemble_marginal(self._measures.rows_margin_proportion)
 
     @lazyproperty
     def rows_scale_mean(self):
@@ -1207,7 +1192,9 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
         """Marginal object providing values for sort."""
         marginal = self._order_spec.marginal
         marginal_propname = {
+            MARGINAL.BASE: "rows_base",
             MARGINAL.MARGIN: "rows_margin",
+            MARGINAL.MARGIN_PROPORTION: "rows_margin_proportion",
             MARGINAL.SCALE_MEAN: "rows_scale_mean",
             MARGINAL.SCALE_MEAN_STDDEV: "rows_scale_mean_stddev",
             MARGINAL.SCALE_MEDIAN: "rows_scale_median",
