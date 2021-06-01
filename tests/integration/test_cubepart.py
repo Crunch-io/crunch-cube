@@ -1434,7 +1434,7 @@ class Describe_Slice(object):
         )
 
     def it_has_bases_that_dont_sum_across_ca_subvars(self):
-        slice_ = Cube(CR.ca_cat_x_ca_subvar).partitions[0]
+        slice_ = Cube(CR.CA_CAT_X_CA_SUBVAR).partitions[0]
         column_bases = [
             [1641.0, 1639.0, 0.0],
             [1641.0, 1639.0, 0.0],
@@ -1463,7 +1463,7 @@ class Describe_Slice(object):
                 ],
             },
         }
-        slice_ = Cube(CR.ca_cat_x_ca_subvar, transforms=transforms).partitions[0]
+        slice_ = Cube(CR.CA_CAT_X_CA_SUBVAR, transforms=transforms).partitions[0]
         column_bases = [
             [1641.0, 1639.0, 0.0],
             [1641.0, 1639.0, 0.0],
