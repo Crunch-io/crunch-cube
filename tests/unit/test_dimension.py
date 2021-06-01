@@ -1236,11 +1236,15 @@ class Describe_OrderSpec(object):
             _OrderSpec(None, None).measure
         assert str(e.value) == "'measure'"
 
-    def and_it_returns_None_when_the_measure_keyword_is_not_recognized(
+    def and_it_raises_when_the_measure_keyword_is_not_recognized(
         self, _order_dict_prop_
     ):
         _order_dict_prop_.return_value = {"measure": "foobar"}
-        assert _OrderSpec(None, None).measure is None
+        with pytest.raises(ValueError) as e:
+            _OrderSpec(None, None).measure
+        # --- `.endswith()` to accommodate a Python 2.7 vs. 3.0 error message difference
+        # --- in Enum module
+        assert str(e.value).endswith(" is not a valid MEASURE")
 
     @pytest.mark.parametrize(
         "order_dict, expected_value",

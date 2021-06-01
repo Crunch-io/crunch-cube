@@ -952,8 +952,9 @@ class _BaseOrderHelper(object):
         measure_propname = propname_by_measure.get(measure)
 
         if measure_propname is None:
-            # --- Drives the fallback to the PayloadOrder VS SortByValueOrder
-            return None
+            raise NotImplementedError(
+                "sort-by-value for measure '%s' is not yet supported" % measure
+            )
 
         return getattr(self._second_order_measures, measure_propname)
 
@@ -1003,7 +1004,6 @@ class _ColumnOrderHelper(_BaseOrderHelper):
         insertion, hiding, pruning, and ordering transforms specified in the
         rows-dimension.
         """
-
         CollatorCls = (
             ExplicitOrderCollator
             if self._order_spec.collation_method == CM.EXPLICIT_ORDER
@@ -1104,18 +1104,17 @@ class _SortRowsByBaseColumnHelper(_RowOrderHelper):
     @lazyproperty
     def _order(self):
         """tuple of int element-idx specifying ordering of dimension elements."""
-        if self._measure is None:
-            # ---Fallback to PayloadOrderCollator if the measure is not available for
-            # ---the sort-row-by-basecol
+        try:
+            return SortByValueCollator.display_order(
+                self._rows_dimension,
+                self._element_values,
+                self._subtotal_values,
+                self._empty_row_idxs,
+            )
+        except ValueError:
             return PayloadOrderCollator.display_order(
                 self._rows_dimension, self._empty_row_idxs
             )
-        return SortByValueCollator.display_order(
-            self._rows_dimension,
-            self._element_values,
-            self._subtotal_values,
-            self._empty_row_idxs,
-        )
 
     @lazyproperty
     def _subtotal_values(self):
@@ -1156,18 +1155,17 @@ class _SortRowsByInsertedColumnHelper(_RowOrderHelper):
     @lazyproperty
     def _order(self):
         """tuple of int element-idx specifying ordering of dimension elements."""
-        if self._measure is None:
-            # ---Fallback to PayloadOrderCollator if the measure is not available for
-            # ---the sort-row-by-inserted-col
+        try:
+            return SortByValueCollator.display_order(
+                self._rows_dimension,
+                self._element_values,
+                self._subtotal_values,
+                self._empty_row_idxs,
+            )
+        except ValueError:
             return PayloadOrderCollator.display_order(
                 self._rows_dimension, self._empty_row_idxs
             )
-        return SortByValueCollator.display_order(
-            self._rows_dimension,
-            self._element_values,
-            self._subtotal_values,
-            self._empty_row_idxs,
-        )
 
     @lazyproperty
     def _subtotal_values(self):
@@ -1211,25 +1209,26 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
         }.get(marginal)
 
         if marginal_propname is None:
-            return None
+            raise NotImplementedError(
+                "sort-by-value for marginal '%s' is not yet supported" % marginal
+            )
 
         return getattr(self._second_order_measures, marginal_propname)
 
     @lazyproperty
     def _order(self):
         """tuple of int element-idx specifying ordering of dimension elements."""
-        if self._marginal is None:
-            # ---Fallback to PayloadOrderCollator if the marginal is not available for
-            # ---the sort-row-by-marginal
+        try:
+            return SortByValueCollator.display_order(
+                self._rows_dimension,
+                self._element_values,
+                self._subtotal_values,
+                self._empty_row_idxs,
+            )
+        except ValueError:
             return PayloadOrderCollator.display_order(
                 self._rows_dimension, self._empty_row_idxs
             )
-        return SortByValueCollator.display_order(
-            self._rows_dimension,
-            self._element_values,
-            self._subtotal_values,
-            self._empty_row_idxs,
-        )
 
     @lazyproperty
     def _subtotal_values(self):

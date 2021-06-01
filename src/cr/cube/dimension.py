@@ -860,7 +860,7 @@ class _OrderSpec(object):
     def collation_method(self):
         """Member of COLLATION_METHOD specifying ordering of dimension elements."""
         method_keyword = self._order_dict.get("type")
-        if method_keyword is None:
+        if method_keyword is None or not CM.has_value(method_keyword):
             return CM.PAYLOAD_ORDER
         return CM(method_keyword)
 
@@ -903,11 +903,7 @@ class _OrderSpec(object):
         value in that field is not a recognized marginal keyword. Note that not all order
         types use the "marginal": field.
         """
-        return (
-            MARGINAL(self.marginal_keyname)
-            if self.marginal_keyname in MARGINAL.members()
-            else None
-        )
+        return MARGINAL(self.marginal_keyname)
 
     @lazyproperty
     def marginal_keyname(self):
@@ -922,13 +918,11 @@ class _OrderSpec(object):
     def measure(self):
         """Member of enums.MEASURE corresponding to "measure": field in order transform.
 
-        Returns None if `measure_keyname` is not a MEASURE member.
+        Raises KeyError if the order dict has no "measure": field and ValueError if the
+        value in that field is not a recognized measure keyword. Note that not all order
+        types use the "measure": field.
         """
-        return (
-            MEASURE(self.measure_keyname)
-            if self.measure_keyname in MEASURE.members()
-            else None
-        )
+        return MEASURE(self.measure_keyname)
 
     @lazyproperty
     def measure_keyname(self):

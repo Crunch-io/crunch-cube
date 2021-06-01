@@ -933,6 +933,49 @@ class Describe_Slice(object):
 
         assert measure == pytest.approx(np.array(load_python_expression(expectation)))
 
+    def it_can_recover_from_sort_by_value_failure_invalid_id(self):
+        """Falls back to payload order when opposing element id does not exist."""
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "opposing_element",
+                    "element_id": 500,  # --- There is no element with id=500
+                    "measure": "col_percent",
+                    "direction": "ascending",
+                }
+            }
+        }
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_4), 0, transforms, None, 0)
+
+        # --- measure element id = 500 does not exist
+        assert 500 not in slice_._dimensions[0].element_ids
+        # --- measures should be in payload order because id was unavailable
+        assert slice_.counts.tolist() == [
+            [14.0, 14.0, 13.0, 16.0],
+            [22.0, 14.0, 19.0, 19.0],
+            [14.0, 16.0, 19.0, 18.0],
+            [17.0, 12.0, 28.0, 11.0],
+        ]
+
+    def it_can_recover_from_sort_by_value_invalid_sort_type(self):
+        """Falls back to payload order when measure is unavailable."""
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "foo",  # --- not a valid sort order dict
+                }
+            }
+        }
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_4), 0, transforms, None, 0)
+
+        # --- measure should be in payload order
+        assert slice_.counts.tolist() == [
+            [14.0, 14.0, 13.0, 16.0],
+            [22.0, 14.0, 19.0, 19.0],
+            [14.0, 16.0, 19.0, 18.0],
+            [17.0, 12.0, 28.0, 11.0],
+        ]
+
     def it_can_sort_by_rows_scale_mean(self):
         """Responds to order of marginal sort-by-value."""
         transforms = {
@@ -1013,12 +1056,36 @@ class Describe_Slice(object):
         # --- base should be in order
         assert slice_.rows_base.tolist() == pytest.approx([57.0, 67.0, 68.0, 74.0])
 
-    def but_it_fallback_to_payload_order_when_measure_is_not_a_valid_marginal(self):
+    def but_it_falls_back_to_payload_order_when_rows_scale_means_is_unavailable(self):
+        """Falls back to payload order when measure is unavailable."""
         transforms = {
             "rows_dimension": {
                 "order": {
                     "type": "marginal",
-                    "marginal": "table_proportion",
+                    "marginal": "scale_mean",  # --- scale_mean is unavailable
+                    "direction": "ascending",
+                    "fixed": {"top": [2], "bottom": [1]},
+                }
+            }
+        }
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_4), 0, transforms, None, 0)
+
+        # --- scale means don't exist because there are no numeric_values
+        assert slice_.rows_scale_mean is None
+        # --- but other measures should be in payload order
+        assert slice_.counts.tolist() == [
+            [14.0, 14.0, 13.0, 16.0],
+            [22.0, 14.0, 19.0, 19.0],
+            [14.0, 16.0, 19.0, 18.0],
+            [17.0, 12.0, 28.0, 11.0],
+        ]
+
+    def it_fallback_to_payload_order_when_measure_is_not_a_valid_marginal(self):
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "marginal",
+                    "marginal": "foo",
                     "direction": "ascending",
                     "fixed": {"top": [2], "bottom": [1]},
                 }
