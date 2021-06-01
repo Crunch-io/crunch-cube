@@ -27,7 +27,7 @@ from cr.cube.matrix.measure import (
     _PairwiseMeansSigPVals,
     _PairwiseMeansSigTStats,
     _PopulationProportions,
-    _ProportionMargin,
+    _MarginProportion,
     _RowComparableCounts,
     _RowProportions,
     _RowShareSum,
@@ -136,8 +136,8 @@ class DescribeSecondOrderMeasures(object):
         (
             ("rows", "rows_margin", _SummedCountMargin),
             ("columns", "columns_margin", _SummedCountMargin),
-            ("rows", "rows_margin_proportion", _ProportionMargin),
-            ("columns", "columns_margin_proportion", _ProportionMargin),
+            ("rows", "rows_margin_proportion", _MarginProportion),
+            ("columns", "columns_margin_proportion", _MarginProportion),
             ("rows", "rows_scale_median", _ScaleMedian),
             ("columns", "columns_scale_median", _ScaleMedian),
             ("rows", "rows_scale_mean", _ScaleMean),
@@ -1749,20 +1749,20 @@ class Describe_BaseScaledCountMarginal(object):
         assert marginal._opposing_numeric_values == expected
 
 
-class Describe_ProportionMargin(object):
-    """Unit test suite for `cr.cube.matrix.measure._ProportionMargin` object."""
+class Describe_MarginProportion(object):
+    """Unit test suite for `cr.cube.matrix.measure._MarginProportion` object."""
 
     def it_provides_blocks(self, request, cube_measures_, weighted_cube_counts_):
         property_mock(
             request,
-            _ProportionMargin,
+            _MarginProportion,
             "_proportion_numerators",
             return_value=[np.array([2.0, 3.0]), np.array([], dtype=float)],
         )
         cube_measures_.weighted_cube_counts = weighted_cube_counts_
         weighted_cube_counts_.table_margin = 5.0
 
-        proportions = _ProportionMargin(None, None, cube_measures_, None).blocks
+        proportions = _MarginProportion(None, None, cube_measures_, None).blocks
 
         assert len(proportions) == 2
         assert proportions[0] == pytest.approx([0.4, 0.6])
@@ -1770,7 +1770,7 @@ class Describe_ProportionMargin(object):
 
     def it_can_tell_if_it_is_defined(self, request):
         property_mock(request, _BaseMarginal, "_counts_are_defined")
-        summed_count = _ProportionMargin(None, None, None, None)
+        summed_count = _MarginProportion(None, None, None, None)
         assert summed_count.is_defined == summed_count._counts_are_defined
 
     def it_provides_the_right_numerator_for_rows(
@@ -1778,7 +1778,7 @@ class Describe_ProportionMargin(object):
     ):
         second_order_measures_.weighted_counts = weighted_counts_
         weighted_counts_.blocks = [[1, 2], [3, 4]]
-        margin = _ProportionMargin(None, second_order_measures_, None, MO.ROWS)
+        margin = _MarginProportion(None, second_order_measures_, None, MO.ROWS)
 
         margin._proportion_numerators
 
@@ -1798,7 +1798,7 @@ class Describe_ProportionMargin(object):
         property_mock(
             request, _ColumnComparableCounts, "blocks", side_effect=ValueError
         )
-        margin = _ProportionMargin(None, second_order_measures_, None, MO.ROWS)
+        margin = _MarginProportion(None, second_order_measures_, None, MO.ROWS)
 
         with pytest.raises(ValueError):
             margin._proportion_numerators
@@ -1808,7 +1808,7 @@ class Describe_ProportionMargin(object):
     ):
         second_order_measures_.weighted_counts = weighted_counts_
         weighted_counts_.blocks = [[1, 2], [3, 4]]
-        margin = _ProportionMargin(None, second_order_measures_, None, MO.COLUMNS)
+        margin = _MarginProportion(None, second_order_measures_, None, MO.COLUMNS)
 
         margin._proportion_numerators
 
@@ -1826,7 +1826,7 @@ class Describe_ProportionMargin(object):
             _RowComparableCounts,
         )
         property_mock(request, _RowComparableCounts, "blocks", side_effect=ValueError)
-        margin = _ProportionMargin(None, second_order_measures_, None, MO.ROWS)
+        margin = _MarginProportion(None, second_order_measures_, None, MO.ROWS)
 
         with pytest.raises(ValueError):
             margin._proportion_numerators
@@ -1837,7 +1837,7 @@ class Describe_ProportionMargin(object):
     def _apply_along_orientation_(self, request):
         return method_mock(
             request,
-            _ProportionMargin,
+            _MarginProportion,
             "_apply_along_orientation",
         )
 

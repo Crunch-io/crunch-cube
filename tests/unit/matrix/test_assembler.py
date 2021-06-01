@@ -34,7 +34,7 @@ from cr.cube.matrix.measure import (
     _ColumnWeightedBases,
     _Means,
     _PopulationProportions,
-    _ProportionMargin,
+    _MarginProportion,
     _RowComparableCounts,
     _RowProportions,
     _RowShareSum,
@@ -485,7 +485,7 @@ class DescribeAssembler(object):
         dimension_.dimension_type = DT.CAT
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
-        measure_ = instance_mock(request, _ProportionMargin)
+        measure_ = instance_mock(request, _MarginProportion)
         second_order_measures_.rows_margin_proportion = measure_
         assembler = Assembler(None, None, None)
 
@@ -908,7 +908,7 @@ class DescribeAssembler(object):
 
     @pytest.fixture
     def margin_proportion_(self, request):
-        return instance_mock(request, _ProportionMargin)
+        return instance_mock(request, _MarginProportion)
 
     @pytest.fixture
     def _column_order_prop_(self, request):

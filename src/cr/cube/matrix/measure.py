@@ -77,8 +77,8 @@ class SecondOrderMeasures(object):
 
     @lazyproperty
     def columns_margin_proportion(self):
-        """_ProportionMargin for measure object for this cube-result."""
-        return _ProportionMargin(
+        """_MarginProportion for measure object for this cube-result."""
+        return _MarginProportion(
             self._dimensions, self, self._cube_measures, MO.COLUMNS
         )
 
@@ -198,8 +198,8 @@ class SecondOrderMeasures(object):
 
     @lazyproperty
     def rows_margin_proportion(self):
-        """_ProportionMargin for measure object for this cube-result."""
-        return _ProportionMargin(self._dimensions, self, self._cube_measures, MO.ROWS)
+        """_MarginProportion for measure object for this cube-result."""
+        return _MarginProportion(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def rows_pruning_base(self):
@@ -1826,7 +1826,7 @@ class _BaseScaledCountMarginal(_BaseMarginal):
         )
 
 
-class _ProportionMargin(_BaseMarginal):
+class _MarginProportion(_BaseMarginal):
     """The 'proportion-margin' (aka rows-margin-proportion/columns-margin-proportion)"""
 
     @lazyproperty
