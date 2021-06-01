@@ -113,6 +113,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.2.2
+- Can now sort by value for unweighted base and the margin proportion
+
 ### 2.2.1
 - Bug fix for sort-by-col-index
 
