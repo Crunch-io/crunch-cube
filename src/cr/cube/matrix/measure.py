@@ -237,6 +237,16 @@ class SecondOrderMeasures(object):
         return _TableProportions(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def table_proportion_variances(self):
+        """_TableProportionVariances measure object for this cube-result."""
+        return _TableProportionVariances(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def table_stderrs(self):
+        """_TableStandardErrors measure object for this cube-result."""
+        return _TableStandardErrors(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def table_unweighted_bases(self):
         """_TableUnweightedBases measure object for this cube-result."""
         return _TableUnweightedBases(self._dimensions, self, self._cube_measures)
@@ -1329,6 +1339,68 @@ class _TableProportions(_BaseSecondOrderMeasure):
                     count_blocks[1][0] / weighted_base_blocks[1][0],
                     # --- intersections ---
                     count_blocks[1][1] / weighted_base_blocks[1][1],
+                ],
+            ]
+
+
+class _TableProportionVariances(_BaseSecondOrderMeasure):
+    """Provides the variance of the table-proportions measure for a matrix.
+
+    Table-proportions-variance is a 2D np.float64 ndarray of p * (1 - p) where p is the
+    table-proportions.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values.
+        """
+        p = self._second_order_measures.table_proportions.blocks
+
+        return [
+            [
+                # --- base values ---
+                p[0][0] * (1 - p[0][0]),
+                # --- inserted columns ---
+                p[0][1] * (1 - p[0][1]),
+            ],
+            [
+                # --- inserted rows ---
+                p[1][0] * (1 - p[1][0]),
+                # --- intersections ---
+                p[1][1] * (1 - p[1][1]),
+            ],
+        ]
+
+
+class _TableStandardErrors(_BaseSecondOrderMeasure):
+    """Provides the standard errors of the table-proportions measure for a matrix.
+
+    Table-standard-errors is a 2D np.float64 ndarray of the table proportion variance
+    divided by the table weighted bases.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        variance_blocks = self._second_order_measures.table_proportion_variances.blocks
+        weighted_base_blocks = self._second_order_measures.table_weighted_bases.blocks
+
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return [
+                [
+                    # --- base values ---
+                    np.sqrt(variance_blocks[0][0] / weighted_base_blocks[0][0]),
+                    # --- inserted columns ---
+                    np.sqrt(variance_blocks[0][1] / weighted_base_blocks[0][1]),
+                ],
+                [
+                    # --- inserted rows ---
+                    np.sqrt(variance_blocks[1][0] / weighted_base_blocks[1][0]),
+                    # --- intersections ---
+                    np.sqrt(variance_blocks[1][1] / weighted_base_blocks[1][1]),
                 ],
             ]
 

@@ -48,7 +48,9 @@ from cr.cube.matrix.measure import (
     _SummedCountMargin,
     _Sums,
     _TotalShareSum,
+    _TableProportionVariances,
     _TableProportions,
+    _TableStandardErrors,
     _TableUnweightedBases,
     _TableWeightedBases,
     _UnweightedBaseMargin,
@@ -88,6 +90,8 @@ class DescribeAssembler(object):
             ("stddev", _StdDev),
             ("sums", _Sums),
             ("table_proportions", _TableProportions),
+            ("table_proportion_variances", _TableProportionVariances),
+            ("table_stderrs", _TableStandardErrors),
             ("table_unweighted_bases", _TableUnweightedBases),
             ("table_weighted_bases", _TableWeightedBases),
             ("total_share_sum", _TotalShareSum),
@@ -706,28 +710,6 @@ class DescribeAssembler(object):
 
         assert assembler.table_margin == 4242
 
-    def it_knows_the_table_stderrs(
-        self,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        dimensions_,
-        TableStdErrSubtotals_,
-        _assemble_matrix_,
-    ):
-        cube_result_matrix_.table_stderrs = [[1, 2], [3, 4]]
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        TableStdErrSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
-        _assemble_matrix_.return_value = [[1, 3, 2], [4, 6, 5]]
-        assembler = Assembler(None, dimensions_, None)
-
-        table_stderrs = assembler.table_stderrs
-
-        TableStdErrSubtotals_.blocks.assert_called_once_with(
-            [[1, 2], [3, 4]], dimensions_, cube_result_matrix_
-        )
-        _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
-        assert table_stderrs == [[1, 3, 2], [4, 6, 5]]
-
     # === implementation methods/properties ===
 
     @pytest.mark.parametrize(
@@ -969,10 +951,6 @@ class DescribeAssembler(object):
     @pytest.fixture
     def SumSubtotals_(self, request):
         return class_mock(request, "cr.cube.matrix.assembler.SumSubtotals")
-
-    @pytest.fixture
-    def TableStdErrSubtotals_(self, request):
-        return class_mock(request, "cr.cube.matrix.assembler.TableStdErrSubtotals")
 
 
 class Describe_BaseOrderHelper(object):

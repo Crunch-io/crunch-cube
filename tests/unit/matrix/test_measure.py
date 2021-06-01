@@ -39,7 +39,9 @@ from cr.cube.matrix.measure import (
     SecondOrderMeasures,
     _SummedCountMargin,
     _Sums,
+    _TableProportionVariances,
     _TableProportions,
+    _TableStandardErrors,
     _TableUnweightedBases,
     _TableWeightedBases,
     _TotalShareSum,
@@ -1062,6 +1064,49 @@ class Describe_TableProportions(object):
         table_proportions = _TableProportions(None, second_order_measures_, None)
 
         assert table_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
+
+
+class Describe_TableProportionVariances(object):
+    """Unit test suite for `cr.cube.matrix.measure._TableProportionVariances` object."""
+
+    def it_computes_its_blocks(self, request):
+        table_proportions_ = instance_mock(
+            request, _TableProportions, blocks=[[0.1, 0.3], [0.25, 0.35]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            table_proportions=table_proportions_,
+        )
+
+        variances = _TableProportionVariances(None, second_order_measures_, None)
+
+        assert variances.blocks == [
+            pytest.approx([0.09, 0.21]),
+            pytest.approx([0.1875, 0.2275]),
+        ]
+
+
+class Describe_TableStandardErrors(object):
+    """Unit test suite for `cr.cube.matrix.measure._TableStandardErrors` object."""
+
+    def it_computes_its_blocks(self, request):
+        table_proportion_variances_ = instance_mock(
+            request, _TableProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
+        )
+        table_weighted_bases_ = instance_mock(
+            request, _TableWeightedBases, blocks=[[1.0, 2.0], [3.0, 4.0]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            table_proportion_variances=table_proportion_variances_,
+            table_weighted_bases=table_weighted_bases_,
+        )
+
+        stderrs = _TableStandardErrors(None, second_order_measures_, None)
+
+        assert stderrs.blocks == [[2.0, 3.0], [4.0, 5.0]]
 
 
 class Describe_TotalShareSum(object):
