@@ -1768,7 +1768,7 @@ class Describe_MrXCatWeightedCubeCounts(object):
         weighted_cube_counts = _MrXCatWeightedCubeCounts(None, None, None, None)
         assert weighted_cube_counts.row_bases == [[1.1, 2.2, 3.3], [7.7, 8.8, 9.9]]
 
-    def it_knows_its_table_bases(self, request):
+    def it_knows_its_table_bases_with_1D_margin(self, request):
         property_mock(
             request,
             _MrXCatWeightedCubeCounts,
@@ -1786,6 +1786,20 @@ class Describe_MrXCatWeightedCubeCounts(object):
         assert weighted_cube_counts.table_bases.tolist() == [
             [9.8, 9.8, 9.8],
             [7.6, 7.6, 7.6],
+        ]
+
+    def it_knows_its_table_bases_with_2D_margin(self, request):
+        property_mock(
+            request,
+            _MrXCatWeightedCubeCounts,
+            "table_margin",
+            return_value=np.array([[1.0, 2.0], [3.0, 4.0]]),
+        )
+        weighted_cube_counts = _MrXCatWeightedCubeCounts(None, None, None, None)
+
+        assert weighted_cube_counts.table_bases.tolist() == [
+            [1.0, 2.0],
+            [3.0, 4.0],
         ]
 
     def it_knows_its_table_margin_mr_x_nonarray(
