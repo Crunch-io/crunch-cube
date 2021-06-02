@@ -1175,9 +1175,9 @@ class _CatXMrWeightedCubeCounts(_BaseWeightedCubeCounts):
         # --- be this unknown dimension thing, but it's used for calculating
         # --- the table weighted base subtotals
         # --- Never add across subvariables. If rows dimension is an array, then the
-        # --- table_margin is the same as the counts (and also the row_bases).
+        # --- table_margin is the same as row_bases.
         if self._row_dimension_is_array:
-            return self.weighted_counts
+            return self.row_bases
         # --- weighted-counts is (rows, cols, selected/not) so axis 1 is preserved to
         # --- provide a distinct value for each MR subvar.
         return np.sum(self._weighted_counts, axis=(0, 2))
@@ -1258,11 +1258,11 @@ class _MrXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
 
     @lazyproperty
     def table_bases(self):
-        """1D or 2D np.float64 ndarray of table-proportion denominator for each cell."""
-        # --- TODO: Long term I think it'd be better to not have the margin
-        # --- be this unknown dimension thing, but it's used for calculating
-        # --- the table weighted base subtotals
-        return np.broadcast_to(self.table_margin[:, None], self.weighted_counts.shape)
+        """2D np.float64 ndarray of table-proportion denominator for each cell."""
+        table_margin = self.table_margin
+        if table_margin.ndim == 2:
+            return table_margin
+        return np.broadcast_to(table_margin[:, None], self.weighted_counts.shape)
 
     @lazyproperty
     def table_margin(self):
@@ -1273,12 +1273,16 @@ class _MrXCatWeightedCubeCounts(_BaseWeightedCubeCounts):
         table-margin for each row indicates the weighted number of respondents who were
         offered that option.
 
-        If the columns-dimension is an array, then the
+        If the rows-dimension is an array, then margin is the same as the column
+        bases because no addition across columns is possible.
         """
-        # --- Never add across subvariables. If columns dimension is an array, then the
-        # --- table_margin is the same as the counts (and also column_bases).
+        # --- TODO: Long term I think it'd be better to not have the margin
+        # --- be this unknown dimension thing, but it's used for calculating
+        # --- the table weighted base subtotals
+        # --- Never add across subvariables. If rows dimension is an array, then the
+        # --- table_margin is the same as column_bases.
         if self._column_dimension_is_array:
-            return self.weighted_counts
+            return self.column_bases
 
         return np.sum(self._weighted_counts, axis=(1, 2))
 

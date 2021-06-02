@@ -479,20 +479,15 @@ class DescribeNumericArrays(object):
 
     def it_has_bases_that_dont_sum_across_num_array_subvars_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_X_MR_WEIGHTED).partitions[0]
-        counts = np.array([[2.33, 7.009], [4.123, 6.777], [4.67, 6.4], [1.898, 6.1]])
-
-        # --- row bases add along the selection axis (and aren't the same as the counts)  ---
-        assert slice_.row_weighted_bases == pytest.approx(
-            np.array(
-                [
-                    [4.66, 8.9992],
-                    [8.243, 9.011],
-                    [5.781, 7.523445],
-                    [6.228, 8.553],
-                ]
-            )
+        row_bases = np.array(
+            [[4.66, 8.9992], [8.243, 9.011], [5.781, 7.523445], [6.228, 8.553]]
         )
-        # --- but the column & table bases are the same as the counts because no addition
-        # --- across subvariables
-        assert slice_.column_weighted_bases == pytest.approx(counts)
-        assert slice_.table_weighted_bases == pytest.approx(counts)
+
+        # --- row bases add along the selection axis (and aren't the same as the counts)
+        assert slice_.row_weighted_bases == pytest.approx(row_bases)
+        # --- table bases are the same as the row bases ---
+        assert slice_.table_weighted_bases == pytest.approx(row_bases)
+        # --- but the column weighted bases are the same as the counts ---
+        assert slice_.column_weighted_bases == pytest.approx(
+            np.array([[2.33, 7.009], [4.123, 6.777], [4.67, 6.4], [1.898, 6.1]])
+        )

@@ -1659,7 +1659,7 @@ class Describe_CatXMrWeightedCubeCounts(object):
         property_mock(
             request,
             _CatXMrWeightedCubeCounts,
-            "weighted_counts",
+            "row_bases",
             return_value=[[7.7, 7.7, 7.7], [7.7, 7.7, 7.7]],
         )
         weighted_cube_counts = _CatXMrWeightedCubeCounts(None, None, None, None)
@@ -1806,7 +1806,7 @@ class Describe_MrXCatWeightedCubeCounts(object):
         property_mock(
             request,
             _MrXCatWeightedCubeCounts,
-            "weighted_counts",
+            "column_bases",
             return_value=[[1.1, 2.2, 3.3], [7.7, 8.8, 9.9]],
         )
         weighted_cube_counts = _MrXCatWeightedCubeCounts(None, None, None, None)
