@@ -1671,6 +1671,11 @@ class _Zscores(_BaseSecondOrderMeasure):
         if self._is_defective:
             return np.full(counts.shape, np.nan)
 
+        # --- to avoid precision errors, check if it'll be 0/0 before other
+        # --- calculations and set to nan
+        if np.all(table_bases == row_bases) or np.all(table_bases == column_bases):
+            return np.full(counts.shape, np.nan)
+
         expected_counts = row_bases * column_bases / table_bases
         variance = (
             row_bases

@@ -1585,6 +1585,34 @@ class Describe_Zscores(object):
 
         assert actual == pytest.approx(np.full(counts.shape, np.nan), nan_ok=True)
 
+    def and_it_is_nan_if_rows_base_equal_table_base(self, _is_defective_prop_):
+        _is_defective_prop_.return_value = False
+        counts = np.array([[3.3, 2.2, 1.1], [6.6, 5.5, 4.4]])
+        zscores = _Zscores(None, None, None)
+
+        actual = zscores._calculate_zscores(
+            np.array([[3.3, 2.2, 1.1], [6.6, 5.5, 4.4]]),
+            np.array([[6.6, 6.6, 6.6], [16.5, 16.5, 16.5]]),
+            np.array([[6.6, 6.6, 6.6], [16.5, 16.5, 16.5]]),
+            np.array([[9.9, 7.7, 5.5], [9.9, 7.7, 5.5]]),
+        )
+
+        assert actual == pytest.approx(np.full(counts.shape, np.nan), nan_ok=True)
+
+    def and_it_is_nan_if_columns_base_equal_table_base(self, _is_defective_prop_):
+        _is_defective_prop_.return_value = False
+        counts = np.array([[3.3, 2.2, 1.1], [6.6, 5.5, 4.4]])
+        zscores = _Zscores(None, None, None)
+
+        actual = zscores._calculate_zscores(
+            np.array([[3.3, 2.2, 1.1], [6.6, 5.5, 4.4]]),
+            np.array([[9.9, 7.7, 5.5], [9.9, 7.7, 5.5]]),
+            np.array([[6.6, 6.6, 6.6], [16.5, 16.5, 16.5]]),
+            np.array([[9.9, 7.7, 5.5], [9.9, 7.7, 5.5]]),
+        )
+
+        assert actual == pytest.approx(np.full(counts.shape, np.nan), nan_ok=True)
+
     @pytest.mark.parametrize(
         "counts, expected",
         (
