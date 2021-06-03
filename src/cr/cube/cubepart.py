@@ -1171,7 +1171,7 @@ class _Slice(CubePartition):
 
         A cell value can be np.nan under certain conditions.
         """
-        return self._assembler.table_stderrs
+        return self._assembler.table_std_err
 
     @lazyproperty
     def table_unweighted_bases(self):

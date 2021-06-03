@@ -41,7 +41,7 @@ from cr.cube.matrix.measure import (
     _Sums,
     _TableProportionVariances,
     _TableProportions,
-    _TableStandardErrors,
+    _TableStandardError,
     _TableUnweightedBases,
     _TableWeightedBases,
     _TotalShareSum,
@@ -67,6 +67,8 @@ class DescribeSecondOrderMeasures(object):
             ("row_proportions", _RowProportions),
             ("row_unweighted_bases", _RowUnweightedBases),
             ("row_weighted_bases", _RowWeightedBases),
+            ("table_proportion_variances", _TableProportionVariances),
+            ("table_std_err", _TableStandardError),
             ("table_proportions", _TableProportions),
             ("table_unweighted_bases", _TableUnweightedBases),
             ("table_weighted_bases", _TableWeightedBases),
@@ -1087,8 +1089,8 @@ class Describe_TableProportionVariances(object):
         ]
 
 
-class Describe_TableStandardErrors(object):
-    """Unit test suite for `cr.cube.matrix.measure._TableStandardErrors` object."""
+class Describe_TableStandardError(object):
+    """Unit test suite for `cr.cube.matrix.measure._TableStandardError` object."""
 
     def it_computes_its_blocks(self, request):
         table_proportion_variances_ = instance_mock(
@@ -1104,7 +1106,7 @@ class Describe_TableStandardErrors(object):
             table_weighted_bases=table_weighted_bases_,
         )
 
-        stderrs = _TableStandardErrors(None, second_order_measures_, None)
+        stderrs = _TableStandardError(None, second_order_measures_, None)
 
         assert stderrs.blocks == [[2.0, 3.0], [4.0, 5.0]]
 

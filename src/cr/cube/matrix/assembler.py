@@ -640,9 +640,9 @@ class Assembler(object):
         return self._cube_result_matrix.table_margin
 
     @lazyproperty
-    def table_stderrs(self):
+    def table_std_err(self):
         """2D np.float64 ndarray of std-error of table-percent for each matrix cell."""
-        return self._assemble_matrix(self._measures.table_stderrs.blocks)
+        return self._assemble_matrix(self._measures.table_std_err.blocks)
 
     @lazyproperty
     def table_unweighted_bases(self):

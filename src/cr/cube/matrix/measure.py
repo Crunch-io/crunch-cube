@@ -242,9 +242,9 @@ class SecondOrderMeasures(object):
         return _TableProportionVariances(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
-    def table_stderrs(self):
-        """_TableStandardErrors measure object for this cube-result."""
-        return _TableStandardErrors(self._dimensions, self, self._cube_measures)
+    def table_std_err(self):
+        """_TableStandardError measure object for this cube-result."""
+        return _TableStandardError(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def table_unweighted_bases(self):
@@ -1375,7 +1375,7 @@ class _TableProportionVariances(_BaseSecondOrderMeasure):
         ]
 
 
-class _TableStandardErrors(_BaseSecondOrderMeasure):
+class _TableStandardError(_BaseSecondOrderMeasure):
     """Provides the standard errors of the table-proportions measure for a matrix.
 
     Table-standard-errors is a 2D np.float64 ndarray of the table proportion variance
