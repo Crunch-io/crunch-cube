@@ -34,7 +34,9 @@ from cr.cube.matrix.measure import (
     _MarginTableProportion,
     _RowComparableCounts,
     _RowProportions,
+    _RowProportionVariances,
     _RowShareSum,
+    _RowStandardError,
     _RowUnweightedBases,
     _RowWeightedBases,
     _ScaleMean,
@@ -71,6 +73,8 @@ class DescribeSecondOrderMeasures(object):
             ("column_weighted_bases", _ColumnWeightedBases),
             ("population_proportions", _PopulationProportions),
             ("row_proportions", _RowProportions),
+            ("row_proportion_variances", _RowProportionVariances),
+            ("row_std_err", _RowStandardError),
             ("row_unweighted_bases", _RowUnweightedBases),
             ("row_weighted_bases", _RowWeightedBases),
             ("table_proportion_variances", _TableProportionVariances),
@@ -407,7 +411,7 @@ class Describe_ColumnProportionVariances(object):
 
     def it_computes_its_blocks(self, request):
         column_proportions_ = instance_mock(
-            request, _TableProportions, blocks=[[0.1, 0.3], [0.25, 0.35]]
+            request, _ColumnProportions, blocks=[[0.1, 0.3], [0.25, 0.35]]
         )
         second_order_measures_ = instance_mock(
             request,
@@ -784,6 +788,49 @@ class Describe_RowProportions(object):
         row_proportions = _RowProportions(None, second_order_measures_, cube_measures_)
 
         assert row_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
+
+
+class Describe_RowProportionVariances(object):
+    """Unit test suite for `cr.cube.matrix.measure._RowProportionVariances` object."""
+
+    def it_computes_its_blocks(self, request):
+        row_proportions_ = instance_mock(
+            request, _RowProportions, blocks=[[0.1, 0.3], [0.25, 0.35]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            row_proportions=row_proportions_,
+        )
+
+        variances = _RowProportionVariances(None, second_order_measures_, None)
+
+        assert variances.blocks == [
+            pytest.approx([0.09, 0.21]),
+            pytest.approx([0.1875, 0.2275]),
+        ]
+
+
+class Describe_RowStandardError(object):
+    """Unit test suite for `cr.cube.matrix.measure._RowStandardError` object."""
+
+    def it_computes_its_blocks(self, request):
+        row_proportion_variances_ = instance_mock(
+            request, _RowProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
+        )
+        row_weighted_bases_ = instance_mock(
+            request, _RowWeightedBases, blocks=[[1.0, 2.0], [3.0, 4.0]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            row_proportion_variances=row_proportion_variances_,
+            row_weighted_bases=row_weighted_bases_,
+        )
+
+        stderrs = _RowStandardError(None, second_order_measures_, None)
+
+        assert stderrs.blocks == [[2.0, 3.0], [4.0, 5.0]]
 
 
 class Describe_RowUnweightedBases(object):
