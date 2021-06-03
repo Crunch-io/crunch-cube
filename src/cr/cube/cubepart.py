@@ -314,7 +314,7 @@ class _Slice(CubePartition):
 
         `std_deviation = sqrt(variance)`
         """
-        return np.sqrt(self._column_variances)
+        return np.sqrt(self._assembler.column_proportion_variances)
 
     @lazyproperty
     def column_std_err(self):
@@ -322,7 +322,7 @@ class _Slice(CubePartition):
 
         `std_error = sqrt(variance/N)`
         """
-        return np.sqrt(self._column_variances / self.column_weighted_bases)
+        return self._assembler.column_std_err
 
     @lazyproperty
     def column_unweighted_bases(self):
@@ -1224,12 +1224,6 @@ class _Slice(CubePartition):
         construction, and orders the result matrix, including removing hidden vectors.
         """
         return Assembler(self._cube, self._dimensions, self._slice_idx)
-
-    @lazyproperty
-    def _column_variances(self):
-        """Variance for column percentages."""
-        p = self.column_proportions
-        return p * (1 - p)
 
     @lazyproperty
     def _columns_dimension(self):

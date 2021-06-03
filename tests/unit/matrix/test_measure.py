@@ -19,7 +19,9 @@ from cr.cube.matrix.measure import (
     _BaseScaledCountMarginal,
     _ColumnComparableCounts,
     _ColumnProportions,
+    _ColumnProportionVariances,
     _ColumnShareSum,
+    _ColumnStandardError,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
     _MarginTableWeightedBase,
@@ -63,6 +65,8 @@ class DescribeSecondOrderMeasures(object):
         "measure_prop_name, MeasureCls",
         (
             ("column_proportions", _ColumnProportions),
+            ("column_proportion_variances", _ColumnProportionVariances),
+            ("column_std_err", _ColumnStandardError),
             ("column_unweighted_bases", _ColumnUnweightedBases),
             ("column_weighted_bases", _ColumnWeightedBases),
             ("population_proportions", _PopulationProportions),
@@ -396,6 +400,49 @@ class Describe_ColumnProportions(object):
         )
 
         assert column_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
+
+
+class Describe_ColumnProportionVariances(object):
+    """Unit test suite for `cr.cube.matrix.measure._ColumnProportionVariances` object."""
+
+    def it_computes_its_blocks(self, request):
+        column_proportions_ = instance_mock(
+            request, _TableProportions, blocks=[[0.1, 0.3], [0.25, 0.35]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            column_proportions=column_proportions_,
+        )
+
+        variances = _ColumnProportionVariances(None, second_order_measures_, None)
+
+        assert variances.blocks == [
+            pytest.approx([0.09, 0.21]),
+            pytest.approx([0.1875, 0.2275]),
+        ]
+
+
+class Describe_ColumnStandardError(object):
+    """Unit test suite for `cr.cube.matrix.measure._ColumnStandardError` object."""
+
+    def it_computes_its_blocks(self, request):
+        column_proportion_variances_ = instance_mock(
+            request, _ColumnProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
+        )
+        column_weighted_bases_ = instance_mock(
+            request, _ColumnWeightedBases, blocks=[[1.0, 2.0], [3.0, 4.0]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            column_proportion_variances=column_proportion_variances_,
+            column_weighted_bases=column_weighted_bases_,
+        )
+
+        stderrs = _ColumnStandardError(None, second_order_measures_, None)
+
+        assert stderrs.blocks == [[2.0, 3.0], [4.0, 5.0]]
 
 
 class Describe_ColumnUnweightedBases(object):
