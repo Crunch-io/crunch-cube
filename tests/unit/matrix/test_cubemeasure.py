@@ -2110,42 +2110,11 @@ class Describe_CatXCatMatrix(object):
         unweighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
         assert _CatXCatMatrix(None, None, unweighted_counts).table_base == 21
 
-    def it_knows_its_table_margin(self):
-        weighted_counts = np.array([[1, 2, 3], [4, 5, 6]])
-        assert _CatXCatMatrix(None, weighted_counts, None).table_margin == 21
-
-    def it_knows_its_table_stderrs(self, request):
-        property_mock(
-            request,
-            _CatXCatMatrix,
-            "_table_proportion_variances",
-            return_value=np.array([[0.5, 1.0], [0.25, 2.0]]),
-        )
-        property_mock(request, _CatXCatMatrix, "table_margin", return_value=2.0)
-
-        np.testing.assert_almost_equal(
-            _CatXCatMatrix(None, None, None).table_stderrs,
-            np.array([[0.5, 0.7071068], [0.3535534, 1.0]]),
-        )
-
     def it_knows_its_unweighted_counts(self):
         unweighted_cube_counts = np.array([[1, 2, 3], [4, 5, 6]])
         matrix = _CatXCatMatrix(None, None, unweighted_cube_counts)
 
         assert matrix.unweighted_counts.tolist() == [[1, 2, 3], [4, 5, 6]]
-
-    def it_knows_its_weighted_counts(self):
-        weighted_cube_counts = np.array([[3, 2, 1], [6, 5, 4]])
-        matrix = _CatXCatMatrix(None, weighted_cube_counts, None)
-
-        assert matrix.weighted_counts.tolist() == [[3, 2, 1], [6, 5, 4]]
-
-    def it_knows_its_table_proportion_variances_to_help(self, request):
-        weighted_counts = np.arange(6).reshape(2, 3)
-        np.testing.assert_almost_equal(
-            _CatXCatMatrix(None, weighted_counts, None)._table_proportion_variances,
-            np.array([[0.0, 0.0622222, 0.1155556], [0.16, 0.1955556, 0.2222222]]),
-        )
 
 
 class Describe_CatXMrMatrix(object):
@@ -2171,26 +2140,6 @@ class Describe_CatXMrMatrix(object):
 
         assert matrix.table_base.tolist() == [14, 14, 14]
 
-    def it_knows_its_table_margin(self):
-        weighted_cube_counts = np.array(
-            [
-                [  # -- row 0 ------------
-                    [1, 6],  # -- col 0 --
-                    [2, 5],  # -- col 1 --
-                    [3, 4],  # -- col 2 --
-                ],
-                [  # -- row 1 ------------
-                    [4, 3],  # -- col 0 --
-                    [5, 2],  # -- col 1 --
-                    [6, 1],  # -- col 2 --
-                    # --------------------
-                ],
-            ]
-        )
-        matrix = _CatXMrMatrix(None, weighted_cube_counts, None, None)
-
-        assert matrix.table_margin.tolist() == [14, 14, 14]
-
     def it_knows_its_unweighted_counts(self):
         unweighted_cube_counts = np.array(
             [
@@ -2210,33 +2159,6 @@ class Describe_CatXMrMatrix(object):
         matrix = _CatXMrMatrix(None, None, unweighted_cube_counts, None)
 
         assert matrix.unweighted_counts.tolist() == [[1, 2, 3], [4, 5, 6]]
-
-    def it_knows_its_weighted_counts(self):
-        weighted_cube_counts = np.array(
-            [
-                [  # -- row 0 ------------
-                    [1, 6],  # -- col 0 --
-                    [2, 5],  # -- col 1 --
-                    [3, 4],  # -- col 2 --
-                ],
-                [  # -- row 1 ------------
-                    [4, 3],  # -- col 0 --
-                    [5, 2],  # -- col 1 --
-                    [6, 1],  # -- col 2 --
-                    # --------------------
-                ],
-            ]
-        )
-        matrix = _CatXMrMatrix(None, weighted_cube_counts, None, None)
-
-        assert matrix.weighted_counts.tolist() == [[1, 2, 3], [4, 5, 6]]
-
-    def it_knows_its_table_proportion_variances_to_help(self):
-        weighted_cube_counts = np.arange(12).reshape((2, 3, 2))
-        np.testing.assert_almost_equal(
-            _CatXMrMatrix(None, weighted_cube_counts, None)._table_proportion_variances,
-            np.array([[0.0, 0.0826446, 0.1155556], [0.244898, 0.231405, 0.2222222]]),
-        )
 
 
 class Describe_MrXCatMatrix(object):
@@ -2259,47 +2181,6 @@ class Describe_MrXCatMatrix(object):
             _MrXCatMatrix(None, None, unweighted_counts).table_base, [21, 30]
         )
 
-    def it_knows_its_table_margin(self):
-        weighted_counts = np.array(
-            [
-                [  # -- row 0 ---------------
-                    [1, 2, 3],  # -- selected
-                    [4, 5, 6],  # -- not
-                ],
-                [  # -- row 1 ---------------
-                    [7, 8, 9],  # -- selected
-                    [0, 4, 2],  # -- not
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXCatMatrix(None, weighted_counts, None).table_margin, [21, 30]
-        )
-
-    def it_knows_its_table_stderrs(self, request):
-        property_mock(
-            request,
-            _MrXCatMatrix,
-            "_table_proportion_variances",
-            return_value=np.array([[0.5, 1.0], [0.25, 2.0]]),
-        )
-        property_mock(
-            request,
-            _MrXCatMatrix,
-            "table_margin",
-            return_value=np.array([[1, 2], [3, 4]]),
-        )
-
-        np.testing.assert_almost_equal(
-            _MrXCatMatrix(None, None, None).table_stderrs,
-            np.array(
-                [
-                    [[0.7071068, 0.7071068], [0.5, 1.0]],
-                    [[0.4082483, 0.5], [0.2886751, 0.7071068]],
-                ]
-            ),
-        )
-
     def it_knows_its_unweighted_counts(self):
         unweighted_counts = np.array(
             [
@@ -2317,31 +2198,6 @@ class Describe_MrXCatMatrix(object):
         np.testing.assert_equal(
             _MrXCatMatrix(None, None, unweighted_counts).unweighted_counts,
             np.array([[1, 2, 3], [7, 8, 9]]),
-        )
-
-    def it_knows_its_weighted_counts(self):
-        weighted_counts = np.array(
-            [
-                [  # -- row 0 ---------------
-                    [1, 2, 3],  # -- selected
-                    [4, 5, 6],  # -- not
-                ],
-                [  # -- row 1 ---------------
-                    [7, 8, 9],  # -- selected
-                    [0, 4, 2],  # -- not
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXCatMatrix(None, weighted_counts, None).weighted_counts,
-            np.array([[1, 2, 3], [7, 8, 9]]),
-        )
-
-    def it_knows_its_table_proportion_variances_to_help(self, request):
-        weighted_counts = np.arange(12).reshape((2, 2, 3))
-        np.testing.assert_almost_equal(
-            _MrXCatMatrix(None, weighted_counts, None)._table_proportion_variances,
-            np.array([[0.0, 0.0622222, 0.1155556], [0.1038062, 0.118416, 0.1322568]]),
         )
 
 
@@ -2378,36 +2234,6 @@ class Describe_MrXMrMatrix(object):
             np.array([[10, 9], [20, 18]]),
         )
 
-    def it_knows_its_table_margin(self):
-        weighted_counts = np.array(
-            [
-                [  # -- row 0 -------------
-                    [  # -- selected ------
-                        [0, 5],  # -- col 0
-                        [1, 4],  # -- col 1
-                    ],
-                    [  # -- not selected --
-                        [2, 3],  # -- col 0
-                        [3, 1],  # -- col 1
-                    ],
-                ],
-                [  # -- row 1 -------------
-                    [  # -- selected ------
-                        [4, 1],  # -- col 0
-                        [5, 0],  # -- col 1
-                    ],
-                    [  # -- not selected --
-                        [6, 9],  # -- col 0
-                        [7, 6],  # -- col 1
-                    ],
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXMrMatrix(None, weighted_counts, None, None).table_margin,
-            np.array([[10, 9], [20, 18]]),
-        )
-
     def it_knows_its_unweighted_counts(self):
         unweighted_counts = np.array(
             [
@@ -2436,41 +2262,4 @@ class Describe_MrXMrMatrix(object):
         np.testing.assert_equal(
             _MrXMrMatrix(None, None, unweighted_counts, None).unweighted_counts,
             np.array([[0, 1], [4, 5]]),
-        )
-
-    def it_knows_its_weighted_counts(self):
-        weighted_counts = np.array(
-            [
-                [  # -- row 0 -------------
-                    [  # -- selected ------
-                        [0, 8],  # -- col 0
-                        [1, 7],  # -- col 1
-                    ],
-                    [  # -- not selected --
-                        [2, 6],  # -- col 0
-                        [3, 5],  # -- col 1
-                    ],
-                ],
-                [  # -- row 1 -------------
-                    [  # -- selected ------
-                        [4, 4],  # -- col 0
-                        [5, 3],  # -- col 1
-                    ],
-                    [  # -- not selected --
-                        [6, 2],  # -- col 0
-                        [7, 1],  # -- col 1
-                    ],
-                ],
-            ]
-        )
-        np.testing.assert_equal(
-            _MrXMrMatrix(None, weighted_counts, None, None).weighted_counts,
-            np.array([[0, 1], [4, 5]]),
-        )
-
-    def it_knows_its_table_proportion_variances_to_help(self):
-        weighted_counts = np.arange(24).reshape((2, 2, 3, 2))
-        np.testing.assert_almost_equal(
-            _MrXMrMatrix(None, weighted_counts, None)._table_proportion_variances,
-            np.array([[0.0, 0.0826446, 0.1155556], [0.1560874, 0.16, 0.1630506]]),
         )

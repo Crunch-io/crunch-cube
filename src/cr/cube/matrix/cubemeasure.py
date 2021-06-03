@@ -1423,44 +1423,10 @@ class BaseCubeResultMatrix(object):
         )  # pragma: no cover
 
     @lazyproperty
-    def table_margin(self):
-        """np.float64 scalar or a 1D or 2D np.float64 ndarray table margin.
-
-        The table margin is the overall sample size of the matrix. This is the weighted
-        count of respondents who were asked both questions and provided a valid response
-        for both (including not-selecting an MR option/subvar).
-
-        A matrix with a multiple-response (MR) dimension produces a 1D ndarray value.
-        When both dimensions are MR, the return value is a 2D ndarray and there is
-        a distinct table-base value for each "cell" of the matrix. A CAT_X_CAT matrix
-        produces a scalar value for this property.
-        """
-        raise NotImplementedError(
-            "`%s` must implement `.table_margin" % self.__class__.__name__
-        )  # pragma: no cover
-
-    @lazyproperty
-    def table_stderrs(self):
-        """2D np.float64 ndarray of table-percent std-error for each matrix cell."""
-        raise NotImplementedError(
-            "`%s` must implement `.table_stderrs" % self.__class__.__name__
-        )  # pragma: no cover
-
-    @lazyproperty
     def unweighted_counts(self):
         """2D np.float64 ndarray of unweighted-count for each valid matrix cell."""
         raise NotImplementedError(
             "`%s` must implement `.unweighted_counts" % type(self).__name__
-        )  # pragma: no cover
-
-    @lazyproperty
-    def weighted_counts(self):
-        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
-
-        If cube is unweighted, this is the same as unweighted_counts.
-        """
-        raise NotImplementedError(
-            "`%s` must implement `.weighted_counts`" % type(self).__name__
         )  # pragma: no cover
 
     @staticmethod
@@ -1521,44 +1487,12 @@ class _CatXCatMatrix(BaseCubeResultMatrix):
         return np.sum(self.unweighted_counts)
 
     @lazyproperty
-    def table_margin(self):
-        """Scalar np.float64 weighted-N for overall table.
-
-        This is the weighted count of respondents who provided a valid response to
-        both questions. Because both dimensions are CAT, the table-margin value is the
-        same for all cells of the matrix.
-        """
-        return np.sum(self._weighted_counts)
-
-    @lazyproperty
-    def table_stderrs(self):
-        """2D np.float64 ndarray of table-percent std-error for each matrix cell.
-
-        Standard error is sqrt(variance/N).
-        """
-        return np.sqrt(self._table_proportion_variances / self.table_margin)
-
-    @lazyproperty
     def unweighted_counts(self):
         """2D np.float64 ndarray of unweighted-count for each valid matrix cell.
 
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
         return self._unweighted_counts
-
-    @lazyproperty
-    def weighted_counts(self):
-        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
-
-        If cube is unweighted, this is the same as unweighted_counts.
-        """
-        return self._weighted_counts
-
-    @lazyproperty
-    def _table_proportion_variances(self):
-        """2D ndarray of np.float64 cell proportion variance for each cell of matrix."""
-        p = self._weighted_counts / self.table_margin
-        return p * (1 - p)
 
 
 class _CatXMrMatrix(_CatXCatMatrix):
@@ -1599,38 +1533,12 @@ class _CatXMrMatrix(_CatXCatMatrix):
         return np.sum(self._unweighted_counts, axis=(0, 2))
 
     @lazyproperty
-    def table_margin(self):
-        """1D np.float64 ndarray of weighted-N for each column of matrix.
-
-        Because the matrix is X_MR, each column has a distinct table margin.
-        """
-        # --- weighted-counts is (rows, cols, selected/not) so axis 1 is preserved to
-        # --- provide a distinct value for each MR subvar.
-        return np.sum(self._weighted_counts, axis=(0, 2))
-
-    @lazyproperty
     def unweighted_counts(self):
         """2D np.float64 ndarray of unweighted-count for each valid matrix cell.
 
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
         return self._unweighted_counts[:, :, 0]
-
-    @lazyproperty
-    def weighted_counts(self):
-        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
-
-        A valid matrix cell is one whose row and column elements are both non-missing.
-        If the cube-result has no weight, these values are the same as the
-        unweighted-counts.
-        """
-        return self._weighted_counts[:, :, 0]
-
-    @lazyproperty
-    def _table_proportion_variances(self):
-        """2D ndarray of np.float64 table proportion variance for each matrix cell."""
-        p = self._weighted_counts[:, :, 0] / self.table_margin
-        return p * (1 - p)
 
 
 class _MrXCatMatrix(BaseCubeResultMatrix):
@@ -1662,47 +1570,12 @@ class _MrXCatMatrix(BaseCubeResultMatrix):
         return np.sum(self._unweighted_counts, axis=(1, 2))
 
     @lazyproperty
-    def table_margin(self):
-        """1D np.float64 ndarray of weighted-N for each row of matrix.
-
-        Since the rows-dimension is MR, each row has a distinct table margin, since not
-        all of the multiple responses were necessarily offered to all respondents. The
-        table-margin for each row indicates the weighted number of respondents who were
-        offered that option.
-        """
-        return np.sum(self._weighted_counts, axis=(1, 2))
-
-    @lazyproperty
-    def table_stderrs(self):
-        """2D np.float64 ndarray of table-percent std-error for each matrix cell.
-
-        Standard error is sqrt(variance/N).
-        """
-        return np.sqrt(self._table_proportion_variances / self.table_margin[:, None])
-
-    @lazyproperty
     def unweighted_counts(self):
         """2D np.float64 ndarray of unweighted-count for each valid matrix cell.
 
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
         return self._unweighted_counts[:, 0, :]
-
-    @lazyproperty
-    def weighted_counts(self):
-        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
-
-        A valid matrix cell is one whose row and column elements are both non-missing.
-        When the cube-result has no weight, in which case these values are the same as
-        the unweighted-counts.
-        """
-        return self._weighted_counts[:, 0, :]
-
-    @lazyproperty
-    def _table_proportion_variances(self):
-        """2D ndarray of np.float64 table proportion variance for each matrix cell."""
-        p = self._weighted_counts[:, 0, :] / self.table_margin[:, None]
-        return p * (1 - p)
 
 
 class _MrXMrMatrix(_CatXCatMatrix):
@@ -1762,37 +1635,9 @@ class _MrXMrMatrix(_CatXCatMatrix):
         return np.sum(self._unweighted_counts, axis=(1, 3))
 
     @lazyproperty
-    def table_margin(self):
-        """2D np.float64 ndarray of weighted N for each cell of matrix.
-
-        Because the matrix is MR_X_MR, each cell corresponds to a 2x2 sub-table
-        (selected/not on each axis), each of which has its own distinct table-margin.
-        """
-        # --- Reduce second and fourth axes (the two MR_CAT dimensions) with sum()
-        # --- producing 2D (nrows, ncols). This sums the (selected, selected),
-        # --- (selected, not), (not, selected) and (not, not) cells of the subtable for
-        # --- each matrix cell.
-        return np.sum(self._weighted_counts, axis=(1, 3))
-
-    @lazyproperty
     def unweighted_counts(self):
         """2D np.float64 ndarray of unweighted-count for each valid matrix cell.
 
         A valid matrix cell is one whose row and column elements are both non-missing.
         """
         return self._unweighted_counts[:, 0, :, 0]
-
-    @lazyproperty
-    def weighted_counts(self):
-        """2D np.float64 ndarray of weighted-count for each valid matrix cell.
-
-        When the cube-result has no weight, these values are the same as the
-        unweighted-counts. Only *selected* counts contribute to these values.
-        """
-        return self._weighted_counts[:, 0, :, 0]
-
-    @lazyproperty
-    def _table_proportion_variances(self):
-        """2D ndarray of np.float64 table proportion variance for each matrix cell."""
-        p = self._weighted_counts[:, 0, :, 0] / self.table_margin
-        return p * (1 - p)
