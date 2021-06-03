@@ -29,7 +29,9 @@ from cr.cube.matrix.cubemeasure import (
     _CatXMrMatrix,
     _CatXMrUnweightedCubeCounts,
     _CatXMrWeightedCubeCounts,
+    _CatXNumArrayCubeCovariance,
     CubeMeasures,
+    _EmptyCubeCovariance,
     _MrXCatCubeMeans,
     _MrXCatCubeStdDev,
     _MrXCatCubeSums,
@@ -42,8 +44,10 @@ from cr.cube.matrix.cubemeasure import (
     _MrXMrMatrix,
     _MrXMrUnweightedCubeCounts,
     _MrXMrWeightedCubeCounts,
+    _MrXNumArrayCubeCovariance,
     _NumArrayXMrUnweightedCubeCounts,
     _NumArrayXCatUnweightedCubeCounts,
+    _BaseCubeCovariance,
 )
 
 from ...unitutil import class_mock, instance_mock, method_mock, property_mock
@@ -106,6 +110,136 @@ class Describe_BaseCubeMeasure(object):
         measure = _BaseCubeMeasure(None)
 
         assert measure._slice_idx_expr(cube_, slice_idx=3) == expected_value
+
+
+# === COVARIANCE ===
+
+
+class Describe_BaseCubeCovariance(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeCovariance`."""
+
+    @pytest.mark.parametrize(
+        "dimension_types, CubeCovarianceCls",
+        (
+            ((DT.MR, DT.NUM_ARRAY), _MrXNumArrayCubeCovariance),
+            ((DT.CAT, DT.NUM_ARRAY), _CatXNumArrayCubeCovariance),
+            ((DT.CAT, DT.MR), _EmptyCubeCovariance),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_cube_covariance_objects(
+        self, request, dimension_types, CubeCovarianceCls
+    ):
+        cube_ = instance_mock(request, Cube)
+        dimensions_ = (
+            instance_mock(request, Dimension),
+            instance_mock(request, Dimension),
+        )
+        cube_covariance_ = instance_mock(request, CubeCovarianceCls)
+        CubeCovarianceCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % CubeCovarianceCls.__name__,
+            return_value=cube_covariance_,
+        )
+        _slice_idx_expr_ = method_mock(
+            request,
+            _BaseCubeCovariance,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
+        )
+        cube_.dimension_types = dimension_types
+        cube_.covariance = [[1, 2], [3, 4]]
+
+        cube_covariance = _BaseCubeCovariance.factory(cube_, dimensions_, slice_idx=7)
+
+        _slice_idx_expr_.assert_called_once_with(cube_, 7)
+        CubeCovarianceCls_.assert_called_once_with(dimensions_, [3, 4])
+        assert cube_covariance is cube_covariance_
+
+    def but_it_raises_a_value_error_when_cube_result_does_not_contain_cov_measure(
+        self, cube_
+    ):
+        cube_.covariance = None
+
+        with pytest.raises(ValueError) as e:
+            _BaseCubeCovariance.factory(cube_, None, None)
+
+        assert str(e.value) == "cube-result does not contain cube-covariance measure"
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+
+class Describe_CatXNumArrayCubeCovariance(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXNumArrayCubeCovariance`."""
+
+    def it_knows_its_covariance(self, raw_covariance):
+        cube_covariance = _CatXNumArrayCubeCovariance(None, raw_covariance)
+
+        assert cube_covariance.covariance.tolist() == [
+            [[0.95, 0.03, 0.9], [0.25, 0.8, 0.47], [0.88, 0.38, 0.62]],
+            [[0.18, 0.13, 0.54], [0.44, 0.85, 0.69], [0.87, 0.39, 0.31]],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_covariance(self):
+        """(2, 3, 3) np.float64 ndarray of covariance as received from Cube."""
+        return np.array(
+            [
+                [[0.95, 0.03, 0.9], [0.25, 0.8, 0.47], [0.88, 0.38, 0.62]],
+                [[0.18, 0.13, 0.54], [0.44, 0.85, 0.69], [0.87, 0.39, 0.31]],
+            ]
+        )
+
+
+class Describe_MrXNumArrayCubeCovariance(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXNumArrayCubeCovariance`."""
+
+    def it_knows_its_covariance(self, raw_covariance):
+        cube_covariance = _MrXNumArrayCubeCovariance(None, raw_covariance)
+
+        assert cube_covariance.covariance.tolist() == [
+            [[0.02, 0.68, 0.85], [0.16, 0.99, 0.75], [0.82, 0.22, 0.08]],
+            [[0.68, 0.93, 0.45], [0.96, 0.3, 0.76], [0.97, 0.8, 0.72]],
+            [[0.73, 0.37, 0.78], [0.52, 0.42, 0.26], [0.22, 0.06, 0.69]],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_covariance(self):
+        """(3,2,3,3) np.int float64 of covariance as received from Cube."""
+        return np.array(
+            [
+                [
+                    [[0.02, 0.68, 0.85], [0.16, 0.99, 0.75], [0.82, 0.22, 0.08]],
+                    [[0.25, 1.0, 0.26], [0.44, 1.0, 0.08], [0.49, 0.79, 0.91]],
+                ],
+                [
+                    [[0.68, 0.93, 0.45], [0.96, 0.3, 0.76], [0.97, 0.8, 0.72]],
+                    [[0.71, 0.13, 0.68], [0.88, 0.37, 0.74], [0.63, 0.0, 0.68]],
+                ],
+                [
+                    [[0.73, 0.37, 0.78], [0.52, 0.42, 0.26], [0.22, 0.06, 0.69]],
+                    [[0.08, 0.49, 0.69], [0.21, 0.71, 0.92], [0.73, 0.93, 0.12]],
+                ],
+            ]
+        )
+
+
+class Describe_EmptyCubeCovariance(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._EmptyCubeCovariance`."""
+
+    def it_knows_its_covariance(self):
+        raw_covariance = np.random.rand(3, 2)
+        cube_covariance = _EmptyCubeCovariance(None, raw_covariance)
+
+        assert cube_covariance.covariance == 0
 
 
 # === MEANS ===

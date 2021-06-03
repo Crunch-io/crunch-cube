@@ -1,0 +1,846 @@
+{
+  "query": {
+    "measures": {
+      "valid_count_unweighted": {
+        "function": "cube_valid_count",
+        "args": [
+          {
+            "variable": "https://app.crunch.io/api/datasets/8e6c08/variables/c2af99/"
+          }
+        ]
+      },
+      "covariance": {
+        "function": "cube_covariance",
+        "args": [
+          {
+            "variable": "https://app.crunch.io/api/datasets/8e6c08/variables/c2af99/"
+          }
+        ]
+      },
+      "stddev": {
+        "function": "cube_stddev",
+        "args": [
+          {
+            "variable": "https://app.crunch.io/api/datasets/8e6c08/variables/c2af99/"
+          }
+        ]
+      },
+      "mean": {
+        "function": "cube_mean",
+        "args": [
+          {
+            "variable": "https://app.crunch.io/api/datasets/8e6c08/variables/c2af99/"
+          }
+        ]
+      }
+    },
+    "dimensions": [
+      {
+        "variable": "https://app.crunch.io/api/datasets/8e6c08/variables/000004/"
+      }
+    ],
+    "weight": null
+  },
+  "query_environment": {
+    "filter": [
+    ]
+  },
+  "result": {
+    "dimensions": [
+      {
+        "references": {
+          "description": "Healthy Eater",
+          "format": {
+            "summary": {
+              "digits": 0
+            }
+          },
+          "notes": "Do you consider yourself a 'Healthy Eater' (eg someone who enjoys eating healthy food)?",
+          "name": "Healthy Eater",
+          "alias": "healthy_eater",
+          "view": {
+            "show_counts": false,
+            "column_width": null,
+            "include_missing": false,
+            "show_numeric_values": false
+          }
+        },
+        "derived": false,
+        "type": {
+          "ordinal": false,
+          "class": "categorical",
+          "categories": [
+            {
+              "numeric_value": 1,
+              "missing": false,
+              "id": 1,
+              "name": "No"
+            },
+            {
+              "numeric_value": 2,
+              "missing": false,
+              "id": 2,
+              "name": "Yes"
+            },
+            {
+              "numeric_value": null,
+              "missing": true,
+              "id": -1,
+              "name": "No Data"
+            }
+          ]
+        }
+      }
+    ],
+    "missing": 5,
+    "measures": {
+      "valid_count_unweighted": {
+        "data": [
+          85,
+          81,
+          81,
+          82,
+          82,
+          80,
+          115,
+          118,
+          117,
+          113,
+          112,
+          112,
+          5,
+          5,
+          5,
+          5,
+          5,
+          4
+        ],
+        "n_missing": 5,
+        "metadata": {
+          "references": {
+            "uniform_basis": false,
+            "description": "Vegetable Ratings",
+            "subreferences": [
+              {
+                "description": "Avocado Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Avocado",
+                "name": "Avocado",
+                "alias": "ratings_numa_avocado",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Brussel Sprout Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Brussel Sprout",
+                "name": "Brussel Sprout",
+                "alias": "ratings_numa_brussel_sprout",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Carrot Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Carrot",
+                "name": "Carrot",
+                "alias": "ratings_numa_carrot",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Daikon Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Daikon",
+                "name": "Daikon",
+                "alias": "ratings_numa_daikon",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Eggplant Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Eggplant",
+                "name": "Eggplant",
+                "alias": "ratings_numa_eggplant",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Fennel Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Fennel",
+                "name": "Fennel",
+                "alias": "ratings_numa_fennel",
+                "view": {
+                  "column_width": null
+                }
+              }
+            ],
+            "notes": "On a scale of 0-100, how would you rate...?",
+            "alias": "ratings_numa",
+            "name": "Vegetable Ratings"
+          },
+          "derived": true,
+          "type": {
+            "integer": false,
+            "class": "numeric",
+            "missing_rules": {
+            },
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "subvariables": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        }
+      },
+      "covariance": {
+        "data": [
+          61.11400560224087,
+          -9.122689075630246,
+          19.406302521008396,
+          30.934173669467782,
+          -10.275630252100838,
+          -13.166806722689078,
+          -9.122689075630246,
+          537.6098039215682,
+          3.4581232492997227,
+          -59.046218487394945,
+          -47.230812324929964,
+          -62.26134453781512,
+          19.406302521008396,
+          3.4581232492997227,
+          373.10700280112036,
+          4.612044817927163,
+          -32.95546218487394,
+          -26.198039215686283,
+          30.934173669467782,
+          -59.046218487394945,
+          4.612044817927163,
+          328.10224089635864,
+          -26.165966386554615,
+          -30.568627450980387,
+          -10.275630252100838,
+          -47.230812324929964,
+          -32.95546218487394,
+          -26.165966386554615,
+          293.9084033613444,
+          122.78599439775907,
+          -13.166806722689078,
+          -62.26134453781512,
+          -26.198039215686283,
+          -30.568627450980387,
+          122.78599439775907,
+          439.067787114846,
+          287.17471988795506,
+          9.117997198879538,
+          86.76015406162465,
+          9.668417366946779,
+          -37.762605042016794,
+          36.49474789915966,
+          9.117997198879538,
+          482.90749299719874,
+          17.972338935574225,
+          17.148669467787116,
+          -53.46260504201681,
+          -92.41995798319331,
+          86.76015406162465,
+          17.972338935574225,
+          225.20833333333314,
+          8.917717086834742,
+          -16.32563025210084,
+          -8.597689075630253,
+          9.668417366946779,
+          17.148669467787116,
+          8.917717086834742,
+          416.6100140056022,
+          -38.75504201680674,
+          1.7220588235293992,
+          -37.762605042016794,
+          -53.46260504201681,
+          -16.32563025210084,
+          -38.75504201680674,
+          400.7369747899158,
+          43.72394957983192,
+          36.49474789915966,
+          -92.41995798319331,
+          -8.597689075630253,
+          1.7220588235293992,
+          43.72394957983192,
+          484.7052521008407,
+          97.2,
+          -129.85,
+          -5.0,
+          61.95,
+          -8.3,
+          230.75,
+          -129.85,
+          466.79999999999995,
+          83.25,
+          -97.1,
+          -60.349999999999994,
+          128.25,
+          -5.0,
+          83.25,
+          25.5,
+          23.0,
+          -41.5,
+          69.0,
+          61.95,
+          -97.1,
+          23.0,
+          210.70000000000002,
+          -134.79999999999998,
+          -65.0,
+          -8.3,
+          -60.349999999999994,
+          -41.5,
+          -134.79999999999998,
+          124.7,
+          40.0,
+          230.75,
+          128.25,
+          69.0,
+          -65.0,
+          40.0,
+          1515.0
+        ],
+        "n_missing": 5,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "uniform_basis": false,
+            "description": "Vegetable Ratings",
+            "subreferences": [
+              {
+                "description": "Avocado Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Avocado",
+                "name": "Avocado",
+                "alias": "ratings_numa_avocado",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Brussel Sprout Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Brussel Sprout",
+                "name": "Brussel Sprout",
+                "alias": "ratings_numa_brussel_sprout",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Carrot Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Carrot",
+                "name": "Carrot",
+                "alias": "ratings_numa_carrot",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Daikon Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Daikon",
+                "name": "Daikon",
+                "alias": "ratings_numa_daikon",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Eggplant Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Eggplant",
+                "name": "Eggplant",
+                "alias": "ratings_numa_eggplant",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Fennel Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Fennel",
+                "name": "Fennel",
+                "alias": "ratings_numa_fennel",
+                "view": {
+                  "column_width": null
+                }
+              }
+            ],
+            "notes": "On a scale of 0-100, how would you rate...?",
+            "alias": "ratings_numa",
+            "name": "Vegetable Ratings"
+          },
+          "type": {
+            "subvariables": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ],
+            "missing_rules": {
+            },
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "class": "numeric"
+          }
+        }
+      },
+      "stddev": {
+        "data": [
+          7.817544729788303,
+          19.426142180062403,
+          9.904700218570627,
+          12.840279564065122,
+          11.758945930429336,
+          4.062486611467715,
+          8.487034127641579,
+          20.64661831964463,
+          9.427191640887077,
+          12.251183538893956,
+          10.851623012606087,
+          4.0536837561472385,
+          9.85900603509299,
+          21.605554841290235,
+          5.049752469181039,
+          14.515508947329405,
+          11.166915420114902,
+          6.020797289396148
+        ],
+        "n_missing": 5,
+        "metadata": {
+          "references": {
+            "uniform_basis": false,
+            "description": "Vegetable Ratings",
+            "subreferences": [
+              {
+                "description": "Avocado Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Avocado",
+                "name": "Avocado",
+                "alias": "ratings_numa_avocado",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Brussel Sprout Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Brussel Sprout",
+                "name": "Brussel Sprout",
+                "alias": "ratings_numa_brussel_sprout",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Carrot Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Carrot",
+                "name": "Carrot",
+                "alias": "ratings_numa_carrot",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Daikon Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Daikon",
+                "name": "Daikon",
+                "alias": "ratings_numa_daikon",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Eggplant Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Eggplant",
+                "name": "Eggplant",
+                "alias": "ratings_numa_eggplant",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Fennel Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Fennel",
+                "name": "Fennel",
+                "alias": "ratings_numa_fennel",
+                "view": {
+                  "column_width": null
+                }
+              }
+            ],
+            "notes": "On a scale of 0-100, how would you rate...?",
+            "alias": "ratings_numa",
+            "name": "Vegetable Ratings"
+          },
+          "derived": true,
+          "type": {
+            "integer": null,
+            "class": "numeric",
+            "missing_rules": {
+            },
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "subvariables": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        }
+      },
+      "mean": {
+        "data": [
+          72.07058823529412,
+          62.666666666666664,
+          78.50617283950618,
+          70.0609756097561,
+          68.26829268292683,
+          86.95,
+          73.6086956521739,
+          62.1271186440678,
+          75.08547008547009,
+          70.50442477876106,
+          68.08928571428571,
+          86.49107142857143,
+          72.2,
+          64.4,
+          68.0,
+          76.2,
+          74.2,
+          86.25
+        ],
+        "n_missing": 5,
+        "metadata": {
+          "references": {
+            "uniform_basis": false,
+            "description": "Vegetable Ratings",
+            "subreferences": [
+              {
+                "description": "Avocado Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Avocado",
+                "name": "Avocado",
+                "alias": "ratings_numa_avocado",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Brussel Sprout Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Brussel Sprout",
+                "name": "Brussel Sprout",
+                "alias": "ratings_numa_brussel_sprout",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Carrot Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Carrot",
+                "name": "Carrot",
+                "alias": "ratings_numa_carrot",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Daikon Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Daikon",
+                "name": "Daikon",
+                "alias": "ratings_numa_daikon",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Eggplant Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Eggplant",
+                "name": "Eggplant",
+                "alias": "ratings_numa_eggplant",
+                "view": {
+                  "column_width": null
+                }
+              },
+              {
+                "description": "Fennel Rating (100 point scale)",
+                "format": {
+                  "data": {
+                    "digits": 2
+                  },
+                  "summary": {
+                    "digits": 2
+                  }
+                },
+                "notes": "What is your rating between 0 and 100 of: Fennel",
+                "name": "Fennel",
+                "alias": "ratings_numa_fennel",
+                "view": {
+                  "column_width": null
+                }
+              }
+            ],
+            "notes": "On a scale of 0-100, how would you rate...?",
+            "alias": "ratings_numa",
+            "name": "Vegetable Ratings"
+          },
+          "derived": true,
+          "type": {
+            "integer": true,
+            "class": "numeric",
+            "missing_rules": {
+            },
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "subvariables": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ]
+          }
+        }
+      }
+    },
+    "n": 210,
+    "filter_stats": {
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 210,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 210,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered": {
+        "unweighted": {
+          "selected": 210,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 210,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "is_cat_date": false
+    },
+    "unfiltered": {
+      "unweighted_n": 210,
+      "weighted_n": 210
+    },
+    "filtered": {
+      "unweighted_n": 210,
+      "weighted_n": 210
+    },
+    "counts": [
+      85,
+      120,
+      5
+    ],
+    "element": "crunch:cube"
+  }
+}

@@ -1323,3 +1323,53 @@ class TestMeanDifferenceSignificance(object):
         slice_ = Cube(CR.CAT_X_MR_SUBVAR_MEANS).partitions[0]
 
         assert slice_.pairwise_means_indices.tolist() == [[(), (), (), ()]]
+
+    def test_mean_diff_significance_for_cat_x_numeric_array(self):
+        transforms = {"num_array_position": "column"}
+        slice_ = Cube(
+            NA.NUM_ARRAY_MEANS_COV_GROUPED_BY_CAT, transforms=transforms
+        ).partitions[0]
+
+        expected_tstats = [
+            # -----------------Numeric Array Subvars---------------------------
+            # Avocado    B. Sprout     Carrot      Daikon    Eggplant   Fennel
+            [0.0, -8.7894883, 11.7006019, -3.11768484, -5.08913266, 28.8943939],  # yes
+            [0.0, -10.4672529, 8.29372844, -4.3325229, -6.7260758, 64.8421318],  # no
+        ]
+        expected_pvals = [
+            # -----------------Numeric Array Subvars---------------------------
+            # Avocado    B. Sprout     Carrot      Daikon    Eggplant   Fennel
+            [1, 0.00000000e00, 0.00000000e00, 1.88900847e-03, 4.50351161e-07, 0],  # yes
+            [1, 0.00000000e00, 4.44089210e-16, 1.66468978e-05, 3.35462769e-11, 0],  # no
+        ]
+        assert slice_.pairwise_significance_means_t_stats(0) == pytest.approx(
+            np.array(expected_tstats)
+        )
+        assert slice_.pairwise_significance_means_p_vals(0) == pytest.approx(
+            np.array(expected_pvals)
+        )
+
+    def test_mean_diff_significance_for_mr_x_numeric_array(self):
+        transforms = {"num_array_position": "column"}
+        slice_ = Cube(NA.NUM_ARR_COVARIANCE_X_MR, transforms=transforms).partitions[0]
+
+        expected_tstats = [
+            # -----------------Numeric Array Subvars---------------------------
+            # Avocado    B. Sprout     Carrot      Daikon    Eggplant   Fennel
+            [0.0, -7.96318077, 8.24821549, -4.53583847, -4.03941692, 50.15526798],
+            [0.0, -9.49627637, 33.31887846, 0.66230713, -7.22351994, 59.07543545],
+            [0.0, -9.75417392, 14.34054008, -1.63283976, -5.87288512, 26.45563715],
+        ]
+        expected_pvals = [
+            # -----------------Numeric Array Subvars---------------------------
+            # Avocado    B. Sprout     Carrot      Daikon    Eggplant   Fennel
+            [1, 5.99520433e-15, 6.66133815e-16, 6.66533192e-06, 5.90573064e-05, 0],
+            [1, 0.00000000e00, 0.00000000e00, 5.07976785e-01, 1.24433797e-12, 0],
+            [1, 0.00000000e00, 0.00000000e00, 1.02904225e-01, 6.33065222e-09, 0],
+        ]
+        assert slice_.pairwise_significance_means_t_stats(0) == pytest.approx(
+            np.array(expected_tstats)
+        )
+        assert slice_.pairwise_significance_means_p_vals(0) == pytest.approx(
+            np.array(expected_pvals)
+        )

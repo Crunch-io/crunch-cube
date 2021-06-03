@@ -850,17 +850,26 @@ class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
         t = (x̄1 - x̄2 - μ) √ (N / s2)
         s2 = var1 + var2 - 2 * covar12 - covar12 in this specific case is 0.
         """
-        if self._selected_column_idx < 0:
+        col_idx = self._selected_column_idx
+        if col_idx < 0:
             return np.full(self._cube_measures.cube_stddev.stddev.shape, np.nan)
 
         means = self._cube_measures.cube_means.means
-        variance = np.power(self._cube_measures.cube_stddev.stddev, 2)
         col_bases = self._cube_measures.unweighted_cube_counts.column_bases
-
-        combined_variance = variance[:, self._selected_column_idx] + variance.T
-        diff = means.T - means[:, self._selected_column_idx]
-        n = col_bases[:, self._selected_column_idx] + col_bases.T
-        return diff.T * np.sqrt(n.T / combined_variance.T)
+        diff = means.T - means[:, col_idx]
+        n = col_bases[:, col_idx] + col_bases.T
+        variance = np.power(self._cube_measures.cube_stddev.stddev, 2)
+        try:
+            cube_covariance = self._cube_measures.cube_covariance.covariance
+            covariance = (
+                cube_covariance[:, col_idx]
+                if isinstance(cube_covariance, np.ndarray)
+                else cube_covariance
+            )
+        except ValueError:
+            covariance = 0
+        combined_variance = (variance[:, col_idx] + variance.T).T - (2 * covariance)
+        return diff.T * np.sqrt(n.T / abs(combined_variance))
 
 
 class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
