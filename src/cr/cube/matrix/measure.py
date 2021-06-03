@@ -54,6 +54,11 @@ class SecondOrderMeasures(object):
         return _ColumnShareSum(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def columns_table_margin(self):
+        """_TableMargin1D measure object for this cube-result for columns."""
+        return _TableMargin1D(self._dimensions, self, self._cube_measures, MO.COLUMNS)
+
+    @lazyproperty
     def column_unweighted_bases(self):
         """_ColumnUnweightedBases measure object for this cube-result."""
         return _ColumnUnweightedBases(self._dimensions, self, self._cube_measures)
@@ -222,6 +227,11 @@ class SecondOrderMeasures(object):
         return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
+    def rows_table_margin(self):
+        """_TableMargin1D measure object for this cube-result for rows."""
+        return _TableMargin1D(self._dimensions, self, self._cube_measures, MO.ROWS)
+
+    @lazyproperty
     def sums(self):
         """_Sums measure object for this cube-result"""
         return _Sums(self._dimensions, self, self._cube_measures)
@@ -245,6 +255,11 @@ class SecondOrderMeasures(object):
     def table_std_err(self):
         """_TableStandardError measure object for this cube-result."""
         return _TableStandardError(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def table_margin(self):
+        """_TableMargin scalar object for this cube-result."""
+        return _TableMargin(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def table_unweighted_bases(self):
@@ -1900,7 +1915,7 @@ class _BaseScaledCountMarginal(_BaseMarginal):
 
 
 class _MarginProportion(_BaseMarginal):
-    """The 'proportion-margin' (aka rows-margin-proportion/columns-margin-proportion)"""
+    """The 'margin-proportion' (aka rows-margin-proportion/columns-margin-proportion)"""
 
     @lazyproperty
     def blocks(self):
@@ -1908,15 +1923,10 @@ class _MarginProportion(_BaseMarginal):
 
         These are the base-values and the subtotals.
         """
-        denominator = self._cube_measures.weighted_cube_counts.table_margin
-        base_values = self._proportion_numerators[0] / denominator
-        # --- if insertion numerator is empty (eg no insertions) don't divide ---
-        insertions = (
-            self._proportion_numerators[1]
-            if self._proportion_numerators[1].shape == (0,)
-            else self._proportion_numerators[1] / denominator
-        )
-        return [base_values, insertions]
+        return [
+            self._proportion_numerators[0] / self._proportion_denominators[0],
+            self._proportion_numerators[1] / self._proportion_denominators[1],
+        ]
 
     @lazyproperty
     def is_defined(self):
@@ -1925,7 +1935,7 @@ class _MarginProportion(_BaseMarginal):
 
     @lazyproperty
     def _proportion_numerators(self):
-        """ndarray of counts to be used as numerator for the margin proportions
+        """list of ndarray of counts to be used as numerator for the margin proportions
 
         We want the numerator to exist even along subtotal differences, so we cannot
         use the already defined `rows/columns` margin.
@@ -1944,6 +1954,14 @@ class _MarginProportion(_BaseMarginal):
             counts = [counts[0][0], counts[0][1]]
 
         return [self._apply_along_orientation(np.sum, count) for count in counts]
+
+    @lazyproperty
+    def _proportion_denominators(self):
+        """list of ndarray 1D table margins to be used as denominator"""
+        if self.orientation == MO.ROWS:
+            return self._second_order_measures.rows_table_margin.blocks
+        else:
+            return self._second_order_measures.columns_table_margin.blocks
 
 
 class _ScaleMean(_BaseScaledCountMarginal):
@@ -2191,6 +2209,51 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
         )
 
 
+class _TableMargin1D(_BaseMarginal):
+    """The denominator for margin-proportion
+
+    A consistently 1D form of the table_margin. There are 3 cases:
+
+    - The opposing dimension is an array: There is no 1D representation of the table
+      margin for this orientation, so it is undefined.
+    - The corresponding dimension is an array: There is a unique table margin for each
+      cell. No subtotals are possible on array variables, so the insertion block will
+      always be empty.
+    - Neither dimension is an array: The table margin is a scalar, and needs to repeated
+      into 1D blocks (insertions are possible).
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin."""
+        if not self.is_defined:
+            raise ValueError(
+                "Could not calculate weighted-table-base-margin across subvariables"
+            )
+        if self._second_order_measures.table_margin.is_defined:
+            table_margin = self._second_order_measures.table_margin.value
+            return [np.full(shape, table_margin) for shape in self._shapes]
+        # --- insertions are not possible on arrays, so we know insertion block is empty
+        return [self._cube_measures.weighted_cube_counts.table_margin, np.array([])]
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool indicating whether the margin is defined in this orientation
+
+        True if the opposing dimension is not an array.
+        """
+        dim = 1 if self.orientation == MO.ROWS else 0
+        return self._dimensions[dim].dimension_type not in DT.ARRAY_TYPES
+
+    @lazyproperty
+    def _shapes(self):
+        """Tuple of ints that indicate the sizes of the elements and insertion blocks"""
+        dim = (
+            self._dimensions[0] if self.orientation == MO.ROWS else self._dimensions[1]
+        )
+        return (len(dim.element_ids), len(dim.insertion_ids))
+
+
 class _UnweightedBaseMargin(_BaseMarginal):
     """The unweighted bases margin (sum of unweighted counts)"""
 
@@ -2235,8 +2298,44 @@ class _WeightedBaseMargin(_BaseMarginal):
 
     @lazyproperty
     def is_defined(self):
-        """True if counts are defined."""
+        """True if comparable counts are defined.
+
+        Opposing dimension is not an array. (If opposing dimension is an array, no
+        1D representation of the counts is possible.)
+        """
         return self._counts_are_defined
+
+
+# === SCALARS ====
+
+
+class _TableMargin(object):
+    """The 'table-margin' (sum of all counts when neither variable is an array)"""
+
+    def __init__(self, dimensions, second_order_measures, cube_measures):
+        self._dimensions = dimensions
+        self._second_order_measures = second_order_measures
+        self._cube_measures = cube_measures
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool indicating whether the table-margin is defined
+
+        It is defined (as a scalar) only when neither dimension is an array
+        """
+        return (
+            not self._dimensions[0].dimension_type in DT.ARRAY_TYPES
+            and not self._dimensions[1].dimension_type in DT.ARRAY_TYPES
+        )
+
+    @lazyproperty
+    def value(self):
+        """float of the table-margin"""
+        if not self.is_defined:
+            raise ValueError(
+                "Cannot sum across subvariables dimension to calculate table margin scalar"
+            )
+        return self._cube_measures.weighted_cube_counts.table_margin
 
 
 # === PAIRWISE HELPERS ===

@@ -38,6 +38,8 @@ from cr.cube.matrix.measure import (
     _ScaleMedian,
     SecondOrderMeasures,
     _Sums,
+    _TableMargin,
+    _TableMargin1D,
     _TableProportionVariances,
     _TableProportions,
     _TableStandardError,
@@ -148,6 +150,8 @@ class DescribeSecondOrderMeasures(object):
             ("columns", "columns_scale_mean", _ScaleMean),
             ("rows", "rows_scale_mean_stddev", _ScaleMeanStddev),
             ("columns", "columns_scale_mean_stddev", _ScaleMeanStddev),
+            ("rows", "rows_table_margin", _TableMargin1D),
+            ("columns", "columns_table_margin", _TableMargin1D),
         ),
     )
     def it_provides_access_to_the_marginals(
@@ -175,6 +179,27 @@ class DescribeSecondOrderMeasures(object):
             dimensions_, measures, cube_measures_, MO(orientation)
         )
         assert marginal is marginal_
+
+    def it_provides_access_to_the_table_margin_scalar(
+        self,
+        request,
+        dimensions_,
+        _cube_measures_prop_,
+        cube_measures_,
+    ):
+        table_margin_ = instance_mock(request, _TableMargin)
+        _TableMargin_ = class_mock(
+            request,
+            "cr.cube.matrix.measure._TableMargin",
+            return_value=table_margin_,
+        )
+        _cube_measures_prop_.return_value = cube_measures_
+        measures = SecondOrderMeasures(None, dimensions_, None)
+
+        table_margin = measures.table_margin
+
+        _TableMargin_.assert_called_once_with(dimensions_, measures, cube_measures_)
+        assert table_margin is table_margin_
 
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
@@ -1833,17 +1858,21 @@ class Describe_BaseScaledCountMarginal(object):
 class Describe_MarginProportion(object):
     """Unit test suite for `cr.cube.matrix.measure._MarginProportion` object."""
 
-    def it_provides_blocks(self, request, cube_measures_, weighted_cube_counts_):
+    def it_provides_blocks(self, request):
         property_mock(
             request,
             _MarginProportion,
             "_proportion_numerators",
             return_value=[np.array([2.0, 3.0]), np.array([], dtype=float)],
         )
-        cube_measures_.weighted_cube_counts = weighted_cube_counts_
-        weighted_cube_counts_.table_margin = 5.0
+        property_mock(
+            request,
+            _MarginProportion,
+            "_proportion_denominators",
+            return_value=[np.array([5.0, 5.0]), np.array([], dtype=float)],
+        )
 
-        proportions = _MarginProportion(None, None, cube_measures_, None).blocks
+        proportions = _MarginProportion(None, None, None, None).blocks
 
         assert len(proportions) == 2
         assert proportions[0] == pytest.approx([0.4, 0.6])
@@ -1853,6 +1882,9 @@ class Describe_MarginProportion(object):
         property_mock(request, _BaseMarginal, "_counts_are_defined")
         summed_count = _MarginProportion(None, None, None, None)
         assert summed_count.is_defined == summed_count._counts_are_defined
+
+    def it_provides_the_right_denominator_for_rows(self):
+        pass
 
     def it_provides_the_right_numerator_for_rows(
         self, second_order_measures_, weighted_counts_, _apply_along_orientation_
@@ -1923,16 +1955,8 @@ class Describe_MarginProportion(object):
         )
 
     @pytest.fixture
-    def cube_measures_(self, request):
-        return instance_mock(request, CubeMeasures)
-
-    @pytest.fixture
     def second_order_measures_(self, request):
         return instance_mock(request, SecondOrderMeasures)
-
-    @pytest.fixture
-    def weighted_cube_counts_(self, request):
-        return instance_mock(request, _BaseWeightedCubeCounts)
 
     @pytest.fixture
     def weighted_counts_(self, request):
@@ -2323,6 +2347,120 @@ class Describe_WeightedBaseMargin(object):
         assert summed_count.is_defined == summed_count._counts_are_defined
 
 
+class Describe_TableMargin1D(object):
+    """Unit test suite for `cr.cube.matrix.measure._TableMargin1D` object."""
+
+    def it_provides_blocks_if_scalar_table_margin_defined(
+        self, request, is_defined_prop_, second_order_measures_, table_margin_
+    ):
+        is_defined_prop_.return_value = True
+        second_order_measures_.table_margin = table_margin_
+        table_margin_.is_defined = True
+        table_margin_.value = 1.0
+        property_mock(request, _TableMargin1D, "_shapes", return_value=(2, 3))
+        table_margin1d = _TableMargin1D(None, second_order_measures_, None, None)
+
+        results = table_margin1d.blocks
+
+        assert results[0].tolist() == [1.0, 1.0]
+        assert results[1].tolist() == [1.0, 1.0, 1.0]
+
+    def and_it_provides_blocks_if_vector_table_margin(
+        self,
+        is_defined_prop_,
+        cube_measures_,
+        second_order_measures_,
+        table_margin_,
+        weighted_cube_counts_,
+    ):
+        is_defined_prop_.return_value = True
+        second_order_measures_.table_margin = table_margin_
+        table_margin_.is_defined = False
+        cube_measures_.weighted_cube_counts = weighted_cube_counts_
+        weighted_cube_counts_.table_margin = [1.0, 2.0]
+        table_margin1d = _TableMargin1D(
+            None, second_order_measures_, cube_measures_, None
+        )
+
+        results = table_margin1d.blocks
+
+        assert results[0] == [1.0, 2.0]
+        assert results[1].tolist() == []
+
+    def but_it_raises_if_undefined(self, is_defined_prop_):
+        is_defined_prop_.return_value = False
+
+        with pytest.raises(ValueError) as e:
+            _TableMargin1D(None, None, None, None).blocks
+
+        assert (
+            str(e.value)
+            == "Could not calculate weighted-table-base-margin across subvariables"
+        )
+
+    @pytest.mark.parametrize(
+        "row_dim_type, col_dim_type, orientation, expected",
+        (
+            (DT.CAT, DT.CAT, MO.ROWS, True),
+            (DT.CAT, DT.CAT, MO.COLUMNS, True),
+            (DT.NUM_ARRAY, DT.CAT, MO.ROWS, True),
+            (DT.NUM_ARRAY, DT.CAT, MO.COLUMNS, False),
+            (DT.CAT, DT.CA_SUBVAR, MO.ROWS, False),
+            (DT.CAT, DT.CA_SUBVAR, MO.COLUMNS, True),
+            (DT.CAT, DT.MR, MO.ROWS, False),
+        ),
+    )
+    def it_can_tell_if_it_is_defined(
+        self, dimensions_, row_dim_type, col_dim_type, orientation, expected
+    ):
+        dimensions_[0].dimension_type = row_dim_type
+        dimensions_[1].dimension_type = col_dim_type
+
+        table_margin1d = _TableMargin1D(dimensions_, None, None, orientation)
+
+        assert table_margin1d.is_defined == expected
+
+    def it_knows_its_shapes_for_rows_orientation(self, dimensions_):
+        dimensions_[0].element_ids = (1, 2)
+        dimensions_[0].insertion_ids = (-1, -2, -3)
+        table_margin1d = _TableMargin1D(dimensions_, None, None, MO.ROWS)
+
+        assert table_margin1d._shapes == (2, 3)
+
+    def it_knows_its_shapes_for_columns_orientation(self, dimensions_):
+        dimensions_[1].element_ids = (1, 2, 3)
+        dimensions_[1].insertion_ids = tuple()
+        table_margin1d = _TableMargin1D(dimensions_, None, None, MO.COLUMNS)
+
+        assert table_margin1d._shapes == (3, 0)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_measures_(self, request):
+        return instance_mock(request, CubeMeasures)
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def is_defined_prop_(self, request):
+        return property_mock(request, _TableMargin1D, "is_defined")
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
+
+    @pytest.fixture
+    def table_margin_(self, request):
+        return instance_mock(request, _TableMargin)
+
+    @pytest.fixture
+    def weighted_cube_counts_(self, request):
+        return instance_mock(request, _BaseWeightedCubeCounts)
+
+
 class Describe_UnweightedBaseMargin(object):
     """Unit test suite for `cr.cube.matrix.measure._UnweightedBaseMargin` object."""
 
@@ -2402,3 +2540,56 @@ class Describe_UnweightedBaseMargin(object):
     @pytest.fixture
     def second_order_measures_(self, request):
         return instance_mock(request, SecondOrderMeasures)
+
+
+# === Scalars ===
+
+
+class Describe_TableMargin(object):
+    """Unit test suite for `cr.cube.matrix.measure._TableMargin` object."""
+
+    @pytest.mark.parametrize(
+        "row_dim_type, col_dim_type, expected",
+        (
+            (DT.CAT, DT.CAT, True),
+            (DT.CAT, DT.NUM_ARRAY, False),
+            (DT.CA_SUBVAR, DT.CAT, False),
+            (DT.CAT, DT.MR, False),
+        ),
+    )
+    def it_knows_if_it_is_defined(self, request, row_dim_type, col_dim_type, expected):
+        dimensions_ = (
+            instance_mock(request, Dimension, dimension_type=row_dim_type),
+            instance_mock(request, Dimension, dimension_type=col_dim_type),
+        )
+
+        assert _TableMargin(dimensions_, None, None).is_defined == expected
+
+    def it_provides_its_value(self, request, is_defined_prop_):
+        is_defined_prop_.return_value = True
+        weighted_cube_counts_ = instance_mock(
+            request, _BaseWeightedCubeCounts, table_margin=2.0
+        )
+        cube_measures_ = instance_mock(
+            request, CubeMeasures, weighted_cube_counts=weighted_cube_counts_
+        )
+        table_margin = _TableMargin(None, None, cube_measures_)
+
+        assert table_margin.value == 2.0
+
+    def but_it_raises_if_it_is_not_defined(self, is_defined_prop_):
+        is_defined_prop_.return_value = False
+
+        with pytest.raises(ValueError) as e:
+            _TableMargin(None, None, None).value
+
+        assert (
+            str(e.value)
+            == "Cannot sum across subvariables dimension to calculate table margin scalar"
+        )
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def is_defined_prop_(self, request):
+        return property_mock(request, _TableMargin, "is_defined")
