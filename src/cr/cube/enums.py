@@ -112,6 +112,7 @@ class MEASURE(enum.Enum):
     ROW_SHARE_SUM = "row_share_sum"
     ROW_STDDEV = "row_std_dev"
     ROW_STDERR = "row_std_err"
+    STDDEV = "stddev"
     SUM = "sum"
     TABLE_BASE_UNWEIGHTED = "table_base_unweighted"
     TABLE_BASE_WEIGHTED = "table_base_weighted"
@@ -121,7 +122,9 @@ class MEASURE(enum.Enum):
     TABLE_STDERR = "table_std_err"
     TOTAL_SHARE_SUM = "total_share_sum"
     UNWEIGHTED_COUNT = "count_unweighted"
+    UNWEIGHTED_VALID_COUNT = "unweighted_valid_count"
     WEIGHTED_COUNT = "count_weighted"
+    WEIGHTED_VALID_COUNT = "weighted_valid_count"
     Z_SCORE = "z_score"
 
 
