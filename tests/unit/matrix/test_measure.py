@@ -1979,8 +1979,27 @@ class Describe_MarginTableProportion(object):
         margin_proportion = _MarginTableProportion(None, None, None, None)
         assert margin_proportion.is_defined == margin_proportion._counts_are_defined
 
-    def it_provides_the_right_denominator_for_rows(self):
-        pass
+    def it_provides_the_right_denominator_for_rows(
+        self,
+        second_order_measures_,
+        table_margin_1d_,
+    ):
+        second_order_measures_.rows_table_margin = table_margin_1d_
+        table_margin_1d_.blocks = [[1, 2], [3, 4]]
+        margin = _MarginProportion(None, second_order_measures_, None, MO.ROWS)
+
+        assert margin._proportion_denominators == [[1, 2], [3, 4]]
+
+    def it_provides_the_right_denominator_for_columns(
+        self,
+        second_order_measures_,
+        table_margin_1d_,
+    ):
+        second_order_measures_.columns_table_margin = table_margin_1d_
+        table_margin_1d_.blocks = [[1, 2], [3, 4]]
+        margin = _MarginProportion(None, second_order_measures_, None, MO.COLUMNS)
+
+        assert margin._proportion_denominators == [[1, 2], [3, 4]]
 
     def it_provides_the_right_numerator_for_rows(
         self, second_order_measures_, weighted_counts_, _apply_along_orientation_
@@ -2053,6 +2072,10 @@ class Describe_MarginTableProportion(object):
     @pytest.fixture
     def second_order_measures_(self, request):
         return instance_mock(request, SecondOrderMeasures)
+
+    @pytest.fixture
+    def table_margin_1d_(self, request):
+        return instance_mock(request, _TableMargin1D)
 
     @pytest.fixture
     def weighted_counts_(self, request):
@@ -2157,11 +2180,42 @@ class Describe_ScaleMean(object):
 class Describe_ScaleMeanStddev(object):
     """Unit test suite for `cr.cube.matrix.measure._ScaleMeanStddev` object."""
 
-    def it_provides_blocks_for_rows(self, request):
-        pass
+    def it_provides_blocks(self, request, is_defined_prop_):
+        is_defined_prop_.return_value = True
+        _rows_weighted_mean_stddev_ = method_mock(
+            request, _ScaleMeanStddev, "_rows_weighted_mean_stddev"
+        )
+        property_mock(
+            request,
+            _ScaleMeanStddev,
+            "_stddev_func",
+            return_value=_rows_weighted_mean_stddev_,
+        )
+        property_mock(
+            request, _ScaleMeanStddev, "_opposing_numeric_values", return_value=[1, 2]
+        )
+        property_mock(request, _ScaleMeanStddev, "_counts", return_value=["a", "b"])
+        property_mock(
+            request, _ScaleMeanStddev, "_scale_means", return_value=["c", "d"]
+        )
 
-    def but_blocks_raises_if_undefined(self, request):
-        property_mock(request, _ScaleMeanStddev, "is_defined", return_value=False)
+        marginal = _ScaleMeanStddev(None, None, None, None).blocks
+
+        assert _rows_weighted_mean_stddev_.call_args_list == [
+            call(
+                "a",
+                [1, 2],
+                "c",
+            ),
+            call(
+                "b",
+                [1, 2],
+                "d",
+            ),
+        ]
+
+    def but_blocks_raises_if_undefined(self, is_defined_prop_):
+        is_defined_prop_.return_value = False
 
         with pytest.raises(ValueError) as e:
             _ScaleMeanStddev(None, None, None, MO.ROWS).blocks
@@ -2249,6 +2303,12 @@ class Describe_ScaleMeanStddev(object):
         )
 
         assert result.tolist() == pytest.approx(expected, nan_ok=True)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def is_defined_prop_(self, request):
+        return property_mock(request, _ScaleMeanStddev, "is_defined")
 
 
 class Describe_ScaleMedian(object):
