@@ -19,6 +19,7 @@ from __future__ import division
 
 import math
 import numpy as np
+from tabulate import tabulate
 
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
@@ -247,6 +248,29 @@ class _Slice(CubePartition):
         self._slice_idx = slice_idx
         self._population = population
         self._mask_size = mask_size
+
+    def __repr__(self):
+        """Provide text representation suitable for working at console.
+
+        Falls back to a default repr on exception, such as might occur in
+        unit tests where object need not otherwise be provided with all
+        instance variable values.
+        """
+        try:
+            dimensionality = " x ".join(dt.name for dt in self.dimension_types)
+            title = "%s(name='%s', dimension_types='%s')" % (
+                type(self).__name__,
+                self.name,
+                dimensionality,
+            )
+            headers = [""] + self.column_labels.tolist()
+            table = [
+                [row_label] + row.tolist()
+                for row_label, row in zip(self.row_labels, self.counts)
+            ]
+            return title + "\n" + tabulate(table, headers)
+        except Exception:
+            return super(_Slice, self).__repr__()
 
     # ---interface ---------------------------------------------------
 
@@ -1334,6 +1358,27 @@ class _Strand(CubePartition):
         self._ca_as_0th = ca_as_0th
         self._slice_idx = slice_idx
         self._mask_size = mask_size
+
+    def __repr__(self):
+        """Provide text representation suitable for working at console.
+
+        Falls back to a default repr on exception, such as might occur in
+        unit tests where object need not otherwise be provided with all
+        instance variable values.
+        """
+        try:
+            title = "%s(name='%s', dimension_type='%s')" % (
+                type(self).__name__,
+                self.name,
+                self.dimension_types[0].name,
+            )
+            headers = ["", self.name]
+            table = [
+                [row_label, row] for row_label, row in zip(self.row_labels, self.counts)
+            ]
+            return title + "\n" + tabulate(table, headers)
+        except Exception:
+            return super(_Slice, self).__repr__()
 
     @lazyproperty
     def counts(self):

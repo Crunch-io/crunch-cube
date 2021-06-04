@@ -135,6 +135,13 @@ class Describe_Slice(object):
         )
         assert slice_.unweighted_counts.tolist() == [[5, 2], [5, 3]]
         assert slice_.variable_name == "v7"
+        assert str(slice_) == (
+            "_Slice(name='v4', dimension_types='CAT x CAT')\n"
+            "      C    E\n"
+            "--  ---  ---\n"
+            "B     5    2\n"
+            "C     5    3"
+        )
 
     def it_provides_values_for_cat_hs_mt_x_cat_hs_mt(self):
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, population=1000).partitions[0]
@@ -1694,6 +1701,13 @@ class Describe_Strand(object):
         assert strand.unweighted_counts.tolist() == [10, 5]
         assert strand.variable_name == "v7"
         assert strand.weighted_bases == pytest.approx([15.0, 15.0])
+        assert str(strand) == (
+            "_Strand(name='v7', dimension_type='CAT')\n"
+            "      v7\n"
+            "--  ----\n"
+            "C     10\n"
+            "E      5"
+        )
 
     def it_provides_values_for_univariate_cat_means_hs(self):
         strand = Cube(CR.CAT_MEANS_HS).partitions[0]
