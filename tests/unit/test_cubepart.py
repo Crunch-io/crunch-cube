@@ -297,6 +297,21 @@ class Describe_Slice(object):
 
         assert slice_.population_counts == pytest.approx(0.6)
 
+    def population_counts_moe(
+        self,
+        cube_,
+        _assembler_prop_,
+        assembler_,
+    ):
+        assembler_.population_std_err = 0.3
+        _assembler_prop_.return_value = assembler_
+        cube_.population_fraction = 0.1
+        population = 20
+
+        slice_ = _Slice(cube_, None, None, population, None)
+
+        assert slice_.population_counts == pytest.approx(0.6 * 1.959964)
+
     def it_provides_the_secondary_scale_mean_pairwise_indices(
         self, _alpha_alt_prop_, _only_larger_prop_, PairwiseSignificance_
     ):
