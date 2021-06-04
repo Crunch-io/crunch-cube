@@ -1160,20 +1160,51 @@ class Describe_BaseOrderHelper(object):
 
         assert order_helper._empty_row_idxs == expected_value
 
-    def it_retrieves_the_measure_object_to_help(self, request):
+    @pytest.mark.parametrize(
+        "json_name, internal_name",
+        (
+            ("col_base_unweighted", "column_unweighted_bases"),
+            ("col_base_weighted", "column_weighted_bases"),
+            ("col_index", "column_index"),
+            ("col_percent", "column_proportions"),
+            ("col_percent_moe", "column_std_err"),
+            ("col_std_dev", "column_proportion_variances"),
+            ("col_std_err", "column_std_err"),
+            ("count_unweighted", "unweighted_counts"),
+            ("count_weighted", "weighted_counts"),
+            ("mean", "means"),
+            ("population", "population_proportions"),
+            ("population_moe", "population_std_err"),
+            ("p_value", "pvalues"),
+            ("row_base_unweighted", "row_unweighted_bases"),
+            ("row_base_weighted", "row_weighted_bases"),
+            ("row_percent", "row_proportions"),
+            ("row_percent_moe", "row_std_err"),
+            ("row_std_dev", "row_proportion_variances"),
+            ("row_std_err", "row_std_err"),
+            ("table_base_unweighted", "table_unweighted_bases"),
+            ("table_base_weighted", "table_weighted_bases"),
+            ("table_percent", "table_proportions"),
+            ("table_percent_moe", "table_std_err"),
+            ("table_std_dev", "table_proportion_variances"),
+            ("table_std_err", "table_std_err"),
+            ("z_score", "zscores"),
+        ),
+    )
+    def it_retrieves_the_measure_object_to_help(
+        self, request, second_order_measures_, json_name, internal_name
+    ):
         property_mock(
             request,
             _BaseOrderHelper,
             "_order_spec",
-            return_value=instance_mock(request, _OrderSpec, measure=M.COLUMN_PERCENT),
+            return_value=instance_mock(request, _OrderSpec, measure=M(json_name)),
         )
-        column_proportions_ = instance_mock(request, _ColumnProportions)
-        second_order_measures_ = instance_mock(
-            request, SecondOrderMeasures, column_proportions=column_proportions_
-        )
+        measure_ = instance_mock(request, _BaseSecondOrderMeasure)
+        setattr(second_order_measures_, internal_name, measure_)
         order_helper = _BaseOrderHelper(None, second_order_measures_)
 
-        assert order_helper._measure is column_proportions_
+        assert order_helper._measure is measure_
 
     def it_provides_access_to_the_rows_dimension_to_help(self, dimension_):
         order_helper = _BaseOrderHelper((dimension_, None), None)

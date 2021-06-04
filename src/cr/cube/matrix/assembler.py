@@ -955,19 +955,33 @@ class _BaseOrderHelper(object):
 
         This property is not used by some subclasses.
         """
+        # --- Sometimes we sort by a measure that is a monotonic transformation of
+        # --- another measure that is already calculated by the assembler. Because
+        # --- monotonic transformations preserve order, the sorting is correct.
         propname_by_measure = {
             M.COLUMN_BASE_UNWEIGHTED: "column_unweighted_bases",
             M.COLUMN_BASE_WEIGHTED: "column_weighted_bases",
             M.COLUMN_INDEX: "column_index",
             M.COLUMN_PERCENT: "column_proportions",
+            M.COLUMN_PERCENT_MOE: "column_std_err",  # monotonic transform
+            M.COLUMN_STDDEV: "column_proportion_variances",  # monotonic transform
+            M.COLUMN_STDERR: "column_std_err",
             M.MEAN: "means",
-            M.POPULATION: "population_proportions",
+            M.POPULATION: "population_proportions",  # montonic transform
+            M.POPULATION_MOE: "population_std_err",  # monotonic transform
+            M.PVALUES: "pvalues",
             M.ROW_BASE_UNWEIGHTED: "row_unweighted_bases",
             M.ROW_BASE_WEIGHTED: "row_weighted_bases",
             M.ROW_PERCENT: "row_proportions",
-            M.TABLE_PERCENT: "table_proportions",
+            M.ROW_PERCENT_MOE: "row_std_err",  # monotonic transform
+            M.ROW_STDDEV: "row_proportion_variances",  # montonic transform
+            M.ROW_STDERR: "row_std_err",
             M.TABLE_BASE_UNWEIGHTED: "table_unweighted_bases",
             M.TABLE_BASE_WEIGHTED: "table_weighted_bases",
+            M.TABLE_PERCENT: "table_proportions",
+            M.TABLE_PERCENT_MOE: "table_std_err",  # monotonic transform
+            M.TABLE_STDDEV: "table_proportion_variances",  # monotonic transform
+            M.TABLE_STDERR: "table_std_err",
             M.UNWEIGHTED_COUNT: "unweighted_counts",
             M.WEIGHTED_COUNT: "weighted_counts",
             M.Z_SCORE: "zscores",
@@ -1219,6 +1233,7 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
             MARGINAL.MARGIN_PROPORTION: "rows_table_proportion",
             MARGINAL.SCALE_MEAN: "rows_scale_mean",
             MARGINAL.SCALE_MEAN_STDDEV: "rows_scale_mean_stddev",
+            MARGINAL.SCALE_MEAN_STDERR: "rows_scale_mean_stderr",
             MARGINAL.SCALE_MEDIAN: "rows_scale_median",
         }.get(marginal)
 
