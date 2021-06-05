@@ -65,6 +65,8 @@ from cr.cube.matrix.measure import (
     _UnweightedCounts,
     _WeightedCounts,
     _Zscores,
+    _PairwiseSigPvalsScaleMeans,
+    _PairwiseSigTstatsScaleMeans,
 )
 
 from ...unitutil import ANY, call, class_mock, instance_mock, method_mock, property_mock
@@ -255,13 +257,57 @@ class DescribeSecondOrderMeasures:
         )
         _cube_measures_prop_.return_value = cube_measures_
         second_order_measures = SecondOrderMeasures(None, dimensions_, None)
-        col_idx = 0
+        column_dimension = dimensions_[-1]
 
         pairwise_sig_measure = getattr(second_order_measures, measure_prop_name)
 
-        assert pairwise_sig_measure(col_idx) is measure_
+        assert pairwise_sig_measure is measure_
+
         MeasureCls_.assert_called_once_with(
-            dimensions_, second_order_measures, cube_measures_, False
+            dimensions_,
+            second_order_measures,
+            cube_measures_,
+            column_dimension.pairwise_significance_spec.reference_insertion_idx,
+            column_dimension.pairwise_significance_spec.reference_column_idx,
+        )
+
+    @pytest.mark.parametrize(
+        "measure_prop_name, MeasureCls",
+        (
+            ("pairwise_p_vals_scale_means", _PairwiseSigPvalsScaleMeans),
+            ("pairwise_t_stats_scale_means", _PairwiseSigTstatsScaleMeans),
+        ),
+    )
+    def it_provides_access_to_pairwise_significance_scale_means_measure_objects(
+        self,
+        request,
+        dimensions_,
+        _cube_measures_prop_,
+        cube_measures_,
+        measure_prop_name,
+        MeasureCls,
+    ):
+        measure_ = instance_mock(request, MeasureCls)
+        MeasureCls_ = class_mock(
+            request,
+            "cr.cube.matrix.measure.%s" % MeasureCls.__name__,
+            return_value=measure_,
+        )
+        _cube_measures_prop_.return_value = cube_measures_
+        second_order_measures = SecondOrderMeasures(None, dimensions_, None)
+        column_dimension = dimensions_[-1]
+
+        pairwise_sig_measure = getattr(second_order_measures, measure_prop_name)
+
+        assert pairwise_sig_measure is measure_
+
+        MeasureCls_.assert_called_once_with(
+            dimensions_,
+            second_order_measures,
+            cube_measures_,
+            MO.COLUMNS,
+            column_dimension.pairwise_significance_spec.reference_insertion_idx,
+            column_dimension.pairwise_significance_spec.reference_column_idx,
         )
 
     # fixture components ---------------------------------------------
@@ -709,7 +755,7 @@ class Describe_PairwiseMeansSigPvals:
         cube_measures_ = instance_mock(request, CubeMeasures)
         cube_measures_.cube_stddev = cube_std_dev_
         cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
-        pairwise_pvals = _PairwiseMeansSigPVals(None, None, cube_measures_, 0)
+        pairwise_pvals = _PairwiseMeansSigPVals(None, None, cube_measures_, None, 0)
 
         assert pairwise_pvals._df == pytest.approx(np.array([[44, 37.8554]]))
 
@@ -733,7 +779,7 @@ class Describe_PairwiseMeansSigTStats:
         cube_measures_.cube_means = cube_means_
         cube_measures_.cube_stddev = cube_std_dev_
         cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
-        pairwise_tstat = _PairwiseMeansSigTStats(None, None, cube_measures_, 0)
+        pairwise_tstat = _PairwiseMeansSigTStats(None, None, cube_measures_, None, 0)
 
         assert pairwise_tstat.t_stats == pytest.approx(np.array([[0, 2.310889]]))
 
@@ -746,7 +792,7 @@ class Describe_PairwiseSigTstats:
         property_mock(request, _PairwiseSigTstats, "_subtotal_columns", return_value=2)
         property_mock(request, _PairwiseSigTstats, "_subtotal_rows", return_value=3)
         property_mock(request, _PairwiseSigTstats, "_intersections", return_value=4)
-        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None, None)
 
         assert pairwise_tstat.blocks == [[1, 2], [3, 4]]
 
@@ -757,7 +803,7 @@ class Describe_PairwiseSigTstats:
         _proportions_prop_.return_value = [[0.5, 0.6], [0.7, 0.8]]
         _reference_values_.return_value = [9, 0]
         _calculate_t_stats_.return_value = "tstat"
-        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None, None)
 
         base_values = pairwise_tstat._base_values
 
@@ -767,12 +813,14 @@ class Describe_PairwiseSigTstats:
 
     def it_provides_the_bases_to_help(self, second_order_measures_):
         second_order_measures_.column_unweighted_bases.blocks = [1, 2]
-        pairwise_tstat = _PairwiseSigTstats(None, second_order_measures_, None, None)
+        pairwise_tstat = _PairwiseSigTstats(
+            None, second_order_measures_, None, None, None
+        )
 
         assert pairwise_tstat._bases == [1, 2]
 
     def it_can_calculate_the_t_stat_to_help(self):
-        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None, None)
 
         actual = pairwise_tstat._calculate_t_stats(
             np.array([[0.5, 0.3, 0.1], [0.5, 0.7, 0.9]]),
@@ -795,7 +843,7 @@ class Describe_PairwiseSigTstats:
         )
 
     def but_tstat_calculation_is_ok_with_empty_inputs(self):
-        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None, None)
 
         actual = pairwise_tstat._calculate_t_stats(
             np.array([[]]),
@@ -813,7 +861,7 @@ class Describe_PairwiseSigTstats:
         _proportions_prop_.return_value = [[0.5, 0.6], [0.7, 0.8]]
         _reference_values_.return_value = [9, 0]
         _calculate_t_stats_.return_value = "tstat"
-        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None, None)
 
         base_values = pairwise_tstat._intersections
 
@@ -823,22 +871,30 @@ class Describe_PairwiseSigTstats:
 
     def it_provides_the_proportions_to_help(self, second_order_measures_):
         second_order_measures_.column_proportions.blocks = [1, 2]
-        pairwise_tstat = _PairwiseSigTstats(None, second_order_measures_, None, None)
+        pairwise_tstat = _PairwiseSigTstats(
+            None, second_order_measures_, None, None, None
+        )
 
         assert pairwise_tstat._proportions == [1, 2]
 
     @pytest.mark.parametrize(
-        "col_index, block_index, expected",
+        "insertion_index, col_index, block_index, expected",
         (
-            (0, 0, ("0", "2")),
-            (1, 0, ("1", "3")),
-            (1, 1, ("10", "12")),
-            (-1, 0, ("6", "8")),
-            (-2, 1, ("13", "15")),
+            (None, 0, 0, ("0", "2")),
+            (None, 1, 0, ("1", "3")),
+            (None, 1, 1, ("10", "12")),
+            (1, None, 0, ("6", "8")),
+            (0, None, 1, ("13", "15")),
         ),
     )
     def it_can_calculate_the_reference_values_to_help(
-        self, _bases_prop_, _proportions_prop_, col_index, block_index, expected
+        self,
+        _bases_prop_,
+        _proportions_prop_,
+        insertion_index,
+        col_index,
+        block_index,
+        expected,
     ):
         _bases_prop_.return_value = [
             [
@@ -860,7 +916,9 @@ class Describe_PairwiseSigTstats:
                 np.array([["p13", "p14"], ["p15", "p16"]]),
             ],
         ]
-        pairwise_tstat = _PairwiseSigTstats(None, None, None, col_index)
+        pairwise_tstat = _PairwiseSigTstats(
+            None, None, None, insertion_index, col_index
+        )
 
         actual = pairwise_tstat._reference_values(block_index)
 
@@ -874,7 +932,7 @@ class Describe_PairwiseSigTstats:
         _proportions_prop_.return_value = [[0.5, 0.6], [0.7, 0.8]]
         _reference_values_.return_value = [9, 0]
         _calculate_t_stats_.return_value = "tstat"
-        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None, None)
 
         base_values = pairwise_tstat._subtotal_columns
 
@@ -889,7 +947,7 @@ class Describe_PairwiseSigTstats:
         _proportions_prop_.return_value = [[0.5, 0.6], [0.7, 0.8]]
         _reference_values_.return_value = [9, 0]
         _calculate_t_stats_.return_value = "tstat"
-        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None, None)
 
         base_values = pairwise_tstat._subtotal_rows
 

@@ -17,6 +17,7 @@ from cr.cube.dimension import (
     _Element,
     _ElementTransforms,
     _OrderSpec,
+    _PairwiseSignificanceSpec,
     _RawDimension,
     _Subtotal,
     _Subtotals,
@@ -605,6 +606,21 @@ class DescribeDimension:
 
         _OrderSpec_.assert_called_once_with(dimension, dimension_transforms)
         assert order_spec is order_spec_
+
+    def it_provides_access_to_the_pairwise_significance_spec(self, request):
+        pw_sig_spec_ = instance_mock(request, _PairwiseSignificanceSpec)
+        _PwSigSpec_ = class_mock(
+            request,
+            "cr.cube.dimension._PairwiseSignificanceSpec",
+            return_value=pw_sig_spec_,
+        )
+        dimension_transforms = {"dim": "xfrms"}
+        dimension = Dimension(None, None, dimension_transforms)
+
+        pw_sig_spec = dimension.pairwise_significance_spec
+
+        _PwSigSpec_.assert_called_once_with(dimension, dimension_transforms)
+        assert pw_sig_spec is pw_sig_spec_
 
     @pytest.mark.parametrize(
         "dim_transforms, expected_value",
@@ -1528,6 +1544,187 @@ class Describe_OrderSpec:
     @pytest.fixture
     def _order_dict_prop_(self, request):
         return property_mock(request, _OrderSpec, "_order_dict")
+
+
+class Describe_PairwiseSignificanceSpec(object):
+    @pytest.mark.parametrize(
+        "dim_transforms, expected_value",
+        (
+            ({}, {}),
+            ({"pairwise_significance": None}, {}),
+            ({"pairwise_significance": {}}, {}),
+            (
+                {
+                    "pairwise_significance": {
+                        "column_significance": {"insertion_id": "foo"}
+                    }
+                },
+                {"column_significance": {"insertion_id": "foo"}},
+            ),
+            (
+                {"pairwise_significance": {"column_significance": {"column": 0}}},
+                {"column_significance": {"column": 0}},
+            ),
+        ),
+    )
+    def it_provides_access_to_the_pairwise_sig_dict_to_help(
+        self, dim_transforms, expected_value
+    ):
+        assert (
+            _PairwiseSignificanceSpec(None, dim_transforms)._pairwise_sig_dict
+            == expected_value
+        )
+
+    def it_knows_the_insertion_id(self):
+        dim_transforms = {
+            "pairwise_significance": {"column_significance": {"insertion_id": "foo"}}
+        }
+        pw_sig_spec = _PairwiseSignificanceSpec(None, dim_transforms)
+
+        insertion_id = pw_sig_spec._insertion_id
+
+        assert insertion_id == "foo"
+
+    @pytest.mark.parametrize(
+        "col_sig_dict, expected_value", (({"element_id": 0}, 0), (None, None))
+    )
+    def it_knows_the_column_idx(self, col_sig_dict, expected_value):
+        dim_transforms = {
+            "pairwise_significance": {"column_significance": col_sig_dict}
+        }
+        pw_sig_spec = _PairwiseSignificanceSpec(None, dim_transforms)
+
+        column_idx = pw_sig_spec.reference_column_idx
+
+        assert column_idx == expected_value
+
+    @pytest.mark.parametrize(
+        "col_sig_dict, expected_value",
+        (
+            ({"insertion_id": 3}, 2),
+            ({"insertion_id": 1}, 0),
+            ({"element_id": 1}, None),
+            ({}, None),
+            (None, None),
+        ),
+    )
+    def it_knows_the_insertion_idx(self, request, col_sig_dict, expected_value):
+        dim_transforms = {
+            "pairwise_significance": {"column_significance": col_sig_dict}
+        }
+        dimension_ = instance_mock(request, Dimension)
+        dimension_.insertion_ids = (1, 2, 3)
+        pw_sig_spec = _PairwiseSignificanceSpec(dimension_, dim_transforms)
+
+        insertion_idx = pw_sig_spec.reference_insertion_idx
+
+        assert insertion_idx == expected_value
+
+    @pytest.mark.parametrize(
+        "pw_indices_dict, expected_value",
+        (
+            # --- default value is .05 ---
+            ({}, (0.05, None)),
+            ({"alpha": {}}, (0.05, None)),
+            ({"alpha": []}, (0.05, None)),
+            # --- scalar (float) value sets alpha and sets alpha_alt to None ---
+            ({"alpha": 0.025}, (0.025, None)),
+            # --- single (float) value sets alpha and sets alpha_alt to None ---
+            ({"alpha": [0.03]}, (0.03, None)),
+            # --- two values sets alpha to lesser and alpha_alt to greater ---
+            ({"alpha": [0.07, 0.03]}, (0.03, 0.07)),
+            # --- third and later values are ignored ---
+            ({"alpha": (0.07, 0.03, "foobar")}, (0.03, 0.07)),
+        ),
+    )
+    def it_interprets_the_provided_alpha_values_to_help(
+        self, request, pw_indices_dict, expected_value
+    ):
+        dim_transforms = {
+            "pairwise_significance": {"pairwise_indices": pw_indices_dict}
+        }
+        dimension_ = instance_mock(request, Dimension)
+        pw_sig_spec = _PairwiseSignificanceSpec(dimension_, dim_transforms)
+
+        alpha_values = pw_sig_spec.alpha_values
+
+        assert alpha_values == expected_value
+
+    @pytest.mark.parametrize(
+        "pw_indices_dict, exception_type, expected_message",
+        (
+            # --- type errors ---
+            (
+                {"alpha": {"al": "pha"}},
+                TypeError,
+                "transforms.pairwise_indices.alpha, when defined, must be a list of 1 "
+                "or 2 float values between 0.0 and 1.0 exclusive. Got %s"
+                % repr({"al": "pha"}),
+            ),
+            (
+                {"alpha": "0.05"},
+                TypeError,
+                "transforms.pairwise_indices.alpha, when defined, must be a list of 1 "
+                "or 2 float values between 0.0 and 1.0 exclusive. Got %s"
+                % repr("0.05"),
+            ),
+            # --- scalar out-of-range errors ---
+            (
+                {"alpha": -0.1},
+                ValueError,
+                "alpha value, when provided, must be between 0.0 and 1.0 exclusive. "
+                "Got %s" % repr(-0.1),
+            ),
+            (
+                {"alpha": 1.0},
+                ValueError,
+                "alpha value, when provided, must be between 0.0 and 1.0 exclusive. "
+                "Got %s" % repr(1.0),
+            ),
+            # --- sequence value errors ---
+            (
+                {"alpha": [0.01, ".05"]},
+                ValueError,
+                "transforms.pairwise_indices.alpha must be a list of 1 or 2 float "
+                "values between 0.0 and 1.0 exclusive. Got %s" % repr([0.01, ".05"]),
+            ),
+        ),
+    )
+    def but_it_raises_on_invalid_alpha_values(
+        self, request, pw_indices_dict, exception_type, expected_message
+    ):
+        dim_transforms = {
+            "pairwise_significance": {"pairwise_indices": pw_indices_dict}
+        }
+        dimension_ = instance_mock(request, Dimension)
+        pw_sig_spec = _PairwiseSignificanceSpec(dimension_, dim_transforms)
+
+        with pytest.raises(exception_type) as e:
+            pw_sig_spec.alpha_values
+
+        assert str(e.value) == expected_message
+
+    @pytest.mark.parametrize(
+        "pw_indices_dict, expected_value",
+        (
+            # --- default value is True ---
+            ({}, True),
+            ({"only_larger": "foobar"}, True),
+            ({"only_larger": False}, False),
+        ),
+    )
+    def it_knows_the_only_larger_flag_state_to_help(
+        self, request, pw_indices_dict, expected_value
+    ):
+        dim_transforms = {
+            "pairwise_significance": {"pairwise_indices": pw_indices_dict}
+        }
+        dimension_ = instance_mock(request, Dimension)
+        pw_sig_spec = _PairwiseSignificanceSpec(dimension_, dim_transforms)
+
+        only_larger = pw_sig_spec.only_larger
+
+        assert only_larger == expected_value
 
 
 class Describe_Subtotals:

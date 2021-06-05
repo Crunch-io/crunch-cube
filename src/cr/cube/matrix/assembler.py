@@ -277,42 +277,63 @@ class Assembler:
         """
         return self._assemble_matrix(self._measures.means.blocks)
 
-    def pairwise_indices(self, alpha, only_larger):
-        """2D optional ndarray of tuple of int column-idxs pairwise-t threshold.
+    @lazyproperty
+    def pairwise_indices(self):
+        """2D ndarray of tuple of int column-idxs pairwise-t threshold."""
+        indices_matrix = (
+            self._measures.pairwise_indices_for_subvar.values
+            if self._cube.has_overlaps
+            else self._measures.pairwise_indices.values
+        )
+        return self._assemble_matrix(self._remap_indices(indices_matrix))
 
-        Raises `ValueError if the cube-result does not include `overlaps` cube-measures.
+    @lazyproperty
+    def pairwise_indices_alt(self):
+        """Optional 2D ndarray of tuple of int column-idxs pairwise-t alt threshold.
+
+        Represents the pairwise significance array of tuples considering the alternative
+        threshold value.
         """
-        return np.array(
-            [
-                self._pairwise_indices(
-                    self.pairwise_significance_p_vals(col),
-                    self.pairwise_significance_t_stats(col),
-                    alpha,
-                    only_larger,
-                )
-                for col in range(len(self._column_order))
-            ]
-        ).T
+        if self._alpha_alt is None:
+            return None
+        indices_matrix = (
+            self._measures.pairwise_indices_for_subvar_alt.values
+            if self._cube.has_overlaps
+            else self._measures.pairwise_indices_alt.values
+        )
+        return self._assemble_matrix(self._remap_indices(indices_matrix))
 
-    def pairwise_means_indices(self, alpha, only_larger):
-        """2D optional ndarray of tuple of int column-idxs means pairwise-t threshold.
+    @lazyproperty
+    def pairwise_means_indices(self):
+        """Optional 2D ndarray of tuple of int column-idxs.
 
-        Raises `ValueError if the cube-result does not include `means` cube-measures.
+        Represents the pairwise mean significance array of tuples considering the base
+        threshold value.
+
+        Raises `ValueError` if the cube-result does not include `means` cube-measures.
         """
-        return np.array(
-            [
-                self._pairwise_indices(
-                    self.pairwise_significance_means_p_vals(col),
-                    self.pairwise_significance_means_t_stats(col),
-                    alpha,
-                    only_larger,
-                )
-                for col in range(len(self._column_order))
-            ]
-        ).T
+        return self._assemble_matrix(
+            self._remap_indices(self._measures.pairwise_means_indices.values)
+        )
 
-    def pairwise_significance_p_vals(self, column_idx):
-        """2D optional np.float64 ndarray of overlaps-p_vals matrices for subvar idx.
+    @lazyproperty
+    def pairwise_means_indices_alt(self):
+        """Optional 2D ndarray of tuple of int column-idxs.
+
+        Represents the pairwise mean significance array of tuples considering the
+        alternative threshold value.
+
+        Raises `ValueError` if the cube-result does not include `means` cube-measures.
+        """
+        if self._alpha_alt is None:
+            return None
+        return self._assemble_matrix(
+            self._remap_indices(self._measures.pairwise_means_indices_alt.values)
+        )
+
+    @lazyproperty
+    def pairwise_significance_p_vals(self):
+        """Optional 2D np.float64 ndarray of overlaps-p_vals for subvar idx.
 
         For cubes where the last dimension is categorical, column idxs represent
         specific categories.
@@ -321,21 +342,24 @@ class Assembler:
         pairwise significance matrix is a 2D ndarray of the p-vals for the selected
         subvariable index (the selected column).
 
-        Raises `ValueError if the cube-result does not include `overlaps`
-        and `valid_overlaps` cube-measures.
+        Raises `ValueError` if the cube-result does not include `overlaps` and
+        `valid_overlaps` cube-measures.
         """
-        if self._cube_has_overlaps:
+        if self._cube.has_overlaps:
             # If overlaps are defined, calculate significance based on them
             return self._assemble_matrix(
-                self._measures.pairwise_p_vals_for_subvar(column_idx).blocks
+                self._measures.pairwise_p_vals_for_subvar.blocks
             )
-        base_column_idx = self._column_order[column_idx]
-        return self._assemble_matrix(
-            self._measures.pairwise_p_vals(base_column_idx).blocks
-        )
+        return self._assemble_matrix(self._measures.pairwise_p_vals.blocks)
 
-    def pairwise_significance_t_stats(self, column_idx):
-        """2D optional np.float64 ndarray of overlaps-t_stats matrices for subvar idx.
+    @lazyproperty
+    def pairwise_p_vals_scale_means(self):
+        """Optional 1D np.float64 ndarray of p_vals for scale means measure."""
+        return self._assemble_marginal(self._measures.pairwise_p_vals_scale_means)
+
+    @lazyproperty
+    def pairwise_significance_t_stats(self):
+        """Optional 2D np.float64 ndarray of overlaps-t_stats for subvar idx.
 
         For cubes where the last dimension is categorical, column idxs represent
         specific categories.
@@ -344,38 +368,57 @@ class Assembler:
         pairwise significance matrix is a 2D ndarray of the t-stats for the selected
         subvariable index (the selected column).
 
-        Raises `ValueError if the cube-result does not include `overlaps`
+        Raises `ValueError` if the cube-result does not include `overlaps`
         and `valid_overlaps` cube-measures.
         """
-        if self._cube_has_overlaps:
+        if self._cube.has_overlaps:
             # If overlaps are defined, calculate significance based on them
             return self._assemble_matrix(
-                self._measures.pairwise_t_stats_for_subvar(column_idx).blocks
+                self._measures.pairwise_t_stats_for_subvar.blocks
             )
-        base_column_idx = self._column_order[column_idx]
-        return self._assemble_matrix(
-            self._measures.pairwise_t_stats(base_column_idx).blocks
-        )
+        return self._assemble_matrix(self._measures.pairwise_t_stats.blocks)
 
-    def pairwise_significance_means_p_vals(self, column_idx):
-        """2D optional np.float64 ndarray of mean difference p_vals for column idx.
+    @lazyproperty
+    def pairwise_t_stats_scale_means(self):
+        """Optional 2D np.float64 ndarray of t-stats for scale means measure"""
+        return self._assemble_marginal(self._measures.pairwise_t_stats_scale_means)
 
-        Raises `ValueError if the cube-result does not include `mean` cube-measures.
+    @lazyproperty
+    def pairwise_significance_means_p_vals(self):
+        """Optional 2D np.float64 ndarray of mean difference p_vals for column idx.
+
+        Raises `ValueError` if the cube-result does not include `mean` cube-measures.
         """
-        base_column_idx = self._column_order[column_idx]
         return self._assemble_matrix(
-            self._measures.pairwise_significance_means_p_vals(base_column_idx).blocks
+            self._measures.pairwise_significance_means_p_vals.blocks
         )
 
-    def pairwise_significance_means_t_stats(self, column_idx):
-        """2D optional np.float64 ndarray of mean difference t_stats for column idx.
+    @lazyproperty
+    def pairwise_significance_means_t_stats(self):
+        """Optional 2D np.float64 ndarray of mean difference t_stats for column idx.
 
-        Raises `ValueError if the cube-result does not include `mean` cube-measures.
+        Raises `ValueError` if the cube-result does not include `mean` cube-measures.
         """
-        base_column_idx = self._column_order[column_idx]
         return self._assemble_matrix(
-            self._measures.pairwise_significance_means_t_stats(base_column_idx).blocks
+            self._measures.pairwise_significance_means_t_stats.blocks
         )
+
+    @lazyproperty
+    def pairwise_selection_idx(self):
+        """Optional int representing the actual selected column idx pro sig tests.
+
+        In case of standard column it returns its idx in the column order, for subotals
+        idxs are the negative in the column order.
+        """
+        pairwise_spec = self._columns_dimension.pairwise_significance_spec
+        insertion_idx = pairwise_spec.reference_insertion_idx
+        column_idx = pairwise_spec.reference_column_idx
+        column_order = self._column_order.tolist()
+        if insertion_idx is not None:
+            return column_order.index(~insertion_idx)
+        elif column_idx is not None:
+            return column_order.index(column_idx)
+        return None
 
     @lazyproperty
     def population_proportions(self):
@@ -573,6 +616,27 @@ class Assembler:
         """Optional 1D Row scale median marginal for this cube-result"""
         return self._assemble_marginal(self._measures.rows_scale_median)
 
+    def scale_mean_pairwise_indices(self):
+        """1D ndarray of tuple of int pairwise-t threshold for scale means."""
+        marginal = self._measures.scale_mean_pairwise_indices
+        if marginal.is_empty:
+            return np.empty(shape=(len(self._column_order), 0))
+        return self._remap_indices(self._assemble_marginal(marginal))
+
+    @lazyproperty
+    def scale_mean_pairwise_indices_alt(self):
+        """Optional 1D ndarray of tuple of int pairwise-t threshold for scale means.
+
+        Represents the pairwise significance for scale means considering the
+        alternative threshold value.
+        """
+        if self._alpha_alt is None:
+            return None
+        marginal = self._measures.scale_mean_pairwise_indices_alt
+        if marginal.is_empty:
+            return np.empty(shape=(len(self._column_order), 0))
+        return self._remap_indices(self._assemble_marginal(marginal))
+
     @lazyproperty
     def smoothed_column_index(self):
         """2D np.float64 ndarray of smoothed column-index for each table cell."""
@@ -738,6 +802,15 @@ class Assembler:
         """
         return self._assemble_matrix(self._measures.zscores.blocks)
 
+    @lazyproperty
+    def _alpha_alt(self):
+        """Alternate float confidence-interval threshold or None.
+
+        This is an optional secondary confidence interval allowing two-level
+        significance testing. Value is None if no alternate alpha was specified by user.
+        """
+        return self._columns_dimension.pairwise_significance_spec.alpha_values[1]
+
     def _assemble_marginal(self, marginal):
         """Optional 1D ndarray created from a marginal.
 
@@ -813,15 +886,6 @@ class Assembler:
         """The `Dimension` object representing column elements in this matrix."""
         return self._dimensions[1]
 
-    @lazyproperty
-    def _cube_has_overlaps(self):
-        """True if overlaps are defined and the last dimension is MR, False otherwise"""
-        return (
-            self._dimensions[-1].dimension_type == DT.MR
-            and self._cube.overlaps is not None
-            and self._cube.valid_overlaps is not None
-        )
-
     def _derived_element_idxs(self, dimension, order):
         """Return tuple(int) of derived elements' indices for a dimension.
 
@@ -872,15 +936,48 @@ class Assembler:
         """SecondOrderMeasures collection object for this cube-result."""
         return SecondOrderMeasures(self._cube, self._dimensions, self._slice_idx)
 
-    @staticmethod
-    def _pairwise_indices(p_vals, t_stats, alpha, only_larger):
-        """1D ndarray containing tuples of int pairwise indices of each column."""
-        significance = p_vals < alpha
-        if only_larger:
-            significance = np.logical_and(t_stats < 0, significance)
-        col_significance = np.empty((len(significance),), dtype=object)
-        col_significance[:] = [tuple(np.where(sig_row)[0]) for sig_row in significance]
-        return col_significance
+    def _remap_indices(self, indices_matrix):
+        """Remap pairwise indices from payload order to sort order.
+
+        Returns the significance indices of columns shifted according to the final
+        column order and the eventual column insertions positions.
+
+        Considering a column_order == (0, 1, -1, 2, 3) with negative indices mapped to
+        payload position of insertions
+
+        The column-order mapped to the payload positions will be (0, 1, 4, 2, 3) with
+        (0, 1, 2, 3, 4*) as related sorted position (4* is a col insertion).
+
+        So, (1, 3, 4) should map to (1, 4, 2)
+        """
+        n_col = len(self._columns_dimension.element_ids) + len(
+            self._columns_dimension.insertion_ids
+        )
+        col_order = tuple((n_col + idx) % n_col for idx in self._column_order)
+        # --- Mapping between payload-order indices and sorted positions (indices):
+        # ---
+        # --- {
+        # ---     0: 0,
+        # ---     1: 1,
+        # ---     2: 3,
+        # ---     3: 4,
+        # ---     4: 2  # (-1)
+        # --- }
+        order_map = {k: v for v, k in enumerate(col_order)}
+        remapped_indices = np.array(
+            [
+                tuple(
+                    sorted([order_map[idx] for idx in idxs if idx in order_map.keys()])
+                )
+                for idxs in indices_matrix.ravel()
+            ],
+            dtype=object,
+        )
+        return (
+            remapped_indices.reshape(indices_matrix.shape)
+            if remapped_indices.size > 0
+            else indices_matrix
+        )
 
     @lazyproperty
     def _row_order(self):

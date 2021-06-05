@@ -61,6 +61,7 @@ class Describe_Slice:
             " without a mean measure"
         )
         assert slice_.pairwise_means_indices_alt is None
+        assert slice_.columns_scale_mean_pairwise_indices_alt is None
         with pytest.raises(ValueError) as e:
             slice_.pairwise_significance_means_p_vals(0)
         assert (
@@ -1790,6 +1791,16 @@ class Describe_Slice:
         assert slice_.table_weighted_bases.tolist() == column_bases
         # --- and row bases are the same as the counts
         assert slice_.row_weighted_bases.tolist() == slice_.counts.tolist()
+
+    def it_knows_its_pairwise_selection_idx(self):
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 0}}
+            }
+        }
+        slice_ = Cube(CR.CAT_X_CAT, transforms=transforms).partitions[0]
+
+        assert slice_.pairwise_selection_idx == 0
 
 
 class Describe_Strand:
