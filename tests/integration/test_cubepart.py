@@ -137,10 +137,12 @@ class Describe_Slice(object):
         assert slice_.variable_name == "v7"
         assert str(slice_) == (
             "_Slice(name='v4', dimension_types='CAT x CAT')\n"
+            "Showing: COUNT\n"
             "      C    E\n"
             "--  ---  ---\n"
             "B     5    2\n"
-            "C     5    3"
+            "C     5    3\n"
+            "Available measures: [<CUBE_MEASURE.COUNT: 'count'>]"
         )
 
     def it_provides_values_for_cat_hs_mt_x_cat_hs_mt(self):
@@ -411,6 +413,16 @@ class Describe_Slice(object):
                 ]
             ),
             nan_ok=True,
+        )
+        assert str(slice_) == (
+            "_Slice(name='mymrset', dimension_types='MR_SUBVAR x MR_SUBVAR')\n"
+            "Showing: COUNT\n"
+            "               Response #1    Response #2    Response #3\n"
+            "-----------  -------------  -------------  -------------\n"
+            "Response #1              3              2              0\n"
+            "Response #2              2              4              0\n"
+            "Response #3              0              0              0\n"
+            "Available measures: [<CUBE_MEASURE.COUNT: 'count'>, <CUBE_MEASURE.MEAN: 'mean'>]"
         )
 
     def it_provides_values_for_mr_x_cat_hs(self):
@@ -1447,6 +1459,16 @@ class Describe_Slice(object):
                 ]
             )
         )
+        assert str(slice_) == (
+            "_Slice(name='mymrset', dimension_types='MR_SUBVAR x MR_SUBVAR')\n"
+            "Showing: COUNT\n"
+            "               Response #1    Response #2    Response #3\n"
+            "-----------  -------------  -------------  -------------\n"
+            "Response #1              3              2              2\n"
+            "Response #2              2              4              1\n"
+            "Response #3              0              0              0\n"
+            "Available measures: [<CUBE_MEASURE.COUNT: 'count'>, <CUBE_MEASURE.SUM: 'sum'>]"
+        )
 
     def it_uses_row_proportions_for_pop_counts_and_moe_when_row_dim_is_cat_date(self):
         slice_ = Cube(CR.CAT_DATE_X_CAT, population=100).partitions[0]
@@ -1703,10 +1725,12 @@ class Describe_Strand(object):
         assert strand.weighted_bases == pytest.approx([15.0, 15.0])
         assert str(strand) == (
             "_Strand(name='v7', dimension_type='CAT')\n"
+            "Showing: COUNT\n"
             "      v7\n"
             "--  ----\n"
             "C     10\n"
-            "E      5"
+            "E      5\n"
+            "Available measures: [<CUBE_MEASURE.COUNT: 'count'>]"
         )
 
     def it_provides_values_for_univariate_cat_means_hs(self):

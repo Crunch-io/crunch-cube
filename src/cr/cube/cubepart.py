@@ -21,7 +21,7 @@ import math
 import numpy as np
 from tabulate import tabulate
 
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT, CUBE_MEASURE as CM
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
@@ -200,6 +200,19 @@ class CubePartition(object):
         return tuple(sorted(value[:2]))
 
     @lazyproperty
+    def _available_measures(self):
+        """sorted list of available CUBE_MEASURE members in the cube response."""
+        return sorted(list(self._cube.available_measures), key=lambda el: el.name)
+
+    @lazyproperty
+    def _default_contents(self):
+        """1D/2D np.float64 ndarray of counts, means or sums, if available."""
+        measure = self._available_measures[0]
+        return getattr(
+            self, {CM.COUNT: "counts", CM.MEAN: "means", CM.SUM: "sums"}[measure]
+        )
+
+    @lazyproperty
     def _dimensions(self):
         """tuple of Dimension object for each dimension in cube-partition."""
         raise NotImplementedError(
@@ -263,14 +276,18 @@ class _Slice(CubePartition):
                 self.name,
                 dimensionality,
             )
-            headers = [""] + self.column_labels.tolist()
-            table = [
+            contents = [
                 [row_label] + row.tolist()
-                for row_label, row in zip(self.row_labels, self.counts)
+                for row_label, row in zip(self.row_labels, self._default_contents)
             ]
-            return title + "\n" + tabulate(table, headers)
+            return (
+                title
+                + "\nShowing: %s" % self._available_measures[0].name
+                + "\n%s" % tabulate(contents, [""] + self.column_labels.tolist())
+                + "\nAvailable measures: %s" % str(self._available_measures)
+            )
         except Exception:
-            return super(_Slice, self).__repr__()
+            return super(_Slice, self).__repr__()  # noqa
 
     # ---interface ---------------------------------------------------
 
@@ -1372,13 +1389,18 @@ class _Strand(CubePartition):
                 self.name,
                 self.dimension_types[0].name,
             )
-            headers = ["", self.name]
-            table = [
-                [row_label, row] for row_label, row in zip(self.row_labels, self.counts)
+            contents = [
+                [row_label, row]
+                for row_label, row in zip(self.row_labels, self._default_contents)
             ]
-            return title + "\n" + tabulate(table, headers)
+            return (
+                title
+                + "\nShowing: %s" % self._available_measures[0].name
+                + "\n%s" % tabulate(contents, ["", self.name])
+                + "\nAvailable measures: %s" % str(self._available_measures)
+            )
         except Exception:
-            return super(_Slice, self).__repr__()
+            return super(_Strand, self).__repr__()  # noqa
 
     @lazyproperty
     def counts(self):
