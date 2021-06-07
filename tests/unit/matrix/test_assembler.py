@@ -32,9 +32,12 @@ from cr.cube.matrix.measure import (
     _ColumnShareSum,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
+    _MarginTableProportions,
+    _MarginUnweightedCounts,
+    _MarginWeightedCounts,
+    _MarginTableWeightedBases,
     _Means,
     _PopulationProportions,
-    _MarginProportion,
     _RowComparableCounts,
     _RowProportions,
     _RowShareSum,
@@ -46,17 +49,14 @@ from cr.cube.matrix.measure import (
     SecondOrderMeasures,
     _StdDev,
     _Sums,
-    _TableMargin,
-    _TableMargin1D,
-    _TotalShareSum,
+    _TableWeightedCount,
     _TableProportionVariances,
     _TableProportions,
     _TableStandardError,
     _TableUnweightedBases,
     _TableWeightedBases,
-    _UnweightedBaseMargin,
+    _TotalShareSum,
     _UnweightedCounts,
-    _WeightedBaseMargin,
     _WeightedCounts,
     _Zscores,
 )
@@ -491,7 +491,7 @@ class DescribeAssembler(object):
         dimension_.dimension_type = DT.CAT
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
-        measure_ = instance_mock(request, _MarginProportion)
+        measure_ = instance_mock(request, _MarginTableProportions)
         second_order_measures_.rows_margin_proportion = measure_
         assembler = Assembler(None, None, None)
 
@@ -955,7 +955,7 @@ class DescribeAssembler(object):
 
     @pytest.fixture
     def base_margin_(self, request):
-        return instance_mock(request, _UnweightedBaseMargin)
+        return instance_mock(request, _MarginUnweightedCounts)
 
     @pytest.fixture
     def _BaseOrderHelper_(self, request):
@@ -963,7 +963,7 @@ class DescribeAssembler(object):
 
     @pytest.fixture
     def margin_proportion_(self, request):
-        return instance_mock(request, _MarginProportion)
+        return instance_mock(request, _MarginTableProportions)
 
     @pytest.fixture
     def _column_order_prop_(self, request):
@@ -975,7 +975,7 @@ class DescribeAssembler(object):
 
     @pytest.fixture
     def columns_table_margin_(self, request):
-        return instance_mock(request, _TableMargin1D)
+        return instance_mock(request, _MarginTableWeightedBases)
 
     @pytest.fixture
     def cube_(self, request):
@@ -1015,7 +1015,7 @@ class DescribeAssembler(object):
 
     @pytest.fixture
     def rows_table_margin_(self, request):
-        return instance_mock(request, _TableMargin1D)
+        return instance_mock(request, _MarginTableWeightedBases)
 
     @pytest.fixture
     def second_order_measures_(self, request):
@@ -1031,11 +1031,11 @@ class DescribeAssembler(object):
 
     @pytest.fixture
     def table_margin_(self, request):
-        return instance_mock(request, _TableMargin)
+        return instance_mock(request, _TableWeightedCount)
 
     @pytest.fixture
     def weighted_base_margin_(self, request):
-        return instance_mock(request, _WeightedBaseMargin)
+        return instance_mock(request, _MarginWeightedCounts)
 
 
 class Describe_BaseOrderHelper(object):
