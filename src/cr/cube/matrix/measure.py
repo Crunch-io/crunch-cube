@@ -54,7 +54,7 @@ class SecondOrderMeasures(object):
         return _ColumnShareSum(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
-    def columns_table_margin(self):
+    def columns_table_weighted_bases(self):
         """_MarginTableWeightedBases measure object for this cube-result for columns."""
         return _MarginTableWeightedBases(
             self._dimensions, self, self._cube_measures, MO.COLUMNS
@@ -76,15 +76,15 @@ class SecondOrderMeasures(object):
         return _ColumnsBase(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
-    def columns_margin(self):
+    def columns_weighted_counts(self):
         """_MarginWeightedCounts for columns measure object for this cube-result."""
         return _MarginWeightedCounts(
             self._dimensions, self, self._cube_measures, MO.COLUMNS
         )
 
     @lazyproperty
-    def columns_margin_proportion(self):
-        """_MarginTableProportions for measure object for this cube-result."""
+    def columns_table_proportions(self):
+        """_MarginTableProportion for measure object for this cube-result."""
         return _MarginTableProportions(
             self._dimensions, self, self._cube_measures, MO.COLUMNS
         )
@@ -192,21 +192,21 @@ class SecondOrderMeasures(object):
         return _RowWeightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
-    def rows_base(self):
+    def rows_unweighted_counts(self):
         """_MarginUnweightedCounts for rows measure object for this cube-result."""
         return _MarginUnweightedCounts(
             self._dimensions, self, self._cube_measures, MO.ROWS
         )
 
     @lazyproperty
-    def rows_margin(self):
+    def rows_weighted_counts(self):
         """_MarginWeightedCounts for rows measure object for this cube-result."""
         return _MarginWeightedCounts(
             self._dimensions, self, self._cube_measures, MO.ROWS
         )
 
     @lazyproperty
-    def rows_margin_proportion(self):
+    def rows_table_proportions(self):
         """_MarginTableProportions for measure object for this cube-result."""
         return _MarginTableProportions(
             self._dimensions, self, self._cube_measures, MO.ROWS
@@ -233,7 +233,7 @@ class SecondOrderMeasures(object):
         return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
-    def rows_table_margin(self):
+    def rows_table_weighted_bases(self):
         """_MarginTableWeightedBases measure object for this cube-result for rows."""
         return _MarginTableWeightedBases(
             self._dimensions, self, self._cube_measures, MO.ROWS
@@ -432,7 +432,7 @@ class _ColumnComparableCounts(_BaseSecondOrderMeasure):
     the row dimension is not an array. The values in a subtotal difference column are
     overridden as np.nan because they do not share the same base and so are "not
     comparable" when calculating other measures along the column (across the rows),
-    like rows_margin.
+    like rows_weighted_counts.
 
     Raises a ValueError when the row is an array.
     """
@@ -1070,7 +1070,7 @@ class _RowComparableCounts(_BaseSecondOrderMeasure):
     the column dimension is not an array. The values in a subtotal difference row are
     overridden as np.nan because they do not share the same base and so are "not
     comparable" when calculating other measures along the row (across the columns),
-    like columns_margin.
+    like columns_weighted_count.
 
     Raises a ValueError when the column is an array.
     """
@@ -1208,9 +1208,9 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
 
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
-        # --- the strategy here is simply to broadcast the rows_base to the shape of
-        # --- the subtotal-columns matrix because these don't add. Note that this
-        # --- initial subtotal-columns matrix is used only for its shape because it
+        # --- the strategy here is simply to broadcast the rows unweighted counts to the
+        # ---  shape of the subtotal-columns matrix because these don't add. Note that
+        # --- this initial subtotal-columns matrix is used only for its shape because it
         # --- computes the wrong values.
         subtotal_columns = SumSubtotals.subtotal_columns(
             self._base_values, self._dimensions, diff_rows_nan=True
@@ -1275,10 +1275,9 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
 
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
-        # --- broadcast the rows_margin to the shape of the subtotal-columns matrix
-        # --- because rows-margin doesn't add in this direction. Note this initial
-        # --- subtotal-columns matrix is used only for its shape because it computes
-        # --- the wrong values.
+        # --- broadcast the bases to the shape of the subtotal-columns matrix because
+        # --- the bases don't add in this direction. Note this initial subtotal-columns
+        # --- matrix is used only for its shape because it computes the wrong values.
         subtotal_columns = SumSubtotals.subtotal_columns(
             self._base_values, self._dimensions, diff_rows_nan=True
         )
@@ -1970,9 +1969,9 @@ class _MarginTableProportions(_BaseMarginal):
     def _proportion_denominators(self):
         """list of ndarray 1D table margins to be used as denominator"""
         if self.orientation == MO.ROWS:
-            return self._second_order_measures.rows_table_margin.blocks
+            return self._second_order_measures.rows_table_weighted_bases.blocks
         else:
-            return self._second_order_measures.columns_table_margin.blocks
+            return self._second_order_measures.columns_table_weighted_bases.blocks
 
 
 class _MarginUnweightedCounts(_BaseMarginal):

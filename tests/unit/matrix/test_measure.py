@@ -140,18 +140,20 @@ class DescribeSecondOrderMeasures(object):
     @pytest.mark.parametrize(
         "orientation, measure, MarginalCls",
         (
-            ("rows", "rows_margin", _MarginWeightedCounts),
-            ("columns", "columns_margin", _MarginWeightedCounts),
-            ("rows", "rows_margin_proportion", _MarginTableProportions),
-            ("columns", "columns_margin_proportion", _MarginTableProportions),
+            ("rows", "rows_weighted_counts", _MarginWeightedCounts),
+            ("columns", "columns_weighted_counts", _MarginWeightedCounts),
+            ("rows", "rows_table_proportions", _MarginTableProportions),
+            ("columns", "columns_table_proportions", _MarginTableProportions),
+            ("rows", "rows_weighted_counts", _MarginWeightedCounts),
+            ("columns", "columns_weighted_counts", _MarginWeightedCounts),
             ("rows", "rows_scale_median", _ScaleMedian),
             ("columns", "columns_scale_median", _ScaleMedian),
             ("rows", "rows_scale_mean", _ScaleMean),
             ("columns", "columns_scale_mean", _ScaleMean),
             ("rows", "rows_scale_mean_stddev", _ScaleMeanStddev),
             ("columns", "columns_scale_mean_stddev", _ScaleMeanStddev),
-            ("rows", "rows_table_margin", _MarginTableWeightedBases),
-            ("columns", "columns_table_margin", _MarginTableWeightedBases),
+            ("rows", "rows_table_weighted_bases", _MarginTableWeightedBases),
+            ("columns", "columns_table_weighted_bases", _MarginTableWeightedBases),
         ),
     )
     def it_provides_access_to_the_marginals(
