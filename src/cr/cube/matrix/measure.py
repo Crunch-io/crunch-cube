@@ -1974,6 +1974,52 @@ class _MarginTableProportions(_BaseMarginal):
             return self._second_order_measures.columns_table_weighted_bases.blocks
 
 
+class _MarginTableWeightedBases(_BaseMarginal):
+    """The 'margin-weighted-table-bases', or the denominator for margin-table-proportion
+
+    A consistently 1D form of what used to be called the table_margin. There are 3 cases:
+
+    - The opposing dimension is an array: There is no 1D representation of the table
+      margin for this orientation, so it is undefined.
+    - The corresponding dimension is an array: There is a unique margin table base for each
+      array. No subtotals are possible on array variables, so the insertion block will
+      always be empty.
+    - Neither dimension is an array: The table weighted count scalar exists, and needs to
+      repeated into 1D blocks (insertions are possible and are also repetitions of the
+      scalar).
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin."""
+        if not self.is_defined:
+            raise ValueError(
+                "Could not calculate weighted-table-base-margin across subvariables"
+            )
+        if self._second_order_measures.table_margin.is_defined:
+            table_margin = self._second_order_measures.table_margin.value
+            return [np.full(shape, table_margin) for shape in self._shapes]
+        # --- insertions are not possible on arrays, so we know insertion block is empty
+        return [self._cube_measures.weighted_cube_counts.table_margin, np.array([])]
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool indicating whether the margin is defined in this orientation
+
+        True if the opposing dimension is not an array.
+        """
+        dim = 1 if self.orientation == MO.ROWS else 0
+        return self._dimensions[dim].dimension_type not in DT.ARRAY_TYPES
+
+    @lazyproperty
+    def _shapes(self):
+        """Tuple of ints that indicate the sizes of the elements and insertion blocks"""
+        dim = (
+            self._dimensions[0] if self.orientation == MO.ROWS else self._dimensions[1]
+        )
+        return (len(dim.element_ids), len(dim.insertion_ids))
+
+
 class _MarginUnweightedCounts(_BaseMarginal):
     """The unweighted counts of the margin (sum of unweighted counts).
 
@@ -2034,52 +2080,6 @@ class _MarginWeightedCounts(_BaseMarginal):
         1D representation of the counts is possible.)
         """
         return self._counts_are_defined
-
-
-class _MarginTableWeightedBases(_BaseMarginal):
-    """The 'margin-weighted-table-bases', or the denominator for margin-table-proportion
-
-    A consistently 1D form of what used to be called the table_margin. There are 3 cases:
-
-    - The opposing dimension is an array: There is no 1D representation of the table
-      margin for this orientation, so it is undefined.
-    - The corresponding dimension is an array: There is a unique margin table base for each
-      array. No subtotals are possible on array variables, so the insertion block will
-      always be empty.
-    - Neither dimension is an array: The table weighted count scalar exists, and needs to
-      repeated into 1D blocks (insertions are possible and are also repetitions of the
-      scalar).
-    """
-
-    @lazyproperty
-    def blocks(self):
-        """List of the 2 1D ndarray "blocks" of the summed count margin."""
-        if not self.is_defined:
-            raise ValueError(
-                "Could not calculate weighted-table-base-margin across subvariables"
-            )
-        if self._second_order_measures.table_margin.is_defined:
-            table_margin = self._second_order_measures.table_margin.value
-            return [np.full(shape, table_margin) for shape in self._shapes]
-        # --- insertions are not possible on arrays, so we know insertion block is empty
-        return [self._cube_measures.weighted_cube_counts.table_margin, np.array([])]
-
-    @lazyproperty
-    def is_defined(self):
-        """Bool indicating whether the margin is defined in this orientation
-
-        True if the opposing dimension is not an array.
-        """
-        dim = 1 if self.orientation == MO.ROWS else 0
-        return self._dimensions[dim].dimension_type not in DT.ARRAY_TYPES
-
-    @lazyproperty
-    def _shapes(self):
-        """Tuple of ints that indicate the sizes of the elements and insertion blocks"""
-        dim = (
-            self._dimensions[0] if self.orientation == MO.ROWS else self._dimensions[1]
-        )
-        return (len(dim.element_ids), len(dim.insertion_ids))
 
 
 class _ScaleMean(_BaseScaledCountMarginal):
