@@ -956,6 +956,27 @@ class Describe_Slice(object):
             [2.45356177, 2.11838791, 2.0, 1.97, 1.74213625, np.nan], nan_ok=True
         )
 
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def it_can_sort_by_value_for_mr_derived_insertions(self):
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "direction": "ascending",
+                    "type": "opposing_insertion",
+                    "insertion_id": 1,
+                    "measure": "count_weighted",
+                }
+            }
+        }
+        slice_ = Cube(MRI.CAT_X_MR, transforms=transforms).partitions[0]
+        assert slice_.counts.tolist() == [
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.6, 0.0, 0.6, 0.0],
+            [0.9, 0.9, 0.0, 0.0],
+            [1.5, 1.5, 1.5, 0.0],
+        ]
+
     @pytest.mark.parametrize(
         "measure, expectation",
         (
