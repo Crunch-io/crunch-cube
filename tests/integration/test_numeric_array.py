@@ -449,3 +449,45 @@ class DescribeNumericArrays(object):
             [4.67, 6.4],
             [1.898, 6.1],
         ]
+
+    def it_has_bases_that_dont_sum_across_num_array_subvars_x_cat(self):
+        slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT).partitions[0]
+
+        assert slice_.row_weighted_bases.tolist() == [
+            [5.0, 5.0],
+            [4.0, 4.0],
+            [2.0, 2.0],
+        ]
+        assert slice_.table_weighted_bases == pytest.approx(slice_.row_weighted_bases)
+        # --- Can't sum across subvariables so column bases are the same as counts ---
+        assert slice_.column_weighted_bases == pytest.approx(slice_.counts)
+
+    def it_has_bases_that_dont_sum_across_num_array_subvars_x_cat_with_insertion(self):
+        slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS).partitions[0]
+
+        assert slice_.row_weighted_bases.tolist() == [
+            [20.0, 20.0, 20.0, 20.0, 20.0],
+            [19.0, 19.0, 19.0, 19.0, 19.0],
+            [16.0, 16.0, 16.0, 16.0, 16.0],
+            [17.0, 17.0, 17.0, 17.0, 17.0],
+        ]
+        assert (
+            slice_.table_weighted_bases.tolist() == slice_.row_weighted_bases.tolist()
+        )
+        # --- Can't sum across subvariables so column bases are the same as counts ---
+        assert slice_.column_weighted_bases.tolist() == slice_.counts.tolist()
+
+    def it_has_bases_that_dont_sum_across_num_array_subvars_x_mr(self):
+        slice_ = Cube(NA.NUM_ARR_MEANS_X_MR_WEIGHTED).partitions[0]
+        row_bases = np.array(
+            [[4.66, 8.9992], [8.243, 9.011], [5.781, 7.523445], [6.228, 8.553]]
+        )
+
+        # --- row bases add along the selection axis (and aren't the same as the counts)
+        assert slice_.row_weighted_bases == pytest.approx(row_bases)
+        # --- table bases are the same as the row bases ---
+        assert slice_.table_weighted_bases == pytest.approx(row_bases)
+        # --- but the column weighted bases are the same as the counts ---
+        assert slice_.column_weighted_bases == pytest.approx(
+            np.array([[2.33, 7.009], [4.123, 6.777], [4.67, 6.4], [1.898, 6.1]])
+        )

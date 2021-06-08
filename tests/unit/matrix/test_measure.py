@@ -534,17 +534,20 @@ class Describe_ColumnWeightedBases(object):
         _weighted_cube_counts_prop_,
         weighted_cube_counts_,
     ):
-        _base_values_prop_.return_value = [[4.4, 3.3], [2.2, 1.1]]
+        _base_values_prop_.return_value = np.array([[4.4, 7.7], [4.4, 7.7]])
         SumSubtotals_.subtotal_rows.return_value = np.array([[8.8, 3.3], [6.6, 4.4]])
         _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
-        weighted_cube_counts_.columns_margin = np.array([4.4, 7.7])
         column_weighted_bases = _ColumnWeightedBases(dimensions_, None, None)
 
         subtotal_rows = column_weighted_bases._subtotal_rows
 
         SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[4.4, 3.3], [2.2, 1.1]], dimensions_, diff_cols_nan=True
+            ANY, dimensions_, diff_cols_nan=True
         )
+        assert SumSubtotals_.subtotal_rows.call_args.args[0].tolist() == [
+            [4.4, 7.7],
+            [4.4, 7.7],
+        ]
         assert subtotal_rows.tolist() == [[4.4, 7.7], [4.4, 7.7]]
 
     def but_it_returns_empty_array_of_right_shape_when_there_are_no_row_subtotals(
@@ -909,17 +912,20 @@ class Describe_RowWeightedBases(object):
         _weighted_cube_counts_prop_,
         weighted_cube_counts_,
     ):
-        _base_values_prop_.return_value = [[3.3, 4.4, 5.5], [1.1, 2.2, 3.3]]
+        _base_values_prop_.return_value = np.array([[7.7, 7.7], [4.4, 4.4]])
         SumSubtotals_.subtotal_columns.return_value = np.array([[3.3, 8.8], [4.4, 6.6]])
         _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
-        weighted_cube_counts_.rows_margin = np.array([7.7, 4.4])
         row_weighted_bases = _RowWeightedBases(dimensions_, None, None)
 
         subtotal_columns = row_weighted_bases._subtotal_columns
 
         SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[3.3, 4.4, 5.5], [1.1, 2.2, 3.3]], dimensions_, diff_rows_nan=True
+            ANY, dimensions_, diff_rows_nan=True
         )
+        assert SumSubtotals_.subtotal_columns.call_args.args[0].tolist() == [
+            [7.7, 7.7],
+            [4.4, 4.4],
+        ]
         assert subtotal_columns.tolist() == [[7.7, 7.7], [4.4, 4.4]]
 
     def but_it_returns_empty_array_of_right_shape_when_there_are_no_column_subtotals(
@@ -1576,6 +1582,34 @@ class Describe_Zscores(object):
         zscores = _Zscores(None, None, None)
 
         actual = zscores._calculate_zscores(counts, None, None, None)
+
+        assert actual == pytest.approx(np.full(counts.shape, np.nan), nan_ok=True)
+
+    def and_it_is_nan_if_rows_base_equal_table_base(self, _is_defective_prop_):
+        _is_defective_prop_.return_value = False
+        counts = np.array([[3.3, 2.2, 1.1], [6.6, 5.5, 4.4]])
+        zscores = _Zscores(None, None, None)
+
+        actual = zscores._calculate_zscores(
+            np.array([[3.3, 2.2, 1.1], [6.6, 5.5, 4.4]]),
+            np.array([[6.6, 6.6, 6.6], [16.5, 16.5, 16.5]]),
+            np.array([[6.6, 6.6, 6.6], [16.5, 16.5, 16.5]]),
+            np.array([[9.9, 7.7, 5.5], [9.9, 7.7, 5.5]]),
+        )
+
+        assert actual == pytest.approx(np.full(counts.shape, np.nan), nan_ok=True)
+
+    def and_it_is_nan_if_columns_base_equal_table_base(self, _is_defective_prop_):
+        _is_defective_prop_.return_value = False
+        counts = np.array([[3.3, 2.2, 1.1], [6.6, 5.5, 4.4]])
+        zscores = _Zscores(None, None, None)
+
+        actual = zscores._calculate_zscores(
+            np.array([[3.3, 2.2, 1.1], [6.6, 5.5, 4.4]]),
+            np.array([[9.9, 7.7, 5.5], [9.9, 7.7, 5.5]]),
+            np.array([[6.6, 6.6, 6.6], [16.5, 16.5, 16.5]]),
+            np.array([[9.9, 7.7, 5.5], [9.9, 7.7, 5.5]]),
+        )
 
         assert actual == pytest.approx(np.full(counts.shape, np.nan), nan_ok=True)
 

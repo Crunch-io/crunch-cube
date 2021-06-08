@@ -1800,7 +1800,7 @@ class Describe_SortRowsByInsertedColumnHelper(object):
             ),
             (
                 CR.CA_SUBVAR_X_CA_CAT_HS,
-                "col_percent",
+                "table_percent",
                 "ascending",
                 {},
                 [2, 1, 0],
