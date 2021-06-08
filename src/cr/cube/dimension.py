@@ -860,7 +860,7 @@ class _OrderSpec(object):
     def collation_method(self):
         """Member of COLLATION_METHOD specifying ordering of dimension elements."""
         method_keyword = self._order_dict.get("type")
-        if method_keyword is None:
+        if method_keyword is None or not CM.has_value(method_keyword):
             return CM.PAYLOAD_ORDER
         return CM(method_keyword)
 

@@ -927,6 +927,8 @@ class _BaseOrderHelper(object):
     def _measure(self):
         """Second-order measure object providing values for sort.
 
+        Returns None when the measure in the `order_spec` is not enable for sorting.
+
         This property is not used by some subclasses.
         """
         propname_by_measure = {
@@ -1102,12 +1104,17 @@ class _SortRowsByBaseColumnHelper(_RowOrderHelper):
     @lazyproperty
     def _order(self):
         """tuple of int element-idx specifying ordering of dimension elements."""
-        return SortByValueCollator.display_order(
-            self._rows_dimension,
-            self._element_values,
-            self._subtotal_values,
-            self._empty_row_idxs,
-        )
+        try:
+            return SortByValueCollator.display_order(
+                self._rows_dimension,
+                self._element_values,
+                self._subtotal_values,
+                self._empty_row_idxs,
+            )
+        except ValueError:
+            return PayloadOrderCollator.display_order(
+                self._rows_dimension, self._empty_row_idxs
+            )
 
     @lazyproperty
     def _subtotal_values(self):
@@ -1148,12 +1155,17 @@ class _SortRowsByInsertedColumnHelper(_RowOrderHelper):
     @lazyproperty
     def _order(self):
         """tuple of int element-idx specifying ordering of dimension elements."""
-        return SortByValueCollator.display_order(
-            self._rows_dimension,
-            self._element_values,
-            self._subtotal_values,
-            self._empty_row_idxs,
-        )
+        try:
+            return SortByValueCollator.display_order(
+                self._rows_dimension,
+                self._element_values,
+                self._subtotal_values,
+                self._empty_row_idxs,
+            )
+        except ValueError:
+            return PayloadOrderCollator.display_order(
+                self._rows_dimension, self._empty_row_idxs
+            )
 
     @lazyproperty
     def _subtotal_values(self):
@@ -1206,12 +1218,17 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
     @lazyproperty
     def _order(self):
         """tuple of int element-idx specifying ordering of dimension elements."""
-        return SortByValueCollator.display_order(
-            self._rows_dimension,
-            self._element_values,
-            self._subtotal_values,
-            self._empty_row_idxs,
-        )
+        try:
+            return SortByValueCollator.display_order(
+                self._rows_dimension,
+                self._element_values,
+                self._subtotal_values,
+                self._empty_row_idxs,
+            )
+        except ValueError:
+            return PayloadOrderCollator.display_order(
+                self._rows_dimension, self._empty_row_idxs
+            )
 
     @lazyproperty
     def _subtotal_values(self):

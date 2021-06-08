@@ -1824,3 +1824,18 @@ class Describe_SortRowsByInsertedColumnHelper(object):
         assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
 
         assert assembler._row_order.tolist() == expected_value
+
+    def but_it_fallback_to_payload_order_when_sort_by_value_is_not_supported(self):
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "opposing_insertion",
+                    "insertion_id": 1,
+                    "measure": "population_counts",
+                    "direction": "ascending",
+                }
+            }
+        }
+        assembler = _Slice(Cube(CR.CAT_HS_X_CAT_HS), 0, transforms, None, 0)._assembler
+
+        assert assembler._row_order.tolist() == [0, 1, -2, 2, 3, 4, -1]

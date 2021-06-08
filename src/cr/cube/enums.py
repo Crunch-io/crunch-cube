@@ -69,6 +69,10 @@ class COLLATION_METHOD(enum.Enum):
     PAYLOAD_ORDER = "payload_order"
     UNIVARIATE_MEASURE = "univariate_measure"
 
+    @classmethod
+    def has_value(cls, value):
+        return value in cls._value2member_map_
+
 
 class MARGINAL(enum.Enum):
     """Enumerated values representing the (second-order) marginals."""
