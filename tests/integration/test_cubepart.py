@@ -956,7 +956,6 @@ class Describe_Slice(object):
             [2.45356177, 2.11838791, 2.0, 1.97, 1.74213625, np.nan], nan_ok=True
         )
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_can_sort_by_value_for_mr_derived_insertions(self):
         transforms = {
             "rows_dimension": {

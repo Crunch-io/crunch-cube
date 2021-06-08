@@ -20,6 +20,7 @@ from cr.cube.matrix.assembler import (
     _ColumnOrderHelper,
     _RowOrderHelper,
     _SortRowsByBaseColumnHelper,
+    _SortRowsByDerivedColumnHelper,
     _SortRowsByInsertedColumnHelper,
     _SortRowsByLabelHelper,
     _SortRowsByMarginalHelper,
@@ -1063,6 +1064,38 @@ class Describe_BaseOrderHelper(object):
         HelperCls_.assert_called_once_with(dimensions_, second_order_measures_)
         assert row_order.tolist() == [-1, 1, -2, 2]
 
+    @pytest.mark.parametrize(
+        "HelperCls, column_type",
+        (
+            (_SortRowsByDerivedColumnHelper, DT.MR_SUBVAR),
+            (_SortRowsByDerivedColumnHelper, DT.NUM_ARRAY),
+            (_SortRowsByInsertedColumnHelper, DT.CAT),
+            (_SortRowsByInsertedColumnHelper, DT.CA_CAT),
+        ),
+    )
+    def and_it_dispatches_to_the_right_row_order_helper_for_insertions_or_derived(
+        self, request, dimensions_, second_order_measures_, HelperCls, column_type
+    ):
+        dimensions_[0].order_spec = instance_mock(
+            request, _OrderSpec, collation_method=CM.OPPOSING_INSERTION
+        )
+        dimensions_[1].dimension_type = column_type
+        helper_ = instance_mock(
+            request, HelperCls, _display_order=np.array([-1, 1, -2, 2])
+        )
+        HelperCls_ = class_mock(
+            request,
+            "cr.cube.matrix.assembler.%s" % HelperCls.__name__,
+            return_value=helper_,
+        )
+
+        row_order = _BaseOrderHelper.row_display_order(
+            dimensions_, second_order_measures_
+        )
+
+        HelperCls_.assert_called_once_with(dimensions_, second_order_measures_)
+        assert row_order.tolist() == [-1, 1, -2, 2]
+
     def it_provides_access_to_the_columns_dimension_to_help(self, dimension_):
         order_helper = _BaseOrderHelper((None, dimension_), None)
         assert order_helper._columns_dimension is dimension_
@@ -1549,6 +1582,40 @@ class Describe_SortRowsByInsertedColumnHelper(object):
     @pytest.fixture
     def _order_spec_prop_(self, request):
         return property_mock(request, _SortRowsByInsertedColumnHelper, "_order_spec")
+
+
+    
+class Describe_SortRowsByDerivedColumnHelper(object):
+    """Unit test suite for `cr.cube.matrix.assembler._SortRowsByDerivedColumnHelper`."""
+
+    def it_derives_the_sort_column_idx_from_the_order_spec_to_help(
+        self, _columns_dimension_prop_, dimension_, _order_spec_prop_, order_spec_
+    ):
+        _columns_dimension_prop_.return_value = dimension_
+        dimension_.derived_element_ids = (1, 2, 3, 4, 5)
+        _order_spec_prop_.return_value = order_spec_
+        order_spec_.insertion_id = 3
+        order_helper = _SortRowsByDerivedColumnHelper(None, None)
+
+        assert order_helper._column_idx == 2
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _columns_dimension_prop_(self, request):
+        return property_mock(request, _SortRowsByBaseColumnHelper, "_columns_dimension")
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def order_spec_(self, request):
+        return instance_mock(request, _OrderSpec)
+
+    @pytest.fixture
+    def _order_spec_prop_(self, request):
+        return property_mock(request, _SortRowsByBaseColumnHelper, "_order_spec")
 
 
 class Describe_SortRowsByLabelHelper(object):

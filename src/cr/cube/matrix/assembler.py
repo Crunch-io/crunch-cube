@@ -833,13 +833,21 @@ class _BaseOrderHelper(object):
         insertion, hiding, pruning, and ordering transforms specified in the
         rows-dimension.
         """
-        order_spec = dimensions[0].order_spec
-        HelperCls = {
-            CM.LABEL: _SortRowsByLabelHelper,
-            CM.MARGINAL: _SortRowsByMarginalHelper,
-            CM.OPPOSING_ELEMENT: _SortRowsByBaseColumnHelper,
-            CM.OPPOSING_INSERTION: _SortRowsByInsertedColumnHelper,
-        }.get(order_spec.collation_method, _RowOrderHelper)
+        collation_method = dimensions[0].order_spec.collation_method
+        dim_type = dimensions[1].dimension_type
+        HelperCls = (
+            _SortRowsByBaseColumnHelper
+            if collation_method == CM.OPPOSING_ELEMENT
+            else _SortRowsByDerivedColumnHelper
+            if collation_method == CM.OPPOSING_INSERTION and dim_type in DT.ARRAY_TYPES
+            else _SortRowsByInsertedColumnHelper
+            if collation_method == CM.OPPOSING_INSERTION
+            else _SortRowsByLabelHelper
+            if collation_method == CM.LABEL
+            else _SortRowsByMarginalHelper
+            if collation_method == CM.MARGINAL
+            else _RowOrderHelper
+        )
 
         return HelperCls(dimensions, second_order_measures)._display_order
 
@@ -1137,6 +1145,26 @@ class _SortRowsByBaseColumnHelper(_BaseSortRowsByValueHelper):
         """
         measure_subtotal_rows = self._measure.blocks[1][0]
         return measure_subtotal_rows[:, self._column_idx]
+
+
+class _SortRowsByDerivedColumnHelper(_SortRowsByBaseColumnHelper):
+    """Orders elements by the values of an opposing derived element vector.
+
+    This would be like "order rows in descending order by value of 'Coke' or 'Diet Coke'
+    array column. An opposing-element ordering is only available on a matrix, because only
+    a matrix dimension has an opposing dimension.
+
+    In user-facing language, these "derived columns" are called insertions, the difference
+    being that these insertions must be calculated by zz9.
+    """
+
+    @lazyproperty
+    def _column_idx(self):
+        """int index of column whose values the sort is based on."""
+        # --- MR insertions are called derived elements by cube
+        derived_element_ids = self._columns_dimension.derived_element_ids
+        insertion_id = self._order_spec.insertion_id
+        return derived_element_ids.index(insertion_id)
 
 
 class _SortRowsByInsertedColumnHelper(_BaseSortRowsByValueHelper):
