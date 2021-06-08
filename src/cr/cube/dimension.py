@@ -366,6 +366,23 @@ class Dimension(object):
         )
 
     @lazyproperty
+    def derived_elements(self):
+        """_Elements object providing access to derived elements.
+
+        Derived elements are insertions computed by zz9.
+        """
+        return self.all_elements.derived_elements
+
+    @lazyproperty
+    def derived_element_ids(self):
+        """tuple of insertion-id for each derived element in this dimension.
+
+        Insertion-ids appear in the order that the derived elements are defined. Can
+        be int or string.
+        """
+        return tuple(s.element_id for s in self.derived_elements)
+
+    @lazyproperty
     def description(self):
         """str description of this dimension."""
         # ---First authority in cascade is analysis-specific dimension transform. None
@@ -594,6 +611,11 @@ class _AllElements(_BaseElements):
         self._dimension_type = dimension_type
 
     @lazyproperty
+    def derived_elements(self):
+        """_DerivedElements object containing only derived elements."""
+        return _DerivedElements(self._elements, self._dimension_transforms_dict)
+
+    @lazyproperty
     def valid_elements(self):
         """_ValidElements object containing only non-missing elements."""
         return _ValidElements(self._elements, self._dimension_transforms_dict)
@@ -704,6 +726,25 @@ class _AllElements(_BaseElements):
         }
         shimmed_transforms.update(self._dimension_transforms_dict.get("elements", {}))
         return shimmed_transforms
+
+
+class _DerivedElements(_BaseElements):
+    """Sequence of derived element objects for a dimension.
+
+    *derived_elements* is a sequence of _Elements containing the elements
+    of a dimension that are derived (aka zz9 computed insertions on array variables).
+    This object is only intended to be constructed by _AllElements.derived_elements and
+    there should be no reason to construct it directly.
+    """
+
+    def __init__(self, all_elements, dimension_transforms_dict):
+        self._all_elements = all_elements
+        self._dimension_transforms_dict = dimension_transforms_dict
+
+    @lazyproperty
+    def _elements(self):
+        """tuple containing actual sequence of element objects."""
+        return tuple(element for element in self._all_elements if element.derived)
 
 
 class _ValidElements(_BaseElements):

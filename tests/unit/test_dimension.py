@@ -11,6 +11,7 @@ from cr.cube.dimension import (
     _ApparentDimensions,
     _BaseDimensions,
     _BaseElements,
+    _DerivedElements,
     Dimension,
     _DimensionFactory,
     _Element,
@@ -517,6 +518,12 @@ class DescribeDimension(object):
     def it_knows_its_description(self, dimension_dict, expected_value):
         assert Dimension(dimension_dict, None).description == expected_value
 
+    def it_knows_its_derived_element_ids(self, request, derived_elements_prop_):
+        derived_elements_prop_.return_value = (
+            instance_mock(request, _Element, element_id=(i + 1)) for i in range(6)
+        )
+        assert Dimension(None, None).derived_element_ids == (1, 2, 3, 4, 5, 6)
+
     def it_knows_its_dimension_type(self):
         assert Dimension(None, DT.CAT).dimension_type == DT.CAT
 
@@ -739,6 +746,10 @@ class DescribeDimension(object):
     def valid_elements_prop_(self, request):
         return property_mock(request, Dimension, "valid_elements")
 
+    @pytest.fixture
+    def derived_elements_prop_(self, request):
+        return property_mock(request, Dimension, "derived_elements")
+
 
 class Describe_BaseElements(object):
     """Unit-test suite for `cr.cube.dimension._BaseElements` object."""
@@ -833,6 +844,28 @@ class Describe_AllElements(object):
 
         _ValidElements_.assert_called_once_with(elements_, dimension_transforms_dict)
         assert valid_elements is valid_elements_
+
+    def it_provides_access_to_the_DerivedElements_object(
+        self, request, _elements_prop_
+    ):
+        elements_ = tuple(
+            instance_mock(request, _Element, name="el%s" % idx, derived=True)
+            for idx in range(3)
+        )
+        dimension_transforms_dict = {"dimension": "transforms"}
+        _elements_prop_.return_value = elements_
+        derived_elements_ = instance_mock(request, _DerivedElements)
+        _DerivedElements_ = class_mock(
+            request,
+            "cr.cube.dimension._DerivedElements",
+            return_value=derived_elements_,
+        )
+        all_elements = _AllElements(None, dimension_transforms_dict, None)
+
+        derived_elements = all_elements.derived_elements
+
+        _DerivedElements_.assert_called_once_with(elements_, dimension_transforms_dict)
+        assert derived_elements is derived_elements_
 
     def it_creates_its_Element_objects_in_a_local_factory_to_help(
         self,
@@ -1038,6 +1071,23 @@ class Describe_ValidElements(object):
         valid_elements = _ValidElements(all_elements_, None)
 
         elements = valid_elements._elements
+
+        assert elements == (elements_[0], elements_[2])
+
+
+class Describe_DerivedElements(object):
+    """Unit-test suite for `cr.cube.dimension._DerivedElements` object."""
+
+    def it_gets_its_Element_objects_from_an_AllElements_object(self, request):
+        elements_ = tuple(
+            instance_mock(request, _Element, name="element-%s" % idx, derived=derived)
+            for idx, derived in enumerate([True, False, True])
+        )
+        all_elements_ = instance_mock(request, _AllElements)
+        all_elements_.__iter__.return_value = iter(elements_)
+        derived_elements = _DerivedElements(all_elements_, None)
+
+        elements = derived_elements._elements
 
         assert elements == (elements_[0], elements_[2])
 
