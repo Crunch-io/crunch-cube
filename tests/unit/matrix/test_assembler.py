@@ -626,19 +626,19 @@ class DescribeAssembler(object):
 
         assert assembler.table_base == 4242
 
-    def it_knows_the_2D_table_margin_of_an_ARRAY_X_ARRAY_matrix(
+    def it_knows_the_2D_table_weighted_count_of_an_ARRAY_X_ARRAY_matrix(
         self,
         request,
         _measures_prop_,
         second_order_measures_,
-        table_margin_,
+        table_weighted_count_,
         rows_table_weighted_bases_,
         columns_table_weighted_bases_,
     ):
-        table_margin_.is_defined = False
+        table_weighted_count_.is_defined = False
         rows_table_weighted_bases_.is_defined = False
         columns_table_weighted_bases_.is_defined = False
-        second_order_measures_.table_margin = table_margin_
+        second_order_measures_.table_weighted_count = table_weighted_count_
         second_order_measures_.rows_table_weighted_bases = rows_table_weighted_bases_
         second_order_measures_.columns_table_weighted_bases = (
             columns_table_weighted_bases_
@@ -654,17 +654,17 @@ class DescribeAssembler(object):
 
         assert assembler.table_margin == [[5, 4, 6], [2, 1, 3]]
 
-    def and_it_knows_the_1D_table_margin_of_an_ARRAY_X_CAT_matrix(
+    def and_it_knows_the_1D_table_weighted_count_of_an_ARRAY_X_CAT_matrix(
         self,
         _measures_prop_,
         second_order_measures_,
-        table_margin_,
+        table_weighted_count_,
         columns_table_weighted_bases_,
         _assemble_marginal_,
     ):
-        table_margin_.is_defined = False
+        table_weighted_count_.is_defined = False
         columns_table_weighted_bases_.is_defined = True
-        second_order_measures_.table_margin = table_margin_
+        second_order_measures_.table_weighted_count = table_weighted_count_
         second_order_measures_.columns_table_weighted_bases = (
             columns_table_weighted_bases_
         )
@@ -679,19 +679,19 @@ class DescribeAssembler(object):
         )
         assert table_margin == [2, 1, 3]
 
-    def and_it_knows_the_1D_table_margin_of_a_CAT_X_ARRAY_matrix(
+    def and_it_knows_the_1D_table_weighted_count_of_a_CAT_X_ARRAY_matrix(
         self,
         _measures_prop_,
         second_order_measures_,
-        table_margin_,
+        table_weighted_count_,
         rows_table_weighted_bases_,
         columns_table_weighted_bases_,
         _assemble_marginal_,
     ):
-        table_margin_.is_defined = False
+        table_weighted_count_.is_defined = False
         rows_table_weighted_bases_.is_defined = True
         columns_table_weighted_bases_.is_defined = False
-        second_order_measures_.table_margin = table_margin_
+        second_order_measures_.table_weighted_count = table_weighted_count_
         second_order_measures_.rows_table_weighted_bases = rows_table_weighted_bases_
         second_order_measures_.columns_table_weighted_bases = (
             columns_table_weighted_bases_
@@ -707,15 +707,15 @@ class DescribeAssembler(object):
         )
         assert table_margin == [2, 1, 3]
 
-    def and_it_knows_the_scalar_table_margin_of_a_CAT_X_CAT_matrix(
+    def and_it_knows_the_scalar_table_weighted_count_of_a_CAT_X_CAT_matrix(
         self,
         _measures_prop_,
         second_order_measures_,
-        table_margin_,
+        table_weighted_count_,
     ):
-        table_margin_.is_defined = True
-        table_margin_.value = 4242
-        second_order_measures_.table_margin = table_margin_
+        table_weighted_count_.is_defined = True
+        table_weighted_count_.value = 4242
+        second_order_measures_.table_weighted_count = table_weighted_count_
         _measures_prop_.return_value = second_order_measures_
         assembler = Assembler(None, None, None)
 
@@ -726,14 +726,14 @@ class DescribeAssembler(object):
         request,
         _measures_prop_,
         second_order_measures_,
-        table_margin_,
+        table_weighted_count_,
         rows_table_weighted_bases_,
         columns_table_weighted_bases_,
     ):
-        table_margin_.is_defined = False
+        table_weighted_count_.is_defined = False
         rows_table_weighted_bases_.is_defined = False
         columns_table_weighted_bases_.is_defined = False
-        second_order_measures_.table_margin = table_margin_
+        second_order_measures_.table_weighted_count = table_weighted_count_
         second_order_measures_.rows_table_weighted_bases = rows_table_weighted_bases_
         second_order_measures_.columns_table_weighted_bases = (
             columns_table_weighted_bases_
@@ -750,13 +750,13 @@ class DescribeAssembler(object):
         self,
         _measures_prop_,
         second_order_measures_,
-        table_margin_,
+        table_weighted_count_,
         columns_table_weighted_bases_,
     ):
-        table_margin_.is_defined = False
+        table_weighted_count_.is_defined = False
         columns_table_weighted_bases_.is_defined = True
         columns_table_weighted_bases_.blocks = [[2, 1], [3]]
-        second_order_measures_.table_margin = table_margin_
+        second_order_measures_.table_weighted_count = table_weighted_count_
         second_order_measures_.columns_table_weighted_bases = (
             columns_table_weighted_bases_
         )
@@ -769,15 +769,15 @@ class DescribeAssembler(object):
         self,
         _measures_prop_,
         second_order_measures_,
-        table_margin_,
+        table_weighted_count_,
         rows_table_weighted_bases_,
         columns_table_weighted_bases_,
     ):
-        table_margin_.is_defined = False
+        table_weighted_count_.is_defined = False
         rows_table_weighted_bases_.is_defined = True
         rows_table_weighted_bases_.blocks = [[2, 1], [3]]
         columns_table_weighted_bases_.is_defined = False
-        second_order_measures_.table_margin = table_margin_
+        second_order_measures_.table_weighted_count = table_weighted_count_
         second_order_measures_.rows_table_weighted_bases = rows_table_weighted_bases_
         second_order_measures_.columns_table_weighted_bases = (
             columns_table_weighted_bases_
@@ -791,11 +791,11 @@ class DescribeAssembler(object):
         self,
         _measures_prop_,
         second_order_measures_,
-        table_margin_,
+        table_weighted_count_,
     ):
-        table_margin_.is_defined = True
-        table_margin_.value = 4242
-        second_order_measures_.table_margin = table_margin_
+        table_weighted_count_.is_defined = True
+        table_weighted_count_.value = 4242
+        second_order_measures_.table_weighted_count = table_weighted_count_
         _measures_prop_.return_value = second_order_measures_
         assembler = Assembler(None, None, None)
 
@@ -1048,7 +1048,7 @@ class DescribeAssembler(object):
         return class_mock(request, "cr.cube.matrix.assembler.SumSubtotals")
 
     @pytest.fixture
-    def table_margin_(self, request):
+    def table_weighted_count_(self, request):
         return instance_mock(request, _TableWeightedCount)
 
     @pytest.fixture

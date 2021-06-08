@@ -182,28 +182,28 @@ class DescribeSecondOrderMeasures(object):
         )
         assert marginal is marginal_
 
-    def it_provides_access_to_the_table_margin_scalar(
+    def it_provides_access_to_the_table_weighted_count_scalar(
         self,
         request,
         dimensions_,
         _cube_measures_prop_,
         cube_measures_,
     ):
-        table_margin_ = instance_mock(request, _TableWeightedCount)
+        table_weighted_count_ = instance_mock(request, _TableWeightedCount)
         _TableWeightedCount_ = class_mock(
             request,
             "cr.cube.matrix.measure._TableWeightedCount",
-            return_value=table_margin_,
+            return_value=table_weighted_count_,
         )
         _cube_measures_prop_.return_value = cube_measures_
         measures = SecondOrderMeasures(None, dimensions_, None)
 
-        table_margin = measures.table_margin
+        table_weighted_count = measures.table_weighted_count
 
         _TableWeightedCount_.assert_called_once_with(
             dimensions_, measures, cube_measures_
         )
-        assert table_margin is table_margin_
+        assert table_weighted_count is table_weighted_count_
 
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
@@ -2354,13 +2354,13 @@ class Describe_MarginWeightedCounts(object):
 class Describe_MarginTableWeightedBases(object):
     """Unit test suite for `cr.cube.matrix.measure._MarginTableWeightedBases` object."""
 
-    def it_provides_blocks_if_scalar_table_margin_defined(
-        self, request, is_defined_prop_, second_order_measures_, table_margin_
+    def it_provides_blocks_if_scalar_table_weighted_count_defined(
+        self, request, is_defined_prop_, second_order_measures_, table_weighted_count_
     ):
         is_defined_prop_.return_value = True
-        second_order_measures_.table_margin = table_margin_
-        table_margin_.is_defined = True
-        table_margin_.value = 1.0
+        second_order_measures_.table_weighted_count = table_weighted_count_
+        table_weighted_count_.is_defined = True
+        table_weighted_count_.value = 1.0
         property_mock(
             request, _MarginTableWeightedBases, "_shapes", return_value=(2, 3)
         )
@@ -2378,12 +2378,12 @@ class Describe_MarginTableWeightedBases(object):
         is_defined_prop_,
         cube_measures_,
         second_order_measures_,
-        table_margin_,
+        table_weighted_count_,
         weighted_cube_counts_,
     ):
         is_defined_prop_.return_value = True
-        second_order_measures_.table_margin = table_margin_
-        table_margin_.is_defined = False
+        second_order_measures_.table_weighted_count = table_weighted_count_
+        table_weighted_count_.is_defined = False
         cube_measures_.weighted_cube_counts = weighted_cube_counts_
         weighted_cube_counts_.table_margin = [1.0, 2.0]
         table_margin1d = _MarginTableWeightedBases(
@@ -2461,7 +2461,7 @@ class Describe_MarginTableWeightedBases(object):
         return instance_mock(request, SecondOrderMeasures)
 
     @pytest.fixture
-    def table_margin_(self, request):
+    def table_weighted_count_(self, request):
         return instance_mock(request, _TableWeightedCount)
 
     @pytest.fixture

@@ -265,7 +265,7 @@ class SecondOrderMeasures(object):
         return _TableStandardError(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
-    def table_margin(self):
+    def table_weighted_count(self):
         """_TableWeightedCount scalar object for this cube-result."""
         return _TableWeightedCount(self._dimensions, self, self._cube_measures)
 
@@ -1996,8 +1996,8 @@ class _MarginTableWeightedBases(_BaseMarginal):
             raise ValueError(
                 "Could not calculate weighted-table-base-margin across subvariables"
             )
-        if self._second_order_measures.table_margin.is_defined:
-            table_margin = self._second_order_measures.table_margin.value
+        if self._second_order_measures.table_weighted_count.is_defined:
+            table_margin = self._second_order_measures.table_weighted_count.value
             return [np.full(shape, table_margin) for shape in self._shapes]
         # --- insertions are not possible on arrays, so we know insertion block is empty
         return [self._cube_measures.weighted_cube_counts.table_margin, np.array([])]

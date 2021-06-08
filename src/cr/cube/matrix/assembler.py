@@ -579,8 +579,8 @@ class Assembler(object):
             * X_ARRAY - 1D ndarray of value per *column* when only column is ARRAY.
             * ARRAY_X_ARRAY - 2D ndarray with a distinct table-margin value per cell.
         """
-        if self._measures.table_margin.is_defined:
-            return self._measures.table_margin.value
+        if self._measures.table_weighted_count.is_defined:
+            return self._measures.table_weighted_count.value
         if self._measures.columns_table_weighted_bases.is_defined:
             return self._assemble_marginal(self._measures.columns_table_weighted_bases)
         if self._measures.rows_table_weighted_bases.is_defined:
@@ -604,8 +604,8 @@ class Assembler(object):
         CAT_X_CAT matrix produces a scalar value for this property.
         """
         # TODO: see TODO in `.table_base_unpruned`
-        if self._measures.table_margin.is_defined:
-            return self._measures.table_margin.value
+        if self._measures.table_weighted_count.is_defined:
+            return self._measures.table_weighted_count.value
         if self._measures.columns_table_weighted_bases.is_defined:
             return self._measures.columns_table_weighted_bases.blocks[0]
         if self._measures.rows_table_weighted_bases.is_defined:
