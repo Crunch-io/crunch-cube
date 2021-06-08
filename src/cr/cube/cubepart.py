@@ -19,8 +19,9 @@ from __future__ import division
 
 import math
 import numpy as np
+from tabulate import tabulate
 
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT, CUBE_MEASURE as CM
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
@@ -199,6 +200,19 @@ class CubePartition(object):
         return tuple(sorted(value[:2]))
 
     @lazyproperty
+    def _available_measures(self):
+        """sorted list of available CUBE_MEASURE members in the cube response."""
+        return sorted(list(self._cube.available_measures), key=lambda el: el.name)
+
+    @lazyproperty
+    def _default_contents(self):
+        """1D/2D np.float64 ndarray of counts, means or sums, if available."""
+        measure = self._available_measures[0]
+        return getattr(
+            self, {CM.COUNT: "counts", CM.MEAN: "means", CM.SUM: "sums"}[measure]
+        )
+
+    @lazyproperty
     def _dimensions(self):
         """tuple of Dimension object for each dimension in cube-partition."""
         raise NotImplementedError(
@@ -247,6 +261,33 @@ class _Slice(CubePartition):
         self._slice_idx = slice_idx
         self._population = population
         self._mask_size = mask_size
+
+    def __repr__(self):
+        """Provide text representation suitable for working at console.
+
+        Falls back to a default repr on exception, such as might occur in
+        unit tests where object need not otherwise be provided with all
+        instance variable values.
+        """
+        try:
+            dimensionality = " x ".join(dt.name for dt in self.dimension_types)
+            title = "%s(name='%s', dimension_types='%s')" % (
+                type(self).__name__,
+                self.name,
+                dimensionality,
+            )
+            contents = [
+                [row_label] + row.tolist()
+                for row_label, row in zip(self.row_labels, self._default_contents)
+            ]
+            return (
+                title
+                + "\nShowing: %s" % self._available_measures[0].name
+                + "\n%s" % tabulate(contents, [""] + self.column_labels.tolist())
+                + "\nAvailable measures: %s" % str(self._available_measures)
+            )
+        except Exception:
+            return super(_Slice, self).__repr__()  # noqa
 
     # ---interface ---------------------------------------------------
 
@@ -1334,6 +1375,32 @@ class _Strand(CubePartition):
         self._ca_as_0th = ca_as_0th
         self._slice_idx = slice_idx
         self._mask_size = mask_size
+
+    def __repr__(self):
+        """Provide text representation suitable for working at console.
+
+        Falls back to a default repr on exception, such as might occur in
+        unit tests where object need not otherwise be provided with all
+        instance variable values.
+        """
+        try:
+            title = "%s(name='%s', dimension_type='%s')" % (
+                type(self).__name__,
+                self.name,
+                self.dimension_types[0].name,
+            )
+            contents = [
+                [row_label, row]
+                for row_label, row in zip(self.row_labels, self._default_contents)
+            ]
+            return (
+                title
+                + "\nShowing: %s" % self._available_measures[0].name
+                + "\n%s" % tabulate(contents, ["", self.name])
+                + "\nAvailable measures: %s" % str(self._available_measures)
+            )
+        except Exception:
+            return super(_Strand, self).__repr__()  # noqa
 
     @lazyproperty
     def counts(self):

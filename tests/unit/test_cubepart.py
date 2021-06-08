@@ -225,6 +225,13 @@ class DescribeCubePartition(object):
 class Describe_Slice(object):
     """Unit test suite for `cr.cube.cubepart._Slice` object."""
 
+    def it_provides_the_default_repr_when_enhanced_repr_fails(self):
+        cube = _Slice(None, None, None, None, None)
+
+        cube_repr = cube.__repr__()
+
+        assert cube_repr.startswith("<cr.cube.cubepart._Slice object at 0x")
+
     @pytest.mark.parametrize(
         "measure_name",
         (
@@ -420,6 +427,13 @@ class Describe_Slice(object):
 
 class Describe_Strand(object):
     """Unit test suite for `cr.cube.cubepart._Strand` object."""
+
+    def it_provides_the_default_repr_when_enhanced_repr_fails(self):
+        cube = _Strand(None, None, None, None, None, None)
+
+        cube_repr = cube.__repr__()
+
+        assert cube_repr.startswith("<cr.cube.cubepart._Strand object at 0x")
 
     def it_knows_which_of_its_rows_are_inserted(self, _assembler_prop_, assembler_):
         _assembler_prop_.return_value = assembler_
