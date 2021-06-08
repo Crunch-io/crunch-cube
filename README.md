@@ -113,6 +113,10 @@ The detailed description can be found
 
 ## Changes
 
+### 2.2.3
+- More sort-by-value support including a fallback to payload order
+
+
 ### 2.2.2
 - Can now sort by value for unweighted base and the margin proportion
 
