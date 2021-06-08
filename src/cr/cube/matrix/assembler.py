@@ -28,10 +28,7 @@ from cr.cube.enums import (
 )
 from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.measure import SecondOrderMeasures
-from cr.cube.matrix.subtotals import (
-    SumSubtotals,
-    TableStdErrSubtotals,
-)
+from cr.cube.matrix.subtotals import SumSubtotals
 from cr.cube.util import lazyproperty
 
 
@@ -609,6 +606,11 @@ class Assembler(object):
         return base_table_margin
 
     @lazyproperty
+    def table_proportion_variances(self):
+        """2D ndarray of np.float64 table-proportion variance for each matrix cell."""
+        return self._assemble_matrix(self._measures.table_proportion_variances.blocks)
+
+    @lazyproperty
     def table_proportions(self):
         """2D np.float64 ndarray of table-proportion for each matrix cell.
 
@@ -638,15 +640,9 @@ class Assembler(object):
         return self._cube_result_matrix.table_margin
 
     @lazyproperty
-    def table_stderrs(self):
+    def table_std_err(self):
         """2D np.float64 ndarray of std-error of table-percent for each matrix cell."""
-        return self._assemble_matrix(
-            TableStdErrSubtotals.blocks(
-                self._cube_result_matrix.table_stderrs,
-                self._dimensions,
-                self._cube_result_matrix,
-            )
-        )
+        return self._assemble_matrix(self._measures.table_std_err.blocks)
 
     @lazyproperty
     def table_unweighted_bases(self):

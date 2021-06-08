@@ -241,6 +241,7 @@ class Describe_Slice(object):
             "rows_scale_mean_stddev",
             "rows_scale_median",
             "table_proportions",
+            "table_std_err",
             "table_unweighted_bases",
             "table_weighted_bases",
         ),

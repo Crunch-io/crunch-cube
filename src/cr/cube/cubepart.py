@@ -1163,7 +1163,7 @@ class _Slice(CubePartition):
     @lazyproperty
     def table_std_dev(self):
         """2D np.float64 ndarray of std-dev of table-percent for each table cell."""
-        return np.sqrt(self._table_proportion_variance)
+        return np.sqrt(self._assembler.table_proportion_variances)
 
     @lazyproperty
     def table_std_err(self):
@@ -1171,7 +1171,7 @@ class _Slice(CubePartition):
 
         A cell value can be np.nan under certain conditions.
         """
-        return self._assembler.table_stderrs
+        return self._assembler.table_std_err
 
     @lazyproperty
     def table_unweighted_bases(self):
@@ -1305,12 +1305,6 @@ class _Slice(CubePartition):
     def _rows_have_numeric_value(self):
         """True when one or more row elements have an assigned numeric-value."""
         return not np.all(np.isnan(self._rows_dimension_numeric_values))
-
-    @lazyproperty
-    def _table_proportion_variance(self):
-        """2D ndarray of np.float64 table-proportion variance for each matrix cell."""
-        p = self.table_proportions
-        return p * (1 - p)
 
     @lazyproperty
     def _transform_dicts(self):
