@@ -64,11 +64,6 @@ class SecondOrderMeasures(object):
         return _ColumnStandardError(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
-    def columns_table_margin(self):
-        """_TableMargin1D measure object for this cube-result for columns."""
-        return _TableMargin1D(self._dimensions, self, self._cube_measures, MO.COLUMNS)
-
-    @lazyproperty
     def column_unweighted_bases(self):
         """_ColumnUnweightedBases measure object for this cube-result."""
         return _ColumnUnweightedBases(self._dimensions, self, self._cube_measures)
