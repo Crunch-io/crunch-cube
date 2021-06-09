@@ -149,11 +149,11 @@ class Assembler(object):
         # --- TODO: Should column_margin only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a
         # --- "column_margin_range"
-        if not self._measures.columns_weighted_counts.is_defined:
+        if not self._measures.columns_weighted_base.is_defined:
             return self.column_weighted_bases
 
         # --- otherwise columns-base is a vector ---
-        return self._assemble_marginal(self._measures.columns_weighted_counts)
+        return self._assemble_marginal(self._measures.columns_weighted_base)
 
     @lazyproperty
     def columns_margin_proportion(self):
@@ -161,7 +161,7 @@ class Assembler(object):
         # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
         # --- TODO: Should colums_margin_proportion only be defined when it's 1D? This
         # --- requires changes to exporter to use the bases to give a "rows_margin_range"
-        if not self._measures.columns_table_proportions.is_defined:
+        if not self._measures.columns_table_proportion.is_defined:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
                     self.columns_margin / self.table_weighted_bases,
@@ -170,7 +170,7 @@ class Assembler(object):
             )
 
         # --- otherwise columns-base is a vector ---
-        return self._assemble_marginal(self._measures.columns_table_proportions)
+        return self._assemble_marginal(self._measures.columns_table_proportion)
 
     @lazyproperty
     def columns_scale_mean(self):
@@ -412,7 +412,7 @@ class Assembler(object):
             return self.row_unweighted_bases
 
         # --- otherwise rows-base is a vector ---
-        return self._assemble_marginal(self._measures.rows_unweighted_counts)
+        return self._assemble_marginal(self._measures.rows_unweighted_base)
 
     @lazyproperty
     def rows_dimension_fills(self):
@@ -448,19 +448,19 @@ class Assembler(object):
         # --- This is really just another way to call the row_weighted_bases ---
         # --- TODO: Should rows_margin only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a "rows_margin_range"
-        if not self._measures.rows_weighted_counts.is_defined:
+        if not self._measures.rows_weighted_base.is_defined:
             return self.row_weighted_bases
 
         # --- otherwise rows-margin is a vector ---
-        return self._assemble_marginal(self._measures.rows_weighted_counts)
+        return self._assemble_marginal(self._measures.rows_weighted_base)
 
     @lazyproperty
     def rows_margin_proportion(self):
         """1D/2D np.float64 ndarray of weighted-proportion for each slice row/cell."""
         # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
-        # --- TODO: Should rows_table_proportions only be defined when it's 1D? This would
+        # --- TODO: Should rows_table_proportion only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a "rows_margin_range"
-        if not self._measures.rows_table_proportions.is_defined:
+        if not self._measures.rows_table_proportion.is_defined:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
                     self.rows_margin / self.table_weighted_bases,
@@ -469,7 +469,7 @@ class Assembler(object):
             )
 
         # --- otherwise rows-margin is a vector ---
-        return self._assemble_marginal(self._measures.rows_table_proportions)
+        return self._assemble_marginal(self._measures.rows_table_proportion)
 
     @lazyproperty
     def rows_scale_mean(self):
@@ -581,10 +581,10 @@ class Assembler(object):
         """
         if self._measures.table_weighted_count.is_defined:
             return self._measures.table_weighted_count.value
-        if self._measures.columns_table_weighted_bases.is_defined:
-            return self._assemble_marginal(self._measures.columns_table_weighted_bases)
-        if self._measures.rows_table_weighted_bases.is_defined:
-            return self._assemble_marginal(self._measures.rows_table_weighted_bases)
+        if self._measures.columns_table_weighted_base.is_defined:
+            return self._assemble_marginal(self._measures.columns_table_weighted_base)
+        if self._measures.rows_table_weighted_base.is_defined:
+            return self._assemble_marginal(self._measures.rows_table_weighted_base)
         return self.table_weighted_bases
 
     @lazyproperty
@@ -606,10 +606,10 @@ class Assembler(object):
         # TODO: see TODO in `.table_base_unpruned`
         if self._measures.table_weighted_count.is_defined:
             return self._measures.table_weighted_count.value
-        if self._measures.columns_table_weighted_bases.is_defined:
-            return self._measures.columns_table_weighted_bases.blocks[0]
-        if self._measures.rows_table_weighted_bases.is_defined:
-            return self._measures.rows_table_weighted_bases.blocks[0]
+        if self._measures.columns_table_weighted_base.is_defined:
+            return self._measures.columns_table_weighted_base.blocks[0]
+        if self._measures.rows_table_weighted_base.is_defined:
+            return self._measures.rows_table_weighted_base.blocks[0]
         return self._measures.table_weighted_bases.blocks[0][0]
 
     @lazyproperty
@@ -1176,9 +1176,9 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
         """Marginal object providing values for sort."""
         marginal = self._order_spec.marginal
         marginal_propname = {
-            MARGINAL.BASE: "rows_unweighted_counts",
-            MARGINAL.MARGIN: "rows_weighted_counts",
-            MARGINAL.MARGIN_PROPORTION: "rows_table_proportions",
+            MARGINAL.BASE: "rows_unweighted_base",
+            MARGINAL.MARGIN: "rows_weighted_base",
+            MARGINAL.MARGIN_PROPORTION: "rows_table_proportion",
             MARGINAL.SCALE_MEAN: "rows_scale_mean",
             MARGINAL.SCALE_MEAN_STDDEV: "rows_scale_mean_stddev",
             MARGINAL.SCALE_MEDIAN: "rows_scale_median",

@@ -685,13 +685,13 @@ class Describe_Slice(object):
 
         assert (
             slice_._assembler._assemble_marginal(
-                slice_._assembler._measures.rows_weighted_counts
+                slice_._assembler._measures.rows_weighted_base
             )
             is None
         )
         assert (
             slice_._assembler._assemble_marginal(
-                slice_._assembler._measures.columns_weighted_counts
+                slice_._assembler._measures.columns_weighted_base
             )
             is None
         )
