@@ -53,7 +53,7 @@ from cr.cube.matrix.measure import (
     _TableStandardError,
     _TableUnweightedBases,
     _TableWeightedBases,
-    _UnweightedBaseMargin,
+    _MarginUnweightedBase,
     _UnweightedCounts,
     _WeightedCounts,
     _Zscores,
@@ -370,33 +370,32 @@ class DescribeAssembler(object):
 
     def it_provides_a_1D_rows_base_for_an_X_CAT_cube_result(
         self,
-        _columns_dimension_prop_,
-        dimension_,
         _measures_prop_,
         second_order_measures_,
         _assemble_marginal_,
-        base_margin_,
+        margin_unweighted_base_,
     ):
-        _columns_dimension_prop_.return_value = dimension_
-        dimension_.dimension_type = DT.CAT
-        second_order_measures_.rows_base = base_margin_
+        margin_unweighted_base_.is_defined = True
+        second_order_measures_.rows_unweighted_base = margin_unweighted_base_
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
         assembler = Assembler(None, None, None)
 
         rows_base = assembler.rows_base
 
-        _assemble_marginal_.assert_called_once_with(assembler, base_margin_)
+        _assemble_marginal_.assert_called_once_with(assembler, margin_unweighted_base_)
         assert rows_base == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_rows_base_for_an_X_MR_cube_result(
         self,
         request,
-        _columns_dimension_prop_,
-        dimensions_,
+        _measures_prop_,
+        second_order_measures_,
+        margin_unweighted_base_,
     ):
-        _columns_dimension_prop_.return_value = dimensions_[1]
-        dimensions_[1].dimension_type = DT.MR_SUBVAR
+        margin_unweighted_base_.is_defined = False
+        second_order_measures_.rows_unweighted_base = margin_unweighted_base_
+        _measures_prop_.return_value = second_order_measures_
         property_mock(
             request,
             Assembler,
@@ -881,8 +880,8 @@ class DescribeAssembler(object):
         return method_mock(request, Assembler, "_assemble_matrix")
 
     @pytest.fixture
-    def base_margin_(self, request):
-        return instance_mock(request, _UnweightedBaseMargin)
+    def margin_unweighted_base_(self, request):
+        return instance_mock(request, _MarginUnweightedBase)
 
     @pytest.fixture
     def _BaseOrderHelper_(self, request):

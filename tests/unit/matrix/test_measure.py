@@ -47,7 +47,7 @@ from cr.cube.matrix.measure import (
     _TableWeightedBases,
     _TableWeightedBase,
     _TotalShareSum,
-    _UnweightedBaseMargin,
+    _MarginUnweightedBase,
     _UnweightedCounts,
     _WeightedCounts,
     _Zscores,
@@ -2469,8 +2469,8 @@ class Describe_MarginWeightedBase(object):
         )
 
 
-class Describe_UnweightedBaseMargin(object):
-    """Unit test suite for `cr.cube.matrix.measure._UnweightedBaseMargin` object."""
+class Describe_MarginUnweightedBase(object):
+    """Unit test suite for `cr.cube.matrix.measure._MarginUnweightedBase` object."""
 
     def it_provides_blocks_for_rows(
         self,
@@ -2486,7 +2486,7 @@ class Describe_UnweightedBaseMargin(object):
             request, _RowUnweightedBases, blocks=blocks_
         )
         second_order_measures_.row_unweighted_bases = row_unweighted_bases_
-        margin_ = _UnweightedBaseMargin(None, second_order_measures_, None, None)
+        margin_ = _MarginUnweightedBase(None, second_order_measures_, None, None)
 
         actual = margin_.blocks
 
@@ -2507,7 +2507,7 @@ class Describe_UnweightedBaseMargin(object):
             request, _RowUnweightedBases, blocks=blocks_
         )
         second_order_measures_.column_unweighted_bases = column_unweighted_bases_
-        margin_ = _UnweightedBaseMargin(None, second_order_measures_, None, None)
+        margin_ = _MarginUnweightedBase(None, second_order_measures_, None, None)
 
         actual = margin_.blocks
 
@@ -2516,7 +2516,7 @@ class Describe_UnweightedBaseMargin(object):
 
     def but_blocks_raises_if_undefined(self, is_defined_prop_):
         is_defined_prop_.return_value = False
-        margin_ = _UnweightedBaseMargin(None, None, None, None)
+        margin_ = _MarginUnweightedBase(None, None, None, None)
 
         with pytest.raises(ValueError) as e:
             margin_.blocks
@@ -2525,10 +2525,10 @@ class Describe_UnweightedBaseMargin(object):
 
     def it_can_tell_if_it_is_defined(self, request):
         property_mock(request, _BaseMarginal, "_counts_are_defined")
-        unweighted_base_margin = _UnweightedBaseMargin(None, None, None, None)
+        margin_unweighted_base = _MarginUnweightedBase(None, None, None, None)
         assert (
-            unweighted_base_margin.is_defined
-            == unweighted_base_margin._counts_are_defined
+            margin_unweighted_base.is_defined
+            == margin_unweighted_base._counts_are_defined
         )
 
     # fixture components ---------------------------------------------
@@ -2542,11 +2542,11 @@ class Describe_UnweightedBaseMargin(object):
 
     @pytest.fixture
     def is_defined_prop_(self, request):
-        return property_mock(request, _UnweightedBaseMargin, "is_defined")
+        return property_mock(request, _MarginUnweightedBase, "is_defined")
 
     @pytest.fixture
     def orientation_prop_(self, request):
-        return property_mock(request, _UnweightedBaseMargin, "orientation")
+        return property_mock(request, _MarginUnweightedBase, "orientation")
 
     @pytest.fixture
     def second_order_measures_(self, request):

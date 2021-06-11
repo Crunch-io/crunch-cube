@@ -66,19 +66,10 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def columns_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix column."""
+        # --- TODO: Should use `_MarginUnweightedBase` and be called 
+        # --- `columns_unweighted_base` when unweighted counts are 
+        # --- refactored to not add across subvariables
         return _ColumnsBase(self._dimensions, self, self._cube_measures)
-
-    @lazyproperty
-    def columns_weighted_base(self):
-        """_MarginWeightedBase for columns measure object for this cube-result.
-
-        Formerly called the 1D columns-margin, this is the weighted base of the column
-        margin, the sum across the columns of the weighted counts for non-MR or selected
-        & non-selected for MR.
-        """
-        return _MarginWeightedBase(
-            self._dimensions, self, self._cube_measures, MO.COLUMNS
-        )
 
     @lazyproperty
     def columns_table_proportion(self):
@@ -136,6 +127,18 @@ class SecondOrderMeasures(object):
         of selected and non-selected for MR variables)
         """
         return _MarginTableWeightedBase(
+            self._dimensions, self, self._cube_measures, MO.COLUMNS
+        )
+
+    @lazyproperty
+    def columns_weighted_base(self):
+        """_MarginWeightedBase for columns measure object for this cube-result.
+
+        Formerly called the 1D columns-margin, this is the weighted base of the column
+        margin, the sum across the columns of the weighted counts for non-MR or selected
+        & non-selected for MR.
+        """
+        return _MarginWeightedBase(
             self._dimensions, self, self._cube_measures, MO.COLUMNS
         )
 
@@ -222,21 +225,24 @@ class SecondOrderMeasures(object):
         return _RowWeightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
-    def rows_base(self):
-        """1D np.float64 ndarray of unweighted-N for each matrix column."""
-        return _UnweightedBaseMargin(
-            self._dimensions, self, self._cube_measures, MO.ROWS
-        )
+    def rows_pruning_base(self):
+        """1D np.float64 ndarray of unweighted-N for each matrix row."""
+        return self._cube_measures.unweighted_cube_counts.rows_pruning_base
 
     @lazyproperty
-    def rows_weighted_base(self):
-        """_MarginWeightedBase for rows measure object for this cube-result.
+    def rows_scale_mean(self):
+        """_ScaleMean for rows measure object for this cube-result."""
+        return _ScaleMean(self._dimensions, self, self._cube_measures, MO.ROWS)
 
-        Formerly called the 1D rows-margin, this is the weighted base of the column
-        margin, the sum across the rows of the weighted counts for non-MR or selected
-        & non-selected for MR.
-        """
-        return _MarginWeightedBase(self._dimensions, self, self._cube_measures, MO.ROWS)
+    @lazyproperty
+    def rows_scale_mean_stddev(self):
+        """_ScaleMeanStddev for rpws measure object for this cube-result."""
+        return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, MO.ROWS)
+
+    @lazyproperty
+    def rows_scale_median(self):
+        """_ScaleMedian for rows measure object for this cube-result."""
+        return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def rows_table_proportion(self):
@@ -258,26 +264,6 @@ class SecondOrderMeasures(object):
         )
 
     @lazyproperty
-    def rows_pruning_base(self):
-        """1D np.float64 ndarray of unweighted-N for each matrix row."""
-        return self._cube_measures.unweighted_cube_counts.rows_pruning_base
-
-    @lazyproperty
-    def rows_scale_mean(self):
-        """_ScaleMean for rows measure object for this cube-result."""
-        return _ScaleMean(self._dimensions, self, self._cube_measures, MO.ROWS)
-
-    @lazyproperty
-    def rows_scale_mean_stddev(self):
-        """_ScaleMeanStddev for rpws measure object for this cube-result."""
-        return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, MO.ROWS)
-
-    @lazyproperty
-    def rows_scale_median(self):
-        """_ScaleMedian for rows measure object for this cube-result."""
-        return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.ROWS)
-
-    @lazyproperty
     def rows_table_weighted_base(self):
         """_MarginTableWeightedBase measure object for this cube-result for rows.
 
@@ -296,6 +282,23 @@ class SecondOrderMeasures(object):
         return _MarginTableWeightedBase(
             self._dimensions, self, self._cube_measures, MO.ROWS
         )
+
+    @lazyproperty
+    def rows_unweighted_base(self):
+        """1D np.float64 ndarray of unweighted-N for each matrix column."""
+        return _MarginUnweightedBase(
+            self._dimensions, self, self._cube_measures, MO.ROWS
+        )
+
+    @lazyproperty
+    def rows_weighted_base(self):
+        """_MarginWeightedBase for rows measure object for this cube-result.
+
+        Formerly called the 1D rows-margin, this is the weighted base of the column
+        margin, the sum across the rows of the weighted counts for non-MR or selected
+        & non-selected for MR.
+        """
+        return _MarginWeightedBase(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def sums(self):
@@ -2115,13 +2118,48 @@ class _MarginTableWeightedBase(_BaseMarginal):
         return (len(dim.element_ids), len(dim.insertion_ids))
 
 
+class _MarginUnweightedBase(_BaseMarginal):
+    """The 'margin-unweighted base', a 1D weighted base in the margin
+
+    This is the sum of the unweighted counts across a non-array dimension, It is called
+    "Unweighted N" when put in the margin of  the web app. Since we cannot add across
+    array variables, we cannot reduce the dimensionality to get to a margin when there
+    are arrays, each cell has it's own value.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin.
+
+        These are the base-values and the subtotals.
+        """
+        if not self.is_defined:
+            raise ValueError("Cannot calculate base across subvariables dimension.")
+
+        # --- Since we know we're not an array variable, we can trust that
+        # --- the 2D array for the unweighted bases measure is the same in
+        # --- the direction we need. Therefore, we can just grab the first
+        # --- row/column of that.
+        if self.orientation == MO.ROWS:
+            bases = self._second_order_measures.row_unweighted_bases.blocks
+            return [bases[0][0][:, 0], bases[1][0][:, 0]]
+        else:
+            bases = self._second_order_measures.column_unweighted_bases.blocks
+            return [bases[0][0][0, :], bases[0][1][0, :]]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if counts are defined."""
+        return self._counts_are_defined
+
+
 class _MarginWeightedBase(_BaseMarginal):
     """The 'margin-weighted base', a 1D weighted base in the margin
 
-    This is the sum of the weighted counts across a non-array dimension, and is undefined
-    when it would require summing across an array dimension. Since we cannot add across
-    array variables, we cannot reduce the dimensionality to get to a margin when there
-    are arrays, each cell has it's own value.
+    This is the sum of the weighted counts across a non-array dimension, It is called
+    "Weighted N" when put in the margin of  the web app. Since we cannot add across array
+    variables, we cannot reduce the dimensionality to get to a margin when there are
+    arrays, each cell has it's own value.
     """
 
     @lazyproperty
@@ -2383,35 +2421,6 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
             if self.orientation == MO.ROWS
             else self._columns_weighted_mean_stddev
         )
-
-
-class _UnweightedBaseMargin(_BaseMarginal):
-    """The unweighted bases margin (sum of unweighted counts)"""
-
-    @lazyproperty
-    def blocks(self):
-        """List of the 2 1D ndarray "blocks" of the summed count margin.
-
-        These are the base-values and the subtotals.
-        """
-        if not self.is_defined:
-            raise ValueError("Cannot calculate base across subvariables dimension.")
-
-        # --- Since we know we're not an array variable, we can trust that
-        # --- the 2D array for the unweighted bases measure is the same in
-        # --- the direction we need. Therefore, we can just grab the first
-        # --- row/column of that.
-        if self.orientation == MO.ROWS:
-            bases = self._second_order_measures.row_unweighted_bases.blocks
-            return [bases[0][0][:, 0], bases[1][0][:, 0]]
-        else:
-            bases = self._second_order_measures.column_unweighted_bases.blocks
-            return [bases[0][0][0, :], bases[0][1][0, :]]
-
-    @lazyproperty
-    def is_defined(self):
-        """True if counts are defined."""
-        return self._counts_are_defined
 
 
 # === SCALAR TABLE VALUES ===

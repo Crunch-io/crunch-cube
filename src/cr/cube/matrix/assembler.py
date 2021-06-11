@@ -409,11 +409,11 @@ class Assembler(object):
         # --- an X_ARRAY slice produces a 2D row-base (each cell has its own N) ---
         # --- TODO: Should rows_base only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a "rows_base_range"
-        if self._columns_dimension.dimension_type in DT.ARRAY_TYPES:
+        if not self._measures.rows_unweighted_base.is_defined:
             return self.row_unweighted_bases
 
         # --- otherwise rows-base is a vector ---
-        return self._assemble_marginal(self._measures.rows_base)
+        return self._assemble_marginal(self._measures.rows_unweighted_base)
 
     @lazyproperty
     def rows_dimension_fills(self):
@@ -1201,7 +1201,7 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
         """Marginal object providing values for sort."""
         marginal = self._order_spec.marginal
         marginal_propname = {
-            MARGINAL.BASE: "rows_base",
+            MARGINAL.BASE: "rows_unweighted_base",
             MARGINAL.MARGIN: "rows_weighted_base",
             MARGINAL.MARGIN_PROPORTION: "rows_table_proportion",
             MARGINAL.SCALE_MEAN: "rows_scale_mean",
