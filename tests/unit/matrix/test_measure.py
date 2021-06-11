@@ -28,6 +28,7 @@ from cr.cube.matrix.measure import (
     _PairwiseMeansSigTStats,
     _PopulationProportions,
     _MarginProportion,
+    _MarginTableWeightedBase,
     _RowComparableCounts,
     _RowProportions,
     _RowShareSum,
@@ -1852,6 +1853,126 @@ class Describe_BaseScaledCountMarginal(object):
         )
 
         assert marginal._opposing_numeric_values == expected
+
+
+class Describe_MarginTableWeightedBase(object):
+    """Unit test suite for `cr.cube.matrix.measure._MarginTableWeightedBase` object."""
+
+    def it_provides_blocks_if_scalar_table_weighted_base_defined(
+        self, request, is_defined_prop_, second_order_measures_, table_weighted_base_
+    ):
+        is_defined_prop_.return_value = True
+        second_order_measures_.table_weighted_base = table_weighted_base_
+        table_weighted_base_.is_defined = True
+        table_weighted_base_.value = 1.0
+        property_mock(request, _MarginTableWeightedBase, "_shapes", return_value=(2, 3))
+        table_weighted_base = _MarginTableWeightedBase(
+            None, second_order_measures_, None, None
+        )
+
+        results = table_weighted_base.blocks
+
+        assert results[0].tolist() == [1.0, 1.0]
+        assert results[1].tolist() == [1.0, 1.0, 1.0]
+
+    def and_it_provides_blocks_if_vector_table_margin(
+        self,
+        is_defined_prop_,
+        cube_measures_,
+        second_order_measures_,
+        table_weighted_base_,
+        weighted_cube_counts_,
+    ):
+        is_defined_prop_.return_value = True
+        second_order_measures_.table_weighted_base = table_weighted_base_
+        table_weighted_base_.is_defined = False
+        cube_measures_.weighted_cube_counts = weighted_cube_counts_
+        weighted_cube_counts_.table_margin = [1.0, 2.0]
+        table_weighted_base = _MarginTableWeightedBase(
+            None, second_order_measures_, cube_measures_, None
+        )
+
+        results = table_weighted_base.blocks
+
+        assert results[0] == [1.0, 2.0]
+        assert results[1].tolist() == []
+
+    def but_it_raises_if_undefined(self, is_defined_prop_):
+        is_defined_prop_.return_value = False
+
+        with pytest.raises(ValueError) as e:
+            _MarginTableWeightedBase(None, None, None, None).blocks
+
+        assert (
+            str(e.value)
+            == "Could not calculate weighted-table-base-margin across subvariables"
+        )
+
+    @pytest.mark.parametrize(
+        "row_dim_type, col_dim_type, orientation, expected",
+        (
+            (DT.CAT, DT.CAT, MO.ROWS, True),
+            (DT.CAT, DT.CAT, MO.COLUMNS, True),
+            (DT.NUM_ARRAY, DT.CAT, MO.ROWS, True),
+            (DT.NUM_ARRAY, DT.CAT, MO.COLUMNS, False),
+            (DT.CAT, DT.CA_SUBVAR, MO.ROWS, False),
+            (DT.CAT, DT.CA_SUBVAR, MO.COLUMNS, True),
+            (DT.CAT, DT.MR, MO.ROWS, False),
+        ),
+    )
+    def it_can_tell_if_it_is_defined(
+        self, dimensions_, row_dim_type, col_dim_type, orientation, expected
+    ):
+        dimensions_[0].dimension_type = row_dim_type
+        dimensions_[1].dimension_type = col_dim_type
+
+        table_weighted_base = _MarginTableWeightedBase(
+            dimensions_, None, None, orientation
+        )
+
+        assert table_weighted_base.is_defined == expected
+
+    def it_knows_its_shapes_for_rows_orientation(self, dimensions_):
+        dimensions_[0].element_ids = (1, 2)
+        dimensions_[0].insertion_ids = (-1, -2, -3)
+        table_weighted_base = _MarginTableWeightedBase(dimensions_, None, None, MO.ROWS)
+
+        assert table_weighted_base._shapes == (2, 3)
+
+    def it_knows_its_shapes_for_columns_orientation(self, dimensions_):
+        dimensions_[1].element_ids = (1, 2, 3)
+        dimensions_[1].insertion_ids = tuple()
+        table_weighted_base = _MarginTableWeightedBase(
+            dimensions_, None, None, MO.COLUMNS
+        )
+
+        assert table_weighted_base._shapes == (3, 0)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_measures_(self, request):
+        return instance_mock(request, CubeMeasures)
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def is_defined_prop_(self, request):
+        return property_mock(request, _MarginTableWeightedBase, "is_defined")
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
+
+    @pytest.fixture
+    def table_weighted_base_(self, request):
+        return instance_mock(request, _TableWeightedBase)
+
+    @pytest.fixture
+    def weighted_cube_counts_(self, request):
+        return instance_mock(request, _BaseWeightedCubeCounts)
 
 
 class Describe_MarginProportion(object):

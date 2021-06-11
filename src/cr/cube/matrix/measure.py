@@ -103,6 +103,26 @@ class SecondOrderMeasures(object):
         return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.COLUMNS)
 
     @lazyproperty
+    def columns_table_weighted_base(self):
+        """_MarginTableWeightedBase measure object for this cube-result for columns.
+
+        The name is a mouthful, but each component is important.
+
+        - "columns": Indicates it is a marginal in the "columns" orientation (kind of
+        like a stripe in the shape of a row).
+        - "table": Indicates that it is the base for the whole table. When the
+        `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
+        the columns are array (and therefore we can't sum across them), each cell has
+        its own value.
+        - "weighted": Indicates that weights are used
+        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
+        of selected and non-selected for MR variables)
+        """
+        return _MarginTableWeightedBase(
+            self._dimensions, self, self._cube_measures, MO.COLUMNS
+        )
+
+    @lazyproperty
     def means(self):
         """_Means measure object for this cube-result"""
         return _Means(self._dimensions, self, self._cube_measures)
@@ -220,6 +240,26 @@ class SecondOrderMeasures(object):
     def rows_scale_median(self):
         """_ScaleMedian for rows measure object for this cube-result."""
         return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.ROWS)
+
+    @lazyproperty
+    def rows_table_weighted_base(self):
+        """_MarginTableWeightedBase measure object for this cube-result for rows.
+
+        The name is a mouthful, but each component is important.
+
+        - "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
+        stripe in the shape of a column).
+        - "table": Indicates that it is the base for the whole table. When the
+        `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
+        the rows are array (and therefore we can't sum across them), each cell has
+        its own value.
+        - "weighted": Indicates that weights are used
+        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
+        of selected and non-selected for MR variables)
+        """
+        return _MarginTableWeightedBase(
+            self._dimensions, self, self._cube_measures, MO.ROWS
+        )
 
     @lazyproperty
     def sums(self):
@@ -1953,6 +1993,64 @@ class _MarginProportion(_BaseMarginal):
             counts = [counts[0][0], counts[0][1]]
 
         return [self._apply_along_orientation(np.sum, count) for count in counts]
+
+
+class _MarginTableWeightedBase(_BaseMarginal):
+    """The 'margin-weighted-table-bases', or the denominator for margin-table-proportion
+
+    A consistently 1D form of what used to be called the table_margin. The name is a
+    mouthful, but each component is important.
+
+    - "margin": Indicates it is a marginal eg 1D (either in rows or columns orientation)
+    - "table": Indicates that it is the base for the whole table. When the
+    `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
+    the corresponding dimension is an array (and therefore we can't sum across them),
+    each cell has its own value.
+    - "weighted": Indicates that weights are used
+    - "base": Indicates that it is the base, not necessarily the counts (eg the sum
+    of selected and non-selected for MR variables)
+
+    There are 3 cases:
+
+    - The opposing dimension is an array: There is no 1D representation of the table
+      margin for this orientation, so it is undefined.
+    - The corresponding dimension is an array: There is a unique margin table base for each
+      array. No subtotals are possible on array variables, so the insertion block will
+      always be empty.
+    - Neither dimension is an array: The table weighted count scalar exists, and needs to
+      repeated into 1D blocks (insertions are possible and are also repetitions of the
+      scalar).
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin."""
+        if not self.is_defined:
+            raise ValueError(
+                "Could not calculate weighted-table-base-margin across subvariables"
+            )
+        if self._second_order_measures.table_weighted_base.is_defined:
+            table_margin = self._second_order_measures.table_weighted_base.value
+            return [np.full(shape, table_margin) for shape in self._shapes]
+        # --- insertions are not possible on arrays, so we know insertion block is empty
+        return [self._cube_measures.weighted_cube_counts.table_margin, np.array([])]
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool indicating whether the margin is defined in this orientation
+
+        True if the opposing dimension is not an array.
+        """
+        dim = 1 if self.orientation == MO.ROWS else 0
+        return self._dimensions[dim].dimension_type not in DT.ARRAY_TYPES
+
+    @lazyproperty
+    def _shapes(self):
+        """Tuple of ints that indicate the sizes of the elements and insertion blocks"""
+        dim = (
+            self._dimensions[0] if self.orientation == MO.ROWS else self._dimensions[1]
+        )
+        return (len(dim.element_ids), len(dim.insertion_ids))
 
 
 class _ScaleMean(_BaseScaledCountMarginal):
