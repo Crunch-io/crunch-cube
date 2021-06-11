@@ -252,6 +252,15 @@ class SecondOrderMeasures(object):
         return _TableUnweightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def table_weighted_base(self):
+        """_TableWeightedBase measure object for this cube-result.
+
+        A scalar value that is the base for the whole table. It is only defined
+        when both dimensions are CAT and is equal to the sum of all the counts.
+        """
+        return _TableWeightedBase(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def table_weighted_bases(self):
         """_TableWeightedBases measure object for this cube-result."""
         return _TableWeightedBases(self._dimensions, self, self._cube_measures)
@@ -2237,6 +2246,44 @@ class _UnweightedBaseMargin(_BaseMarginal):
     def is_defined(self):
         """True if counts are defined."""
         return self._counts_are_defined
+
+
+# === SCALAR TABLE VALUES ===
+
+
+class _TableWeightedBase(object):
+    """The 'table-weighted-base', a scalar base for the whole table
+
+    The table-weighted-base is only defined when both rows and columns dimensions
+    are non-array and is equal to the sum of all counts. It was formerly known as the
+    'table-margin' when it was a scalar (which was also only when neither dimension is
+    an arary).
+    """
+
+    def __init__(self, dimensions, second_order_measures, cube_measures):
+        self._dimensions = dimensions
+        self._second_order_measures = second_order_measures
+        self._cube_measures = cube_measures
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool indicating whether the table-margin is defined
+
+        It is defined (as a scalar) only when neither dimension is an array
+        """
+        return (
+            not self._dimensions[0].dimension_type in DT.ARRAY_TYPES
+            and not self._dimensions[1].dimension_type in DT.ARRAY_TYPES
+        )
+
+    @lazyproperty
+    def value(self):
+        """float of the table-margin"""
+        if not self.is_defined:
+            raise ValueError(
+                "Cannot sum across subvariables dimension for table weighted base scalar"
+            )
+        return self._cube_measures.weighted_cube_counts.table_margin
 
 
 # === PAIRWISE HELPERS ===

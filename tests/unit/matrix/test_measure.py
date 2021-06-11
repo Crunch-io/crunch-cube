@@ -44,6 +44,7 @@ from cr.cube.matrix.measure import (
     _TableStandardError,
     _TableUnweightedBases,
     _TableWeightedBases,
+    _TableWeightedBase,
     _TotalShareSum,
     _UnweightedBaseMargin,
     _UnweightedCounts,
@@ -175,6 +176,29 @@ class DescribeSecondOrderMeasures(object):
             dimensions_, measures, cube_measures_, MO(orientation)
         )
         assert marginal is marginal_
+
+    def it_provides_access_to_the_table_weighted_base_scalar(
+        self,
+        request,
+        dimensions_,
+        _cube_measures_prop_,
+        cube_measures_,
+    ):
+        table_weighted_base_ = instance_mock(request, _TableWeightedBase)
+        _TableWeightedBase_ = class_mock(
+            request,
+            "cr.cube.matrix.measure._TableWeightedBase",
+            return_value=table_weighted_base_,
+        )
+        _cube_measures_prop_.return_value = cube_measures_
+        measures = SecondOrderMeasures(None, dimensions_, None)
+
+        table_weighted_base = measures.table_weighted_base
+
+        _TableWeightedBase_.assert_called_once_with(
+            dimensions_, measures, cube_measures_
+        )
+        assert table_weighted_base is table_weighted_base_
 
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
@@ -2402,3 +2426,56 @@ class Describe_UnweightedBaseMargin(object):
     @pytest.fixture
     def second_order_measures_(self, request):
         return instance_mock(request, SecondOrderMeasures)
+
+
+# === Scalars ===
+
+
+class Describe_TableWeightedBase(object):
+    """Unit test suite for `cr.cube.matrix.measure._TableWeightedBase` object."""
+
+    @pytest.mark.parametrize(
+        "row_dim_type, col_dim_type, expected",
+        (
+            (DT.CAT, DT.CAT, True),
+            (DT.CAT, DT.NUM_ARRAY, False),
+            (DT.CA_SUBVAR, DT.CAT, False),
+            (DT.CAT, DT.MR, False),
+        ),
+    )
+    def it_knows_if_it_is_defined(self, request, row_dim_type, col_dim_type, expected):
+        dimensions_ = (
+            instance_mock(request, Dimension, dimension_type=row_dim_type),
+            instance_mock(request, Dimension, dimension_type=col_dim_type),
+        )
+
+        assert _TableWeightedBase(dimensions_, None, None).is_defined == expected
+
+    def it_provides_its_value(self, request, is_defined_prop_):
+        is_defined_prop_.return_value = True
+        weighted_cube_counts_ = instance_mock(
+            request, _BaseWeightedCubeCounts, table_margin=2.0
+        )
+        cube_measures_ = instance_mock(
+            request, CubeMeasures, weighted_cube_counts=weighted_cube_counts_
+        )
+        table_margin = _TableWeightedBase(None, None, cube_measures_)
+
+        assert table_margin.value == 2.0
+
+    def but_it_raises_if_it_is_not_defined(self, is_defined_prop_):
+        is_defined_prop_.return_value = False
+
+        with pytest.raises(ValueError) as e:
+            _TableWeightedBase(None, None, None).value
+
+        assert (
+            str(e.value)
+            == "Cannot sum across subvariables dimension for table weighted base scalar"
+        )
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def is_defined_prop_(self, request):
+        return property_mock(request, _TableWeightedBase, "is_defined")
