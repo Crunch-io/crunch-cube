@@ -76,9 +76,21 @@ class SecondOrderMeasures(object):
         )
 
     @lazyproperty
-    def columns_margin_proportion(self):
-        """_MarginProportion for measure object for this cube-result."""
-        return _MarginProportion(
+    def columns_table_proportion(self):
+        """_MarginTableProportion for measure object for columns of this cube-result.
+
+        The name is a bit of a mouthful, but each component is meaningful.
+        - "columns": Indicates it is a marginal in the "columns" orientation (kind of
+        like a stripe in the shape of a row).
+        - "table": Indicates that it is the proportion for the whole table, meaning it
+        uses the `columns_table_weighted_base` as the denominator.
+        - "proportion": It is a proportion, the `columns_weighted_base` divided
+        by the `columns_table_weighted_base`
+
+        Note that there is an implied "weighted" here, which we do not spell out because
+        we never calculate unweighted proportions.
+        """
+        return _MarginTableProportion(
             self._dimensions, self, self._cube_measures, MO.COLUMNS
         )
 
@@ -217,9 +229,23 @@ class SecondOrderMeasures(object):
         return _SummedCountMargin(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
-    def rows_margin_proportion(self):
-        """_MarginProportion for measure object for this cube-result."""
-        return _MarginProportion(self._dimensions, self, self._cube_measures, MO.ROWS)
+    def rows_table_proportion(self):
+        """_MarginTableProportion for measure object for this cube-result.
+
+        The name is a bit of a mouthful, but each component is meaningful.
+        - "rows": Indicates it is a marginal in the "rows" orientation (kind of
+        like a stripe in the shape of a column).
+        - "table": Indicates that it is the proportion for the whole table, meaning it
+        uses the `rows_table_weighted_base` as the denominator.
+        - "proportion": It is a proportion, the `rows_weighted_base` divided
+        by the `rows_table_weighted_base`
+
+        Note that there is an implied "weighted" here, which we do not spell out because
+        we never calculate unweighted proportions.
+        """
+        return _MarginTableProportion(
+            self._dimensions, self, self._cube_measures, MO.ROWS
+        )
 
     @lazyproperty
     def rows_pruning_base(self):
@@ -1948,8 +1974,22 @@ class _BaseScaledCountMarginal(_BaseMarginal):
         )
 
 
-class _MarginProportion(_BaseMarginal):
-    """The 'proportion-margin' (aka rows-margin-proportion/columns-margin-proportion)"""
+class _MarginTableProportion(_BaseMarginal):
+    """The 'margin-table-proportion', table proportion of the marginal values
+
+    The name is a bit of a mouthful, but each component is meaningful.
+    - "margin": Indicates it is a marginal eg 1D (either in rows or columns orientation)
+    - "table": Indicates that it is the proportion for the whole table, meaning it uses
+      the `_MarginTableWeightedBase` as the denominator.
+    - "proportion": It is a proportion, eg the `_MarginWeightedBase` divided by the
+      `_MarginTableWeightedBase`
+
+    Note that there is an implied "weighted" here, which we do not spell out because we
+    never calculate unweighted proportions.
+
+    Also note we don't actually use the `_MarginWeightedBase` as the numerator here
+    because we want values for subtotal differences. See `._proportion_numerators`
+    """
 
     @lazyproperty
     def blocks(self):
@@ -1957,15 +1997,10 @@ class _MarginProportion(_BaseMarginal):
 
         These are the base-values and the subtotals.
         """
-        denominator = self._cube_measures.weighted_cube_counts.table_margin
-        base_values = self._proportion_numerators[0] / denominator
-        # --- if insertion numerator is empty (eg no insertions) don't divide ---
-        insertions = (
-            self._proportion_numerators[1]
-            if self._proportion_numerators[1].shape == (0,)
-            else self._proportion_numerators[1] / denominator
-        )
-        return [base_values, insertions]
+        return [
+            self._proportion_numerators[0] / self._proportion_denominators[0],
+            self._proportion_numerators[1] / self._proportion_denominators[1],
+        ]
 
     @lazyproperty
     def is_defined(self):
@@ -1974,10 +2009,19 @@ class _MarginProportion(_BaseMarginal):
 
     @lazyproperty
     def _proportion_numerators(self):
-        """ndarray of counts to be used as numerator for the margin proportions
+        """list of ndarray of counts to be used as numerator for the margin proportions
 
-        We want the numerator to exist even along subtotal differences, so we cannot
-        use the already defined `rows/columns` margin.
+        We want the numerator to exist even along subtotal differences, so we cannot use
+        the "rows/columns -table-weighted-base". This is because of the dual nature of
+        bases on non-MR variables, where bases are just the sum of counts and there's no
+        "selected" diension to sum over. Therefore, the "margin-weighted-base" could
+        also be called the "margin-weighted-count" if you think of the margin as a
+        stripe, and for the proportions we want to use the count as the numerator. For
+        non-array variables (all situations where there is a 1D table-weighted-base),
+        this "base" and "count" are equal for the base values, but we set the base to
+        `NaN` for subtotal differences for bases, but we actually want the values for
+        counts. Since this is the only place we use this, and there are already a lot of
+        overlapping names, we just calculate the numerators privately in this class.
         """
         counts = self._second_order_measures.weighted_counts.blocks
 
@@ -1993,6 +2037,14 @@ class _MarginProportion(_BaseMarginal):
             counts = [counts[0][0], counts[0][1]]
 
         return [self._apply_along_orientation(np.sum, count) for count in counts]
+
+    @lazyproperty
+    def _proportion_denominators(self):
+        """list of ndarray 1D table margins to be used as denominator"""
+        if self.orientation == MO.ROWS:
+            return self._second_order_measures.rows_table_weighted_base.blocks
+        else:
+            return self._second_order_measures.columns_table_weighted_base.blocks
 
 
 class _MarginTableWeightedBase(_BaseMarginal):

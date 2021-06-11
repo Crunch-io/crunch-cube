@@ -34,7 +34,7 @@ from cr.cube.matrix.measure import (
     _ColumnWeightedBases,
     _Means,
     _PopulationProportions,
-    _MarginProportion,
+    _MarginTableProportion,
     _RowComparableCounts,
     _RowProportions,
     _RowShareSum,
@@ -264,20 +264,20 @@ class DescribeAssembler(object):
         dimension_,
         _assemble_marginal_,
         _measures_prop_,
-        margin_proportion_,
+        margin_table_proportion_,
         second_order_measures_,
     ):
-        margin_proportion_.is_defined = True
+        margin_table_proportion_.is_defined = True
         _rows_dimension_prop_.return_value = dimension_
         dimension_.dimension_type = DT.CAT
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.columns_margin_proportion = margin_proportion_
+        second_order_measures_.columns_table_proportion = margin_table_proportion_
         assembler = Assembler(None, None, None)
 
         columns_margin_proportion = assembler.columns_margin_proportion
 
-        _assemble_marginal_.assert_called_once_with(assembler, margin_proportion_)
+        _assemble_marginal_.assert_called_once_with(assembler, margin_table_proportion_)
         assert columns_margin_proportion == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_columns_margin_proportion_for_an_MR_X_cube_result(
@@ -286,13 +286,13 @@ class DescribeAssembler(object):
         dimensions_,
         _measures_prop_,
         second_order_measures_,
-        margin_proportion_,
+        margin_table_proportion_,
         SumSubtotals_,
         _assemble_matrix_,
     ):
-        margin_proportion_.is_defined = False
+        margin_table_proportion_.is_defined = False
         _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.columns_margin_proportion = margin_proportion_
+        second_order_measures_.columns_table_proportion = margin_table_proportion_
         property_mock(
             request,
             Assembler,
@@ -489,8 +489,8 @@ class DescribeAssembler(object):
         dimension_.dimension_type = DT.CAT
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
-        measure_ = instance_mock(request, _MarginProportion)
-        second_order_measures_.rows_margin_proportion = measure_
+        measure_ = instance_mock(request, _MarginTableProportion)
+        second_order_measures_.rows_table_proportion = measure_
         assembler = Assembler(None, None, None)
 
         rows_margin_proportion = assembler.rows_margin_proportion
@@ -504,13 +504,13 @@ class DescribeAssembler(object):
         dimensions_,
         _measures_prop_,
         second_order_measures_,
-        margin_proportion_,
+        margin_table_proportion_,
         SumSubtotals_,
         _assemble_matrix_,
     ):
-        margin_proportion_.is_defined = False
+        margin_table_proportion_.is_defined = False
         _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.rows_margin_proportion = margin_proportion_
+        second_order_measures_.rows_table_proportion = margin_table_proportion_
         property_mock(
             request, Assembler, "rows_margin", return_value=np.array([[1, 2], [3, 4]])
         )
@@ -889,8 +889,8 @@ class DescribeAssembler(object):
         return class_mock(request, "cr.cube.matrix.assembler._BaseOrderHelper")
 
     @pytest.fixture
-    def margin_proportion_(self, request):
-        return instance_mock(request, _MarginProportion)
+    def margin_table_proportion_(self, request):
+        return instance_mock(request, _MarginTableProportion)
 
     @pytest.fixture
     def _column_order_prop_(self, request):

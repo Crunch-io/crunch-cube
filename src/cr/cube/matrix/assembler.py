@@ -161,7 +161,7 @@ class Assembler(object):
         # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
         # --- TODO: Should colums_margin_proportion only be defined when it's 1D? This
         # --- requires changes to exporter to use the bases to give a "rows_margin_range"
-        if not self._measures.columns_margin_proportion.is_defined:
+        if not self._measures.columns_table_proportion.is_defined:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
                     self.columns_margin / self.table_weighted_bases,
@@ -169,8 +169,8 @@ class Assembler(object):
                 )
             )
 
-        # --- otherwise columns-base is a vector ---
-        return self._assemble_marginal(self._measures.columns_margin_proportion)
+        # --- otherwise columns-margin-proportion is a maginal ---
+        return self._assemble_marginal(self._measures.columns_table_proportion)
 
     @lazyproperty
     def columns_scale_mean(self):
@@ -460,7 +460,7 @@ class Assembler(object):
         # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
         # --- TODO: Should rows_margin_proportion only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a "rows_margin_range"
-        if not self._measures.rows_margin_proportion.is_defined:
+        if not self._measures.rows_table_proportion.is_defined:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
                     self.rows_margin / self.table_weighted_bases,
@@ -469,7 +469,7 @@ class Assembler(object):
             )
 
         # --- otherwise rows-margin is a vector ---
-        return self._assemble_marginal(self._measures.rows_margin_proportion)
+        return self._assemble_marginal(self._measures.rows_table_proportion)
 
     @lazyproperty
     def rows_scale_mean(self):
@@ -1202,7 +1202,7 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
         marginal_propname = {
             MARGINAL.BASE: "rows_base",
             MARGINAL.MARGIN: "rows_margin",
-            MARGINAL.MARGIN_PROPORTION: "rows_margin_proportion",
+            MARGINAL.MARGIN_PROPORTION: "rows_table_proportion",
             MARGINAL.SCALE_MEAN: "rows_scale_mean",
             MARGINAL.SCALE_MEAN_STDDEV: "rows_scale_mean_stddev",
             MARGINAL.SCALE_MEDIAN: "rows_scale_median",
