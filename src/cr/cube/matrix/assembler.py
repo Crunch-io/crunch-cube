@@ -149,18 +149,19 @@ class Assembler(object):
         # --- TODO: Should column_margin only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a
         # --- "column_margin_range"
-        if not self._measures.columns_margin.is_defined:
+        if not self._measures.columns_weighted_base.is_defined:
             return self.column_weighted_bases
 
         # --- otherwise columns-base is a vector ---
-        return self._assemble_marginal(self._measures.columns_margin)
+        return self._assemble_marginal(self._measures.columns_weighted_base)
 
     @lazyproperty
     def columns_margin_proportion(self):
         """1D/2D np.float64 ndarray of weighted-prop for each column of this slice."""
         # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
         # --- TODO: Should colums_margin_proportion only be defined when it's 1D? This
-        # --- requires changes to exporter to use the bases to give a "rows_margin_range"
+        # --- requires changes to exporter to use the bases to give a
+        # --- "columns_margin_range"
         if not self._measures.columns_table_proportion.is_defined:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
@@ -448,11 +449,11 @@ class Assembler(object):
         # --- This is really just another way to call the row_weighted_bases ---
         # --- TODO: Should rows_margin only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a "rows_margin_range"
-        if not self._measures.rows_margin.is_defined:
+        if not self._measures.rows_weighted_base.is_defined:
             return self.row_weighted_bases
 
         # --- otherwise rows-margin is a vector ---
-        return self._assemble_marginal(self._measures.rows_margin)
+        return self._assemble_marginal(self._measures.rows_weighted_base)
 
     @lazyproperty
     def rows_margin_proportion(self):
@@ -1201,7 +1202,7 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
         marginal = self._order_spec.marginal
         marginal_propname = {
             MARGINAL.BASE: "rows_base",
-            MARGINAL.MARGIN: "rows_margin",
+            MARGINAL.MARGIN: "rows_weighted_base",
             MARGINAL.MARGIN_PROPORTION: "rows_table_proportion",
             MARGINAL.SCALE_MEAN: "rows_scale_mean",
             MARGINAL.SCALE_MEAN_STDDEV: "rows_scale_mean_stddev",

@@ -69,9 +69,14 @@ class SecondOrderMeasures(object):
         return _ColumnsBase(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
-    def columns_margin(self):
-        """_SummedCountMargin for columns measure object for this cube-result."""
-        return _SummedCountMargin(
+    def columns_weighted_base(self):
+        """_MarginWeightedBase for columns measure object for this cube-result.
+
+        Formerly called the 1D columns-margin, this is the weighted base of the column
+        margin, the sum across the columns of the weighted counts for non-MR or selected
+        & non-selected for MR.
+        """
+        return _MarginWeightedBase(
             self._dimensions, self, self._cube_measures, MO.COLUMNS
         )
 
@@ -224,9 +229,14 @@ class SecondOrderMeasures(object):
         )
 
     @lazyproperty
-    def rows_margin(self):
-        """_SummedCountMargin rows measure object for this cube-result."""
-        return _SummedCountMargin(self._dimensions, self, self._cube_measures, MO.ROWS)
+    def rows_weighted_base(self):
+        """_MarginWeightedBase for rows measure object for this cube-result.
+
+        Formerly called the 1D rows-margin, this is the weighted base of the column
+        margin, the sum across the rows of the weighted counts for non-MR or selected
+        & non-selected for MR.
+        """
+        return _MarginWeightedBase(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def rows_table_proportion(self):
@@ -484,7 +494,7 @@ class _ColumnComparableCounts(_BaseSecondOrderMeasure):
     the row dimension is not an array. The values in a subtotal difference column are
     overridden as np.nan because they do not share the same base and so are "not
     comparable" when calculating other measures along the column (across the rows),
-    like rows_margin.
+    like rows-weighted-base.
 
     Raises a ValueError when the row is an array.
     """
@@ -1122,7 +1132,7 @@ class _RowComparableCounts(_BaseSecondOrderMeasure):
     the column dimension is not an array. The values in a subtotal difference row are
     overridden as np.nan because they do not share the same base and so are "not
     comparable" when calculating other measures along the row (across the columns),
-    like columns_margin.
+    like columns-weighted-base.
 
     Raises a ValueError when the column is an array.
     """
@@ -2105,6 +2115,31 @@ class _MarginTableWeightedBase(_BaseMarginal):
         return (len(dim.element_ids), len(dim.insertion_ids))
 
 
+class _MarginWeightedBase(_BaseMarginal):
+    """The 'margin-weighted base', a 1D weighted base in the margin
+
+    This is the sum of the weighted counts across a non-array dimension, and is undefined
+    when it would require summing across an array dimension. Since we cannot add across
+    array variables, we cannot reduce the dimensionality to get to a margin when there
+    are arrays, each cell has it's own value.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin.
+
+        These are the base-values and the subtotals.
+        """
+        return [
+            self._apply_along_orientation(np.sum, counts) for counts in self._counts
+        ]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if counts are defined."""
+        return self._counts_are_defined
+
+
 class _ScaleMean(_BaseScaledCountMarginal):
     """Provides the scale mean marginals for a matrix if available.
 
@@ -2348,25 +2383,6 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
             if self.orientation == MO.ROWS
             else self._columns_weighted_mean_stddev
         )
-
-
-class _SummedCountMargin(_BaseMarginal):
-    """The 'summed-count-margin' (often called the rows-margin/columns-margin)"""
-
-    @lazyproperty
-    def blocks(self):
-        """List of the 2 1D ndarray "blocks" of the summed count margin.
-
-        These are the base-values and the subtotals.
-        """
-        return [
-            self._apply_along_orientation(np.sum, counts) for counts in self._counts
-        ]
-
-    @lazyproperty
-    def is_defined(self):
-        """True if counts are defined."""
-        return self._counts_are_defined
 
 
 class _UnweightedBaseMargin(_BaseMarginal):

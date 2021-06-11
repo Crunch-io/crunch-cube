@@ -38,7 +38,7 @@ from cr.cube.matrix.measure import (
     _ScaleMeanStddev,
     _ScaleMedian,
     SecondOrderMeasures,
-    _SummedCountMargin,
+    _MarginWeightedBase,
     _Sums,
     _TableProportionVariances,
     _TableProportions,
@@ -140,8 +140,8 @@ class DescribeSecondOrderMeasures(object):
     @pytest.mark.parametrize(
         "orientation, measure, MarginalCls",
         (
-            ("rows", "rows_margin", _SummedCountMargin),
-            ("columns", "columns_margin", _SummedCountMargin),
+            ("rows", "rows_weighted_base", _MarginWeightedBase),
+            ("columns", "columns_weighted_base", _MarginWeightedBase),
             ("rows", "rows_table_proportion", _MarginTableProportion),
             ("columns", "columns_table_proportion", _MarginTableProportion),
             ("rows", "rows_scale_median", _ScaleMedian),
@@ -2430,32 +2430,32 @@ class Describe_ScaleMedian(object):
         ) == pytest.approx(expected, nan_ok=True)
 
 
-class Describe_SummedCountMargin(object):
-    """Unit test suite for `cr.cube.matrix.measure._SummedCountMargin` object."""
+class Describe_MarginWeightedBase(object):
+    """Unit test suite for `cr.cube.matrix.measure._MarginWeightedBase` object."""
 
     def it_provides_blocks(self, request):
         property_mock(
-            request, _SummedCountMargin, "_counts", return_value=("count1", "count2")
+            request, _MarginWeightedBase, "_counts", return_value=("count1", "count2")
         )
         _apply_along_orientation_ = method_mock(
             request,
-            _SummedCountMargin,
+            _MarginWeightedBase,
             "_apply_along_orientation",
             side_effect=("result1", "result2"),
         )
-        summed_count = _SummedCountMargin(None, None, None, MO.ROWS)
+        margin_weighted_base = _MarginWeightedBase(None, None, None, MO.ROWS)
 
-        results = summed_count.blocks
+        results = margin_weighted_base.blocks
 
         assert results == ["result1", "result2"]
         assert _apply_along_orientation_.call_args_list == [
             call(
-                summed_count,
+                margin_weighted_base,
                 np.sum,
                 "count1",
             ),
             call(
-                summed_count,
+                margin_weighted_base,
                 np.sum,
                 "count2",
             ),
@@ -2463,8 +2463,10 @@ class Describe_SummedCountMargin(object):
 
     def it_can_tell_if_it_is_defined(self, request):
         property_mock(request, _BaseMarginal, "_counts_are_defined")
-        summed_count = _SummedCountMargin(None, None, None, None)
-        assert summed_count.is_defined == summed_count._counts_are_defined
+        margin_weighted_base = _MarginWeightedBase(None, None, None, None)
+        assert (
+            margin_weighted_base.is_defined == margin_weighted_base._counts_are_defined
+        )
 
 
 class Describe_UnweightedBaseMargin(object):
@@ -2523,8 +2525,11 @@ class Describe_UnweightedBaseMargin(object):
 
     def it_can_tell_if_it_is_defined(self, request):
         property_mock(request, _BaseMarginal, "_counts_are_defined")
-        summed_count = _SummedCountMargin(None, None, None, None)
-        assert summed_count.is_defined == summed_count._counts_are_defined
+        unweighted_base_margin = _UnweightedBaseMargin(None, None, None, None)
+        assert (
+            unweighted_base_margin.is_defined
+            == unweighted_base_margin._counts_are_defined
+        )
 
     # fixture components ---------------------------------------------
 

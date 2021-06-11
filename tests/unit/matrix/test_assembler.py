@@ -45,7 +45,7 @@ from cr.cube.matrix.measure import (
     _ScaleMedian,
     SecondOrderMeasures,
     _StdDev,
-    _SummedCountMargin,
+    _MarginWeightedBase,
     _Sums,
     _TotalShareSum,
     _TableProportionVariances,
@@ -227,18 +227,18 @@ class DescribeAssembler(object):
         _measures_prop_,
         _assemble_marginal_,
         second_order_measures_,
-        summed_count_margin_,
+        margin_weighted_base_,
     ):
         _rows_dimension_prop_.return_value = dimension_
         dimension_.dimension_type = DT.CAT
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.columns_margin = summed_count_margin_
+        second_order_measures_.columns_weighted_base = margin_weighted_base_
         assembler = Assembler(None, None, None)
 
         columns_margin = assembler.columns_margin
 
-        _assemble_marginal_.assert_called_once_with(assembler, summed_count_margin_)
+        _assemble_marginal_.assert_called_once_with(assembler, margin_weighted_base_)
         assert columns_margin == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_columns_margin_for_an_MR_X_cube_result(
@@ -445,18 +445,18 @@ class DescribeAssembler(object):
         _measures_prop_,
         _assemble_marginal_,
         second_order_measures_,
-        summed_count_margin_,
+        margin_weighted_base_,
     ):
         _columns_dimension_prop_.return_value = dimension_
         dimension_.dimension_type = DT.CAT
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.rows_margin = summed_count_margin_
+        second_order_measures_.rows_weighted_base = margin_weighted_base_
         assembler = Assembler(None, None, None)
 
         rows_margin = assembler.rows_margin
 
-        _assemble_marginal_.assert_called_once_with(assembler, summed_count_margin_)
+        _assemble_marginal_.assert_called_once_with(assembler, margin_weighted_base_)
         assert rows_margin == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_rows_margin_for_an_X_MR_cube_result(
@@ -945,8 +945,8 @@ class DescribeAssembler(object):
         return instance_mock(request, _Subtotals)
 
     @pytest.fixture
-    def summed_count_margin_(self, request):
-        return instance_mock(request, _SummedCountMargin)
+    def margin_weighted_base_(self, request):
+        return instance_mock(request, _MarginWeightedBase)
 
     @pytest.fixture
     def SumSubtotals_(self, request):
@@ -1489,7 +1489,7 @@ class Describe_SortRowsByMarginalHelper(object):
     @pytest.mark.parametrize(
         "marginal, marginal_prop_name",
         (
-            (MARGINAL.MARGIN, "rows_margin"),
+            (MARGINAL.MARGIN, "rows_weighted_base"),
             (MARGINAL.SCALE_MEAN, "rows_scale_mean"),
             (MARGINAL.SCALE_MEAN_STDDEV, "rows_scale_mean_stddev"),
             (MARGINAL.SCALE_MEDIAN, "rows_scale_median"),
