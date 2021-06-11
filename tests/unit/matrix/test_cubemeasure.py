@@ -1341,6 +1341,31 @@ class Describe_BaseWeightedCubeCounts(object):
         assert counts._row_dimension_is_array == row_expected
         assert counts._column_dimension_is_array == column_expected
 
+    @pytest.mark.parametrize(
+        "row_type, column_type, expected_value",
+        (
+            (DT.CAT, DT.CAT, 3),
+            (DT.CA_SUBVAR, DT.CAT, None),
+            (DT.CAT, DT.NUM_ARRAY, None),
+            (DT.MR_SUBVAR, DT.MR_SUBVAR, None),
+        ),
+    )
+    def it_knows_its_table_base(
+        self, request, dimensions_, row_type, column_type, expected_value
+    ):
+        property_mock(
+            request,
+            _BaseWeightedCubeCounts,
+            "weighted_counts",
+            return_value=np.array([1, 2]),
+        )
+        dimensions_[0].dimension_type = row_type
+        dimensions_[1].dimension_type = column_type
+
+        table_base = _BaseWeightedCubeCounts(dimensions_, None, None, None).table_base
+
+        assert table_base == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

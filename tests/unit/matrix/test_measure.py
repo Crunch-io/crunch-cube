@@ -1356,159 +1356,115 @@ class Describe_TableWeightedBases(object):
         ]
 
     @pytest.mark.parametrize(
-        "intersections, table_margin, expected_value, expected_shape",
+        "intersections_shape, expected_value",
         (
-            # --- CAT_X_CAT with both row-subtotals and column-subtotals ---
-            (
-                np.array([[8, 4], [3, 7]]),
-                7,
-                [[7, 7], [7, 7]],
-                (2, 2),
-            ),
-            # --- All other cases, intersections array is empty ---
-            (
-                np.array([], dtype=int).reshape(0, 2),
-                None,
-                [],
-                (0, 2),
-            ),
+            ((0, 0), []),
+            ((0, 2), []),
+            ((2, 0), [[], []]),
+            ((4, 1), [[6.6], [6.6], [6.6], [6.6]]),
         ),
     )
     def it_computes_its_intersections_block_to_help(
         self,
         _base_values_prop_,
-        dimensions_,
-        SumSubtotals_,
-        _weighted_cube_counts_prop_,
-        weighted_cube_counts_,
-        intersections,
-        table_margin,
+        _intersections_shape_prop_,
+        intersections_shape,
         expected_value,
-        expected_shape,
     ):
-        _base_values_prop_.return_value = [
-            [6.6, 5.5, 4.4],
-            [9.9, 8.8, 7.7],
-            [3.3, 2.2, 1.1],
-        ]
-        SumSubtotals_.intersections.return_value = intersections
-        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
-        weighted_cube_counts_.table_margin = table_margin
-        table_weighted_bases = _TableWeightedBases(dimensions_, None, None)
-
-        intersections = table_weighted_bases._intersections
-
-        SumSubtotals_.intersections.assert_called_once_with(
-            [[6.6, 5.5, 4.4], [9.9, 8.8, 7.7], [3.3, 2.2, 1.1]], dimensions_
+        _base_values_prop_.return_value = np.array(
+            [
+                [6.6, 5.5, 4.4],
+                [9.9, 8.8, 7.7],
+                [3.3, 2.2, 1.1],
+            ]
         )
+        _intersections_shape_prop_.return_value = intersections_shape
+
+        intersections = _TableWeightedBases(None, None, None)._intersections
+
         assert intersections.tolist() == expected_value
-        assert intersections.shape == expected_shape
-        assert intersections.dtype == int
+        assert intersections.shape == intersections_shape
+        assert intersections.dtype == np.float64
+
+    def it_computes_its_intersections_shape_to_help(self, request):
+        pass
 
     @pytest.mark.parametrize(
-        "subtotal_columns_, table_margin, expected_value",
+        "intersections_shape, expected_value",
         (
-            # --- CAT_X_CAT case, scalar table-margin ---
-            (
-                np.array([[6.1, 6.2], [6.3, 6.4]]),
-                9.9,
-                np.array([[9.9, 9.9], [9.9, 9.9]]),
-            ),
-            # --- CAT_X_MR and MR_X_MR cases, subtotal-columns is (nrows, 0) array ---
-            (
-                np.array([[], []]),
-                None,
-                np.array([[], []]),
-            ),
-            # --- MR_X_CAT case, table-margin is a 1D array "column" ---
-            (
-                np.array([[6.6, 7.7], [8.8, 9.9]]),
-                np.array([3.4, 5.6]),
-                np.array([[3.4, 3.4], [5.6, 5.6]]),
-            ),
+            ((0, 0), [[], [], []]),
+            ((0, 2), [[6.6, 6.6], [9.9, 9.9], [3.3, 3.3]]),
+            ((2, 0), [[], [], []]),
+            ((4, 1), [[6.6], [9.9], [3.3]]),
         ),
     )
     def it_computes_its_subtotal_columns_to_help(
         self,
         _base_values_prop_,
-        dimensions_,
-        SumSubtotals_,
-        subtotal_columns_,
-        _weighted_cube_counts_prop_,
-        weighted_cube_counts_,
-        table_margin,
+        _intersections_shape_prop_,
+        intersections_shape,
         expected_value,
     ):
-        _base_values_prop_.return_value = [[5.5, 6.6, 3.3], [4.4, 1.1, 2.2]]
-        SumSubtotals_.subtotal_columns.return_value = subtotal_columns_
-        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
-        weighted_cube_counts_.table_margin = table_margin
-        table_weighted_bases = _TableWeightedBases(dimensions_, None, None)
-
-        subtotal_columns = table_weighted_bases._subtotal_columns
-
-        SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[5.5, 6.6, 3.3], [4.4, 1.1, 2.2]], dimensions_
+        _base_values_prop_.return_value = np.array(
+            [
+                [6.6, 6.6, 6.6],
+                [9.9, 9.9, 9.9],
+                [3.3, 3.3, 3.3],
+            ]
         )
-        assert subtotal_columns == pytest.approx(expected_value)
+        _intersections_shape_prop_.return_value = intersections_shape
+
+        subtotal_columns = _TableWeightedBases(None, None, None)._subtotal_columns
+
+        assert subtotal_columns.tolist() == expected_value
+        assert subtotal_columns.shape[0] == 3
+        assert subtotal_columns.shape[1] == intersections_shape[1]
+        assert subtotal_columns.dtype == np.float64
 
     @pytest.mark.parametrize(
-        "subtotal_rows_, table_margin, expected_value",
+        "intersections_shape, expected_value",
         (
-            # --- CAT_X_CAT case, scalar table-margin ---
+            ((0, 0), []),
+            ((0, 2), []),
+            ((2, 0), [[6.6, 5.5, 4.4], [6.6, 5.5, 4.4]]),
             (
-                np.array([[6.1, 6.2, 6.3], [6.4, 6.5, 6.6]]),
-                9.9,
-                np.array([[9.9, 9.9, 9.9], [9.9, 9.9, 9.9]]),
-            ),
-            # --- CAT_X_MR case, table-margin is a 1D array "row" ---
-            (
-                np.array([[6.1, 6.2, 6.3], [6.4, 6.5, 6.6]]),
-                np.array([3.4, 5.6, 7.8]),
-                np.array(
-                    [
-                        [3.4, 5.6, 7.8],
-                        [3.4, 5.6, 7.8],
-                    ]
-                ),
-            ),
-            # --- MR_X_CAT and MR_X_MR cases, subtotal-rows is (0, ncols) array ---
-            (
-                np.array([]).reshape(0, 3),
-                None,
-                np.array([]).reshape(0, 3),
+                (4, 1),
+                [[6.6, 5.5, 4.4], [6.6, 5.5, 4.4], [6.6, 5.5, 4.4], [6.6, 5.5, 4.4]],
             ),
         ),
     )
     def it_computes_its_subtotal_rows_to_help(
         self,
         _base_values_prop_,
-        dimensions_,
-        SumSubtotals_,
-        subtotal_rows_,
-        _weighted_cube_counts_prop_,
-        weighted_cube_counts_,
-        table_margin,
+        _intersections_shape_prop_,
+        intersections_shape,
         expected_value,
     ):
-        _base_values_prop_.return_value = [[5.5, 6.6, 3.3], [4.4, 1.1, 2.2]]
-        SumSubtotals_.subtotal_rows.return_value = subtotal_rows_
-        _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
-        weighted_cube_counts_.table_margin = table_margin
-        table_weighted_bases = _TableWeightedBases(dimensions_, None, None)
-
-        subtotal_rows = table_weighted_bases._subtotal_rows
-
-        SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[5.5, 6.6, 3.3], [4.4, 1.1, 2.2]], dimensions_
+        _base_values_prop_.return_value = np.array(
+            [
+                [6.6, 5.5, 4.4],
+                [6.6, 5.5, 4.4],
+                [6.6, 5.5, 4.4],
+            ]
         )
-        assert subtotal_rows == pytest.approx(expected_value)
+        _intersections_shape_prop_.return_value = intersections_shape
+
+        subtotal_rows = _TableWeightedBases(None, None, None)._subtotal_rows
+
+        assert subtotal_rows.tolist() == expected_value
+        assert subtotal_rows.shape[0] == intersections_shape[0]
+        assert subtotal_rows.shape[1] == 3
+        assert subtotal_rows.dtype == np.float64
 
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def _base_values_prop_(self, request):
         return property_mock(request, _TableWeightedBases, "_base_values")
+
+    @pytest.fixture
+    def _intersections_shape_prop_(self, request):
+        return property_mock(request, _TableWeightedBases, "_intersections_shape")
 
     @pytest.fixture
     def dimensions_(self, request):
@@ -2560,30 +2516,26 @@ class Describe_TableWeightedBase(object):
     """Unit test suite for `cr.cube.matrix.measure._TableWeightedBase` object."""
 
     @pytest.mark.parametrize(
-        "row_dim_type, col_dim_type, expected",
+        "table_base, expected",
         (
-            (DT.CAT, DT.CAT, True),
-            (DT.CAT, DT.NUM_ARRAY, False),
-            (DT.CA_SUBVAR, DT.CAT, False),
-            (DT.CAT, DT.MR, False),
+            (None, False),
+            (1, True),
         ),
     )
-    def it_knows_if_it_is_defined(self, request, row_dim_type, col_dim_type, expected):
-        dimensions_ = (
-            instance_mock(request, Dimension, dimension_type=row_dim_type),
-            instance_mock(request, Dimension, dimension_type=col_dim_type),
-        )
+    def it_knows_if_it_is_defined(
+        self, cube_measures_, weighted_cube_counts_, table_base, expected
+    ):
+        cube_measures_.weighted_cube_counts = weighted_cube_counts_
+        weighted_cube_counts_.table_base = table_base
 
-        assert _TableWeightedBase(dimensions_, None, None).is_defined == expected
+        assert _TableWeightedBase(None, None, cube_measures_).is_defined == expected
 
-    def it_provides_its_value(self, request, is_defined_prop_):
+    def it_provides_its_value(
+        self, request, cube_measures_, weighted_cube_counts_, is_defined_prop_
+    ):
         is_defined_prop_.return_value = True
-        weighted_cube_counts_ = instance_mock(
-            request, _BaseWeightedCubeCounts, table_margin=2.0
-        )
-        cube_measures_ = instance_mock(
-            request, CubeMeasures, weighted_cube_counts=weighted_cube_counts_
-        )
+        cube_measures_.weighted_cube_counts = weighted_cube_counts_
+        weighted_cube_counts_.table_base = 2.0
         table_margin = _TableWeightedBase(None, None, cube_measures_)
 
         assert table_margin.value == 2.0
@@ -2604,3 +2556,11 @@ class Describe_TableWeightedBase(object):
     @pytest.fixture
     def is_defined_prop_(self, request):
         return property_mock(request, _TableWeightedBase, "is_defined")
+
+    @pytest.fixture
+    def cube_measures_(self, request):
+        return instance_mock(request, CubeMeasures)
+
+    @pytest.fixture
+    def weighted_cube_counts_(self, request):
+        return instance_mock(request, _BaseWeightedCubeCounts)

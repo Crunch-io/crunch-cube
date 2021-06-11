@@ -966,6 +966,17 @@ class _BaseWeightedCubeCounts(_BaseCubeMeasure):
         )
 
     @lazyproperty
+    def table_base(self):
+        """Optional np.float value is the base for the whole table
+
+        If either dimension is an array, then it is undefined. Otherwise, it is the sum
+        of all counts.
+        """
+        if self._column_dimension_is_array or self._row_dimension_is_array:
+            return None
+        return np.sum(self.weighted_counts)
+
+    @lazyproperty
     def weighted_counts(self):
         """2D np.float64 ndarray of weighted-count for each valid matrix cell.
 
