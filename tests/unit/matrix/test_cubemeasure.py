@@ -676,6 +676,90 @@ class Describe_CatXArrCubeCounts(object):
         )
 
 
+class Describe_CatXCatCubeCounts(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeCounts`."""
+
+    def it_knows_its_column_bases(self, raw_counts):
+        cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.column_bases == pytest.approx(
+            np.array(
+                [
+                    [4.5, 3.8, 4.9],
+                    [4.5, 3.8, 4.9],
+                ]
+            )
+        )
+
+    def it_knows_its_columns_base(self, raw_counts):
+        cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.columns_base == pytest.approx(np.array([4.5, 3.8, 4.9]))
+
+    def it_knows_its_columns_table_base(self, raw_counts):
+        cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.columns_table_base == pytest.approx(
+            np.array([13.2, 13.2, 13.2])
+        )
+
+    def it_knows_its_counts(self, raw_counts):
+        cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.counts == pytest.approx(raw_counts)
+
+    def it_knows_its_row_bases(self, raw_counts):
+        cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.row_bases == pytest.approx(
+            np.array(
+                [
+                    [6.7, 6.7, 6.7],
+                    [6.5, 6.5, 6.5],
+                ]
+            )
+        )
+
+    def it_knows_its_rows_base(self, raw_counts):
+        cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.rows_base == pytest.approx(np.array([6.7, 6.5]))
+
+    def it_knows_its_rows_table_base(self, raw_counts):
+        cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.rows_table_base == pytest.approx(np.array([13.2, 13.2]))
+
+    def it_knows_its_table_base(self, raw_counts):
+        cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.table_base == pytest.approx(np.array([13.2, 13.2]))
+
+    def it_knows_its_table_bases(self, raw_counts):
+        cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.table_bases == pytest.approx(
+            np.array(
+                [
+                    [13.2, 13.2, 13.2],
+                    [13.2, 13.2, 13.2],
+                ]
+            )
+        )
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_counts(self):
+        """(2, 3) np.float64 ndarray of counts as received from Cube."""
+        return np.array(
+            [
+                [1.1, 2.3, 3.3],
+                [3.4, 1.5, 1.6],
+            ]
+        )
+
+
 # === MEANS ===
 
 

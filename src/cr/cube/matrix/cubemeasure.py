@@ -414,7 +414,84 @@ class _CatXArrCubeCounts(_BaseCubeCounts):
 class _CatXCatCubeCounts(_BaseCubeCounts):
     """Counts cube-measure for a slice with rows=CAT & columns=CAT dimensions"""
 
-    pass
+    @lazyproperty
+    def column_bases(self):
+        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        return np.broadcast_to(self.columns_base, self.counts.shape)
+
+    @lazyproperty
+    def columns_base(self):
+        """Optional 1D np.float64 ndarray of column-wise base for each valid column."""
+        # --- Avaialable because row is CAT, equal to the sum across rows dimension.
+        return np.sum(self._counts, axis=0)
+
+    @lazyproperty
+    def columns_table_base(self):
+        """Optional 1D np.float64 ndarray of table-wise base for each valid column.
+
+        The name is a mouthful, but each component is meaningful.
+        - "columns": Indicates it is a marginal in the "columns" orientation (kind of
+        like a stripe in the shape of a row).
+        - "table": Indicates that it is the base for the whole table. When the
+        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+        the rows are array (and therefore we can't sum across them), each cell has
+        its own value.
+        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
+        of selected and non-selected for MR variables)
+        """
+        # --- Available because rows are CAT, equal to a repeat of the scalar table base
+        # --- because both dimensions are CAT.
+        return np.repeat(self.table_base, self.counts.shape[1])
+
+    @lazyproperty
+    def counts(self):
+        """2D np.float64 ndarray of count for each valid matrix cell.
+
+        A valid matrix cell is one whose row and column elements are both non-missing.
+        """
+        # --- No MR, so counts are already in correct shape
+        return self._counts
+
+    @lazyproperty
+    def row_bases(self):
+        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        return np.broadcast_to(self.rows_base[:, None], self.counts.shape)
+
+    @lazyproperty
+    def rows_base(self):
+        """Optional 1D np.float64 ndarray of row-wise base for each valid row."""
+        # --- Avaialable because column is CAT, equal to the sum across cols dimension.
+        return np.sum(self._counts, axis=1)
+
+    @lazyproperty
+    def rows_table_base(self):
+        """Optional 1D np.float64 ndarray of table-wise base for each valid row.
+
+        The name is a mouthful, but each component is meaningful.
+        - "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
+        stripe in the shape of a column).
+        - "table": Indicates that it is the base for the whole table. When the
+        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+        the rows are array (and therefore we can't sum across them), each cell has
+        its own value.
+        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
+        of selected and non-selected for MR variables)
+        """
+        # --- Available because columns are CAT, equal to a repeat of the scalar table
+        # --- base because both dimensions are CAT.
+        return np.repeat(self.table_base, self.counts.shape[0])
+
+    @lazyproperty
+    def table_base(self):
+        """Optional float of the table-wise base for the whole table."""
+        # --- Available because both dimensions are CAT, equal to sum of counts
+        return np.sum(self._counts)
+
+    @lazyproperty
+    def table_bases(self):
+        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        # --- Scalar table_base, broadcast it to the correct shape
+        return np.broadcast_to(self.table_base, self.counts.shape)
 
 
 class _CatXMrCubeCounts(_BaseCubeCounts):
