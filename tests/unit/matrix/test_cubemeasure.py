@@ -990,6 +990,91 @@ class Describe_MrXCatCubeCounts(object):
         )
 
 
+class Describe_MrXMrCubeCounts(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeCounts`."""
+
+    def it_knows_its_column_bases(self, raw_counts):
+        cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.column_bases == pytest.approx(
+            np.array([[2.2, 4.4], [11.0, 13.2]])
+        )
+
+    def it_knows_its_columns_base(self, raw_counts):
+        cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.columns_base is None
+
+    def it_knows_its_columns_table_base(self, raw_counts):
+        cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.columns_table_base is None
+
+    def it_knows_its_counts(self, raw_counts):
+        cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.counts == pytest.approx(np.array([[0.0, 1.1], [4.4, 5.5]]))
+
+    def it_knows_its_row_bases(self, raw_counts):
+        cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.row_bases == pytest.approx(
+            np.array([[8.8, 8.8], [8.8, 8.8]])
+        )
+
+    def it_knows_its_rows_base(self, raw_counts):
+        cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.rows_base is None
+
+    def it_knows_its_rows_table_base(self, raw_counts):
+        cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.rows_table_base is None
+
+    def it_knows_its_table_base(self, raw_counts):
+        cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.table_base is None
+
+    def it_knows_its_table_bases(self, raw_counts):
+        cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.table_bases == pytest.approx(
+            np.array([[17.6, 17.6], [17.6, 17.6]])
+        )
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_counts(self):
+        """(2, 2, 2, 2) np.float ndarray of cube-counts as from Cube."""
+        return np.array(
+            [  # ------ sel/not (col) -----
+                [  # -- row 0 -------------
+                    [  # -- selected ------
+                        [0.0, 8.8],  # -- col 0
+                        [1.1, 7.7],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [2.2, 6.6],  # -- col 0
+                        [3.3, 5.5],  # -- col 1
+                    ],
+                ],
+                [  # -- row 1 -------------
+                    [  # -- selected ------
+                        [4.4, 4.4],  # -- col 0
+                        [5.5, 3.3],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [6.6, 2.2],  # -- col 0
+                        [7.7, 1.1],  # -- col 1
+                    ],
+                ],
+            ]
+        )
+
+
 # === MEANS ===
 
 

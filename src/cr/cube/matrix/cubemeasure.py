@@ -640,6 +640,53 @@ class _MrXCatCubeCounts(_BaseCubeCounts):
 class _MrXMrCubeCounts(_BaseCubeCounts):
     """Counts cube-measure for a slice with rows=MR & columns=MR dimensions"""
 
+    @lazyproperty
+    def column_bases(self):
+        """2D np.float64 ndarray of column-wise bases for each valid matrix cell.
+
+        An MR_X matrix has a distinct columns-base for each cell. This is because not
+        all responses (subvars) are necessarily presented to each respondent. Each
+        MR_X_MR cell has four counts: sel-sel, sel-not, not-sel, and not-not. Only
+        sel-sel and not-sel contribute to the column-bases.
+        """
+        # --- only column-selected counts contribute ([:, :, :, 0]), row-selected and
+        # --- not-selected are summed (axis=1), rows and columns are retained.
+        return np.sum(self._counts[:, :, :, 0], axis=1)
+
+    @lazyproperty
+    def counts(self):
+        """2D np.float64 ndarray of count for each valid matrix cell.
+
+        A valid matrix cell is one whose row and column elements are both non-missing.
+        """
+        # --- Only selected from the selection dimension
+        return self._counts[:, 0, :, 0]
+
+    @lazyproperty
+    def row_bases(self):
+        """2D np.float64 ndarray of row-wise bases for each valid matrix cell.
+
+        An X_MR matrix has a distinct row-bases for each cell. Each MR_X_MR cell has
+        four counts: sel-sel, sel-not, not-sel, and not-not. Only sel-sel and sel-not
+        contribute to the row-bases.
+        """
+        # --- only selecteds in rows contribute ([:, 0, :, :]), selected and not from
+        # --- columns both contribute (axis=2 after rows sel/not axis is collapsed)
+        return np.sum(self._counts[:, 0, :, :], axis=2)
+
+    @lazyproperty
+    def table_bases(self):
+        """2D np.float64 ndarray of table-wise bases for each valid matrix cell.
+
+        Because the matrix is MR_X_MR, each cell corresponds to a 2x2 sub-table
+        (selected/not on each axis), each of which has its own distinct table-margin.
+        """
+        # --- Reduce second and fourth axes (the two MR_CAT dimensions) with sum()
+        # --- producing 2D (nrows, ncols). This sums the (selected, selected),
+        # --- (selected, not), (not, selected) and (not, not) cells of the subtable for
+        # --- each matrix cell.
+        return np.sum(self._counts, axis=(1, 3))
+
 
 # === MEANS ===
 
