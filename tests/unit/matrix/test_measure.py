@@ -104,21 +104,21 @@ class DescribeSecondOrderMeasures(object):
         assert measure is measure_
 
     def it_provides_access_to_the_columns_pruning_base(
-        self, _cube_measures_prop_, cube_measures_, unweighted_cube_counts_
+        self, _cube_measures_prop_, cube_measures_, old_unwted_cube_counts
     ):
         _cube_measures_prop_.return_value = cube_measures_
-        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
-        unweighted_cube_counts_.columns_pruning_base = np.array([8, 5, 7, 4])
+        cube_measures_.old_unwted_cube_counts = old_unwted_cube_counts
+        old_unwted_cube_counts.columns_pruning_base = np.array([8, 5, 7, 4])
         measures = SecondOrderMeasures(None, None, None)
 
         assert measures.columns_pruning_base.tolist() == [8, 5, 7, 4]
 
     def it_provides_access_to_the_rows_pruning_base(
-        self, _cube_measures_prop_, cube_measures_, unweighted_cube_counts_
+        self, _cube_measures_prop_, cube_measures_, old_unwted_cube_counts
     ):
         _cube_measures_prop_.return_value = cube_measures_
-        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
-        unweighted_cube_counts_.rows_pruning_base = np.array([7, 4, 0, 2])
+        cube_measures_.old_unwted_cube_counts = old_unwted_cube_counts
+        old_unwted_cube_counts.rows_pruning_base = np.array([7, 4, 0, 2])
         measures = SecondOrderMeasures(None, None, None)
 
         assert measures.rows_pruning_base.tolist() == [7, 4, 0, 2]
@@ -256,7 +256,7 @@ class DescribeSecondOrderMeasures(object):
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
 
     @pytest.fixture
-    def unweighted_cube_counts_(self, request):
+    def old_unwted_cube_counts(self, request):
         return instance_mock(request, _BaseUnweightedCubeCounts)
 
 
@@ -285,11 +285,11 @@ class Describe_BaseSecondOrderMeasure(object):
     def it_provides_access_to_the_unweighted_cube_counts_object_to_help(
         self, request, cube_measures_
     ):
-        unweighted_cube_counts_ = instance_mock(request, _BaseUnweightedCubeCounts)
-        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
+        old_unwted_cube_counts_ = instance_mock(request, _BaseUnweightedCubeCounts)
+        cube_measures_.old_unwted_cube_counts = old_unwted_cube_counts_
         measure = _BaseSecondOrderMeasure(None, None, cube_measures_)
 
-        assert measure._unweighted_cube_counts is unweighted_cube_counts_
+        assert measure._old_unwted_cube_counts is old_unwted_cube_counts_
 
     def it_provides_access_to_the_weighted_cube_counts_object_to_help(
         self, request, cube_measures_
@@ -399,10 +399,10 @@ class Describe_ColumnUnweightedBases(object):
     """Unit test suite for `cr.cube.matrix.measure._ColumnUnweightedBases` object."""
 
     def it_computes_its_base_values_to_help(
-        self, _unweighted_cube_counts_prop_, unweighted_cube_counts_
+        self, _old_unwted_cube_counts_prop_, old_unwted_cube_counts_
     ):
-        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
-        unweighted_cube_counts_.column_bases = np.arange(6).reshape(2, 3)
+        _old_unwted_cube_counts_prop_.return_value = old_unwted_cube_counts_
+        old_unwted_cube_counts_.column_bases = np.arange(6).reshape(2, 3)
         column_unweighted_bases = _ColumnUnweightedBases(None, None, None)
 
         assert column_unweighted_bases._base_values.tolist() == [[0, 1, 2], [3, 4, 5]]
@@ -446,13 +446,13 @@ class Describe_ColumnUnweightedBases(object):
         _base_values_prop_,
         dimensions_,
         SumSubtotals_,
-        _unweighted_cube_counts_prop_,
-        unweighted_cube_counts_,
+        _old_unwted_cube_counts_prop_,
+        old_unwted_cube_counts_,
     ):
         _base_values_prop_.return_value = [[4, 3], [2, 1]]
         SumSubtotals_.subtotal_rows.return_value = np.array([[8, 3], [6, 4]])
-        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
-        unweighted_cube_counts_.columns_base = np.array([4, 7])
+        _old_unwted_cube_counts_prop_.return_value = old_unwted_cube_counts_
+        old_unwted_cube_counts_.columns_base = np.array([4, 7])
         column_unweighted_bases = _ColumnUnweightedBases(dimensions_, None, None)
 
         subtotal_rows = column_unweighted_bases._subtotal_rows
@@ -494,12 +494,12 @@ class Describe_ColumnUnweightedBases(object):
         return class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
 
     @pytest.fixture
-    def unweighted_cube_counts_(self, request):
+    def old_unwted_cube_counts_(self, request):
         return instance_mock(request, _BaseUnweightedCubeCounts)
 
     @pytest.fixture
-    def _unweighted_cube_counts_prop_(self, request):
-        return property_mock(request, _ColumnUnweightedBases, "_unweighted_cube_counts")
+    def _old_unwted_cube_counts_prop_(self, request):
+        return property_mock(request, _ColumnUnweightedBases, "_old_unwted_cube_counts")
 
 
 class Describe_ColumnWeightedBases(object):
@@ -738,10 +738,10 @@ class Describe_RowUnweightedBases(object):
     """Unit test suite for `cr.cube.matrix.measure._RowUnweightedBases` object."""
 
     def it_computes_its_base_values_to_help(
-        self, _unweighted_cube_counts_prop_, unweighted_cube_counts_
+        self, _old_unwted_cube_counts_prop_, old_unwted_cube_counts_
     ):
-        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
-        unweighted_cube_counts_.row_bases = np.arange(6).reshape(2, 3)
+        _old_unwted_cube_counts_prop_.return_value = old_unwted_cube_counts_
+        old_unwted_cube_counts_.row_bases = np.arange(6).reshape(2, 3)
         row_unweighted_bases = _RowUnweightedBases(None, None, None)
 
         assert row_unweighted_bases._base_values.tolist() == [[0, 1, 2], [3, 4, 5]]
@@ -795,13 +795,13 @@ class Describe_RowUnweightedBases(object):
         _base_values_prop_,
         dimensions_,
         SumSubtotals_,
-        _unweighted_cube_counts_prop_,
-        unweighted_cube_counts_,
+        _old_unwted_cube_counts_prop_,
+        old_unwted_cube_counts_,
     ):
         _base_values_prop_.return_value = [[3, 4, 5], [1, 2, 3]]
         SumSubtotals_.subtotal_columns.return_value = np.array([[3, 8], [4, 6]])
-        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
-        unweighted_cube_counts_.rows_base = np.array([7, 4])
+        _old_unwted_cube_counts_prop_.return_value = old_unwted_cube_counts_
+        old_unwted_cube_counts_.rows_base = np.array([7, 4])
         row_unweighted_bases = _RowUnweightedBases(dimensions_, None, None)
 
         subtotal_columns = row_unweighted_bases._subtotal_columns
@@ -859,12 +859,12 @@ class Describe_RowUnweightedBases(object):
         return class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
 
     @pytest.fixture
-    def unweighted_cube_counts_(self, request):
+    def old_unwted_cube_counts_(self, request):
         return instance_mock(request, _BaseUnweightedCubeCounts)
 
     @pytest.fixture
-    def _unweighted_cube_counts_prop_(self, request):
-        return property_mock(request, _RowUnweightedBases, "_unweighted_cube_counts")
+    def _old_unwted_cube_counts_prop_(self, request):
+        return property_mock(request, _RowUnweightedBases, "_old_unwted_cube_counts")
 
 
 class Describe_RowWeightedBases(object):
@@ -1169,10 +1169,10 @@ class Describe_TableUnweightedBases(object):
     """Unit test suite for `cr.cube.matrix.measure._TableUnweightedBases` object."""
 
     def it_computes_its_base_values_to_help(
-        self, _unweighted_cube_counts_prop_, unweighted_cube_counts_
+        self, _old_unwted_cube_counts_prop_, old_unwted_cube_counts_
     ):
-        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
-        unweighted_cube_counts_.table_bases = np.array([[3, 0, 5], [1, 4, 2]])
+        _old_unwted_cube_counts_prop_.return_value = old_unwted_cube_counts_
+        old_unwted_cube_counts_.table_bases = np.array([[3, 0, 5], [1, 4, 2]])
         table_unweighted_bases = _TableUnweightedBases(None, None, None)
 
         assert table_unweighted_bases._base_values.tolist() == [[3, 0, 5], [1, 4, 2]]
@@ -1208,8 +1208,8 @@ class Describe_TableUnweightedBases(object):
         _base_values_prop_,
         dimensions_,
         SumSubtotals_,
-        _unweighted_cube_counts_prop_,
-        unweighted_cube_counts_,
+        _old_unwted_cube_counts_prop_,
+        old_unwted_cube_counts_,
         intersections,
         table_base,
         expected_value,
@@ -1217,8 +1217,8 @@ class Describe_TableUnweightedBases(object):
     ):
         _base_values_prop_.return_value = [[6, 5, 4], [9, 8, 7], [3, 2, 1]]
         SumSubtotals_.intersections.return_value = intersections
-        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
-        unweighted_cube_counts_.table_base = table_base
+        _old_unwted_cube_counts_prop_.return_value = old_unwted_cube_counts_
+        old_unwted_cube_counts_.table_base = table_base
         table_unweighted_bases = _TableUnweightedBases(dimensions_, None, None)
 
         intersections = table_unweighted_bases._intersections
@@ -1239,15 +1239,15 @@ class Describe_TableUnweightedBases(object):
         _base_values_prop_,
         dimensions_,
         SumSubtotals_,
-        _unweighted_cube_counts_prop_,
-        unweighted_cube_counts_,
+        _old_unwted_cube_counts_prop_,
+        old_unwted_cube_counts_,
         table_base,
         expected_value,
     ):
         _base_values_prop_.return_value = [[5, 6, 3], [4, 1, 2]]
         SumSubtotals_.subtotal_columns.return_value = np.array([[0, 0], [0, 0]])
-        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
-        unweighted_cube_counts_.table_base = table_base
+        _old_unwted_cube_counts_prop_.return_value = old_unwted_cube_counts_
+        old_unwted_cube_counts_.table_base = table_base
         table_unweighted_bases = _TableUnweightedBases(dimensions_, None, None)
 
         subtotal_columns = table_unweighted_bases._subtotal_columns
@@ -1292,8 +1292,8 @@ class Describe_TableUnweightedBases(object):
         _base_values_prop_,
         dimensions_,
         SumSubtotals_,
-        _unweighted_cube_counts_prop_,
-        unweighted_cube_counts_,
+        _old_unwted_cube_counts_prop_,
+        old_unwted_cube_counts_,
         subtotal_rows,
         table_base,
         expected_value,
@@ -1301,8 +1301,8 @@ class Describe_TableUnweightedBases(object):
     ):
         _base_values_prop_.return_value = [[3, 5, 6], [2, 4, 1]]
         SumSubtotals_.subtotal_rows.return_value = subtotal_rows
-        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
-        unweighted_cube_counts_.table_base = table_base
+        _old_unwted_cube_counts_prop_.return_value = old_unwted_cube_counts_
+        old_unwted_cube_counts_.table_base = table_base
         table_unweighted_bases = _TableUnweightedBases(dimensions_, None, None)
 
         subtotal_rows = table_unweighted_bases._subtotal_rows
@@ -1329,12 +1329,12 @@ class Describe_TableUnweightedBases(object):
         return class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
 
     @pytest.fixture
-    def unweighted_cube_counts_(self, request):
+    def old_unwted_cube_counts_(self, request):
         return instance_mock(request, _BaseUnweightedCubeCounts)
 
     @pytest.fixture
-    def _unweighted_cube_counts_prop_(self, request):
-        return property_mock(request, _TableUnweightedBases, "_unweighted_cube_counts")
+    def _old_unwted_cube_counts_prop_(self, request):
+        return property_mock(request, _TableUnweightedBases, "_old_unwted_cube_counts")
 
 
 class Describe_TableWeightedBases(object):
@@ -1480,7 +1480,7 @@ class Describe_UnweightedCounts(object):
         # --- uses equality, which doesn't work on numpy arrays. Normally this would be
         # --- the array itself.
         ucounts = np.arange(12).reshape(3, 4).tolist()
-        unweighted_cube_counts_ = instance_mock(
+        old_unwted_cube_counts_ = instance_mock(
             request,
             _BaseUnweightedCubeCounts,
             unweighted_counts=ucounts,
@@ -1489,8 +1489,8 @@ class Describe_UnweightedCounts(object):
         property_mock(
             request,
             _UnweightedCounts,
-            "_unweighted_cube_counts",
-            return_value=unweighted_cube_counts_,
+            "_old_unwted_cube_counts",
+            return_value=old_unwted_cube_counts_,
         )
         SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]

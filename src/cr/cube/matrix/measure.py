@@ -93,7 +93,7 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def columns_pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix column."""
-        return self._cube_measures.unweighted_cube_counts.columns_pruning_base
+        return self._cube_measures.old_unwted_cube_counts.columns_pruning_base
 
     @lazyproperty
     def columns_scale_mean(self):
@@ -227,7 +227,7 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def rows_pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix row."""
-        return self._cube_measures.unweighted_cube_counts.rows_pruning_base
+        return self._cube_measures.old_unwted_cube_counts.rows_pruning_base
 
     @lazyproperty
     def rows_scale_mean(self):
@@ -442,13 +442,13 @@ class _BaseSecondOrderMeasure(object):
         )
 
     @lazyproperty
-    def _unweighted_cube_counts(self):
+    def _old_unwted_cube_counts(self):
         """_BaseUnweightedCubeCounts subclass instance for this measure.
 
         Provides cube measures associated with unweighted counts, including
         unweighted-counts and cell, vector, and table bases.
         """
-        return self._cube_measures.unweighted_cube_counts
+        return self._cube_measures.old_unwted_cube_counts
 
     @lazyproperty
     def _weighted_cube_counts(self):
@@ -471,7 +471,7 @@ class _ColumnsBase(_BaseSecondOrderMeasure):
         subtotal intersection-cell values, but in case of 1D array the blocks are made
         up by base-values and column-subtotals, with no row-subtotals and intersections.
         """
-        columns_base = self._cube_measures.unweighted_cube_counts.columns_base
+        columns_base = self._cube_measures.old_unwted_cube_counts.columns_base
         dimensions = self._dimensions
         if columns_base.ndim >= 2:
             return SumSubtotals.blocks(columns_base, dimensions, diff_cols_nan=True)
@@ -639,7 +639,7 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
 
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
-        return self._unweighted_cube_counts.column_bases
+        return self._old_unwted_cube_counts.column_bases
 
     @lazyproperty
     def _intersections(self):
@@ -696,7 +696,7 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
             return subtotal_rows
 
         return np.broadcast_to(
-            self._unweighted_cube_counts.columns_base, subtotal_rows.shape
+            self._old_unwted_cube_counts.columns_base, subtotal_rows.shape
         )
 
 
@@ -956,7 +956,7 @@ class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
 
         means = self._cube_measures.cube_means.means
         variance = np.power(self._cube_measures.cube_stddev.stddev, 2)
-        col_bases = self._cube_measures.unweighted_cube_counts.column_bases
+        col_bases = self._cube_measures.old_unwted_cube_counts.column_bases
 
         combined_variance = variance[:, self._selected_column_idx] + variance.T
         diff = means.T - means[:, self._selected_column_idx]
@@ -978,7 +978,7 @@ class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
     @lazyproperty
     def p_vals(self):
         """2D ndarray of float64 representing p-vals for means pairwise testing."""
-        col_bases = self._cube_measures.unweighted_cube_counts.column_bases
+        col_bases = self._cube_measures.old_unwted_cube_counts.column_bases
         n = col_bases[:, self._selected_column_idx] + col_bases.T
         df = 2 * (n - 1)
         return 2 * (1 - t.cdf(abs(self.t_stats), df=df.T))
@@ -1253,7 +1253,7 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
 
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
-        return self._unweighted_cube_counts.row_bases
+        return self._old_unwted_cube_counts.row_bases
 
     @lazyproperty
     def _intersections(self):
@@ -1292,7 +1292,7 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
             return subtotal_columns
 
         return np.broadcast_to(
-            self._unweighted_cube_counts.rows_base[:, None], subtotal_columns.shape
+            self._old_unwted_cube_counts.rows_base[:, None], subtotal_columns.shape
         )
 
     @lazyproperty
@@ -1511,7 +1511,7 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
 
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
-        return self._unweighted_cube_counts.table_bases
+        return self._old_unwted_cube_counts.table_bases
 
     @lazyproperty
     def _intersections(self):
@@ -1538,7 +1538,7 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
 
         # --- Otherwise, we know that table-base must be a scalar (only CAT_X_CAT can
         # --- have intersections, so fill the intersections shape with that scalar.
-        return np.broadcast_to(self._unweighted_cube_counts.table_base, shape)
+        return np.broadcast_to(self._old_unwted_cube_counts.table_base, shape)
 
     @lazyproperty
     def _subtotal_columns(self):
@@ -1563,7 +1563,7 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
         if subtotal_columns.shape[1] == 0:
             return subtotal_columns
 
-        table_base = self._unweighted_cube_counts.table_base
+        table_base = self._old_unwted_cube_counts.table_base
         shape = subtotal_columns.shape
 
         # TODO: Resolve this abstraction leakage from _BaseUnweightedCounts where the
@@ -1609,7 +1609,7 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
         # --- works for the vector table-base (CAT_X_MR) case because the vector
         # --- table-base is a "row" of base values.
         return np.broadcast_to(
-            self._unweighted_cube_counts.table_base, subtotal_rows.shape
+            self._old_unwted_cube_counts.table_base, subtotal_rows.shape
         )
 
 
@@ -1732,9 +1732,9 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
         These are the base-values, the column-subtotals, the row-subtotals, and the
         subtotal intersection-cell values.
         """
-        diff_nans = self._unweighted_cube_counts.diff_nans
+        diff_nans = self._old_unwted_cube_counts.diff_nans
         return SumSubtotals.blocks(
-            self._unweighted_cube_counts.unweighted_counts,
+            self._old_unwted_cube_counts.unweighted_counts,
             self._dimensions,
             diff_cols_nan=diff_nans,
             diff_rows_nan=diff_nans,

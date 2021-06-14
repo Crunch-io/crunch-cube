@@ -50,8 +50,12 @@ class CubeMeasures(object):
         )
 
     @lazyproperty
-    def unweighted_cube_counts(self):
-        """_BaseUnweightedCubeCounts subclass object for this cube-result."""
+    def old_unwted_cube_counts(self):
+        """_BaseUnweightedCubeCounts subclass object for this cube-result.
+        
+        TODO: This class is being deprecated in favor of _BaseCubeCounts because
+        it can share code with the weighted cube counts.
+        """
         return _BaseUnweightedCubeCounts.factory(
             self._cube, self._dimensions, self._slice_idx
         )
