@@ -87,24 +87,36 @@ class DescribeIntegratedCube(object):
         slice_ = Cube(CR.CAT_X_MR_SENTRY, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(slice_.counts, np.array([[0, 0, 0]]))
 
-    def it_provides_pruned_array_for_CA_CAT_x_CA_SUBVAR(self):
-        transforms = {
-            "rows_dimension": {"prune": True},
-            "columns_dimension": {"prune": True},
-        }
-        slice_ = Cube(CR.CA_CAT_X_CA_SUBVAR, transforms=transforms).partitions[0]
-        np.testing.assert_array_equal(
-            slice_.column_proportions,
-            np.array(
+    @pytest.mark.parametrize(
+        "transforms, expected",
+        (
+            # ---Not pruned (last columns all NaNs)
+            (
+                None,
+                [
+                    [0.19012797074954296, 0.10494203782794387, np.nan],
+                    [0.2528945764777575, 0.2190359975594875, np.nan],
+                    [0.16514320536258378, 0.1720561317876754, np.nan],
+                    [0.29859841560024375, 0.4069554606467358, np.nan],
+                    [0.09323583180987204, 0.09701037217815742, np.nan],
+                ],
+            ),
+            # ---Pruned (last column)
+            (
+                {"columns_dimension": {"prune": True}},
                 [
                     [0.19012797074954296, 0.10494203782794387],
                     [0.2528945764777575, 0.2190359975594875],
                     [0.16514320536258378, 0.1720561317876754],
                     [0.29859841560024375, 0.4069554606467358],
                     [0.09323583180987204, 0.09701037217815742],
-                ]
+                ],
             ),
-        )
+        ),
+    )
+    def it_provides_pruned_array_for_CA_CAT_x_CA_SUBVAR(self, transforms, expected):
+        slice_ = Cube(CR.CA_CAT_X_CA_SUBVAR, transforms=transforms).partitions[0]
+        np.testing.assert_array_equal(slice_.column_proportions, np.array(expected))
 
     def it_provides_valid_counts_for_NUM_ARRAY_GROUPED_BY_CAT(self):
         cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
@@ -171,75 +183,74 @@ class DescribeIntegratedCube(object):
             )
         )
 
-    def test_optional_covariance_cube_measure(self):
+    @pytest.mark.parametrize(
+        "measure", ("covariance", "sums", "stddev", "overlaps", "valid_overlaps")
+    )
+    def but_it_provides_none_for_non_existent_cube_measures(self, measure):
         cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
 
-        assert cube.covariance is None
+        assert getattr(cube, measure) is None
 
 
 class DescribeIntegrated_Measures(object):
     """Integration-tests that exercise the `cr.cube.cube._Measures` object."""
 
-    def it_provides_access_to_the_overlaps_measure(self):
-        cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
+    @pytest.mark.parametrize(
+        "fixture, measure, name",
+        (
+            (OL.CAT_X_MR_SUB_X_MR_SEL, "overlaps", "_OverlapMeasure"),
+            (CR.CAT_X_CAT_MEAN_WGTD, "means", "_MeanMeasure"),
+        ),
+    )
+    def it_provides_access_to_a_particular_cube_measure(self, fixture, measure, name):
         measures = _Measures(
-            cube_dict,
-            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            fixture,
+            AllDimensions(dimension_dicts=fixture["result"]["dimensions"]),
         )
 
-        overlaps = measures.overlaps
+        measure = getattr(measures, measure)
 
-        assert type(overlaps).__name__ == "_OverlapMeasure"
+        assert type(measure).__name__ == name
 
-    def but_only_when_the_cube_response_contains_overlaps(self):
-        cube_dict = CR.CAT_X_CAT
-        measures = _Measures(cube_dict, None)
+    @pytest.mark.parametrize(
+        "fixture, non_available_measure",
+        (
+            (OL.CAT_X_MR_SUB_X_MR_SEL, "means"),
+            (OL.CAT_X_MR_SUB_X_MR_SEL, "stddev"),
+            (OL.CAT_X_MR_SUB_X_MR_SEL, "covariance"),
+            (CR.CAT_X_CAT_MEAN_WGTD, "overlaps"),
+            (CR.CAT_X_CAT_MEAN_WGTD, "stddev"),
+        ),
+    )
+    def but_only_when_the_measure_is_available_in_cube_response(
+        self, fixture, non_available_measure
+    ):
+        measures = _Measures(fixture, None)
 
-        overlaps = measures.overlaps
+        measure = getattr(measures, non_available_measure)
 
-        assert overlaps is None
+        assert measure is None
 
-    def it_provides_access_to_the_mean_measure(self):
-        cube_dict = CR.CAT_X_CAT_MEAN_WGTD
+    @pytest.mark.parametrize(
+        "fixture, expected",
+        (
+            # ---Getting missingness from corresponding measures
+            (CR.CAT_X_CAT_MEAN_WGTD, 3),
+            (CR.SUM_CAT_X_MR, 1),
+            (CR.CAT_X_CAT, 5),
+        ),
+    )
+    def it_provides_measure_missing_count_when_available_but_general_otherwise(
+        self, fixture, expected
+    ):
         measures = _Measures(
-            cube_dict,
-            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            fixture,
+            AllDimensions(dimension_dicts=fixture["result"]["dimensions"]),
         )
 
-        means = measures.means
-
-        assert type(means).__name__ == "_MeanMeasure"
-
-    def but_only_when_the_cube_response_contains_means(self):
-        cube_dict = CR.CAT_X_CAT
-        measures = _Measures(cube_dict, None)
-
-        means = measures.means
-
-        assert means is None
-
-    def it_provides_the_means_missing_count_when_means_are_available(self):
-        cube_dict = CR.CAT_X_CAT_MEAN_WGTD
-        measures = _Measures(
-            cube_dict,
-            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
-        )
         missing_count = measures.missing_count
-        assert missing_count == 3
 
-    def it_provides_the_means_missing_count_when_sum_are_available(self):
-        cube_dict = CR.SUM_CAT_X_MR
-        measures = _Measures(
-            cube_dict,
-            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
-        )
-        missing_count = measures.missing_count
-        assert missing_count == 1
-
-    def but_provides_the_general_missing_count_otherwise(self):
-        measures = _Measures(CR.CAT_X_CAT, None)
-        missing_count = measures.missing_count
-        assert missing_count == 5
+        assert missing_count == expected
 
     @pytest.mark.parametrize(
         "cube_dict, expected_value",
