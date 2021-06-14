@@ -275,7 +275,55 @@ class _ArrXArrCubeCounts(_BaseCubeCounts):
 class _ArrXCatCubeCounts(_BaseCubeCounts):
     """Counts cube-measure for a slice with rows=ARR & columns=CAT dimensions"""
 
-    pass
+    @lazyproperty
+    def column_bases(self):
+        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        # --- No addition across subvariables possible, bases are equal to counts
+        return self.counts
+
+    @lazyproperty
+    def counts(self):
+        """2D np.float64 ndarray of count for each valid matrix cell.
+
+        A valid matrix cell is one whose row and column elements are both non-missing.
+        """
+        # --- No MR, so counts are already in correct shape
+        return self._counts
+
+    @lazyproperty
+    def row_bases(self):
+        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        return np.broadcast_to(self.rows_base[:, None], self.counts.shape)
+
+    @lazyproperty
+    def rows_base(self):
+        """Optional 1D np.float64 ndarray of row-wise base for each valid row."""
+        # --- Avaialable because column is CAT, equal to the sum across cols dimension.
+        return np.sum(self._counts, axis=1)
+
+    @lazyproperty
+    def rows_table_base(self):
+        """Optional 1D np.float64 ndarray of table-wise base for each valid row.
+
+        The name is a mouthful, but each component is meaningful.
+        - "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
+        stripe in the shape of a column).
+        - "table": Indicates that it is the base for the whole table. When the
+        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+        the rows are array (and therefore we can't sum across them), each cell has
+        its own value.
+        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
+        of selected and non-selected for MR variables)
+        """
+        # --- Available because columns are CAT, equal to the rows_base because the row
+        # --- is array and so addition over rows is not possible
+        return self.rows_base
+
+    @lazyproperty
+    def table_bases(self):
+        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        # --- Can't sum across rows array, table bases equal to rows bases
+        return self.row_bases
 
 
 class _ArrXMrCubeCounts(_BaseCubeCounts):
