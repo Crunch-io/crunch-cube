@@ -583,7 +583,58 @@ class _MrXArrCubeCounts(_BaseCubeCounts):
 class _MrXCatCubeCounts(_BaseCubeCounts):
     """Counts cube-measure for a slice with rows=MR & columns=CAT dimensions"""
 
-    pass
+    @lazyproperty
+    def column_bases(self):
+        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        # --- selected and not-selected both contribute to margin (axis=1), both rows
+        # --- and columns are retained.
+        return np.sum(self._counts, axis=1)
+
+    @lazyproperty
+    def counts(self):
+        """2D np.float64 ndarray of count for each valid matrix cell.
+
+        A valid matrix cell is one whose row and column elements are both non-missing.
+        """
+        # --- Only selected from the selection dimension
+        return self._counts[:, 0, :]
+
+    @lazyproperty
+    def row_bases(self):
+        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        return np.broadcast_to(self.rows_base[:, None], self.counts.shape)
+
+    @lazyproperty
+    def rows_base(self):
+        """Optional 1D np.float64 ndarray of row-wise base for each valid row."""
+        # --- Avaialable because column is CAT, equal to the sum across cols dimension.
+        return np.sum(self.counts, axis=1)
+
+    @lazyproperty
+    def rows_table_base(self):
+        """Optional 1D np.float64 ndarray of table-wise base for each valid row.
+
+        The name is a mouthful, but each component is meaningful.
+        - "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
+        stripe in the shape of a column).
+        - "table": Indicates that it is the base for the whole table. When the
+        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+        the rows are array (and therefore we can't sum across them), each cell has
+        its own value.
+        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
+        of selected and non-selected for MR variables)
+        """
+        # --- Since the rows-dimension is MR, each row has a distinct table base, since
+        # --- not all of the multiple responses were necessarily offered to all
+        # --- respondents. The table-base for each row indicates the weighted number
+        # --- of respondents who were offered that option.
+        return np.sum(self._counts, axis=(1, 2))
+
+    @lazyproperty
+    def table_bases(self):
+        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        # --- Broadcast the rows_table_base to the correct shape
+        return np.broadcast_to(self.rows_table_base[:, None], self.counts.shape)
 
 
 class _MrXMrCubeCounts(_BaseCubeCounts):
