@@ -501,6 +501,104 @@ class Describe_ArrXCatCubeCounts(object):
         )
 
 
+class Describe_ArrXMrCubeCounts(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._ArrXMrCubeCounts`."""
+
+    def it_knows_its_column_bases(self, raw_counts):
+        cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.column_bases == pytest.approx(
+            np.array(
+                [
+                    [1.1, 2.2, 3.3],
+                    [4.4, 5.5, 6.6],
+                ]
+            )
+        )
+
+    def it_knows_its_columns_base(self, raw_counts):
+        cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.columns_base is None
+
+    def it_knows_its_columns_table_base(self, raw_counts):
+        cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.columns_table_base is None
+
+    def it_knows_its_counts(self, raw_counts):
+        cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.counts == pytest.approx(
+            np.array(
+                [
+                    [1.1, 2.2, 3.3],
+                    [4.4, 5.5, 6.6],
+                ]
+            )
+        )
+
+    def it_knows_its_row_bases(self, raw_counts):
+        cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.row_bases == pytest.approx(
+            np.array(
+                [
+                    [4.8, 6.8, 8.8],
+                    [5.9, 7.9, 9.9],
+                ]
+            )
+        )
+
+    def it_knows_its_rows_base(self, raw_counts):
+        cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.rows_base is None
+
+    def it_knows_its_rows_table_base(self, raw_counts):
+        cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.rows_table_base is None
+
+    def it_knows_its_table_base(self, raw_counts):
+        cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.table_base is None
+
+    def it_knows_its_table_bases(self, raw_counts):
+        cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.table_bases == pytest.approx(
+            np.array(
+                [
+                    [4.8, 6.8, 8.8],
+                    [5.9, 7.9, 9.9],
+                ]
+            )
+        )
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_counts(self):
+        """(2, 3, 2) np.float ndarray of weighted cube-counts as received from Cube."""
+        return np.array(
+            [
+                # -- sel / not ---------------
+                [  # -- row 0 ----------------
+                    [1.1, 3.7],  # -- col 0 --
+                    [2.2, 4.6],  # -- col 1 --
+                    [3.3, 5.5],  # -- col 2 --
+                ],
+                [  # -- row 1 ----------------
+                    [4.4, 1.5],  # -- col 0 --
+                    [5.5, 2.4],  # -- col 1 --
+                    [6.6, 3.3],  # -- col 2 --
+                ],
+            ]
+        )
+
+
 # === MEANS ===
 
 
