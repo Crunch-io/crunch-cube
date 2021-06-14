@@ -551,7 +551,33 @@ class _CatXMrCubeCounts(_BaseCubeCounts):
 class _MrXArrCubeCounts(_BaseCubeCounts):
     """Counts cube-measure for a slice with rows=MR & columns=ARR dimensions"""
 
-    pass
+    @lazyproperty
+    def column_bases(self):
+        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        # --- selected and not-selected both contribute to margin (axis=2), both rows
+        # --- and columns are retained.
+        return np.sum(self._counts, axis=1)
+
+    @lazyproperty
+    def counts(self):
+        """2D np.float64 ndarray of count for each valid matrix cell.
+
+        A valid matrix cell is one whose row and column elements are both non-missing.
+        """
+        # --- Only selected from the selection dimension
+        return self._counts[:, 0, :]
+
+    @lazyproperty
+    def row_bases(self):
+        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        return self.counts
+
+    @lazyproperty
+    def table_bases(self):
+        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        # --- No addition across subvariables possible, but use column bases to add
+        # --- over the selected/not selected dimension
+        return self.column_bases
 
 
 class _MrXCatCubeCounts(_BaseCubeCounts):
