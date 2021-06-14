@@ -87,6 +87,237 @@ class _BaseCubeMeasure(object):
         return np.s_[slice_idx]
 
 
+# === COUNTS (UNWEIGHTED & WEIGHTED) ===
+
+
+class _BaseCubeCounts(_BaseCubeMeasure):
+    """Base class for count (weighted & unweighted) cube-measure variants."""
+
+    def __init__(self, dimensions, counts, diff_nans):
+        super(_BaseCubeCounts, self).__init__(dimensions)
+        self._counts = counts
+        self._diff_nans = diff_nans
+
+    @classmethod
+    def factory(cls, weighted, cube, dimensions, slice_idx):
+        """Return _BaseCubeCounts subclass instance appropriate to `cube`
+
+        Chooses between unweighted and weighted counts based on `type`.
+        """
+        dimension_type_strings = tuple(
+            "MR"
+            if dim_type == DT.MR
+            else "ARR"
+            if dim_type in DT.ARRAY_TYPES
+            else "CAT"
+            for dim_type in cube.dimension_types[-2:]
+        )
+        if weighted:
+            valid_counts = cube.weighted_valid_counts
+            counts = valid_counts if valid_counts is not None else cube.counts
+        else:
+            valid_counts = cube.unweighted_valid_counts
+            counts = (
+                valid_counts if valid_counts is not None else cube.unweighted_counts
+            )
+        diff_nans = True if valid_counts is not None else False
+        CubeCountsCls = (
+            _MrXMrCubeCounts
+            if dimension_type_strings == ("MR", "MR")
+            else _MrXArrCubeCounts
+            if dimension_type_strings == ("MR", "ARR")
+            else _MrXCatCubeCounts
+            if dimension_type_strings == ("MR", "CAT")
+            else _ArrXMrCubeCounts
+            if dimension_type_strings == ("ARR", "MR")
+            else _ArrXArrCubeCounts
+            if dimension_type_strings == ("ARR", "ARR")
+            else _ArrXCatCubeCounts
+            if dimension_type_strings == ("ARR", "CAT")
+            else _CatXMrCubeCounts
+            if dimension_type_strings == ("CAT", "MR")
+            else _CatXArrCubeCounts
+            if dimension_type_strings == ("CAT", "ARR")
+            else _CatXCatCubeCounts
+        )
+
+        return CubeCountsCls(
+            dimensions, counts[cls._slice_idx_expr(cube, slice_idx)], diff_nans
+        )
+
+    @lazyproperty
+    def column_bases(self):
+        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        raise NotImplementedError(  # pragma: no cover
+            "`%s` must implement `.column_bases`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def columns_base(self):
+        """Optional 1D np.float64 ndarray of column-wise base for each valid column.
+
+        None if rows dimension is an ARRAY or MR because the base can vary among columns
+        """
+        return None
+
+    @lazyproperty
+    def columns_table_base(self):
+        """Optional 1D np.float64 ndarray of table-wise base for each valid column.
+
+        The name is a mouthful, but each component is meaningful.
+        - "columns": Indicates it is a marginal in the "columns" orientation (kind of
+        like a stripe in the shape of a row).
+        - "table": Indicates that it is the base for the whole table. When the
+        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+        the rows are array (and therefore we can't sum across them), each cell has
+        its own value.
+        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
+        of selected and non-selected for MR variables)
+
+        None if rows dimension is an ARRAY or MR because the base can vary among columns.
+        """
+        return None
+
+    @lazyproperty
+    def counts(self):
+        """2D np.float64 ndarray of count for each valid matrix cell.
+
+        A valid matrix cell is one whose row and column elements are both non-missing.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            "`%s` must implement `.counts`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def diff_nans(self):
+        return self._diff_nans
+
+    @lazyproperty
+    def row_bases(self):
+        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        raise NotImplementedError(  # pragma: no cover
+            "`%s` must implement `.row_bases`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def rows_base(self):
+        """Optional 1D np.float64 ndarray of row-wise base for each valid row.
+
+        None if columns dimension is an ARRAY or MR because the base can vary among rows
+        """
+        return None
+
+    @lazyproperty
+    def rows_table_base(self):
+        """Optional 1D np.float64 ndarray of table-wise base for each valid row.
+
+        The name is a mouthful, but each component is meaningful.
+        - "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
+        stripe in the shape of a column).
+        - "table": Indicates that it is the base for the whole table. When the
+        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+        the rows are array (and therefore we can't sum across them), each cell has
+        its own value.
+        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
+        of selected and non-selected for MR variables)
+
+        None if columns dimension is an ARRAY or MR because the base can vary among rows.
+        """
+        return None
+
+    @lazyproperty
+    def table_base(self):
+        """Optional float of the table-wise base for the whole table
+
+        None if either dimension is an ARRAY or MR because the table base varies.
+        """
+        return None
+
+    @lazyproperty
+    def table_bases(self):
+        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        raise NotImplementedError(  # pragma: no cover
+            "`%s` must implement `.table_bases`" % type(self).__name__
+        )
+
+
+class _ArrXArrCubeCounts(_BaseCubeCounts):
+    """Counts cube-measure for a slice with rows=ARR & columns=ARR dimensions"""
+
+    @lazyproperty
+    def column_bases(self):
+        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        # --- No addition across subvariables possible, bases are equal to counts
+        return self.counts
+
+    @lazyproperty
+    def counts(self):
+        """2D np.float64 ndarray of count for each valid matrix cell.
+
+        A valid matrix cell is one whose row and column elements are both non-missing.
+        """
+        # --- No MR, so counts are already in correct shape
+        return self._counts
+
+    @lazyproperty
+    def row_bases(self):
+        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        # --- No addition across subvariables possible, bases are equal to counts
+        return self.counts
+
+    @lazyproperty
+    def table_bases(self):
+        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        # --- No addition across subvariables possible, bases are equal to counts
+        return self.counts
+
+
+class _ArrXCatCubeCounts(_BaseCubeCounts):
+    """Counts cube-measure for a slice with rows=ARR & columns=CAT dimensions"""
+
+    pass
+
+
+class _ArrXMrCubeCounts(_BaseCubeCounts):
+    """Counts cube-measure for a slice with rows=ARR & columns=MR dimensions"""
+
+    pass
+
+
+class _CatXArrCubeCounts(_BaseCubeCounts):
+    """Counts cube-measure for a slice with rows=CAT & columns=ARR dimensions"""
+
+    pass
+
+
+class _CatXCatCubeCounts(_BaseCubeCounts):
+    """Counts cube-measure for a slice with rows=CAT & columns=CAT dimensions"""
+
+    pass
+
+
+class _CatXMrCubeCounts(_BaseCubeCounts):
+    """Counts cube-measure for a slice with rows=CAT & columns=MR dimensions"""
+
+    pass
+
+
+class _MrXArrCubeCounts(_BaseCubeCounts):
+    """Counts cube-measure for a slice with rows=MR & columns=ARR dimensions"""
+
+    pass
+
+
+class _MrXCatCubeCounts(_BaseCubeCounts):
+    """Counts cube-measure for a slice with rows=MR & columns=CAT dimensions"""
+
+    pass
+
+
+class _MrXMrCubeCounts(_BaseCubeCounts):
+    """Counts cube-measure for a slice with rows=MR & columns=MR dimensions"""
+
+
 # === MEANS ===
 
 

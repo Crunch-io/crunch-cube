@@ -9,6 +9,10 @@ from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import (
+    _ArrXArrCubeCounts,
+    _ArrXCatCubeCounts,
+    _ArrXMrCubeCounts,
+    _BaseCubeCounts,
     _BaseCubeMeans,
     _BaseCubeMeasure,
     _BaseCubeOverlaps,
@@ -17,12 +21,15 @@ from cr.cube.matrix.cubemeasure import (
     BaseCubeResultMatrix,
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
+    _CatXArrCubeCounts,
+    _CatXCatCubeCounts,
     _CatXCatCubeMeans,
     _CatXCatCubeStdDev,
     _CatXCatCubeSums,
     _CatXCatMatrix,
     _CatXCatUnweightedCubeCounts,
     _CatXCatWeightedCubeCounts,
+    _CatXMrCubeCounts,
     _CatXMrCubeMeans,
     _CatXMrCubeStdDev,
     _CatXMrCubeSums,
@@ -30,12 +37,15 @@ from cr.cube.matrix.cubemeasure import (
     _CatXMrUnweightedCubeCounts,
     _CatXMrWeightedCubeCounts,
     CubeMeasures,
+    _MrXArrCubeCounts,
+    _MrXCatCubeCounts,
     _MrXCatCubeMeans,
     _MrXCatCubeStdDev,
     _MrXCatCubeSums,
     _MrXCatMatrix,
     _MrXCatUnweightedCubeCounts,
     _MrXCatWeightedCubeCounts,
+    _MrXMrCubeCounts,
     _MrXMrCubeMeans,
     _MrXMrCubeStdDev,
     _MrXMrCubeSums,
@@ -106,6 +116,314 @@ class Describe_BaseCubeMeasure(object):
         measure = _BaseCubeMeasure(None)
 
         assert measure._slice_idx_expr(cube_, slice_idx=3) == expected_value
+
+
+# === COUNTS (UNWEIGHTED & WEIGHTED)
+
+
+class Describe_BaseCubeCounts(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeCounts`."""
+
+    @pytest.mark.parametrize(
+        (
+            "dimension_types",
+            "CubeCountsCls",
+            "unweighted_counts",
+            "unweighted_valid_counts",
+            "diff_nans",
+            "expected_counts",
+        ),
+        (
+            (
+                (DT.MR, DT.MR),
+                _MrXMrCubeCounts,
+                [[1, 2], [3, 4]],
+                None,
+                False,
+                [3, 4],
+            ),
+            (
+                (DT.MR, DT.CAT),
+                _MrXCatCubeCounts,
+                [[1, 2], [3, 4]],
+                None,
+                False,
+                [3, 4],
+            ),
+            (
+                (DT.CAT, DT.MR),
+                _CatXMrCubeCounts,
+                [[1, 2], [3, 4]],
+                None,
+                False,
+                [3, 4],
+            ),
+            (
+                (DT.CAT, DT.CAT),
+                _CatXCatCubeCounts,
+                [[1, 2], [3, 4]],
+                None,
+                False,
+                [3, 4],
+            ),
+            (
+                (DT.NUM_ARRAY, DT.MR),
+                _ArrXMrCubeCounts,
+                [[1, 2], [3, 4]],
+                [[1, 2], [6, 7]],
+                True,
+                [6, 7],
+            ),
+            (
+                (DT.NUM_ARRAY, DT.CAT),
+                _ArrXCatCubeCounts,
+                [[1, 2], [3, 4]],
+                [[1, 2], [6, 7]],
+                True,
+                [6, 7],
+            ),
+            (
+                (DT.CA_CAT, DT.CA_SUBVAR),
+                _CatXArrCubeCounts,
+                [[1, 2], [8, 9]],
+                None,
+                False,
+                [8, 9],
+            ),
+            (
+                (DT.MR, DT.CA_SUBVAR),
+                _MrXArrCubeCounts,
+                [[1, 2], [8, 9]],
+                None,
+                False,
+                [8, 9],
+            ),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_cube_count_objects_unweighted(
+        self,
+        request,
+        cube_,
+        dimensions_,
+        dimension_types,
+        CubeCountsCls,
+        unweighted_counts,
+        unweighted_valid_counts,
+        diff_nans,
+        expected_counts,
+    ):
+        cube_counts_ = instance_mock(request, CubeCountsCls)
+        CubeCountsCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % CubeCountsCls.__name__,
+            return_value=cube_counts_,
+        )
+        _slice_idx_expr_ = method_mock(
+            request,
+            _BaseCubeCounts,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
+        )
+        cube_.dimension_types = dimension_types
+        cube_.unweighted_valid_counts = unweighted_valid_counts
+        cube_.unweighted_counts = unweighted_counts
+
+        cube_counts = _BaseCubeCounts.factory(False, cube_, dimensions_, slice_idx=7)
+
+        _slice_idx_expr_.assert_called_once_with(cube_, 7)
+        CubeCountsCls_.assert_called_once_with(dimensions_, expected_counts, diff_nans)
+        assert cube_counts is cube_counts_
+
+    @pytest.mark.parametrize(
+        (
+            "dimension_types",
+            "CubeCountsCls",
+            "weighted_counts",
+            "weighted_valid_counts",
+            "diff_nans",
+            "expected_counts",
+        ),
+        (
+            (
+                (DT.MR, DT.MR),
+                _MrXMrCubeCounts,
+                [[1, 2], [3, 4]],
+                None,
+                False,
+                [3, 4],
+            ),
+            (
+                (DT.MR, DT.CAT),
+                _MrXCatCubeCounts,
+                [[1, 2], [3, 4]],
+                None,
+                False,
+                [3, 4],
+            ),
+            (
+                (DT.CAT, DT.MR),
+                _CatXMrCubeCounts,
+                [[1, 2], [3, 4]],
+                None,
+                False,
+                [3, 4],
+            ),
+            (
+                (DT.CAT, DT.CAT),
+                _CatXCatCubeCounts,
+                [[1, 2], [3, 4]],
+                None,
+                False,
+                [3, 4],
+            ),
+            (
+                (DT.NUM_ARRAY, DT.MR),
+                _ArrXMrCubeCounts,
+                [[1, 2], [3, 4]],
+                [[1, 2], [6, 7]],
+                True,
+                [6, 7],
+            ),
+            (
+                (DT.NUM_ARRAY, DT.CAT),
+                _ArrXCatCubeCounts,
+                [[1, 2], [3, 4]],
+                [[1, 2], [6, 7]],
+                True,
+                [6, 7],
+            ),
+            (
+                (DT.CA_CAT, DT.CA_SUBVAR),
+                _CatXArrCubeCounts,
+                [[1, 2], [8, 9]],
+                None,
+                False,
+                [8, 9],
+            ),
+            (
+                (DT.MR, DT.CA_SUBVAR),
+                _MrXArrCubeCounts,
+                [[1, 2], [8, 9]],
+                None,
+                False,
+                [8, 9],
+            ),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_cube_count_objects_weighted(
+        self,
+        request,
+        cube_,
+        dimensions_,
+        dimension_types,
+        CubeCountsCls,
+        weighted_counts,
+        weighted_valid_counts,
+        diff_nans,
+        expected_counts,
+    ):
+        cube_counts_ = instance_mock(request, CubeCountsCls)
+        CubeCountsCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % CubeCountsCls.__name__,
+            return_value=cube_counts_,
+        )
+        _slice_idx_expr_ = method_mock(
+            request,
+            _BaseCubeCounts,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
+        )
+        cube_.dimension_types = dimension_types
+        cube_.weighted_valid_counts = weighted_valid_counts
+        cube_.counts = weighted_counts
+
+        cube_counts = _BaseCubeCounts.factory(True, cube_, dimensions_, slice_idx=7)
+
+        _slice_idx_expr_.assert_called_once_with(cube_, 7)
+        CubeCountsCls_.assert_called_once_with(dimensions_, expected_counts, diff_nans)
+        assert cube_counts is cube_counts_
+
+    @pytest.mark.parametrize("diff_nans", (True, False))
+    def it_provides_its_diff_nans(self, diff_nans):
+        counts = _BaseCubeCounts(None, None, diff_nans)
+        assert counts.diff_nans == diff_nans
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (
+            instance_mock(request, Dimension),
+            instance_mock(request, Dimension),
+        )
+
+
+class Describe_ArrXArrCubeCounts(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._ArrXArrCubeCounts`."""
+
+    def it_knows_its_column_bases(self, raw_counts):
+        cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.column_bases == pytest.approx(raw_counts)
+
+    def it_knows_its_columns_base(self, raw_counts):
+        cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.columns_base is None
+
+    def it_knows_its_columns_table_base(self, raw_counts):
+        cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.columns_table_base is None
+
+    def it_knows_its_counts(self, raw_counts):
+        cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.counts == pytest.approx(raw_counts)
+
+    def it_knows_its_row_bases(self, raw_counts):
+        cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.row_bases == pytest.approx(raw_counts)
+
+    def it_knows_its_rows_base(self, raw_counts):
+        cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.rows_base is None
+
+    def it_knows_its_rows_table_base(self, raw_counts):
+        cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.rows_table_base is None
+
+    def it_knows_its_table_base(self, raw_counts):
+        cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.table_base is None
+
+    def it_knows_its_table_bases(self, raw_counts):
+        cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts.table_bases == pytest.approx(raw_counts)
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_counts(self):
+        """(2, 3) np.float64 ndarray of counts as received from Cube."""
+        return np.array(
+            [
+                [1.1, 2.3, 3.3],
+                [3.4, 1.5, 1.6],
+            ]
+        )
 
 
 # === MEANS ===
