@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension
+from cr.cube.dimension import Dimension, _ValidElements
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import (
     _ArrXArrCubeCounts,
@@ -19,6 +19,7 @@ from cr.cube.matrix.cubemeasure import (
     _BaseCubeStdDev,
     _BaseCubeSums,
     BaseCubeResultMatrix,
+    _BaseUnconditionalCubeCounts,
     _BaseUnweightedCubeCounts,
     _BaseWeightedCubeCounts,
     _CatXArrCubeCounts,
@@ -27,6 +28,7 @@ from cr.cube.matrix.cubemeasure import (
     _CatXCatCubeStdDev,
     _CatXCatCubeSums,
     _CatXCatMatrix,
+    _CatXCatUnconditionalCubeCounts,
     _CatXCatUnweightedCubeCounts,
     _CatXCatWeightedCubeCounts,
     _CatXMrCubeCounts,
@@ -34,6 +36,7 @@ from cr.cube.matrix.cubemeasure import (
     _CatXMrCubeStdDev,
     _CatXMrCubeSums,
     _CatXMrMatrix,
+    _CatXMrUnconditionalCubeCounts,
     _CatXMrUnweightedCubeCounts,
     _CatXMrWeightedCubeCounts,
     CubeMeasures,
@@ -43,6 +46,7 @@ from cr.cube.matrix.cubemeasure import (
     _MrXCatCubeStdDev,
     _MrXCatCubeSums,
     _MrXCatMatrix,
+    _MrXCatUnconditionalCubeCounts,
     _MrXCatUnweightedCubeCounts,
     _MrXCatWeightedCubeCounts,
     _MrXMrCubeCounts,
@@ -50,6 +54,7 @@ from cr.cube.matrix.cubemeasure import (
     _MrXMrCubeStdDev,
     _MrXMrCubeSums,
     _MrXMrMatrix,
+    _MrXMrUnconditionalCubeCounts,
     _MrXMrUnweightedCubeCounts,
     _MrXMrWeightedCubeCounts,
     _NumArrayXMrUnweightedCubeCounts,
@@ -1665,6 +1670,103 @@ class Describe_MrXMrCubeSum(object):
                 ],
             ]
         )
+
+
+# === (WEIGHTED) UNCONDITIONAL COUNTS ===
+
+
+class Describe_BaseUnconditionalCubeCounts(object):
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseUnconditionalCubeCounts`."""
+
+    @pytest.mark.parametrize(
+        (
+            "dimension_types",
+            "UnconditinoalCubeCountsCls",
+            "counts_with_missings",
+            "expected_counts_with_missings",
+        ),
+        (
+            (
+                (DT.MR, DT.MR),
+                _MrXMrUnconditionalCubeCounts,
+                [[1, 2], [3, 4]],
+                [3, 4],
+            ),
+            (
+                (DT.MR, DT.CAT),
+                _MrXCatUnconditionalCubeCounts,
+                [[1, 2], [3, 4]],
+                [3, 4],
+            ),
+            (
+                (DT.CAT, DT.MR),
+                _CatXMrUnconditionalCubeCounts,
+                [[1, 2], [3, 4]],
+                [3, 4],
+            ),
+            (
+                (DT.CAT, DT.CAT),
+                _CatXCatUnconditionalCubeCounts,
+                [[1, 2], [3, 4]],
+                [3, 4],
+            ),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_weighted_cube_count_objects(
+        self,
+        request,
+        cube_,
+        dimensions_,
+        dimension_types,
+        UnconditinoalCubeCountsCls,
+        counts_with_missings,
+        expected_counts_with_missings,
+    ):
+        uncond_cube_counts_ = instance_mock(request, UnconditinoalCubeCountsCls)
+        WeightedCubeCountsCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % UnconditinoalCubeCountsCls.__name__,
+            return_value=uncond_cube_counts_,
+        )
+        _slice_idx_expr_ = method_mock(
+            request,
+            _BaseUnconditionalCubeCounts,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
+        )
+        cube_.dimension_types = dimension_types
+        cube_.counts_with_missings = counts_with_missings
+
+        weighted_cube_counts = _BaseUnconditionalCubeCounts.factory(
+            cube_,
+            dimensions_,
+            slice_idx=2,
+        )
+
+        _slice_idx_expr_.assert_called_with(cube_, 2)
+        WeightedCubeCountsCls_.assert_called_once_with(
+            dimensions_,
+            expected_counts_with_missings,
+        )
+        assert weighted_cube_counts is uncond_cube_counts_
+
+    def it_provides_valid_row_idxs_to_help(self, request, dimensions_):
+        valid_elements_ = instance_mock(request, _ValidElements, element_idxs=(0, 2, 4))
+        dimensions_[0].valid_elements = valid_elements_
+        unconditional_counts = _BaseUnconditionalCubeCounts(dimensions_, None)
+
+        unconditional_counts._valid_row_idxs == np.array([0, 2, 4])
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return instance_mock(request, Dimension), instance_mock(request, Dimension)
 
 
 # === UNWEIGHTED COUNTS ===
