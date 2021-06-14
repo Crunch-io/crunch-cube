@@ -452,6 +452,97 @@ class Describe_Slice(object):
         )
 
     @pytest.mark.parametrize(
+        "fixture, size, expected",
+        (
+            (
+                CR.MR_X_CAT_HS_MT,
+                220,
+                [
+                    [True, True, True, True, True, True],
+                    [True, True, True, True, True, True],
+                    [False, False, False, False, False, False],
+                    [False, False, False, False, False, False],
+                    [False, False, False, False, False, False],
+                ],
+            ),
+            (CR.CAT_X_MR, 75, [[False, False, True], [False, False, True]]),
+            (CR.CAT_X_MR_X_MR, 11000, [[True, True], [True, True], [True, True]]),
+        ),
+    )
+    def it_provides_min_base_size_table_mask_for_mr_cubes(
+        self, fixture, size, expected
+    ):
+        transforms = {
+            "columns_dimension": {"insertions": {}},
+            "rows_dimension": {"insertions": {}},
+        }
+        slice_ = Cube(fixture, transforms=transforms, mask_size=size).partitions[0]
+
+        mask = slice_.min_base_size_mask.table_mask
+
+        assert mask == pytest.approx(np.array(expected))
+
+    @pytest.mark.parametrize(
+        "fixture, size, expected",
+        (
+            (
+                CR.MR_X_CAT_HS_MT,
+                30,
+                [
+                    [True, True, True, False, False, True],
+                    [True, False, True, False, False, True],
+                    [True, False, True, False, False, True],
+                    [True, False, True, False, False, True],
+                    [False, False, True, False, False, True],
+                ],
+            ),
+            (CR.CAT_X_MR, 35, [[False, True, False], [False, True, False]]),
+            (CR.CAT_X_MR_X_MR, 2000, [[True, False], [True, False], [True, False]]),
+        ),
+    )
+    def it_provides_min_base_size_column_mask_for_mr_cubes(
+        self, fixture, size, expected
+    ):
+        transforms = {
+            "columns_dimension": {"insertions": {}},
+            "rows_dimension": {"insertions": {}},
+        }
+        slice_ = Cube(fixture, transforms=transforms, mask_size=size).partitions[0]
+
+        mask = slice_.min_base_size_mask.column_mask
+
+        assert mask == pytest.approx(np.array(expected))
+
+    @pytest.mark.parametrize(
+        "fixture, size, expected",
+        (
+            (
+                CR.MR_X_CAT_HS_MT,
+                80,
+                [
+                    [True, True, True, True, True, True],
+                    [True, True, True, True, True, True],
+                    [False, False, False, False, False, False],
+                    [False, False, False, False, False, False],
+                    [False, False, False, False, False, False],
+                ],
+            ),
+            (CR.CAT_X_MR, 25, [[False, False, True], [False, False, False]]),
+            (CR.CAT_X_MR_X_MR, 1000, [[False, False], [False, False], [True, True]]),
+        ),
+    )
+    def it_provides_min_base_size_row_mask_for_mr_cubes(self, fixture, size, expected):
+        transforms = {
+            "columns_dimension": {"insertions": {}},
+            "rows_dimension": {"insertions": {}},
+        }
+        slice_ = Cube(fixture, transforms=transforms, mask_size=size).partitions[0]
+
+        mask = slice_.min_base_size_mask.row_mask
+
+        assert mask == pytest.approx(np.array(expected))
+
+    @pytest.mark.parametrize(
         "fixture, dim_key, derived_rows, derived_cols, inserted_rows, inserted_cols",
         (
             (MRI.CAT_X_MR, "rows_dimension", (), (0,), (3,), ()),

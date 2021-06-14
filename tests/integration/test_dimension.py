@@ -2,7 +2,6 @@
 
 """Integration test suite for the cr.cube.dimension module."""
 
-import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
@@ -12,7 +11,6 @@ from cr.cube.dimension import (
     Dimension,
     _Element,
     _ElementTransforms,
-    _Subtotal,
 )
 from cr.cube.enums import DIMENSION_TYPE as DT
 
@@ -233,78 +231,3 @@ class DescribeIntegrated_Element(object):
     @pytest.fixture
     def element_transforms_(self, request):
         return instance_mock(request, _ElementTransforms)
-
-
-class TestDimension(object):
-    """Legacy integration-test suite for Dimension object."""
-
-    def test_subtotals(self):
-        dimension_dict = {
-            "references": {
-                "view": {
-                    "transform": {
-                        "insertions": [
-                            {"anchor": 101, "name": "This is respondent ideology"},
-                            {
-                                "anchor": 2,
-                                "args": [1, 2],
-                                "function": "subtotal",
-                                "name": "Liberal net",
-                            },
-                            {
-                                "anchor": 5,
-                                "args": [5, 4],
-                                "function": "subtotal",
-                                "name": "Conservative net",
-                            },
-                            {
-                                "anchor": "fake anchor",
-                                "args": ["fake_arg_1", "fake_arg_2"],
-                                "function": "fake_fcn_name_not_subtotal",
-                                "name": "Fake Name",
-                            },
-                        ]
-                    }
-                }
-            },
-            "type": {
-                "categories": [{"id": 1}, {"id": 5}, {"id": 8}, {"id": 9}, {"id": -1}],
-                "class": "categorical",
-            },
-        }
-        dimension = Dimension(dimension_dict, DT.CAT)
-
-        subtotals = dimension.subtotals
-
-        assert len(subtotals) == 2
-
-        subtotal = subtotals[0]
-        assert isinstance(subtotal, _Subtotal)
-        assert subtotal.anchor == "bottom"
-        assert subtotal.addend_ids == (1,)
-        assert subtotal.label == "Liberal net"
-
-        subtotal = subtotals[1]
-        assert isinstance(subtotal, _Subtotal)
-        assert subtotal.anchor == 5
-        assert subtotal.addend_ids == (5,)
-        assert subtotal.label == "Conservative net"
-
-    def test_numeric_values(self):
-        dimension_dict = {
-            "type": {
-                "categories": [
-                    {"id": 42, "missing": False, "numeric_value": 1},
-                    {"id": 43, "missing": False, "numeric_value": 2},
-                    {"id": 44, "missing": True, "numeric_value": 3},
-                    {"id": 45, "missing": False, "numeric_value": None},
-                    {"id": 46, "missing": False},
-                ],
-                "class": "categorical",
-            }
-        }
-        dimension = Dimension(dimension_dict, DT.CAT)
-
-        numeric_values = dimension.numeric_values
-
-        assert numeric_values == (1, 2, np.nan, np.nan)
