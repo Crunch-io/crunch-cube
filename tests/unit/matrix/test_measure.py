@@ -1464,14 +1464,6 @@ class Describe_TableWeightedBases(object):
         return property_mock(request, _TableWeightedBases, "_intersections_shape")
 
     @pytest.fixture
-    def dimensions_(self, request):
-        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
-
-    @pytest.fixture
-    def SumSubtotals_(self, request):
-        return class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
-
-    @pytest.fixture
     def weighted_cube_counts_(self, request):
         return instance_mock(request, _BaseCubeCounts)
 
