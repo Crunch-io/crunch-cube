@@ -44,8 +44,9 @@ from cr.cube.matrix.measure import (
     _TableProportions,
     _TableStandardError,
     _TableUnweightedBases,
-    _TableWeightedBases,
     _TableWeightedBase,
+    _TableWeightedBases,
+    _TableWeightedBasesRange,
     _TotalShareSum,
     _MarginUnweightedBase,
     _UnweightedCounts,
@@ -2564,3 +2565,28 @@ class Describe_TableWeightedBase(object):
     @pytest.fixture
     def weighted_cube_counts_(self, request):
         return instance_mock(request, _BaseWeightedCubeCounts)
+
+
+class Describe_TableWeightedBasesRange(object):
+    """Unit test suite for `cr.cube.matrix.measure._TableWeightedBasesRange` object."""
+
+    def it_is_always_defined(self):
+        assert _TableWeightedBasesRange(None, None, None).is_defined
+
+    @pytest.mark.parametrize(
+        "bases, expected",
+        (
+            ([[2, 2, 2], [2, 2, 2]], [2, 2]),
+            ([[0, 1, 2], [3, 4, 5]], [0, 5]),
+        ),
+    )
+    def it_knows_its_values(self, request, bases, expected):
+        weighted_cube_counts_ = instance_mock(
+            request, _BaseWeightedCubeCounts, table_bases=bases
+        )
+        cube_measures_ = instance_mock(
+            request, CubeMeasures, weighted_cube_counts=weighted_cube_counts_
+        )
+        range = _TableWeightedBasesRange(None, None, cube_measures_)
+
+        assert range.value.tolist() == expected

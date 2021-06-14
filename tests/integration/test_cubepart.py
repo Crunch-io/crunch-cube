@@ -1300,12 +1300,10 @@ class Describe_Slice(object):
 
     def it_provides_unpruned_table_margin(self):
         slice_ = _Slice(Cube(CR.MR_X_CAT_HS_MT), 0, None, None, 0)
-        np.testing.assert_array_equal(
-            slice_.table_base_unpruned, [165, 210, 242, 450, 476]
-        )
-        np.testing.assert_almost_equal(
-            slice_.table_margin_unpruned,
-            [176.3655518, 211.4205877, 247.7407379, 457.0509557, 471.9317685],
+        assert slice_.table_base_unpruned.tolist() == [165, 210, 242, 450, 476]
+
+        assert slice_.unpruned_table_margin_range == pytest.approx(
+            [176.3655518, 471.9317685]
         )
 
     def it_prunes_cat_x_cat_with_hs(self):
@@ -2072,11 +2070,11 @@ class Test_Slice(object):
 
         # Assert table base
         expected = np.full((12, 12), 6490)
-        np.testing.assert_array_equal(slice_.table_base_unpruned, expected)
+        assert slice_.table_base_unpruned == pytest.approx(expected)
 
-        # Assert table margin
-        expected = np.full((12, 12), 6456.761929)
-        np.testing.assert_almost_equal(slice_.table_margin_unpruned, expected)
+        # Assert table margin range
+        expected = np.array([6456.761929, 6456.761929])
+        assert slice_.unpruned_table_margin_range == pytest.approx(expected)
 
     def test_filtered_population_counts(self):
         transforms = {

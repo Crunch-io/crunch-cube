@@ -1154,24 +1154,6 @@ class _Slice(CubePartition):
         return self._assembler.table_margin
 
     @lazyproperty
-    def table_margin_unpruned(self):
-        """np.float64 scalar or a 1D or 2D ndarray of np.float64 table margin.
-
-        This value includes hidden vectors, those with either a hide transform on
-        their element or that have been pruned (because their base (N) is zero). Also,
-        it does not include inserted subtotals. This
-        does not affect a scalar value but when the return value is an ndarray, the
-        shape may be different than the array returned by `.table_margin`.
-
-        A matrix with a multiple-response (MR) dimension produces an array of
-        table-margin values because each element (subvariable) of the dimension
-        represents a logically distinct question which may not have been asked of all
-        respondents. When both dimensions are MR, the return value is a 2D ndarray.
-        A CAT_X_CAT matrix produces a scalar value for this property.
-        """
-        return self._assembler.table_margin_unpruned
-
-    @lazyproperty
     def table_name(self):
         """Provides differentiated name for each stacked table of a 3D cube."""
         if self._cube.ndim < 3:
@@ -1239,6 +1221,17 @@ class _Slice(CubePartition):
                 "`.total_share_sum` is undefined for a cube-result without a sum "
                 "measure"
             )
+
+    @lazyproperty
+    def unpruned_table_margin_range(self):
+        """[min, max] np.float64 ndarray range of the table_margin (table-weighted-base)
+
+        A CAT_X_CAT has a scalar for all table-weighted-bases, but arrays have more than
+        one table-weighted-base. This collapses all the values them to the range, and
+        it is "unpruned", meaning that it is calculated before any hiding or removing
+        of empty rows/columns.
+        """
+        return self._assembler.unpruned_table_margin_range
 
     @lazyproperty
     def unweighted_counts(self):

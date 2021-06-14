@@ -345,6 +345,11 @@ class SecondOrderMeasures(object):
         return _TableWeightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def table_weighted_bases_range(self):
+        """_TableWeightedBasesRange measure object for this cube-result."""
+        return _TableWeightedBasesRange(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def total_share_sum(self):
         """_TotalShareSum measure object for this cube-result"""
         return _TotalShareSum(self._dimensions, self, self._cube_measures)
@@ -2385,7 +2390,32 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
 # === SCALAR TABLE VALUES ===
 
 
-class _TableWeightedBase(object):
+class _BaseTableValue(object):
+    """Base class for all (second-order) table values
+
+    Table values are values that apply to the whole table, which are often scalars, but
+    not necessarily (eg the table-weighted-base-range is a length 2 array, but these
+    values apply to the whole table.)
+    """
+
+    def __init__(self, dimensions, second_order_measures, cube_measures):
+        self._dimensions = dimensions
+        self._second_order_measures = second_order_measures
+        self._cube_measures = cube_measures
+
+    @lazyproperty
+    def is_defined(self):
+        """Whether scalar is defined. Defaults to True, but designed to be overridden"""
+        return True
+
+    @lazyproperty
+    def value(self):
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `.value`" % type(self).__name__
+        )
+
+
+class _TableWeightedBase(_BaseTableValue):
     """The 'table-weighted-base', a scalar base for the whole table
 
     The table-weighted-base is only defined when both rows and columns dimensions
@@ -2393,11 +2423,6 @@ class _TableWeightedBase(object):
     'table-margin' when it was a scalar (which was also only when neither dimension is
     an arary).
     """
-
-    def __init__(self, dimensions, second_order_measures, cube_measures):
-        self._dimensions = dimensions
-        self._second_order_measures = second_order_measures
-        self._cube_measures = cube_measures
 
     @lazyproperty
     def is_defined(self):
@@ -2416,6 +2441,20 @@ class _TableWeightedBase(object):
                 "Cannot sum across subvariables dimension for table weighted base scalar"
             )
         return self._cube_measures.weighted_cube_counts.table_base
+
+
+class _TableWeightedBasesRange(_BaseTableValue):
+    """The (unpruned) 'table-weighted-bases-range', a length 2 np.array of min and max.
+
+    The range of the table-weighted-bases *before* pruning, eg removing rows and columns
+    that are hidden or empty.
+    """
+
+    @lazyproperty
+    def value(self):
+        """[min, max] np.float64 ndarray range of the table-weighted-base"""
+        bases = self._cube_measures.weighted_cube_counts.table_bases
+        return np.array([np.min(bases), np.max(bases)])
 
 
 # === PAIRWISE HELPERS ===
