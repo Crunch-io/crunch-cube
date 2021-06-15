@@ -59,8 +59,12 @@ class CubeMeasures(object):
     @lazyproperty
     def weighted_cube_counts(self):
         """_BaseWeightedCounts subclass object for this cube-result."""
+        valid_counts = self._cube.weighted_valid_counts
+        counts = valid_counts if valid_counts is not None else self._cube.counts
+        diff_nans = True if valid_counts is not None else False
+
         return _BaseCubeCounts.factory(
-            "weighted", self._cube, self._dimensions, self._slice_idx
+            counts, diff_nans, self._cube, self._dimensions, self._slice_idx
         )
 
 
@@ -106,7 +110,7 @@ class _BaseCubeCounts(_BaseCubeMeasure):
         self._diff_nans = diff_nans
 
     @classmethod
-    def factory(cls, weighted, cube, dimensions, slice_idx):
+    def factory(cls, counts, diff_nans, cube, dimensions, slice_idx):
         """Return _BaseCubeCounts subclass instance appropriate to `cube`
 
         Chooses between unweighted and weighted counts based on `type`.
@@ -119,34 +123,16 @@ class _BaseCubeCounts(_BaseCubeMeasure):
             else "CAT"
             for dim_type in cube.dimension_types[-2:]
         )
-        if weighted:
-            valid_counts = cube.weighted_valid_counts
-            counts = valid_counts if valid_counts is not None else cube.counts
-        else:
-            valid_counts = cube.unweighted_valid_counts
-            counts = (
-                valid_counts if valid_counts is not None else cube.unweighted_counts
-            )
-        diff_nans = True if valid_counts is not None else False
-        CubeCountsCls = (
-            _MrXMrCubeCounts
-            if dimension_type_strings == ("MR", "MR")
-            else _MrXArrCubeCounts
-            if dimension_type_strings == ("MR", "ARR")
-            else _MrXCatCubeCounts
-            if dimension_type_strings == ("MR", "CAT")
-            else _ArrXMrCubeCounts
-            if dimension_type_strings == ("ARR", "MR")
-            else _ArrXArrCubeCounts
-            if dimension_type_strings == ("ARR", "ARR")
-            else _ArrXCatCubeCounts
-            if dimension_type_strings == ("ARR", "CAT")
-            else _CatXMrCubeCounts
-            if dimension_type_strings == ("CAT", "MR")
-            else _CatXArrCubeCounts
-            if dimension_type_strings == ("CAT", "ARR")
-            else _CatXCatCubeCounts
-        )
+        CubeCountsCls = {
+            ("MR", "MR"): _MrXMrCubeCounts,
+            ("MR", "ARR"): _MrXArrCubeCounts,
+            ("MR", "CAT"): _MrXCatCubeCounts,
+            ("ARR", "MR"): _ArrXMrCubeCounts,
+            ("ARR", "ARR"): _ArrXArrCubeCounts,
+            ("ARR", "CAT"): _ArrXCatCubeCounts,
+            ("CAT", "MR"): _CatXMrCubeCounts,
+            ("CAT", "ARR"): _CatXArrCubeCounts,
+        }.get(dimension_type_strings, _CatXCatCubeCounts)
 
         return CubeCountsCls(
             dimensions, counts[cls._slice_idx_expr(cube, slice_idx)], diff_nans
@@ -154,81 +140,114 @@ class _BaseCubeCounts(_BaseCubeMeasure):
 
     @lazyproperty
     def column_bases(self):
-        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of column-wise bases for each matrix cell."""
         raise NotImplementedError(  # pragma: no cover
             "`%s` must implement `.column_bases`" % type(self).__name__
         )
 
     @lazyproperty
     def columns_base(self):
-        """Optional 1D np.float64 ndarray of column-wise base for each valid column.
+        """Optional 1D np.float64 ndarray of column-wise base for each column.
 
-        None if rows dimension is an ARRAY or MR because the base can vary among columns
+        This marginal is used as the (un)weighted N row that is shown (typically)
+        below other measures.
+
+        This value is None if the columns dimension is not CAT because in that case each
+        row has a unique rows base, and so it is not possible to reduce to a 1D
+        vector in the columns orientation (aka a single row). Subclasses with legitimite
+        values (eg *_X_CAT) must override this default method.
         """
         return None
 
     @lazyproperty
     def columns_table_base(self):
-        """Optional 1D np.float64 ndarray of table-wise base for each valid column.
+        """Optional 1D np.float64 ndarray of table-wise base for each column.
 
-        The name is a mouthful, but each component is meaningful.
-        - "columns": Indicates it is a marginal in the "columns" orientation (kind of
-        like a stripe in the shape of a row).
-        - "table": Indicates that it is the base for the whole table. When the
-        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-        the rows are array (and therefore we can't sum across them), each cell has
-        its own value.
-        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
-        of selected and non-selected for MR variables)
+        This marginal is used as the denominator of the margin-table-proportions. The
+        name is a mouthful, but each component is meaningful:
 
-        None if rows dimension is an ARRAY or MR because the base can vary among columns.
+        * "columns": Indicates it is a marginal in the "columns" orientation (kind of
+          like a stripe in the shape of a row).
+        * "table": Indicates that it is the base for the whole table. When the
+          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+          the rows are array (and therefore we can't sum across them), each cell has
+          its own value.
+        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
+          of selected and non-selected for MR variables)
+
+        This value is None if the columns dimension is not CAT because in that case each
+        row has a unique table base, and so it is not possible to reduce to a 1D
+        vector in the columns orientation (aka a single row). Subclasses with legitimite
+        values (eg *_X_CAT) must override this default method.
         """
         return None
 
     @lazyproperty
     def counts(self):
-        """2D np.float64 ndarray of count for each valid matrix cell.
-
-        A valid matrix cell is one whose row and column elements are both non-missing.
-        """
+        """2D np.float64 ndarray of the count for each matrix cell."""
         raise NotImplementedError(  # pragma: no cover
             "`%s` must implement `.counts`" % type(self).__name__
         )
 
     @lazyproperty
     def diff_nans(self):
+        """Boolean, indicates if subtotal differences (rows and cols) has to be NaN.
+
+        We set the subtotal differences to be NaN for count measures that are paired
+        alongside numeric dimension collapsing measures (eg mean/count/etc.) because
+        those measures are undefined for subtotal differences. We want to do this here
+        because we want to make sure that all calculations derived from the counts are
+        also correctly set to NaN, rather than having to track down all the derived
+        calculations.
+
+        The parameter must be passed in during _BaseCubeCount's creation because it has
+        no knowledge of what type of counts it's using, and the way to tell if the counts
+        are paired with a numeric variable is by knowing if it comes from `*_counts`
+        or `*_valid_counts`.
+        """
         return self._diff_nans
 
     @lazyproperty
     def row_bases(self):
-        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of row-wise bases for each matrix cell."""
         raise NotImplementedError(  # pragma: no cover
             "`%s` must implement `.row_bases`" % type(self).__name__
         )
 
     @lazyproperty
     def rows_base(self):
-        """Optional 1D np.float64 ndarray of row-wise base for each valid row.
+        """Optional 1D np.float64 ndarray of row-wise base for each row.
 
-        None if columns dimension is an ARRAY or MR because the base can vary among rows
+        This marginal is used as the (un)weighted N column that is shown alongside other
+        measures.
+
+        This value is None if the rows dimension is not CAT because in that case each
+        column has a unique rows base, and so it is not possible to reduce to a 1D
+        vector in the rows orientation (aka a single column). Subclasses with legitimite
+        values (eg CAT_X_*) must override this default method.
         """
         return None
 
     @lazyproperty
     def rows_table_base(self):
-        """Optional 1D np.float64 ndarray of table-wise base for each valid row.
+        """Optional 1D np.float64 ndarray of table-wise base for each row.
 
-        The name is a mouthful, but each component is meaningful.
-        - "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
-        stripe in the shape of a column).
-        - "table": Indicates that it is the base for the whole table. When the
-        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-        the rows are array (and therefore we can't sum across them), each cell has
-        its own value.
-        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
-        of selected and non-selected for MR variables)
+        This marginal is used as the denominator of the margin-table-proportions. The
+        name is a mouthful, but each component is meaningful:
 
-        None if columns dimension is an ARRAY or MR because the base can vary among rows.
+        * "rows": Indicates it is a marginal in the "rows" orientation (kind of
+          like a stripe in the shape of a row).
+        * "table": Indicates that it is the base for the whole table. When the
+          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+          the columns are array (and therefore we can't sum across them), each cell has
+          its own value.
+        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
+          of selected and non-selected for MR variables)
+
+        This value is None if the rows dimension is not CAT because in that case each
+        column has a unique table base, and so it is not possible to reduce to a 1D
+        vector in the rows orientation (aka a single column). Subclasses with legitimite
+        values (eg CAT_X_*) must override this default method.
         """
         return None
 
@@ -237,12 +256,14 @@ class _BaseCubeCounts(_BaseCubeMeasure):
         """Optional float of the table-wise base for the whole table
 
         None if either dimension is an ARRAY or MR because the table base varies.
+        The subclass with a legitimite value (CAT_X_CAT) must override this default
+        method.
         """
         return None
 
     @lazyproperty
     def table_bases(self):
-        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of table-wise bases for each matrix cell."""
         raise NotImplementedError(  # pragma: no cover
             "`%s` must implement `.table_bases`" % type(self).__name__
         )
@@ -253,28 +274,25 @@ class _ArrXArrCubeCounts(_BaseCubeCounts):
 
     @lazyproperty
     def column_bases(self):
-        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of column-wise bases for each matrix cell."""
         # --- No addition across subvariables possible, bases are equal to counts
         return self.counts
 
     @lazyproperty
     def counts(self):
-        """2D np.float64 ndarray of count for each valid matrix cell.
-
-        A valid matrix cell is one whose row and column elements are both non-missing.
-        """
+        """2D np.float64 ndarray of the count for each matrix cell."""
         # --- No MR, so counts are already in correct shape
         return self._counts
 
     @lazyproperty
     def row_bases(self):
-        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of row-wise bases for each matrix cell."""
         # --- No addition across subvariables possible, bases are equal to counts
         return self.counts
 
     @lazyproperty
     def table_bases(self):
-        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of table-wise bases for each matrix cell."""
         # --- No addition across subvariables possible, bases are equal to counts
         return self.counts
 
@@ -284,43 +302,46 @@ class _ArrXCatCubeCounts(_BaseCubeCounts):
 
     @lazyproperty
     def column_bases(self):
-        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of column-wise bases for each matrix cell."""
         # --- No addition across subvariables possible, bases are equal to counts
         return self.counts
 
     @lazyproperty
     def counts(self):
-        """2D np.float64 ndarray of count for each valid matrix cell.
-
-        A valid matrix cell is one whose row and column elements are both non-missing.
-        """
+        """2D np.float64 ndarray of the count for each matrix cell."""
         # --- No MR, so counts are already in correct shape
         return self._counts
 
     @lazyproperty
     def row_bases(self):
-        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of row-wise bases for each matrix cell."""
         return np.broadcast_to(self.rows_base[:, None], self.counts.shape)
 
     @lazyproperty
     def rows_base(self):
-        """Optional 1D np.float64 ndarray of row-wise base for each valid row."""
+        """Optional 1D np.float64 ndarray of row-wise base for each row.
+
+        This marginal is used as the (un)weighted N column that is shown alongside other
+        measures.
+        """
         # --- Avaialable because column is CAT, equal to the sum across cols dimension.
         return np.sum(self._counts, axis=1)
 
     @lazyproperty
     def rows_table_base(self):
-        """Optional 1D np.float64 ndarray of table-wise base for each valid row.
+        """Optional 1D np.float64 ndarray of table-wise base for each row.
 
-        The name is a mouthful, but each component is meaningful.
-        - "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
-        stripe in the shape of a column).
-        - "table": Indicates that it is the base for the whole table. When the
-        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-        the rows are array (and therefore we can't sum across them), each cell has
-        its own value.
-        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
-        of selected and non-selected for MR variables)
+        This marginal is used as the denominator of the margin-table-proportions. The
+        name is a mouthful, but each component is meaningful:
+
+        * "rows": Indicates it is a marginal in the "rows" orientation (kind of
+          like a stripe in the shape of a row).
+        * "table": Indicates that it is the base for the whole table. When the
+          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+          the columns are array (and therefore we can't sum across them), each cell has
+          its own value.
+        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
+          of selected and non-selected for MR variables)
         """
         # --- Available because columns are CAT, equal to the rows_base because the row
         # --- is array and so addition over rows is not possible
@@ -328,7 +349,7 @@ class _ArrXCatCubeCounts(_BaseCubeCounts):
 
     @lazyproperty
     def table_bases(self):
-        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of table-wise bases for each matrix cell."""
         # --- Can't sum across rows array, table bases equal to rows bases
         return self.row_bases
 
@@ -338,28 +359,25 @@ class _ArrXMrCubeCounts(_BaseCubeCounts):
 
     @lazyproperty
     def column_bases(self):
-        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of column-wise bases for each matrix cell."""
         return self.counts
 
     @lazyproperty
     def counts(self):
-        """2D np.float64 ndarray of count for each valid matrix cell.
-
-        A valid matrix cell is one whose row and column elements are both non-missing.
-        """
+        """2D np.float64 ndarray of the count for each matrix cell."""
         # --- Only selected from the selection dimension
         return self._counts[:, :, 0]
 
     @lazyproperty
     def row_bases(self):
-        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of row-wise bases for each matrix cell."""
         # --- selected and not-selected both contribute to margin (axis=2), both rows
         # --- and columns are retained.
         return np.sum(self._counts, axis=2)
 
     @lazyproperty
     def table_bases(self):
-        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of table-wise bases for each matrix cell."""
         # --- No addition across subvariables possible, but use row bases to add
         # --- over the selected/not selected dimension
         return self.row_bases
@@ -370,50 +388,53 @@ class _CatXArrCubeCounts(_BaseCubeCounts):
 
     @lazyproperty
     def column_bases(self):
-        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of column-wise bases for each matrix cell."""
         return np.broadcast_to(self.columns_base, self.counts.shape)
 
     @lazyproperty
     def columns_base(self):
-        """Optional 1D np.float64 ndarray of column-wise base for each valid column."""
+        """Optional 1D np.float64 ndarray of column-wise base for each column.
+
+        This marginal is used as the (un)weighted N row that is shown (typically)
+        below other measures.
+        """
         # --- Avaialable because row is CAT, equal to the sum across rows dimension.
         return np.sum(self._counts, axis=0)
 
     @lazyproperty
     def columns_table_base(self):
-        """Optional 1D np.float64 ndarray of table-wise base for each valid column.
+        """Optional 1D np.float64 ndarray of table-wise base for each column.
 
-        The name is a mouthful, but each component is meaningful.
-        - "columns": Indicates it is a marginal in the "columns" orientation (kind of
-        like a stripe in the shape of a row).
-        - "table": Indicates that it is the base for the whole table. When the
-        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-        the rows are array (and therefore we can't sum across them), each cell has
-        its own value.
-        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
-        of selected and non-selected for MR variables)
+        This marginal is used as the denominator of the margin-table-proportions. The
+        name is a mouthful, but each component is meaningful:
+
+        * "columns": Indicates it is a marginal in the "columns" orientation (kind of
+          like a stripe in the shape of a row).
+        * "table": Indicates that it is the base for the whole table. When the
+          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+          the rows are array (and therefore we can't sum across them), each cell has
+          its own value.
+        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
+          of selected and non-selected for MR variables)
         """
         # --- Available because row is CAT, equal to columns_base because column is ARR
         return self.columns_base
 
     @lazyproperty
     def counts(self):
-        """2D np.float64 ndarray of count for each valid matrix cell.
-
-        A valid matrix cell is one whose row and column elements are both non-missing.
-        """
+        """2D np.float64 ndarray of the count for each matrix cell."""
         # --- No MR, so counts are already in correct shape
         return self._counts
 
     @lazyproperty
     def row_bases(self):
-        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of row-wise bases for each matrix cell."""
         # --- No addition across subvariables possible, bases are equal to counts
         return self.counts
 
     @lazyproperty
     def table_bases(self):
-        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of table-wise bases for each matrix cell."""
         # --- Can't sum across columns array, table bases equal to column bases
         return self.column_bases
 
@@ -423,28 +444,34 @@ class _CatXCatCubeCounts(_BaseCubeCounts):
 
     @lazyproperty
     def column_bases(self):
-        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of column-wise bases for each matrix cell."""
         return np.broadcast_to(self.columns_base, self.counts.shape)
 
     @lazyproperty
     def columns_base(self):
-        """Optional 1D np.float64 ndarray of column-wise base for each valid column."""
+        """Optional 1D np.float64 ndarray of column-wise base for each column.
+
+        This marginal is used as the (un)weighted N row that is shown (typically)
+        below other measures.
+        """
         # --- Avaialable because row is CAT, equal to the sum across rows dimension.
         return np.sum(self._counts, axis=0)
 
     @lazyproperty
     def columns_table_base(self):
-        """Optional 1D np.float64 ndarray of table-wise base for each valid column.
+        """Optional 1D np.float64 ndarray of table-wise base for each column.
 
-        The name is a mouthful, but each component is meaningful.
-        - "columns": Indicates it is a marginal in the "columns" orientation (kind of
-        like a stripe in the shape of a row).
-        - "table": Indicates that it is the base for the whole table. When the
-        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-        the rows are array (and therefore we can't sum across them), each cell has
-        its own value.
-        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
-        of selected and non-selected for MR variables)
+        This marginal is used as the denominator of the margin-table-proportions. The
+        name is a mouthful, but each component is meaningful:
+
+        * "columns": Indicates it is a marginal in the "columns" orientation (kind of
+          like a stripe in the shape of a row).
+        * "table": Indicates that it is the base for the whole table. When the
+          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+          the rows are array (and therefore we can't sum across them), each cell has
+          its own value.
+        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
+          of selected and non-selected for MR variables)
         """
         # --- Available because rows are CAT, equal to a repeat of the scalar table base
         # --- because both dimensions are CAT.
@@ -452,37 +479,40 @@ class _CatXCatCubeCounts(_BaseCubeCounts):
 
     @lazyproperty
     def counts(self):
-        """2D np.float64 ndarray of count for each valid matrix cell.
-
-        A valid matrix cell is one whose row and column elements are both non-missing.
-        """
+        """2D np.float64 ndarray of the count for each matrix cell."""
         # --- No MR, so counts are already in correct shape
         return self._counts
 
     @lazyproperty
     def row_bases(self):
-        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of row-wise bases for each matrix cell."""
         return np.broadcast_to(self.rows_base[:, None], self.counts.shape)
 
     @lazyproperty
     def rows_base(self):
-        """Optional 1D np.float64 ndarray of row-wise base for each valid row."""
+        """Optional 1D np.float64 ndarray of row-wise base for each row.
+
+        This marginal is used as the (un)weighted N column that is shown alongside other
+        measures.
+        """
         # --- Avaialable because column is CAT, equal to the sum across cols dimension.
         return np.sum(self._counts, axis=1)
 
     @lazyproperty
     def rows_table_base(self):
-        """Optional 1D np.float64 ndarray of table-wise base for each valid row.
+        """Optional 1D np.float64 ndarray of table-wise base for each row.
 
-        The name is a mouthful, but each component is meaningful.
-        - "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
-        stripe in the shape of a column).
-        - "table": Indicates that it is the base for the whole table. When the
-        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-        the rows are array (and therefore we can't sum across them), each cell has
-        its own value.
-        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
-        of selected and non-selected for MR variables)
+        This marginal is used as the denominator of the margin-table-proportions. The
+        name is a mouthful, but each component is meaningful:
+
+        * "rows": Indicates it is a marginal in the "rows" orientation (kind of
+          like a stripe in the shape of a row).
+        * "table": Indicates that it is the base for the whole table. When the
+          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+          the columns are array (and therefore we can't sum across them), each cell has
+          its own value.
+        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
+          of selected and non-selected for MR variables)
         """
         # --- Available because columns are CAT, equal to a repeat of the scalar table
         # --- base because both dimensions are CAT.
@@ -496,7 +526,7 @@ class _CatXCatCubeCounts(_BaseCubeCounts):
 
     @lazyproperty
     def table_bases(self):
-        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of table-wise bases for each matrix cell."""
         # --- Scalar table_base, broadcast it to the correct shape
         return np.broadcast_to(self.table_base, self.counts.shape)
 
@@ -506,50 +536,53 @@ class _CatXMrCubeCounts(_BaseCubeCounts):
 
     @lazyproperty
     def column_bases(self):
-        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of column-wise bases for each matrix cell."""
         return np.broadcast_to(self.columns_base, self.counts.shape)
 
     @lazyproperty
     def columns_base(self):
-        """Optional 1D np.float64 ndarray of column-wise base for each valid column."""
+        """Optional 1D np.float64 ndarray of column-wise base for each column.
+
+        This marginal is used as the (un)weighted N row that is shown (typically)
+        below other measures.
+        """
         # --- Avaialable because row is CAT, equal to the sum across rows dimension.
         return np.sum(self.counts, axis=0)
 
     @lazyproperty
     def columns_table_base(self):
-        """Optional 1D np.float64 ndarray of table-wise base for each valid column.
+        """Optional 1D np.float64 ndarray of table-wise base for each column.
 
-        The name is a mouthful, but each component is meaningful.
-        - "columns": Indicates it is a marginal in the "columns" orientation (kind of
-        like a stripe in the shape of a row).
-        - "table": Indicates that it is the base for the whole table. When the
-        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-        the rows are array (and therefore we can't sum across them), each cell has
-        its own value.
-        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
-        of selected and non-selected for MR variables)
+        This marginal is used as the denominator of the margin-table-proportions. The
+        name is a mouthful, but each component is meaningful:
+
+        * "columns": Indicates it is a marginal in the "columns" orientation (kind of
+          like a stripe in the shape of a row).
+        * "table": Indicates that it is the base for the whole table. When the
+          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+          the rows are array (and therefore we can't sum across them), each cell has
+          its own value.
+        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
+          of selected and non-selected for MR variables)
         """
         return np.sum(self._counts, axis=(0, 2))
 
     @lazyproperty
     def counts(self):
-        """2D np.float64 ndarray of count for each valid matrix cell.
-
-        A valid matrix cell is one whose row and column elements are both non-missing.
-        """
+        """2D np.float64 ndarray of the count for each matrix cell."""
         # --- No MR, so counts are already in correct shape
         return self._counts[:, :, 0]
 
     @lazyproperty
     def row_bases(self):
-        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of row-wise bases for each matrix cell."""
         # --- selected and not-selected both contribute to margin (axis=2), both rows
         # --- and columns are retained.
         return np.sum(self._counts, axis=2)
 
     @lazyproperty
     def table_bases(self):
-        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of table-wise bases for each matrix cell."""
         # --- weighted-counts is (rows, cols, selected/not) so axis 1 is preserved to
         # --- provide a distinct value for each MR subvar.
         return np.broadcast_to(self.columns_table_base, self.counts.shape)
@@ -560,28 +593,25 @@ class _MrXArrCubeCounts(_BaseCubeCounts):
 
     @lazyproperty
     def column_bases(self):
-        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of column-wise bases for each matrix cell."""
         # --- selected and not-selected both contribute to margin (axis=2), both rows
         # --- and columns are retained.
         return np.sum(self._counts, axis=1)
 
     @lazyproperty
     def counts(self):
-        """2D np.float64 ndarray of count for each valid matrix cell.
-
-        A valid matrix cell is one whose row and column elements are both non-missing.
-        """
+        """2D np.float64 ndarray of the count for each matrix cell."""
         # --- Only selected from the selection dimension
         return self._counts[:, 0, :]
 
     @lazyproperty
     def row_bases(self):
-        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of row-wise bases for each matrix cell."""
         return self.counts
 
     @lazyproperty
     def table_bases(self):
-        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of table-wise bases for each matrix cell."""
         # --- No addition across subvariables possible, but use column bases to add
         # --- over the selected/not selected dimension
         return self.column_bases
@@ -592,44 +622,47 @@ class _MrXCatCubeCounts(_BaseCubeCounts):
 
     @lazyproperty
     def column_bases(self):
-        """2D np.float64 ndarray of column-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of column-wise bases for each matrix cell."""
         # --- selected and not-selected both contribute to margin (axis=1), both rows
         # --- and columns are retained.
         return np.sum(self._counts, axis=1)
 
     @lazyproperty
     def counts(self):
-        """2D np.float64 ndarray of count for each valid matrix cell.
-
-        A valid matrix cell is one whose row and column elements are both non-missing.
-        """
+        """2D np.float64 ndarray of the count for each valid matrix cell."""
         # --- Only selected from the selection dimension
         return self._counts[:, 0, :]
 
     @lazyproperty
     def row_bases(self):
-        """2D np.float64 ndarray of row-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of row-wise bases for each matrix cell."""
         return np.broadcast_to(self.rows_base[:, None], self.counts.shape)
 
     @lazyproperty
     def rows_base(self):
-        """Optional 1D np.float64 ndarray of row-wise base for each valid row."""
+        """Optional 1D np.float64 ndarray of row-wise base for each row.
+
+        This marginal is used as the (un)weighted N column that is shown alongside other
+        measures.
+        """
         # --- Avaialable because column is CAT, equal to the sum across cols dimension.
         return np.sum(self.counts, axis=1)
 
     @lazyproperty
     def rows_table_base(self):
-        """Optional 1D np.float64 ndarray of table-wise base for each valid row.
+        """Optional 1D np.float64 ndarray of table-wise base for each row.
 
-        The name is a mouthful, but each component is meaningful.
-        - "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
-        stripe in the shape of a column).
-        - "table": Indicates that it is the base for the whole table. When the
-        `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-        the rows are array (and therefore we can't sum across them), each cell has
-        its own value.
-        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
-        of selected and non-selected for MR variables)
+        This marginal is used as the denominator of the margin-table-proportions. The
+        name is a mouthful, but each component is meaningful:
+
+        * "rows": Indicates it is a marginal in the "rows" orientation (kind of
+          like a stripe in the shape of a row).
+        * "table": Indicates that it is the base for the whole table. When the
+          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
+          the columns are array (and therefore we can't sum across them), each cell has
+          its own value.
+        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
+          of selected and non-selected for MR variables)
         """
         # --- Since the rows-dimension is MR, each row has a distinct table base, since
         # --- not all of the multiple responses were necessarily offered to all
@@ -639,7 +672,7 @@ class _MrXCatCubeCounts(_BaseCubeCounts):
 
     @lazyproperty
     def table_bases(self):
-        """2D np.float64 ndarray of table-wise bases for each valid matrix cell."""
+        """2D np.float64 ndarray of table-wise bases for each matrix cell."""
         # --- Broadcast the rows_table_base to the correct shape
         return np.broadcast_to(self.rows_table_base[:, None], self.counts.shape)
 
@@ -649,45 +682,27 @@ class _MrXMrCubeCounts(_BaseCubeCounts):
 
     @lazyproperty
     def column_bases(self):
-        """2D np.float64 ndarray of column-wise bases for each valid matrix cell.
-
-        An MR_X matrix has a distinct columns-base for each cell. This is because not
-        all responses (subvars) are necessarily presented to each respondent. Each
-        MR_X_MR cell has four counts: sel-sel, sel-not, not-sel, and not-not. Only
-        sel-sel and not-sel contribute to the column-bases.
-        """
+        """2D np.float64 ndarray of column-wise bases for each matrix cell."""
         # --- only column-selected counts contribute ([:, :, :, 0]), row-selected and
         # --- not-selected are summed (axis=1), rows and columns are retained.
         return np.sum(self._counts[:, :, :, 0], axis=1)
 
     @lazyproperty
     def counts(self):
-        """2D np.float64 ndarray of count for each valid matrix cell.
-
-        A valid matrix cell is one whose row and column elements are both non-missing.
-        """
+        """2D np.float64 ndarray of the count for each matrix cell."""
         # --- Only selected from the selection dimension
         return self._counts[:, 0, :, 0]
 
     @lazyproperty
     def row_bases(self):
-        """2D np.float64 ndarray of row-wise bases for each valid matrix cell.
-
-        An X_MR matrix has a distinct row-bases for each cell. Each MR_X_MR cell has
-        four counts: sel-sel, sel-not, not-sel, and not-not. Only sel-sel and sel-not
-        contribute to the row-bases.
-        """
+        """2D np.float64 ndarray of row-wise bases for each matrix cell."""
         # --- only selecteds in rows contribute ([:, 0, :, :]), selected and not from
         # --- columns both contribute (axis=2 after rows sel/not axis is collapsed)
         return np.sum(self._counts[:, 0, :, :], axis=2)
 
     @lazyproperty
     def table_bases(self):
-        """2D np.float64 ndarray of table-wise bases for each valid matrix cell.
-
-        Because the matrix is MR_X_MR, each cell corresponds to a 2x2 sub-table
-        (selected/not on each axis), each of which has its own distinct table-margin.
-        """
+        """2D np.float64 ndarray of table-wise bases for each matrix cell."""
         # --- Reduce second and fourth axes (the two MR_CAT dimensions) with sum()
         # --- producing 2D (nrows, ncols). This sums the (selected, selected),
         # --- (selected, not), (not, selected) and (not, not) cells of the subtable for

@@ -1302,9 +1302,7 @@ class Describe_Slice(object):
         slice_ = _Slice(Cube(CR.MR_X_CAT_HS_MT), 0, None, None, 0)
         assert slice_.table_base_unpruned.tolist() == [165, 210, 242, 450, 476]
 
-        assert slice_.unpruned_table_margin_range == pytest.approx(
-            [176.3655518, 471.9317685]
-        )
+        assert slice_.table_margin_range == pytest.approx([176.3655518, 471.9317685])
 
     def it_prunes_cat_x_cat_with_hs(self):
         # Pruned - without insertions
@@ -2074,7 +2072,7 @@ class Test_Slice(object):
 
         # Assert table margin range
         expected = np.array([6456.761929, 6456.761929])
-        assert slice_.unpruned_table_margin_range == pytest.approx(expected)
+        assert slice_.table_margin_range == pytest.approx(expected)
 
     def test_filtered_population_counts(self):
         transforms = {

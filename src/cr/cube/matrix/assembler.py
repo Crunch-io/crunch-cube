@@ -628,7 +628,7 @@ class Assembler(object):
         return self._assemble_matrix(self._measures.total_share_sum.blocks)
 
     @lazyproperty
-    def unpruned_table_margin_range(self):
+    def table_margin_range(self):
         """[min, max] np.float64 ndarray range of the table_margin (table-weighted-base)
 
         A CAT_X_CAT has a scalar for all table-weighted-bases, but arrays have more than

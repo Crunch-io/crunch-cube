@@ -125,92 +125,25 @@ class Describe_BaseCubeCounts(object):
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeCounts`."""
 
     @pytest.mark.parametrize(
+        ("dimension_types", "CubeCountsCls"),
         (
-            "dimension_types",
-            "CubeCountsCls",
-            "unweighted_counts",
-            "unweighted_valid_counts",
-            "diff_nans",
-            "expected_counts",
-        ),
-        (
-            (
-                (DT.MR, DT.MR),
-                _MrXMrCubeCounts,
-                [[1, 2], [3, 4]],
-                None,
-                False,
-                [3, 4],
-            ),
-            (
-                (DT.MR, DT.CAT),
-                _MrXCatCubeCounts,
-                [[1, 2], [3, 4]],
-                None,
-                False,
-                [3, 4],
-            ),
-            (
-                (DT.CAT, DT.MR),
-                _CatXMrCubeCounts,
-                [[1, 2], [3, 4]],
-                None,
-                False,
-                [3, 4],
-            ),
-            (
-                (DT.CAT, DT.CAT),
-                _CatXCatCubeCounts,
-                [[1, 2], [3, 4]],
-                None,
-                False,
-                [3, 4],
-            ),
-            (
-                (DT.NUM_ARRAY, DT.MR),
-                _ArrXMrCubeCounts,
-                [[1, 2], [3, 4]],
-                [[1, 2], [6, 7]],
-                True,
-                [6, 7],
-            ),
-            (
-                (DT.NUM_ARRAY, DT.CAT),
-                _ArrXCatCubeCounts,
-                [[1, 2], [3, 4]],
-                [[1, 2], [6, 7]],
-                True,
-                [6, 7],
-            ),
-            (
-                (DT.CA_CAT, DT.CA_SUBVAR),
-                _CatXArrCubeCounts,
-                [[1, 2], [8, 9]],
-                None,
-                False,
-                [8, 9],
-            ),
-            (
-                (DT.MR, DT.CA_SUBVAR),
-                _MrXArrCubeCounts,
-                [[1, 2], [8, 9]],
-                None,
-                False,
-                [8, 9],
-            ),
+            ((DT.MR, DT.MR), _MrXMrCubeCounts),
+            ((DT.MR, DT.CAT), _MrXCatCubeCounts),
+            ((DT.CAT, DT.MR), _CatXMrCubeCounts),
+            ((DT.CAT, DT.CAT), _CatXCatCubeCounts),
+            ((DT.NUM_ARRAY, DT.MR), _ArrXMrCubeCounts),
+            ((DT.NUM_ARRAY, DT.CAT), _ArrXCatCubeCounts),
+            ((DT.CA_CAT, DT.CA_SUBVAR), _CatXArrCubeCounts),
+            ((DT.MR, DT.CA_SUBVAR), _MrXArrCubeCounts),
         ),
     )
-    def it_provides_a_factory_for_constructing_cube_count_objects_unweighted(
+    def it_provides_a_factory_for_constructing_cube_count_objects(
         self,
         request,
         cube_,
         dimensions_,
         dimension_types,
         CubeCountsCls,
-        unweighted_counts,
-        unweighted_valid_counts,
-        diff_nans,
-        expected_counts,
     ):
         cube_counts_ = instance_mock(request, CubeCountsCls)
         CubeCountsCls_ = class_mock(
@@ -226,130 +159,14 @@ class Describe_BaseCubeCounts(object):
             autospec=False,
         )
         cube_.dimension_types = dimension_types
-        cube_.unweighted_valid_counts = unweighted_valid_counts
-        cube_.unweighted_counts = unweighted_counts
 
-        cube_counts = _BaseCubeCounts.factory(False, cube_, dimensions_, slice_idx=7)
+        cube_counts = _BaseCubeCounts.factory(
+            [[1, 2], [3, 4]], "diff_nans", cube_, dimensions_, slice_idx=7
+        )
 
         _slice_idx_expr_.assert_called_once_with(cube_, 7)
-        CubeCountsCls_.assert_called_once_with(dimensions_, expected_counts, diff_nans)
+        CubeCountsCls_.assert_called_once_with(dimensions_, [3, 4], "diff_nans")
         assert cube_counts is cube_counts_
-
-    @pytest.mark.parametrize(
-        (
-            "dimension_types",
-            "CubeCountsCls",
-            "weighted_counts",
-            "weighted_valid_counts",
-            "diff_nans",
-            "expected_counts",
-        ),
-        (
-            (
-                (DT.MR, DT.MR),
-                _MrXMrCubeCounts,
-                [[1, 2], [3, 4]],
-                None,
-                False,
-                [3, 4],
-            ),
-            (
-                (DT.MR, DT.CAT),
-                _MrXCatCubeCounts,
-                [[1, 2], [3, 4]],
-                None,
-                False,
-                [3, 4],
-            ),
-            (
-                (DT.CAT, DT.MR),
-                _CatXMrCubeCounts,
-                [[1, 2], [3, 4]],
-                None,
-                False,
-                [3, 4],
-            ),
-            (
-                (DT.CAT, DT.CAT),
-                _CatXCatCubeCounts,
-                [[1, 2], [3, 4]],
-                None,
-                False,
-                [3, 4],
-            ),
-            (
-                (DT.NUM_ARRAY, DT.MR),
-                _ArrXMrCubeCounts,
-                [[1, 2], [3, 4]],
-                [[1, 2], [6, 7]],
-                True,
-                [6, 7],
-            ),
-            (
-                (DT.NUM_ARRAY, DT.CAT),
-                _ArrXCatCubeCounts,
-                [[1, 2], [3, 4]],
-                [[1, 2], [6, 7]],
-                True,
-                [6, 7],
-            ),
-            (
-                (DT.CA_CAT, DT.CA_SUBVAR),
-                _CatXArrCubeCounts,
-                [[1, 2], [8, 9]],
-                None,
-                False,
-                [8, 9],
-            ),
-            (
-                (DT.MR, DT.CA_SUBVAR),
-                _MrXArrCubeCounts,
-                [[1, 2], [8, 9]],
-                None,
-                False,
-                [8, 9],
-            ),
-        ),
-    )
-    def it_provides_a_factory_for_constructing_cube_count_objects_weighted(
-        self,
-        request,
-        cube_,
-        dimensions_,
-        dimension_types,
-        CubeCountsCls,
-        weighted_counts,
-        weighted_valid_counts,
-        diff_nans,
-        expected_counts,
-    ):
-        cube_counts_ = instance_mock(request, CubeCountsCls)
-        CubeCountsCls_ = class_mock(
-            request,
-            "cr.cube.matrix.cubemeasure.%s" % CubeCountsCls.__name__,
-            return_value=cube_counts_,
-        )
-        _slice_idx_expr_ = method_mock(
-            request,
-            _BaseCubeCounts,
-            "_slice_idx_expr",
-            return_value=1,
-            autospec=False,
-        )
-        cube_.dimension_types = dimension_types
-        cube_.weighted_valid_counts = weighted_valid_counts
-        cube_.counts = weighted_counts
-
-        cube_counts = _BaseCubeCounts.factory(True, cube_, dimensions_, slice_idx=7)
-
-        _slice_idx_expr_.assert_called_once_with(cube_, 7)
-        CubeCountsCls_.assert_called_once_with(dimensions_, expected_counts, diff_nans)
-        assert cube_counts is cube_counts_
-
-    @pytest.mark.parametrize("diff_nans", (True, False))
-    def it_provides_its_diff_nans(self, diff_nans):
-        counts = _BaseCubeCounts(None, None, diff_nans)
-        assert counts.diff_nans == diff_nans
 
     # fixtures -------------------------------------------------------
 

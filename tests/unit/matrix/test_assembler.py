@@ -722,7 +722,7 @@ class DescribeAssembler(object):
 
         assert assembler.table_margin == 4242
 
-    def it_knows_unpruned_table_margin_range(
+    def it_knows_table_margin_range(
         self,
         request,
         _measures_prop_,
@@ -733,7 +733,7 @@ class DescribeAssembler(object):
         second_order_measures_.table_weighted_bases_range = measure_
         assembler = Assembler(None, None, None)
 
-        assert assembler.unpruned_table_margin_range == 42
+        assert assembler.table_margin_range == 42
 
     # === implementation methods/properties ===
 

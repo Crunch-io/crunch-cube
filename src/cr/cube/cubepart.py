@@ -1223,7 +1223,7 @@ class _Slice(CubePartition):
             )
 
     @lazyproperty
-    def unpruned_table_margin_range(self):
+    def table_margin_range(self):
         """[min, max] np.float64 ndarray range of the table_margin (table-weighted-base)
 
         A CAT_X_CAT has a scalar for all table-weighted-bases, but arrays have more than
@@ -1231,7 +1231,7 @@ class _Slice(CubePartition):
         it is "unpruned", meaning that it is calculated before any hiding or removing
         of empty rows/columns.
         """
-        return self._assembler.unpruned_table_margin_range
+        return self._assembler.table_margin_range
 
     @lazyproperty
     def unweighted_counts(self):
