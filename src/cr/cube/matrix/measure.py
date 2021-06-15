@@ -451,8 +451,17 @@ class _BaseSecondOrderMeasure(object):
         return self._cube_measures.old_unwted_cube_counts
 
     @lazyproperty
+    def _unweighted_cube_counts(self):
+        """_BaseCubeCounts subclass instance for this measure.
+
+        Provides cube measures associated with weighted counts, including
+        weighted-counts and cell, vector, and table margins.
+        """
+        return self._cube_measures.unweighted_cube_counts
+
+    @lazyproperty
     def _weighted_cube_counts(self):
-        """_BaseWeightedCubeCounts subclass instance for this measure.
+        """_BaseCubeCounts subclass instance for this measure.
 
         Provides cube measures associated with weighted counts, including
         weighted-counts and cell, vector, and table margins.
@@ -639,7 +648,7 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
 
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
-        return self._old_unwted_cube_counts.column_bases
+        return self._unweighted_cube_counts.column_bases
 
     @lazyproperty
     def _intersections(self):
@@ -690,13 +699,12 @@ class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
 
         # --- in the "no-row-subtotals" case, short-circuit with a (0, ncols) array
         # --- return value, both because that is the right answer, but also because the
-        # --- non-empty columns-base array cannot be broadcast into that shape. dtype
-        # --- must be `int` to avoid changing type of assembled array to float.
+        # --- non-empty columns-base array cannot be broadcast into that shape.
         if subtotal_rows.shape[0] == 0:
             return subtotal_rows
 
         return np.broadcast_to(
-            self._old_unwted_cube_counts.columns_base, subtotal_rows.shape
+            self._unweighted_cube_counts.columns_base, subtotal_rows.shape
         )
 
 
@@ -1253,7 +1261,7 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
 
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
-        return self._old_unwted_cube_counts.row_bases
+        return self._unweighted_cube_counts.row_bases
 
     @lazyproperty
     def _intersections(self):
@@ -1292,7 +1300,7 @@ class _RowUnweightedBases(_BaseSecondOrderMeasure):
             return subtotal_columns
 
         return np.broadcast_to(
-            self._old_unwted_cube_counts.rows_base[:, None], subtotal_columns.shape
+            self._unweighted_cube_counts.rows_base[:, None], subtotal_columns.shape
         )
 
     @lazyproperty
@@ -1501,17 +1509,19 @@ class _TableStandardError(_BaseSecondOrderMeasure):
 class _TableUnweightedBases(_BaseSecondOrderMeasure):
     """Provides the table-unweighted-bases measure for a matrix.
 
-    table-unweighted-bases is a 2D np.float64 ndarray of the denominator, or "base" of
-    the unweighted table-proportion for each matrix cell.
+    table-unweighted-bases is a 2D np.float64 ndarray of the (weighted) table-proportion
+    denominator (base) for each matrix cell.
     """
 
     @lazyproperty
     def _base_values(self):
-        """2D float64 ndarray of unweighted table-proportion denominator for each cell.
+        """2D np.float64 ndarray of weighted table-proportion denominator per cell."""
+        return self._unweighted_cube_counts.table_bases
 
-        This is the first "block" and has the shape of the cube-measure (no insertions).
-        """
-        return self._old_unwted_cube_counts.table_bases
+    @lazyproperty
+    def _intersections_shape(self):
+        """Tuple of (number of row insertions, number of column insertions)"""
+        return tuple(len(dimension.subtotals) for dimension in self._dimensions)
 
     @lazyproperty
     def _intersections(self):
@@ -1520,97 +1530,52 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
         An intersection value arises where a row-subtotal crosses a column-subtotal.
         This is the fourth and final "block" required by the assembler.
         """
-        # --- There are only two cases. Note that intersections can only occur when
-        # --- there are *both* row-subtotals and column-subtotals. Since an MR dimension
-        # --- can have no subtotals, this rules out all but the CAT_X_CAT case. We need
-        # --- the shape of the intersections array for all cases, and we get it from
-        # --- SumSubtotals. Note that in general, the summed values it returns are wrong
-        # --- for this case, but the shape and dtype are right and when empty, it gives
-        # --- the right answer directly.
-        intersections = SumSubtotals.intersections(self._base_values, self._dimensions)
-        shape = intersections.shape
+        # --- There are two cases.
+        # --- Case 1: Intersections are empty, we can broadcast any value of the
+        # --- right dtype and it will be correct, because it is empty.
+        # --- Case 2: There is an intersection, so both dimensions have subtotals,
+        # --- meaning they must both be CAT (because ARRAYs don't have subtotals).
 
-        # --- if intersections is empty, return it, because it is the right shape and
-        # --- because the table-base cannot be broadcast to an empty shape if it is an
-        # --- array value (which it will be when the slice has an MR dimension).
-        if 0 in shape:
-            return intersections
-
-        # --- Otherwise, we know that table-base must be a scalar (only CAT_X_CAT can
-        # --- have intersections, so fill the intersections shape with that scalar.
-        return np.broadcast_to(self._old_unwted_cube_counts.table_base, shape)
+        # --- In either case, we can broadcast any value from the base values to the
+        # --- shape and have the correct answer.
+        return np.broadcast_to(self._base_values[0, 0], self._intersections_shape)
 
     @lazyproperty
     def _subtotal_columns(self):
-        """2D np.float64 ndarray of inserted-column table-proportions denominator value.
+        """2D np.float64 ndarray of inserted-column table-proportion denominator values.
 
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
-        # --- There are three cases. For all of them we need the shape of the
-        # --- subtotal-rows array, which we can get from SumSubtotals. Note that in
-        # --- general, the summed values it returns are wrong for this case, but the
-        # --- shape and dtype are right and when empty, it gives the right answer
-        # --- directly.
-        subtotal_columns = SumSubtotals.subtotal_columns(
-            self._base_values, self._dimensions
-        )
+        # --- There are two cases.
+        # --- Case 1: There are no column-subtotals, we can broadcast any column np.array
+        # --- of the right dtype and it will become the right answer because it is empty.
+        # --- Case 2: There are column-subtotals, so we know that the columns dimension
+        # --- is not ARRAY, and therefore each column is the same. Therefore, we can
+        # --- get a column from the base values (rotate it to appease numpy), and then
+        # --- broadcast it to the correct shape.
 
-        # --- Case 1: in the "no-row-subtotals" case, short-circuit with an (nrows, 0)
-        # --- array return value, both because that is the right answer, but also
-        # --- because the non-empty table-base value cannot be broadcast into that
-        # --- shape. Note that because an X_MR cube can have no column subtotals, this
-        # --- automatically takes care of the CAT_X_MR and MR_X_MR cases.
-        if subtotal_columns.shape[1] == 0:
-            return subtotal_columns
-
-        table_base = self._old_unwted_cube_counts.table_base
-        shape = subtotal_columns.shape
-
-        # TODO: Resolve this abstraction leakage from _BaseUnweightedCounts where the
-        # table-margin (for MR_X_CAT) is a (column) vector instead of a scalar and
-        # column subtotals can still occur. When `.table_base` becomes a min-max range,
-        # we might need something like `.table_base_column` that is (nrows, 1) so this
-        # "rotation" is performed in `_MrXCatUnweightedCounts`. This same shape
-        # diversity happens with `._subtotal_rows` below, but since that vector is a row
-        # it is handled without special-casing.
-
-        # --- Case 2: in the "vector table-base" (MR_X_CAT) case, rotate the vector into
-        # --- a "column" and broadcast it into the subtotal-columns shape.
-        if isinstance(table_base, np.ndarray):
-            return np.broadcast_to(table_base[:, None], shape)
-
-        # --- Case 3: in the "scalar table-base" (CAT_X_CAT) case, simply fill the
-        # --- subtotal-columns shape with that scalar.
-        return np.broadcast_to(table_base, shape)
+        # --- In either case, we can broadcast a rotated column from the base values to
+        # --- the shape and have the correct answer.
+        shape = (self._base_values.shape[0], self._intersections_shape[1])
+        return np.broadcast_to(self._base_values[:, 0][:, None], shape)
 
     @lazyproperty
     def _subtotal_rows(self):
-        """2D np.float64 ndarray of inserted-row table-proportions denominator values.
+        """2D np.float64 ndarray of inserted-row table-proportion denominator values.
 
         This is the third "block" and has the shape (n_row_subtotals, n_cols).
         """
-        # --- There are three cases. For all of them we need the shape of the
-        # --- subtotal-rows array, which we can get from SumSubtotals.subtotal_rows().
-        # --- Note that in general, the summed values it returns are wrong for this
-        # --- case, but the shape and dtype are right and when empty, it gives the
-        # --- right answer directly.
-        subtotal_rows = SumSubtotals.subtotal_rows(self._base_values, self._dimensions)
+        # --- There are two cases.
+        # --- Case 1: There are no row-subtotal, we can broadcast any row np.array
+        # --- of the right dtype and it will become the right answer because it is empty.
+        # --- Case 2: There are row-subtotals, so we know that the columns dimension
+        # --- is not ARRAY, and therefore each row is the same. Therefore, we can
+        # --- get a row from the base values, and then broadcast it to the correct shape.
 
-        # --- Case 1: in the "no-row-subtotals" case, short-circuit with a (0, ncols)
-        # --- array return value, both because that is the right answer, but also
-        # --- because the non-empty table-base value cannot be broadcast into that
-        # --- shape. Note that because an MR_X cube can have no row subtotals, this
-        # --- automatically takes care of the MR_X_CAT and MR_X_MR case.
-        if subtotal_rows.shape[0] == 0:
-            return subtotal_rows
-
-        # --- Case 2 & 3: in the "scalar table-base" (CAT_X_CAT) case, fill the
-        # --- subtotal-rows shape with the scalar value. The same numpy operation also
-        # --- works for the vector table-base (CAT_X_MR) case because the vector
-        # --- table-base is a "row" of base values.
-        return np.broadcast_to(
-            self._old_unwted_cube_counts.table_base, subtotal_rows.shape
-        )
+        # --- In either case, we can broadcast a row from the base values to
+        # --- the shape and have the correct answer.
+        shape = (self._intersections_shape[0], self._base_values.shape[1])
+        return np.broadcast_to(self._base_values[0, :], shape)
 
 
 class _TableWeightedBases(_BaseSecondOrderMeasure):
@@ -1732,9 +1697,9 @@ class _UnweightedCounts(_BaseSecondOrderMeasure):
         These are the base-values, the column-subtotals, the row-subtotals, and the
         subtotal intersection-cell values.
         """
-        diff_nans = self._old_unwted_cube_counts.diff_nans
+        diff_nans = self._unweighted_cube_counts.diff_nans
         return SumSubtotals.blocks(
-            self._old_unwted_cube_counts.unweighted_counts,
+            self._unweighted_cube_counts.counts,
             self._dimensions,
             diff_cols_nan=diff_nans,
             diff_rows_nan=diff_nans,
