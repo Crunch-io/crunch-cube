@@ -177,6 +177,18 @@ class _BaseCubeCounts(_BaseCubeMeasure):
         return None
 
     @lazyproperty
+    def columns_pruning_mask(self):
+        """1D bool np.ndarray indicating whether all cells in column are empty
+
+        The columns-pruning-mask indicates when every cell in a column has base values
+        of 0. When the column is *not* an MR, the base used is equal to the columns_base,
+        but when the column is an MR, we use the sum of selected & non-selected values from
+        the column, whereas the columns_base uses just the selected values.
+        """
+        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        return self._columns_pruning_base == 0
+
+    @lazyproperty
     def columns_table_base(self):
         """Optional 1D np.float64 ndarray of table-wise base for each column.
 
@@ -246,6 +258,18 @@ class _BaseCubeCounts(_BaseCubeMeasure):
         return None
 
     @lazyproperty
+    def rows_pruning_mask(self):
+        """1D bool np.ndarray indicating whether all cells in rows are empty
+
+        The rows-pruning-mask indicates when every cell in a row has base values
+        of 0. When the row is *not* an MR, the base used is equal to the rows_base,
+        but when the row is an MR, we use the sum of selected & non-selected values from
+        the row, whereas the rows_base uses just the selected values.
+        """
+        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        return self._rows_pruning_base == 0
+
+    @lazyproperty
     def rows_table_base(self):
         """Optional 1D np.float64 ndarray of table-wise base for each row.
 
@@ -284,6 +308,42 @@ class _BaseCubeCounts(_BaseCubeMeasure):
         raise NotImplementedError(  # pragma: no cover
             "`%s` must implement `.table_bases`" % type(self).__name__
         )
+
+    @lazyproperty
+    def _columns_pruning_base(self):
+        """1D bool np.ndarray of the sum of the column-bases for cells in a column
+
+        Used to calculate he columns-pruning-mask, which indicates when every cell in a
+        column has base values of 0. When the column is *not* an MR, the base used is
+        equal to the columns_base, but when the column is an MR, we use the sum of
+        selected & non-selected values the column, whereas the columns_base uses just the
+        selected values. These values are not meaningful on their own, but used to
+        calculate the columns-pruning-mask.
+
+        This method works when the column is not an MR, and must be overriden when it is
+        MR.
+        """
+        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        # --- To really hammer home the point that this number is invalid, we keep it
+        # --- private. But it's easier to test, so it is separate from the mask.
+        return np.sum(self.column_bases, axis=0)
+
+    @lazyproperty
+    def _rows_pruning_base(self):
+        """1D bool np.ndarray of the sum of the row-bases for cells in a row
+
+        Used to calculate he rows-pruning-mask, which indicates when every cell in a row
+        of 0. When the row is *not* an MR, the base used is equal to the rows_base,
+        but when the row is an MR, we use the sum of selected & non-selected values from
+        the row, whereas the rows_base uses just the selected values. These values
+        are not meaningful on their own, but used to calculate the rows-pruning-mask.
+
+        This method works when the row is not an MR, and must be overriden when it is MR.
+        """
+        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        # --- To really hammer home the point that this number is invalid, we keep it
+        # --- private. But it's easier to test, so it is separate from the mask.
+        return np.sum(self.row_bases, axis=1)
 
 
 class _ArrXArrCubeCounts(_BaseCubeCounts):
@@ -389,6 +449,25 @@ class _ArrXMrCubeCounts(_BaseCubeCounts):
         # --- No addition across subvariables possible, but use row bases to add
         # --- over the selected/not selected dimension
         return self.row_bases
+
+    @lazyproperty
+    def _columns_pruning_base(self):
+        """1D bool np.ndarray of the sum of the column-bases for cells in a column
+
+        Used to calculate he columns-pruning-mask, which indicates when every cell in a
+        column has base values of 0. When the column is *not* an MR, the base used is
+        equal to the columns_base, but when the column is an MR, we use the sum of
+        selected & non-selected values the column, whereas the columns_base uses just the
+        selected values. These values are not meaningful on their own, but used to
+        calculate the columns-pruning-mask.
+
+        This method works when the column is not an MR, and must be overriden when it is
+        MR.
+        """
+        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        # --- Because column is MR, want to sum over the selection dimension (dim=2) &
+        # --- the rows (dim=0)
+        return np.sum(self._counts, axis=(0, 2))
 
 
 class _CatXArrCubeCounts(_BaseCubeCounts):
@@ -559,6 +638,25 @@ class _CatXMrCubeCounts(_BaseCubeCounts):
         # --- provide a distinct value for each MR subvar.
         return np.broadcast_to(self.columns_table_base, self.counts.shape)
 
+    @lazyproperty
+    def _columns_pruning_base(self):
+        """1D bool np.ndarray of the sum of the column-bases for cells in a column
+
+        Used to calculate he columns-pruning-mask, which indicates when every cell in a
+        column has base values of 0. When the column is *not* an MR, the base used is
+        equal to the columns_base, but when the column is an MR, we use the sum of
+        selected & non-selected values the column, whereas the columns_base uses just the
+        selected values. These values are not meaningful on their own, but used to
+        calculate the columns-pruning-mask.
+
+        This method works when the column is not an MR, and must be overriden when it is
+        MR.
+        """
+        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        # --- Because column is MR, want to sum over the selection dimension (dim=2) &
+        # --- the rows (dim=0)
+        return np.sum(self._counts, axis=(0, 2))
+
 
 class _MrXArrCubeCounts(_BaseCubeCounts):
     """Counts cube-measure for a slice with rows=MR & columns=ARR dimensions"""
@@ -587,6 +685,21 @@ class _MrXArrCubeCounts(_BaseCubeCounts):
         # --- No addition across subvariables possible, but use column bases to add
         # --- over the selected/not selected dimension
         return self.column_bases
+
+    @lazyproperty
+    def _rows_pruning_base(self):
+        """1D bool np.ndarray indicating whether all cells in row are empty
+
+        Used to calculate he rows-pruning-mask, which indicates when every cell in a row
+        of 0. When the row is *not* an MR, the base used is equal to the rows_base,
+        but when the row is an MR, we use the sum of selected & non-selected values from
+        the row, whereas the rows_base uses just the selected values. These values
+        are not meaningful on their own, but used to calculate the rows-pruning-mask.
+        """
+        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        # --- Because row is MR, want to sum over the selection dimension (dim=1) & the
+        # --- columns (dim=1)
+        return np.sum(self._counts, axis=(1, 2))
 
 
 class _MrXCatCubeCounts(_BaseCubeCounts):
@@ -639,6 +752,21 @@ class _MrXCatCubeCounts(_BaseCubeCounts):
         # --- Broadcast the rows_table_base to the correct shape
         return np.broadcast_to(self.rows_table_base[:, None], self.counts.shape)
 
+    @lazyproperty
+    def _rows_pruning_base(self):
+        """1D bool np.ndarray indicating whether all cells in row are empty
+
+        Used to calculate he rows-pruning-mask, which indicates when every cell in a row
+        of 0. When the row is *not* an MR, the base used is equal to the rows_base,
+        but when the row is an MR, we use the sum of selected & non-selected values from
+        the row, whereas the rows_base uses just the selected values. These values
+        are not meaningful on their own, but used to calculate the rows-pruning-mask.
+        """
+        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        # --- Because row is MR, want to sum over the selection dimension (dim=1) & the
+        # --- columns (dim=1)
+        return np.sum(self._counts, axis=(1, 2))
+
 
 class _MrXMrCubeCounts(_BaseCubeCounts):
     """Counts cube-measure for a slice with rows=MR & columns=MR dimensions"""
@@ -671,6 +799,37 @@ class _MrXMrCubeCounts(_BaseCubeCounts):
         # --- (selected, not), (not, selected) and (not, not) cells of the subtable for
         # --- each matrix cell.
         return np.sum(self._counts, axis=(1, 3))
+
+    @lazyproperty
+    def _columns_pruning_base(self):
+        """1D bool np.ndarray of the sum of the column-bases for cells in a column
+
+        Used to calculate he columns-pruning-mask, which indicates when every cell in a
+        column has base values of 0. When the column is *not* an MR, the base used is
+        equal to the columns_base, but when the column is an MR, we use the sum of
+        selected & non-selected values the column, whereas the columns_base uses just the
+        selected values. These values are not meaningful on their own, but used to
+        calculate the columns-pruning-mask.
+        """
+        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        # --- The base includes both selected and unselected counts for the row MR but
+        # --- only column-selecteds contribute.
+        return np.sum(self._counts[:, :, :, 0], axis=(0, 1))
+
+    @lazyproperty
+    def _rows_pruning_base(self):
+        """1D bool np.ndarray indicating whether all cells in row are empty
+
+        Used to calculate he rows-pruning-mask, which indicates when every cell in a row
+        of 0. When the row is *not* an MR, the base used is equal to the rows_base,
+        but when the row is an MR, we use the sum of selected & non-selected values from
+        the row, whereas the rows_base uses just the selected values. These values
+        are not meaningful on their own, but used to calculate the rows-pruning-mask.
+        """
+        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        # --- The base includes both selected and unselected counts for the column MR but
+        # --- only row-selecteds contribute.
+        return np.sum(self._counts[:, 0, :, :], axis=(1, 2))
 
 
 # === MEANS ===

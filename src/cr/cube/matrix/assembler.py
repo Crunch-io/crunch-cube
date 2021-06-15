@@ -880,11 +880,8 @@ class _BaseOrderHelper(object):
         These columns are subject to pruning, depending on a user setting in the
         dimension.
         """
-        return tuple(
-            i
-            for i, N in enumerate(self._second_order_measures.columns_pruning_base)
-            if N == 0
-        )
+        # --- subset because numpy.where returns tuple to allow for multiple axes
+        return tuple(np.where(self._second_order_measures.columns_pruning_mask)[0])
 
     @lazyproperty
     def _empty_row_idxs(self):
@@ -892,11 +889,8 @@ class _BaseOrderHelper(object):
 
         These rows are subject to pruning, depending on a user setting in the dimension.
         """
-        return tuple(
-            i
-            for i, N in enumerate(self._second_order_measures.rows_pruning_base)
-            if N == 0
-        )
+        # --- subset because numpy.where returns tuple to allow for multiple axes
+        return tuple(np.where(self._second_order_measures.rows_pruning_mask)[0])
 
     @lazyproperty
     def _measure(self):

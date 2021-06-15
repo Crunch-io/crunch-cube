@@ -91,9 +91,9 @@ class SecondOrderMeasures(object):
         )
 
     @lazyproperty
-    def columns_pruning_base(self):
-        """1D np.float64 ndarray of unweighted-N for each matrix column."""
-        return self._cube_measures.old_unwted_cube_counts.columns_pruning_base
+    def columns_pruning_mask(self):
+        """1D bool ndarray indicating if each matrix column is empty."""
+        return self._cube_measures.unweighted_cube_counts.columns_pruning_mask
 
     @lazyproperty
     def columns_scale_mean(self):
@@ -225,9 +225,9 @@ class SecondOrderMeasures(object):
         return _RowWeightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
-    def rows_pruning_base(self):
-        """1D np.float64 ndarray of unweighted-N for each matrix row."""
-        return self._cube_measures.old_unwted_cube_counts.rows_pruning_base
+    def rows_pruning_mask(self):
+        """1D bool ndarray indicating if each matrix row is empty."""
+        return self._cube_measures.unweighted_cube_counts.rows_pruning_mask
 
     @lazyproperty
     def rows_scale_mean(self):

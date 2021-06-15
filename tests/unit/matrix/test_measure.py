@@ -104,24 +104,24 @@ class DescribeSecondOrderMeasures(object):
         assert measure is measure_
 
     def it_provides_access_to_the_columns_pruning_base(
-        self, _cube_measures_prop_, cube_measures_, old_unwted_cube_counts
+        self, _cube_measures_prop_, cube_measures_, unweighted_cube_counts_
     ):
         _cube_measures_prop_.return_value = cube_measures_
-        cube_measures_.old_unwted_cube_counts = old_unwted_cube_counts
-        old_unwted_cube_counts.columns_pruning_base = np.array([8, 5, 7, 4])
+        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
+        unweighted_cube_counts_.columns_pruning_mask = [True, False, True, False]
         measures = SecondOrderMeasures(None, None, None)
 
-        assert measures.columns_pruning_base.tolist() == [8, 5, 7, 4]
+        assert measures.columns_pruning_mask == [True, False, True, False]
 
     def it_provides_access_to_the_rows_pruning_base(
-        self, _cube_measures_prop_, cube_measures_, old_unwted_cube_counts
+        self, _cube_measures_prop_, cube_measures_, unweighted_cube_counts_
     ):
         _cube_measures_prop_.return_value = cube_measures_
-        cube_measures_.old_unwted_cube_counts = old_unwted_cube_counts
-        old_unwted_cube_counts.rows_pruning_base = np.array([7, 4, 0, 2])
+        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
+        unweighted_cube_counts_.rows_pruning_mask = [False, False, True, False]
         measures = SecondOrderMeasures(None, None, None)
 
-        assert measures.rows_pruning_base.tolist() == [7, 4, 0, 2]
+        assert measures.rows_pruning_mask == [False, False, True, False]
 
     def it_provides_access_to_the_cube_measures_to_help(
         self, request, cube_, dimensions_, cube_measures_
@@ -256,8 +256,8 @@ class DescribeSecondOrderMeasures(object):
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
 
     @pytest.fixture
-    def old_unwted_cube_counts(self, request):
-        return instance_mock(request, _BaseUnweightedCubeCounts)
+    def unweighted_cube_counts_(self, request):
+        return instance_mock(request, _BaseCubeCounts)
 
 
 class Describe_BaseSecondOrderMeasure(object):

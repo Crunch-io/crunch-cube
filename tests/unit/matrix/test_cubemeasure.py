@@ -168,6 +168,28 @@ class Describe_BaseCubeCounts(object):
         CubeCountsCls_.assert_called_once_with(dimensions_, [3, 4], "diff_nans")
         assert cube_counts is cube_counts_
 
+    def it_provides_columns_pruning_mask(self, request):
+        property_mock(
+            request,
+            _BaseCubeCounts,
+            "_columns_pruning_base",
+            return_value=np.array([0, 2, 0, 4]),
+        )
+        cube_counts = _BaseCubeCounts(None, None, None)
+
+        assert cube_counts.columns_pruning_mask.tolist() == [True, False, True, False]
+
+    def it_provides_rows_pruning_mask(self, request):
+        property_mock(
+            request,
+            _BaseCubeCounts,
+            "_rows_pruning_base",
+            return_value=np.array([0, 2, 0, 4]),
+        )
+        cube_counts = _BaseCubeCounts(None, None, None)
+
+        assert cube_counts.rows_pruning_mask.tolist() == [True, False, True, False]
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
@@ -229,6 +251,18 @@ class Describe_ArrXArrCubeCounts(object):
         cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_bases == pytest.approx(raw_counts)
+
+    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+        cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._columns_pruning_base == pytest.approx(
+            np.array([4.5, 3.8, 4.9])
+        )
+
+    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+        cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._rows_pruning_base == pytest.approx(np.array([6.7, 6.5]))
 
     # fixtures -------------------------------------------------------
 
@@ -304,6 +338,18 @@ class Describe_ArrXCatCubeCounts(object):
                 ]
             )
         )
+
+    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+        cube_counts = _ArrXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._columns_pruning_base == pytest.approx(
+            np.array([4.5, 3.8, 4.9])
+        )
+
+    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+        cube_counts = _ArrXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._rows_pruning_base == pytest.approx(np.array([20.1, 19.5]))
 
     # fixtures -------------------------------------------------------
 
@@ -394,6 +440,22 @@ class Describe_ArrXMrCubeCounts(object):
             )
         )
 
+    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+        cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._columns_pruning_base == pytest.approx(
+            np.array(
+                # --- sel/not for all rows in a column.
+                # --- example: 10.7 == 1.1 + 3.7 + 4.4 + 1.5
+                [10.7, 14.7, 18.7]
+            )
+        )
+
+    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+        cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._rows_pruning_base == pytest.approx(np.array([20.4, 23.7]))
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
@@ -480,6 +542,18 @@ class Describe_CatXArrCubeCounts(object):
             )
         )
 
+    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+        cube_counts = _CatXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._columns_pruning_base == pytest.approx(
+            np.array([9.0, 7.6, 9.8])
+        )
+
+    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+        cube_counts = _CatXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._rows_pruning_base == pytest.approx(np.array([6.7, 6.5]))
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
@@ -564,6 +638,18 @@ class Describe_CatXCatCubeCounts(object):
             )
         )
 
+    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+        cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._columns_pruning_base == pytest.approx(
+            np.array([9.0, 7.6, 9.8])
+        )
+
+    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+        cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._rows_pruning_base == pytest.approx(np.array([20.1, 19.5]))
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
@@ -634,6 +720,22 @@ class Describe_CatXMrCubeCounts(object):
         assert cube_counts.table_bases == pytest.approx(
             np.array([[10.7, 14.7, 18.7], [10.7, 14.7, 18.7]])
         )
+
+    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+        cube_counts = _CatXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._columns_pruning_base == pytest.approx(
+            np.array(
+                # --- sel/not for all rows in a column.
+                # --- example: 10.7 == 1.1 + 3.7 + 4.4 + 1.5
+                [10.7, 14.7, 18.7]
+            )
+        )
+
+    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+        cube_counts = _CatXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._rows_pruning_base == pytest.approx(np.array([20.4, 23.7]))
 
     # fixtures -------------------------------------------------------
 
@@ -713,6 +815,22 @@ class Describe_MrXArrCubeCounts(object):
             np.array([[4.5, 6.5, 8.5], [5.9, 7.9, 9.9]])
         )
 
+    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+        cube_counts = _MrXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._columns_pruning_base == pytest.approx(
+            np.array([10.4, 14.4, 18.4])
+        )
+
+    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+        cube_counts = _MrXArrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._rows_pruning_base == pytest.approx(
+            # --- sel/not for all columns in a row
+            # --- example: 19.5 = 1.1 + 2.2 + 3.3 + 3.4 + 4.3 + 5.2
+            np.array([19.5, 23.7])
+        )
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
@@ -788,6 +906,22 @@ class Describe_MrXCatCubeCounts(object):
             np.array([[19.5, 19.5, 19.5], [23.7, 23.7, 23.7]])
         )
 
+    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+        cube_counts = _MrXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._columns_pruning_base == pytest.approx(
+            np.array([10.4, 14.4, 18.4])
+        )
+
+    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+        cube_counts = _MrXCatCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._rows_pruning_base == pytest.approx(
+            # --- sel/not for all columns in a row
+            # --- example: 19.5 = 1.1 + 2.2 + 3.3 + 3.4 + 4.3 + 5.2
+            np.array([19.5, 23.7])
+        )
+
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
@@ -814,7 +948,9 @@ class Describe_MrXMrCubeCounts(object):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.column_bases == pytest.approx(
-            np.array([[2.2, 4.4], [11.0, 13.2]])
+            # --- sel/not for each column in sel row
+            # --- example: 4.6 = 1.1 + 3.5
+            np.array([[4.6, 8.0], [4.2, 12.6]])
         )
 
     def it_knows_its_columns_base(self, raw_counts):
@@ -830,13 +966,15 @@ class Describe_MrXMrCubeCounts(object):
     def it_knows_its_counts(self, raw_counts):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
-        assert cube_counts.counts == pytest.approx(np.array([[0.0, 1.1], [4.4, 5.5]]))
+        assert cube_counts.counts == pytest.approx(np.array([[1.1, 3.1], [2.8, 7.3]]))
 
     def it_knows_its_row_bases(self, raw_counts):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.row_bases == pytest.approx(
-            np.array([[8.8, 8.8], [8.8, 8.8]])
+            # --- sel/not for each column in sel row
+            # --- example: 3.4 = 1.1 + 2.3
+            np.array([[3.4, 7.1], [6.3, 15.5]])
         )
 
     def it_knows_its_rows_base(self, raw_counts):
@@ -858,7 +996,27 @@ class Describe_MrXMrCubeCounts(object):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_bases == pytest.approx(
-            np.array([[17.6, 17.6], [17.6, 17.6]])
+            # --- sel/not for all columns in sel/not rows
+            # --- example: 12.2 = 1.1+ 2.3 + 3.5+ 5.3
+            np.array([[12.2, 18.8], [14.1, 30.6]])
+        )
+
+    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+        cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._columns_pruning_base == pytest.approx(
+            # --- sel/not for all rows in a selected column
+            # --- example: 8.8 = 1.1 + 3.5 + 2.8 + 1.4
+            np.array([8.8, 20.6])
+        )
+
+    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+        cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
+
+        assert cube_counts._rows_pruning_base == pytest.approx(
+            # --- sel/not for all columns in a selected row
+            # --- example: 10.5 = 1.1 + 2.3 + 3.1 + 4.0
+            np.array([10.5, 21.8])
         )
 
     # fixtures -------------------------------------------------------
@@ -870,22 +1028,22 @@ class Describe_MrXMrCubeCounts(object):
             [  # ------ sel/not (col) -----
                 [  # -- row 0 -------------
                     [  # -- selected ------
-                        [0.0, 8.8],  # -- col 0
-                        [1.1, 7.7],  # -- col 1
+                        [1.1, 2.3],  # -- col 0
+                        [3.1, 4.0],  # -- col 1
                     ],
                     [  # -- not selected --
-                        [2.2, 6.6],  # -- col 0
-                        [3.3, 5.5],  # -- col 1
+                        [3.5, 5.3],  # -- col 0
+                        [4.9, 6.8],  # -- col 1
                     ],
                 ],
                 [  # -- row 1 -------------
                     [  # -- selected ------
-                        [4.4, 4.4],  # -- col 0
-                        [5.5, 3.3],  # -- col 1
+                        [2.8, 3.5],  # -- col 0
+                        [7.3, 8.2],  # -- col 1
                     ],
                     [  # -- not selected --
-                        [6.6, 2.2],  # -- col 0
-                        [7.7, 1.1],  # -- col 1
+                        [1.4, 6.4],  # -- col 0
+                        [5.3, 9.8],  # -- col 1
                     ],
                 ],
             ]
