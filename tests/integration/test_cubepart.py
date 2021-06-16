@@ -1300,7 +1300,7 @@ class Describe_Slice(object):
 
     def it_provides_unpruned_table_margin(self):
         slice_ = _Slice(Cube(CR.MR_X_CAT_HS_MT), 0, None, None, 0)
-        assert slice_.table_base_unpruned.tolist() == [165, 210, 242, 450, 476]
+        assert slice_.table_base_range.tolist() == [165, 476]
 
         assert slice_.table_margin_range == pytest.approx([176.3655518, 471.9317685])
 
@@ -2067,8 +2067,7 @@ class Test_Slice(object):
         slice_ = Cube(CR.MR_X_MR_WITH_PRUNING).partitions[0]
 
         # Assert table base
-        expected = np.full((12, 12), 6490)
-        assert slice_.table_base_unpruned == pytest.approx(expected)
+        assert slice_.table_base_range.tolist() == [6490, 6490]
 
         # Assert table margin range
         expected = np.array([6456.761929, 6456.761929])

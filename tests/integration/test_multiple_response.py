@@ -67,9 +67,13 @@ def test_3D_with_means():
             [-2.0, np.nan, 1.0, np.nan, -1.0],
         ],
     )
-    assert slice_.table_base == 24
-    np.testing.assert_array_equal(slice_.columns_base, [9, 0, 3, 3, 9])
-    np.testing.assert_array_equal(slice_.rows_base, [9, 6, 9])
+    assert slice_.table_unweighted_bases.tolist() == [
+        [9.0, 9.0, 9.0, 9.0, 9.0],
+        [6.0, 6.0, 6.0, 6.0, 6.0],
+        [9.0, 9.0, 9.0, 9.0, 9.0],
+    ]
+    assert slice_.columns_base.tolist() == [9, 0, 3, 3, 9]
+    assert slice_.rows_base.tolist() == [9, 6, 9]
 
 
 def test_mr_x_cat_with_means():
@@ -249,10 +253,9 @@ def test_proportions_cat_x_mr_by_row():
     np.testing.assert_almost_equal(slice_.row_proportions, expected)
 
 
-def test_table_base_unpruned_cat_x_mr():
+def test_table_base_range_cat_x_mr():
     slice_ = Cube(CR.CAT_X_MR).partitions[0]
-    expected = np.array([80, 79, 70])
-    np.testing.assert_array_equal(slice_.table_base_unpruned, expected)
+    assert slice_.table_base_range.tolist() == [70, 80]
 
 
 def test_mr_x_cat_various_measures():

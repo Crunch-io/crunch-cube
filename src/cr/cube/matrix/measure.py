@@ -111,23 +111,51 @@ class SecondOrderMeasures(object):
         return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.COLUMNS)
 
     @lazyproperty
-    def columns_table_weighted_base(self):
-        """_MarginTableWeightedBase measure object for this cube-result for columns.
+    def columns_table_unweighted_base(self):
+        """_MarginTableBase measure object for this cube-result for columns (unweighted).
 
         The name is a mouthful, but each component is important.
 
-        - "columns": Indicates it is a marginal in the "columns" orientation (kind of
-        like a stripe in the shape of a row).
-        - "table": Indicates that it is the base for the whole table. When the
-        `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
-        the columns are array (and therefore we can't sum across them), each cell has
-        its own value.
-        - "weighted": Indicates that weights are used
-        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
-        of selected and non-selected for MR variables)
+        * "columns": Indicates it is a marginal in the "columns" orientation (kind of
+          like a stripe in the shape of a row).
+        * "table": Indicates that it is the base for the whole table. When the
+          `.table_unweighted_base` exists (CAT X CAT), it is a repetition of that, but when
+          the columns are array (and therefore we can't sum across them), each cell has
+          its own value.
+        * "unweighted": Indicates that weights are not used
+        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
+          of selected and non-selected for MR variables)
         """
-        return _MarginTableWeightedBase(
-            self._dimensions, self, self._cube_measures, MO.COLUMNS
+        return _MarginTableBase(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            MO.COLUMNS,
+            self._cube_measures.unweighted_cube_counts,
+        )
+
+    @lazyproperty
+    def columns_table_weighted_base(self):
+        """_MarginTableBase measure object for this cube-result for columns (weighted).
+
+        The name is a mouthful, but each component is important.
+
+        * "columns": Indicates it is a marginal in the "columns" orientation (kind of
+          like a stripe in the shape of a row).
+        * "table": Indicates that it is the base for the whole table. When the
+          `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
+          the columns are array (and therefore we can't sum across them), each cell has
+          its own value.
+        * "weighted": Indicates that weights are used
+        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
+          of selected and non-selected for MR variables)
+        """
+        return _MarginTableBase(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            MO.COLUMNS,
+            self._cube_measures.weighted_cube_counts,
         )
 
     @lazyproperty
@@ -264,23 +292,51 @@ class SecondOrderMeasures(object):
         )
 
     @lazyproperty
+    def rows_table_unweighted_base(self):
+        """_MarginTableBase measure object for this cube-result for rows (unweighted).
+
+        The name is a mouthful, but each component is important.
+
+        * "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
+          stripe in the shape of a column).
+        * "table": Indicates that it is the base for the whole table. When the
+          `.table_unweighted_base` exists (CAT X CAT), it is a repetition of that, but when
+          the rows are array (and therefore we can't sum across them), each cell has
+          its own value.
+        * "unweighted": Indicates that weights are not used
+        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
+          of selected and non-selected for MR variables)
+        """
+        return _MarginTableBase(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            MO.ROWS,
+            self._cube_measures.unweighted_cube_counts,
+        )
+
+    @lazyproperty
     def rows_table_weighted_base(self):
-        """_MarginTableWeightedBase measure object for this cube-result for rows.
+        """_MarginTableBase measure object for this cube-result for rows (weighted).
 
         The name is a mouthful, but each component is important.
 
         - "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
-        stripe in the shape of a column).
+          stripe in the shape of a column).
         - "table": Indicates that it is the base for the whole table. When the
-        `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
-        the rows are array (and therefore we can't sum across them), each cell has
-        its own value.
+          `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
+          the rows are array (and therefore we can't sum across them), each cell has
+          its own value.
         - "weighted": Indicates that weights are used
         - "base": Indicates that it is the base, not necessarily the counts (eg the sum
-        of selected and non-selected for MR variables)
+          of selected and non-selected for MR variables)
         """
-        return _MarginTableWeightedBase(
-            self._dimensions, self, self._cube_measures, MO.ROWS
+        return _MarginTableBase(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            MO.ROWS,
+            self._cube_measures.weighted_cube_counts,
         )
 
     @lazyproperty
@@ -326,18 +382,47 @@ class SecondOrderMeasures(object):
         return _TableStandardError(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def table_unweighted_base(self):
+        """_TableBase measure object for this cube-result (unweighted).
+
+        A scalar value that is the unweighted base for the whole table. It is only
+        defined when both dimensions are CAT and is equal to the sum of all the counts.
+        """
+        return _TableBase(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self._cube_measures.unweighted_cube_counts,
+        )
+
+    @lazyproperty
     def table_unweighted_bases(self):
         """_TableUnweightedBases measure object for this cube-result."""
         return _TableUnweightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
-    def table_weighted_base(self):
-        """_TableWeightedBase measure object for this cube-result.
+    def table_unweighted_bases_range(self):
+        """_TableBasesRange measure object for this cube-result (unweighted)."""
+        return _TableBasesRange(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self._cube_measures.unweighted_cube_counts,
+        )
 
-        A scalar value that is the base for the whole table. It is only defined
+    @lazyproperty
+    def table_weighted_base(self):
+        """_TableBase measure object for this cube-result (weighted).
+
+        A scalar value that is the weighted base for the whole table. It is only defined
         when both dimensions are CAT and is equal to the sum of all the counts.
         """
-        return _TableWeightedBase(self._dimensions, self, self._cube_measures)
+        return _TableBase(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self._cube_measures.weighted_cube_counts,
+        )
 
     @lazyproperty
     def table_weighted_bases(self):
@@ -346,8 +431,13 @@ class SecondOrderMeasures(object):
 
     @lazyproperty
     def table_weighted_bases_range(self):
-        """_TableWeightedBasesRange measure object for this cube-result."""
-        return _TableWeightedBasesRange(self._dimensions, self, self._cube_measures)
+        """_TableBasesRange measure object for this cube-result (weighted)."""
+        return _TableBasesRange(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self._cube_measures.weighted_cube_counts,
+        )
 
     @lazyproperty
     def total_share_sum(self):
@@ -1922,11 +2012,11 @@ class _MarginTableProportion(_BaseMarginal):
     """The 'margin-table-proportion', table proportion of the marginal values
 
     The name is a bit of a mouthful, but each component is meaningful.
-    - "margin": Indicates it is a marginal eg 1D (either in rows or columns orientation)
-    - "table": Indicates that it is the proportion for the whole table, meaning it uses
-      the `_MarginTableWeightedBase` as the denominator.
-    - "proportion": It is a proportion, eg the `_MarginWeightedBase` divided by the
-      `_MarginTableWeightedBase`
+    * "margin": Indicates it is a marginal eg 1D (either in rows or columns orientation)
+    * "table": Indicates that it is the proportion for the whole table, meaning it uses
+      the weighted `_MarginTableBase` as the denominator.
+    * "proportion": It is a proportion, eg the `_MarginWeightedBase` divided by the
+      weighted `_MarginTableBase`
 
     Note that there is an implied "weighted" here, which we do not spell out because we
     never calculate unweighted proportions.
@@ -1991,28 +2081,37 @@ class _MarginTableProportion(_BaseMarginal):
             return self._second_order_measures.columns_table_weighted_base.blocks
 
 
-class _MarginTableWeightedBase(_BaseMarginal):
-    """The 'margin-weighted-table-bases', or the denominator for margin-table-proportion
+class _MarginTableBase(_BaseMarginal):
+    """The 'margin-table-bases', or the denominator for margin-table-proportion
 
-    A consistently 1D form of what used to be called the table_margin. The name is a
-    mouthful, but each component is important.
+    A consistently 1D form of what used to be called the table_margin/table_base. The
+    name is a mouthful, but each component is important.
 
-    - "margin": Indicates it is a marginal eg 1D (either in rows or columns orientation)
-    - "table": Indicates that it is the base for the whole table. When the
-    `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
-    the corresponding dimension is an array (and therefore we can't sum across them),
-    each cell has its own value.
-    - "weighted": Indicates that weights are used
-    - "base": Indicates that it is the base, not necessarily the counts (eg the sum
-    of selected and non-selected for MR variables)
+    * "margin": Indicates it is a marginal eg 1D (either in rows or columns orientation)
+    * "table": Indicates that it is the base for the whole table. When the
+      `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
+      the corresponding dimension is an array (and therefore we can't sum across them),
+      each cell has its own value.
+    * "base": Indicates that it is the base, not necessarily the counts (eg the sum
+      of selected and non-selected for MR variables)
+
+    Depending on the cube_counts passed in, can be weighted or unweighted.
     """
+
+    def __init__(
+        self, dimensions, second_order_measures, cube_measures, orientation, cube_counts
+    ):
+        super(_MarginTableBase, self).__init__(
+            dimensions, second_order_measures, cube_measures, orientation
+        )
+        self._cube_counts = cube_counts
 
     @lazyproperty
     def blocks(self):
         """List of the 2 1D ndarray "blocks" of the summed count margin."""
         if not self.is_defined:
             raise ValueError(
-                "Could not calculate weighted-table-base-margin across subvariables"
+                "Could not calculate margin-table-base across subvariables"
             )
 
         # --- There are 2 cases if defined.
@@ -2040,9 +2139,9 @@ class _MarginTableWeightedBase(_BaseMarginal):
     def _base_values(self):
         """Optional np.ndarray of float margin-table-base from the cube measure"""
         return (
-            self._cube_measures.weighted_cube_counts.rows_table_base
+            self._cube_counts.rows_table_base
             if self.orientation == MO.ROWS
-            else self._cube_measures.weighted_cube_counts.columns_table_base
+            else self._cube_counts.columns_table_base
         )
 
     @lazyproperty
@@ -2413,7 +2512,7 @@ class _BaseTableValue(object):
         )
 
 
-class _TableWeightedBase(_BaseTableValue):
+class _TableBase(_BaseTableValue):
     """The 'table-weighted-base', a scalar base for the whole table
 
     The table-weighted-base is only defined when both rows and columns dimensions
@@ -2422,6 +2521,14 @@ class _TableWeightedBase(_BaseTableValue):
     an arary).
     """
 
+    def __init__(self, dimensions, second_order_measures, cube_measures, cube_counts):
+        super(_TableBase, self).__init__(
+            dimensions,
+            second_order_measures,
+            cube_measures,
+        )
+        self._cube_counts = cube_counts
+
     @lazyproperty
     def is_defined(self):
         """Bool indicating whether the table-margin is defined
@@ -2429,29 +2536,37 @@ class _TableWeightedBase(_BaseTableValue):
         It is defined (as a scalar) only when available on the weighted_cube_counts
         (eg neither dimension is an array)
         """
-        return self._cube_measures.weighted_cube_counts.table_base is not None
+        return self._cube_counts.table_base is not None
 
     @lazyproperty
     def value(self):
         """float of the table-margin"""
         if not self.is_defined:
             raise ValueError(
-                "Cannot sum across subvariables dimension for table weighted base scalar"
+                "Cannot sum across subvariables dimension for table base scalar"
             )
-        return self._cube_measures.weighted_cube_counts.table_base
+        return self._cube_counts.table_base
 
 
-class _TableWeightedBasesRange(_BaseTableValue):
+class _TableBasesRange(_BaseTableValue):
     """The (unpruned) 'table-weighted-bases-range', a length 2 np.array of min and max.
 
     The range of the table-weighted-bases *before* pruning, eg removing rows and columns
     that are hidden or empty.
     """
 
+    def __init__(self, dimensions, second_order_measures, cube_measures, cube_counts):
+        super(_TableBasesRange, self).__init__(
+            dimensions,
+            second_order_measures,
+            cube_measures,
+        )
+        self._cube_counts = cube_counts
+
     @lazyproperty
     def value(self):
         """[min, max] np.float64 ndarray range of the table-weighted-base"""
-        bases = self._cube_measures.weighted_cube_counts.table_bases
+        bases = self._cube_counts.table_bases
         return np.array([np.min(bases), np.max(bases)])
 
 

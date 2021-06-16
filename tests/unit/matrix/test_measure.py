@@ -30,7 +30,7 @@ from cr.cube.matrix.measure import (
     _PairwiseMeansSigTStats,
     _PopulationProportions,
     _MarginTableProportion,
-    _MarginTableWeightedBase,
+    _MarginTableBase,
     _RowComparableCounts,
     _RowProportions,
     _RowShareSum,
@@ -42,13 +42,13 @@ from cr.cube.matrix.measure import (
     SecondOrderMeasures,
     _MarginWeightedBase,
     _Sums,
+    _TableBase,
+    _TableBasesRange,
     _TableProportionVariances,
     _TableProportions,
     _TableStandardError,
     _TableUnweightedBases,
-    _TableWeightedBase,
     _TableWeightedBases,
-    _TableWeightedBasesRange,
     _TotalShareSum,
     _MarginUnweightedBase,
     _UnweightedCounts,
@@ -188,10 +188,10 @@ class DescribeSecondOrderMeasures(object):
         _cube_measures_prop_,
         cube_measures_,
     ):
-        table_weighted_base_ = instance_mock(request, _TableWeightedBase)
-        _TableWeightedBase_ = class_mock(
+        table_weighted_base_ = instance_mock(request, _TableBase)
+        _TableBase_ = class_mock(
             request,
-            "cr.cube.matrix.measure._TableWeightedBase",
+            "cr.cube.matrix.measure._TableBase",
             return_value=table_weighted_base_,
         )
         _cube_measures_prop_.return_value = cube_measures_
@@ -199,8 +199,8 @@ class DescribeSecondOrderMeasures(object):
 
         table_weighted_base = measures.table_weighted_base
 
-        _TableWeightedBase_.assert_called_once_with(
-            dimensions_, measures, cube_measures_
+        _TableBase_.assert_called_once_with(
+            dimensions_, measures, cube_measures_, cube_measures_.weighted_cube_counts
         )
         assert table_weighted_base is table_weighted_base_
 
@@ -1791,8 +1791,8 @@ class Describe_BaseScaledCountMarginal(object):
         assert marginal._opposing_numeric_values == expected
 
 
-class Describe_MarginTableWeightedBase(object):
-    """Unit test suite for `cr.cube.matrix.measure._MarginTableWeightedBase` object."""
+class Describe_MarginTableBase(object):
+    """Unit test suite for `cr.cube.matrix.measure._MarginTableBase` object."""
 
     def it_provides_blocks_if_table_weighted_base(
         self,
@@ -1802,10 +1802,8 @@ class Describe_MarginTableWeightedBase(object):
     ):
         is_defined_prop_.return_value = True
         _base_values_prop_.return_value = np.array([1.0, 1.0])
-        property_mock(
-            request, _MarginTableWeightedBase, "_subtotal_shape", return_value=3
-        )
-        table_weighted_base = _MarginTableWeightedBase(None, None, None, None)
+        property_mock(request, _MarginTableBase, "_subtotal_shape", return_value=3)
+        table_weighted_base = _MarginTableBase(None, None, None, None, None)
 
         results = table_weighted_base.blocks
 
@@ -1816,11 +1814,10 @@ class Describe_MarginTableWeightedBase(object):
         is_defined_prop_.return_value = False
 
         with pytest.raises(ValueError) as e:
-            _MarginTableWeightedBase(None, None, None, None).blocks
+            _MarginTableBase(None, None, None, None, None).blocks
 
         assert (
-            str(e.value)
-            == "Could not calculate weighted-table-base-margin across subvariables"
+            str(e.value) == "Could not calculate margin-table-base across subvariables"
         )
 
     @pytest.mark.parametrize(
@@ -1832,42 +1829,34 @@ class Describe_MarginTableWeightedBase(object):
     )
     def it_can_tell_if_it_is_defined(self, _base_values_prop_, base_values, expected):
         _base_values_prop_.return_value = base_values
-        table_weighted_base = _MarginTableWeightedBase(None, None, None, None)
+        table_weighted_base = _MarginTableBase(None, None, None, None, None)
 
         assert table_weighted_base.is_defined == expected
 
-    def it_provides_the_base_values_for_rows_to_help(
-        self, weighted_cube_counts_, cube_measures_
-    ):
-        weighted_cube_counts_.rows_table_base = [1, 2]
-        cube_measures_.weighted_cube_counts = weighted_cube_counts_
-        table_weighted_base = _MarginTableWeightedBase(
-            None, None, cube_measures_, MO.ROWS
-        )
+    def it_provides_the_base_values_for_rows_to_help(self, cube_counts_):
+        cube_counts_.rows_table_base = [1, 2]
+        table_weighted_base = _MarginTableBase(None, None, None, MO.ROWS, cube_counts_)
 
         assert table_weighted_base._base_values == [1, 2]
 
-    def it_provides_the_base_values_for_columns_to_help(
-        self, weighted_cube_counts_, cube_measures_
-    ):
-        weighted_cube_counts_.columns_table_base = [1, 2]
-        cube_measures_.weighted_cube_counts = weighted_cube_counts_
-        table_weighted_base = _MarginTableWeightedBase(
-            None, None, cube_measures_, MO.COLUMNS
+    def it_provides_the_base_values_for_columns_to_help(self, cube_counts_):
+        cube_counts_.columns_table_base = [1, 2]
+        table_weighted_base = _MarginTableBase(
+            None, None, None, MO.COLUMNS, cube_counts_
         )
 
         assert table_weighted_base._base_values == [1, 2]
 
     def it_provides_subtotal_shape_for_rows_orientation_to_help(self, dimensions_):
         dimensions_[0].subtotals = (1, 2, 3)
-        table_weighted_base = _MarginTableWeightedBase(dimensions_, None, None, MO.ROWS)
+        table_weighted_base = _MarginTableBase(dimensions_, None, None, MO.ROWS, None)
 
         assert table_weighted_base._subtotal_shape == 3
 
     def it_provides_subtotal_shape_for_columns_orientation_to_help(self, dimensions_):
         dimensions_[1].subtotals = (1,)
-        table_weighted_base = _MarginTableWeightedBase(
-            dimensions_, None, None, MO.COLUMNS
+        table_weighted_base = _MarginTableBase(
+            dimensions_, None, None, MO.COLUMNS, None
         )
 
         assert table_weighted_base._subtotal_shape == 1
@@ -1876,11 +1865,7 @@ class Describe_MarginTableWeightedBase(object):
 
     @pytest.fixture
     def _base_values_prop_(self, request):
-        return property_mock(request, _MarginTableWeightedBase, "_base_values")
-
-    @pytest.fixture
-    def cube_measures_(self, request):
-        return instance_mock(request, CubeMeasures)
+        return property_mock(request, _MarginTableBase, "_base_values")
 
     @pytest.fixture
     def dimensions_(self, request):
@@ -1888,10 +1873,10 @@ class Describe_MarginTableWeightedBase(object):
 
     @pytest.fixture
     def is_defined_prop_(self, request):
-        return property_mock(request, _MarginTableWeightedBase, "is_defined")
+        return property_mock(request, _MarginTableBase, "is_defined")
 
     @pytest.fixture
-    def weighted_cube_counts_(self, request):
+    def cube_counts_(self, request):
         return instance_mock(request, _BaseCubeCounts)
 
 
@@ -2559,8 +2544,8 @@ class Describe_ScaleMedian(object):
 # === Scalars ===
 
 
-class Describe_TableWeightedBase(object):
-    """Unit test suite for `cr.cube.matrix.measure._TableWeightedBase` object."""
+class Describe_TableBase(object):
+    """Unit test suite for `cr.cube.matrix.measure._TableBase` object."""
 
     @pytest.mark.parametrize(
         "table_base, expected",
@@ -2569,21 +2554,15 @@ class Describe_TableWeightedBase(object):
             (1, True),
         ),
     )
-    def it_knows_if_it_is_defined(
-        self, cube_measures_, weighted_cube_counts_, table_base, expected
-    ):
-        cube_measures_.weighted_cube_counts = weighted_cube_counts_
-        weighted_cube_counts_.table_base = table_base
+    def it_knows_if_it_is_defined(self, cube_counts_, table_base, expected):
+        cube_counts_.table_base = table_base
 
-        assert _TableWeightedBase(None, None, cube_measures_).is_defined == expected
+        assert _TableBase(None, None, None, cube_counts_).is_defined == expected
 
-    def it_provides_its_value(
-        self, request, cube_measures_, weighted_cube_counts_, is_defined_prop_
-    ):
+    def it_provides_its_value(self, cube_counts_, is_defined_prop_):
         is_defined_prop_.return_value = True
-        cube_measures_.weighted_cube_counts = weighted_cube_counts_
-        weighted_cube_counts_.table_base = 2.0
-        table_margin = _TableWeightedBase(None, None, cube_measures_)
+        cube_counts_.table_base = 2.0
+        table_margin = _TableBase(None, None, None, cube_counts_)
 
         assert table_margin.value == 2.0
 
@@ -2591,33 +2570,29 @@ class Describe_TableWeightedBase(object):
         is_defined_prop_.return_value = False
 
         with pytest.raises(ValueError) as e:
-            _TableWeightedBase(None, None, None).value
+            _TableBase(None, None, None, None).value
 
         assert (
             str(e.value)
-            == "Cannot sum across subvariables dimension for table weighted base scalar"
+            == "Cannot sum across subvariables dimension for table base scalar"
         )
 
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def is_defined_prop_(self, request):
-        return property_mock(request, _TableWeightedBase, "is_defined")
+        return property_mock(request, _TableBase, "is_defined")
 
     @pytest.fixture
-    def cube_measures_(self, request):
-        return instance_mock(request, CubeMeasures)
-
-    @pytest.fixture
-    def weighted_cube_counts_(self, request):
+    def cube_counts_(self, request):
         return instance_mock(request, _BaseCubeCounts)
 
 
-class Describe_TableWeightedBasesRange(object):
-    """Unit test suite for `cr.cube.matrix.measure._TableWeightedBasesRange` object."""
+class Describe_TableBasesRange(object):
+    """Unit test suite for `cr.cube.matrix.measure._TableBasesRange` object."""
 
     def it_is_always_defined(self):
-        assert _TableWeightedBasesRange(None, None, None).is_defined
+        assert _TableBasesRange(None, None, None, None).is_defined
 
     @pytest.mark.parametrize(
         "bases, expected",
@@ -2627,12 +2602,8 @@ class Describe_TableWeightedBasesRange(object):
         ),
     )
     def it_knows_its_values(self, request, bases, expected):
-        weighted_cube_counts_ = instance_mock(
-            request, _BaseCubeCounts, table_bases=bases
-        )
-        cube_measures_ = instance_mock(
-            request, CubeMeasures, weighted_cube_counts=weighted_cube_counts_
-        )
-        range = _TableWeightedBasesRange(None, None, cube_measures_)
+        cube_counts_ = instance_mock(request, _BaseCubeCounts, table_bases=bases)
+
+        range = _TableBasesRange(None, None, None, cube_counts_)
 
         assert range.value.tolist() == expected

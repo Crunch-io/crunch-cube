@@ -509,65 +509,30 @@ class Assembler(object):
 
         This value has four distinct forms, depending on the slice dimensions:
 
-            * MR_X_MR - 2D ndarray with a distinct table-base value per cell.
-            * MR_X - 1D ndarray of value per *row* when only rows dimension is MR.
-            * X_MR - 1D ndarray of value per *column* when only columns dimension is MR.
+            * ARR_X_ARR - 2D ndarray with a distinct table-base value per cell.
+            * ARR_X - 1D ndarray of value per *row* when only rows dimension is ARR.
+            * X_ARR - 1D ndarray of value per *column* when only columns dimension is ARR
             * CAT_X_CAT - scalar float value when slice has no MR dimension.
 
         """
-        # --- an MR dimension cannot have subtotals, and a non-scalar table base only
-        # --- arises in an MR dimension case, so a non-scalar table-base never has
-        # --- subtotals and we need only operate on the base values. There is no need to
-        # --- assemble with subtotals, however the values of a non-scalar table-base do
-        # --- still need to be ordered (which includes hiding).
-        base_table_base = self._cube_result_matrix.table_base
-
-        # --- MR_X_MR slice produces a 2D table-base (each cell has its own N) ---
-        if (
-            self._rows_dimension.dimension_type == DT.MR_SUBVAR
-            and self._columns_dimension.dimension_type == DT.MR_SUBVAR
-        ):
-            return base_table_base[np.ix_(self._row_order, self._column_order)]
-
-        # --- CAT_X_MR slice produces a 1D table-base (each column has its own N) ---
-        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
-            return base_table_base[self._column_order]
-
-        # --- MR_X_CAT slice produces a 1D table-base (each row has its own N) ---
-        if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
-            return base_table_base[self._row_order]
-
-        # --- CAT_X_CAT produces scalar table-base ---
-        return self._cube_result_matrix.table_base
+        if self._measures.table_unweighted_base.is_defined:
+            return self._measures.table_unweighted_base.value
+        if self._measures.columns_table_unweighted_base.is_defined:
+            return self._assemble_marginal(self._measures.columns_table_unweighted_base)
+        if self._measures.rows_table_unweighted_base.is_defined:
+            return self._assemble_marginal(self._measures.rows_table_unweighted_base)
+        return self.table_unweighted_bases
 
     @lazyproperty
-    def table_base_unpruned(self):
-        """np.float64 scalar or a 1D or 2D ndarray of np.float64 representing table base.
+    def table_base_range(self):
+        """[min, max] np.float64 ndarray range of the table_margin (table-weighted-base)
 
-        This value includes hidden vectors, those with either a hide transform on
-        their element or that have been pruned (because their base (N) is zero). Also,
-        it does *not* include inserted subtotals. This does not affect a scalar value
-        but when the return value is an ndarray, the shape may be different than the
-        array returned by `.table_base`.
-
-        A multiple-response (MR) dimension produces an array of table-base values
-        because each element (subvariable) of the dimension represents a logically
-        distinct question which may not have been asked of all respondents. When both
-        dimensions are MR, the return value is a 2D ndarray. A CAT_X_CAT matrix produces
-        a scalar value for this property.
+        A CAT_X_CAT has a scalar for all table-weighted-bases, but arrays have more than
+        one table-weighted-base. This collapses all the values them to the range, and
+        it is "unpruned", meaning that it is calculated before any hiding or removing
+        of empty rows/columns.
         """
-        # TODO: This name is misleading. It's not only "unpruned" it's "before_hiding"
-        # (of either kind, prune or hide-transform). But the real problem is having this
-        # interface property at all. The need for this is related to expressing ranges
-        # for base and margin in cubes that have an MR dimension. The real solution is
-        # to compute ranges in `cr.cube` rather than leaking this sort of internal
-        # detail through the interface and making the client compute those for
-        # themselves. So this will require reconstructing that "show-ranges" requirement
-        # and either adding some sort of a `.range` property that returns a sequence of
-        # (min, max) tuples, or maybe just returning margin or base as tuples when
-        # appropriate and having something like a `.margin_is_ranges` predicate the
-        # client can switch on to control their rendering.
-        return self._cube_result_matrix.table_base
+        return self._measures.table_unweighted_bases_range.value
 
     @lazyproperty
     def table_margin(self):
