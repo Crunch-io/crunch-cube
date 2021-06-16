@@ -1065,9 +1065,9 @@ class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
         col_bases = self._cube_measures.unweighted_cube_counts.column_bases
         idx = self._selected_column_idx
 
-        ref_means = np.broadcast_to(means[:, idx][:, None], means.shape)
-        ref_variance = np.broadcast_to(variance[:, idx][:, None], variance.shape)
-        ref_col_bases = np.broadcast_to(col_bases[:, idx][:, None], col_bases.shape)
+        ref_means = np.broadcast_to(means[:, [idx]], means.shape)
+        ref_variance = np.broadcast_to(variance[:, [idx]], variance.shape)
+        ref_col_bases = np.broadcast_to(col_bases[:, [idx]], col_bases.shape)
 
         return (means - ref_means) / np.sqrt(
             (variance / col_bases) + (ref_variance / ref_col_bases)
