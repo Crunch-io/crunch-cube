@@ -953,23 +953,25 @@ class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
     @lazyproperty
     def t_stats(self):
         """2D ndarray of float64 representing t-stats for means pairwise testing.
-
         Calculate the level of significance for the difference of two means from the
         selected column different from a hypothesized value.
-        t = (x̄1 - x̄2 - μ) √ (N / s2)
-        s2 = var1 + var2 - 2 * covar12 - covar12 in this specific case is 0.
+        t = (x̄1 - x̄2 - (μ1 - μ2)) / √ ((s1 / N1) + (s2 / N2))
         """
         if self._selected_column_idx < 0:
             return np.full(self._cube_measures.cube_stddev.stddev.shape, np.nan)
 
         means = self._cube_measures.cube_means.means
         variance = np.power(self._cube_measures.cube_stddev.stddev, 2)
-        col_bases = self._cube_measures.old_unwted_cube_counts.column_bases
+        col_bases = self._cube_measures.unweighted_cube_counts.column_bases
+        idx = self._selected_column_idx
 
-        combined_variance = variance[:, self._selected_column_idx] + variance.T
-        diff = means.T - means[:, self._selected_column_idx]
-        n = col_bases[:, self._selected_column_idx] + col_bases.T
-        return diff.T * np.sqrt(n.T / combined_variance.T)
+        ref_means = np.broadcast_to(means[:, idx][:, None], means.shape)
+        ref_variance = np.broadcast_to(variance[:, idx][:, None], variance.shape)
+        ref_col_bases = np.broadcast_to(col_bases[:, idx][:, None], col_bases.shape)
+
+        return (means - ref_means) / np.sqrt(
+            (variance / col_bases) + (ref_variance / ref_col_bases)
+        )
 
 
 class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):

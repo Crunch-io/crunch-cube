@@ -11,6 +11,8 @@ from cr.cube.enums import DIMENSION_TYPE as DT, MARGINAL_ORIENTATION as MO
 from cr.cube.matrix.cubemeasure import (
     CubeMeasures,
     _BaseCubeCounts,
+    _BaseCubeMeans,
+    _BaseCubeStdDev,
     _BaseUnweightedCubeCounts,
 )
 from cr.cube.matrix.measure import (
@@ -395,6 +397,32 @@ class Describe_ColumnProportions(object):
         assert column_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
 
 
+class Describe_ColumnShareSum(object):
+    """Unit test suite for `cr.cube.matrix.measure._ColumnShareSum` object."""
+
+    def it_computes_its_blocks(self, request):
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [
+            [[5.0, 12.0], [21.0, 32.0]],
+            [[], []],
+            [[], []],
+            [[], []],
+        ]
+        sums_blocks_ = instance_mock(request, _Sums, blocks=[[5.0, 6.0], [7.0, 8.0]])
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            sums=sums_blocks_,
+        )
+        cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
+
+        col_share_sum = _ColumnShareSum(None, second_order_measures_, cube_measures_)
+
+        assert col_share_sum.blocks[0][0] == pytest.approx([0.2941176, 0.7058823])
+        assert col_share_sum.blocks[0][1] == pytest.approx([0.3962264, 0.6037735])
+        SumSubtotals_.blocks.assert_called_once_with(ANY, None, True, True)
+
+
 class Describe_ColumnUnweightedBases(object):
     """Unit test suite for `cr.cube.matrix.measure._ColumnUnweightedBases` object."""
 
@@ -616,6 +644,30 @@ class Describe_ColumnWeightedBases(object):
     @pytest.fixture
     def _weighted_cube_counts_prop_(self, request):
         return property_mock(request, _ColumnWeightedBases, "_weighted_cube_counts")
+
+
+class Describe_PairwiseMeansSigTStats(object):
+    """Unit test suite for `cr.cube.matrix.measure._PairwiseMeansSigTStats` object."""
+
+    def it_provides_the_tstats(self, request):
+        # Adapted from:
+        # https://mse.redwoods.edu/darnold/math15/spring2013/R/Activities/WelchTTest.html
+        cube_means_ = instance_mock(
+            request, _BaseCubeMeans, means=np.array([[41.52174, 51.47619]])
+        )
+        cube_std_dev_ = instance_mock(
+            request, _BaseCubeStdDev, stddev=np.array([[17.14873, 11.00736]])
+        )
+        unweighted_cube_counts_ = instance_mock(
+            request, _BaseCubeCounts, column_bases=np.array([[23, 21]])
+        )
+        cube_measures_ = instance_mock(request, CubeMeasures)
+        cube_measures_.cube_means = cube_means_
+        cube_measures_.cube_stddev = cube_std_dev_
+        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
+        pairwise_tstat = _PairwiseMeansSigTStats(None, None, cube_measures_, 0)
+
+        assert pairwise_tstat.t_stats == pytest.approx(np.array([[0, 2.310889]]))
 
 
 class Describe_PopulationProportions(object):
@@ -1008,32 +1060,6 @@ class Describe_RowWeightedBases(object):
     @pytest.fixture
     def _weighted_cube_counts_prop_(self, request):
         return property_mock(request, _RowWeightedBases, "_weighted_cube_counts")
-
-
-class Describe_ColumnShareSum(object):
-    """Unit test suite for `cr.cube.matrix.measure._ColumnShareSum` object."""
-
-    def it_computes_its_blocks(self, request):
-        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
-        SumSubtotals_.blocks.return_value = [
-            [[5.0, 12.0], [21.0, 32.0]],
-            [[], []],
-            [[], []],
-            [[], []],
-        ]
-        sums_blocks_ = instance_mock(request, _Sums, blocks=[[5.0, 6.0], [7.0, 8.0]])
-        second_order_measures_ = instance_mock(
-            request,
-            SecondOrderMeasures,
-            sums=sums_blocks_,
-        )
-        cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
-
-        col_share_sum = _ColumnShareSum(None, second_order_measures_, cube_measures_)
-
-        assert col_share_sum.blocks[0][0] == pytest.approx([0.2941176, 0.7058823])
-        assert col_share_sum.blocks[0][1] == pytest.approx([0.3962264, 0.6037735])
-        SumSubtotals_.blocks.assert_called_once_with(ANY, None, True, True)
 
 
 class Describe_RowShareSum(object):
