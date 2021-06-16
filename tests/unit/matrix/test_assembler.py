@@ -539,7 +539,7 @@ class DescribeAssembler(object):
         _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
         assert rows_margin_proportion == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
-    def it_knows_the_2D_table_margin_of_an_ARRAY_X_ARRAY_matrix(
+    def it_knows_the_2D_table_base_of_an_ARRAY_X_ARRAY_matrix(
         self,
         request,
         _measures_prop_,
@@ -567,7 +567,7 @@ class DescribeAssembler(object):
 
         assert assembler.table_base == [[5, 4, 6], [2, 1, 3]]
 
-    def and_it_knows_the_1D_table_margin_of_an_ARRAY_X_CAT_matrix(
+    def and_it_knows_the_1D_table_base_of_an_ARRAY_X_CAT_matrix(
         self,
         _measures_prop_,
         second_order_measures_,
@@ -592,7 +592,7 @@ class DescribeAssembler(object):
         )
         assert table_base == [2, 1, 3]
 
-    def and_it_knows_the_1D_table_margin_of_a_CAT_X_ARRAY_matrix(
+    def and_it_knows_the_1D_table_base_of_a_CAT_X_ARRAY_matrix(
         self,
         _measures_prop_,
         second_order_measures_,
@@ -613,14 +613,14 @@ class DescribeAssembler(object):
         _assemble_marginal_.return_value = [2, 1, 3]
         assembler = Assembler(None, None, None)
 
-        table_base = assembler.table_margin
+        table_base = assembler.table_base
 
         _assemble_marginal_.assert_called_once_with(
             assembler, rows_table_unweighted_base_
         )
         assert table_base == [2, 1, 3]
 
-    def and_it_knows_the_scalar_table_margin_of_a_CAT_X_CAT_matrix(
+    def and_it_knows_the_scalar_table_base_of_a_CAT_X_CAT_matrix(
         self,
         _measures_prop_,
         second_order_measures_,
