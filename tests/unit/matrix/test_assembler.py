@@ -722,7 +722,7 @@ class DescribeAssembler(object):
 
         assert assembler.table_margin == 4242
 
-    def it_knows_table_margin_range(
+    def it_knows_the_table_margin_range(
         self,
         request,
         _measures_prop_,
@@ -906,16 +906,8 @@ class DescribeAssembler(object):
         return method_mock(request, Assembler, "_assemble_matrix")
 
     @pytest.fixture
-    def margin_unweighted_base_(self, request):
-        return instance_mock(request, _MarginUnweightedBase)
-
-    @pytest.fixture
     def _BaseOrderHelper_(self, request):
         return class_mock(request, "cr.cube.matrix.assembler._BaseOrderHelper")
-
-    @pytest.fixture
-    def margin_table_proportion_(self, request):
-        return instance_mock(request, _MarginTableProportion)
 
     @pytest.fixture
     def _column_order_prop_(self, request):
@@ -954,6 +946,14 @@ class DescribeAssembler(object):
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
 
     @pytest.fixture
+    def margin_table_proportion_(self, request):
+        return instance_mock(request, _MarginTableProportion)
+
+    @pytest.fixture
+    def margin_unweighted_base_(self, request):
+        return instance_mock(request, _MarginUnweightedBase)
+
+    @pytest.fixture
     def margin_weighted_base_(self, request):
         return instance_mock(request, _MarginWeightedBase)
 
@@ -982,12 +982,12 @@ class DescribeAssembler(object):
         return instance_mock(request, _Subtotals)
 
     @pytest.fixture
-    def table_weighted_base_(self, request):
-        return instance_mock(request, _TableWeightedBase)
-
-    @pytest.fixture
     def SumSubtotals_(self, request):
         return class_mock(request, "cr.cube.matrix.assembler.SumSubtotals")
+
+    @pytest.fixture
+    def table_weighted_base_(self, request):
+        return instance_mock(request, _TableWeightedBase)
 
 
 class Describe_BaseOrderHelper(object):

@@ -1227,7 +1227,7 @@ class _Slice(CubePartition):
         """[min, max] np.float64 ndarray range of the table_margin (table-weighted-base)
 
         A CAT_X_CAT has a scalar for all table-weighted-bases, but arrays have more than
-        one table-weighted-base. This collapses all the values them to the range, and
+        one table-weighted-base. This collapses all of the values to a range, and
         it is "unpruned", meaning that it is calculated before any hiding or removing
         of empty rows/columns.
         """

@@ -332,16 +332,7 @@ class _ArrXCatCubeCounts(_BaseCubeCounts):
         """Optional 1D np.float64 ndarray of table-wise base for each row.
 
         This marginal is used as the denominator of the margin-table-proportions. The
-        name is a mouthful, but each component is meaningful:
-
-        * "rows": Indicates it is a marginal in the "rows" orientation (kind of
-          like a stripe in the shape of a row).
-        * "table": Indicates that it is the base for the whole table. When the
-          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-          the columns are array (and therefore we can't sum across them), each cell has
-          its own value.
-        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
-          of selected and non-selected for MR variables)
+        name is a mouthful, see `_BaseCubeCounts.rows_table_base` for details.
         """
         # --- Available because columns are CAT, equal to the rows_base because the row
         # --- is array and so addition over rows is not possible
@@ -406,16 +397,7 @@ class _CatXArrCubeCounts(_BaseCubeCounts):
         """Optional 1D np.float64 ndarray of table-wise base for each column.
 
         This marginal is used as the denominator of the margin-table-proportions. The
-        name is a mouthful, but each component is meaningful:
-
-        * "columns": Indicates it is a marginal in the "columns" orientation (kind of
-          like a stripe in the shape of a row).
-        * "table": Indicates that it is the base for the whole table. When the
-          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-          the rows are array (and therefore we can't sum across them), each cell has
-          its own value.
-        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
-          of selected and non-selected for MR variables)
+        name is a mouthful, see `_BaseCubeCounts.columns_table_base` for details.
         """
         # --- Available because row is CAT, equal to columns_base because column is ARR
         return self.columns_base
@@ -462,16 +444,7 @@ class _CatXCatCubeCounts(_BaseCubeCounts):
         """Optional 1D np.float64 ndarray of table-wise base for each column.
 
         This marginal is used as the denominator of the margin-table-proportions. The
-        name is a mouthful, but each component is meaningful:
-
-        * "columns": Indicates it is a marginal in the "columns" orientation (kind of
-          like a stripe in the shape of a row).
-        * "table": Indicates that it is the base for the whole table. When the
-          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-          the rows are array (and therefore we can't sum across them), each cell has
-          its own value.
-        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
-          of selected and non-selected for MR variables)
+        name is a mouthful, see `_BaseCubeCounts.columns_table_base` for details.
         """
         # --- Available because rows are CAT, equal to a repeat of the scalar table base
         # --- because both dimensions are CAT.
@@ -503,16 +476,7 @@ class _CatXCatCubeCounts(_BaseCubeCounts):
         """Optional 1D np.float64 ndarray of table-wise base for each row.
 
         This marginal is used as the denominator of the margin-table-proportions. The
-        name is a mouthful, but each component is meaningful:
-
-        * "rows": Indicates it is a marginal in the "rows" orientation (kind of
-          like a stripe in the shape of a row).
-        * "table": Indicates that it is the base for the whole table. When the
-          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-          the columns are array (and therefore we can't sum across them), each cell has
-          its own value.
-        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
-          of selected and non-selected for MR variables)
+        name is a mouthful, see `_BaseCubeCounts.rows_table_base` for details.
         """
         # --- Available because columns are CAT, equal to a repeat of the scalar table
         # --- base because both dimensions are CAT.
@@ -554,16 +518,7 @@ class _CatXMrCubeCounts(_BaseCubeCounts):
         """Optional 1D np.float64 ndarray of table-wise base for each column.
 
         This marginal is used as the denominator of the margin-table-proportions. The
-        name is a mouthful, but each component is meaningful:
-
-        * "columns": Indicates it is a marginal in the "columns" orientation (kind of
-          like a stripe in the shape of a row).
-        * "table": Indicates that it is the base for the whole table. When the
-          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-          the rows are array (and therefore we can't sum across them), each cell has
-          its own value.
-        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
-          of selected and non-selected for MR variables)
+        name is a mouthful, see `_BaseCubeCounts.columns_table_base` for details.
         """
         return np.sum(self._counts, axis=(0, 2))
 
@@ -653,16 +608,7 @@ class _MrXCatCubeCounts(_BaseCubeCounts):
         """Optional 1D np.float64 ndarray of table-wise base for each row.
 
         This marginal is used as the denominator of the margin-table-proportions. The
-        name is a mouthful, but each component is meaningful:
-
-        * "rows": Indicates it is a marginal in the "rows" orientation (kind of
-          like a stripe in the shape of a row).
-        * "table": Indicates that it is the base for the whole table. When the
-          `.table_base` exists (CAT X CAT), it is a repetition of that, but when
-          the columns are array (and therefore we can't sum across them), each cell has
-          its own value.
-        * "base": Indicates that it is the base, not necessarily the counts (eg the sum
-          of selected and non-selected for MR variables)
+        name is a mouthful, see `_BaseCubeCounts.rows_table_base` for details.
         """
         # --- Since the rows-dimension is MR, each row has a distinct table base, since
         # --- not all of the multiple responses were necessarily offered to all
