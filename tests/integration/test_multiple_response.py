@@ -72,7 +72,11 @@ def test_3D_with_means():
         [6.0, 6.0, 6.0, 6.0, 6.0],
         [9.0, 9.0, 9.0, 9.0, 9.0],
     ]
-    assert slice_.columns_base.tolist() == [9, 0, 3, 3, 9]
+    assert slice_.column_unweighted_bases.tolist() == [
+        [3.0, 0.0, 0.0, 3.0, 3.0],
+        [3.0, 0.0, 0.0, 0.0, 3.0],
+        [3.0, 0.0, 3.0, 0.0, 3.0],
+    ]
     assert slice_.rows_base.tolist() == [9, 6, 9]
 
 

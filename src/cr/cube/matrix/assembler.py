@@ -117,14 +117,16 @@ class Assembler(object):
     @lazyproperty
     def columns_base(self):
         """1D/2D np.float64 ndarray of unweighted-N for each slice column/cell."""
-        # --- an MR_X slice produces a 2D column-base (each cell has its own N) ---
-        columns_base = self._measures.columns_base
-        if self._rows_dimension.dimension_type in (DT.MR_SUBVAR, DT.NUM_ARRAY):
-            return self._assemble_matrix(columns_base.blocks)
+        # --- an MR_X slice produces a 2D columns-base (each cell has its own N) ---
+        # --- This is really just another way to call the columns_weighted_bases ---
+        # --- TODO: Should column_base only be defined when it's 1D? This would
+        # --- require changes to exporter to use the bases to give a
+        # --- "column_base_range"
+        if not self._measures.columns_unweighted_base.is_defined:
+            return self.column_unweighted_bases
+
         # --- otherwise columns-base is a vector ---
-        base_values = columns_base.blocks[0][0]
-        columns_subtotals = columns_base.blocks[0][1]
-        return np.hstack([base_values, columns_subtotals])[self._column_order]
+        return self._assemble_marginal(self._measures.columns_unweighted_base)
 
     @lazyproperty
     def columns_dimension_numeric_values(self):

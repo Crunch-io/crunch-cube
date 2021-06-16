@@ -174,37 +174,45 @@ class DescribeAssembler(object):
         _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
         assert column_labels.tolist() == ["Alpha", "Baker", "Charlie"]
 
-    def it_provides_a_1D_columns_base_for_a_CAT_X_cube_result(
-        self, _measures_prop_, second_order_measures_, dimensions_, _column_order_prop_
-    ):
-        dimensions_[0].dimension_type = DT.CAT
-        _column_order_prop_.return_value = [0, 1]
-        second_order_measures_.columns_base.blocks = [[[1], [2]], [[3], [4]]]
-        _measures_prop_.return_value = second_order_measures_
-        assembler = Assembler(None, dimensions_, None)
-
-        columns_base = assembler.columns_base
-
-        assert pytest.approx(columns_base) == [1, 2]
-
-    def but_it_provides_a_2D_columns_base_for_an_MR_X_cube_result(
+    def it_provides_a_1D_columns_base_for_an_X_CAT_cube_result(
         self,
         _measures_prop_,
         second_order_measures_,
-        _assemble_matrix_,
-        dimensions_,
+        _assemble_marginal_,
+        margin_unweighted_base_,
     ):
-        dimensions_[0].dimension_type = DT.MR_SUBVAR
+        margin_unweighted_base_.is_defined = True
+        second_order_measures_.columns_unweighted_base = margin_unweighted_base_
+        _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
-        _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, dimensions_, None)
+        assembler = Assembler(None, None, None)
 
-        columns_base = assembler.columns_base
+        rows_base = assembler.columns_base
 
-        _assemble_matrix_.assert_called_once_with(
-            assembler, second_order_measures_.columns_base.blocks
+        _assemble_marginal_.assert_called_once_with(assembler, margin_unweighted_base_)
+        assert rows_base == [[1, 2, 3], [4, 5, 6]]
+
+    def but_it_provides_a_2D_columns_base_for_an_X_MR_cube_result(
+        self,
+        request,
+        _measures_prop_,
+        second_order_measures_,
+        margin_unweighted_base_,
+    ):
+        margin_unweighted_base_.is_defined = False
+        second_order_measures_.columns_unweighted_base = margin_unweighted_base_
+        _measures_prop_.return_value = second_order_measures_
+        property_mock(
+            request,
+            Assembler,
+            "column_unweighted_bases",
+            return_value=[[1, 2, 3], [4, 5, 6], [7, 8, 9]],
         )
-        assert columns_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        assembler = Assembler(None, None, None)
+
+        rows_base = assembler.columns_base
+
+        assert rows_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
     def it_knows_the_columns_dimension_numeric_values(
         self, request, _columns_dimension_prop_, dimension_, _column_order_prop_
