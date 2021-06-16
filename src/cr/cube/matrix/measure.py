@@ -13,7 +13,6 @@ from cr.cube.matrix.subtotals import (
     SumSubtotals,
     NanSubtotals,
     NoneSubtotals,
-    PairwiseSigTestSubtotals,
 )
 from cr.cube.util import lazyproperty
 
@@ -61,14 +60,6 @@ class SecondOrderMeasures(object):
     def column_weighted_bases(self):
         """_ColumnWeightedBases measure object for this cube-result."""
         return _ColumnWeightedBases(self._dimensions, self, self._cube_measures)
-
-    @lazyproperty
-    def columns_base(self):
-        """1D np.float64 ndarray of unweighted-N for each matrix column."""
-        # --- TODO: Should use `_MarginUnweightedBase` and be called
-        # --- `columns_unweighted_base` when unweighted counts are
-        # --- refactored to not add across subvariables
-        return _ColumnsBase(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def columns_table_proportion(self):
@@ -563,45 +554,6 @@ class _BaseSecondOrderMeasure(object):
         weighted-counts and cell, vector, and table margins.
         """
         return self._cube_measures.weighted_cube_counts
-
-
-class _ColumnsBase(_BaseSecondOrderMeasure):
-    """Provides the columns-base measure for a matrix.
-    
-    TODO: Remove this measure, it's a weird congomeration of a 2D measure and
-    a 1D marginal.
-    """
-
-    @lazyproperty
-    def blocks(self):
-        """Nested list of the four 2D ndarray "blocks" making up this measure.
-
-        These are the base-values, the column-subtotals, the row-subtotals, and the
-        subtotal intersection-cell values, but in case of 1D array the blocks are made
-        up by base-values and column-subtotals, with no row-subtotals and intersections.
-        """
-        columns_base = self._second_order_measures.columns_unweighted_base
-        column_unweighted_bases = self._second_order_measures.column_unweighted_bases
-        if not columns_base.is_defined:
-            return column_unweighted_bases.blocks
-        # --- If the columns_base cube measure is a 1D ndarray (means that the row
-        # --- dimension is not an array type, the blocks should be composed of:
-        # --- the 1D column_base values array, the 1D subtotals columns, empty subtotal
-        # --- rows and empty intersections.
-        return [
-            [
-                # --- base values ---
-                columns_base.blocks[0],
-                # --- inserted columns ---
-                columns_base.blocks[1],
-            ],
-            [
-                # --- inserted rows (always empty) ---
-                np.ndarray(shape=(0, columns_base.blocks[0].size)),
-                # --- intersections (always empty) ---
-                np.array([]),
-            ],
-        ]
 
 
 class _ColumnComparableCounts(_BaseSecondOrderMeasure):
@@ -1111,18 +1063,8 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
         self._selected_column_idx = selected_column_idx
 
     @lazyproperty
-    def blocks(self):
-        """2D array of the four 2D "blocks" making up this measure."""
-        return PairwiseSigTestSubtotals.blocks(
-            self._t_stats,
-            self._dimensions,
-            self._second_order_measures,
-            self._selected_column_idx,
-        )
-
-    @lazyproperty
-    def _t_stats(self):
-        """2D ndarray of float64 representing t-stats for pairwise col testing.
+    def _base_values(self):
+        """2D ndarray np.float64 of the t-stats for the base values (1st block)
 
         These are the base values t-stats considering the eventual selection on a
         subtotal column. For a normal column selected, this property compute the t-stats
@@ -1139,30 +1081,86 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
         comparison will be between S1-C1, S1-C2 and S1-C3. The final shape of the
         t-stats will be the same of the base values block of the column proportions,
         in this example (2,3).
-        NOTE: the t-stats computation for insertions is done in the
-        `PairwiseSigTestSubtotals` class in the `subtotals` matrix module.
         """
-        col_idx = self._selected_column_idx
-        props = self._second_order_measures.column_proportions.blocks[0][0]
-        props_hs = self._second_order_measures.column_proportions.blocks[0][1]
-        columns_base = self._second_order_measures.column_unweighted_bases.blocks[0][0]
-        columns_base_subtotals = (
-            self._second_order_measures.column_unweighted_bases.blocks[0][1]
+        # --- Use "body" reference values for base values
+        (ref_props, ref_bases) = self._reference_values(0)
+        return self._calculate_t_stats(
+            self._proportions[0][0], self._bases[0][0], ref_props, ref_bases
         )
 
-        var_props = props * (1.0 - props) / columns_base
-        var_props_hs = props_hs * (1 - props_hs) / columns_base_subtotals
+    @lazyproperty
+    def _bases(self):
+        """2D array of 2D ndarray "blocks" for the column unweighted bases"""
+        return self._second_order_measures.column_unweighted_bases.blocks
 
+    def _reference_values(self, block_index):
+        """Tuple of the reference proportions and bases for
+
+        Because the comparison of interest is between columns, the shape of the reference
+        is determined by whether we're in the "body" of the table (the base values and
+        subtotal columns), or the "inserted" rows (inserted rows & intersections).
+        This takes the column index and gets the needed references for the body.
+
+        The block_index parameter chooses between the body (block_index=0) and inserted
+        rows (block_index=1).
+        """
+        col_idx = self._selected_column_idx
         if col_idx < 0:
-            selected_column_proportions = props_hs[:, [col_idx]]
-            selected_column_variance = var_props_hs[:, [col_idx]]
+            props = self._proportions[block_index][1]
+            bases = self._bases[block_index][1]
         else:
-            selected_column_proportions = props[:, [col_idx]]
-            selected_column_variance = var_props[:, [col_idx]]
+            props = self._proportions[block_index][0]
+            bases = self._bases[block_index][0]
 
-        diff = props - selected_column_proportions
-        se_diff = np.sqrt(var_props + selected_column_variance)
+        return (props[:, [col_idx]], bases[:, [col_idx]])
+
+    def _calculate_t_stats(self, props, bases, ref_props, ref_bases):
+        """Calculates the 2D ndarray of np.float64 values for the tstats
+
+        This method calculates the t test on dependent samples, comparing each column
+        with the selected one.
+        """
+        if props.size == 0:
+            return props
+        var_props = props * (1.0 - props) / bases
+        ref_var_props = ref_props * (1.0 - ref_props) / ref_bases
+        diff = props - ref_props
+        # --- Absolute value to handle subtotal differences (can't get square root of
+        # --- negative number)
+        se_diff = np.sqrt(np.abs(var_props + ref_var_props))
         return diff / se_diff
+
+    @lazyproperty
+    def _intersections(self):
+        "2D ndarray np.float64 of the t-stats for the intersections (4th block)" ""
+        # --- Use "inserted" reference values for intersections
+        (ref_props, ref_variance) = self._reference_values(1)
+        return self._calculate_t_stats(
+            self._proportions[1][1], self._bases[1][1], ref_props, ref_variance
+        )
+
+    @lazyproperty
+    def _proportions(self):
+        """2D ndarray np.float64 of the t-stats for the column proportions"""
+        return self._second_order_measures.column_proportions.blocks
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D ndarray np.float64 of the values for the subtotal columns (2nd block)"""
+        # --- Use "body" reference values for inserted columns
+        (ref_props, ref_variance) = self._reference_values(0)
+        return self._calculate_t_stats(
+            self._proportions[0][1], self._bases[0][1], ref_props, ref_variance
+        )
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """2D ndarray np.float64 of the t-stats for the subtotal rows (3rd block)"""
+        # --- Use "inserted" reference values for inserted rows
+        (ref_props, ref_variance) = self._reference_values(1)
+        return self._calculate_t_stats(
+            self._proportions[1][0], self._bases[1][0], ref_props, ref_variance
+        )
 
 
 class _PairwiseSigPvals(_PairwiseSigTstats):

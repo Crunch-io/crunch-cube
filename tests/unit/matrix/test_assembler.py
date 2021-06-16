@@ -1018,16 +1018,12 @@ class DescribeAssembler(object):
         return instance_mock(request, _Subtotals)
 
     @pytest.fixture
-    def table_unweighted_base_(self, request):
-        return instance_mock(request, _TableBase)
-
-    @pytest.fixture
-    def table_weighted_base_(self, request):
-        return instance_mock(request, _TableBase)
-
-    @pytest.fixture
     def SumSubtotals_(self, request):
         return class_mock(request, "cr.cube.matrix.assembler.SumSubtotals")
+
+    @pytest.fixture
+    def table_unweighted_base_(self, request):
+        return instance_mock(request, _TableBase)
 
     @pytest.fixture
     def table_weighted_base_(self, request):

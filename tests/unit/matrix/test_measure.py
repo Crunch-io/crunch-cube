@@ -670,6 +670,188 @@ class Describe_PairwiseMeansSigTStats(object):
         assert pairwise_tstat.t_stats == pytest.approx(np.array([[0, 2.310889]]))
 
 
+class Describe_PairwiseSigTstats(object):
+    """Unit test suite for `cr.cube.matrix.measure._PairwiseSigTstats` object."""
+
+    def it_provides_a_blocks_interface(self, request):
+        property_mock(request, _PairwiseSigTstats, "_base_values", return_value=1)
+        property_mock(request, _PairwiseSigTstats, "_subtotal_columns", return_value=2)
+        property_mock(request, _PairwiseSigTstats, "_subtotal_rows", return_value=3)
+        property_mock(request, _PairwiseSigTstats, "_intersections", return_value=4)
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        assert pairwise_tstat.blocks == [[1, 2], [3, 4]]
+
+    def it_calculates_the_base_values_to_help(
+        self, _bases_prop_, _proportions_prop_, _reference_values_, _calculate_t_stats_
+    ):
+        _bases_prop_.return_value = [[1, 2], [3, 4]]
+        _proportions_prop_.return_value = [[0.5, 0.6], [0.7, 0.8]]
+        _reference_values_.return_value = [9, 0]
+        _calculate_t_stats_.return_value = "tstat"
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        base_values = pairwise_tstat._base_values
+
+        assert base_values == "tstat"
+        _reference_values_.assert_called_once_with(pairwise_tstat, 0)
+        _calculate_t_stats_.assert_called_once_with(pairwise_tstat, 0.5, 1, 9, 0)
+
+    def it_provides_the_bases_to_help(self, second_order_measures_):
+        second_order_measures_.column_unweighted_bases.blocks = [1, 2]
+        pairwise_tstat = _PairwiseSigTstats(None, second_order_measures_, None, None)
+
+        assert pairwise_tstat._bases == [1, 2]
+
+    def it_can_calculate_the_t_stat_to_help(self):
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        actual = pairwise_tstat._calculate_t_stats(
+            np.array([[0.5, 0.3, 0.1], [0.5, 0.7, 0.9]]),
+            np.array([[20, 30, 40], [15, 25, 35]]),
+            np.array([[0.2], [0.4]]),
+            np.array([[45], [55]]),
+        )
+
+        # --- Example calculation:
+        # --- s1 = 0.5 * (1 - 0.5) / 20
+        # --- s2 = 0.2 * (1 - 0.2) / 45
+        # --- 2.367601387 = (0.5 - 0.2) / sqrt(s1 + s2)
+        assert actual == pytest.approx(
+            np.array(
+                [
+                    [2.367601387, 0.9733285, -1.31243591],
+                    [0.689568214, 2.6554250, 6.00405605],
+                ]
+            )
+        )
+
+    def but_tstat_calculation_is_ok_with_empty_inputs(self):
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        actual = pairwise_tstat._calculate_t_stats(
+            np.array([[]]),
+            np.array([[]]),
+            np.array([[]]),
+            np.array([[]]),
+        )
+
+        assert actual.tolist() == [[]]
+
+    def it_provides_the_intersections_to_help(
+        self, _bases_prop_, _proportions_prop_, _reference_values_, _calculate_t_stats_
+    ):
+        _bases_prop_.return_value = [[1, 2], [3, 4]]
+        _proportions_prop_.return_value = [[0.5, 0.6], [0.7, 0.8]]
+        _reference_values_.return_value = [9, 0]
+        _calculate_t_stats_.return_value = "tstat"
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        base_values = pairwise_tstat._intersections
+
+        assert base_values == "tstat"
+        _reference_values_.assert_called_once_with(pairwise_tstat, 1)
+        _calculate_t_stats_.assert_called_once_with(pairwise_tstat, 0.8, 4, 9, 0)
+
+    def it_provides_the_proportions_to_help(self, second_order_measures_):
+        second_order_measures_.column_proportions.blocks = [1, 2]
+        pairwise_tstat = _PairwiseSigTstats(None, second_order_measures_, None, None)
+
+        assert pairwise_tstat._proportions == [1, 2]
+
+    @pytest.mark.parametrize(
+        "col_index, block_index, expected",
+        (
+            (0, 0, ("0", "2")),
+            (1, 0, ("1", "3")),
+            (1, 1, ("10", "12")),
+            (-1, 0, ("6", "8")),
+            (-2, 1, ("13", "15")),
+        ),
+    )
+    def it_can_calculate_the_reference_values_to_help(
+        self, _bases_prop_, _proportions_prop_, col_index, block_index, expected
+    ):
+        _bases_prop_.return_value = [
+            [
+                np.array([["b0", "b1"], ["b2", "b3"]]),
+                np.array([["b5", "b6"], ["b7", "b8"]]),
+            ],
+            [
+                np.array([["b9", "b10"], ["b11", "b12"]]),
+                np.array([["b13", "b14"], ["b15", "b16"]]),
+            ],
+        ]
+        _proportions_prop_.return_value = [
+            [
+                np.array([["p0", "p1"], ["p2", "p3"]]),
+                np.array([["p5", "p6"], ["p7", "p8"]]),
+            ],
+            [
+                np.array([["p9", "p10"], ["p11", "p12"]]),
+                np.array([["p13", "p14"], ["p15", "p16"]]),
+            ],
+        ]
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, col_index)
+
+        actual = pairwise_tstat._reference_values(block_index)
+
+        assert actual[1].tolist() == [["b" + i] for i in expected]
+        assert actual[0].tolist() == [["p" + i] for i in expected]
+
+    def it_provides_the_subtotal_columns_to_help(
+        self, _bases_prop_, _proportions_prop_, _reference_values_, _calculate_t_stats_
+    ):
+        _bases_prop_.return_value = [[1, 2], [3, 4]]
+        _proportions_prop_.return_value = [[0.5, 0.6], [0.7, 0.8]]
+        _reference_values_.return_value = [9, 0]
+        _calculate_t_stats_.return_value = "tstat"
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        base_values = pairwise_tstat._subtotal_columns
+
+        assert base_values == "tstat"
+        _reference_values_.assert_called_once_with(pairwise_tstat, 0)
+        _calculate_t_stats_.assert_called_once_with(pairwise_tstat, 0.6, 2, 9, 0)
+
+    def it_provides_the_subtotal_rows_to_help(
+        self, _bases_prop_, _proportions_prop_, _reference_values_, _calculate_t_stats_
+    ):
+        _bases_prop_.return_value = [[1, 2], [3, 4]]
+        _proportions_prop_.return_value = [[0.5, 0.6], [0.7, 0.8]]
+        _reference_values_.return_value = [9, 0]
+        _calculate_t_stats_.return_value = "tstat"
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        base_values = pairwise_tstat._subtotal_rows
+
+        assert base_values == "tstat"
+        _reference_values_.assert_called_once_with(pairwise_tstat, 1)
+        _calculate_t_stats_.assert_called_once_with(pairwise_tstat, 0.7, 3, 9, 0)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _bases_prop_(self, request):
+        return property_mock(request, _PairwiseSigTstats, "_bases")
+
+    @pytest.fixture
+    def _calculate_t_stats_(self, request):
+        return method_mock(request, _PairwiseSigTstats, "_calculate_t_stats")
+
+    @pytest.fixture
+    def _proportions_prop_(self, request):
+        return property_mock(request, _PairwiseSigTstats, "_proportions")
+
+    @pytest.fixture
+    def _reference_values_(self, request):
+        return method_mock(request, _PairwiseSigTstats, "_reference_values")
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
+
+
 class Describe_PopulationProportions(object):
     """Unit test suite for `cr.cube.matrix.measure._PopulationProportions` object."""
 
