@@ -149,19 +149,20 @@ class Assembler(object):
         # --- TODO: Should column_margin only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a
         # --- "column_margin_range"
-        if not self._measures.columns_margin.is_defined:
+        if not self._measures.columns_weighted_base.is_defined:
             return self.column_weighted_bases
 
         # --- otherwise columns-base is a vector ---
-        return self._assemble_marginal(self._measures.columns_margin)
+        return self._assemble_marginal(self._measures.columns_weighted_base)
 
     @lazyproperty
     def columns_margin_proportion(self):
         """1D/2D np.float64 ndarray of weighted-prop for each column of this slice."""
         # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
         # --- TODO: Should colums_margin_proportion only be defined when it's 1D? This
-        # --- requires changes to exporter to use the bases to give a "rows_margin_range"
-        if not self._measures.columns_margin_proportion.is_defined:
+        # --- requires changes to exporter to use the bases to give a
+        # --- "columns_margin_range"
+        if not self._measures.columns_table_proportion.is_defined:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
                     self.columns_margin / self.table_weighted_bases,
@@ -169,8 +170,8 @@ class Assembler(object):
                 )
             )
 
-        # --- otherwise columns-base is a vector ---
-        return self._assemble_marginal(self._measures.columns_margin_proportion)
+        # --- otherwise columns-margin-proportion is a maginal ---
+        return self._assemble_marginal(self._measures.columns_table_proportion)
 
     @lazyproperty
     def columns_scale_mean(self):
@@ -408,11 +409,11 @@ class Assembler(object):
         # --- an X_ARRAY slice produces a 2D row-base (each cell has its own N) ---
         # --- TODO: Should rows_base only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a "rows_base_range"
-        if self._columns_dimension.dimension_type in DT.ARRAY_TYPES:
+        if not self._measures.rows_unweighted_base.is_defined:
             return self.row_unweighted_bases
 
         # --- otherwise rows-base is a vector ---
-        return self._assemble_marginal(self._measures.rows_base)
+        return self._assemble_marginal(self._measures.rows_unweighted_base)
 
     @lazyproperty
     def rows_dimension_fills(self):
@@ -448,11 +449,11 @@ class Assembler(object):
         # --- This is really just another way to call the row_weighted_bases ---
         # --- TODO: Should rows_margin only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a "rows_margin_range"
-        if not self._measures.rows_margin.is_defined:
+        if not self._measures.rows_weighted_base.is_defined:
             return self.row_weighted_bases
 
         # --- otherwise rows-margin is a vector ---
-        return self._assemble_marginal(self._measures.rows_margin)
+        return self._assemble_marginal(self._measures.rows_weighted_base)
 
     @lazyproperty
     def rows_margin_proportion(self):
@@ -460,7 +461,7 @@ class Assembler(object):
         # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
         # --- TODO: Should rows_margin_proportion only be defined when it's 1D? This would
         # --- require changes to exporter to use the bases to give a "rows_margin_range"
-        if not self._measures.rows_margin_proportion.is_defined:
+        if not self._measures.rows_table_proportion.is_defined:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
                     self.rows_margin / self.table_weighted_bases,
@@ -469,7 +470,7 @@ class Assembler(object):
             )
 
         # --- otherwise rows-margin is a vector ---
-        return self._assemble_marginal(self._measures.rows_margin_proportion)
+        return self._assemble_marginal(self._measures.rows_table_proportion)
 
     @lazyproperty
     def rows_scale_mean(self):
@@ -574,36 +575,18 @@ class Assembler(object):
 
         This value has four distinct forms, depending on the slice dimensions:
 
-            * MR_X_MR - 2D ndarray with a distinct table-margin value per cell.
-            * MR_X - 1D ndarray of value per *row* when only rows dimension is MR.
-            * X_MR - 1D ndarray of value per *column* when only columns dimension is MR.
-            * CAT_X_CAT - scalar float value when slice has no MR dimension.
-
+            * CAT_X_CAT - scalar float value when slice has no ARRAY dimension.
+            * ARRAY_X - 1D ndarray of value per *row* when only rows dimension is ARRAY.
+            * X_ARRAY - 1D ndarray of value per *column* when only column is ARRAY.
+            * ARRAY_X_ARRAY - 2D ndarray with a distinct table-margin value per cell.
         """
-        # NOTE: This all works out even though it doesn't include subtotals and isn't
-        # assembled, because an MR dimension can't have subtotals. Because the
-        # dimensionality of table-margin "follows" the MR-dimension(s), it follows that
-        # a table-margin vector or matrix never has subtotals.
-
-        base_table_margin = self._cube_result_matrix.table_margin
-
-        # --- MR_X_MR slice produces a 2D table-margin (each cell has its own N) ---
-        if (
-            self._rows_dimension.dimension_type == DT.MR_SUBVAR
-            and self._columns_dimension.dimension_type == DT.MR_SUBVAR
-        ):
-            return base_table_margin[np.ix_(self._row_order, self._column_order)]
-
-        # --- MR_X_CAT slice produces a 1D table-margin (each row has its own N) ---
-        if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
-            return base_table_margin[self._row_order]
-
-        # --- CAT_X_MR slice produces a 1D table-margin (each column has its own N) ---
-        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
-            return base_table_margin[self._column_order]
-
-        # --- CAT_X_CAT produces scalar table-margin ---
-        return base_table_margin
+        if self._measures.table_weighted_base.is_defined:
+            return self._measures.table_weighted_base.value
+        if self._measures.columns_table_weighted_base.is_defined:
+            return self._assemble_marginal(self._measures.columns_table_weighted_base)
+        if self._measures.rows_table_weighted_base.is_defined:
+            return self._assemble_marginal(self._measures.rows_table_weighted_base)
+        return self.table_weighted_bases
 
     @lazyproperty
     def table_proportion_variances(self):
@@ -619,25 +602,6 @@ class Assembler(object):
         1.0 inclusive, but subtotal differences can be between -1.0 and 1.0 inclusive.
         """
         return self._assemble_matrix(self._measures.table_proportions.blocks)
-
-    @lazyproperty
-    def table_margin_unpruned(self):
-        """np.float64 scalar or a 1D or 2D ndarray of np.float64 table margin.
-
-        This value includes hidden vectors, those with either a hide transform on
-        their element or that have been pruned (because their base (N) is zero). Also,
-        it does not include inserted subtotals. This
-        does not affect a scalar value but when the return value is an ndarray, the
-        shape may be different than the array returned by `.table_margin`.
-
-        A matrix with a multiple-response (MR) dimension produces an array of
-        table-margin values because each element (subvariable) of the dimension
-        represents a logically distinct question which may not have been asked of all
-        respondents. When both dimensions are MR, the return value is a 2D ndarray.
-        A CAT_X_CAT matrix produces a scalar value for this property.
-        """
-        # TODO: see TODO in `.table_base_unpruned`
-        return self._cube_result_matrix.table_margin
 
     @lazyproperty
     def table_std_err(self):
@@ -662,6 +626,17 @@ class Assembler(object):
         cube-measure.
         """
         return self._assemble_matrix(self._measures.total_share_sum.blocks)
+
+    @lazyproperty
+    def table_margin_range(self):
+        """[min, max] np.float64 ndarray range of the table_margin (table-weighted-base)
+
+        A CAT_X_CAT has a scalar for all table-weighted-bases, but arrays have more than
+        one table-weighted-base. This collapses all of the values to a range, and
+        it is "unpruned", meaning that it is calculated before any hiding or removing
+        of empty rows/columns.
+        """
+        return self._measures.table_weighted_bases_range.value
 
     @lazyproperty
     def unweighted_counts(self):
@@ -1200,9 +1175,9 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
         """Marginal object providing values for sort."""
         marginal = self._order_spec.marginal
         marginal_propname = {
-            MARGINAL.BASE: "rows_base",
-            MARGINAL.MARGIN: "rows_margin",
-            MARGINAL.MARGIN_PROPORTION: "rows_margin_proportion",
+            MARGINAL.BASE: "rows_unweighted_base",
+            MARGINAL.MARGIN: "rows_weighted_base",
+            MARGINAL.MARGIN_PROPORTION: "rows_table_proportion",
             MARGINAL.SCALE_MEAN: "rows_scale_mean",
             MARGINAL.SCALE_MEAN_STDDEV: "rows_scale_mean_stddev",
             MARGINAL.SCALE_MEDIAN: "rows_scale_median",

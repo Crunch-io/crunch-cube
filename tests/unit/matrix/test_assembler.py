@@ -34,7 +34,8 @@ from cr.cube.matrix.measure import (
     _ColumnWeightedBases,
     _Means,
     _PopulationProportions,
-    _MarginProportion,
+    _MarginTableProportion,
+    _MarginTableWeightedBase,
     _RowComparableCounts,
     _RowProportions,
     _RowShareSum,
@@ -45,15 +46,17 @@ from cr.cube.matrix.measure import (
     _ScaleMedian,
     SecondOrderMeasures,
     _StdDev,
-    _SummedCountMargin,
+    _MarginWeightedBase,
     _Sums,
     _TotalShareSum,
     _TableProportionVariances,
     _TableProportions,
     _TableStandardError,
     _TableUnweightedBases,
+    _TableWeightedBase,
+    _TableWeightedBasesRange,
     _TableWeightedBases,
-    _UnweightedBaseMargin,
+    _MarginUnweightedBase,
     _UnweightedCounts,
     _WeightedCounts,
     _Zscores,
@@ -221,38 +224,39 @@ class DescribeAssembler(object):
 
     def it_provides_a_1D_columns_margin_for_a_CAT_X_cube_result(
         self,
-        request,
         _rows_dimension_prop_,
         dimension_,
         _measures_prop_,
         _assemble_marginal_,
         second_order_measures_,
-        summed_count_margin_,
+        margin_weighted_base_,
     ):
         _rows_dimension_prop_.return_value = dimension_
         dimension_.dimension_type = DT.CAT
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.columns_margin = summed_count_margin_
+        second_order_measures_.columns_weighted_base = margin_weighted_base_
         assembler = Assembler(None, None, None)
 
         columns_margin = assembler.columns_margin
 
-        _assemble_marginal_.assert_called_once_with(assembler, summed_count_margin_)
+        _assemble_marginal_.assert_called_once_with(assembler, margin_weighted_base_)
         assert columns_margin == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_columns_margin_for_an_MR_X_cube_result(
         self,
         request,
-        _rows_dimension_prop_,
-        dimensions_,
+        _measures_prop_,
+        second_order_measures_,
+        margin_weighted_base_,
     ):
-        _rows_dimension_prop_.return_value = dimensions_[0]
-        dimensions_[0].dimension_type = DT.MR_SUBVAR
         property_mock(
             request, Assembler, "column_weighted_bases", return_value=[[1, 2], [3, 4]]
         )
-        assembler = Assembler(None, dimensions_, None)
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.columns_weighted_base = margin_weighted_base_
+        margin_weighted_base_.is_defined = False
+        assembler = Assembler(None, None, None)
 
         columns_margin = assembler.columns_margin
 
@@ -264,20 +268,20 @@ class DescribeAssembler(object):
         dimension_,
         _assemble_marginal_,
         _measures_prop_,
-        margin_proportion_,
+        margin_table_proportion_,
         second_order_measures_,
     ):
-        margin_proportion_.is_defined = True
+        margin_table_proportion_.is_defined = True
         _rows_dimension_prop_.return_value = dimension_
         dimension_.dimension_type = DT.CAT
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.columns_margin_proportion = margin_proportion_
+        second_order_measures_.columns_table_proportion = margin_table_proportion_
         assembler = Assembler(None, None, None)
 
         columns_margin_proportion = assembler.columns_margin_proportion
 
-        _assemble_marginal_.assert_called_once_with(assembler, margin_proportion_)
+        _assemble_marginal_.assert_called_once_with(assembler, margin_table_proportion_)
         assert columns_margin_proportion == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_columns_margin_proportion_for_an_MR_X_cube_result(
@@ -286,13 +290,13 @@ class DescribeAssembler(object):
         dimensions_,
         _measures_prop_,
         second_order_measures_,
-        margin_proportion_,
+        margin_table_proportion_,
         SumSubtotals_,
         _assemble_matrix_,
     ):
-        margin_proportion_.is_defined = False
+        margin_table_proportion_.is_defined = False
         _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.columns_margin_proportion = margin_proportion_
+        second_order_measures_.columns_table_proportion = margin_table_proportion_
         property_mock(
             request,
             Assembler,
@@ -370,33 +374,32 @@ class DescribeAssembler(object):
 
     def it_provides_a_1D_rows_base_for_an_X_CAT_cube_result(
         self,
-        _columns_dimension_prop_,
-        dimension_,
         _measures_prop_,
         second_order_measures_,
         _assemble_marginal_,
-        base_margin_,
+        margin_unweighted_base_,
     ):
-        _columns_dimension_prop_.return_value = dimension_
-        dimension_.dimension_type = DT.CAT
-        second_order_measures_.rows_base = base_margin_
+        margin_unweighted_base_.is_defined = True
+        second_order_measures_.rows_unweighted_base = margin_unweighted_base_
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
         assembler = Assembler(None, None, None)
 
         rows_base = assembler.rows_base
 
-        _assemble_marginal_.assert_called_once_with(assembler, base_margin_)
+        _assemble_marginal_.assert_called_once_with(assembler, margin_unweighted_base_)
         assert rows_base == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_rows_base_for_an_X_MR_cube_result(
         self,
         request,
-        _columns_dimension_prop_,
-        dimensions_,
+        _measures_prop_,
+        second_order_measures_,
+        margin_unweighted_base_,
     ):
-        _columns_dimension_prop_.return_value = dimensions_[1]
-        dimensions_[1].dimension_type = DT.MR_SUBVAR
+        margin_unweighted_base_.is_defined = False
+        second_order_measures_.rows_unweighted_base = margin_unweighted_base_
+        _measures_prop_.return_value = second_order_measures_
         property_mock(
             request,
             Assembler,
@@ -445,32 +448,34 @@ class DescribeAssembler(object):
         _measures_prop_,
         _assemble_marginal_,
         second_order_measures_,
-        summed_count_margin_,
+        margin_weighted_base_,
     ):
         _columns_dimension_prop_.return_value = dimension_
         dimension_.dimension_type = DT.CAT
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.rows_margin = summed_count_margin_
+        second_order_measures_.rows_weighted_base = margin_weighted_base_
         assembler = Assembler(None, None, None)
 
         rows_margin = assembler.rows_margin
 
-        _assemble_marginal_.assert_called_once_with(assembler, summed_count_margin_)
+        _assemble_marginal_.assert_called_once_with(assembler, margin_weighted_base_)
         assert rows_margin == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_rows_margin_for_an_X_MR_cube_result(
         self,
         request,
-        _columns_dimension_prop_,
-        dimensions_,
+        _measures_prop_,
+        second_order_measures_,
+        margin_weighted_base_,
     ):
-        _columns_dimension_prop_.return_value = dimensions_[1]
-        dimensions_[1].dimension_type = DT.MR_SUBVAR
         property_mock(
             request, Assembler, "row_weighted_bases", return_value=[[1, 2], [3, 4]]
         )
-        assembler = Assembler(None, dimensions_, None)
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.rows_weighted_base = margin_weighted_base_
+        margin_weighted_base_.is_defined = False
+        assembler = Assembler(None, None, None)
 
         rows_margin = assembler.rows_margin
 
@@ -489,8 +494,8 @@ class DescribeAssembler(object):
         dimension_.dimension_type = DT.CAT
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
-        measure_ = instance_mock(request, _MarginProportion)
-        second_order_measures_.rows_margin_proportion = measure_
+        measure_ = instance_mock(request, _MarginTableProportion)
+        second_order_measures_.rows_table_proportion = measure_
         assembler = Assembler(None, None, None)
 
         rows_margin_proportion = assembler.rows_margin_proportion
@@ -504,13 +509,13 @@ class DescribeAssembler(object):
         dimensions_,
         _measures_prop_,
         second_order_measures_,
-        margin_proportion_,
+        margin_table_proportion_,
         SumSubtotals_,
         _assemble_matrix_,
     ):
-        margin_proportion_.is_defined = False
+        margin_table_proportion_.is_defined = False
         _measures_prop_.return_value = second_order_measures_
-        second_order_measures_.rows_margin_proportion = margin_proportion_
+        second_order_measures_.rows_table_proportion = margin_table_proportion_
         property_mock(
             request, Assembler, "rows_margin", return_value=np.array([[1, 2], [3, 4]])
         )
@@ -622,93 +627,113 @@ class DescribeAssembler(object):
 
         assert assembler.table_base == 4242
 
-    def it_knows_the_2D_table_margin_of_an_MR_X_MR_matrix(
+    def it_knows_the_2D_table_margin_of_an_ARRAY_X_ARRAY_matrix(
         self,
         request,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        _rows_dimension_prop_,
-        _columns_dimension_prop_,
-        _row_order_prop_,
-        _column_order_prop_,
+        _measures_prop_,
+        second_order_measures_,
+        table_weighted_base_,
+        rows_table_weighted_base_,
+        columns_table_weighted_base_,
     ):
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.table_margin = np.array([[1, 2, 3], [4, 5, 6]])
-        _rows_dimension_prop_.return_value = instance_mock(
-            request, Dimension, dimension_type=DT.MR
+        table_weighted_base_.is_defined = False
+        rows_table_weighted_base_.is_defined = False
+        columns_table_weighted_base_.is_defined = False
+        second_order_measures_.table_weighted_base = table_weighted_base_
+        second_order_measures_.rows_table_weighted_base = rows_table_weighted_base_
+        second_order_measures_.columns_table_weighted_base = (
+            columns_table_weighted_base_
         )
-        _columns_dimension_prop_.return_value = instance_mock(
-            request, Dimension, dimension_type=DT.MR
+        _measures_prop_.return_value = second_order_measures_
+        property_mock(
+            request,
+            Assembler,
+            "table_weighted_bases",
+            return_value=[[5, 4, 6], [2, 1, 3]],
         )
-        _row_order_prop_.return_value = np.array([1, 0])
-        _column_order_prop_.return_value = np.array([1, 0, 2])
         assembler = Assembler(None, None, None)
 
-        assert assembler.table_margin.tolist() == [[5, 4, 6], [2, 1, 3]]
+        assert assembler.table_margin == [[5, 4, 6], [2, 1, 3]]
 
-    def and_it_knows_the_1D_table_margin_of_an_MR_X_CAT_matrix(
+    def and_it_knows_the_1D_table_margin_of_an_ARRAY_X_CAT_matrix(
         self,
-        request,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        _rows_dimension_prop_,
-        _columns_dimension_prop_,
-        _row_order_prop_,
+        _measures_prop_,
+        second_order_measures_,
+        table_weighted_base_,
+        columns_table_weighted_base_,
+        _assemble_marginal_,
     ):
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.table_margin = np.array([1, 2, 3])
-        _rows_dimension_prop_.return_value = instance_mock(
-            request, Dimension, dimension_type=DT.MR
+        table_weighted_base_.is_defined = False
+        columns_table_weighted_base_.is_defined = True
+        second_order_measures_.table_weighted_base = table_weighted_base_
+        second_order_measures_.columns_table_weighted_base = (
+            columns_table_weighted_base_
         )
-        _columns_dimension_prop_.return_value = instance_mock(
-            request, Dimension, dimension_type=DT.CAT
-        )
-        _row_order_prop_.return_value = np.array([1, 0, 2])
+        _measures_prop_.return_value = second_order_measures_
+        _assemble_marginal_.return_value = [2, 1, 3]
         assembler = Assembler(None, None, None)
 
-        assert assembler.table_margin.tolist() == [2, 1, 3]
+        table_margin = assembler.table_margin
 
-    def and_it_knows_the_1D_table_margin_of_a_CAT_X_MR_matrix(
+        _assemble_marginal_.assert_called_once_with(
+            assembler, columns_table_weighted_base_
+        )
+        assert table_margin == [2, 1, 3]
+
+    def and_it_knows_the_1D_table_margin_of_a_CAT_X_ARRAY_matrix(
         self,
-        request,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        _rows_dimension_prop_,
-        _columns_dimension_prop_,
-        _column_order_prop_,
+        _measures_prop_,
+        second_order_measures_,
+        table_weighted_base_,
+        rows_table_weighted_base_,
+        columns_table_weighted_base_,
+        _assemble_marginal_,
     ):
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.table_margin = np.array([1, 2, 3])
-        _rows_dimension_prop_.return_value = instance_mock(
-            request, Dimension, dimension_type=DT.CAT
+        table_weighted_base_.is_defined = False
+        rows_table_weighted_base_.is_defined = True
+        columns_table_weighted_base_.is_defined = False
+        second_order_measures_.table_weighted_base = table_weighted_base_
+        second_order_measures_.rows_table_weighted_base = rows_table_weighted_base_
+        second_order_measures_.columns_table_weighted_base = (
+            columns_table_weighted_base_
         )
-        _columns_dimension_prop_.return_value = instance_mock(
-            request, Dimension, dimension_type=DT.MR
-        )
-        _column_order_prop_.return_value = np.array([2, 0, 1])
+        _measures_prop_.return_value = second_order_measures_
+        _assemble_marginal_.return_value = [2, 1, 3]
         assembler = Assembler(None, None, None)
 
-        assert assembler.table_margin.tolist() == [3, 1, 2]
+        table_margin = assembler.table_margin
+
+        _assemble_marginal_.assert_called_once_with(
+            assembler, rows_table_weighted_base_
+        )
+        assert table_margin == [2, 1, 3]
 
     def and_it_knows_the_scalar_table_margin_of_a_CAT_X_CAT_matrix(
         self,
-        request,
-        _cube_result_matrix_prop_,
-        cube_result_matrix_,
-        _rows_dimension_prop_,
-        _columns_dimension_prop_,
+        _measures_prop_,
+        second_order_measures_,
+        table_weighted_base_,
     ):
-        _cube_result_matrix_prop_.return_value = cube_result_matrix_
-        cube_result_matrix_.table_margin = 4242
-        _rows_dimension_prop_.return_value = instance_mock(
-            request, Dimension, dimension_type=DT.CAT
-        )
-        _columns_dimension_prop_.return_value = instance_mock(
-            request, Dimension, dimension_type=DT.CAT
-        )
+        table_weighted_base_.is_defined = True
+        table_weighted_base_.value = 4242
+        second_order_measures_.table_weighted_base = table_weighted_base_
+        _measures_prop_.return_value = second_order_measures_
         assembler = Assembler(None, None, None)
 
         assert assembler.table_margin == 4242
+
+    def it_knows_the_table_margin_range(
+        self,
+        request,
+        _measures_prop_,
+        second_order_measures_,
+    ):
+        _measures_prop_.return_value = second_order_measures_
+        measure_ = instance_mock(request, _TableWeightedBasesRange, value=42)
+        second_order_measures_.table_weighted_bases_range = measure_
+        assembler = Assembler(None, None, None)
+
+        assert assembler.table_margin_range == 42
 
     # === implementation methods/properties ===
 
@@ -881,16 +906,8 @@ class DescribeAssembler(object):
         return method_mock(request, Assembler, "_assemble_matrix")
 
     @pytest.fixture
-    def base_margin_(self, request):
-        return instance_mock(request, _UnweightedBaseMargin)
-
-    @pytest.fixture
     def _BaseOrderHelper_(self, request):
         return class_mock(request, "cr.cube.matrix.assembler._BaseOrderHelper")
-
-    @pytest.fixture
-    def margin_proportion_(self, request):
-        return instance_mock(request, _MarginProportion)
 
     @pytest.fixture
     def _column_order_prop_(self, request):
@@ -899,6 +916,10 @@ class DescribeAssembler(object):
     @pytest.fixture
     def _columns_dimension_prop_(self, request):
         return property_mock(request, Assembler, "_columns_dimension")
+
+    @pytest.fixture
+    def columns_table_weighted_base_(self, request):
+        return instance_mock(request, _MarginTableWeightedBase)
 
     @pytest.fixture
     def cube_(self, request):
@@ -925,6 +946,18 @@ class DescribeAssembler(object):
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
 
     @pytest.fixture
+    def margin_table_proportion_(self, request):
+        return instance_mock(request, _MarginTableProportion)
+
+    @pytest.fixture
+    def margin_unweighted_base_(self, request):
+        return instance_mock(request, _MarginUnweightedBase)
+
+    @pytest.fixture
+    def margin_weighted_base_(self, request):
+        return instance_mock(request, _MarginWeightedBase)
+
+    @pytest.fixture
     def _measures_prop_(self, request):
         return property_mock(request, Assembler, "_measures")
 
@@ -937,6 +970,10 @@ class DescribeAssembler(object):
         return property_mock(request, Assembler, "_rows_dimension")
 
     @pytest.fixture
+    def rows_table_weighted_base_(self, request):
+        return instance_mock(request, _MarginTableWeightedBase)
+
+    @pytest.fixture
     def second_order_measures_(self, request):
         return instance_mock(request, SecondOrderMeasures)
 
@@ -945,12 +982,12 @@ class DescribeAssembler(object):
         return instance_mock(request, _Subtotals)
 
     @pytest.fixture
-    def summed_count_margin_(self, request):
-        return instance_mock(request, _SummedCountMargin)
-
-    @pytest.fixture
     def SumSubtotals_(self, request):
         return class_mock(request, "cr.cube.matrix.assembler.SumSubtotals")
+
+    @pytest.fixture
+    def table_weighted_base_(self, request):
+        return instance_mock(request, _TableWeightedBase)
 
 
 class Describe_BaseOrderHelper(object):
@@ -1489,7 +1526,7 @@ class Describe_SortRowsByMarginalHelper(object):
     @pytest.mark.parametrize(
         "marginal, marginal_prop_name",
         (
-            (MARGINAL.MARGIN, "rows_margin"),
+            (MARGINAL.MARGIN, "rows_weighted_base"),
             (MARGINAL.SCALE_MEAN, "rows_scale_mean"),
             (MARGINAL.SCALE_MEAN_STDDEV, "rows_scale_mean_stddev"),
             (MARGINAL.SCALE_MEDIAN, "rows_scale_median"),

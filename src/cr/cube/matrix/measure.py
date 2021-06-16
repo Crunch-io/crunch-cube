@@ -66,19 +66,27 @@ class SecondOrderMeasures(object):
     @lazyproperty
     def columns_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix column."""
+        # --- TODO: Should use `_MarginUnweightedBase` and be called
+        # --- `columns_unweighted_base` when unweighted counts are
+        # --- refactored to not add across subvariables
         return _ColumnsBase(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
-    def columns_margin(self):
-        """_SummedCountMargin for columns measure object for this cube-result."""
-        return _SummedCountMargin(
-            self._dimensions, self, self._cube_measures, MO.COLUMNS
-        )
+    def columns_table_proportion(self):
+        """_MarginTableProportion for measure object for columns of this cube-result.
 
-    @lazyproperty
-    def columns_margin_proportion(self):
-        """_MarginProportion for measure object for this cube-result."""
-        return _MarginProportion(
+        The name is a bit of a mouthful, but each component is meaningful.
+        - "columns": Indicates it is a marginal in the "columns" orientation (kind of
+        like a stripe in the shape of a row).
+        - "table": Indicates that it is the proportion for the whole table, meaning it
+        uses the `columns_table_weighted_base` as the denominator.
+        - "proportion": It is a proportion, the `columns_weighted_base` divided
+        by the `columns_table_weighted_base`
+
+        Note that there is an implied "weighted" here, which we do not spell out because
+        we never calculate unweighted proportions.
+        """
+        return _MarginTableProportion(
             self._dimensions, self, self._cube_measures, MO.COLUMNS
         )
 
@@ -101,6 +109,38 @@ class SecondOrderMeasures(object):
     def columns_scale_median(self):
         """_ScaleMedian for columns measure object for this cube-result."""
         return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.COLUMNS)
+
+    @lazyproperty
+    def columns_table_weighted_base(self):
+        """_MarginTableWeightedBase measure object for this cube-result for columns.
+
+        The name is a mouthful, but each component is important.
+
+        - "columns": Indicates it is a marginal in the "columns" orientation (kind of
+        like a stripe in the shape of a row).
+        - "table": Indicates that it is the base for the whole table. When the
+        `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
+        the columns are array (and therefore we can't sum across them), each cell has
+        its own value.
+        - "weighted": Indicates that weights are used
+        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
+        of selected and non-selected for MR variables)
+        """
+        return _MarginTableWeightedBase(
+            self._dimensions, self, self._cube_measures, MO.COLUMNS
+        )
+
+    @lazyproperty
+    def columns_weighted_base(self):
+        """_MarginWeightedBase for columns measure object for this cube-result.
+
+        Formerly called the 1D columns-margin, this is the weighted base of the column
+        margin, the sum across the columns of the weighted counts for non-MR or selected
+        & non-selected for MR.
+        """
+        return _MarginWeightedBase(
+            self._dimensions, self, self._cube_measures, MO.COLUMNS
+        )
 
     @lazyproperty
     def means(self):
@@ -185,23 +225,6 @@ class SecondOrderMeasures(object):
         return _RowWeightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
-    def rows_base(self):
-        """1D np.float64 ndarray of unweighted-N for each matrix column."""
-        return _UnweightedBaseMargin(
-            self._dimensions, self, self._cube_measures, MO.ROWS
-        )
-
-    @lazyproperty
-    def rows_margin(self):
-        """_SummedCountMargin rows measure object for this cube-result."""
-        return _SummedCountMargin(self._dimensions, self, self._cube_measures, MO.ROWS)
-
-    @lazyproperty
-    def rows_margin_proportion(self):
-        """_MarginProportion for measure object for this cube-result."""
-        return _MarginProportion(self._dimensions, self, self._cube_measures, MO.ROWS)
-
-    @lazyproperty
     def rows_pruning_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix row."""
         return self._cube_measures.unweighted_cube_counts.rows_pruning_base
@@ -220,6 +243,62 @@ class SecondOrderMeasures(object):
     def rows_scale_median(self):
         """_ScaleMedian for rows measure object for this cube-result."""
         return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.ROWS)
+
+    @lazyproperty
+    def rows_table_proportion(self):
+        """_MarginTableProportion for measure object for this cube-result.
+
+        The name is a bit of a mouthful, but each component is meaningful.
+        - "rows": Indicates it is a marginal in the "rows" orientation (kind of
+        like a stripe in the shape of a column).
+        - "table": Indicates that it is the proportion for the whole table, meaning it
+        uses the `rows_table_weighted_base` as the denominator.
+        - "proportion": It is a proportion, the `rows_weighted_base` divided
+        by the `rows_table_weighted_base`
+
+        Note that there is an implied "weighted" here, which we do not spell out because
+        we never calculate unweighted proportions.
+        """
+        return _MarginTableProportion(
+            self._dimensions, self, self._cube_measures, MO.ROWS
+        )
+
+    @lazyproperty
+    def rows_table_weighted_base(self):
+        """_MarginTableWeightedBase measure object for this cube-result for rows.
+
+        The name is a mouthful, but each component is important.
+
+        - "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
+        stripe in the shape of a column).
+        - "table": Indicates that it is the base for the whole table. When the
+        `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
+        the rows are array (and therefore we can't sum across them), each cell has
+        its own value.
+        - "weighted": Indicates that weights are used
+        - "base": Indicates that it is the base, not necessarily the counts (eg the sum
+        of selected and non-selected for MR variables)
+        """
+        return _MarginTableWeightedBase(
+            self._dimensions, self, self._cube_measures, MO.ROWS
+        )
+
+    @lazyproperty
+    def rows_unweighted_base(self):
+        """1D np.float64 ndarray of unweighted-N for each matrix column."""
+        return _MarginUnweightedBase(
+            self._dimensions, self, self._cube_measures, MO.ROWS
+        )
+
+    @lazyproperty
+    def rows_weighted_base(self):
+        """_MarginWeightedBase for rows measure object for this cube-result.
+
+        Formerly called the 1D rows-margin, this is the weighted base of the column
+        margin, the sum across the rows of the weighted counts for non-MR or selected
+        & non-selected for MR.
+        """
+        return _MarginWeightedBase(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def sums(self):
@@ -252,9 +331,23 @@ class SecondOrderMeasures(object):
         return _TableUnweightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def table_weighted_base(self):
+        """_TableWeightedBase measure object for this cube-result.
+
+        A scalar value that is the base for the whole table. It is only defined
+        when both dimensions are CAT and is equal to the sum of all the counts.
+        """
+        return _TableWeightedBase(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def table_weighted_bases(self):
         """_TableWeightedBases measure object for this cube-result."""
         return _TableWeightedBases(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def table_weighted_bases_range(self):
+        """_TableWeightedBasesRange measure object for this cube-result."""
+        return _TableWeightedBasesRange(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def total_share_sum(self):
@@ -409,7 +502,7 @@ class _ColumnComparableCounts(_BaseSecondOrderMeasure):
     the row dimension is not an array. The values in a subtotal difference column are
     overridden as np.nan because they do not share the same base and so are "not
     comparable" when calculating other measures along the column (across the rows),
-    like rows_margin.
+    like rows-weighted-base.
 
     Raises a ValueError when the row is an array.
     """
@@ -423,7 +516,7 @@ class _ColumnComparableCounts(_BaseSecondOrderMeasure):
             )
 
         return SumSubtotals.blocks(
-            self._weighted_cube_counts.weighted_counts,
+            self._weighted_cube_counts.counts,
             self._dimensions,
             diff_rows_nan=True,
         )
@@ -453,7 +546,7 @@ class _ColumnIndex(_BaseSecondOrderMeasure):
         population (or the population surveyed anyway).
         """
         proportions = self._second_order_measures.column_proportions.blocks[0][0]
-        baseline = self._weighted_cube_counts.baseline
+        baseline = self._cube_measures.unconditional_cube_counts.baseline
         return NanSubtotals.blocks(100 * (proportions / baseline), self._dimensions)
 
 
@@ -1047,7 +1140,7 @@ class _RowComparableCounts(_BaseSecondOrderMeasure):
     the column dimension is not an array. The values in a subtotal difference row are
     overridden as np.nan because they do not share the same base and so are "not
     comparable" when calculating other measures along the row (across the columns),
-    like columns_margin.
+    like columns-weighted-base.
 
     Raises a ValueError when the column is an array.
     """
@@ -1059,7 +1152,7 @@ class _RowComparableCounts(_BaseSecondOrderMeasure):
             raise ValueError("row_comparable_counts not defined across subvariables.")
 
         return SumSubtotals.blocks(
-            self._weighted_cube_counts.weighted_counts,
+            self._weighted_cube_counts.counts,
             self._dimensions,
             diff_cols_nan=True,
         )
@@ -1533,32 +1626,26 @@ class _TableWeightedBases(_BaseSecondOrderMeasure):
         return self._weighted_cube_counts.table_bases
 
     @lazyproperty
+    def _intersections_shape(self):
+        """Tuple of (number of row insertions, number of column insertions)"""
+        return tuple(len(dimension.subtotals) for dimension in self._dimensions)
+
+    @lazyproperty
     def _intersections(self):
         """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
 
         An intersection value arises where a row-subtotal crosses a column-subtotal.
         This is the fourth and final "block" required by the assembler.
         """
-        # --- There are only two cases. Note that intersections can only occur when
-        # --- there are *both* row-subtotals and column-subtotals. Since an ARRAY
-        # --- dimension can have no subtotals, this rules out all but the CAT_X_CAT case.
-        # --- We need the shape of the intersections array for both cases, and we get it
-        # --- from SumSubtotals. Note that in general, the summed values it returns are
-        # --- wrong for this case, but the shape and dtype are right and when empty, it
-        # --- gives the right answer directly.
-        intersections = SumSubtotals.intersections(self._base_values, self._dimensions)
-        shape = intersections.shape
+        # --- There are two cases.
+        # --- Case 1: Intersections are empty, we can broadcast any value of the
+        # --- right dtype and it will be correct, because it is empty.
+        # --- Case 2: There is an intersection, so both dimensions have subtotals,
+        # --- meaning they must both be CAT (because ARRAYs don't have subtotals).
 
-        # --- if intersections is empty, return it, both because it is the correct
-        # --- return value (it has the right "empty" shape) and because an array
-        # --- table-margin (occuring when slice has an MR dimension) cannot be broadcast
-        # --- to an empty shape.
-        if 0 in shape:
-            return intersections
-
-        # --- Otherwise, we know that table-base must be a scalar (only CAT_X_CAT can
-        # --- have intersections), so fill the intersections shape with that scalar.
-        return np.broadcast_to(self._weighted_cube_counts.table_margin, shape)
+        # --- In either case, we can broadcast any value from the base values to the
+        # --- shape and have the correct answer.
+        return np.broadcast_to(self._base_values[0, 0], self._intersections_shape)
 
     @lazyproperty
     def _subtotal_columns(self):
@@ -1566,42 +1653,18 @@ class _TableWeightedBases(_BaseSecondOrderMeasure):
 
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
-        # --- There are three cases. For all of them we need the shape of the
-        # --- subtotal-rows array, which we can get from SumSubtotals. Note that in
-        # --- general, the summed values it returns are wrong for this case, but the
-        # --- shape and dtype are right and when empty, it gives the right answer
-        # --- directly.
-        subtotal_columns = SumSubtotals.subtotal_columns(
-            self._base_values, self._dimensions
-        )
+        # --- There are two cases.
+        # --- Case 1: There are no column-subtotals, we can broadcast any column np.array
+        # --- of the right dtype and it will become the right answer because it is empty.
+        # --- Case 2: There are column-subtotals, so we know that the columns dimension
+        # --- is not ARRAY, and therefore each column is the same. Therefore, we can
+        # --- get a column from the base values (rotate it to appease numpy), and then
+        # --- broadcast it to the correct shape.
 
-        # --- Case 1: in the "no-row-subtotals" case, short-circuit with an (nrows, 0)
-        # --- array return value, both because that is the right answer, but also
-        # --- because the non-empty table-base value cannot be broadcast into that
-        # --- shape. Note that because an X_ARRAY cube can have no column subtotals, this
-        # --- automatically takes care of the CAT_X_ARRAY and ARRAY_X_ARRAY cases.
-        if subtotal_columns.shape[1] == 0:
-            return subtotal_columns
-
-        table_margin = self._weighted_cube_counts.table_margin
-        shape = subtotal_columns.shape
-
-        # TODO: Resolve this abstraction leakage from _BaseWeightedCounts where the
-        # table-margin (for ARRAY_X_CAT) is a (column) vector instead of a scalar and
-        # therefore cannot be directly broadcast. When `.table_margin` becomes a min-max
-        # range, we might need something like `.table_margin_column` that is (nrows, 1)
-        # such that this "rotation" is performed in `_MrXCatWeightedCounts`. This same
-        # shape diversity happens with `._subtotal_rows` below, but since that vector is
-        # a row it is handled without special-casing.
-
-        # --- Case 2: in the "vector table-base" (ARRAY_X_CAT) case, rotate the vector into
-        # --- a "column" and broadcast it into the subtotal-columns shape.
-        if isinstance(table_margin, np.ndarray):
-            return np.broadcast_to(table_margin[:, None], shape)
-
-        # --- Case 3: in the "scalar table-base" (CAT_X_CAT) case, simply fill the
-        # --- subtotal-columns shape with that scalar.
-        return np.broadcast_to(table_margin, shape)
+        # --- In either case, we can broadcast a rotated column from the base values to
+        # --- the shape and have the correct answer.
+        shape = (self._base_values.shape[0], self._intersections_shape[1])
+        return np.broadcast_to(self._base_values[:, 0][:, None], shape)
 
     @lazyproperty
     def _subtotal_rows(self):
@@ -1609,28 +1672,17 @@ class _TableWeightedBases(_BaseSecondOrderMeasure):
 
         This is the third "block" and has the shape (n_row_subtotals, n_cols).
         """
-        # --- There are three cases. For all of them we need the shape of the
-        # --- subtotal-rows array, which we can get from SumSubtotals.subtotal_rows().
-        # --- Note that in general, the summed values it returns are wrong for this
-        # --- case, but the shape and dtype are right and when empty, it gives the
-        # --- right answer directly.
-        subtotal_rows = SumSubtotals.subtotal_rows(self._base_values, self._dimensions)
+        # --- There are two cases.
+        # --- Case 1: There are no row-subtotal, we can broadcast any row np.array
+        # --- of the right dtype and it will become the right answer because it is empty.
+        # --- Case 2: There are row-subtotals, so we know that the columns dimension
+        # --- is not ARRAY, and therefore each row is the same. Therefore, we can
+        # --- get a row from the base values, and then broadcast it to the correct shape.
 
-        # --- Case 1: in the "no-row-subtotals" case, short-circuit with a (0, ncols)
-        # --- array return value, both because that is the right answer, but also
-        # --- because the non-empty table-base value cannot be broadcast into that
-        # --- shape. Note that because an ARRAY_X cube can have no row subtotals, this
-        # --- automatically takes care of the ARRAY_X_CAT and ARRAY_X_ARRAY case.
-        if subtotal_rows.shape[0] == 0:
-            return subtotal_rows
-
-        # --- Case 2 & 3: in the "scalar table-base" (CAT_X_CAT) case, fill the
-        # --- subtotal-rows shape with the scalar value. The same numpy operation also
-        # --- works for the vector table-base (CAT_X_ARRAY) case because the vector
-        # --- table-base is a "row" of base values.
-        return np.broadcast_to(
-            self._weighted_cube_counts.table_margin, subtotal_rows.shape
-        )
+        # --- In either case, we can broadcast a row from the base values to
+        # --- the shape and have the correct answer.
+        shape = (self._intersections_shape[0], self._base_values.shape[1])
+        return np.broadcast_to(self._base_values[0, :], shape)
 
 
 class _TotalShareSum(_BaseSecondOrderMeasure):
@@ -1697,7 +1749,7 @@ class _WeightedCounts(_BaseSecondOrderMeasure):
         """2D array of the four 2D "blocks" making up this measure."""
         diff_nans = self._weighted_cube_counts.diff_nans
         return SumSubtotals.blocks(
-            self._weighted_cube_counts.weighted_counts,
+            self._weighted_cube_counts.counts,
             self._dimensions,
             diff_cols_nan=diff_nans,
             diff_rows_nan=diff_nans,
@@ -1899,8 +1951,22 @@ class _BaseScaledCountMarginal(_BaseMarginal):
         )
 
 
-class _MarginProportion(_BaseMarginal):
-    """The 'proportion-margin' (aka rows-margin-proportion/columns-margin-proportion)"""
+class _MarginTableProportion(_BaseMarginal):
+    """The 'margin-table-proportion', table proportion of the marginal values
+
+    The name is a bit of a mouthful, but each component is meaningful.
+    - "margin": Indicates it is a marginal eg 1D (either in rows or columns orientation)
+    - "table": Indicates that it is the proportion for the whole table, meaning it uses
+      the `_MarginTableWeightedBase` as the denominator.
+    - "proportion": It is a proportion, eg the `_MarginWeightedBase` divided by the
+      `_MarginTableWeightedBase`
+
+    Note that there is an implied "weighted" here, which we do not spell out because we
+    never calculate unweighted proportions.
+
+    Also note we don't actually use the `_MarginWeightedBase` as the numerator here
+    because we want values for subtotal differences. See `._proportion_numerators`
+    """
 
     @lazyproperty
     def blocks(self):
@@ -1908,15 +1974,10 @@ class _MarginProportion(_BaseMarginal):
 
         These are the base-values and the subtotals.
         """
-        denominator = self._cube_measures.weighted_cube_counts.table_margin
-        base_values = self._proportion_numerators[0] / denominator
-        # --- if insertion numerator is empty (eg no insertions) don't divide ---
-        insertions = (
-            self._proportion_numerators[1]
-            if self._proportion_numerators[1].shape == (0,)
-            else self._proportion_numerators[1] / denominator
-        )
-        return [base_values, insertions]
+        return [
+            self._proportion_numerators[0] / self._proportion_denominators[0],
+            self._proportion_numerators[1] / self._proportion_denominators[1],
+        ]
 
     @lazyproperty
     def is_defined(self):
@@ -1925,10 +1986,19 @@ class _MarginProportion(_BaseMarginal):
 
     @lazyproperty
     def _proportion_numerators(self):
-        """ndarray of counts to be used as numerator for the margin proportions
+        """list of ndarray of counts to be used as numerator for the margin proportions
 
-        We want the numerator to exist even along subtotal differences, so we cannot
-        use the already defined `rows/columns` margin.
+        We want the numerator to exist even along subtotal differences, so we cannot use
+        the "rows/columns -table-weighted-base". This is because of the dual nature of
+        bases on non-MR variables, where bases are just the sum of counts and there's no
+        "selected" diension to sum over. Therefore, the "margin-weighted-base" could
+        also be called the "margin-weighted-count" if you think of the margin as a
+        stripe, and for the proportions we want to use the count as the numerator. For
+        non-array variables (all situations where there is a 1D table-weighted-base),
+        this "base" and "count" are equal for the base values, but we set the base to
+        `NaN` for subtotal differences for bases, but we actually want the values for
+        counts. Since this is the only place we use this, and there are already a lot of
+        overlapping names, we just calculate the numerators privately in this class.
         """
         counts = self._second_order_measures.weighted_counts.blocks
 
@@ -1944,6 +2014,163 @@ class _MarginProportion(_BaseMarginal):
             counts = [counts[0][0], counts[0][1]]
 
         return [self._apply_along_orientation(np.sum, count) for count in counts]
+
+    @lazyproperty
+    def _proportion_denominators(self):
+        """list of ndarray 1D table margins to be used as denominator"""
+        if self.orientation == MO.ROWS:
+            return self._second_order_measures.rows_table_weighted_base.blocks
+        else:
+            return self._second_order_measures.columns_table_weighted_base.blocks
+
+
+class _MarginTableWeightedBase(_BaseMarginal):
+    """The 'margin-weighted-table-bases', or the denominator for margin-table-proportion
+
+    A consistently 1D form of what used to be called the table_margin. The name is a
+    mouthful, but each component is important.
+
+    - "margin": Indicates it is a marginal eg 1D (either in rows or columns orientation)
+    - "table": Indicates that it is the base for the whole table. When the
+    `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
+    the corresponding dimension is an array (and therefore we can't sum across them),
+    each cell has its own value.
+    - "weighted": Indicates that weights are used
+    - "base": Indicates that it is the base, not necessarily the counts (eg the sum
+    of selected and non-selected for MR variables)
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin."""
+        if not self.is_defined:
+            raise ValueError(
+                "Could not calculate weighted-table-base-margin across subvariables"
+            )
+
+        # --- There are 2 cases if defined.
+        # --- 1) The corresponding dimension is array, in which case there can be no subtotals
+        # --- and so repeating any value to the shape of the subtotals gives the correct
+        # --- empty values.
+        # --- 2) The corresponding dimension is not array, in which case, the table-margin
+        # --- is always the same, so repeating any value to the shape is correct.
+        # --- Therefore we can just repeat the first value to the shape.
+        return [
+            self._base_values,
+            np.repeat([self._base_values[0]], self._subtotal_shape),
+        ]
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool indicating whether the margin is defined in this orientation
+
+        True if the cube measure has the base values we need (eg the corresponding
+        dimension is not array).
+        """
+        return self._base_values is not None
+
+    @lazyproperty
+    def _base_values(self):
+        """Optional np.ndarray of float margin-table-base from the cube measure"""
+        return (
+            self._cube_measures.weighted_cube_counts.rows_table_base
+            if self.orientation == MO.ROWS
+            else self._cube_measures.weighted_cube_counts.columns_table_base
+        )
+
+    @lazyproperty
+    def _subtotal_shape(self):
+        """Int indicating the number of subtotals given the orientation"""
+        if self.orientation == MO.ROWS:
+            return len(self._dimensions[0].subtotals)
+        return len(self._dimensions[1].subtotals)
+
+
+class _MarginUnweightedBase(_BaseMarginal):
+    """The 'margin-unweighted base', a 1D weighted base in the margin
+
+    This is the sum of the unweighted counts across a non-array dimension, It is called
+    "Unweighted N" when put in the margin of  the web app. Since we cannot add across
+    array variables, we cannot reduce the dimensionality to get to a margin when there
+    are arrays, each cell has it's own value.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin.
+
+        These are the base-values and the subtotals.
+        """
+        if not self.is_defined:
+            raise ValueError("Cannot calculate base across subvariables dimension.")
+
+        # --- Because we know that the corresponding dimension is not array (otherwise
+        # --- the margin-unweighted-base is not defined), we know that the 2D row/column
+        # --- unweighted base is a repetition in the orientation we need. Therefore,
+        # --- we can get a row/column of the 2D dimension and use it so that we don't
+        # --- have to recalculate the subtotals.
+        if self.orientation == MO.ROWS:
+            bases = self._second_order_measures.row_unweighted_bases.blocks
+            return [bases[0][0][:, 0], bases[1][0][:, 0]]
+        else:
+            bases = self._second_order_measures.column_unweighted_bases.blocks
+            return [bases[0][0][0, :], bases[0][1][0, :]]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if counts are defined."""
+        return self._counts_are_defined
+
+
+class _MarginWeightedBase(_BaseMarginal):
+    """The 'margin-weighted base', a 1D weighted base in the margin
+
+    This is the sum of the weighted counts across a non-array dimension, It is called
+    "Weighted N" when put in the margin of  the web app. Since we cannot add across array
+    variables, we cannot reduce the dimensionality to get to a margin when there are
+    arrays, each cell has it's own value.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the summed count margin.
+
+        These are the base-values and the subtotals.
+        """
+        if not self.is_defined:
+            raise ValueError(
+                "Could not calculate weighted-base-margin across subvariables"
+            )
+
+        # --- Because we know that the corresponding dimension is not array (otherwise
+        # --- the margin-weighted-base is not defined), we know that the 2D row/column
+        # --- weighted base is a repetition in the orientation we need. Therefore,
+        # --- we can get a row/column of the 2D dimension and use it so that we don't
+        # --- have to recalculate the subtotals.
+        if self.orientation == MO.ROWS:
+            bases = self._second_order_measures.row_weighted_bases.blocks
+            return [bases[0][0][:, 0], bases[1][0][:, 0]]
+        else:
+            bases = self._second_order_measures.column_weighted_bases.blocks
+            return [bases[0][0][0, :], bases[0][1][0, :]]
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool indicating whether the margin is defined in this orientation
+
+        True if the cube measure has the base values we need (eg the corresponding
+        dimension is not array).
+        """
+        return self._base_values is not None
+
+    @lazyproperty
+    def _base_values(self):
+        """Optional np.ndarray of float margin-base from the cube measure"""
+        return (
+            self._cube_measures.weighted_cube_counts.rows_base
+            if self.orientation == MO.ROWS
+            else self._cube_measures.weighted_cube_counts.columns_base
+        )
 
 
 class _ScaleMean(_BaseScaledCountMarginal):
@@ -2191,52 +2418,74 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
         )
 
 
-class _SummedCountMargin(_BaseMarginal):
-    """The 'summed-count-margin' (often called the rows-margin/columns-margin)"""
+# === SCALAR TABLE VALUES ===
 
-    @lazyproperty
-    def blocks(self):
-        """List of the 2 1D ndarray "blocks" of the summed count margin.
 
-        These are the base-values and the subtotals.
-        """
-        return [
-            self._apply_along_orientation(np.sum, counts) for counts in self._counts
-        ]
+class _BaseTableValue(object):
+    """Base class for all (second-order) table values
+
+    Table values are values that apply to the whole table, which are often scalars, but
+    not necessarily (eg the table-weighted-base-range is a length 2 array, but these
+    values apply to the whole table.)
+    """
+
+    def __init__(self, dimensions, second_order_measures, cube_measures):
+        self._dimensions = dimensions
+        self._second_order_measures = second_order_measures
+        self._cube_measures = cube_measures
 
     @lazyproperty
     def is_defined(self):
-        """True if counts are defined."""
-        return self._counts_are_defined
-
-
-class _UnweightedBaseMargin(_BaseMarginal):
-    """The unweighted bases margin (sum of unweighted counts)"""
+        """Whether scalar is defined. Defaults to True, but designed to be overridden"""
+        return True
 
     @lazyproperty
-    def blocks(self):
-        """List of the 2 1D ndarray "blocks" of the summed count margin.
+    def value(self):
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `.value`" % type(self).__name__
+        )
 
-        These are the base-values and the subtotals.
+
+class _TableWeightedBase(_BaseTableValue):
+    """The 'table-weighted-base', a scalar base for the whole table
+
+    The table-weighted-base is only defined when both rows and columns dimensions
+    are non-array and is equal to the sum of all counts. It was formerly known as the
+    'table-margin' when it was a scalar (which was also only when neither dimension is
+    an arary).
+    """
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool indicating whether the table-margin is defined
+
+        It is defined (as a scalar) only when available on the weighted_cube_counts
+        (eg neither dimension is an array)
         """
+        return self._cube_measures.weighted_cube_counts.table_base is not None
+
+    @lazyproperty
+    def value(self):
+        """float of the table-margin"""
         if not self.is_defined:
-            raise ValueError("Cannot calculate base across subvariables dimension.")
+            raise ValueError(
+                "Cannot sum across subvariables dimension for table weighted base scalar"
+            )
+        return self._cube_measures.weighted_cube_counts.table_base
 
-        # --- Since we know we're not an array variable, we can trust that
-        # --- the 2D array for the unweighted bases measure is the same in
-        # --- the direction we need. Therefore, we can just grab the first
-        # --- row/column of that.
-        if self.orientation == MO.ROWS:
-            bases = self._second_order_measures.row_unweighted_bases.blocks
-            return [bases[0][0][:, 0], bases[1][0][:, 0]]
-        else:
-            bases = self._second_order_measures.column_unweighted_bases.blocks
-            return [bases[0][0][0, :], bases[0][1][0, :]]
+
+class _TableWeightedBasesRange(_BaseTableValue):
+    """The (unpruned) 'table-weighted-bases-range', a length 2 np.array of min and max.
+
+    The range of the table-weighted-bases *before* pruning, eg removing rows and columns
+    that are hidden or empty.
+    """
 
     @lazyproperty
-    def is_defined(self):
-        """True if counts are defined."""
-        return self._counts_are_defined
+    def value(self):
+        """[min, max] np.float64 ndarray range of the table-weighted-base"""
+        bases = self._cube_measures.weighted_cube_counts.table_bases
+        return np.array([np.min(bases), np.max(bases)])
 
 
 # === PAIRWISE HELPERS ===
