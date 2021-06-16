@@ -646,6 +646,26 @@ class Describe_ColumnWeightedBases(object):
         return property_mock(request, _ColumnWeightedBases, "_weighted_cube_counts")
 
 
+class Describe_PairwiseMeansSigPvals(object):
+    """Unit test suite for `cr.cube.matrix.measure._PairwiseMeansSigPvals` object."""
+
+    def it_provides_the_df(self, request):
+        # Adapted from:
+        # https://mse.redwoods.edu/darnold/math15/spring2013/R/Activities/WelchTTest.html
+        cube_std_dev_ = instance_mock(
+            request, _BaseCubeStdDev, stddev=np.array([[17.14873, 11.00736]])
+        )
+        unweighted_cube_counts_ = instance_mock(
+            request, _BaseCubeCounts, column_bases=np.array([[23, 21]])
+        )
+        cube_measures_ = instance_mock(request, CubeMeasures)
+        cube_measures_.cube_stddev = cube_std_dev_
+        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
+        pairwise_pvals = _PairwiseMeansSigPVals(None, None, cube_measures_, 0)
+
+        assert pairwise_pvals._df == pytest.approx(np.array([[44, 37.8554]]))
+
+
 class Describe_PairwiseMeansSigTStats(object):
     """Unit test suite for `cr.cube.matrix.measure._PairwiseMeansSigTStats` object."""
 

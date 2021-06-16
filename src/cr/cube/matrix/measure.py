@@ -1040,10 +1040,31 @@ class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
     @lazyproperty
     def p_vals(self):
         """2D ndarray of float64 representing p-vals for means pairwise testing."""
-        col_bases = self._cube_measures.old_unwted_cube_counts.column_bases
-        n = col_bases[:, self._selected_column_idx] + col_bases.T
-        df = 2 * (n - 1)
-        return 2 * (1 - t.cdf(abs(self.t_stats), df=df.T))
+        return 2 * (1 - t.cdf(abs(self.t_stats), df=self._df))
+
+    @lazyproperty
+    def _df(self):
+        """A np.float64 ndarray of the degrees of freedom for the Pairwise mean test
+        
+        We use the Welch's T Test, which has a complicated formula for the degrees of
+        freedom to acvount for the fact that we are allowing the variances to be 
+        different between the distributions.
+
+        Formula is:
+        df = ( (s1/N1) + (s2/N2) )^2 / ( (s1/N1)^2/(N1-1) + (s2/N2)^2/(N2-1) )
+        """
+        variance = np.power(self._cube_measures.cube_stddev.stddev, 2)
+        col_bases = self._cube_measures.unweighted_cube_counts.column_bases
+        idx = self._selected_column_idx
+
+        ref_variance = np.broadcast_to(variance[:, [idx]], variance.shape)
+        ref_col_bases = np.broadcast_to(col_bases[:, [idx]], col_bases.shape)
+
+        numerator = np.power((variance / col_bases) + (ref_variance / ref_col_bases), 2)
+        denominator1 = np.power(variance / col_bases, 2) / (col_bases - 1)
+        denominator2 = np.power(ref_variance / ref_col_bases, 2) / (ref_col_bases - 1)
+
+        return numerator / (denominator1 + denominator2)
 
 
 class _PairwiseSigTstats(_BaseSecondOrderMeasure):
