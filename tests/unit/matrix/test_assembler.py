@@ -22,7 +22,6 @@ from cr.cube.matrix.assembler import (
     _SortRowsByInsertedColumnHelper,
     _SortRowsByMarginalHelper,
 )
-from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.measure import (
     _BaseMarginal,
     _BaseSecondOrderMeasure,
@@ -847,20 +846,6 @@ class DescribeAssembler(object):
         assembler = Assembler(None, (None, dimension_), None)
         assert assembler._columns_dimension is dimension_
 
-    def it_constructs_the_cube_result_matrix_to_help(
-        self, request, cube_, dimensions_, cube_result_matrix_
-    ):
-        BaseCubeResultMatrix_ = class_mock(
-            request, "cr.cube.matrix.assembler.BaseCubeResultMatrix"
-        )
-        BaseCubeResultMatrix_.factory.return_value = cube_result_matrix_
-        assembler = Assembler(cube_, dimensions_, slice_idx=42)
-
-        cube_result_matrix = assembler._cube_result_matrix
-
-        BaseCubeResultMatrix_.factory.assert_called_once_with(cube_, dimensions_, 42)
-        assert cube_result_matrix is cube_result_matrix_
-
     def it_assembles_the_dimension_labels_to_help(self, request, dimension_):
         dimension_.valid_elements = tuple(
             instance_mock(request, _Element, label=label)
@@ -956,14 +941,6 @@ class DescribeAssembler(object):
     @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
-
-    @pytest.fixture
-    def cube_result_matrix_(self, request):
-        return instance_mock(request, BaseCubeResultMatrix)
-
-    @pytest.fixture
-    def _cube_result_matrix_prop_(self, request):
-        return property_mock(request, Assembler, "_cube_result_matrix")
 
     @pytest.fixture
     def dimension_(self, request):

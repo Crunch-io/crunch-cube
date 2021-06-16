@@ -26,7 +26,6 @@ from cr.cube.enums import (
     MARGINAL_ORIENTATION as MO,
     MEASURE as M,
 )
-from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.measure import SecondOrderMeasures
 from cr.cube.matrix.subtotals import SumSubtotals
 from cr.cube.util import lazyproperty
@@ -699,18 +698,6 @@ class Assembler(object):
     def _columns_dimension(self):
         """The `Dimension` object representing column elements in this matrix."""
         return self._dimensions[1]
-
-    @lazyproperty
-    def _cube_result_matrix(self):
-        """BaseCubeResultMatrix subclass object appropriate to this cube-slice.
-
-        This matrix object encapsulates cube-result array parsing and MR multi-value
-        differences and provides a foundational set of second-order analysis measure and
-        margin arrays.
-        """
-        return BaseCubeResultMatrix.factory(
-            self._cube, self._dimensions, self._slice_idx
-        )
 
     @lazyproperty
     def _cube_has_overlaps(self):

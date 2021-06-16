@@ -529,15 +529,6 @@ class _BaseSecondOrderMeasure(object):
         )
 
     @lazyproperty
-    def _old_unwted_cube_counts(self):
-        """_BaseUnweightedCubeCounts subclass instance for this measure.
-
-        Provides cube measures associated with unweighted counts, including
-        unweighted-counts and cell, vector, and table bases.
-        """
-        return self._cube_measures.old_unwted_cube_counts
-
-    @lazyproperty
     def _unweighted_cube_counts(self):
         """_BaseCubeCounts subclass instance for this measure.
 

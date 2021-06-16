@@ -2,11 +2,11 @@
 
 """Unit test suite for `cr.cube.matrix.subtotals` module."""
 
+from cr.cube.matrix.cubemeasure import _BaseCubeCounts
 import numpy as np
 import pytest
 
 from cr.cube.dimension import Dimension, _Subtotal
-from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.subtotals import (
     _BaseSubtotals,
     NanSubtotals,
@@ -19,13 +19,13 @@ from ...unitutil import ANY, initializer_mock, instance_mock, method_mock, prope
 class Describe_BaseSubtotals(object):
     """Unit test suite for `cr.cube.matrix._BaseSubtotals` object."""
 
-    def it_provides_a_blocks_interface_method(self, request, cube_result_matrix_):
+    def it_provides_a_blocks_interface_method(self, request, cube_counts_):
         _init_ = initializer_mock(request, _BaseSubtotals)
         _blocks_ = property_mock(
             request, _BaseSubtotals, "_blocks", return_value=[[1, 2], [3, 4]]
         )
 
-        blocks = _BaseSubtotals.blocks(cube_result_matrix_, "weighted_counts")
+        blocks = _BaseSubtotals.blocks(cube_counts_, "weighted_counts")
 
         _init_.assert_called_once()
         _blocks_.assert_called_once()
@@ -137,8 +137,8 @@ class Describe_BaseSubtotals(object):
         return property_mock(request, _BaseSubtotals, "_column_subtotals")
 
     @pytest.fixture
-    def cube_result_matrix_(self, request):
-        return instance_mock(request, BaseCubeResultMatrix)
+    def cube_counts_(self, request):
+        return instance_mock(request, _BaseCubeCounts)
 
     @pytest.fixture
     def dimension_(self, request):

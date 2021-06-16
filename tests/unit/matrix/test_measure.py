@@ -13,7 +13,6 @@ from cr.cube.matrix.cubemeasure import (
     _BaseCubeCounts,
     _BaseCubeMeans,
     _BaseCubeStdDev,
-    _BaseUnweightedCubeCounts,
 )
 from cr.cube.matrix.measure import (
     _BaseMarginal,
@@ -284,26 +283,6 @@ class Describe_BaseSecondOrderMeasure(object):
 
         assert blocks == [["A", "B"], ["C", "D"]]
 
-    def it_provides_access_to_the_unweighted_cube_counts_object_to_help(
-        self, request, cube_measures_
-    ):
-        old_unwted_cube_counts_ = instance_mock(request, _BaseUnweightedCubeCounts)
-        cube_measures_.old_unwted_cube_counts = old_unwted_cube_counts_
-        measure = _BaseSecondOrderMeasure(None, None, cube_measures_)
-
-        assert measure._old_unwted_cube_counts is old_unwted_cube_counts_
-
-    def it_provides_access_to_the_weighted_cube_counts_object_to_help(
-        self, request, cube_measures_
-    ):
-        cube_counts_ = instance_mock(request, _BaseCubeCounts)
-        cube_measures_.weighted_cube_counts = cube_counts_
-        measure = _BaseSecondOrderMeasure(None, None, cube_measures_)
-
-        weighted_cube_counts = measure._weighted_cube_counts
-
-        assert weighted_cube_counts is cube_counts_
-
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -523,7 +502,7 @@ class Describe_ColumnUnweightedBases(object):
 
     @pytest.fixture
     def unweighted_cube_counts_(self, request):
-        return instance_mock(request, _BaseUnweightedCubeCounts)
+        return instance_mock(request, _BaseCubeCounts)
 
     @pytest.fixture
     def _unweighted_cube_counts_prop_(self, request):
@@ -1114,7 +1093,7 @@ class Describe_RowUnweightedBases(object):
 
     @pytest.fixture
     def unweighted_cube_counts_(self, request):
-        return instance_mock(request, _BaseUnweightedCubeCounts)
+        return instance_mock(request, _BaseCubeCounts)
 
     @pytest.fixture
     def _unweighted_cube_counts_prop_(self, request):
