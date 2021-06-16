@@ -113,9 +113,14 @@ The detailed description can be found
 
 ## Changes
 
+### 2.3.0
+- Consolidation of weighted counts such that bases are no longer calculated by
+  adding across subvariables.
+- Removed the `_Slice.table_margin_unpruned` property, instead use 
+  `_Slice.table_margin_range` to get the unpruned range of table margins.
+
 ### 2.2.3
 - More sort-by-value support including a fallback to payload order
-
 
 ### 2.2.2
 - Can now sort by value for unweighted base and the margin proportion
