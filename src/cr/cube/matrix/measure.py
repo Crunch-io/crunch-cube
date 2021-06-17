@@ -996,6 +996,7 @@ class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
     @lazyproperty
     def t_stats(self):
         """2D ndarray of float64 representing t-stats for means pairwise testing.
+
         Calculate the level of significance for the difference of two means from the
         selected column different from a hypothesized value.
         t = (x̄1 - x̄2 - (μ1 - μ2)) / √ ((s1 / N1) + (s2 / N2))
