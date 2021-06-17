@@ -12,7 +12,6 @@ observations.
 from __future__ import division
 
 import numpy as np
-from scipy.stats import norm
 
 from cr.cube.collator import (
     ExplicitOrderCollator,
@@ -377,7 +376,7 @@ class Assembler(object):
     @lazyproperty
     def pvalues(self):
         """2D np.float64/np.nan ndarray of p-value for each matrix cell."""
-        return 2 * (1 - norm.cdf(np.abs(self.zscores)))
+        return self._assemble_matrix(self._measures.pvalues.blocks)
 
     @lazyproperty
     def row_comparable_counts(self):

@@ -38,6 +38,7 @@ from cr.cube.matrix.measure import (
     _PopulationStandardError,
     _MarginTableProportion,
     _MarginTableBase,
+    _Pvalues,
     _RowComparableCounts,
     _RowProportionVariances,
     _RowProportions,
@@ -93,6 +94,7 @@ class DescribeAssembler(object):
             ("means", _Means),
             ("population_proportions", _PopulationProportions),
             ("population_std_err", _PopulationStandardError),
+            ("pvalues", _Pvalues),
             ("row_comparable_counts", _RowComparableCounts),
             ("row_proportions", _RowProportions),
             ("row_proportion_variances", _RowProportionVariances),
@@ -364,16 +366,6 @@ class DescribeAssembler(object):
         assembler = Assembler(None, dimensions_, None)
 
         assert assembler.sums == pytest.approx([4, 5, 6])
-
-    def it_knows_the_pvalues(self, request):
-        property_mock(
-            request, Assembler, "zscores", return_value=np.array([0.7, 0.8, 0.9])
-        )
-        assembler = Assembler(None, None, None)
-
-        np.testing.assert_almost_equal(
-            assembler.pvalues, np.array([0.4839273, 0.4237108, 0.3681203])
-        )
 
     def it_knows_the_row_labels(
         self,

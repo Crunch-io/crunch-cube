@@ -5,7 +5,7 @@
 from __future__ import division
 
 import numpy as np
-from scipy.stats import t
+from scipy.stats import t, norm
 
 from cr.cube.enums import DIMENSION_TYPE as DT, MARGINAL_ORIENTATION as MO
 from cr.cube.matrix.cubemeasure import CubeMeasures
@@ -255,6 +255,11 @@ class SecondOrderMeasures(object):
         dividing them.
         """
         return _PopulationStandardError(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def pvalues(self):
+        """_Pvalues measure object for this cube-result."""
+        return _Pvalues(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def row_comparable_counts(self):
@@ -1401,6 +1406,38 @@ class _PopulationStandardError(_BaseSecondOrderMeasure):
             if self._dimensions[-1].dimension_type == DT.CAT_DATE
             else self._second_order_measures.table_std_err.blocks
         )
+
+
+class _Pvalues(_BaseSecondOrderMeasure):
+    """p-value measure for the matrix
+
+    A p-value is a measure of the probability that an observed difference could have
+    occurred just by random chance. The lower the p-value, the greater the
+    statistical significance of the observed difference. It is derived from the
+    normal distribution's cdf and the zscore.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure."""
+        zscore_blocks = self._second_order_measures.zscores.blocks
+
+        return [
+            [
+                self._calculate_pval(zscore_blocks[0][0]),
+                self._calculate_pval(zscore_blocks[0][1]),
+            ],
+            [
+                self._calculate_pval(zscore_blocks[1][0]),
+                self._calculate_pval(zscore_blocks[1][1]),
+            ],
+        ]
+
+    def _calculate_pval(self, zscores):
+        """np.array of floats of the pvalues calculated form np.array of zscores"""
+        if 0 in zscores.shape:
+            return zscores
+        return 2 * (1 - norm.cdf(np.abs(zscores)))
 
 
 class _RowComparableCounts(_BaseSecondOrderMeasure):

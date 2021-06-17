@@ -33,6 +33,7 @@ from cr.cube.matrix.measure import (
     _PopulationStandardError,
     _MarginTableProportion,
     _MarginTableBase,
+    _Pvalues,
     _RowComparableCounts,
     _RowProportions,
     _RowProportionVariances,
@@ -77,6 +78,7 @@ class DescribeSecondOrderMeasures(object):
             ("column_weighted_bases", _ColumnWeightedBases),
             ("population_proportions", _PopulationProportions),
             ("population_std_err", _PopulationStandardError),
+            ("pvalues", _Pvalues),
             ("row_proportion_variances", _RowProportionVariances),
             ("row_std_err", _RowStandardError),
             ("row_proportions", _RowProportions),
@@ -967,6 +969,44 @@ class Describe_PopulationStandardError(object):
             _PopulationStandardError(dimensions_, second_order_measures_, None).blocks
             == expected
         )
+
+
+class Describe_Pvalues(object):
+    """Unit test suite for `cr.cube.matrix.measure._Pvalues` object."""
+
+    def it_provides_its_blocks(self, request):
+        _calculate_pval_ = method_mock(
+            request, _Pvalues, "_calculate_pval", side_effect=(0, 1, 2, 3)
+        )
+        zscores_ = instance_mock(request, _Zscores, blocks=[["a", "b"], ["c", "d"]])
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            zscores=zscores_,
+        )
+
+        pvalues = _Pvalues(None, second_order_measures_, None).blocks
+
+        assert pvalues == [[0, 1], [2, 3]]
+        assert _calculate_pval_.call_args_list == [
+            call(ANY, "a"),
+            call(ANY, "b"),
+            call(ANY, "c"),
+            call(ANY, "d"),
+        ]
+
+    @pytest.mark.parametrize(
+        "zscores, expected",
+        (
+            ([[0, 1], [2, 3]], [[1.0, 0.317310508], [0.045500264, 0.002699796]]),
+            ([-1], [0.317310508]),
+            ([], []),
+        ),
+    )
+    def it_can_calculate_pval_to_help(self, zscores, expected):
+        actual = _Pvalues(None, None, None)._calculate_pval(np.array(zscores))
+
+        assert actual == pytest.approx(np.array(expected))
 
 
 class Describe_RowComparableCounts(object):
