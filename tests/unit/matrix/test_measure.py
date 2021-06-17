@@ -30,6 +30,7 @@ from cr.cube.matrix.measure import (
     _PairwiseMeansSigPVals,
     _PairwiseMeansSigTStats,
     _PopulationProportions,
+    _PopulationStandardError,
     _MarginTableProportion,
     _MarginTableBase,
     _RowComparableCounts,
@@ -75,6 +76,7 @@ class DescribeSecondOrderMeasures(object):
             ("column_unweighted_bases", _ColumnUnweightedBases),
             ("column_weighted_bases", _ColumnWeightedBases),
             ("population_proportions", _PopulationProportions),
+            ("population_std_err", _PopulationStandardError),
             ("row_proportion_variances", _RowProportionVariances),
             ("row_std_err", _RowStandardError),
             ("row_proportions", _RowProportions),
@@ -908,10 +910,8 @@ class Describe_PopulationProportions(object):
             ((DT.CAT, DT.CAT), "table"),
             ((DT.CAT_DATE, DT.CAT), "row"),
             ((DT.CAT, DT.CAT_DATE), "column"),
-            ((DT.CA_SUBVAR, DT.CA_CAT), "row"),
-            ((DT.CA_CAT, DT.CA_SUBVAR), "column"),
             ((DT.CAT, DT.CAT_DATE, DT.CAT), "row"),
-            ((DT.CAT, DT.CA_SUBVAR, DT.CA_CAT), "row"),
+            ((DT.CAT, DT.TEXT, DT.CA_CAT), "table"),
         ),
     )
     def it_computes_its_blocks(object, request, dimension_types, expected):
@@ -922,13 +922,49 @@ class Describe_PopulationProportions(object):
         second_order_measures_ = instance_mock(
             request,
             SecondOrderMeasures,
-            row_proportions=instance_mock(request, _RowProportions, blocks="row"),
-            column_proportions=instance_mock(request, _RowProportions, blocks="column"),
+            row_proportions=instance_mock(request, _TableProportions, blocks="row"),
+            column_proportions=instance_mock(
+                request, _ColumnProportions, blocks="column"
+            ),
             table_proportions=instance_mock(request, _RowProportions, blocks="table"),
         )
 
         assert (
             _PopulationProportions(dimensions_, second_order_measures_, None).blocks
+            == expected
+        )
+
+
+class Describe_PopulationStandardError(object):
+    """Unit test suite for `cr.cube.matrix.measure._PopulationStandardError` object."""
+
+    @pytest.mark.parametrize(
+        "dimension_types, expected",
+        (
+            ((DT.CAT, DT.CAT), "table"),
+            ((DT.CAT_DATE, DT.CAT), "row"),
+            ((DT.CAT, DT.CAT_DATE), "column"),
+            ((DT.CAT, DT.CAT_DATE, DT.CAT), "row"),
+            ((DT.CAT, DT.TEXT, DT.CAT_DATE), "column"),
+        ),
+    )
+    def it_computes_its_blocks(object, request, dimension_types, expected):
+        dimensions_ = [
+            instance_mock(request, Dimension, dimension_type=dt)
+            for dt in dimension_types
+        ]
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            row_std_err=instance_mock(request, _RowStandardError, blocks="row"),
+            column_std_err=instance_mock(
+                request, _ColumnStandardError, blocks="column"
+            ),
+            table_std_err=instance_mock(request, _TableStandardError, blocks="table"),
+        )
+
+        assert (
+            _PopulationStandardError(dimensions_, second_order_measures_, None).blocks
             == expected
         )
 

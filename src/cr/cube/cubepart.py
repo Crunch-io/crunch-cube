@@ -786,13 +786,7 @@ class _Slice(CubePartition):
         applied in these specific cases (like the `row_std_err` or `column_std_err`).
         If categorical dates are not involved, the standard `table_std_err` is used.
         """
-        std_err = (
-            self.row_std_err
-            if self.rows_dimension_type == DT.CAT_DATE
-            else self.column_std_err
-            if self.columns_dimension_type == DT.CAT_DATE
-            else self.table_std_err
-        )
+        std_err = self._assembler.population_std_err
         total_filtered_population = self._population * self._cube.population_fraction
         return Z_975 * total_filtered_population * std_err
 

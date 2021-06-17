@@ -236,8 +236,25 @@ class SecondOrderMeasures(object):
 
     @lazyproperty
     def population_proportions(self):
-        """_PopulationProportions measure object for this cube-result."""
+        """_PopulationProportions measure object for this cube-result.
+
+        Population proportions choose between the correct proportion, to calculate the
+        population, generally the table-proportion, but when there is a categorical
+        date we want to hold the population constant for all time periods instead of
+        dividing them.
+        """
         return _PopulationProportions(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def population_std_err(self):
+        """_PopulationStandardError measure object for this cube-result.
+
+        Population standard-errors choose between the correct std-err, to calculate the
+        population, generally the table-std-err, but when there is a categorical
+        date we want to hold the population constant for all time periods instead of
+        dividing them.
+        """
+        return _PopulationStandardError(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def row_comparable_counts(self):
@@ -1327,11 +1344,15 @@ class _PairwiseSigPvals(_PairwiseSigTstats):
 class _PopulationProportions(_BaseSecondOrderMeasure):
     """Provides the cell-specific fraction of population
 
-    If any of the dimensions (rows or columns) is a categorical date or array
-    subvariables, the appropriate percentages are used, to calculate the population
-    counts, so as to be the total amount among categorical dates.
+    If any of the dimensions (rows or columns) is a categorical date the appropriate
+    percentages are used, to calculate the population counts, so as to be the total
+    amount among categorical dates. Otherwise, table percents are used to calculate
+    population counts.
 
-    Otherwise, table percents are used to calculate population counts.
+    Otherwise, table percents are used to calculate population counts. We do not have
+    to special case array variables, because in this case, the table proportion is
+    equivalent to the correct proportion (eg if the rows are categorical array suvars
+    then the table_propoortion and row_proportions are equal).
     """
 
     @lazyproperty
@@ -1343,10 +1364,42 @@ class _PopulationProportions(_BaseSecondOrderMeasure):
         """
         return (
             self._second_order_measures.row_proportions.blocks
-            if self._dimensions[-2].dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
+            if self._dimensions[-2].dimension_type == DT.CAT_DATE
             else self._second_order_measures.column_proportions.blocks
-            if self._dimensions[-1].dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
+            if self._dimensions[-1].dimension_type == DT.CAT_DATE
             else self._second_order_measures.table_proportions.blocks
+        )
+
+
+class _PopulationStandardError(_BaseSecondOrderMeasure):
+    """Provides the cell-specific standard error for proportion used for population
+
+    If any of the dimensions (rows or columns) is a categorical date the appropriate
+    percentages are used, to calculate the population counts, so as to be the total
+    amount among categorical dates. Otherwise, table percents are used to calculate
+    population counts.
+
+    We do not have to special case array variables, because in this case, the table
+    proportion is equivalent to the correct proportion (eg if the rows are categorical
+    array suvars then the table_propoortion and row_proportions are equal).
+
+    This provides the standard error that corresponds to that so that it can be used
+    to calculate the MOE.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values.
+        """
+        return (
+            self._second_order_measures.row_std_err.blocks
+            if self._dimensions[-2].dimension_type == DT.CAT_DATE
+            else self._second_order_measures.column_std_err.blocks
+            if self._dimensions[-1].dimension_type == DT.CAT_DATE
+            else self._second_order_measures.table_std_err.blocks
         )
 
 

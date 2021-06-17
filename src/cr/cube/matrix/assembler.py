@@ -366,6 +366,15 @@ class Assembler(object):
         return self._assemble_matrix(self._measures.population_proportions.blocks)
 
     @lazyproperty
+    def population_std_err(self):
+        """2D np.float64 ndarray of standard errors
+
+        The proportion used to calculate proportion counts depends on the dimension
+        types.
+        """
+        return self._assemble_matrix(self._measures.population_std_err.blocks)
+
+    @lazyproperty
     def pvalues(self):
         """2D np.float64/np.nan ndarray of p-value for each matrix cell."""
         return 2 * (1 - norm.cdf(np.abs(self.zscores)))
