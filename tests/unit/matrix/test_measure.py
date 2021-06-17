@@ -283,12 +283,6 @@ class Describe_BaseSecondOrderMeasure(object):
 
         assert blocks == [["A", "B"], ["C", "D"]]
 
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def cube_measures_(self, request):
-        return instance_mock(request, CubeMeasures)
-
 
 class Describe_ColumnComparableCounts(object):
     """Unit test suite for `cr.cube.matrix.measure._ColumnComparableCounts` object."""
