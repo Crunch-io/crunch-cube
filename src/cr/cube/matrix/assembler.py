@@ -96,12 +96,22 @@ class Assembler(object):
         return self._assemble_matrix(self._measures.column_proportions.blocks)
 
     @lazyproperty
+    def column_proportion_variances(self):
+        """2D ndarray of np.float64 column-proportion variance for each matrix cell."""
+        return self._assemble_matrix(self._measures.column_proportion_variances.blocks)
+
+    @lazyproperty
     def column_share_sum(self):
         """2D optional np.float64 ndarray of column share of sum for each cell.
 
         Raises `ValueError` if the cube-result does not include a sum cube-measure.
         """
         return self._assemble_matrix(self._measures.column_share_sum.blocks)
+
+    @lazyproperty
+    def column_std_err(self):
+        """2D np.float64 ndarray of std-error of column-percent for each matrix cell."""
+        return self._assemble_matrix(self._measures.column_std_err.blocks)
 
     @lazyproperty
     def column_unweighted_bases(self):
