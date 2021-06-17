@@ -5,7 +5,13 @@
 import pytest
 import numpy as np
 
-from cr.cube.cube import Cube, CubeSet, _Measures, _UnweightedValidCountsMeasure
+from cr.cube.cube import (
+    Cube,
+    CubeSet,
+    _Measures,
+    _BaseMeasure,
+    _UnweightedValidCountsMeasure,
+)
 from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.enums import DIMENSION_TYPE as DT
 
@@ -757,6 +763,29 @@ class DescribeMeasures(object):
         population_fraction = measures.population_fraction
 
         assert population_fraction == expected_value
+
+
+class Describe_BaseMeasure(object):
+    def it_returns_None_when_not_able_to_reshape(
+        self, _shape_prop_, _flat_values_prop_
+    ):
+        _shape_prop_.return_value = (4,)
+        _flat_values_prop_.return_value = np.array([1])
+        measure = _BaseMeasure(None, None)
+
+        raw_array = measure.raw_cube_array
+
+        assert raw_array is None
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _shape_prop_(self, request):
+        return property_mock(request, _BaseMeasure, "_shape")
+
+    @pytest.fixture
+    def _flat_values_prop_(self, request):
+        return property_mock(request, _BaseMeasure, "_flat_values")
 
 
 class Describe_UweightedValidCountsMeasure(object):
