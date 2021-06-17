@@ -2621,7 +2621,7 @@ class Describe_ScaleMeanStddev(object):
             request, _ScaleMeanStddev, "_scale_means", return_value=["c", "d"]
         )
 
-        marginal = _ScaleMeanStddev(None, None, None, None).blocks
+        _ScaleMeanStddev(None, None, None, None).blocks
 
         assert _rows_weighted_mean_stddev_.call_args_list == [
             call("a", [1, 2], "c"),
