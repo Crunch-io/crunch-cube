@@ -1036,9 +1036,9 @@ class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
     @lazyproperty
     def _df(self):
         """A np.float64 ndarray of the degrees of freedom for the Pairwise mean test
-        
+
         We use the Welch's T Test, which has a complicated formula for the degrees of
-        freedom to acvount for the fact that we are allowing the variances to be 
+        freedom to account for the fact that we are allowing the variances to be
         different between the distributions.
 
         Formula is:
