@@ -1187,80 +1187,46 @@ class _PairwiseSigPvals(_PairwiseSigTstats):
         col_idx = self._selected_column_idx
         t_stats = self._second_order_measures.pairwise_t_stats(col_idx).blocks
         column_bases = self._second_order_measures.column_unweighted_bases.blocks
+        body_selected_base = self._selected_columns_base(0)
+        ins_selected_base = self._selected_columns_base(1)
 
         return [
             [
-                self._p_vals(t_stats[0][0], self._flatten(column_bases[0][0])),
-                self._p_vals(t_stats[0][1], self._flatten(column_bases[0][1])),
+                self._p_vals(t_stats[0][0], column_bases[0][0], body_selected_base),
+                self._p_vals(t_stats[0][1], column_bases[0][1], body_selected_base),
             ],
             [
-                self._p_vals(t_stats[1][0], self._flatten(column_bases[1][0])),
-                self._p_vals(t_stats[1][1], self._flatten(column_bases[1][1])),
+                self._p_vals(t_stats[1][0], column_bases[1][0], ins_selected_base),
+                self._p_vals(t_stats[1][1], column_bases[1][1], ins_selected_base),
             ],
         ]
 
-    def _flatten(self, x):
-        """returns first the first row of an np.ndarray if there are any rows
-
-        This is a bit of a hack to handle this code which was written before we were as
-        careful about dimensionality as we are now. We need flat arrays as the bases sent
-        to `._p_vals`, but the 2D blocks can be empty, in which case numpy balks at
-        trying to take the first row.
-        """
-        if x.size == 0:
-            return x
-        return x[0, :]
-
-    def _flatten_df(self, df, t_stats):
-        """returns columns_base flattened if it is a different shape than y
-
-        This is anaother hack to handle this code which was written before we were as
-        careful about dimensionality as we are now. Because we're adding the
-        row of columns base to the column of selected_columns_base, we get a 2D
-        array. For the base values, this array is the right shape, but for subtotals
-        it may not be.
-
-        So, when the shapes are different we know we are in a subtotal. When there is
-        a subtotal, we know we are not on an array. When there is not an array, we
-        know that all the rows are the same, so we can take the first row.
-        """
-        # --- can be int if t_stats size has shape 0
-        if type(df) is int:
-            return df
-        # --- if the shapes are the same, we don't need to flatten and in the
-        # --- MR X MR case, the df may not be the same for each row
-        if df.shape == t_stats.shape:
-            return df
-        # --- Now we need to flatten
-        return df[0, :]
-
-    def _p_vals(self, t_stats, columns_base):
+    def _p_vals(self, t_stats, columns_base, selected_columns_base):
         """2D ndarray of float64 representing p-vals for pairwise col testing.
 
         P values are calculated considering the cumulative distribution function
         evaluated at the t_stats values with specific degrees of freedom.
         """
-        df = (columns_base + self._selected_columns_base - 2) if t_stats.size > 0 else 0
-        df = self._flatten_df(df, t_stats)
+        df = (columns_base + selected_columns_base - 2) if t_stats.size > 0 else 0
         return 2 * (1 - t.cdf(abs(t_stats), df=df))
 
-    @lazyproperty
-    def _selected_columns_base(self):
+    def _selected_columns_base(self, table_index):
         """1D int64 ndarray of the selected columns base values.
 
         In case of selected subtotal column the column base selection will be done on
         the column base subtotal values instead of the columns_base base values.
+
+        The parameter `table_index` chooses whether the reference comes from the body
+        (the base_values or subtotal_columns) or the insertions (the subtotal_rows or
+        intersections). By choosing between them, we get the bases in a shape that we
+        don't have to broadcast.
         """
         col_idx = self._selected_column_idx
-        columns_base = (
-            self._second_order_measures.column_unweighted_bases.blocks[0][1]
-            if col_idx < 0
-            else self._second_order_measures.column_unweighted_bases.blocks[0][0]
-        )
+        column_bases = self._second_order_measures.column_unweighted_bases.blocks
         return (
-            columns_base[:, [col_idx]]
-            if columns_base.ndim >= 2
-            else columns_base[col_idx]
+            column_bases[table_index][1][:, [col_idx]]
+            if col_idx < 0
+            else column_bases[table_index][0][:, [col_idx]]
         )
 
 
