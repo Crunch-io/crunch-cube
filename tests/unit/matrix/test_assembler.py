@@ -1130,6 +1130,7 @@ class Describe_BaseOrderHelper(object):
             ("col_index", "column_index"),
             ("col_percent", "column_proportions"),
             ("col_percent_moe", "column_std_err"),
+            ("col_share_sum", "column_share_sum"),
             ("col_std_dev", "column_proportion_variances"),
             ("col_std_err", "column_std_err"),
             ("count_unweighted", "unweighted_counts"),
@@ -1142,14 +1143,20 @@ class Describe_BaseOrderHelper(object):
             ("row_base_weighted", "row_weighted_bases"),
             ("row_percent", "row_proportions"),
             ("row_percent_moe", "row_std_err"),
+            ("row_share_sum", "row_share_sum"),
             ("row_std_dev", "row_proportion_variances"),
             ("row_std_err", "row_std_err"),
+            ("stddev", "stddev"),
+            ("sum", "sums"),
             ("table_base_unweighted", "table_unweighted_bases"),
             ("table_base_weighted", "table_weighted_bases"),
             ("table_percent", "table_proportions"),
             ("table_percent_moe", "table_std_err"),
             ("table_std_dev", "table_proportion_variances"),
             ("table_std_err", "table_std_err"),
+            ("total_share_sum", "total_share_sum"),
+            ("unweighted_valid_count", "unweighted_counts"),
+            ("weighted_valid_count", "weighted_counts"),
             ("z_score", "zscores"),
         ),
     )
@@ -1357,15 +1364,13 @@ class Describe_SortRowsByBaseColumnHelper(object):
         self, _order_spec_prop_, order_spec_
     ):
         _order_spec_prop_.return_value = order_spec_
-        order_spec_.measure = M.TOTAL_SHARE_SUM
+        order_spec_.measure = "foo"
         order_helper = _SortRowsByBaseColumnHelper(None, None)
 
         with pytest.raises(NotImplementedError) as e:
             order_helper._measure
 
-        assert str(e.value) == (
-            "sort-by-value for measure 'MEASURE.TOTAL_SHARE_SUM' is not yet supported"
-        )
+        assert str(e.value) == ("sort-by-value for measure 'foo' is not yet supported")
 
     def it_computes_the_sorted_element_order_to_help(self, request, dimension_):
         property_mock(

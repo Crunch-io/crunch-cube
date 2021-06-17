@@ -901,6 +901,7 @@ class _BaseOrderHelper(object):
             M.COLUMN_INDEX: "column_index",
             M.COLUMN_PERCENT: "column_proportions",
             M.COLUMN_PERCENT_MOE: "column_std_err",  # monotonic transform
+            M.COLUMN_SHARE_SUM: "column_share_sum",
             M.COLUMN_STDDEV: "column_proportion_variances",  # monotonic transform
             M.COLUMN_STDERR: "column_std_err",
             M.MEAN: "means",
@@ -911,8 +912,11 @@ class _BaseOrderHelper(object):
             M.ROW_BASE_WEIGHTED: "row_weighted_bases",
             M.ROW_PERCENT: "row_proportions",
             M.ROW_PERCENT_MOE: "row_std_err",  # monotonic transform
+            M.ROW_SHARE_SUM: "row_share_sum",
             M.ROW_STDDEV: "row_proportion_variances",  # montonic transform
             M.ROW_STDERR: "row_std_err",
+            M.STDDEV: "stddev",
+            M.SUM: "sums",
             M.TABLE_PERCENT: "table_proportions",
             M.TABLE_PERCENT: "table_proportions",
             M.TABLE_PERCENT_MOE: "table_std_err",  # monotonic transform
@@ -920,8 +924,11 @@ class _BaseOrderHelper(object):
             M.TABLE_STDERR: "table_std_err",
             M.TABLE_BASE_UNWEIGHTED: "table_unweighted_bases",
             M.TABLE_BASE_WEIGHTED: "table_weighted_bases",
+            M.TOTAL_SHARE_SUM: "total_share_sum",
             M.UNWEIGHTED_COUNT: "unweighted_counts",
+            M.UNWEIGHTED_VALID_COUNT: "unweighted_counts",
             M.WEIGHTED_COUNT: "weighted_counts",
+            M.WEIGHTED_VALID_COUNT: "weighted_counts",
             M.Z_SCORE: "zscores",
         }
         measure = self._order_spec.measure
