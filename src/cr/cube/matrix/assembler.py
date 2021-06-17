@@ -195,6 +195,11 @@ class Assembler(object):
         return self._assemble_marginal(self._measures.columns_scale_mean_stddev)
 
     @lazyproperty
+    def columns_scale_mean_stderr(self):
+        """Optional 1D column scale mean std err marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.columns_scale_mean_stderr)
+
+    @lazyproperty
     def columns_scale_median(self):
         """Optional 1D column scale median marginal for this cube-result"""
         return self._assemble_marginal(self._measures.columns_scale_median)
@@ -502,6 +507,11 @@ class Assembler(object):
     def rows_scale_mean_stddev(self):
         """Optional 1D row scale mean std dev marginal for this cube-result"""
         return self._assemble_marginal(self._measures.rows_scale_mean_stddev)
+
+    @lazyproperty
+    def rows_scale_mean_stderr(self):
+        """Optional 1D row scale mean std dev marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.rows_scale_mean_stderr)
 
     @lazyproperty
     def rows_scale_median(self):

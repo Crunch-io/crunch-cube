@@ -237,7 +237,7 @@ class Describe_Slice(object):
         (
             "column_unweighted_bases",
             "column_weighted_bases",
-            "columns_scale_mean_stddev",
+            "columns_scale_mean_stderr",
             "columns_scale_mean",
             "columns_scale_median",
             "row_proportions",
@@ -246,6 +246,7 @@ class Describe_Slice(object):
             "rows_margin",
             "rows_scale_mean",
             "rows_scale_mean_stddev",
+            "rows_scale_mean_stderr",
             "rows_scale_median",
             "table_proportions",
             "table_std_err",

@@ -106,6 +106,11 @@ class SecondOrderMeasures(object):
         return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, MO.COLUMNS)
 
     @lazyproperty
+    def columns_scale_mean_stderr(self):
+        """_ScaleMeanStderr for rows measure object for this cube-result."""
+        return _ScaleMeanStderr(self._dimensions, self, self._cube_measures, MO.COLUMNS)
+
+    @lazyproperty
     def columns_scale_median(self):
         """_ScaleMedian for columns measure object for this cube-result."""
         return _ScaleMedian(self._dimensions, self, self._cube_measures, MO.COLUMNS)
@@ -281,8 +286,13 @@ class SecondOrderMeasures(object):
 
     @lazyproperty
     def rows_scale_mean_stddev(self):
-        """_ScaleMeanStddev for rpws measure object for this cube-result."""
+        """_ScaleMeanStddev for rows measure object for this cube-result."""
         return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, MO.ROWS)
+
+    @lazyproperty
+    def rows_scale_mean_stderr(self):
+        """_ScaleMeanStderr for rows measure object for this cube-result."""
+        return _ScaleMeanStderr(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def rows_scale_median(self):
@@ -2651,6 +2661,51 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
             self._rows_weighted_mean_stddev
             if self.orientation == MO.ROWS
             else self._columns_weighted_mean_stddev
+        )
+
+
+class _ScaleMeanStderr(_BaseScaledCountMarginal):
+    """Provides the std. error of the marginal scale means."""
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the scale mean standard deviation.
+
+        These are the base-values and the subtotals.
+        """
+        if not self.is_defined:
+            raise ValueError(
+                "%s-scale-mean-standard-error is undefined if no numeric values "
+                "are defined on opposing dimension or if the corresponding dimension "
+                "has no margin." % self.orientation.value
+            )
+
+        return [
+            self._scale_mean_stddev.blocks[0] / np.sqrt(self._margin.blocks[0]),
+            self._scale_mean_stddev.blocks[1] / np.sqrt(self._margin.blocks[1]),
+        ]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if both the scale mean is defined and the margin is defined."""
+        return self._scale_mean_stddev.is_defined and self._margin.is_defined
+
+    @lazyproperty
+    def _margin(self):
+        """The margin for the opposing dimension, used in the denominator."""
+        return (
+            self._second_order_measures.rows_weighted_base
+            if self.orientation == MO.ROWS
+            else self._second_order_measures.columns_weighted_base
+        )
+
+    @lazyproperty
+    def _scale_mean_stddev(self):
+        """The scale mean std-dev for the opposing dimension, used in the nunmerator."""
+        return (
+            self._second_order_measures.rows_scale_mean_stddev
+            if self.orientation == MO.ROWS
+            else self._second_order_measures.columns_scale_mean_stddev
         )
 
 
