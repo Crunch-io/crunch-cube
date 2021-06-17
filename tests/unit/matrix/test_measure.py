@@ -41,6 +41,7 @@ from cr.cube.matrix.measure import (
     _RowWeightedBases,
     _ScaleMean,
     _ScaleMeanStddev,
+    _ScaleMeanStderr,
     _ScaleMedian,
     SecondOrderMeasures,
     _MarginWeightedBase,
@@ -160,6 +161,8 @@ class DescribeSecondOrderMeasures(object):
             ("columns", "columns_scale_mean", _ScaleMean),
             ("rows", "rows_scale_mean_stddev", _ScaleMeanStddev),
             ("columns", "columns_scale_mean_stddev", _ScaleMeanStddev),
+            ("rows", "rows_scale_mean_stderr", _ScaleMeanStderr),
+            ("columns", "columns_scale_mean_stderr", _ScaleMeanStderr),
         ),
     )
     def it_provides_access_to_the_marginals(
@@ -2723,6 +2726,123 @@ class Describe_ScaleMeanStddev(object):
     @pytest.fixture
     def is_defined_prop_(self, request):
         return property_mock(request, _ScaleMeanStddev, "is_defined")
+
+
+class Describe_ScaleMeanStderr(object):
+    """Unit test suite for `cr.cube.matrix.measure._ScaleMeanStderr` object."""
+
+    def it_provides_blocks(
+        self,
+        is_defined_prop_,
+        _margin_prop_,
+        margin_,
+        _scale_mean_stddev_prop_,
+        scale_mean_stddev_,
+    ):
+        is_defined_prop_.return_value = True
+        _margin_prop_.return_value = margin_
+        margin_.blocks = [np.array([4.0, 16.0]), np.array([25.0])]
+        _scale_mean_stddev_prop_.return_value = scale_mean_stddev_
+        scale_mean_stddev_.blocks = [np.array([2.0, 3.0]), np.array([4.0])]
+
+        stderr = _ScaleMeanStderr(None, None, None, None).blocks
+
+        assert len(stderr) == 2
+        assert stderr[0].tolist() == [1.0, 0.75]
+        assert stderr[1].tolist() == [0.8]
+
+    def but_it_raises_it_if_blocks_are_not_defined(self, is_defined_prop_):
+        is_defined_prop_.return_value = False
+
+        with pytest.raises(ValueError) as e:
+            _ScaleMeanStderr(None, None, None, MO.ROWS).blocks
+
+        assert str(e.value) == (
+            "rows-scale-mean-standard-error is undefined if no numeric values "
+            "are defined on opposing dimension or if the corresponding dimension "
+            "has no margin."
+        )
+
+    @pytest.mark.parametrize(
+        "margin_defined, stddev_defined, expected",
+        (
+            (True, True, True),
+            (True, False, False),
+            (False, True, False),
+            (False, False, False),
+        ),
+    )
+    def it_can_tell_if_it_is_defined(
+        self,
+        _margin_prop_,
+        margin_,
+        _scale_mean_stddev_prop_,
+        scale_mean_stddev_,
+        margin_defined,
+        stddev_defined,
+        expected,
+    ):
+        _margin_prop_.return_value = margin_
+        margin_.is_defined = margin_defined
+        _scale_mean_stddev_prop_.return_value = scale_mean_stddev_
+        scale_mean_stddev_.is_defined = stddev_defined
+        stderr = _ScaleMeanStderr(None, None, None, None)
+
+        assert stderr.is_defined == expected
+
+    def it_provides_the_margin_for_rows_to_help(self, second_order_measures_):
+        second_order_measures_.rows_weighted_base = "a"
+        stderr = _ScaleMeanStderr(None, second_order_measures_, None, MO.ROWS)
+
+        assert stderr._margin == "a"
+
+    def it_provides_the_margin_for_columns_to_help(self, second_order_measures_):
+        second_order_measures_.columns_weighted_base = "b"
+        stderr = _ScaleMeanStderr(None, second_order_measures_, None, MO.COLUMNS)
+
+        assert stderr._margin == "b"
+
+    def it_provides_the_scale_mean_stddev_for_rows_to_help(
+        self, second_order_measures_
+    ):
+        second_order_measures_.rows_scale_mean_stddev = "a"
+        stderr = _ScaleMeanStderr(None, second_order_measures_, None, MO.ROWS)
+
+        assert stderr._scale_mean_stddev == "a"
+
+    def it_provides_the_scale_mean_stddev_for_columns_to_help(
+        self, second_order_measures_
+    ):
+        second_order_measures_.columns_scale_mean_stddev = "b"
+        stderr = _ScaleMeanStderr(None, second_order_measures_, None, MO.COLUMNS)
+
+        assert stderr._scale_mean_stddev == "b"
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def is_defined_prop_(self, request):
+        return property_mock(request, _ScaleMeanStderr, "is_defined")
+
+    @pytest.fixture
+    def margin_(self, request):
+        return instance_mock(request, _MarginWeightedBase)
+
+    @pytest.fixture
+    def _margin_prop_(self, request):
+        return property_mock(request, _ScaleMeanStderr, "_margin")
+
+    @pytest.fixture
+    def _scale_mean_stddev_prop_(self, request):
+        return property_mock(request, _ScaleMeanStderr, "_scale_mean_stddev")
+
+    @pytest.fixture
+    def scale_mean_stddev_(self, request):
+        return instance_mock(request, _ScaleMeanStddev)
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
 
 
 class Describe_ScaleMedian(object):

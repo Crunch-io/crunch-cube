@@ -516,13 +516,10 @@ class _Slice(CubePartition):
         underlying scale values are based on the numeric values of the opposing
         *rows-dimension* elements.
 
-        This value is `None` if no row element has been assigned a numeric value.
+        This value is `None` if no row element has a numeric value assigned or if
+        the columns-weighted-base is `None` (eg an array variable in the row dim).
         """
-        return (
-            self.columns_scale_mean_stddev / np.sqrt(self.columns_margin)
-            if self._rows_have_numeric_value
-            else None
-        )
+        return self._assembler.columns_scale_mean_stderr
 
     @lazyproperty
     def columns_scale_median(self):
@@ -1016,13 +1013,10 @@ class _Slice(CubePartition):
         the underlying scale values are based on the numeric values of the opposing
         *columns-dimension* elements.
 
-        This value is `None` if no column element has an assigned numeric value.
+        This value is `None` if no column element has a numeric value assigned or if
+        the rows-weighted-base is `None` (eg an array variable in the column dim).
         """
-        return (
-            self.rows_scale_mean_stddev / np.sqrt(self.rows_margin)
-            if self._columns_have_numeric_value
-            else None
-        )
+        return self._assembler.rows_scale_mean_stderr
 
     @lazyproperty
     def rows_scale_median(self):
