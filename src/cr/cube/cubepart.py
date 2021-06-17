@@ -870,12 +870,12 @@ class _Slice(CubePartition):
     @lazyproperty
     def row_std_dev(self):
         """2D np.float64 ndarray of standard deviation for row percentages."""
-        return np.sqrt(self._row_variance)
+        return np.sqrt(self._assembler.row_proportion_variances)
 
     @lazyproperty
     def row_std_err(self):
         """2D np.float64 ndarray of standard errors for row percentages."""
-        return np.sqrt(self._row_variance / self.row_weighted_bases)
+        return self._assembler.row_std_err
 
     @lazyproperty
     def row_unweighted_bases(self):
@@ -1303,12 +1303,6 @@ class _Slice(CubePartition):
                 self._cube.dimensions[-2:], self._transform_dicts
             )
         )
-
-    @lazyproperty
-    def _row_variance(self):
-        """2D np.float64 ndarray of row-percentage variance for each cell."""
-        p = self.row_proportions
-        return p * (1 - p)
 
     @lazyproperty
     def _rows_dimension(self):
