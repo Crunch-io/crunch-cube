@@ -1,5 +1,57 @@
 # History of Changes
 
+### 2.2.2
+- Can now sort by value for unweighted base and the margin proportion
+
+### 2.2.1
+- Bug fix for sort-by-col-index
+
+### 2.2.0
+- Can now get indices of MR (pre-query) insertions
+- Support for sorting by value margins, column index and table percentages.
+- rows_margin & columns_margin are now 2D when summing across array subvariables,
+  not just for MR variables.
+
+### 2.1.34
+- Support subtotal differences for hypothesis testing.
+
+### 2.1.33
+- Support sort-by-value for "scale_mean", "scale_mean_stddev" & "scale_median".
+- Scale medians calculation now considers fractional counts from weights.
+
+### 2.1.32
+- Fix scale_std_dev and scale_std_err for stripes when total counts is 0.
+
+### 2.1.31
+- Implement sort-by-value for all measures that have been consolidated so far.
+- Zscores measure consolidation.
+
+### 2.1.30
+- Fix population counts for categorical array.
+
+### 2.1.29
+- Omit rows/columns margin on subtotal difference.
+
+### 2.1.28
+- fix: pairwise mean indices in case of empty numpy array.
+- population fraction for Categorical Dates.
+- Omit scale median on the row of a row subtotal difference or the column of a column subtotal difference.
+
+### 2.1.27
+- fix: population counts for cat dates.
+- fix: filtered population fraction for a univariate cat date filter.
+
+### 2.1.26
+- fix: overlaps for MR x MR.
+
+### 2.1.25
+- fix: sort-by-value keyword to "percent".
+
+### 2.1.24
+- Wire up `_Strand` sort-by-value for "univariate-measure" keyword case.
+- This should fix the existing alpha-Sentry error on sort-by-value for
+  FREQUENCY analyses (aka. 1D card, `_Strand`).
+
 ### 2.1.23
 - Valid weighted and unweighted counts per cell measures
 
