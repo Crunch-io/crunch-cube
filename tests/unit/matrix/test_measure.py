@@ -11,7 +11,8 @@ from cr.cube.enums import DIMENSION_TYPE as DT, MARGINAL_ORIENTATION as MO
 from cr.cube.matrix.cubemeasure import (
     CubeMeasures,
     _BaseCubeCounts,
-    _BaseUnweightedCubeCounts,
+    _BaseCubeMeans,
+    _BaseCubeStdDev,
 )
 from cr.cube.matrix.measure import (
     _BaseMarginal,
@@ -28,7 +29,7 @@ from cr.cube.matrix.measure import (
     _PairwiseMeansSigTStats,
     _PopulationProportions,
     _MarginTableProportion,
-    _MarginTableWeightedBase,
+    _MarginTableBase,
     _RowComparableCounts,
     _RowProportions,
     _RowShareSum,
@@ -40,13 +41,13 @@ from cr.cube.matrix.measure import (
     SecondOrderMeasures,
     _MarginWeightedBase,
     _Sums,
+    _TableBase,
+    _TableBasesRange,
     _TableProportionVariances,
     _TableProportions,
     _TableStandardError,
     _TableUnweightedBases,
-    _TableWeightedBase,
     _TableWeightedBases,
-    _TableWeightedBasesRange,
     _TotalShareSum,
     _MarginUnweightedBase,
     _UnweightedCounts,
@@ -108,20 +109,20 @@ class DescribeSecondOrderMeasures(object):
     ):
         _cube_measures_prop_.return_value = cube_measures_
         cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
-        unweighted_cube_counts_.columns_pruning_base = np.array([8, 5, 7, 4])
+        unweighted_cube_counts_.columns_pruning_mask = [True, False, True, False]
         measures = SecondOrderMeasures(None, None, None)
 
-        assert measures.columns_pruning_base.tolist() == [8, 5, 7, 4]
+        assert measures.columns_pruning_mask == [True, False, True, False]
 
     def it_provides_access_to_the_rows_pruning_base(
         self, _cube_measures_prop_, cube_measures_, unweighted_cube_counts_
     ):
         _cube_measures_prop_.return_value = cube_measures_
         cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
-        unweighted_cube_counts_.rows_pruning_base = np.array([7, 4, 0, 2])
+        unweighted_cube_counts_.rows_pruning_mask = [False, False, True, False]
         measures = SecondOrderMeasures(None, None, None)
 
-        assert measures.rows_pruning_base.tolist() == [7, 4, 0, 2]
+        assert measures.rows_pruning_mask == [False, False, True, False]
 
     def it_provides_access_to_the_cube_measures_to_help(
         self, request, cube_, dimensions_, cube_measures_
@@ -186,10 +187,10 @@ class DescribeSecondOrderMeasures(object):
         _cube_measures_prop_,
         cube_measures_,
     ):
-        table_weighted_base_ = instance_mock(request, _TableWeightedBase)
-        _TableWeightedBase_ = class_mock(
+        table_weighted_base_ = instance_mock(request, _TableBase)
+        _TableBase_ = class_mock(
             request,
-            "cr.cube.matrix.measure._TableWeightedBase",
+            "cr.cube.matrix.measure._TableBase",
             return_value=table_weighted_base_,
         )
         _cube_measures_prop_.return_value = cube_measures_
@@ -197,8 +198,8 @@ class DescribeSecondOrderMeasures(object):
 
         table_weighted_base = measures.table_weighted_base
 
-        _TableWeightedBase_.assert_called_once_with(
-            dimensions_, measures, cube_measures_
+        _TableBase_.assert_called_once_with(
+            dimensions_, measures, cube_measures_, cube_measures_.weighted_cube_counts
         )
         assert table_weighted_base is table_weighted_base_
 
@@ -257,7 +258,7 @@ class DescribeSecondOrderMeasures(object):
 
     @pytest.fixture
     def unweighted_cube_counts_(self, request):
-        return instance_mock(request, _BaseUnweightedCubeCounts)
+        return instance_mock(request, _BaseCubeCounts)
 
 
 class Describe_BaseSecondOrderMeasure(object):
@@ -281,32 +282,6 @@ class Describe_BaseSecondOrderMeasure(object):
         blocks = measure.blocks
 
         assert blocks == [["A", "B"], ["C", "D"]]
-
-    def it_provides_access_to_the_unweighted_cube_counts_object_to_help(
-        self, request, cube_measures_
-    ):
-        unweighted_cube_counts_ = instance_mock(request, _BaseUnweightedCubeCounts)
-        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
-        measure = _BaseSecondOrderMeasure(None, None, cube_measures_)
-
-        assert measure._unweighted_cube_counts is unweighted_cube_counts_
-
-    def it_provides_access_to_the_weighted_cube_counts_object_to_help(
-        self, request, cube_measures_
-    ):
-        cube_counts_ = instance_mock(request, _BaseCubeCounts)
-        cube_measures_.weighted_cube_counts = cube_counts_
-        measure = _BaseSecondOrderMeasure(None, None, cube_measures_)
-
-        weighted_cube_counts = measure._weighted_cube_counts
-
-        assert weighted_cube_counts is cube_counts_
-
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def cube_measures_(self, request):
-        return instance_mock(request, CubeMeasures)
 
 
 class Describe_ColumnComparableCounts(object):
@@ -393,6 +368,32 @@ class Describe_ColumnProportions(object):
         )
 
         assert column_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
+
+
+class Describe_ColumnShareSum(object):
+    """Unit test suite for `cr.cube.matrix.measure._ColumnShareSum` object."""
+
+    def it_computes_its_blocks(self, request):
+        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+        SumSubtotals_.blocks.return_value = [
+            [[5.0, 12.0], [21.0, 32.0]],
+            [[], []],
+            [[], []],
+            [[], []],
+        ]
+        sums_blocks_ = instance_mock(request, _Sums, blocks=[[5.0, 6.0], [7.0, 8.0]])
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            sums=sums_blocks_,
+        )
+        cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
+
+        col_share_sum = _ColumnShareSum(None, second_order_measures_, cube_measures_)
+
+        assert col_share_sum.blocks[0][0] == pytest.approx([0.2941176, 0.7058823])
+        assert col_share_sum.blocks[0][1] == pytest.approx([0.3962264, 0.6037735])
+        SumSubtotals_.blocks.assert_called_once_with(ANY, None, True, True)
 
 
 class Describe_ColumnUnweightedBases(object):
@@ -495,7 +496,7 @@ class Describe_ColumnUnweightedBases(object):
 
     @pytest.fixture
     def unweighted_cube_counts_(self, request):
-        return instance_mock(request, _BaseUnweightedCubeCounts)
+        return instance_mock(request, _BaseCubeCounts)
 
     @pytest.fixture
     def _unweighted_cube_counts_prop_(self, request):
@@ -616,6 +617,232 @@ class Describe_ColumnWeightedBases(object):
     @pytest.fixture
     def _weighted_cube_counts_prop_(self, request):
         return property_mock(request, _ColumnWeightedBases, "_weighted_cube_counts")
+
+
+class Describe_PairwiseMeansSigPvals(object):
+    """Unit test suite for `cr.cube.matrix.measure._PairwiseMeansSigPvals` object."""
+
+    def it_provides_the_df(self, request):
+        # Adapted from:
+        # https://mse.redwoods.edu/darnold/math15/spring2013/R/Activities/WelchTTest.html
+        cube_std_dev_ = instance_mock(
+            request, _BaseCubeStdDev, stddev=np.array([[17.14873, 11.00736]])
+        )
+        unweighted_cube_counts_ = instance_mock(
+            request, _BaseCubeCounts, column_bases=np.array([[23, 21]])
+        )
+        cube_measures_ = instance_mock(request, CubeMeasures)
+        cube_measures_.cube_stddev = cube_std_dev_
+        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
+        pairwise_pvals = _PairwiseMeansSigPVals(None, None, cube_measures_, 0)
+
+        assert pairwise_pvals._df == pytest.approx(np.array([[44, 37.8554]]))
+
+
+class Describe_PairwiseMeansSigTStats(object):
+    """Unit test suite for `cr.cube.matrix.measure._PairwiseMeansSigTStats` object."""
+
+    def it_provides_the_tstats(self, request):
+        # Adapted from:
+        # https://mse.redwoods.edu/darnold/math15/spring2013/R/Activities/WelchTTest.html
+        cube_means_ = instance_mock(
+            request, _BaseCubeMeans, means=np.array([[41.52174, 51.47619]])
+        )
+        cube_std_dev_ = instance_mock(
+            request, _BaseCubeStdDev, stddev=np.array([[17.14873, 11.00736]])
+        )
+        unweighted_cube_counts_ = instance_mock(
+            request, _BaseCubeCounts, column_bases=np.array([[23, 21]])
+        )
+        cube_measures_ = instance_mock(request, CubeMeasures)
+        cube_measures_.cube_means = cube_means_
+        cube_measures_.cube_stddev = cube_std_dev_
+        cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
+        pairwise_tstat = _PairwiseMeansSigTStats(None, None, cube_measures_, 0)
+
+        assert pairwise_tstat.t_stats == pytest.approx(np.array([[0, 2.310889]]))
+
+
+class Describe_PairwiseSigTstats(object):
+    """Unit test suite for `cr.cube.matrix.measure._PairwiseSigTstats` object."""
+
+    def it_provides_a_blocks_interface(self, request):
+        property_mock(request, _PairwiseSigTstats, "_base_values", return_value=1)
+        property_mock(request, _PairwiseSigTstats, "_subtotal_columns", return_value=2)
+        property_mock(request, _PairwiseSigTstats, "_subtotal_rows", return_value=3)
+        property_mock(request, _PairwiseSigTstats, "_intersections", return_value=4)
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        assert pairwise_tstat.blocks == [[1, 2], [3, 4]]
+
+    def it_calculates_the_base_values_to_help(
+        self, _bases_prop_, _proportions_prop_, _reference_values_, _calculate_t_stats_
+    ):
+        _bases_prop_.return_value = [[1, 2], [3, 4]]
+        _proportions_prop_.return_value = [[0.5, 0.6], [0.7, 0.8]]
+        _reference_values_.return_value = [9, 0]
+        _calculate_t_stats_.return_value = "tstat"
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        base_values = pairwise_tstat._base_values
+
+        assert base_values == "tstat"
+        _reference_values_.assert_called_once_with(pairwise_tstat, 0)
+        _calculate_t_stats_.assert_called_once_with(pairwise_tstat, 0.5, 1, 9, 0)
+
+    def it_provides_the_bases_to_help(self, second_order_measures_):
+        second_order_measures_.column_unweighted_bases.blocks = [1, 2]
+        pairwise_tstat = _PairwiseSigTstats(None, second_order_measures_, None, None)
+
+        assert pairwise_tstat._bases == [1, 2]
+
+    def it_can_calculate_the_t_stat_to_help(self):
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        actual = pairwise_tstat._calculate_t_stats(
+            np.array([[0.5, 0.3, 0.1], [0.5, 0.7, 0.9]]),
+            np.array([[20, 30, 40], [15, 25, 35]]),
+            np.array([[0.2], [0.4]]),
+            np.array([[45], [55]]),
+        )
+
+        # --- Example calculation:
+        # --- s1 = 0.5 * (1 - 0.5) / 20
+        # --- s2 = 0.2 * (1 - 0.2) / 45
+        # --- 2.367601387 = (0.5 - 0.2) / sqrt(s1 + s2)
+        assert actual == pytest.approx(
+            np.array(
+                [
+                    [2.367601387, 0.9733285, -1.31243591],
+                    [0.689568214, 2.6554250, 6.00405605],
+                ]
+            )
+        )
+
+    def but_tstat_calculation_is_ok_with_empty_inputs(self):
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        actual = pairwise_tstat._calculate_t_stats(
+            np.array([[]]),
+            np.array([[]]),
+            np.array([[]]),
+            np.array([[]]),
+        )
+
+        assert actual.tolist() == [[]]
+
+    def it_provides_the_intersections_to_help(
+        self, _bases_prop_, _proportions_prop_, _reference_values_, _calculate_t_stats_
+    ):
+        _bases_prop_.return_value = [[1, 2], [3, 4]]
+        _proportions_prop_.return_value = [[0.5, 0.6], [0.7, 0.8]]
+        _reference_values_.return_value = [9, 0]
+        _calculate_t_stats_.return_value = "tstat"
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        base_values = pairwise_tstat._intersections
+
+        assert base_values == "tstat"
+        _reference_values_.assert_called_once_with(pairwise_tstat, 1)
+        _calculate_t_stats_.assert_called_once_with(pairwise_tstat, 0.8, 4, 9, 0)
+
+    def it_provides_the_proportions_to_help(self, second_order_measures_):
+        second_order_measures_.column_proportions.blocks = [1, 2]
+        pairwise_tstat = _PairwiseSigTstats(None, second_order_measures_, None, None)
+
+        assert pairwise_tstat._proportions == [1, 2]
+
+    @pytest.mark.parametrize(
+        "col_index, block_index, expected",
+        (
+            (0, 0, ("0", "2")),
+            (1, 0, ("1", "3")),
+            (1, 1, ("10", "12")),
+            (-1, 0, ("6", "8")),
+            (-2, 1, ("13", "15")),
+        ),
+    )
+    def it_can_calculate_the_reference_values_to_help(
+        self, _bases_prop_, _proportions_prop_, col_index, block_index, expected
+    ):
+        _bases_prop_.return_value = [
+            [
+                np.array([["b0", "b1"], ["b2", "b3"]]),
+                np.array([["b5", "b6"], ["b7", "b8"]]),
+            ],
+            [
+                np.array([["b9", "b10"], ["b11", "b12"]]),
+                np.array([["b13", "b14"], ["b15", "b16"]]),
+            ],
+        ]
+        _proportions_prop_.return_value = [
+            [
+                np.array([["p0", "p1"], ["p2", "p3"]]),
+                np.array([["p5", "p6"], ["p7", "p8"]]),
+            ],
+            [
+                np.array([["p9", "p10"], ["p11", "p12"]]),
+                np.array([["p13", "p14"], ["p15", "p16"]]),
+            ],
+        ]
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, col_index)
+
+        actual = pairwise_tstat._reference_values(block_index)
+
+        assert actual[1].tolist() == [["b" + i] for i in expected]
+        assert actual[0].tolist() == [["p" + i] for i in expected]
+
+    def it_provides_the_subtotal_columns_to_help(
+        self, _bases_prop_, _proportions_prop_, _reference_values_, _calculate_t_stats_
+    ):
+        _bases_prop_.return_value = [[1, 2], [3, 4]]
+        _proportions_prop_.return_value = [[0.5, 0.6], [0.7, 0.8]]
+        _reference_values_.return_value = [9, 0]
+        _calculate_t_stats_.return_value = "tstat"
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        base_values = pairwise_tstat._subtotal_columns
+
+        assert base_values == "tstat"
+        _reference_values_.assert_called_once_with(pairwise_tstat, 0)
+        _calculate_t_stats_.assert_called_once_with(pairwise_tstat, 0.6, 2, 9, 0)
+
+    def it_provides_the_subtotal_rows_to_help(
+        self, _bases_prop_, _proportions_prop_, _reference_values_, _calculate_t_stats_
+    ):
+        _bases_prop_.return_value = [[1, 2], [3, 4]]
+        _proportions_prop_.return_value = [[0.5, 0.6], [0.7, 0.8]]
+        _reference_values_.return_value = [9, 0]
+        _calculate_t_stats_.return_value = "tstat"
+        pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
+
+        base_values = pairwise_tstat._subtotal_rows
+
+        assert base_values == "tstat"
+        _reference_values_.assert_called_once_with(pairwise_tstat, 1)
+        _calculate_t_stats_.assert_called_once_with(pairwise_tstat, 0.7, 3, 9, 0)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _bases_prop_(self, request):
+        return property_mock(request, _PairwiseSigTstats, "_bases")
+
+    @pytest.fixture
+    def _calculate_t_stats_(self, request):
+        return method_mock(request, _PairwiseSigTstats, "_calculate_t_stats")
+
+    @pytest.fixture
+    def _proportions_prop_(self, request):
+        return property_mock(request, _PairwiseSigTstats, "_proportions")
+
+    @pytest.fixture
+    def _reference_values_(self, request):
+        return method_mock(request, _PairwiseSigTstats, "_reference_values")
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
 
 
 class Describe_PopulationProportions(object):
@@ -860,7 +1087,7 @@ class Describe_RowUnweightedBases(object):
 
     @pytest.fixture
     def unweighted_cube_counts_(self, request):
-        return instance_mock(request, _BaseUnweightedCubeCounts)
+        return instance_mock(request, _BaseCubeCounts)
 
     @pytest.fixture
     def _unweighted_cube_counts_prop_(self, request):
@@ -1010,32 +1237,6 @@ class Describe_RowWeightedBases(object):
         return property_mock(request, _RowWeightedBases, "_weighted_cube_counts")
 
 
-class Describe_ColumnShareSum(object):
-    """Unit test suite for `cr.cube.matrix.measure._ColumnShareSum` object."""
-
-    def it_computes_its_blocks(self, request):
-        SumSubtotals_ = class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
-        SumSubtotals_.blocks.return_value = [
-            [[5.0, 12.0], [21.0, 32.0]],
-            [[], []],
-            [[], []],
-            [[], []],
-        ]
-        sums_blocks_ = instance_mock(request, _Sums, blocks=[[5.0, 6.0], [7.0, 8.0]])
-        second_order_measures_ = instance_mock(
-            request,
-            SecondOrderMeasures,
-            sums=sums_blocks_,
-        )
-        cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
-
-        col_share_sum = _ColumnShareSum(None, second_order_measures_, cube_measures_)
-
-        assert col_share_sum.blocks[0][0] == pytest.approx([0.2941176, 0.7058823])
-        assert col_share_sum.blocks[0][1] == pytest.approx([0.3962264, 0.6037735])
-        SumSubtotals_.blocks.assert_called_once_with(ANY, None, True, True)
-
-
 class Describe_RowShareSum(object):
     """Unit test suite for `cr.cube.matrix.measure._RowShareSum` object."""
 
@@ -1172,147 +1373,121 @@ class Describe_TableUnweightedBases(object):
         self, _unweighted_cube_counts_prop_, unweighted_cube_counts_
     ):
         _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
-        unweighted_cube_counts_.table_bases = np.array([[3, 0, 5], [1, 4, 2]])
+        unweighted_cube_counts_.table_bases = np.array(
+            [[3.3, 0.0, 5.5], [1.1, 4.4, 2.2]]
+        )
         table_unweighted_bases = _TableUnweightedBases(None, None, None)
 
-        assert table_unweighted_bases._base_values.tolist() == [[3, 0, 5], [1, 4, 2]]
+        assert table_unweighted_bases._base_values.tolist() == [
+            [3.3, 0.0, 5.5],
+            [1.1, 4.4, 2.2],
+        ]
 
     @pytest.mark.parametrize(
-        "intersections, table_base, expected_value, expected_shape",
+        "intersections_shape, expected_value",
         (
-            # --- CAT_X_CAT with both row-subtotals and column-subtotals ---
-            (
-                np.array([[8, 4], [3, 7]]),
-                7,
-                [[7, 7], [7, 7]],
-                (2, 2),
-            ),
-            # --- No intersections but table-base is an array (one of the MR cases) ---
-            (
-                np.array([], dtype=int).reshape(0, 2),
-                [6, 6, 6],
-                [],
-                (0, 2),
-            ),
-            # --- No intersections and table-base is a scalar ---
-            (
-                np.array([], dtype=int).reshape(0, 2),
-                9,
-                [],
-                (0, 2),
-            ),
+            ((0, 0), []),
+            ((0, 2), []),
+            ((2, 0), [[], []]),
+            ((4, 1), [[6.6], [6.6], [6.6], [6.6]]),
         ),
     )
     def it_computes_its_intersections_block_to_help(
         self,
         _base_values_prop_,
-        dimensions_,
-        SumSubtotals_,
-        _unweighted_cube_counts_prop_,
-        unweighted_cube_counts_,
-        intersections,
-        table_base,
+        _intersections_shape_prop_,
+        intersections_shape,
         expected_value,
-        expected_shape,
     ):
-        _base_values_prop_.return_value = [[6, 5, 4], [9, 8, 7], [3, 2, 1]]
-        SumSubtotals_.intersections.return_value = intersections
-        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
-        unweighted_cube_counts_.table_base = table_base
-        table_unweighted_bases = _TableUnweightedBases(dimensions_, None, None)
-
-        intersections = table_unweighted_bases._intersections
-
-        SumSubtotals_.intersections.assert_called_once_with(
-            [[6, 5, 4], [9, 8, 7], [3, 2, 1]], dimensions_
+        _base_values_prop_.return_value = np.array(
+            [
+                [6.6, 5.5, 4.4],
+                [9.9, 8.8, 7.7],
+                [3.3, 2.2, 1.1],
+            ]
         )
+        _intersections_shape_prop_.return_value = intersections_shape
+
+        intersections = _TableUnweightedBases(None, None, None)._intersections
+
         assert intersections.tolist() == expected_value
-        assert intersections.shape == expected_shape
-        assert intersections.dtype == int
+        assert intersections.shape == intersections_shape
+        assert intersections.dtype == np.float64
+
+    def it_computes_its_intersections_shape_to_help(self, dimensions_):
+        dimensions_[0].subtotals = [0, 1]
+        dimensions_[1].subtotals = [2, 3, 4]
+
+        table_unweighted_base = _TableUnweightedBases(dimensions_, None, None)
+
+        assert table_unweighted_base._intersections_shape == (2, 3)
 
     @pytest.mark.parametrize(
-        "table_base, expected_value",
-        ((np.array([7, 4]), [[7, 7], [4, 4]]), (9, [[9, 9], [9, 9]])),
+        "intersections_shape, expected_value",
+        (
+            ((0, 0), [[], [], []]),
+            ((0, 2), [[6.6, 6.6], [9.9, 9.9], [3.3, 3.3]]),
+            ((2, 0), [[], [], []]),
+            ((4, 1), [[6.6], [9.9], [3.3]]),
+        ),
     )
     def it_computes_its_subtotal_columns_to_help(
         self,
         _base_values_prop_,
-        dimensions_,
-        SumSubtotals_,
-        _unweighted_cube_counts_prop_,
-        unweighted_cube_counts_,
-        table_base,
+        _intersections_shape_prop_,
+        intersections_shape,
         expected_value,
     ):
-        _base_values_prop_.return_value = [[5, 6, 3], [4, 1, 2]]
-        SumSubtotals_.subtotal_columns.return_value = np.array([[0, 0], [0, 0]])
-        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
-        unweighted_cube_counts_.table_base = table_base
-        table_unweighted_bases = _TableUnweightedBases(dimensions_, None, None)
-
-        subtotal_columns = table_unweighted_bases._subtotal_columns
-
-        SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[5, 6, 3], [4, 1, 2]], dimensions_
+        _base_values_prop_.return_value = np.array(
+            [
+                [6.6, 6.6, 6.6],
+                [9.9, 9.9, 9.9],
+                [3.3, 3.3, 3.3],
+            ]
         )
+        _intersections_shape_prop_.return_value = intersections_shape
+
+        subtotal_columns = _TableUnweightedBases(None, None, None)._subtotal_columns
+
         assert subtotal_columns.tolist() == expected_value
-
-    def but_it_returns_empty_array_of_right_shape_when_there_are_no_column_subtotals(
-        self, _base_values_prop_, dimensions_, SumSubtotals_
-    ):
-        """Empty shape must be (nrows, 0) to compose properly in `np.block()` call."""
-        _base_values_prop_.return_value = [[2, 3], [4, 9], [0, 1]]
-        SumSubtotals_.subtotal_columns.return_value = np.array([], dtype=int).reshape(
-            3, 0
-        )
-        table_unweighted_bases = _TableUnweightedBases(dimensions_, None, None)
-
-        subtotal_columns = table_unweighted_bases._subtotal_columns
-
-        SumSubtotals_.subtotal_columns.assert_called_once_with(
-            [[2, 3], [4, 9], [0, 1]], dimensions_
-        )
-        assert subtotal_columns.tolist() == [[], [], []]
-        assert subtotal_columns.shape == (3, 0)
-        assert subtotal_columns.dtype == int
+        assert subtotal_columns.shape[0] == 3
+        assert subtotal_columns.shape[1] == intersections_shape[1]
+        assert subtotal_columns.dtype == np.float64
 
     @pytest.mark.parametrize(
-        "subtotal_rows, table_base, expected_value, expected_shape",
+        "intersections_shape, expected_value",
         (
-            # --- no subtotal-rows case (including MR_X_CAT and MR_X_MR cases) ---
-            (np.array([], dtype=int).reshape(0, 2), None, [], (0, 2)),
-            # --- scalar table-base (CAT_X_CAT case) ---
-            (np.array([[0, 0], [0, 0]]), 8, [[8, 8], [8, 8]], (2, 2)),
-            # --- vector table-base (CAT_X_MR case) ---
-            (np.array([[0, 0], [0, 0]]), np.array([4, 2]), [[4, 2], [4, 2]], (2, 2)),
+            ((0, 0), []),
+            ((0, 2), []),
+            ((2, 0), [[6.6, 5.5, 4.4], [6.6, 5.5, 4.4]]),
+            (
+                (4, 1),
+                [[6.6, 5.5, 4.4], [6.6, 5.5, 4.4], [6.6, 5.5, 4.4], [6.6, 5.5, 4.4]],
+            ),
         ),
     )
     def it_computes_its_subtotal_rows_to_help(
         self,
         _base_values_prop_,
-        dimensions_,
-        SumSubtotals_,
-        _unweighted_cube_counts_prop_,
-        unweighted_cube_counts_,
-        subtotal_rows,
-        table_base,
+        _intersections_shape_prop_,
+        intersections_shape,
         expected_value,
-        expected_shape,
     ):
-        _base_values_prop_.return_value = [[3, 5, 6], [2, 4, 1]]
-        SumSubtotals_.subtotal_rows.return_value = subtotal_rows
-        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
-        unweighted_cube_counts_.table_base = table_base
-        table_unweighted_bases = _TableUnweightedBases(dimensions_, None, None)
-
-        subtotal_rows = table_unweighted_bases._subtotal_rows
-
-        SumSubtotals_.subtotal_rows.assert_called_once_with(
-            [[3, 5, 6], [2, 4, 1]], dimensions_
+        _base_values_prop_.return_value = np.array(
+            [
+                [6.6, 5.5, 4.4],
+                [6.6, 5.5, 4.4],
+                [6.6, 5.5, 4.4],
+            ]
         )
+        _intersections_shape_prop_.return_value = intersections_shape
+
+        subtotal_rows = _TableUnweightedBases(None, None, None)._subtotal_rows
+
         assert subtotal_rows.tolist() == expected_value
-        assert subtotal_rows.dtype == int
-        assert subtotal_rows.shape == expected_shape
+        assert subtotal_rows.shape[0] == intersections_shape[0]
+        assert subtotal_rows.shape[1] == 3
+        assert subtotal_rows.dtype == np.float64
 
     # fixture components ---------------------------------------------
 
@@ -1322,15 +1497,15 @@ class Describe_TableUnweightedBases(object):
 
     @pytest.fixture
     def dimensions_(self, request):
-        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+        return instance_mock(request, Dimension), instance_mock(request, Dimension)
 
     @pytest.fixture
-    def SumSubtotals_(self, request):
-        return class_mock(request, "cr.cube.matrix.measure.SumSubtotals")
+    def _intersections_shape_prop_(self, request):
+        return property_mock(request, _TableUnweightedBases, "_intersections_shape")
 
     @pytest.fixture
     def unweighted_cube_counts_(self, request):
-        return instance_mock(request, _BaseUnweightedCubeCounts)
+        return instance_mock(request, _BaseCubeCounts)
 
     @pytest.fixture
     def _unweighted_cube_counts_prop_(self, request):
@@ -1383,8 +1558,13 @@ class Describe_TableWeightedBases(object):
         assert intersections.shape == intersections_shape
         assert intersections.dtype == np.float64
 
-    def it_computes_its_intersections_shape_to_help(self, request):
-        pass
+    def it_computes_its_intersections_shape_to_help(self, dimensions_):
+        dimensions_[0].subtotals = [0, 1]
+        dimensions_[1].subtotals = [2, 3, 4]
+
+        table_unweighted_base = _TableWeightedBases(dimensions_, None, None)
+
+        assert table_unweighted_base._intersections_shape == (2, 3)
 
     @pytest.mark.parametrize(
         "intersections_shape, expected_value",
@@ -1460,6 +1640,10 @@ class Describe_TableWeightedBases(object):
         return property_mock(request, _TableWeightedBases, "_base_values")
 
     @pytest.fixture
+    def dimensions_(self, request):
+        return instance_mock(request, Dimension), instance_mock(request, Dimension)
+
+    @pytest.fixture
     def _intersections_shape_prop_(self, request):
         return property_mock(request, _TableWeightedBases, "_intersections_shape")
 
@@ -1482,8 +1666,8 @@ class Describe_UnweightedCounts(object):
         ucounts = np.arange(12).reshape(3, 4).tolist()
         unweighted_cube_counts_ = instance_mock(
             request,
-            _BaseUnweightedCubeCounts,
-            unweighted_counts=ucounts,
+            _BaseCubeCounts,
+            counts=ucounts,
             diff_nans=False,
         )
         property_mock(
@@ -1800,8 +1984,8 @@ class Describe_BaseScaledCountMarginal(object):
         assert marginal._opposing_numeric_values == expected
 
 
-class Describe_MarginTableWeightedBase(object):
-    """Unit test suite for `cr.cube.matrix.measure._MarginTableWeightedBase` object."""
+class Describe_MarginTableBase(object):
+    """Unit test suite for `cr.cube.matrix.measure._MarginTableBase` object."""
 
     def it_provides_blocks_if_table_weighted_base(
         self,
@@ -1811,10 +1995,8 @@ class Describe_MarginTableWeightedBase(object):
     ):
         is_defined_prop_.return_value = True
         _base_values_prop_.return_value = np.array([1.0, 1.0])
-        property_mock(
-            request, _MarginTableWeightedBase, "_subtotal_shape", return_value=3
-        )
-        table_weighted_base = _MarginTableWeightedBase(None, None, None, None)
+        property_mock(request, _MarginTableBase, "_subtotal_shape", return_value=3)
+        table_weighted_base = _MarginTableBase(None, None, None, None, None)
 
         results = table_weighted_base.blocks
 
@@ -1825,11 +2007,10 @@ class Describe_MarginTableWeightedBase(object):
         is_defined_prop_.return_value = False
 
         with pytest.raises(ValueError) as e:
-            _MarginTableWeightedBase(None, None, None, None).blocks
+            _MarginTableBase(None, None, None, None, None).blocks
 
         assert (
-            str(e.value)
-            == "Could not calculate weighted-table-base-margin across subvariables"
+            str(e.value) == "Could not calculate margin-table-base across subvariables"
         )
 
     @pytest.mark.parametrize(
@@ -1841,42 +2022,34 @@ class Describe_MarginTableWeightedBase(object):
     )
     def it_can_tell_if_it_is_defined(self, _base_values_prop_, base_values, expected):
         _base_values_prop_.return_value = base_values
-        table_weighted_base = _MarginTableWeightedBase(None, None, None, None)
+        table_weighted_base = _MarginTableBase(None, None, None, None, None)
 
         assert table_weighted_base.is_defined == expected
 
-    def it_provides_the_base_values_for_rows_to_help(
-        self, weighted_cube_counts_, cube_measures_
-    ):
-        weighted_cube_counts_.rows_table_base = [1, 2]
-        cube_measures_.weighted_cube_counts = weighted_cube_counts_
-        table_weighted_base = _MarginTableWeightedBase(
-            None, None, cube_measures_, MO.ROWS
-        )
+    def it_provides_the_base_values_for_rows_to_help(self, cube_counts_):
+        cube_counts_.rows_table_base = [1, 2]
+        table_weighted_base = _MarginTableBase(None, None, None, MO.ROWS, cube_counts_)
 
         assert table_weighted_base._base_values == [1, 2]
 
-    def it_provides_the_base_values_for_columns_to_help(
-        self, weighted_cube_counts_, cube_measures_
-    ):
-        weighted_cube_counts_.columns_table_base = [1, 2]
-        cube_measures_.weighted_cube_counts = weighted_cube_counts_
-        table_weighted_base = _MarginTableWeightedBase(
-            None, None, cube_measures_, MO.COLUMNS
+    def it_provides_the_base_values_for_columns_to_help(self, cube_counts_):
+        cube_counts_.columns_table_base = [1, 2]
+        table_weighted_base = _MarginTableBase(
+            None, None, None, MO.COLUMNS, cube_counts_
         )
 
         assert table_weighted_base._base_values == [1, 2]
 
     def it_provides_subtotal_shape_for_rows_orientation_to_help(self, dimensions_):
         dimensions_[0].subtotals = (1, 2, 3)
-        table_weighted_base = _MarginTableWeightedBase(dimensions_, None, None, MO.ROWS)
+        table_weighted_base = _MarginTableBase(dimensions_, None, None, MO.ROWS, None)
 
         assert table_weighted_base._subtotal_shape == 3
 
     def it_provides_subtotal_shape_for_columns_orientation_to_help(self, dimensions_):
         dimensions_[1].subtotals = (1,)
-        table_weighted_base = _MarginTableWeightedBase(
-            dimensions_, None, None, MO.COLUMNS
+        table_weighted_base = _MarginTableBase(
+            dimensions_, None, None, MO.COLUMNS, None
         )
 
         assert table_weighted_base._subtotal_shape == 1
@@ -1885,11 +2058,7 @@ class Describe_MarginTableWeightedBase(object):
 
     @pytest.fixture
     def _base_values_prop_(self, request):
-        return property_mock(request, _MarginTableWeightedBase, "_base_values")
-
-    @pytest.fixture
-    def cube_measures_(self, request):
-        return instance_mock(request, CubeMeasures)
+        return property_mock(request, _MarginTableBase, "_base_values")
 
     @pytest.fixture
     def dimensions_(self, request):
@@ -1897,10 +2066,10 @@ class Describe_MarginTableWeightedBase(object):
 
     @pytest.fixture
     def is_defined_prop_(self, request):
-        return property_mock(request, _MarginTableWeightedBase, "is_defined")
+        return property_mock(request, _MarginTableBase, "is_defined")
 
     @pytest.fixture
-    def weighted_cube_counts_(self, request):
+    def cube_counts_(self, request):
         return instance_mock(request, _BaseCubeCounts)
 
 
@@ -1932,8 +2101,27 @@ class Describe_MarginTableProportion(object):
         margin_proportion = _MarginTableProportion(None, None, None, None)
         assert margin_proportion.is_defined == margin_proportion._counts_are_defined
 
-    def it_provides_the_right_denominator_for_rows(self):
-        pass
+    def it_provides_the_right_denominator_for_rows(
+        self,
+        second_order_measures_,
+        margin_table_base_,
+    ):
+        second_order_measures_.rows_table_weighted_base = margin_table_base_
+        margin_table_base_.blocks = [[1, 2], [3, 4]]
+        margin = _MarginTableProportion(None, second_order_measures_, None, MO.ROWS)
+
+        assert margin._proportion_denominators == [[1, 2], [3, 4]]
+
+    def it_provides_the_right_denominator_for_columns(
+        self,
+        second_order_measures_,
+        margin_table_base_,
+    ):
+        second_order_measures_.columns_table_weighted_base = margin_table_base_
+        margin_table_base_.blocks = [[1, 2], [3, 4]]
+        margin = _MarginTableProportion(None, second_order_measures_, None, MO.COLUMNS)
+
+        assert margin._proportion_denominators == [[1, 2], [3, 4]]
 
     def it_provides_the_right_numerator_for_rows(
         self, second_order_measures_, weighted_counts_, _apply_along_orientation_
@@ -2002,6 +2190,10 @@ class Describe_MarginTableProportion(object):
             _MarginTableProportion,
             "_apply_along_orientation",
         )
+
+    @pytest.fixture
+    def margin_table_base_(self, request):
+        return instance_mock(request, _MarginTableBase)
 
     @pytest.fixture
     def second_order_measures_(self, request):
@@ -2316,11 +2508,34 @@ class Describe_ScaleMean(object):
 class Describe_ScaleMeanStddev(object):
     """Unit test suite for `cr.cube.matrix.measure._ScaleMeanStddev` object."""
 
-    def it_provides_blocks_for_rows(self, request):
-        pass
+    def it_provides_blocks(self, request, is_defined_prop_):
+        is_defined_prop_.return_value = True
+        _rows_weighted_mean_stddev_ = method_mock(
+            request, _ScaleMeanStddev, "_rows_weighted_mean_stddev"
+        )
+        property_mock(
+            request,
+            _ScaleMeanStddev,
+            "_stddev_func",
+            return_value=_rows_weighted_mean_stddev_,
+        )
+        property_mock(
+            request, _ScaleMeanStddev, "_opposing_numeric_values", return_value=[1, 2]
+        )
+        property_mock(request, _ScaleMeanStddev, "_counts", return_value=["a", "b"])
+        property_mock(
+            request, _ScaleMeanStddev, "_scale_means", return_value=["c", "d"]
+        )
 
-    def but_blocks_raises_if_undefined(self, request):
-        property_mock(request, _ScaleMeanStddev, "is_defined", return_value=False)
+        marginal = _ScaleMeanStddev(None, None, None, None).blocks
+
+        assert _rows_weighted_mean_stddev_.call_args_list == [
+            call("a", [1, 2], "c"),
+            call("b", [1, 2], "d"),
+        ]
+
+    def but_blocks_raises_if_undefined(self, is_defined_prop_):
+        is_defined_prop_.return_value = False
 
         with pytest.raises(ValueError) as e:
             _ScaleMeanStddev(None, None, None, MO.ROWS).blocks
@@ -2408,6 +2623,12 @@ class Describe_ScaleMeanStddev(object):
         )
 
         assert result.tolist() == pytest.approx(expected, nan_ok=True)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def is_defined_prop_(self, request):
+        return property_mock(request, _ScaleMeanStddev, "is_defined")
 
 
 class Describe_ScaleMedian(object):
@@ -2568,8 +2789,8 @@ class Describe_ScaleMedian(object):
 # === Scalars ===
 
 
-class Describe_TableWeightedBase(object):
-    """Unit test suite for `cr.cube.matrix.measure._TableWeightedBase` object."""
+class Describe_TableBase(object):
+    """Unit test suite for `cr.cube.matrix.measure._TableBase` object."""
 
     @pytest.mark.parametrize(
         "table_base, expected",
@@ -2578,21 +2799,15 @@ class Describe_TableWeightedBase(object):
             (1, True),
         ),
     )
-    def it_knows_if_it_is_defined(
-        self, cube_measures_, weighted_cube_counts_, table_base, expected
-    ):
-        cube_measures_.weighted_cube_counts = weighted_cube_counts_
-        weighted_cube_counts_.table_base = table_base
+    def it_knows_if_it_is_defined(self, cube_counts_, table_base, expected):
+        cube_counts_.table_base = table_base
 
-        assert _TableWeightedBase(None, None, cube_measures_).is_defined == expected
+        assert _TableBase(None, None, None, cube_counts_).is_defined == expected
 
-    def it_provides_its_value(
-        self, request, cube_measures_, weighted_cube_counts_, is_defined_prop_
-    ):
+    def it_provides_its_value(self, cube_counts_, is_defined_prop_):
         is_defined_prop_.return_value = True
-        cube_measures_.weighted_cube_counts = weighted_cube_counts_
-        weighted_cube_counts_.table_base = 2.0
-        table_margin = _TableWeightedBase(None, None, cube_measures_)
+        cube_counts_.table_base = 2.0
+        table_margin = _TableBase(None, None, None, cube_counts_)
 
         assert table_margin.value == 2.0
 
@@ -2600,33 +2815,29 @@ class Describe_TableWeightedBase(object):
         is_defined_prop_.return_value = False
 
         with pytest.raises(ValueError) as e:
-            _TableWeightedBase(None, None, None).value
+            _TableBase(None, None, None, None).value
 
         assert (
             str(e.value)
-            == "Cannot sum across subvariables dimension for table weighted base scalar"
+            == "Cannot sum across subvariables dimension for table base scalar"
         )
 
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def is_defined_prop_(self, request):
-        return property_mock(request, _TableWeightedBase, "is_defined")
+        return property_mock(request, _TableBase, "is_defined")
 
     @pytest.fixture
-    def cube_measures_(self, request):
-        return instance_mock(request, CubeMeasures)
-
-    @pytest.fixture
-    def weighted_cube_counts_(self, request):
+    def cube_counts_(self, request):
         return instance_mock(request, _BaseCubeCounts)
 
 
-class Describe_TableWeightedBasesRange(object):
-    """Unit test suite for `cr.cube.matrix.measure._TableWeightedBasesRange` object."""
+class Describe_TableBasesRange(object):
+    """Unit test suite for `cr.cube.matrix.measure._TableBasesRange` object."""
 
     def it_is_always_defined(self):
-        assert _TableWeightedBasesRange(None, None, None).is_defined
+        assert _TableBasesRange(None, None, None, None).is_defined
 
     @pytest.mark.parametrize(
         "bases, expected",
@@ -2636,12 +2847,8 @@ class Describe_TableWeightedBasesRange(object):
         ),
     )
     def it_knows_its_values(self, request, bases, expected):
-        weighted_cube_counts_ = instance_mock(
-            request, _BaseCubeCounts, table_bases=bases
-        )
-        cube_measures_ = instance_mock(
-            request, CubeMeasures, weighted_cube_counts=weighted_cube_counts_
-        )
-        range = _TableWeightedBasesRange(None, None, cube_measures_)
+        cube_counts_ = instance_mock(request, _BaseCubeCounts, table_bases=bases)
+
+        range = _TableBasesRange(None, None, None, cube_counts_)
 
         assert range.value.tolist() == expected

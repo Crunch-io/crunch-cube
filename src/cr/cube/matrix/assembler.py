@@ -26,7 +26,6 @@ from cr.cube.enums import (
     MARGINAL_ORIENTATION as MO,
     MEASURE as M,
 )
-from cr.cube.matrix.cubemeasure import BaseCubeResultMatrix
 from cr.cube.matrix.measure import SecondOrderMeasures
 from cr.cube.matrix.subtotals import SumSubtotals
 from cr.cube.util import lazyproperty
@@ -117,14 +116,16 @@ class Assembler(object):
     @lazyproperty
     def columns_base(self):
         """1D/2D np.float64 ndarray of unweighted-N for each slice column/cell."""
-        # --- an MR_X slice produces a 2D column-base (each cell has its own N) ---
-        columns_base = self._measures.columns_base
-        if self._rows_dimension.dimension_type in (DT.MR_SUBVAR, DT.NUM_ARRAY):
-            return self._assemble_matrix(columns_base.blocks)
+        # --- an MR_X slice produces a 2D columns-base (each cell has its own N) ---
+        # --- This is really just another way to call the columns_weighted_bases ---
+        # --- TODO: Should column_base only be defined when it's 1D? This would
+        # --- require changes to exporter to use the bases to give a
+        # --- "column_base_range"
+        if not self._measures.columns_unweighted_base.is_defined:
+            return self.column_unweighted_bases
+
         # --- otherwise columns-base is a vector ---
-        base_values = columns_base.blocks[0][0]
-        columns_subtotals = columns_base.blocks[0][1]
-        return np.hstack([base_values, columns_subtotals])[self._column_order]
+        return self._assemble_marginal(self._measures.columns_unweighted_base)
 
     @lazyproperty
     def columns_dimension_numeric_values(self):
@@ -509,65 +510,30 @@ class Assembler(object):
 
         This value has four distinct forms, depending on the slice dimensions:
 
-            * MR_X_MR - 2D ndarray with a distinct table-base value per cell.
-            * MR_X - 1D ndarray of value per *row* when only rows dimension is MR.
-            * X_MR - 1D ndarray of value per *column* when only columns dimension is MR.
+            * ARR_X_ARR - 2D ndarray with a distinct table-base value per cell.
+            * ARR_X - 1D ndarray of value per *row* when only rows dimension is ARR.
+            * X_ARR - 1D ndarray of value per *column* when only columns dimension is ARR
             * CAT_X_CAT - scalar float value when slice has no MR dimension.
 
         """
-        # --- an MR dimension cannot have subtotals, and a non-scalar table base only
-        # --- arises in an MR dimension case, so a non-scalar table-base never has
-        # --- subtotals and we need only operate on the base values. There is no need to
-        # --- assemble with subtotals, however the values of a non-scalar table-base do
-        # --- still need to be ordered (which includes hiding).
-        base_table_base = self._cube_result_matrix.table_base
-
-        # --- MR_X_MR slice produces a 2D table-base (each cell has its own N) ---
-        if (
-            self._rows_dimension.dimension_type == DT.MR_SUBVAR
-            and self._columns_dimension.dimension_type == DT.MR_SUBVAR
-        ):
-            return base_table_base[np.ix_(self._row_order, self._column_order)]
-
-        # --- CAT_X_MR slice produces a 1D table-base (each column has its own N) ---
-        if self._columns_dimension.dimension_type == DT.MR_SUBVAR:
-            return base_table_base[self._column_order]
-
-        # --- MR_X_CAT slice produces a 1D table-base (each row has its own N) ---
-        if self._rows_dimension.dimension_type == DT.MR_SUBVAR:
-            return base_table_base[self._row_order]
-
-        # --- CAT_X_CAT produces scalar table-base ---
-        return self._cube_result_matrix.table_base
+        if self._measures.table_unweighted_base.is_defined:
+            return self._measures.table_unweighted_base.value
+        if self._measures.columns_table_unweighted_base.is_defined:
+            return self._assemble_marginal(self._measures.columns_table_unweighted_base)
+        if self._measures.rows_table_unweighted_base.is_defined:
+            return self._assemble_marginal(self._measures.rows_table_unweighted_base)
+        return self.table_unweighted_bases
 
     @lazyproperty
-    def table_base_unpruned(self):
-        """np.float64 scalar or a 1D or 2D ndarray of np.float64 representing table base.
+    def table_base_range(self):
+        """[min, max] np.float64 ndarray range of the table_margin (table-weighted-base)
 
-        This value includes hidden vectors, those with either a hide transform on
-        their element or that have been pruned (because their base (N) is zero). Also,
-        it does *not* include inserted subtotals. This does not affect a scalar value
-        but when the return value is an ndarray, the shape may be different than the
-        array returned by `.table_base`.
-
-        A multiple-response (MR) dimension produces an array of table-base values
-        because each element (subvariable) of the dimension represents a logically
-        distinct question which may not have been asked of all respondents. When both
-        dimensions are MR, the return value is a 2D ndarray. A CAT_X_CAT matrix produces
-        a scalar value for this property.
+        A CAT_X_CAT has a scalar for all table-weighted-bases, but arrays have more than
+        one table-weighted-base. This collapses all the values them to the range, and
+        it is "unpruned", meaning that it is calculated before any hiding or removing
+        of empty rows/columns.
         """
-        # TODO: This name is misleading. It's not only "unpruned" it's "before_hiding"
-        # (of either kind, prune or hide-transform). But the real problem is having this
-        # interface property at all. The need for this is related to expressing ranges
-        # for base and margin in cubes that have an MR dimension. The real solution is
-        # to compute ranges in `cr.cube` rather than leaking this sort of internal
-        # detail through the interface and making the client compute those for
-        # themselves. So this will require reconstructing that "show-ranges" requirement
-        # and either adding some sort of a `.range` property that returns a sequence of
-        # (min, max) tuples, or maybe just returning margin or base as tuples when
-        # appropriate and having something like a `.margin_is_ranges` predicate the
-        # client can switch on to control their rendering.
-        return self._cube_result_matrix.table_base
+        return self._measures.table_unweighted_bases_range.value
 
     @lazyproperty
     def table_margin(self):
@@ -734,18 +700,6 @@ class Assembler(object):
         return self._dimensions[1]
 
     @lazyproperty
-    def _cube_result_matrix(self):
-        """BaseCubeResultMatrix subclass object appropriate to this cube-slice.
-
-        This matrix object encapsulates cube-result array parsing and MR multi-value
-        differences and provides a foundational set of second-order analysis measure and
-        margin arrays.
-        """
-        return BaseCubeResultMatrix.factory(
-            self._cube, self._dimensions, self._slice_idx
-        )
-
-    @lazyproperty
     def _cube_has_overlaps(self):
         """True if overlaps are defined and the last dimension is MR, False otherwise"""
         return (
@@ -880,11 +834,8 @@ class _BaseOrderHelper(object):
         These columns are subject to pruning, depending on a user setting in the
         dimension.
         """
-        return tuple(
-            i
-            for i, N in enumerate(self._second_order_measures.columns_pruning_base)
-            if N == 0
-        )
+        # --- subset because numpy.where returns tuple to allow for multiple axes
+        return tuple(np.where(self._second_order_measures.columns_pruning_mask)[0])
 
     @lazyproperty
     def _empty_row_idxs(self):
@@ -892,11 +843,8 @@ class _BaseOrderHelper(object):
 
         These rows are subject to pruning, depending on a user setting in the dimension.
         """
-        return tuple(
-            i
-            for i, N in enumerate(self._second_order_measures.rows_pruning_base)
-            if N == 0
-        )
+        # --- subset because numpy.where returns tuple to allow for multiple axes
+        return tuple(np.where(self._second_order_measures.rows_pruning_mask)[0])
 
     @lazyproperty
     def _measure(self):

@@ -62,16 +62,20 @@ class DescribeAssembler(object):
 
     def it_computes_column_unweighted_bases_for_cat_hs_x_mr(self):
         slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
-        assert slice_.column_unweighted_bases.tolist() == [
-            [26, 76, 118, 369, 385],
-            [26, 76, 118, 369, 385],
-            [26, 76, 118, 369, 385],
-            [26, 76, 118, 369, 385],
-            [26, 76, 118, 369, 385],
-            [26, 76, 118, 369, 385],
-            [26, 76, 118, 369, 385],
-            [26, 76, 118, 369, 385],
-        ]
+        assert slice_.column_unweighted_bases == pytest.approx(
+            np.array(
+                [
+                    [26, 76, 118, 369, 385],
+                    [26, 76, 118, 369, 385],
+                    [26, 76, 118, 369, 385],
+                    [26, 76, 118, 369, 385],
+                    [26, 76, 118, 369, 385],
+                    [26, 76, 118, 369, 385],
+                    [26, 76, 118, 369, 385],
+                    [26, 76, 118, 369, 385],
+                ]
+            )
+        )
 
     def it_computes_column_unweighted_bases_for_mr_x_cat_hs(self):
         slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]

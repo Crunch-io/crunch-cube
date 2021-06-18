@@ -981,24 +981,25 @@ class TestMeanDifferenceSignificance(object):
         assert slice_.pairwise_significance_means_t_stats(0) == pytest.approx(
             np.array(
                 [
-                    [-0.0, -0.7482866, -4.61524529, -5.29463547],
-                    [-0.0, -4.64371041, -7.14738681, -3.67511747],
-                    [-0.0, 3.13387218, 6.35310465, 2.3932706],
+                    [0.0, -0.32190273, -1.884166, -2.16152588],
+                    [0.0, -1.91311986, -2.91790845, -1.50036042],
+                    [0.0, 1.18770459, 2.59364411, 0.97704863],
                 ]
             )
         )
         assert slice_.pairwise_significance_means_p_vals(0) == pytest.approx(
             np.array(
                 [
-                    [1.00000000e00, 4.60526868e-01, 5.38716457e-05, 7.11866628e-06],
-                    [1.00000000e00, 7.34317022e-05, 2.90876736e-08, 8.12768987e-04],
-                    [1.00000000e00, 4.02303806e-03, 3.00760739e-07, 2.23647892e-02],
+                    [1.0, 0.76970151, 0.17305508, 0.15932937],
+                    [1.0, 0.15766242, 0.07043505, 0.20868233],
+                    [1.0, 0.40057107, 0.08440979, 0.4040728],
                 ]
             )
         )
 
     def test_mean_diff_significance_for_numeric_array_grouped_by_cat_hs(self):
         transforms = {
+            "pairwise_indices": {"alpha": [0.5]},
             "columns_dimension": {
                 "insertions": [
                     {
@@ -1028,7 +1029,7 @@ class TestMeanDifferenceSignificance(object):
                         "kwargs": {"negative": [4, 5]},
                     },
                 ]
-            }
+            },
         }
         slice_ = Cube(
             NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS, transforms=transforms
@@ -1042,36 +1043,47 @@ class TestMeanDifferenceSignificance(object):
             ).tolist() == pytest.approx(
                 np.full(slice_.means.shape, np.nan), nan_ok=True
             )
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_means_t_stats(7),
-            load_python_expression("num-arr-means-grouped-by-cat-hs-t-stats-col-7"),
+        assert slice_.pairwise_significance_means_t_stats(7) == pytest.approx(
+            np.array(
+                load_python_expression("num-arr-means-grouped-by-cat-hs-t-stats-col-7")
+            ),
+            nan_ok=True,
         )
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_means_p_vals(7),
-            load_python_expression("num-arr-means-grouped-by-cat-hs-p-vals-col-7"),
+        assert slice_.pairwise_significance_means_p_vals(7) == pytest.approx(
+            np.array(
+                load_python_expression("num-arr-means-grouped-by-cat-hs-p-vals-col-7")
+            ),
+            nan_ok=True,
         )
         assert slice_.pairwise_means_indices.tolist() == [
             [(), (), (7,), (), (), (), (), (), ()],
             [(), (), (), (), (), (), (), (), ()],
-            [(), (), (1, 4, 7), (), (), (), (1, 4, 7), (), ()],
+            [(), (), (1, 7), (), (), (), (1, 7), (), ()],
             [(), (), (), (), (), (), (), (), ()],
         ]
 
         # Test no subtotals
-        slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS).partitions[0]
+        transforms = {"pairwise_indices": {"alpha": [0.5]}}
+        slice_ = Cube(
+            NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS, transforms=transforms
+        ).partitions[0]
         assert slice_.pairwise_means_indices.tolist() == [
             [(), (4,), (), (), ()],
             [(), (), (), (), ()],
-            [(), (0, 2, 4), (), (0, 2, 4), ()],
+            [(), (0, 4), (), (0, 4), ()],
             [(), (), (), (), ()],
         ]
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_means_t_stats(4),
-            load_python_expression("num-arr-means-grouped-by-cat-t-stats-col-4"),
+        assert slice_.pairwise_significance_means_t_stats(4) == pytest.approx(
+            np.array(
+                load_python_expression("num-arr-means-grouped-by-cat-t-stats-col-4")
+            ),
+            nan_ok=True,
         )
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_means_p_vals(4),
-            load_python_expression("num-arr-means-grouped-by-cat-p-vals-col-4"),
+        assert slice_.pairwise_significance_means_p_vals(4) == pytest.approx(
+            np.array(
+                load_python_expression("num-arr-means-grouped-by-cat-p-vals-col-4")
+            ),
+            nan_ok=True,
         )
 
     def test_mean_diff_significance_for_numeric_array_x_mr(self):
@@ -1080,10 +1092,10 @@ class TestMeanDifferenceSignificance(object):
         assert slice_.pairwise_significance_means_t_stats(0) == pytest.approx(
             np.array(
                 [
-                    [-0.0, 1.3056921, -1.1842639],
-                    [-0.0, 1.7117695, -1.6297401],
+                    [0, 0.461036, -0.41818914],
+                    [0, 0.64326512, -0.5674027],
                     [np.nan, np.nan, np.nan],
-                    [np.nan, -5.8872721, -4.4442801],
+                    [np.nan, -2.29161759, -1.72993372],
                 ]
             ),
             nan_ok=True,
@@ -1091,17 +1103,17 @@ class TestMeanDifferenceSignificance(object):
         assert slice_.pairwise_significance_means_p_vals(0) == pytest.approx(
             np.array(
                 [
-                    [1.00000000e00, 1.96331347e-01, 2.40688158e-01],
-                    [1.00000000e00, 9.17815019e-02, 1.08068956e-01],
+                    [1.0, 0.67005873, 0.69845513],
+                    [1.0, 0.54118287, 0.59229185],
                     [np.nan, np.nan, np.nan],
-                    [np.nan, 1.57810759e-07, 3.57756031e-05],
+                    [np.nan, 0.08370781, 0.15869486],
                 ]
             ),
             nan_ok=True,
         )
 
     def test_mean_diff_significance_indices_for_numeric_array_grouped_by_cat(self):
-        transforms = {"pairwise_indices": {"alpha": [0.05, 0.08]}}
+        transforms = {"pairwise_indices": {"alpha": [0.45, 0.40]}}
         slice_ = Cube(
             NA.NUM_ARR_MULTI_NUMERIC_MEASURES_GROUPED_BY_CAT, transforms=transforms
         ).partitions[0]
@@ -1109,11 +1121,11 @@ class TestMeanDifferenceSignificance(object):
         assert slice_.pairwise_means_indices.tolist() == [
             [(2, 3), (2, 3), (), ()],
             [(1, 2, 3), (), (), ()],
-            [(), (0,), (0, 1, 3), (0,)],
+            [(), (), (0, 3), ()],
         ]
         assert slice_.pairwise_means_indices_alt.tolist() == [
             [(2, 3), (2, 3), (), ()],
-            [(1, 2, 3), (), (), (2,)],
+            [(1, 2, 3), (), (), ()],
             [(), (0,), (0, 1, 3), (0,)],
         ]
 
@@ -1156,8 +1168,8 @@ class TestMeanDifferenceSignificance(object):
             np.array(
                 [
                     [np.nan, np.nan, np.nan, np.nan],
-                    [14.1421356, -0.0, 3.1066887, np.nan],
-                    [1.75662013, -0.0, np.nan, np.nan],
+                    [9.35414347, 0.0, 2.1529364, np.nan],
+                    [1.26202085, 0, np.nan, np.nan],
                 ]
             ),
             nan_ok=True,
@@ -1166,15 +1178,15 @@ class TestMeanDifferenceSignificance(object):
             np.array(
                 [
                     [np.nan, np.nan, np.nan, np.nan],
-                    [8.21565038e-15, 1.00000000e00, 4.80968355e-03, np.nan],
-                    [8.91869315e-02, 1.00000000e00, np.nan, np.nan],
+                    [8.46461576e-05, 1.00000000e00, 6.33217224e-02, np.nan],
+                    [2.27836998e-01, 1.00000000e00, np.nan, np.nan],
                 ]
             ),
             nan_ok=True,
         )
         assert slice_.pairwise_means_indices.tolist() == [
-            [(), (), (), (0, 2)],
-            [(1, 2), (), (1,), ()],
+            [(), (), (), ()],
+            [(1, 2), (), (), ()],
             [(), (), (), ()],
         ]
 
@@ -1182,8 +1194,9 @@ class TestMeanDifferenceSignificance(object):
         slice_ = Cube(
             CR.MEAN_CAT_X_CAT,
             transforms={
+                "pairwise_indices": {"alpha": [0.1]},
                 "rows_dimension": {
-                    "elements": {"2": {"hide": True}},
+                    "elements": {"1": {"hide": True}},
                     "prune": True,
                 },
                 "columns_dimension": {
@@ -1195,13 +1208,13 @@ class TestMeanDifferenceSignificance(object):
         ).partitions[0]
 
         assert slice_.pairwise_means_indices.tolist() == [
-            [(2,), (), ()],
+            [(), (), (1,)],
             [(), (), ()],
         ]
         assert slice_.pairwise_significance_means_t_stats(1) == pytest.approx(
             np.array(
                 [
-                    [np.nan, np.nan, np.nan],
+                    [np.nan, 0, 2.1529364],
                     [np.nan, 0, np.nan],
                 ]
             ),
@@ -1210,7 +1223,7 @@ class TestMeanDifferenceSignificance(object):
         assert slice_.pairwise_significance_means_p_vals(1) == pytest.approx(
             np.array(
                 [
-                    [np.nan, np.nan, np.nan],
+                    [np.nan, 1, 0.06332172],
                     [np.nan, 1.0, np.nan],
                 ]
             ),
@@ -1218,16 +1231,16 @@ class TestMeanDifferenceSignificance(object):
         )
 
     def test_mean_diff_significance_indices_for_cat_x_cat(self):
-        transforms = {"pairwise_indices": {"alpha": [0.05, 0.01]}}
+        transforms = {"pairwise_indices": {"alpha": [0.15, 0.05]}}
         slice_ = Cube(CR.MEAN_CAT_X_CAT, transforms=transforms).partitions[0]
 
         assert slice_.pairwise_means_indices.tolist() == [
             [(), (), (), ()],
-            [(1, 2), (), (1,), ()],
+            [(1, 2), (), (), ()],
             [(), (), (), ()],
         ]
         assert slice_.pairwise_means_indices_alt.tolist() == [
-            [(), (), (), (0, 2)],
+            [(), (), (), (0,)],
             [(1, 2), (), (1,), ()],
             [(), (), (), ()],
         ]
@@ -1262,7 +1275,7 @@ class TestMeanDifferenceSignificance(object):
             },
         ]
         transforms = {
-            "pairwise_indices": {"alpha": [0.05, 0.01]},
+            "pairwise_indices": {"alpha": [0.45, 0.333]},
             "columns_dimension": {"insertions": insertions},
         }
         slice_ = Cube(
@@ -1271,7 +1284,7 @@ class TestMeanDifferenceSignificance(object):
         assert slice_.pairwise_means_indices.tolist() == [
             [(), (), (), (), (), (), (), (), ()],
             [(), (), (), (), (), (), (), (), ()],
-            [(), (), (), (), (), (), (), (6,), ()],
+            [(), (), (), (), (), (), (), (6,), (6,)],
         ]
         assert slice_.pairwise_means_indices_alt.tolist() == [
             [(), (), (), (), (), (), (), (), ()],
@@ -1280,14 +1293,14 @@ class TestMeanDifferenceSignificance(object):
         ]
 
         # Test no subtotals
-        transforms = {"pairwise_indices": {"alpha": [0.05, 0.01]}}
+        transforms = {"pairwise_indices": {"alpha": [0.45, 0.333]}}
         slice_ = Cube(
             NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS_WEIGHTED, transforms=transforms
         ).partitions[0]
         assert slice_.pairwise_means_indices.tolist() == [
             [(), (), (), (), ()],
             [(), (), (), (), ()],
-            [(), (), (), (2,), ()],
+            [(), (), (), (2,), (2,)],
         ]
         assert slice_.pairwise_means_indices_alt.tolist() == [
             [(), (), (), (), ()],
@@ -1302,7 +1315,7 @@ class TestMeanDifferenceSignificance(object):
                 "elements": {"1": {"hide": True}},
                 "insertions": insertions,
             },
-            "pairwise_indices": {"alpha": [0.05, 0.01]},
+            "pairwise_indices": {"alpha": [0.45, 0.333]},
         }
         slice_ = Cube(
             NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS_WEIGHTED, transforms=transforms
@@ -1311,7 +1324,7 @@ class TestMeanDifferenceSignificance(object):
         assert slice_.pairwise_means_indices.tolist() == [
             [(), (), (), (), (), (), (), ()],
             [(), (), (), (), (), (), (), ()],
-            [(), (), (), (), (), (), (5,), ()],
+            [(), (), (), (), (), (), (5,), (5,)],
         ]
         assert slice_.pairwise_means_indices_alt.tolist() == [
             [(), (), (), (), (), (), (), ()],
