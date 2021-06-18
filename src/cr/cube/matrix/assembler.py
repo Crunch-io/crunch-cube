@@ -12,7 +12,6 @@ observations.
 from __future__ import division
 
 import numpy as np
-from scipy.stats import norm
 
 from cr.cube.collator import (
     ExplicitOrderCollator,
@@ -96,12 +95,22 @@ class Assembler(object):
         return self._assemble_matrix(self._measures.column_proportions.blocks)
 
     @lazyproperty
+    def column_proportion_variances(self):
+        """2D ndarray of np.float64 column-proportion variance for each matrix cell."""
+        return self._assemble_matrix(self._measures.column_proportion_variances.blocks)
+
+    @lazyproperty
     def column_share_sum(self):
         """2D optional np.float64 ndarray of column share of sum for each cell.
 
         Raises `ValueError` if the cube-result does not include a sum cube-measure.
         """
         return self._assemble_matrix(self._measures.column_share_sum.blocks)
+
+    @lazyproperty
+    def column_std_err(self):
+        """2D np.float64 ndarray of std-error of column-percent for each matrix cell."""
+        return self._assemble_matrix(self._measures.column_std_err.blocks)
 
     @lazyproperty
     def column_unweighted_bases(self):
@@ -183,6 +192,11 @@ class Assembler(object):
     def columns_scale_mean_stddev(self):
         """Optional 1D column scale mean std dev marginal for this cube-result"""
         return self._assemble_marginal(self._measures.columns_scale_mean_stddev)
+
+    @lazyproperty
+    def columns_scale_mean_stderr(self):
+        """Optional 1D column scale mean std err marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.columns_scale_mean_stderr)
 
     @lazyproperty
     def columns_scale_median(self):
@@ -351,9 +365,18 @@ class Assembler(object):
         return self._assemble_matrix(self._measures.population_proportions.blocks)
 
     @lazyproperty
+    def population_std_err(self):
+        """2D np.float64 ndarray of standard errors
+
+        The proportion used to calculate proportion counts depends on the dimension
+        types.
+        """
+        return self._assemble_matrix(self._measures.population_std_err.blocks)
+
+    @lazyproperty
     def pvalues(self):
         """2D np.float64/np.nan ndarray of p-value for each matrix cell."""
-        return 2 * (1 - norm.cdf(np.abs(self.zscores)))
+        return self._assemble_matrix(self._measures.pvalues.blocks)
 
     @lazyproperty
     def row_comparable_counts(self):
@@ -387,12 +410,22 @@ class Assembler(object):
         return self._assemble_matrix(self._measures.row_proportions.blocks)
 
     @lazyproperty
+    def row_proportion_variances(self):
+        """2D ndarray of np.float64 row-proportion variance for each matrix cell."""
+        return self._assemble_matrix(self._measures.row_proportion_variances.blocks)
+
+    @lazyproperty
     def row_share_sum(self):
         """2D optional np.float64 ndarray of row share of sum for each cell.
 
         Raises `ValueError` if the cube-result does not include a sum cube-measure.
         """
         return self._assemble_matrix(self._measures.row_share_sum.blocks)
+
+    @lazyproperty
+    def row_std_err(self):
+        """2D np.float64 ndarray of std-error of row-percent for each matrix cell."""
+        return self._assemble_matrix(self._measures.row_std_err.blocks)
 
     @lazyproperty
     def row_unweighted_bases(self):
@@ -482,6 +515,11 @@ class Assembler(object):
     def rows_scale_mean_stddev(self):
         """Optional 1D row scale mean std dev marginal for this cube-result"""
         return self._assemble_marginal(self._measures.rows_scale_mean_stddev)
+
+    @lazyproperty
+    def rows_scale_mean_stderr(self):
+        """Optional 1D row scale mean std dev marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.rows_scale_mean_stderr)
 
     @lazyproperty
     def rows_scale_median(self):
@@ -854,21 +892,43 @@ class _BaseOrderHelper(object):
 
         This property is not used by some subclasses.
         """
+        # --- Sometimes we sort by a measure that is a monotonic transformation of
+        # --- another measure that is already calculated by the assembler. Because
+        # --- monotonic transformations preserve order, the sorting is correct.
         propname_by_measure = {
             M.COLUMN_BASE_UNWEIGHTED: "column_unweighted_bases",
             M.COLUMN_BASE_WEIGHTED: "column_weighted_bases",
             M.COLUMN_INDEX: "column_index",
             M.COLUMN_PERCENT: "column_proportions",
+            M.COLUMN_PERCENT_MOE: "column_std_err",  # monotonic transform
+            M.COLUMN_SHARE_SUM: "column_share_sum",
+            M.COLUMN_STDDEV: "column_proportion_variances",  # monotonic transform
+            M.COLUMN_STDERR: "column_std_err",
             M.MEAN: "means",
-            M.POPULATION: "population_proportions",
+            M.POPULATION: "population_proportions",  # montonic transform
+            M.POPULATION_MOE: "population_std_err",  # monotonic transform
+            M.PVALUES: "pvalues",
             M.ROW_BASE_UNWEIGHTED: "row_unweighted_bases",
             M.ROW_BASE_WEIGHTED: "row_weighted_bases",
             M.ROW_PERCENT: "row_proportions",
+            M.ROW_PERCENT_MOE: "row_std_err",  # monotonic transform
+            M.ROW_SHARE_SUM: "row_share_sum",
+            M.ROW_STDDEV: "row_proportion_variances",  # montonic transform
+            M.ROW_STDERR: "row_std_err",
+            M.STDDEV: "stddev",
+            M.SUM: "sums",
             M.TABLE_PERCENT: "table_proportions",
+            M.TABLE_PERCENT: "table_proportions",
+            M.TABLE_PERCENT_MOE: "table_std_err",  # monotonic transform
+            M.TABLE_STDDEV: "table_proportion_variances",  # monotonic transform
+            M.TABLE_STDERR: "table_std_err",
             M.TABLE_BASE_UNWEIGHTED: "table_unweighted_bases",
             M.TABLE_BASE_WEIGHTED: "table_weighted_bases",
+            M.TOTAL_SHARE_SUM: "total_share_sum",
             M.UNWEIGHTED_COUNT: "unweighted_counts",
+            M.UNWEIGHTED_VALID_COUNT: "unweighted_counts",
             M.WEIGHTED_COUNT: "weighted_counts",
+            M.WEIGHTED_VALID_COUNT: "weighted_counts",
             M.Z_SCORE: "zscores",
         }
         measure = self._order_spec.measure
@@ -1128,6 +1188,7 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
             MARGINAL.MARGIN_PROPORTION: "rows_table_proportion",
             MARGINAL.SCALE_MEAN: "rows_scale_mean",
             MARGINAL.SCALE_MEAN_STDDEV: "rows_scale_mean_stddev",
+            MARGINAL.SCALE_MEAN_STDERR: "rows_scale_mean_stderr",
             MARGINAL.SCALE_MEDIAN: "rows_scale_median",
         }.get(marginal)
 

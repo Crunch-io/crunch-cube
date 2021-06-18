@@ -5,7 +5,7 @@
 from __future__ import division
 
 import numpy as np
-from scipy.stats import t
+from scipy.stats import t, norm
 
 from cr.cube.enums import DIMENSION_TYPE as DT, MARGINAL_ORIENTATION as MO
 from cr.cube.matrix.cubemeasure import CubeMeasures
@@ -47,9 +47,19 @@ class SecondOrderMeasures(object):
         return _ColumnProportions(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def column_proportion_variances(self):
+        """_ColumnProportions measure object for this cube-result."""
+        return _ColumnProportionVariances(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def column_share_sum(self):
         """_ColumnShareSum measure object for this cube-result"""
         return _ColumnShareSum(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def column_std_err(self):
+        """_ColumnStandardError measure object for this cube-result."""
+        return _ColumnStandardError(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def column_unweighted_bases(self):
@@ -94,6 +104,11 @@ class SecondOrderMeasures(object):
     def columns_scale_mean_stddev(self):
         """_ScaleMeanStddev for columns measure object for this cube-result."""
         return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, MO.COLUMNS)
+
+    @lazyproperty
+    def columns_scale_mean_stderr(self):
+        """_ScaleMeanStderr for rows measure object for this cube-result."""
+        return _ScaleMeanStderr(self._dimensions, self, self._cube_measures, MO.COLUMNS)
 
     @lazyproperty
     def columns_scale_median(self):
@@ -221,8 +236,30 @@ class SecondOrderMeasures(object):
 
     @lazyproperty
     def population_proportions(self):
-        """_PopulationProportions measure object for this cube-result."""
+        """_PopulationProportions measure object for this cube-result.
+
+        Population proportions choose between the correct proportion, to calculate the
+        population, generally the table-proportion, but when there is a categorical
+        date we want to hold the population constant for all time periods instead of
+        dividing them.
+        """
         return _PopulationProportions(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def population_std_err(self):
+        """_PopulationStandardError measure object for this cube-result.
+
+        Population standard-errors choose between the correct std-err, to calculate the
+        population, generally the table-std-err, but when there is a categorical
+        date we want to hold the population constant for all time periods instead of
+        dividing them.
+        """
+        return _PopulationStandardError(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def pvalues(self):
+        """_Pvalues measure object for this cube-result."""
+        return _Pvalues(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def row_comparable_counts(self):
@@ -235,9 +272,19 @@ class SecondOrderMeasures(object):
         return _RowProportions(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def row_proportion_variances(self):
+        """_RowProportions measure object for this cube-result."""
+        return _RowProportionVariances(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def row_share_sum(self):
         """_RowShareSum measure object for this cube-result"""
         return _RowShareSum(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def row_std_err(self):
+        """_RowStandardError measure object for this cube-result."""
+        return _RowStandardError(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def row_unweighted_bases(self):
@@ -261,8 +308,13 @@ class SecondOrderMeasures(object):
 
     @lazyproperty
     def rows_scale_mean_stddev(self):
-        """_ScaleMeanStddev for rpws measure object for this cube-result."""
+        """_ScaleMeanStddev for rows measure object for this cube-result."""
         return _ScaleMeanStddev(self._dimensions, self, self._cube_measures, MO.ROWS)
+
+    @lazyproperty
+    def rows_scale_mean_stderr(self):
+        """_ScaleMeanStderr for rows measure object for this cube-result."""
+        return _ScaleMeanStderr(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
     def rows_scale_median(self):
@@ -640,6 +692,38 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
             ]
 
 
+class _ColumnProportionVariances(_BaseSecondOrderMeasure):
+    """Provides the variance of the column-proportions measure for a matrix.
+
+    Column-proportions-variance is a 2D np.float64 ndarray of p * (1 - p) where p is the
+    column-proportions.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values.
+        """
+        p = self._second_order_measures.column_proportions.blocks
+
+        return [
+            [
+                # --- base values ---
+                p[0][0] * (1 - p[0][0]),
+                # --- inserted columns ---
+                p[0][1] * (1 - p[0][1]),
+            ],
+            [
+                # --- inserted rows ---
+                p[1][0] * (1 - p[1][0]),
+                # --- intersections ---
+                p[1][1] * (1 - p[1][1]),
+            ],
+        ]
+
+
 class _ColumnShareSum(_BaseSecondOrderMeasure):
     """Provides the column share of sum measure for a matrix.
 
@@ -673,6 +757,37 @@ class _ColumnShareSum(_BaseSecondOrderMeasure):
                     sums_blocks[1][0] / np.sum(sums_blocks[1][0], axis=0),
                     # --- intersections ---
                     sums_blocks[1][1] / np.sum(sums_blocks[1][1], axis=0),
+                ],
+            ]
+
+
+class _ColumnStandardError(_BaseSecondOrderMeasure):
+    """Provides the standard errors of the column-proportions measure for a matrix.
+
+    Column-standard-errors is a 2D np.float64 ndarray of the column proportion variance
+    divided by the column weighted bases.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """list of lists of the four 2D "blocks" making up this measure."""
+        variance_blocks = self._second_order_measures.column_proportion_variances.blocks
+        weighted_base_blocks = self._second_order_measures.column_weighted_bases.blocks
+
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return [
+                [
+                    # --- base values ---
+                    np.sqrt(variance_blocks[0][0] / weighted_base_blocks[0][0]),
+                    # --- inserted columns ---
+                    np.sqrt(variance_blocks[0][1] / weighted_base_blocks[0][1]),
+                ],
+                [
+                    # --- inserted rows ---
+                    np.sqrt(variance_blocks[1][0] / weighted_base_blocks[1][0]),
+                    # --- intersections ---
+                    np.sqrt(variance_blocks[1][1] / weighted_base_blocks[1][1]),
                 ],
             ]
 
@@ -1234,11 +1349,15 @@ class _PairwiseSigPvals(_PairwiseSigTstats):
 class _PopulationProportions(_BaseSecondOrderMeasure):
     """Provides the cell-specific fraction of population
 
-    If any of the dimensions (rows or columns) is a categorical date or array
-    subvariables, the appropriate percentages are used, to calculate the population
-    counts, so as to be the total amount among categorical dates.
+    If any of the dimensions (rows or columns) is a categorical date the appropriate
+    percentages are used, to calculate the population counts, so as to be the total
+    amount among categorical dates. Otherwise, table percents are used to calculate
+    population counts.
 
-    Otherwise, table percents are used to calculate population counts.
+    Otherwise, table percents are used to calculate population counts. We do not have
+    to special case array variables, because in this case, the table proportion is
+    equivalent to the correct proportion (eg if the rows are categorical array suvars
+    then the table_propoortion and row_proportions are equal).
     """
 
     @lazyproperty
@@ -1250,11 +1369,75 @@ class _PopulationProportions(_BaseSecondOrderMeasure):
         """
         return (
             self._second_order_measures.row_proportions.blocks
-            if self._dimensions[-2].dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
+            if self._dimensions[-2].dimension_type == DT.CAT_DATE
             else self._second_order_measures.column_proportions.blocks
-            if self._dimensions[-1].dimension_type in (DT.CAT_DATE, DT.CA_SUBVAR)
+            if self._dimensions[-1].dimension_type == DT.CAT_DATE
             else self._second_order_measures.table_proportions.blocks
         )
+
+
+class _PopulationStandardError(_BaseSecondOrderMeasure):
+    """Provides the cell-specific standard error for proportion used for population
+
+    If any of the dimensions (rows or columns) is a categorical date the appropriate
+    percentages are used, to calculate the population counts, so as to be the total
+    amount among categorical dates. Otherwise, table percents are used to calculate
+    population counts.
+
+    We do not have to special case array variables, because in this case, the table
+    proportion is equivalent to the correct proportion (eg if the rows are categorical
+    array suvars then the table_propoortion and row_proportions are equal).
+
+    This provides the standard error that corresponds to that so that it can be used
+    to calculate the MOE.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values.
+        """
+        return (
+            self._second_order_measures.row_std_err.blocks
+            if self._dimensions[-2].dimension_type == DT.CAT_DATE
+            else self._second_order_measures.column_std_err.blocks
+            if self._dimensions[-1].dimension_type == DT.CAT_DATE
+            else self._second_order_measures.table_std_err.blocks
+        )
+
+
+class _Pvalues(_BaseSecondOrderMeasure):
+    """p-value measure for the matrix
+
+    A p-value is a measure of the probability that an observed difference could have
+    occurred just by random chance. The lower the p-value, the greater the
+    statistical significance of the observed difference. It is derived from the
+    normal distribution's cdf and the zscore.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure."""
+        zscore_blocks = self._second_order_measures.zscores.blocks
+
+        return [
+            [
+                self._calculate_pval(zscore_blocks[0][0]),
+                self._calculate_pval(zscore_blocks[0][1]),
+            ],
+            [
+                self._calculate_pval(zscore_blocks[1][0]),
+                self._calculate_pval(zscore_blocks[1][1]),
+            ],
+        ]
+
+    def _calculate_pval(self, zscores):
+        """np.array of floats of the pvalues calculated form np.array of zscores"""
+        if 0 in zscores.shape:
+            return zscores
+        return 2 * (1 - norm.cdf(np.abs(zscores)))
 
 
 class _RowComparableCounts(_BaseSecondOrderMeasure):
@@ -1327,6 +1510,38 @@ class _RowProportions(_BaseSecondOrderMeasure):
             ]
 
 
+class _RowProportionVariances(_BaseSecondOrderMeasure):
+    """Provides the variance of the row-proportions measure for a matrix.
+
+    Row-proportions-variance is a 2D np.float64 ndarray of p * (1 - p) where p is the
+    row-proportions.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values.
+        """
+        p = self._second_order_measures.row_proportions.blocks
+
+        return [
+            [
+                # --- base values ---
+                p[0][0] * (1 - p[0][0]),
+                # --- inserted columns ---
+                p[0][1] * (1 - p[0][1]),
+            ],
+            [
+                # --- inserted rows ---
+                p[1][0] * (1 - p[1][0]),
+                # --- intersections ---
+                p[1][1] * (1 - p[1][1]),
+            ],
+        ]
+
+
 class _RowShareSum(_BaseSecondOrderMeasure):
     """Provides the row share of sum measure for a matrix.
 
@@ -1360,6 +1575,37 @@ class _RowShareSum(_BaseSecondOrderMeasure):
                     (sums_blocks[1][0].T / np.sum(sums_blocks[1][0], axis=1)).T,
                     # --- intersections ---
                     (sums_blocks[1][1].T / np.sum(sums_blocks[1][1], axis=1)).T,
+                ],
+            ]
+
+
+class _RowStandardError(_BaseSecondOrderMeasure):
+    """Provides the standard errors of the row-proportions measure for a matrix.
+
+    Row-standard-errors is a 2D np.float64 ndarray of the row proportion variance
+    divided by the row weighted bases.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """list of lists of the four 2D "blocks" making up this measure."""
+        variance_blocks = self._second_order_measures.row_proportion_variances.blocks
+        weighted_base_blocks = self._second_order_measures.row_weighted_bases.blocks
+
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return [
+                [
+                    # --- base values ---
+                    np.sqrt(variance_blocks[0][0] / weighted_base_blocks[0][0]),
+                    # --- inserted columns ---
+                    np.sqrt(variance_blocks[0][1] / weighted_base_blocks[0][1]),
+                ],
+                [
+                    # --- inserted rows ---
+                    np.sqrt(variance_blocks[1][0] / weighted_base_blocks[1][0]),
+                    # --- intersections ---
+                    np.sqrt(variance_blocks[1][1] / weighted_base_blocks[1][1]),
                 ],
             ]
 
@@ -2505,6 +2751,51 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
             self._rows_weighted_mean_stddev
             if self.orientation == MO.ROWS
             else self._columns_weighted_mean_stddev
+        )
+
+
+class _ScaleMeanStderr(_BaseScaledCountMarginal):
+    """Provides the std. error of the marginal scale means."""
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the scale mean standard deviation.
+
+        These are the base-values and the subtotals.
+        """
+        if not self.is_defined:
+            raise ValueError(
+                "%s-scale-mean-standard-error is undefined if no numeric values "
+                "are defined on opposing dimension or if the corresponding dimension "
+                "has no margin." % self.orientation.value
+            )
+
+        return [
+            self._scale_mean_stddev.blocks[0] / np.sqrt(self._margin.blocks[0]),
+            self._scale_mean_stddev.blocks[1] / np.sqrt(self._margin.blocks[1]),
+        ]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if both the scale mean is defined and the margin is defined."""
+        return self._scale_mean_stddev.is_defined and self._margin.is_defined
+
+    @lazyproperty
+    def _margin(self):
+        """The margin for the opposing dimension, used in the denominator."""
+        return (
+            self._second_order_measures.rows_weighted_base
+            if self.orientation == MO.ROWS
+            else self._second_order_measures.columns_weighted_base
+        )
+
+    @lazyproperty
+    def _scale_mean_stddev(self):
+        """The scale mean std-dev for the opposing dimension, used in the nunmerator."""
+        return (
+            self._second_order_measures.rows_scale_mean_stddev
+            if self.orientation == MO.ROWS
+            else self._second_order_measures.columns_scale_mean_stddev
         )
 
 

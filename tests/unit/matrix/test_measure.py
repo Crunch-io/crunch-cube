@@ -19,8 +19,10 @@ from cr.cube.matrix.measure import (
     _BaseSecondOrderMeasure,
     _BaseScaledCountMarginal,
     _ColumnComparableCounts,
+    _ColumnProportionVariances,
     _ColumnProportions,
     _ColumnShareSum,
+    _ColumnStandardError,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
     _PairwiseSigPvals,
@@ -28,15 +30,20 @@ from cr.cube.matrix.measure import (
     _PairwiseMeansSigPVals,
     _PairwiseMeansSigTStats,
     _PopulationProportions,
+    _PopulationStandardError,
     _MarginTableProportion,
     _MarginTableBase,
+    _Pvalues,
     _RowComparableCounts,
     _RowProportions,
+    _RowProportionVariances,
     _RowShareSum,
+    _RowStandardError,
     _RowUnweightedBases,
     _RowWeightedBases,
     _ScaleMean,
     _ScaleMeanStddev,
+    _ScaleMeanStderr,
     _ScaleMedian,
     SecondOrderMeasures,
     _MarginWeightedBase,
@@ -65,9 +72,15 @@ class DescribeSecondOrderMeasures(object):
         "measure_prop_name, MeasureCls",
         (
             ("column_proportions", _ColumnProportions),
+            ("column_proportion_variances", _ColumnProportionVariances),
+            ("column_std_err", _ColumnStandardError),
             ("column_unweighted_bases", _ColumnUnweightedBases),
             ("column_weighted_bases", _ColumnWeightedBases),
             ("population_proportions", _PopulationProportions),
+            ("population_std_err", _PopulationStandardError),
+            ("pvalues", _Pvalues),
+            ("row_proportion_variances", _RowProportionVariances),
+            ("row_std_err", _RowStandardError),
             ("row_proportions", _RowProportions),
             ("row_unweighted_bases", _RowUnweightedBases),
             ("row_weighted_bases", _RowWeightedBases),
@@ -152,6 +165,8 @@ class DescribeSecondOrderMeasures(object):
             ("columns", "columns_scale_mean", _ScaleMean),
             ("rows", "rows_scale_mean_stddev", _ScaleMeanStddev),
             ("columns", "columns_scale_mean_stddev", _ScaleMeanStddev),
+            ("rows", "rows_scale_mean_stderr", _ScaleMeanStderr),
+            ("columns", "columns_scale_mean_stderr", _ScaleMeanStderr),
         ),
     )
     def it_provides_access_to_the_marginals(
@@ -370,6 +385,27 @@ class Describe_ColumnProportions(object):
         assert column_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
 
 
+class Describe_ColumnProportionVariances(object):
+    """Unit test suite for `cr.cube.matrix.measure._ColumnProportionVariances` object."""
+
+    def it_computes_its_blocks(self, request):
+        column_proportions_ = instance_mock(
+            request, _ColumnProportions, blocks=[[0.1, 0.3], [0.25, 0.35]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            column_proportions=column_proportions_,
+        )
+
+        variances = _ColumnProportionVariances(None, second_order_measures_, None)
+
+        assert variances.blocks == [
+            pytest.approx([0.09, 0.21]),
+            pytest.approx([0.1875, 0.2275]),
+        ]
+
+
 class Describe_ColumnShareSum(object):
     """Unit test suite for `cr.cube.matrix.measure._ColumnShareSum` object."""
 
@@ -394,6 +430,28 @@ class Describe_ColumnShareSum(object):
         assert col_share_sum.blocks[0][0] == pytest.approx([0.2941176, 0.7058823])
         assert col_share_sum.blocks[0][1] == pytest.approx([0.3962264, 0.6037735])
         SumSubtotals_.blocks.assert_called_once_with(ANY, None, True, True)
+
+
+class Describe_ColumnStandardError(object):
+    """Unit test suite for `cr.cube.matrix.measure._ColumnStandardError` object."""
+
+    def it_computes_its_blocks(self, request):
+        column_proportion_variances_ = instance_mock(
+            request, _ColumnProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
+        )
+        column_weighted_bases_ = instance_mock(
+            request, _ColumnWeightedBases, blocks=[[1.0, 2.0], [3.0, 4.0]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            column_proportion_variances=column_proportion_variances_,
+            column_weighted_bases=column_weighted_bases_,
+        )
+
+        stderrs = _ColumnStandardError(None, second_order_measures_, None)
+
+        assert stderrs.blocks == [[2.0, 3.0], [4.0, 5.0]]
 
 
 class Describe_ColumnUnweightedBases(object):
@@ -854,10 +912,8 @@ class Describe_PopulationProportions(object):
             ((DT.CAT, DT.CAT), "table"),
             ((DT.CAT_DATE, DT.CAT), "row"),
             ((DT.CAT, DT.CAT_DATE), "column"),
-            ((DT.CA_SUBVAR, DT.CA_CAT), "row"),
-            ((DT.CA_CAT, DT.CA_SUBVAR), "column"),
             ((DT.CAT, DT.CAT_DATE, DT.CAT), "row"),
-            ((DT.CAT, DT.CA_SUBVAR, DT.CA_CAT), "row"),
+            ((DT.CAT, DT.TEXT, DT.CA_CAT), "table"),
         ),
     )
     def it_computes_its_blocks(object, request, dimension_types, expected):
@@ -868,8 +924,10 @@ class Describe_PopulationProportions(object):
         second_order_measures_ = instance_mock(
             request,
             SecondOrderMeasures,
-            row_proportions=instance_mock(request, _RowProportions, blocks="row"),
-            column_proportions=instance_mock(request, _RowProportions, blocks="column"),
+            row_proportions=instance_mock(request, _TableProportions, blocks="row"),
+            column_proportions=instance_mock(
+                request, _ColumnProportions, blocks="column"
+            ),
             table_proportions=instance_mock(request, _RowProportions, blocks="table"),
         )
 
@@ -877,6 +935,78 @@ class Describe_PopulationProportions(object):
             _PopulationProportions(dimensions_, second_order_measures_, None).blocks
             == expected
         )
+
+
+class Describe_PopulationStandardError(object):
+    """Unit test suite for `cr.cube.matrix.measure._PopulationStandardError` object."""
+
+    @pytest.mark.parametrize(
+        "dimension_types, expected",
+        (
+            ((DT.CAT, DT.CAT), "table"),
+            ((DT.CAT_DATE, DT.CAT), "row"),
+            ((DT.CAT, DT.CAT_DATE), "column"),
+            ((DT.CAT, DT.CAT_DATE, DT.CAT), "row"),
+            ((DT.CAT, DT.TEXT, DT.CAT_DATE), "column"),
+        ),
+    )
+    def it_computes_its_blocks(object, request, dimension_types, expected):
+        dimensions_ = [
+            instance_mock(request, Dimension, dimension_type=dt)
+            for dt in dimension_types
+        ]
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            row_std_err=instance_mock(request, _RowStandardError, blocks="row"),
+            column_std_err=instance_mock(
+                request, _ColumnStandardError, blocks="column"
+            ),
+            table_std_err=instance_mock(request, _TableStandardError, blocks="table"),
+        )
+
+        assert (
+            _PopulationStandardError(dimensions_, second_order_measures_, None).blocks
+            == expected
+        )
+
+
+class Describe_Pvalues(object):
+    """Unit test suite for `cr.cube.matrix.measure._Pvalues` object."""
+
+    def it_provides_its_blocks(self, request):
+        _calculate_pval_ = method_mock(
+            request, _Pvalues, "_calculate_pval", side_effect=(0, 1, 2, 3)
+        )
+        zscores_ = instance_mock(request, _Zscores, blocks=[["a", "b"], ["c", "d"]])
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            zscores=zscores_,
+        )
+
+        pvalues = _Pvalues(None, second_order_measures_, None).blocks
+
+        assert pvalues == [[0, 1], [2, 3]]
+        assert _calculate_pval_.call_args_list == [
+            call(ANY, "a"),
+            call(ANY, "b"),
+            call(ANY, "c"),
+            call(ANY, "d"),
+        ]
+
+    @pytest.mark.parametrize(
+        "zscores, expected",
+        (
+            ([[0, 1], [2, 3]], [[1.0, 0.317310508], [0.045500264, 0.002699796]]),
+            ([-1], [0.317310508]),
+            ([], []),
+        ),
+    )
+    def it_can_calculate_pval_to_help(self, zscores, expected):
+        actual = _Pvalues(None, None, None)._calculate_pval(np.array(zscores))
+
+        assert actual == pytest.approx(np.array(expected))
 
 
 class Describe_RowComparableCounts(object):
@@ -959,6 +1089,49 @@ class Describe_RowProportions(object):
         row_proportions = _RowProportions(None, second_order_measures_, cube_measures_)
 
         assert row_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
+
+
+class Describe_RowProportionVariances(object):
+    """Unit test suite for `cr.cube.matrix.measure._RowProportionVariances` object."""
+
+    def it_computes_its_blocks(self, request):
+        row_proportions_ = instance_mock(
+            request, _RowProportions, blocks=[[0.1, 0.3], [0.25, 0.35]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            row_proportions=row_proportions_,
+        )
+
+        variances = _RowProportionVariances(None, second_order_measures_, None)
+
+        assert variances.blocks == [
+            pytest.approx([0.09, 0.21]),
+            pytest.approx([0.1875, 0.2275]),
+        ]
+
+
+class Describe_RowStandardError(object):
+    """Unit test suite for `cr.cube.matrix.measure._RowStandardError` object."""
+
+    def it_computes_its_blocks(self, request):
+        row_proportion_variances_ = instance_mock(
+            request, _RowProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
+        )
+        row_weighted_bases_ = instance_mock(
+            request, _RowWeightedBases, blocks=[[1.0, 2.0], [3.0, 4.0]]
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            row_proportion_variances=row_proportion_variances_,
+            row_weighted_bases=row_weighted_bases_,
+        )
+
+        stderrs = _RowStandardError(None, second_order_measures_, None)
+
+        assert stderrs.blocks == [[2.0, 3.0], [4.0, 5.0]]
 
 
 class Describe_RowUnweightedBases(object):
@@ -2527,7 +2700,7 @@ class Describe_ScaleMeanStddev(object):
             request, _ScaleMeanStddev, "_scale_means", return_value=["c", "d"]
         )
 
-        marginal = _ScaleMeanStddev(None, None, None, None).blocks
+        _ScaleMeanStddev(None, None, None, None).blocks
 
         assert _rows_weighted_mean_stddev_.call_args_list == [
             call("a", [1, 2], "c"),
@@ -2629,6 +2802,123 @@ class Describe_ScaleMeanStddev(object):
     @pytest.fixture
     def is_defined_prop_(self, request):
         return property_mock(request, _ScaleMeanStddev, "is_defined")
+
+
+class Describe_ScaleMeanStderr(object):
+    """Unit test suite for `cr.cube.matrix.measure._ScaleMeanStderr` object."""
+
+    def it_provides_blocks(
+        self,
+        is_defined_prop_,
+        _margin_prop_,
+        margin_,
+        _scale_mean_stddev_prop_,
+        scale_mean_stddev_,
+    ):
+        is_defined_prop_.return_value = True
+        _margin_prop_.return_value = margin_
+        margin_.blocks = [np.array([4.0, 16.0]), np.array([25.0])]
+        _scale_mean_stddev_prop_.return_value = scale_mean_stddev_
+        scale_mean_stddev_.blocks = [np.array([2.0, 3.0]), np.array([4.0])]
+
+        stderr = _ScaleMeanStderr(None, None, None, None).blocks
+
+        assert len(stderr) == 2
+        assert stderr[0].tolist() == [1.0, 0.75]
+        assert stderr[1].tolist() == [0.8]
+
+    def but_it_raises_it_if_blocks_are_not_defined(self, is_defined_prop_):
+        is_defined_prop_.return_value = False
+
+        with pytest.raises(ValueError) as e:
+            _ScaleMeanStderr(None, None, None, MO.ROWS).blocks
+
+        assert str(e.value) == (
+            "rows-scale-mean-standard-error is undefined if no numeric values "
+            "are defined on opposing dimension or if the corresponding dimension "
+            "has no margin."
+        )
+
+    @pytest.mark.parametrize(
+        "margin_defined, stddev_defined, expected",
+        (
+            (True, True, True),
+            (True, False, False),
+            (False, True, False),
+            (False, False, False),
+        ),
+    )
+    def it_can_tell_if_it_is_defined(
+        self,
+        _margin_prop_,
+        margin_,
+        _scale_mean_stddev_prop_,
+        scale_mean_stddev_,
+        margin_defined,
+        stddev_defined,
+        expected,
+    ):
+        _margin_prop_.return_value = margin_
+        margin_.is_defined = margin_defined
+        _scale_mean_stddev_prop_.return_value = scale_mean_stddev_
+        scale_mean_stddev_.is_defined = stddev_defined
+        stderr = _ScaleMeanStderr(None, None, None, None)
+
+        assert stderr.is_defined == expected
+
+    def it_provides_the_margin_for_rows_to_help(self, second_order_measures_):
+        second_order_measures_.rows_weighted_base = "a"
+        stderr = _ScaleMeanStderr(None, second_order_measures_, None, MO.ROWS)
+
+        assert stderr._margin == "a"
+
+    def it_provides_the_margin_for_columns_to_help(self, second_order_measures_):
+        second_order_measures_.columns_weighted_base = "b"
+        stderr = _ScaleMeanStderr(None, second_order_measures_, None, MO.COLUMNS)
+
+        assert stderr._margin == "b"
+
+    def it_provides_the_scale_mean_stddev_for_rows_to_help(
+        self, second_order_measures_
+    ):
+        second_order_measures_.rows_scale_mean_stddev = "a"
+        stderr = _ScaleMeanStderr(None, second_order_measures_, None, MO.ROWS)
+
+        assert stderr._scale_mean_stddev == "a"
+
+    def it_provides_the_scale_mean_stddev_for_columns_to_help(
+        self, second_order_measures_
+    ):
+        second_order_measures_.columns_scale_mean_stddev = "b"
+        stderr = _ScaleMeanStderr(None, second_order_measures_, None, MO.COLUMNS)
+
+        assert stderr._scale_mean_stddev == "b"
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def is_defined_prop_(self, request):
+        return property_mock(request, _ScaleMeanStderr, "is_defined")
+
+    @pytest.fixture
+    def margin_(self, request):
+        return instance_mock(request, _MarginWeightedBase)
+
+    @pytest.fixture
+    def _margin_prop_(self, request):
+        return property_mock(request, _ScaleMeanStderr, "_margin")
+
+    @pytest.fixture
+    def _scale_mean_stddev_prop_(self, request):
+        return property_mock(request, _ScaleMeanStderr, "_scale_mean_stddev")
+
+    @pytest.fixture
+    def scale_mean_stddev_(self, request):
+        return instance_mock(request, _ScaleMeanStddev)
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
 
 
 class Describe_ScaleMedian(object):
