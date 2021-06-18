@@ -857,6 +857,11 @@ class _BaseMeasure(object):
         """
         if self._flat_values is None:
             return None
+
+        # ---in case it's impossible to reshape, return None---
+        if len(self._flat_values) != np.prod(self._shape):
+            return None
+
         raw_cube_array = self._flat_values.reshape(self._shape)
         # ---must be read-only to avoid hard-to-find bugs---
         raw_cube_array.flags.writeable = False
