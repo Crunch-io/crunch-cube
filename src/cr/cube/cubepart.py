@@ -355,7 +355,7 @@ class _Slice(CubePartition):
 
         `std_deviation = sqrt(variance)`
         """
-        return np.sqrt(self._column_variances)
+        return np.sqrt(self._assembler.column_proportion_variances)
 
     @lazyproperty
     def column_std_err(self):
@@ -363,7 +363,7 @@ class _Slice(CubePartition):
 
         `std_error = sqrt(variance/N)`
         """
-        return np.sqrt(self._column_variances / self.column_weighted_bases)
+        return self._assembler.column_std_err
 
     @lazyproperty
     def column_unweighted_bases(self):
@@ -516,13 +516,10 @@ class _Slice(CubePartition):
         underlying scale values are based on the numeric values of the opposing
         *rows-dimension* elements.
 
-        This value is `None` if no row element has been assigned a numeric value.
+        This value is `None` if no row element has a numeric value assigned or if
+        the columns-weighted-base is `None` (eg an array variable in the row dim).
         """
-        return (
-            self.columns_scale_mean_stddev / np.sqrt(self.columns_margin)
-            if self._rows_have_numeric_value
-            else None
-        )
+        return self._assembler.columns_scale_mean_stderr
 
     @lazyproperty
     def columns_scale_median(self):
@@ -789,13 +786,7 @@ class _Slice(CubePartition):
         applied in these specific cases (like the `row_std_err` or `column_std_err`).
         If categorical dates are not involved, the standard `table_std_err` is used.
         """
-        std_err = (
-            self.row_std_err
-            if self.rows_dimension_type == DT.CAT_DATE
-            else self.column_std_err
-            if self.columns_dimension_type == DT.CAT_DATE
-            else self.table_std_err
-        )
+        std_err = self._assembler.population_std_err
         total_filtered_population = self._population * self._cube.population_fraction
         return Z_975 * total_filtered_population * std_err
 
@@ -870,12 +861,12 @@ class _Slice(CubePartition):
     @lazyproperty
     def row_std_dev(self):
         """2D np.float64 ndarray of standard deviation for row percentages."""
-        return np.sqrt(self._row_variance)
+        return np.sqrt(self._assembler.row_proportion_variances)
 
     @lazyproperty
     def row_std_err(self):
         """2D np.float64 ndarray of standard errors for row percentages."""
-        return np.sqrt(self._row_variance / self.row_weighted_bases)
+        return self._assembler.row_std_err
 
     @lazyproperty
     def row_unweighted_bases(self):
@@ -1016,13 +1007,10 @@ class _Slice(CubePartition):
         the underlying scale values are based on the numeric values of the opposing
         *columns-dimension* elements.
 
-        This value is `None` if no column element has an assigned numeric value.
+        This value is `None` if no column element has a numeric value assigned or if
+        the rows-weighted-base is `None` (eg an array variable in the column dim).
         """
-        return (
-            self.rows_scale_mean_stddev / np.sqrt(self.rows_margin)
-            if self._columns_have_numeric_value
-            else None
-        )
+        return self._assembler.rows_scale_mean_stderr
 
     @lazyproperty
     def rows_scale_median(self):
@@ -1254,12 +1242,6 @@ class _Slice(CubePartition):
         return Assembler(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
-    def _column_variances(self):
-        """Variance for column percentages."""
-        p = self.column_proportions
-        return p * (1 - p)
-
-    @lazyproperty
     def _columns_dimension(self):
         return self._dimensions[1]
 
@@ -1309,12 +1291,6 @@ class _Slice(CubePartition):
                 self._cube.dimensions[-2:], self._transform_dicts
             )
         )
-
-    @lazyproperty
-    def _row_variance(self):
-        """2D np.float64 ndarray of row-percentage variance for each cell."""
-        p = self.row_proportions
-        return p * (1 - p)
 
     @lazyproperty
     def _rows_dimension(self):

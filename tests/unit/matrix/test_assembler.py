@@ -28,20 +28,27 @@ from cr.cube.matrix.measure import (
     _ColumnComparableCounts,
     _ColumnIndex,
     _ColumnProportions,
+    _ColumnProportionVariances,
     _ColumnShareSum,
+    _ColumnStandardError,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
     _Means,
     _PopulationProportions,
+    _PopulationStandardError,
     _MarginTableProportion,
     _MarginTableBase,
+    _Pvalues,
     _RowComparableCounts,
+    _RowProportionVariances,
     _RowProportions,
+    _RowStandardError,
     _RowShareSum,
     _RowUnweightedBases,
     _RowWeightedBases,
     _ScaleMean,
     _ScaleMeanStddev,
+    _ScaleMeanStderr,
     _ScaleMedian,
     SecondOrderMeasures,
     _StdDev,
@@ -79,14 +86,20 @@ class DescribeAssembler(object):
             ("column_comparable_counts", _ColumnComparableCounts),
             ("column_index", _ColumnIndex),
             ("column_proportions", _ColumnProportions),
+            ("column_proportion_variances", _ColumnProportionVariances),
             ("column_share_sum", _ColumnShareSum),
+            ("column_std_err", _ColumnStandardError),
             ("column_unweighted_bases", _ColumnUnweightedBases),
             ("column_weighted_bases", _ColumnWeightedBases),
             ("means", _Means),
             ("population_proportions", _PopulationProportions),
+            ("population_std_err", _PopulationStandardError),
+            ("pvalues", _Pvalues),
             ("row_comparable_counts", _RowComparableCounts),
             ("row_proportions", _RowProportions),
+            ("row_proportion_variances", _RowProportionVariances),
             ("row_share_sum", _RowShareSum),
+            ("row_std_err", _RowStandardError),
             ("row_unweighted_bases", _RowUnweightedBases),
             ("row_weighted_bases", _RowWeightedBases),
             ("stddev", _StdDev),
@@ -132,6 +145,8 @@ class DescribeAssembler(object):
             ("columns_scale_mean", _ScaleMean),
             ("rows_scale_mean_stddev", _ScaleMeanStddev),
             ("columns_scale_mean_stddev", _ScaleMeanStddev),
+            ("rows_scale_mean_stderr", _ScaleMeanStderr),
+            ("columns_scale_mean_stderr", _ScaleMeanStderr),
             ("rows_scale_median", _ScaleMedian),
             ("columns_scale_median", _ScaleMedian),
         ),
@@ -351,16 +366,6 @@ class DescribeAssembler(object):
         assembler = Assembler(None, dimensions_, None)
 
         assert assembler.sums == pytest.approx([4, 5, 6])
-
-    def it_knows_the_pvalues(self, request):
-        property_mock(
-            request, Assembler, "zscores", return_value=np.array([0.7, 0.8, 0.9])
-        )
-        assembler = Assembler(None, None, None)
-
-        np.testing.assert_almost_equal(
-            assembler.pvalues, np.array([0.4839273, 0.4237108, 0.3681203])
-        )
 
     def it_knows_the_row_labels(
         self,
@@ -1117,20 +1122,58 @@ class Describe_BaseOrderHelper(object):
 
         assert order_helper._empty_row_idxs == expected_value
 
-    def it_retrieves_the_measure_object_to_help(self, request):
+    @pytest.mark.parametrize(
+        "json_name, internal_name",
+        (
+            ("col_base_unweighted", "column_unweighted_bases"),
+            ("col_base_weighted", "column_weighted_bases"),
+            ("col_index", "column_index"),
+            ("col_percent", "column_proportions"),
+            ("col_percent_moe", "column_std_err"),
+            ("col_share_sum", "column_share_sum"),
+            ("col_std_dev", "column_proportion_variances"),
+            ("col_std_err", "column_std_err"),
+            ("count_unweighted", "unweighted_counts"),
+            ("count_weighted", "weighted_counts"),
+            ("mean", "means"),
+            ("population", "population_proportions"),
+            ("population_moe", "population_std_err"),
+            ("p_value", "pvalues"),
+            ("row_base_unweighted", "row_unweighted_bases"),
+            ("row_base_weighted", "row_weighted_bases"),
+            ("row_percent", "row_proportions"),
+            ("row_percent_moe", "row_std_err"),
+            ("row_share_sum", "row_share_sum"),
+            ("row_std_dev", "row_proportion_variances"),
+            ("row_std_err", "row_std_err"),
+            ("stddev", "stddev"),
+            ("sum", "sums"),
+            ("table_base_unweighted", "table_unweighted_bases"),
+            ("table_base_weighted", "table_weighted_bases"),
+            ("table_percent", "table_proportions"),
+            ("table_percent_moe", "table_std_err"),
+            ("table_std_dev", "table_proportion_variances"),
+            ("table_std_err", "table_std_err"),
+            ("total_share_sum", "total_share_sum"),
+            ("unweighted_valid_count", "unweighted_counts"),
+            ("weighted_valid_count", "weighted_counts"),
+            ("z_score", "zscores"),
+        ),
+    )
+    def it_retrieves_the_measure_object_to_help(
+        self, request, second_order_measures_, json_name, internal_name
+    ):
         property_mock(
             request,
             _BaseOrderHelper,
             "_order_spec",
-            return_value=instance_mock(request, _OrderSpec, measure=M.COLUMN_PERCENT),
+            return_value=instance_mock(request, _OrderSpec, measure=M(json_name)),
         )
-        column_proportions_ = instance_mock(request, _ColumnProportions)
-        second_order_measures_ = instance_mock(
-            request, SecondOrderMeasures, column_proportions=column_proportions_
-        )
+        measure_ = instance_mock(request, _BaseSecondOrderMeasure)
+        setattr(second_order_measures_, internal_name, measure_)
         order_helper = _BaseOrderHelper(None, second_order_measures_)
 
-        assert order_helper._measure is column_proportions_
+        assert order_helper._measure is measure_
 
     def it_provides_access_to_the_rows_dimension_to_help(self, dimension_):
         order_helper = _BaseOrderHelper((dimension_, None), None)
@@ -1321,15 +1364,13 @@ class Describe_SortRowsByBaseColumnHelper(object):
         self, _order_spec_prop_, order_spec_
     ):
         _order_spec_prop_.return_value = order_spec_
-        order_spec_.measure = M.TOTAL_SHARE_SUM
+        order_spec_.measure = "foo"
         order_helper = _SortRowsByBaseColumnHelper(None, None)
 
         with pytest.raises(NotImplementedError) as e:
             order_helper._measure
 
-        assert str(e.value) == (
-            "sort-by-value for measure 'MEASURE.TOTAL_SHARE_SUM' is not yet supported"
-        )
+        assert str(e.value) == ("sort-by-value for measure 'foo' is not yet supported")
 
     def it_computes_the_sorted_element_order_to_help(self, request, dimension_):
         property_mock(
@@ -1551,9 +1592,12 @@ class Describe_SortRowsByMarginalHelper(object):
     @pytest.mark.parametrize(
         "marginal, marginal_prop_name",
         (
+            (MARGINAL.BASE, "rows_unweighted_base"),
             (MARGINAL.MARGIN, "rows_weighted_base"),
+            (MARGINAL.MARGIN_PROPORTION, "rows_table_proportion"),
             (MARGINAL.SCALE_MEAN, "rows_scale_mean"),
             (MARGINAL.SCALE_MEAN_STDDEV, "rows_scale_mean_stddev"),
+            (MARGINAL.SCALE_MEAN_STDERR, "rows_scale_mean_stderr"),
             (MARGINAL.SCALE_MEDIAN, "rows_scale_median"),
         ),
     )

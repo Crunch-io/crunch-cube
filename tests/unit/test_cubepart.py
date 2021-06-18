@@ -237,7 +237,7 @@ class Describe_Slice(object):
         (
             "column_unweighted_bases",
             "column_weighted_bases",
-            "columns_scale_mean_stddev",
+            "columns_scale_mean_stderr",
             "columns_scale_mean",
             "columns_scale_median",
             "row_proportions",
@@ -246,6 +246,7 @@ class Describe_Slice(object):
             "rows_margin",
             "rows_scale_mean",
             "rows_scale_mean_stddev",
+            "rows_scale_mean_stderr",
             "rows_scale_median",
             "table_proportions",
             "table_std_err",
@@ -301,6 +302,21 @@ class Describe_Slice(object):
         slice_ = _Slice(cube_, None, None, population, None)
 
         assert slice_.population_counts == pytest.approx(0.6)
+
+    def it_provides_the_population_counts_moe(
+        self,
+        cube_,
+        _assembler_prop_,
+        assembler_,
+    ):
+        assembler_.population_std_err = 0.3
+        _assembler_prop_.return_value = assembler_
+        cube_.population_fraction = 0.1
+        population = 20
+
+        slice_ = _Slice(cube_, None, None, population, None)
+
+        assert slice_.population_counts_moe == pytest.approx(0.6 * 1.959964)
 
     def it_provides_the_secondary_scale_mean_pairwise_indices(
         self, _alpha_alt_prop_, _only_larger_prop_, PairwiseSignificance_
