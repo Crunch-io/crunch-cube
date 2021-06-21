@@ -5,6 +5,7 @@
 import numpy as np
 import pytest
 
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
 from cr.cube.stripe.cubemeasure import (
@@ -18,6 +19,8 @@ from cr.cube.stripe.cubemeasure import (
 from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
     _Means,
+    _PopulationProportions,
+    _PopulationProportionStderrs,
     _ScaledCounts,
     StripeMeasures,
     _TableProportionStddevs,
@@ -40,6 +43,8 @@ class DescribeStripeMeasures(object):
         "measure_prop_name, MeasureCls",
         (
             ("means", _Means),
+            ("population_proportions", _PopulationProportions),
+            ("population_proportion_stderrs", _PopulationProportionStderrs),
             ("scaled_counts", _ScaledCounts),
             ("table_proportion_stddevs", _TableProportionStddevs),
             ("table_proportion_stderrs", _TableProportionStderrs),
@@ -182,6 +187,152 @@ class Describe_Means(object):
             [1.1, 2.2, 3.3], rows_dimension_
         )
         assert subtotal_values == pytest.approx([np.nan, np.nan], nan_ok=True)
+
+
+class Describe_PopulationProportions(object):
+    """Unit test suite for `cr.cube.stripe.measure._PopulationProportions` object."""
+
+    def it_computes_its_base_values_to_help(
+        self, table_proportions_, measures_, rows_dimension_
+    ):
+        rows_dimension_.dimension_type = DT.CAT
+        table_proportions_.base_values = np.array([0, 1])
+        measures_.table_proportions = table_proportions_
+        population_props = _PopulationProportions(rows_dimension_, measures_, None)
+
+        assert population_props.base_values.tolist() == [0, 1]
+
+    def but_it_has_all_1_basevalues_if_dimension_is_cat_date(
+        self, table_proportions_, measures_, rows_dimension_
+    ):
+        rows_dimension_.dimension_type = DT.CAT_DATE
+        table_proportions_.base_values = np.array([0, 1])
+        measures_.table_proportions = table_proportions_
+        population_props = _PopulationProportions(rows_dimension_, measures_, None)
+
+        assert population_props.base_values.tolist() == [1, 1]
+
+    def it_computes_its_subtotal_values_to_help(
+        self, table_proportions_, measures_, rows_dimension_
+    ):
+        rows_dimension_.dimension_type = DT.CAT
+        table_proportions_.subtotal_values = np.array([0, 1])
+        measures_.table_proportions = table_proportions_
+        population_props = _PopulationProportions(rows_dimension_, measures_, None)
+
+        assert population_props.subtotal_values.tolist() == [0, 1]
+
+    def but_it_has_all_1_subtotals_if_dimension_is_cat_date(
+        self, table_proportions_, measures_, rows_dimension_
+    ):
+        rows_dimension_.dimension_type = DT.CAT_DATE
+        table_proportions_.subtotal_values = np.array([0, 1])
+        measures_.table_proportions = table_proportions_
+        population_props = _PopulationProportions(rows_dimension_, measures_, None)
+
+        assert population_props.subtotal_values.tolist() == [1, 1]
+
+    def and_it_is_ok_with_empty_subtotals_for_cat_date(
+        self, table_proportions_, measures_, rows_dimension_
+    ):
+        rows_dimension_.dimension_type = DT.CAT_DATE
+        table_proportions_.subtotal_values = np.array([])
+        measures_.table_proportions = table_proportions_
+        population_props = _PopulationProportions(rows_dimension_, measures_, None)
+
+        assert population_props.subtotal_values.tolist() == []
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def rows_dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def measures_(self, request):
+        return instance_mock(request, StripeMeasures)
+
+    @pytest.fixture
+    def table_proportions_(self, request):
+        return instance_mock(request, _TableProportions)
+
+
+class Describe_PopulationProportionStderrs(object):
+    """Unit test suite for `cr.cube.stripe.measure._PopulationProportionStderrs` object."""
+
+    def it_computes_its_base_values_to_help(
+        self, table_proportion_stderrs_, measures_, rows_dimension_
+    ):
+        rows_dimension_.dimension_type = DT.CAT
+        table_proportion_stderrs_.base_values = np.array([0, 1])
+        measures_.table_proportion_stderrs = table_proportion_stderrs_
+        population_stderrs = _PopulationProportionStderrs(
+            rows_dimension_, measures_, None
+        )
+
+        assert population_stderrs.base_values.tolist() == [0, 1]
+
+    def but_it_has_all_1_basevalues_if_dimension_is_cat_date(
+        self, table_proportion_stderrs_, measures_, rows_dimension_
+    ):
+        rows_dimension_.dimension_type = DT.CAT_DATE
+        table_proportion_stderrs_.base_values = np.array([0, 1])
+        measures_.table_proportion_stderrs = table_proportion_stderrs_
+        population_stderrs = _PopulationProportionStderrs(
+            rows_dimension_, measures_, None
+        )
+
+        assert population_stderrs.base_values.tolist() == [0, 0]
+
+    def it_computes_its_subtotal_values_to_help(
+        self, table_proportion_stderrs_, measures_, rows_dimension_
+    ):
+        rows_dimension_.dimension_type = DT.CAT
+        table_proportion_stderrs_.subtotal_values = np.array([0, 1])
+        measures_.table_proportion_stderrs = table_proportion_stderrs_
+        population_stderrs = _PopulationProportionStderrs(
+            rows_dimension_, measures_, None
+        )
+
+        assert population_stderrs.subtotal_values.tolist() == [0, 1]
+
+    def but_it_has_all_1_subtotals_if_dimension_is_cat_date(
+        self, table_proportion_stderrs_, measures_, rows_dimension_
+    ):
+        rows_dimension_.dimension_type = DT.CAT_DATE
+        table_proportion_stderrs_.subtotal_values = np.array([0, 1])
+        measures_.table_proportion_stderrs = table_proportion_stderrs_
+        population_stderrs = _PopulationProportionStderrs(
+            rows_dimension_, measures_, None
+        )
+
+        assert population_stderrs.subtotal_values.tolist() == [0, 0]
+
+    def and_it_is_ok_with_empty_subtotals_for_cat_date(
+        self, table_proportion_stderrs_, measures_, rows_dimension_
+    ):
+        rows_dimension_.dimension_type = DT.CAT_DATE
+        table_proportion_stderrs_.subtotal_values = np.array([])
+        measures_.table_proportion_stderrs = table_proportion_stderrs_
+        population_stderrs = _PopulationProportionStderrs(
+            rows_dimension_, measures_, None
+        )
+
+        assert population_stderrs.subtotal_values.tolist() == []
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def rows_dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def measures_(self, request):
+        return instance_mock(request, StripeMeasures)
+
+    @pytest.fixture
+    def table_proportion_stderrs_(self, request):
+        return instance_mock(request, _TableProportionStderrs)
 
 
 class Describe_ScaledCounts(object):

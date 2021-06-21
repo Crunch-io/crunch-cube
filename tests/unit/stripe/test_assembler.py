@@ -10,11 +10,14 @@ from cr.cube.stripe.assembler import (
     _BaseOrderHelper,
     _OrderHelper,
     _SortByMeasureHelper,
+    PayloadOrderCollator,
     StripeAssembler,
 )
 from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
     _Means,
+    _PopulationProportions,
+    _PopulationProportionStderrs,
     _ScaledCounts,
     StripeMeasures,
     _TableProportionStddevs,
@@ -41,6 +44,8 @@ class DescribeStripeAssembler(object):
         "measure_prop_name, MeasureCls",
         (
             ("means", _Means),
+            ("population_proportions", _PopulationProportions),
+            ("population_proportion_stderrs", _PopulationProportionStderrs),
             ("table_proportion_stddevs", _TableProportionStddevs),
             ("table_proportion_stderrs", _TableProportionStderrs),
             ("table_proportions", _TableProportions),
@@ -331,7 +336,9 @@ class Describe_OrderHelper(object):
 class Describe_SortByMeasureHelper(object):
     """Unit test suite for `cr.cube.strip.assembler._SortByMeasureHelper`."""
 
-    def it_computes_the_display_order_to_help(self, request, dimension_):
+    def it_computes_the_display_order_to_help(
+        self, request, dimension_, _empty_row_idxs_prop_
+    ):
         property_mock(
             request,
             _SortByMeasureHelper,
@@ -346,7 +353,7 @@ class Describe_SortByMeasureHelper(object):
             "_subtotal_values",
             return_value=[15, 19],  # --- ndarray in real life ---
         )
-        property_mock(request, _SortByMeasureHelper, "_empty_row_idxs", return_value=())
+        _empty_row_idxs_prop_.return_value = ()
         SortByValueCollator_ = class_mock(
             request, "cr.cube.stripe.assembler.SortByValueCollator"
         )
@@ -360,6 +367,20 @@ class Describe_SortByMeasureHelper(object):
         )
         assert order == (-1, -2, 0, 2, 1)
 
+    def but_it_falls_back_to_payload_order_on_value_error(
+        self, request, dimension_, _empty_row_idxs_prop_
+    ):
+        display_order_ = method_mock(
+            request, PayloadOrderCollator, "display_order", return_value=[3, 4]
+        )
+        _empty_row_idxs_prop_.return_value = [1, 2]
+        order_helper = _SortByMeasureHelper(dimension_, None)
+
+        order = order_helper._display_order
+
+        assert order == [3, 4]
+        display_order_.assert_called_once_with(dimension_, [1, 2])
+
     def it_extracts_the_element_values_to_help(self, _measure_prop_, measure_):
         _measure_prop_.return_value = measure_
         measure_.blocks = [np.arange(5), None]
@@ -367,12 +388,35 @@ class Describe_SortByMeasureHelper(object):
 
         assert order_helper._element_values.tolist() == [0, 1, 2, 3, 4]
 
+    @pytest.mark.parametrize(
+        "json_name, internal_name",
+        (
+            ("base_unweighted", "unweighted_bases"),
+            ("base_weighted", "weighted_bases"),
+            ("count_unweighted", "unweighted_counts"),
+            ("count_weighted", "weighted_counts"),
+            ("mean", "means"),
+            ("percent", "table_proportions"),
+            ("percent_stddev", "table_proportion_stddevs"),
+            ("percent_moe", "table_proportion_stderrs"),
+            ("population", "population_proportions"),
+            ("population_moe", "population_proportion_stderrs"),
+            ("sum", "sums"),
+        ),
+    )
     def it_retrieves_the_right_measure_object_to_help(
-        self, request, _order_spec_prop_, order_spec_, measure_
+        self,
+        request,
+        _order_spec_prop_,
+        order_spec_,
+        measure_,
+        json_name,
+        internal_name,
     ):
-        measures_ = instance_mock(request, StripeMeasures, unweighted_bases=measure_)
+        measures_ = instance_mock(request, StripeMeasures)
+        setattr(measures_, internal_name, measure_)
         _order_spec_prop_.return_value = order_spec_
-        order_spec_.measure_keyname = "base_unweighted"
+        order_spec_.measure_keyname = json_name
         order_helper = _SortByMeasureHelper(None, measures_)
 
         assert order_helper._measure is measure_
@@ -401,6 +445,10 @@ class Describe_SortByMeasureHelper(object):
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _empty_row_idxs_prop_(self, request):
+        return property_mock(request, _SortByMeasureHelper, "_empty_row_idxs")
 
     @pytest.fixture
     def measure_(self, request):

@@ -483,6 +483,34 @@ class Describe_Strand(object):
 
         assert population_fraction == 0.5
 
+    def it_provides_the_population_count(
+        self,
+        cube_,
+        _assembler_prop_,
+        assembler_,
+    ):
+        assembler_.population_proportions = 0.3
+        _assembler_prop_.return_value = assembler_
+        cube_.population_fraction = 0.1
+        population = 20
+        strand_ = _Strand(cube_, None, population, None, None, None)
+
+        assert strand_.population_counts == pytest.approx(0.6)
+
+    def it_provides_the_population_counts_moe(
+        self,
+        cube_,
+        _assembler_prop_,
+        assembler_,
+    ):
+        assembler_.population_proportion_stderrs = 0.3
+        _assembler_prop_.return_value = assembler_
+        cube_.population_fraction = 0.1
+        population = 20
+        strand_ = _Strand(cube_, None, population, None, None, None)
+
+        assert strand_.population_counts_moe == pytest.approx(0.6 * 1.959964)
+
     def it_knows_its_selected_categories_labels(self, _dimensions_prop_):
         _dimensions_prop_.return_value = [Dimension({"references": {}}, None, None)]
         strand_ = _Strand(None, None, None, None, None, None)
