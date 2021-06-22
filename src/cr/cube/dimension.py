@@ -626,7 +626,24 @@ class _AllElements(_BaseElements):
     @lazyproperty
     def _elements_transforms(self):
         """Element transform dict expressed in the dimension transforms expression."""
-        return self._dimension_transforms_dict.get("elements", {})
+        transforms = self._dimension_transforms_dict.get("elements", {})
+
+        # ---include MR insertions into "hide" consideration
+        if self._dimension_type == DT.MR:
+            hidden_mr_insertions = tuple(
+                tr
+                for tr in self._dimension_transforms_dict.get("insertions", [])
+                if tr.get("hide")
+            )
+            ids_by_names = {
+                eld["value"]["references"]["name"]: eld["id"]
+                for eld in self._element_dicts
+            }
+            for ins in hidden_mr_insertions:
+                el_id = ids_by_names[ins["name"]]
+                transforms[el_id] = {"hide": True}
+
+        return transforms
 
     def _iter_element_makings(self):
         """Generate tuple of values needed to construct each element object.
