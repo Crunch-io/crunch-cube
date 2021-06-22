@@ -923,6 +923,54 @@ class Describe_AllElements(object):
 
         assert _element_id_from_dict == expected_value
 
+    @pytest.mark.parametrize(
+        "dim_xforms, element_dicts, dim_type, expected_value",
+        (
+            (
+                {"insertions": [{"name": "A&B", "hide": True}]},
+                [
+                    {"id": 1, "value": {"id": "A&B"}},
+                    {"id": 2, "value": {"id": "0004"}},
+                ],
+                DT.MR,
+                {1: {"hide": True}},
+            ),
+            (
+                {
+                    "insertions": [{"name": "A&B", "hide": True}],
+                    "elements": {2: {"hide": True}},
+                },
+                [
+                    {"id": 1, "value": {"id": "A&B"}},
+                    {"id": 2, "value": {"id": "0004"}},
+                ],
+                DT.MR,
+                {1: {"hide": True}, 2: {"hide": True}},
+            ),
+            (
+                {
+                    "insertions": [{"name": "A&B", "hide": True}],
+                    "elements": {2: {"hide": True}},
+                },
+                [
+                    {"id": 1, "value": {"id": "A&B"}},
+                    {"id": 2, "value": {"id": "0004"}},
+                ],
+                DT.CAT,
+                {2: {"hide": True}},  # --- CAT insertions don't get updated
+            ),
+        ),
+    )
+    def it_knows_its_mr_insertions_elements_transforms_from_transforms_dict(
+        self, dim_xforms, element_dicts, dim_type, expected_value, _element_dicts_prop_
+    ):
+        _element_dicts_prop_.return_value = element_dicts
+        all_elements = _AllElements(None, dim_xforms, dim_type)
+
+        elements_transforms = all_elements._elements_transforms
+
+        assert elements_transforms == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

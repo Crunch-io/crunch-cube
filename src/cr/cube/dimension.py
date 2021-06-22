@@ -628,22 +628,30 @@ class _AllElements(_BaseElements):
         """Element transform dict expressed in the dimension transforms expression."""
         transforms = self._dimension_transforms_dict.get("elements", {})
 
-        # ---include MR insertions into "hide" consideration
+        # ---include MR insertions into consideration for hidden elements
         if self._dimension_type == DT.MR:
-            hidden_mr_insertions = tuple(
-                tr
-                for tr in self._dimension_transforms_dict.get("insertions", [])
-                if tr.get("hide")
-            )
-            ids_by_names = {
-                eld["value"]["references"]["name"]: eld["id"]
-                for eld in self._element_dicts
-            }
-            for ins in hidden_mr_insertions:
-                el_id = ids_by_names[ins["name"]]
-                transforms[el_id] = {"hide": True}
+            return {**transforms, **self._hidden_mr_insertions_transforms}
 
         return transforms
+
+    @lazyproperty
+    def _hidden_mr_insertions_transforms(self):
+        """Element transform dict for MR insertions, based on insertions' hide field.
+
+        If we're operating with MR insertions, their hiddenness is generally expressed
+        via the "hide" field on the transform's insertion object. Since the MR
+        insertions are part of the actual data (that comes from ZZ9) we need to map
+        this information to the elements transforms dictionary, to perform the actual
+        hiding of those (MR insertions) elements.
+        """
+
+        mr_insertions = self._dimension_transforms_dict.get("insertions", [])
+        hidden_mr_insertions = [ins for ins in mr_insertions if ins.get("hide")]
+
+        # ---Create internal mapping between element int IDs and str IDs
+        ids_map = {eld["value"]["id"]: eld["id"] for eld in self._element_dicts}
+
+        return {ids_map[ins["name"]]: {"hide": True} for ins in hidden_mr_insertions}
 
     def _iter_element_makings(self):
         """Generate tuple of values needed to construct each element object.
