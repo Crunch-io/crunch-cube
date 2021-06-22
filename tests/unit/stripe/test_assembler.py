@@ -371,7 +371,11 @@ class Describe_SortByMeasureHelper(object):
         self, request, dimension_, _empty_row_idxs_prop_
     ):
         display_order_ = method_mock(
-            request, PayloadOrderCollator, "display_order", return_value=[3, 4]
+            request,
+            PayloadOrderCollator,
+            "display_order",
+            return_value=[3, 4],
+            autospec=False,
         )
         _empty_row_idxs_prop_.return_value = [1, 2]
         order_helper = _SortByMeasureHelper(dimension_, None)
