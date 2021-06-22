@@ -9,10 +9,8 @@ from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
 from cr.cube.stripe.cubemeasure import (
     _BaseCubeMeans,
-    _BaseUnweightedCubeCounts,
-    _BaseWeightedCubeCounts,
-    _CatUnweightedCubeCounts,
-    _CatWeightedCubeCounts,
+    _BaseCubeCounts,
+    _CatCubeCounts,
     CubeMeasures,
 )
 from cr.cube.stripe.measure import (
@@ -78,7 +76,7 @@ class DescribeStripeMeasures(object):
         self, request, _cube_measures_prop_, cube_measures_
     ):
         unweighted_cube_counts_ = instance_mock(
-            request, _BaseUnweightedCubeCounts, pruning_base=np.array([0, 2, 7])
+            request, _BaseCubeCounts, pruning_base=np.array([0, 2, 7])
         )
         cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
         _cube_measures_prop_.return_value = cube_measures_
@@ -135,7 +133,7 @@ class Describe_BaseSecondOrderMeasure(object):
     def it_provides_access_to_the_unweighted_cube_counts_object_to_help(
         self, request, cube_measures_
     ):
-        unweighted_cube_counts_ = instance_mock(request, _BaseUnweightedCubeCounts)
+        unweighted_cube_counts_ = instance_mock(request, _BaseCubeCounts)
         cube_measures_.unweighted_cube_counts = unweighted_cube_counts_
         measure = _BaseSecondOrderMeasure(None, None, cube_measures_)
 
@@ -144,7 +142,7 @@ class Describe_BaseSecondOrderMeasure(object):
     def it_provides_access_to_the_weighted_cube_counts_object_to_help(
         self, request, cube_measures_
     ):
-        weighted_cube_counts_ = instance_mock(request, _BaseWeightedCubeCounts)
+        weighted_cube_counts_ = instance_mock(request, _BaseCubeCounts)
         cube_measures_.weighted_cube_counts = weighted_cube_counts_
         measure = _BaseSecondOrderMeasure(None, None, cube_measures_)
 
@@ -329,7 +327,7 @@ class Describe_ScaledCounts(object):
         self, request, _has_numeric_value_prop_
     ):
         weighted_cube_counts_ = instance_mock(
-            request, _BaseWeightedCubeCounts, weighted_counts=np.array([1.1, 2.2, 3.3])
+            request, _BaseCubeCounts, counts=np.array([1.1, 2.2, 3.3])
         )
         property_mock(
             request,
@@ -479,7 +477,7 @@ class Describe_TableProportions(object):
     """Unit test suite for `cr.cube.stripe.measure._TableProportions` object."""
 
     @pytest.mark.parametrize(
-        "table_margin, expected_value",
+        "weighted_bases, expected_value",
         (
             (np.array([4.5, 6.7]), [0.7555556, 0.8358209]),
             (42.42, [0.08015087, 0.1320132]),
@@ -491,21 +489,21 @@ class Describe_TableProportions(object):
         weighted_counts_,
         _weighted_cube_counts_prop_,
         weighted_cube_counts_,
-        table_margin,
+        weighted_bases,
         expected_value,
     ):
         weighted_counts_.base_values = np.array([3.4, 5.6])
         measures_.weighted_counts = weighted_counts_
-        weighted_cube_counts_.table_margin = table_margin
+        weighted_cube_counts_.bases = weighted_bases
         _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
         table_proportions = _TableProportions(None, measures_, None)
 
         assert table_proportions.base_values == pytest.approx(expected_value)
 
     @pytest.mark.parametrize(
-        "table_margin, expected_value",
+        "weighted_table_base, expected_value",
         (
-            (np.array([4.5, 6.7]), []),
+            (None, []),
             (42.42, [0.2310231, 0.1791608]),
         ),
     )
@@ -515,12 +513,12 @@ class Describe_TableProportions(object):
         weighted_counts_,
         _weighted_cube_counts_prop_,
         weighted_cube_counts_,
-        table_margin,
+        weighted_table_base,
         expected_value,
     ):
         weighted_counts_.subtotal_values = np.array([9.8, 7.6])
         measures_.weighted_counts = weighted_counts_
-        weighted_cube_counts_.table_margin = table_margin
+        weighted_cube_counts_.table_base = weighted_table_base
         _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
         table_proportions = _TableProportions(None, measures_, None)
 
@@ -538,7 +536,7 @@ class Describe_TableProportions(object):
 
     @pytest.fixture
     def weighted_cube_counts_(self, request):
-        return instance_mock(request, _BaseWeightedCubeCounts)
+        return instance_mock(request, _BaseCubeCounts)
 
     @pytest.fixture
     def _weighted_cube_counts_prop_(self, request):
@@ -569,7 +567,7 @@ class Describe_UnweightedBases(object):
         SumSubtotals_ = class_mock(request, "cr.cube.stripe.measure.SumSubtotals")
         SumSubtotals_.subtotal_values.return_value = subtotal_values
         _unweighted_cube_counts_prop_.return_value = instance_mock(
-            request, _CatUnweightedCubeCounts, table_base=42
+            request, _CatCubeCounts, table_base=42
         )
         unweighted_bases = _UnweightedBases(rows_dimension_, None, None)
 
@@ -593,7 +591,7 @@ class Describe_UnweightedBases(object):
 
     @pytest.fixture
     def unweighted_cube_counts_(self, request):
-        return instance_mock(request, _BaseUnweightedCubeCounts)
+        return instance_mock(request, _BaseCubeCounts)
 
     @pytest.fixture
     def _unweighted_cube_counts_prop_(self, request):
@@ -607,7 +605,7 @@ class Describe_UnweightedCounts(object):
         self, _unweighted_cube_counts_prop_, unweighted_cube_counts_
     ):
         _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
-        unweighted_cube_counts_.unweighted_counts = np.array([1, 2, 3])
+        unweighted_cube_counts_.counts = np.array([1, 2, 3])
         unweighted_counts = _UnweightedCounts(None, None, None)
 
         assert unweighted_counts.base_values.tolist() == [1, 2, 3]
@@ -630,7 +628,7 @@ class Describe_UnweightedCounts(object):
 
     @pytest.fixture
     def unweighted_cube_counts_(self, request):
-        return instance_mock(request, _BaseUnweightedCubeCounts)
+        return instance_mock(request, _BaseCubeCounts)
 
     @pytest.fixture
     def _unweighted_cube_counts_prop_(self, request):
@@ -667,7 +665,7 @@ class Describe_WeightedBases(object):
         SumSubtotals_ = class_mock(request, "cr.cube.stripe.measure.SumSubtotals")
         SumSubtotals_.subtotal_values.return_value = subtotal_values
         _weighted_cube_counts_prop_.return_value = instance_mock(
-            request, _CatWeightedCubeCounts, table_margin=42.24
+            request, _CatCubeCounts, table_base=42.24
         )
         weighted_bases = _WeightedBases(rows_dimension_, None, None)
 
@@ -691,7 +689,7 @@ class Describe_WeightedBases(object):
 
     @pytest.fixture
     def weighted_cube_counts_(self, request):
-        return instance_mock(request, _BaseWeightedCubeCounts)
+        return instance_mock(request, _BaseCubeCounts)
 
     @pytest.fixture
     def _weighted_cube_counts_prop_(self, request):
@@ -705,7 +703,7 @@ class Describe_WeightedCounts(object):
         self, _weighted_cube_counts_prop_, weighted_cube_counts_
     ):
         _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
-        weighted_cube_counts_.weighted_counts = np.array([1, 2, 3])
+        weighted_cube_counts_.counts = np.array([1, 2, 3])
         weighted_counts = _WeightedCounts(None, None, None)
 
         assert weighted_counts.base_values.tolist() == [1, 2, 3]
@@ -730,7 +728,7 @@ class Describe_WeightedCounts(object):
 
     @pytest.fixture
     def weighted_cube_counts_(self, request):
-        return instance_mock(request, _BaseWeightedCubeCounts)
+        return instance_mock(request, _BaseCubeCounts)
 
     @pytest.fixture
     def _weighted_cube_counts_prop_(self, request):
