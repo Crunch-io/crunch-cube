@@ -626,32 +626,11 @@ class _AllElements(_BaseElements):
     @lazyproperty
     def _elements_transforms(self):
         """Element transform dict expressed in the dimension transforms expression."""
-        transforms = self._dimension_transforms_dict.get("elements", {})
-
-        # ---include MR insertions into consideration for hidden elements
-        if self._dimension_type == DT.MR:
-            return {**transforms, **self._hidden_mr_insertions_transforms}
-
-        return transforms
-
-    @lazyproperty
-    def _hidden_mr_insertions_transforms(self):
-        """Element transform dict for MR insertions, based on insertions' hide field.
-
-        If we're operating with MR insertions, their hiddenness is generally expressed
-        via the "hide" field on the transform's insertion object. Since the MR
-        insertions are part of the actual data (that comes from ZZ9) we need to map
-        this information to the elements transforms dictionary, to perform the actual
-        hiding of those (MR insertions) elements.
-        """
-
-        mr_insertions = self._dimension_transforms_dict.get("insertions", [])
-        hidden_mr_insertions = [ins for ins in mr_insertions if ins.get("hide")]
-
-        # ---Create internal mapping between element int IDs and str IDs
-        ids_map = {eld["value"]["id"]: eld["id"] for eld in self._element_dicts}
-
-        return {ids_map[ins["name"]]: {"hide": True} for ins in hidden_mr_insertions}
+        return (
+            self._shimmed_element_transforms
+            if self._dimension_type in DT.ARRAY_TYPES
+            else self._dimension_transforms_dict.get("elements", {})
+        )
 
     def _iter_element_makings(self):
         """Generate tuple of values needed to construct each element object.
@@ -673,6 +652,42 @@ class _AllElements(_BaseElements):
                     elements_transforms.get(str(element_dict["id"]), {}),
                 )
             yield idx, element_dict, element_transforms_dict
+
+    @lazyproperty
+    def _shimmed_element_transforms(self):
+        """Element transforms dict for array dimensions.
+
+        To provide consistency with a poorly-defined interface for categorical
+        insertions, a client can include a `"hide": true` field in a (complete) copy of
+        a variable-based insertion in order to suppress that variable-based insertion.
+
+        For the array case, these need to be translated to a "hide" transform on the
+        subvariable element because such an insertion becomes a derived subvariable just
+        like the other subvariables in the dimension.
+        """
+        # --- currently an inserted-subvariable can only be identified by name, there is
+        # --- no alias for an inserted-subvariable and it does not receive a "normal"
+        # --- element.id like "0001".
+        hidden_insertion_names = tuple(
+            insertion["name"]
+            for insertion in self._dimension_transforms_dict.get("insertions", [])
+            if insertion.get("hide", False)
+        )
+
+        # --- however, the hide-transform must be identified by element-id, so we need a
+        # --- mapping of insertion-name to element-id
+        element_id_from_name = {
+            element["value"]["id"]: element["id"] for element in self._element_dicts
+        }
+
+        # --- merge hide transforms with (a copy of) the existing element transforms ---
+        return {
+            **self._dimension_transforms_dict.get("elements", {}),
+            **{
+                element_id_from_name[name]: {"hide": True}
+                for name in hidden_insertion_names
+            },
+        }
 
 
 class _ValidElements(_BaseElements):

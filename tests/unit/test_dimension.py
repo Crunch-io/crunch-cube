@@ -914,8 +914,14 @@ class Describe_AllElements(object):
         ),
     )
     def it_knows_its_element_id_from_dict(
-        self, element_transform, dimension_type, element_dict, expected_value
+        self,
+        element_transform,
+        dimension_type,
+        element_dict,
+        expected_value,
+        _element_dicts_prop_,
     ):
+        _element_dicts_prop_.return_value = []
         dimension_transforms_dict = {"elements": element_transform}
         all_elements = _AllElements(None, dimension_transforms_dict, dimension_type)
 
