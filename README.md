@@ -113,6 +113,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.3.2
+- Allow hiding MR insertions
+
 ### 2.3.1
 - Consolidate weighted counts
 - Fix bug with weighted counts for numeric arrays

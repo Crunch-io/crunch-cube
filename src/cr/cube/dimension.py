@@ -681,13 +681,13 @@ class _AllElements(_BaseElements):
         }
 
         # --- merge hide transforms with (a copy of) the existing element transforms ---
-        return {
-            **self._dimension_transforms_dict.get("elements", {}),
-            **{
-                element_id_from_name[name]: {"hide": True}
-                for name in hidden_insertion_names
-            },
+        # TODO: Move to {**d1, **d2} syntax once we ditch Python 2
+        shimmed_transforms = {
+            element_id_from_name[name]: {"hide": True}
+            for name in hidden_insertion_names
         }
+        shimmed_transforms.update(self._dimension_transforms_dict.get("elements", {}))
+        return shimmed_transforms
 
 
 class _ValidElements(_BaseElements):
