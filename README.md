@@ -113,6 +113,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.3.3
+- Fix Python 2 syntax issue
+
 ### 2.3.2
 - Allow hiding MR insertions
 
