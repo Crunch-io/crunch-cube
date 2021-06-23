@@ -192,55 +192,59 @@ class Describe_Means(object):
 class Describe_PopulationProportions(object):
     """Unit test suite for `cr.cube.stripe.measure._PopulationProportions` object."""
 
+    @pytest.mark.parametrize(
+        "dimension_type, base_values, expected_value",
+        (
+            (DT.CAT, [0, 1], [0, 1]),
+            # --- it has all 1 base-values if dimension is cat date ---
+            (DT.CAT_DATE, [0, 1], [1, 1]),
+        ),
+    )
     def it_computes_its_base_values_to_help(
-        self, table_proportions_, measures_, rows_dimension_
+        self,
+        dimension_type,
+        base_values,
+        table_proportions_,
+        measures_,
+        rows_dimension_,
+        expected_value,
     ):
-        rows_dimension_.dimension_type = DT.CAT
-        table_proportions_.base_values = np.array([0, 1])
+        rows_dimension_.dimension_type = dimension_type
+        table_proportions_.base_values = np.array(base_values)
         measures_.table_proportions = table_proportions_
-        population_props = _PopulationProportions(rows_dimension_, measures_, None)
+        population_proportions = _PopulationProportions(
+            rows_dimension_, measures_, None
+        )
 
-        assert population_props.base_values.tolist() == [0, 1]
+        assert population_proportions.base_values.tolist() == expected_value
 
-    def but_it_has_all_1_basevalues_if_dimension_is_cat_date(
-        self, table_proportions_, measures_, rows_dimension_
-    ):
-        rows_dimension_.dimension_type = DT.CAT_DATE
-        table_proportions_.base_values = np.array([0, 1])
-        measures_.table_proportions = table_proportions_
-        population_props = _PopulationProportions(rows_dimension_, measures_, None)
-
-        assert population_props.base_values.tolist() == [1, 1]
-
+    @pytest.mark.parametrize(
+        "dimension_type, subtotal_values, expected_value",
+        (
+            (DT.CAT, [0, 1], [0, 1]),
+            # --- it has all 1 subtotal-values if dimension is cat date ---
+            (DT.CAT_DATE, [0, 1], [1, 1]),
+            # --- and its ok with empty subtotals for cat-date ---
+            (DT.CAT_DATE, [], []),
+        ),
+    )
     def it_computes_its_subtotal_values_to_help(
-        self, table_proportions_, measures_, rows_dimension_
+        self,
+        dimension_type,
+        subtotal_values,
+        table_proportions_,
+        measures_,
+        rows_dimension_,
+        expected_value,
     ):
-        rows_dimension_.dimension_type = DT.CAT
-        table_proportions_.subtotal_values = np.array([0, 1])
+        rows_dimension_.dimension_type = dimension_type
+        table_proportions_.subtotal_values = np.array(subtotal_values)
         measures_.table_proportions = table_proportions_
-        population_props = _PopulationProportions(rows_dimension_, measures_, None)
+        population_proportions = _PopulationProportions(
+            rows_dimension_, measures_, None
+        )
 
-        assert population_props.subtotal_values.tolist() == [0, 1]
-
-    def but_it_has_all_1_subtotals_if_dimension_is_cat_date(
-        self, table_proportions_, measures_, rows_dimension_
-    ):
-        rows_dimension_.dimension_type = DT.CAT_DATE
-        table_proportions_.subtotal_values = np.array([0, 1])
-        measures_.table_proportions = table_proportions_
-        population_props = _PopulationProportions(rows_dimension_, measures_, None)
-
-        assert population_props.subtotal_values.tolist() == [1, 1]
-
-    def and_it_is_ok_with_empty_subtotals_for_cat_date(
-        self, table_proportions_, measures_, rows_dimension_
-    ):
-        rows_dimension_.dimension_type = DT.CAT_DATE
-        table_proportions_.subtotal_values = np.array([])
-        measures_.table_proportions = table_proportions_
-        population_props = _PopulationProportions(rows_dimension_, measures_, None)
-
-        assert population_props.subtotal_values.tolist() == []
+        assert population_proportions.subtotal_values.tolist() == expected_value
 
     # fixture components ---------------------------------------------
 
@@ -260,65 +264,59 @@ class Describe_PopulationProportions(object):
 class Describe_PopulationProportionStderrs(object):
     """Unit test suite for `cr.cube.stripe.measure._PopulationProportionStderrs` object."""
 
+    @pytest.mark.parametrize(
+        "dimension_type, base_values, expected_value",
+        (
+            (DT.CAT, [0, 1], [0, 1]),
+            # --- it has all 0 base-values if dimension is cat date ---
+            (DT.CAT_DATE, [0, 1], [0, 0]),
+        ),
+    )
     def it_computes_its_base_values_to_help(
-        self, table_proportion_stderrs_, measures_, rows_dimension_
+        self,
+        dimension_type,
+        base_values,
+        table_proportion_stderrs_,
+        measures_,
+        rows_dimension_,
+        expected_value,
     ):
-        rows_dimension_.dimension_type = DT.CAT
-        table_proportion_stderrs_.base_values = np.array([0, 1])
+        rows_dimension_.dimension_type = dimension_type
+        table_proportion_stderrs_.base_values = np.array(base_values)
         measures_.table_proportion_stderrs = table_proportion_stderrs_
         population_stderrs = _PopulationProportionStderrs(
             rows_dimension_, measures_, None
         )
 
-        assert population_stderrs.base_values.tolist() == [0, 1]
+        assert population_stderrs.base_values.tolist() == expected_value
 
-    def but_it_has_all_1_basevalues_if_dimension_is_cat_date(
-        self, table_proportion_stderrs_, measures_, rows_dimension_
-    ):
-        rows_dimension_.dimension_type = DT.CAT_DATE
-        table_proportion_stderrs_.base_values = np.array([0, 1])
-        measures_.table_proportion_stderrs = table_proportion_stderrs_
-        population_stderrs = _PopulationProportionStderrs(
-            rows_dimension_, measures_, None
-        )
-
-        assert population_stderrs.base_values.tolist() == [0, 0]
-
+    @pytest.mark.parametrize(
+        "dimension_type, subtotal_values, expected_value",
+        (
+            (DT.CAT, [0, 1], [0, 1]),
+            # --- it has all 0 subtotal-values if dimension is CAT_DATE ---
+            (DT.CAT_DATE, [0, 1], [0, 0]),
+            # --- and its ok with empty subtotals for CAT_DATE ---
+            (DT.CAT_DATE, [], []),
+        ),
+    )
     def it_computes_its_subtotal_values_to_help(
-        self, table_proportion_stderrs_, measures_, rows_dimension_
+        self,
+        dimension_type,
+        subtotal_values,
+        table_proportion_stderrs_,
+        measures_,
+        rows_dimension_,
+        expected_value,
     ):
-        rows_dimension_.dimension_type = DT.CAT
-        table_proportion_stderrs_.subtotal_values = np.array([0, 1])
+        rows_dimension_.dimension_type = dimension_type
+        table_proportion_stderrs_.subtotal_values = np.array(subtotal_values)
         measures_.table_proportion_stderrs = table_proportion_stderrs_
         population_stderrs = _PopulationProportionStderrs(
             rows_dimension_, measures_, None
         )
 
-        assert population_stderrs.subtotal_values.tolist() == [0, 1]
-
-    def but_it_has_all_1_subtotals_if_dimension_is_cat_date(
-        self, table_proportion_stderrs_, measures_, rows_dimension_
-    ):
-        rows_dimension_.dimension_type = DT.CAT_DATE
-        table_proportion_stderrs_.subtotal_values = np.array([0, 1])
-        measures_.table_proportion_stderrs = table_proportion_stderrs_
-        population_stderrs = _PopulationProportionStderrs(
-            rows_dimension_, measures_, None
-        )
-
-        assert population_stderrs.subtotal_values.tolist() == [0, 0]
-
-    def and_it_is_ok_with_empty_subtotals_for_cat_date(
-        self, table_proportion_stderrs_, measures_, rows_dimension_
-    ):
-        rows_dimension_.dimension_type = DT.CAT_DATE
-        table_proportion_stderrs_.subtotal_values = np.array([])
-        measures_.table_proportion_stderrs = table_proportion_stderrs_
-        population_stderrs = _PopulationProportionStderrs(
-            rows_dimension_, measures_, None
-        )
-
-        assert population_stderrs.subtotal_values.tolist() == []
+        assert population_stderrs.subtotal_values.tolist() == expected_value
 
     # fixture components ---------------------------------------------
 

@@ -288,12 +288,7 @@ class Describe_Slice(object):
 
         assert population_fraction == 0.5
 
-    def it_provides_the_population_count(
-        self,
-        cube_,
-        _assembler_prop_,
-        assembler_,
-    ):
+    def it_provides_the_population_counts(self, _assembler_prop_, assembler_, cube_):
         assembler_.population_proportions = 0.3
         _assembler_prop_.return_value = assembler_
         cube_.population_fraction = 0.1
@@ -303,11 +298,8 @@ class Describe_Slice(object):
 
         assert slice_.population_counts == pytest.approx(0.6)
 
-    def it_provides_the_population_counts_moe(
-        self,
-        cube_,
-        _assembler_prop_,
-        assembler_,
+    def it_provides_the_population_count_moes(
+        self, _assembler_prop_, assembler_, cube_
     ):
         assembler_.population_std_err = 0.3
         _assembler_prop_.return_value = assembler_
