@@ -1180,6 +1180,50 @@ class Describe_Slice(object):
             [[14, 14, 13, 16], [22, 14, 19, 19], [14, 16, 19, 18], [17, 12, 28, 11]],
         )
 
+    def it_ignores_hidden_mr_insertions(self):
+        """A subtotal with `"hide": True` does not appear.
+
+        This behavior is added in the "interim", insertion-has-no-id state to allow
+        display of a global (lives-on-variable) insertion to be suppressed without
+        actually deleting it, which would require unnatural acts to restore it later if
+        wanted again.
+        """
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "function": "any_selected",
+                        "kwargs": {
+                            "variable": "mymrset",
+                            "subvariable_ids": ["bool1", "bool2"],
+                        },
+                        "anchor": "top",
+                        "name": "A&B",
+                        "hide": True,
+                    }
+                ]
+            },
+        }
+        slice_ = _Slice(Cube(MRI.MR_X_CAT), 0, transforms, None, 0)
+
+        assert slice_.row_labels.tolist() == [
+            # "A&B" --- has been hidden by the explicit transform
+            "Response #1",
+            "Response #2",
+            "Response #3",
+        ]
+        assert slice_.column_labels.tolist() == ["red", "green", "blue", "4", "9"]
+        assert slice_.counts == pytest.approx(
+            np.array(
+                [
+                    # [1.5, 0.9, 0.6, 0. , 0. ] --- This is the hidden MR insertion A&B
+                    [1.5, 0.9, 0.0, 0.0, 0.0],
+                    [1.5, 0.0, 0.6, 0.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0, 0.0],
+                ]
+            )
+        )
+
     def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
         """Subtotal anchors follow re-ordered rows.
 
