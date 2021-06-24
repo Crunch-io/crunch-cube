@@ -114,6 +114,10 @@ The detailed description can be found
 ## Changes
 
 ### 2.3.3
+- Consolidate stipe counts
+- Sort by value stripe
+
+### 2.3.3
 - Fix Python 2 syntax issue
 
 ### 2.3.2
