@@ -6,6 +6,7 @@ from __future__ import division
 
 import numpy as np
 
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.stripe.cubemeasure import CubeMeasures
 from cr.cube.stripe.insertion import NanSubtotals, SumSubtotals
 from cr.cube.util import lazyproperty
@@ -33,6 +34,18 @@ class StripeMeasures(object):
     def means(self):
         """_Means measure object for this stripe."""
         return _Means(self._rows_dimension, self, self._cube_measures)
+
+    @lazyproperty
+    def population_proportions(self):
+        """_PopulationPrortion measure object for this stripe."""
+        return _PopulationProportions(self._rows_dimension, self, self._cube_measures)
+
+    @lazyproperty
+    def population_proportion_stderrs(self):
+        """_PopulationProportionStderrs measure object for this stripe."""
+        return _PopulationProportionStderrs(
+            self._rows_dimension, self, self._cube_measures
+        )
 
     @lazyproperty
     def pruning_base(self):
@@ -195,6 +208,68 @@ class _Means(_BaseSecondOrderMeasure):
         np.nan.
         """
         return NanSubtotals.subtotal_values(self.base_values, self._rows_dimension)
+
+
+class _PopulationProportions(_BaseSecondOrderMeasure):
+    """Provides the population-proportions measure for a stripe.
+
+    When the variable is a categorical-date, we do not divide the population between the
+    categories, so the proportion is always 1. Otherwise it is equal to the table
+    proportions.
+
+    This is used to calculate the population_counts.
+    """
+
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of population proportion for each row."""
+        proportions = self._measures.table_proportions.base_values
+        return (
+            np.repeat(1, proportions.shape)
+            if self._rows_dimension.dimension_type == DT.CAT_DATE
+            else proportions
+        )
+
+    @lazyproperty
+    def subtotal_values(self):
+        """1D np.float64 ndarray of population proportion for each row-subtotal."""
+        proportions = self._measures.table_proportions.subtotal_values
+        return (
+            np.repeat(1, proportions.shape)
+            if self._rows_dimension.dimension_type == DT.CAT_DATE
+            else proportions
+        )
+
+
+class _PopulationProportionStderrs(_BaseSecondOrderMeasure):
+    """Provides the population-proportion-standard-errors measure for a stripe.
+
+    When the variable is a categorical-date, we do not divide the population between the
+    categories, so the standard-error is always 0. Otherwise it is equal to the table
+    proportions.
+
+    This is used to calculate the population_counts_moe.
+    """
+
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of population proportion for each row."""
+        stderrs = self._measures.table_proportion_stderrs.base_values
+        return (
+            np.repeat(0, stderrs.shape)
+            if self._rows_dimension.dimension_type == DT.CAT_DATE
+            else stderrs
+        )
+
+    @lazyproperty
+    def subtotal_values(self):
+        """1D np.float64 ndarray of population proportion for each row-subtotal."""
+        stderrs = self._measures.table_proportion_stderrs.subtotal_values
+        return (
+            np.repeat(0, stderrs.shape)
+            if self._rows_dimension.dimension_type == DT.CAT_DATE
+            else stderrs
+        )
 
 
 class _ScaledCounts(_BaseSecondOrderMeasure):

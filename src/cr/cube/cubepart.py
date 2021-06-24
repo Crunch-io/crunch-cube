@@ -21,7 +21,7 @@ import math
 import numpy as np
 from tabulate import tabulate
 
-from cr.cube.enums import DIMENSION_TYPE as DT, CUBE_MEASURE as CM
+from cr.cube.enums import CUBE_MEASURE as CM
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
@@ -1434,16 +1434,10 @@ class _Strand(CubePartition):
         provided when the Strand is created. It is also adjusted to account for any
         filters that were applied as part of the query.
         """
-        # ---If the only dimension is a categorical date, we don't need to break up
-        # ---the population counts between its elements - it's constant throughout time
-        if self.rows_dimension_type == DT.CAT_DATE:
-            return np.full(
-                self.table_proportions.shape,
-                self._population * self._cube.population_fraction,
-            )
-
         return (
-            self.table_proportions * self._population * self._cube.population_fraction
+            self._assembler.population_proportions
+            * self._population
+            * self._cube.population_fraction
         )
 
     @lazyproperty
@@ -1457,7 +1451,11 @@ class _Strand(CubePartition):
         table margin is 0.
         """
         total_filtered_population = self._population * self._cube.population_fraction
-        return Z_975 * total_filtered_population * self.table_proportion_stderrs
+        return (
+            Z_975
+            * total_filtered_population
+            * self._assembler.population_proportion_stderrs
+        )
 
     @lazyproperty
     def row_count(self):

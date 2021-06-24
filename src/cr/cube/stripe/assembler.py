@@ -83,6 +83,28 @@ class StripeAssembler(object):
         return self._assemble_vector(self._measures.means.blocks)
 
     @lazyproperty
+    def population_proportions(self):
+        """1D np.float64 population-proportion for each row
+
+        Generally equal to the table_proprotions, but because we don't divide the
+        population when the row is a CAT_DATE, can also be all 1s. Used to calculate
+        the population_counts.
+        """
+        return self._assemble_vector(self._measures.population_proportions.blocks)
+
+    @lazyproperty
+    def population_proportion_stderrs(self):
+        """1D np.float64 population-proportion-standard-error for each row
+
+        Generally equal to the table_proprotion_standard_error, but because we don't
+        divide the population when the row is a CAT_DATE, can also be all 0s. Used to
+        calculate the population_counts_moe.
+        """
+        return self._assemble_vector(
+            self._measures.population_proportion_stderrs.blocks
+        )
+
+    @lazyproperty
     def row_count(self):
         """int count of rows in this stripe.
 
@@ -356,12 +378,18 @@ class _SortByMeasureHelper(_BaseOrderHelper):
         insertion, hiding, pruning, and ordering transforms specified in the
         rows-dimension.
         """
-        return SortByValueCollator.display_order(
-            self._rows_dimension,
-            self._element_values,
-            self._subtotal_values,
-            self._empty_row_idxs,
-        )
+        # --- fall back to payload order if sort-by-value failes
+        try:
+            return SortByValueCollator.display_order(
+                self._rows_dimension,
+                self._element_values,
+                self._subtotal_values,
+                self._empty_row_idxs,
+            )
+        except ValueError:
+            return PayloadOrderCollator.display_order(
+                self._rows_dimension, self._empty_row_idxs
+            )
 
     @lazyproperty
     def _element_values(self):
@@ -387,6 +415,8 @@ class _SortByMeasureHelper(_BaseOrderHelper):
             "percent_moe": "table_proportion_stderrs",
             "percent_stddev": "table_proportion_stddevs",
             "percent_stderr": "table_proportion_stderrs",
+            "population": "population_proportions",  # strictly proportional
+            "population_moe": "population_proportion_stderrs",  # strictly proportional
             "sum": "sums",
         }.get(measure_keyname)
 
