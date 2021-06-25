@@ -1224,6 +1224,22 @@ class Describe_Slice(object):
             )
         )
 
+    def it_renders_mr_insertions_on_scorecards(self):
+        slice_ = _Slice(Cube(MRI.SCORECARD), 0, None, None, 0)
+        assert slice_.counts == pytest.approx(
+            np.array(
+                [
+                    [1820.0, 2896.0, 1913.0],
+                    [1571.0, 1942.0, 1743.0],
+                    [943.0, 2129.0, 930.0],
+                    [1538.0, 640.0, 2101.0],
+                    [1281.0, 1374.0, 1366.0],
+                    [625.0, 390.0, 1091.0],
+                    [1279.0, 856.0, 849.0],
+                ]
+            )
+        )
+
     def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
         """Subtotal anchors follow re-ordered rows.
 

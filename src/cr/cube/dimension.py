@@ -628,7 +628,7 @@ class _AllElements(_BaseElements):
         """Element transform dict expressed in the dimension transforms expression."""
         return (
             self._shimmed_element_transforms
-            if self._dimension_type in DT.ARRAY_TYPES
+            if self._dimension_type == DT.MR
             else self._dimension_transforms_dict.get("elements", {})
         )
 

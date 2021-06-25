@@ -1,0 +1,672 @@
+{
+    "query": {
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "with": {
+            "v1": {
+                "function": "fuse",
+                "args": [
+                    [
+                        {
+                            "function": "as_selected",
+                            "args": [
+                                {
+                                    "variable": "505f86734c764752abb735f0d6f26d6f"
+                                },
+                                {
+                                    "value": null
+                                },
+                                [
+                                    {
+                                        "map": {
+                                            "column": {
+                                                "function": "anynm",
+                                                "args": [
+                                                    {
+                                                        "variable": "505f86734c764752abb735f0d6f26d6f"
+                                                    },
+                                                    {
+                                                        "column": [
+                                                            "a63e371f7ace4b47b319d6c3208564ac",
+                                                            "1955f26d9b3646908eb59da55153a254"
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            "anchor": {
+                                                "value": "top"
+                                            },
+                                            "name": {
+                                                "value": "NET BBC"
+                                            }
+                                        }
+                                    }
+                                ]
+                            ]
+                        },
+                        {
+                            "function": "as_selected",
+                            "args": [
+                                {
+                                    "variable": "5b52f3c86cf5434abe2b39785f214c04"
+                                },
+                                {
+                                    "value": null
+                                },
+                                [
+                                    {
+                                        "map": {
+                                            "column": {
+                                                "function": "anynm",
+                                                "args": [
+                                                    {
+                                                        "variable": "5b52f3c86cf5434abe2b39785f214c04"
+                                                    },
+                                                    {
+                                                        "column": [
+                                                            "cdcc947db19e4345aea507e0760138b4",
+                                                            "dbce418be5344108bba3faa921347a41"
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            "anchor": {
+                                                "value": "top"
+                                            },
+                                            "name": {
+                                                "value": "NET BBC"
+                                            }
+                                        }
+                                    }
+                                ]
+                            ]
+                        },
+                        {
+                            "function": "as_selected",
+                            "args": [
+                                {
+                                    "variable": "17e77118b0f344e5b9faacd9ef485c15"
+                                },
+                                {
+                                    "value": null
+                                },
+                                [
+                                    {
+                                        "map": {
+                                            "column": {
+                                                "function": "anynm",
+                                                "args": [
+                                                    {
+                                                        "variable": "17e77118b0f344e5b9faacd9ef485c15"
+                                                    },
+                                                    {
+                                                        "column": [
+                                                            "2307c3619a574dbea946ca1b0c50fe53",
+                                                            "bf968a007e594ff790c6ac3142edd8d6"
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            "anchor": {
+                                                "value": "top"
+                                            },
+                                            "name": {
+                                                "value": "NET BBC"
+                                            }
+                                        }
+                                    }
+                                ]
+                            ]
+                        }
+                    ]
+                ]
+            }
+        },
+        "dimensions": [
+            {
+                "local": "v1.subvariables"
+            },
+            {
+                "local": "v1.categories"
+            },
+            {
+                "local": "v1.variables"
+            }
+        ],
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "dimensions": [
+            {
+                "references": {
+                    "alias": "fused_variables_C15_06_C15_07_C15_08",
+                    "view": {
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "function": "any_non_missing_selected",
+                                    "id": 1,
+                                    "anchor": "top",
+                                    "name": "NET BBC",
+                                    "kwargs": {
+                                        "variable": "C15_08",
+                                        "subvariable_ids": [
+                                            "c15_c15_8_c15_grid1",
+                                            "c15_c15_8_c15_grid2"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "description": "fused vars",
+                    "name": "fused",
+                    "subreferences": [
+                        {
+                            "anchor": "top",
+                            "description": null,
+                            "name": "NET BBC"
+                        },
+                        {
+                            "name": "BBCOne",
+                            "description": null
+                        },
+                        {
+                            "name": "BBCTwo",
+                            "description": null
+                        },
+                        {
+                            "name": "ITV1",
+                            "description": null
+                        },
+                        {
+                            "name": "Channel4",
+                            "description": null
+                        },
+                        {
+                            "name": "Five",
+                            "description": null
+                        },
+                        {
+                            "name": "None of these",
+                            "description": null
+                        }
+                    ]
+                },
+                "derived": true,
+                "type": {
+                    "subtype": {
+                        "class": "variable"
+                    },
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "derived": true,
+                                "references": {
+                                    "anchor": "top",
+                                    "description": null,
+                                    "name": "NET BBC"
+                                },
+                                "id": "NET BBC"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "name": "BBCOne",
+                                    "description": null
+                                },
+                                "id": "a63e371f7ace4b47b319d6c3208564ac"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "name": "BBCTwo",
+                                    "description": null
+                                },
+                                "id": "1955f26d9b3646908eb59da55153a254"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "name": "ITV1",
+                                    "description": null
+                                },
+                                "id": "9e039fa14f2d4fd29b80764139046994"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 5,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "name": "Channel4",
+                                    "description": null
+                                },
+                                "id": "6b24d790b44444ea91175a3d88633509"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 6,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "name": "Five",
+                                    "description": null
+                                },
+                                "id": "6b1de93f73d5427db3fa4d561bb04b64"
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 7,
+                            "value": {
+                                "derived": false,
+                                "references": {
+                                    "name": "None of these",
+                                    "description": null
+                                },
+                                "id": "041e03f159b54b6c8e2b17d2760887aa"
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "class": "enum"
+                }
+            },
+            {
+                "type": {
+                    "ordinal": false,
+                    "subvariables": [
+                        "NET BBC",
+                        "a63e371f7ace4b47b319d6c3208564ac",
+                        "1955f26d9b3646908eb59da55153a254",
+                        "9e039fa14f2d4fd29b80764139046994",
+                        "6b24d790b44444ea91175a3d88633509",
+                        "6b1de93f73d5427db3fa4d561bb04b64",
+                        "041e03f159b54b6c8e2b17d2760887aa"
+                    ],
+                    "variables": [
+                        {
+                            "alias": "C15_06",
+                            "id": "0000",
+                            "name": "smile"
+                        },
+                        {
+                            "alias": "C15_07",
+                            "id": "0001",
+                            "name": "think"
+                        },
+                        {
+                            "alias": "C15_08",
+                            "id": "0002",
+                            "name": "watch"
+                        }
+                    ],
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "selected": true,
+                            "id": 1,
+                            "missing": false,
+                            "name": "Selected"
+                        },
+                        {
+                            "numeric_value": 0,
+                            "id": 0,
+                            "name": "Other",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        }
+                    ]
+                },
+                "derived": true,
+                "references": {
+                    "alias": "fused_variables_C15_06_C15_07_C15_08",
+                    "subreferences": [
+                        {
+                            "description": null,
+                            "name": "NET BBC",
+                            "anchor": "top"
+                        },
+                        {
+                            "name": "BBCOne",
+                            "description": null
+                        },
+                        {
+                            "name": "BBCTwo",
+                            "description": null
+                        },
+                        {
+                            "name": "ITV1",
+                            "description": null
+                        },
+                        {
+                            "name": "Channel4",
+                            "description": null
+                        },
+                        {
+                            "name": "Five",
+                            "description": null
+                        },
+                        {
+                            "name": "None of these",
+                            "description": null
+                        }
+                    ],
+                    "description": "fused vars",
+                    "name": "fused",
+                    "view": {
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "function": "any_non_missing_selected",
+                                    "kwargs": {
+                                        "variable": "C15_08",
+                                        "subvariable_ids": [
+                                            "c15_c15_8_c15_grid1",
+                                            "c15_c15_8_c15_grid2"
+                                        ]
+                                    },
+                                    "anchor": "top",
+                                    "name": "NET BBC",
+                                    "id": 1
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                "references": {
+                    "alias": "fused_variables_C15_06_C15_07_C15_08",
+                    "view": {
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "function": "any_non_missing_selected",
+                                    "id": 1,
+                                    "anchor": "top",
+                                    "name": "NET BBC",
+                                    "kwargs": {
+                                        "variable": "C15_08",
+                                        "subvariable_ids": [
+                                            "c15_c15_8_c15_grid1",
+                                            "c15_c15_8_c15_grid2"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "description": "fused vars",
+                    "name": "fused",
+                    "subreferences": [
+                        {
+                            "anchor": "top",
+                            "description": null,
+                            "name": "NET BBC"
+                        },
+                        {
+                            "name": "BBCOne",
+                            "description": null
+                        },
+                        {
+                            "name": "BBCTwo",
+                            "description": null
+                        },
+                        {
+                            "name": "ITV1",
+                            "description": null
+                        },
+                        {
+                            "name": "Channel4",
+                            "description": null
+                        },
+                        {
+                            "name": "Five",
+                            "description": null
+                        },
+                        {
+                            "name": "None of these",
+                            "description": null
+                        }
+                    ]
+                },
+                "derived": true,
+                "type": {
+                    "subtype": {
+                        "class": "variable"
+                    },
+                    "elements": [
+                        {
+                            "id": 0,
+                            "name": "smile"
+                        },
+                        {
+                            "id": 1,
+                            "name": "think"
+                        },
+                        {
+                            "id": 2,
+                            "name": "watch"
+                        }
+                    ],
+                    "class": "enum"
+                }
+            }
+        ],
+        "missing": 35003,
+        "measures": {
+            "count": {
+                "data": [
+                    1820,
+                    2896,
+                    1913,
+                    2425,
+                    1349,
+                    2332,
+                    35003,
+                    35003,
+                    35003,
+                    1571,
+                    1942,
+                    1743,
+                    2674,
+                    2303,
+                    2502,
+                    35003,
+                    35003,
+                    35003,
+                    943,
+                    2129,
+                    930,
+                    3302,
+                    2116,
+                    3315,
+                    35003,
+                    35003,
+                    35003,
+                    1538,
+                    640,
+                    2101,
+                    2707,
+                    3605,
+                    2144,
+                    35003,
+                    35003,
+                    35003,
+                    1281,
+                    1374,
+                    1366,
+                    2964,
+                    2871,
+                    2879,
+                    35003,
+                    35003,
+                    35003,
+                    625,
+                    390,
+                    1091,
+                    3620,
+                    3855,
+                    3154,
+                    35003,
+                    35003,
+                    35003,
+                    1279,
+                    856,
+                    849,
+                    2966,
+                    3389,
+                    3396,
+                    35003,
+                    35003,
+                    35003
+                ],
+                "n_missing": 35003,
+                "metadata": {
+                    "references": {},
+                    "derived": true,
+                    "type": {
+                        "integer": true,
+                        "missing_rules": {},
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "class": "numeric"
+                    }
+                }
+            }
+        },
+        "n": 39248,
+        "filter_stats": {
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 39248,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 39248,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered": {
+                "unweighted": {
+                    "selected": 39248,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 39248,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "is_cat_date": false
+        },
+        "unfiltered": {
+            "unweighted_n": 39248,
+            "weighted_n": 39248
+        },
+        "filtered": {
+            "unweighted_n": 39248,
+            "weighted_n": 39248
+        },
+        "counts": [
+            1820,
+            2896,
+            1913,
+            2425,
+            1349,
+            2332,
+            35003,
+            35003,
+            35003,
+            1571,
+            1942,
+            1743,
+            2674,
+            2303,
+            2502,
+            35003,
+            35003,
+            35003,
+            943,
+            2129,
+            930,
+            3302,
+            2116,
+            3315,
+            35003,
+            35003,
+            35003,
+            1538,
+            640,
+            2101,
+            2707,
+            3605,
+            2144,
+            35003,
+            35003,
+            35003,
+            1281,
+            1374,
+            1366,
+            2964,
+            2871,
+            2879,
+            35003,
+            35003,
+            35003,
+            625,
+            390,
+            1091,
+            3620,
+            3855,
+            3154,
+            35003,
+            35003,
+            35003,
+            1279,
+            856,
+            849,
+            2966,
+            3389,
+            3396,
+            35003,
+            35003,
+            35003
+        ],
+        "element": "crunch:cube"
+    }
+}
