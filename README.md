@@ -113,7 +113,10 @@ The detailed description can be found
 
 ## Changes
 
-### 2.3.3
+### 2.3.5
+- Fix scorecards with MR insertions
+
+### 2.3.4
 - Consolidate stipe counts
 - Sort by value stripe
 
