@@ -3146,9 +3146,9 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert slice_.row_share_sum == pytest.approx(
             np.array(
                 [
-                    [np.nan, 0.5714285, 0.4285714, np.nan],
-                    [np.nan, 1.0, 0.0, np.nan],
-                    [np.nan, 0.4, 0.6, np.nan],
+                    [np.nan, 0.5714285, 0.4285714, 1],
+                    [np.nan, 1.0, 0.0, 1],
+                    [np.nan, 0.4, 0.6, 1],
                 ]
             ),
             nan_ok=True,
@@ -3156,9 +3156,9 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert slice_.total_share_sum == pytest.approx(
             np.array(
                 [
-                    [np.nan, 0.26666667, 0.2, np.nan],
-                    [np.nan, 0.2, 0.0, np.nan],
-                    [np.nan, 0.13333333, 0.2, np.nan],
+                    [np.nan, 0.26666667, 0.2, 0.46666667],
+                    [np.nan, 0.2, 0.0, 0.2],
+                    [np.nan, 0.13333333, 0.2, 0.33333333],
                 ]
             ),
             nan_ok=True,

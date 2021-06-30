@@ -748,15 +748,15 @@ class _ColumnShareSum(_BaseSecondOrderMeasure):
             return [
                 [
                     # --- base values ---
-                    sums_blocks[0][0] / np.sum(sums_blocks[0][0], axis=0),
+                    sums_blocks[0][0] / np.nansum(sums_blocks[0][0], axis=0),
                     # --- inserted columns ---
-                    sums_blocks[0][1] / np.sum(sums_blocks[0][1], axis=0),
+                    sums_blocks[0][1] / np.nansum(sums_blocks[0][1], axis=0),
                 ],
                 [
                     # --- inserted rows ---
-                    sums_blocks[1][0] / np.sum(sums_blocks[1][0], axis=0),
+                    sums_blocks[1][0] / np.nansum(sums_blocks[1][0], axis=0),
                     # --- intersections ---
-                    sums_blocks[1][1] / np.sum(sums_blocks[1][1], axis=0),
+                    sums_blocks[1][1] / np.nansum(sums_blocks[1][1], axis=0),
                 ],
             ]
 
@@ -1566,15 +1566,15 @@ class _RowShareSum(_BaseSecondOrderMeasure):
             return [
                 [
                     # --- base values ---
-                    (sums_blocks[0][0].T / np.sum(sums_blocks[0][0], axis=1)).T,
+                    (sums_blocks[0][0].T / np.nansum(sums_blocks[0][0], axis=1)).T,
                     # --- inserted columns ---
-                    (sums_blocks[0][1].T / np.sum(sums_blocks[0][1], axis=1)).T,
+                    (sums_blocks[0][1].T / np.nansum(sums_blocks[0][1], axis=1)).T,
                 ],
                 [
                     # --- inserted rows ---
-                    (sums_blocks[1][0].T / np.sum(sums_blocks[1][0], axis=1)).T,
+                    (sums_blocks[1][0].T / np.nansum(sums_blocks[1][0], axis=1)).T,
                     # --- intersections ---
-                    (sums_blocks[1][1].T / np.sum(sums_blocks[1][1], axis=1)).T,
+                    (sums_blocks[1][1].T / np.nansum(sums_blocks[1][1], axis=1)).T,
                 ],
             ]
 
@@ -2036,15 +2036,15 @@ class _TotalShareSum(_BaseSecondOrderMeasure):
             return [
                 [
                     # --- base values ---
-                    sums_blocks[0][0] / np.sum(sums_blocks[0][0]),
+                    sums_blocks[0][0] / np.nansum(sums_blocks[0][0]),
                     # --- inserted columns ---
-                    sums_blocks[0][1] / np.sum(sums_blocks[0][1]),
+                    sums_blocks[0][1] / np.nansum(sums_blocks[0][1]),
                 ],
                 [
                     # --- inserted rows ---
-                    sums_blocks[1][0] / np.sum(sums_blocks[1][0]),
+                    sums_blocks[1][0] / np.nansum(sums_blocks[1][0]),
                     # --- intersections ---
-                    sums_blocks[1][1] / np.sum(sums_blocks[1][1]),
+                    sums_blocks[1][1] / np.nansum(sums_blocks[1][1]),
                 ],
             ]
 
