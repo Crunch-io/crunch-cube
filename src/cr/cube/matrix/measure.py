@@ -1568,7 +1568,7 @@ class _RowShareSum(_BaseSecondOrderMeasure):
                     # --- base values ---
                     (sums_blocks[0][0].T / np.nansum(sums_blocks[0][0], axis=1)).T,
                     # --- inserted columns ---
-                    (sums_blocks[0][1].T / np.nansum(sums_blocks[0][1], axis=1)).T,
+                    (sums_blocks[0][1].T / np.nansum(sums_blocks[0][0], axis=1)).T,
                 ],
                 [
                     # --- inserted rows ---
@@ -2038,7 +2038,7 @@ class _TotalShareSum(_BaseSecondOrderMeasure):
                     # --- base values ---
                     sums_blocks[0][0] / np.nansum(sums_blocks[0][0]),
                     # --- inserted columns ---
-                    sums_blocks[0][1] / np.nansum(sums_blocks[0][1]),
+                    sums_blocks[0][1] / np.nansum(sums_blocks[0][0]),
                 ],
                 [
                     # --- inserted rows ---

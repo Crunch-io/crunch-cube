@@ -1437,7 +1437,7 @@ class Describe_RowShareSum(object):
             np.array([[0.29411765, 0.70588235]])
         )
         assert row_share_sum.blocks[0][1] == pytest.approx(
-            np.array([[0.3962264, 0.6037735]])
+            np.array([[1.23529412, 1.88235294]])
         )
         SumSubtotals_.blocks.assert_called_once_with(ANY, None, True, True)
 
@@ -1534,7 +1534,7 @@ class Describe_TotalShareSum(object):
             np.array([[0.29411765, 0.70588235]])
         )
         assert total_share_sum.blocks[0][1] == pytest.approx(
-            np.array([[0.3962264, 0.6037735]])
+            np.array([[1.23529412, 1.88235294]])
         )
         SumSubtotals_.blocks.assert_called_once_with(ANY, None, True, True)
 
