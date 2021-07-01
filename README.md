@@ -113,6 +113,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.3.6
+- Fix row share of sum denominator
+
 ### 2.3.5
 - Fix scorecards with MR insertions
 
