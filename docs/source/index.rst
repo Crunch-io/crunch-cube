@@ -26,7 +26,7 @@ reason, many API methods return data as a `numpy.ndarray` object.
 Installation
 --------------
 
-The Crunch Cube package can be installed by using the `pip install`::
+The `Crunch Cube package <https://pypi.org/project/cr.cube/>`_ can be installed via `pip install`::
 
   pip install cr.cube
 
@@ -39,29 +39,17 @@ is as simple as:
 
 .. code-block:: python
 
-    >>> from cr.cube.crunch_cube import CrunchCube
+    >>> from cr.cube.cube import Cube
 
-    >>> ### Obtain the crunch cube JSON from the Crunch.io
+    >>> ### Obtain the crunch cube JSON payload using app.crunch.io, pycrunch, rcrunch or scrunch
     >>> ### And store it in the 'cube_JSON_response' variable
 
-    >>> cube = CrunchCube(cube_JSON_response)
-    >>> cube.as_array()
-    np.array([
-         [5, 2],
-         [5, 3]
-     ])
-
-
-API Reference
--------------
-
-.. toctree::
-   :maxdepth: 2
-
-   crunch_cube
-   cube_slice
-   dimension
-
+    >>> cube = Cube(cube_JSON_response)
+    >>> print(cube)
+    Cube(name='MyCube', dimension_types='CAT x CAT')
+    >>> cube.counts
+    np.array([[1169, 547],
+              [1473, 1261]])
 
 
 For developers
@@ -88,6 +76,21 @@ will be tested by travis.
 .. image:: https://readthedocs.org/projects/crunch-cube/badge/?version=latest
    :target: http://crunch-cube.readthedocs.io/en/latest/?badge=latest
 
+
+.. toctree::
+  :hidden:
+
+  quickstart
+
+
+.. toctree::
+   :caption: API Reference
+   :maxdepth: 5
+   :hidden:
+
+   cube
+   cubepart
+   dimension
 
 
 Indices and tables

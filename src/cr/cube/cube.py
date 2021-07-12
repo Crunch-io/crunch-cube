@@ -100,7 +100,7 @@ class CubeSet(object):
     def partition_sets(self):
         """Sequence of cube-partition collections across all cubes of this cube-set.
 
-        This value might look like the following for a ca-as-0th tabbook, for example:
+        This value might look like the following for a ca-as-0th tabbook. For example::
 
             (
                 (_Strand, _Slice, _Slice),
@@ -108,7 +108,7 @@ class CubeSet(object):
                 (_Strand, _Slice, _Slice),
             )
 
-        and might often look like this for a typical slide:
+        and might often look like this for a typical slide::
 
             ((_Slice,))
 
@@ -649,7 +649,7 @@ class Cube(object):
 
     @lazyproperty
     def _slice_idxs(self):
-        """Iterable of contiguous int indicies for slices to be produced.
+        """Iterable of contiguous int indices for slices to be produced.
 
         This value is to help cube-section construction which does not by itself know
         how many slices are in a cube-result.
