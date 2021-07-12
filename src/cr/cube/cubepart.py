@@ -1744,20 +1744,24 @@ class _Nub(CubePartition):
 
     @lazyproperty
     def is_empty(self):
+        """True if the partition has no counts, False otherwise"""
         if self.unweighted_count <= 0:
             return True
         return math.isnan(self.unweighted_count)
 
     @lazyproperty
     def means(self):
+        """Float scalar representing the mean."""
         return self._scalar.means
 
     @lazyproperty
     def table_base(self):
+        """Int scalar of the unweighted N of the table."""
         return self._scalar.table_base
 
     @lazyproperty
     def unweighted_count(self):
+        """Integer scalar of total unweighted count of the table"""
         return self._cube.unweighted_counts
 
     # ---implementation (helpers)-------------------------------------
