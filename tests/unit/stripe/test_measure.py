@@ -5,26 +5,26 @@
 import numpy as np
 import pytest
 
-from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.stripe.cubemeasure import (
-    _BaseCubeMeans,
-    _BaseCubeCounts,
-    _CatCubeCounts,
     CubeMeasures,
+    _BaseCubeCounts,
+    _BaseCubeMeans,
+    _CatCubeCounts,
 )
 from cr.cube.stripe.measure import (
+    StripeMeasures,
     _BaseSecondOrderMeasure,
     _Means,
     _PopulationProportions,
     _PopulationProportionStderrs,
     _ScaledCounts,
-    StripeMeasures,
+    _TableProportions,
     _TableProportionStddevs,
     _TableProportionStderrs,
     _TableProportionVariances,
-    _TableProportions,
     _UnweightedBases,
     _UnweightedCounts,
     _WeightedBases,

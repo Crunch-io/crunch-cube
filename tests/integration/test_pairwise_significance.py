@@ -10,7 +10,7 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
 
-from ..fixtures import CR, OL, SM, NA
+from ..fixtures import CR, NA, OL, SM
 from ..util import load_python_expression
 
 

@@ -9,13 +9,13 @@ from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.stripe.cubemeasure import (
+    CubeMeasures,
+    _BaseCubeCounts,
     _BaseCubeMeans,
     _BaseCubeSums,
-    _BaseCubeCounts,
     _CatCubeCounts,
     _CatCubeMeans,
     _CatCubeSums,
-    CubeMeasures,
     _MrCubeCounts,
     _MrCubeMeans,
     _MrCubeSums,

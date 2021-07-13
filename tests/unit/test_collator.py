@@ -8,11 +8,11 @@ import numpy as np
 import pytest
 
 from cr.cube.collator import (
-    _BaseAnchoredCollator,
-    _BaseCollator,
     ExplicitOrderCollator,
     PayloadOrderCollator,
     SortByValueCollator,
+    _BaseAnchoredCollator,
+    _BaseCollator,
 )
 from cr.cube.dimension import Dimension, _OrderSpec, _Subtotal
 

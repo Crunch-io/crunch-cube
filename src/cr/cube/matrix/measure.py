@@ -5,15 +5,11 @@
 from __future__ import division
 
 import numpy as np
-from scipy.stats import t, norm
+from scipy.stats import norm, t
 
 from cr.cube.enums import DIMENSION_TYPE as DT, MARGINAL_ORIENTATION as MO
 from cr.cube.matrix.cubemeasure import CubeMeasures
-from cr.cube.matrix.subtotals import (
-    SumSubtotals,
-    NanSubtotals,
-    NoneSubtotals,
-)
+from cr.cube.matrix.subtotals import NanSubtotals, NoneSubtotals, SumSubtotals
 from cr.cube.util import lazyproperty
 
 

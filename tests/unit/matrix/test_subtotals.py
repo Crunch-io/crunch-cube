@@ -2,16 +2,12 @@
 
 """Unit test suite for `cr.cube.matrix.subtotals` module."""
 
-from cr.cube.matrix.cubemeasure import _BaseCubeCounts
 import numpy as np
 import pytest
 
 from cr.cube.dimension import Dimension, _Subtotal
-from cr.cube.matrix.subtotals import (
-    _BaseSubtotals,
-    NanSubtotals,
-    SumSubtotals,
-)
+from cr.cube.matrix.cubemeasure import _BaseCubeCounts
+from cr.cube.matrix.subtotals import NanSubtotals, SumSubtotals, _BaseSubtotals
 
 from ...unitutil import ANY, initializer_mock, instance_mock, method_mock, property_mock
 

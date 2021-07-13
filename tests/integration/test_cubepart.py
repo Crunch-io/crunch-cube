@@ -7,14 +7,14 @@ from __future__ import unicode_literals
 import numpy as np
 import pytest
 
-from cr.cube.cubepart import _Slice
 from cr.cube.cube import Cube
+from cr.cube.cubepart import _Slice
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 # ---mnemonic: CR = 'cube-response'---
 # ---mnemonic: TR = 'transforms'---
 # ---mnemonic: MRI = 'multiple-response insertions'---
-from ..fixtures import CR, TR, MRI
+from ..fixtures import CR, MRI, TR
 from ..util import load_python_expression
 
 

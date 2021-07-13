@@ -14,14 +14,12 @@ from cr.cube.cube import (
     _UnweightedCountMeasure,
     _WeightedCountMeasure,
 )
-from cr.cube.dimension import _ApparentDimensions, AllDimensions
+from cr.cube.dimension import AllDimensions, _ApparentDimensions
 from cr.cube.enums import DIMENSION_TYPE as DT
 
-from ..fixtures import (
-    CR,  # cube-response
-    OL,  # overlaps
-    NA,  # numeric-array
-)
+from ..fixtures import CR  # cube-response
+from ..fixtures import NA  # numeric-array
+from ..fixtures import OL  # overlaps
 
 
 class DescribeIntegratedCube(object):

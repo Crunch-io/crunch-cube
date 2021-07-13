@@ -8,8 +8,8 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.dimension import (
     AllDimensions,
-    _AllElements,
     Dimension,
+    _AllElements,
     _Element,
     _ElementTransforms,
     _Subtotal,

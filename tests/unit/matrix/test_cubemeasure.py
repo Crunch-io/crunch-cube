@@ -9,6 +9,7 @@ from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _ValidElements
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import (
+    CubeMeasures,
     _ArrXArrCubeCounts,
     _ArrXCatCubeCounts,
     _ArrXMrCubeCounts,
@@ -30,7 +31,6 @@ from cr.cube.matrix.cubemeasure import (
     _CatXMrCubeStdDev,
     _CatXMrCubeSums,
     _CatXMrUnconditionalCubeCounts,
-    CubeMeasures,
     _MrXArrCubeCounts,
     _MrXCatCubeCounts,
     _MrXCatCubeMeans,

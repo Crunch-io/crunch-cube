@@ -2,17 +2,17 @@
 
 """Unit test suite for `cr.cube.cube` module."""
 
-import pytest
 import numpy as np
+import pytest
 
 from cr.cube.cube import (
     Cube,
     CubeSet,
-    _Measures,
     _BaseMeasure,
+    _Measures,
     _UnweightedValidCountsMeasure,
 )
-from cr.cube.cubepart import _Slice, _Strand, _Nub
+from cr.cube.cubepart import _Nub, _Slice, _Strand
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---

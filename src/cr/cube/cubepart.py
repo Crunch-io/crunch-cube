@@ -18,13 +18,14 @@ The three types of cube partition are the *slice*, *strand*, and *nub*, which ar
 from __future__ import division
 
 import math
+
 import numpy as np
 from tabulate import tabulate
 
 from cr.cube.enums import CUBE_MEASURE as CM
-from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
+from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe.assembler import StripeAssembler

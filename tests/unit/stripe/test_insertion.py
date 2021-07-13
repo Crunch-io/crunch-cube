@@ -6,11 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.dimension import Dimension, _Subtotal
-from cr.cube.stripe.insertion import (
-    _BaseSubtotals,
-    NanSubtotals,
-    SumSubtotals,
-)
+from cr.cube.stripe.insertion import NanSubtotals, SumSubtotals, _BaseSubtotals
 
 from ...unitutil import ANY, initializer_mock, instance_mock, property_mock
 

@@ -9,33 +9,28 @@ from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal
 from cr.cube.enums import COLLATION_METHOD as CM
 from cr.cube.stripe.assembler import (
+    StripeAssembler,
     _BaseOrderHelper,
     _OrderHelper,
     _SortByMeasureHelper,
-    StripeAssembler,
 )
 from cr.cube.stripe.measure import (
+    StripeMeasures,
     _BaseSecondOrderMeasure,
     _Means,
     _PopulationProportions,
     _PopulationProportionStderrs,
     _ScaledCounts,
-    StripeMeasures,
+    _TableProportions,
     _TableProportionStddevs,
     _TableProportionStderrs,
-    _TableProportions,
     _UnweightedBases,
     _UnweightedCounts,
     _WeightedBases,
     _WeightedCounts,
 )
 
-from ...unitutil import (
-    class_mock,
-    instance_mock,
-    method_mock,
-    property_mock,
-)
+from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
 
 class DescribeStripeAssembler(object):

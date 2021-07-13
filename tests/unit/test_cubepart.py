@@ -7,7 +7,7 @@ from __future__ import division
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
+from cr.cube.cubepart import CubePartition, _Nub, _Slice, _Strand
 from cr.cube.dimension import Dimension
 from cr.cube.matrix import Assembler
 from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother

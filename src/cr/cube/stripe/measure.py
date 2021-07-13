@@ -11,7 +11,6 @@ from cr.cube.stripe.cubemeasure import CubeMeasures
 from cr.cube.stripe.insertion import NanSubtotals, SumSubtotals
 from cr.cube.util import lazyproperty
 
-
 # === MEASURE COLLECTION ===
 
 

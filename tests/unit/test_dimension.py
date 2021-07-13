@@ -7,11 +7,11 @@ import pytest
 
 from cr.cube.dimension import (
     AllDimensions,
+    Dimension,
     _AllElements,
     _ApparentDimensions,
     _BaseDimensions,
     _BaseElements,
-    Dimension,
     _DimensionFactory,
     _Element,
     _ElementTransforms,
