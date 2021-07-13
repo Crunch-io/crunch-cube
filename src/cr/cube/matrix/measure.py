@@ -11,6 +11,7 @@ from cr.cube.matrix.subtotals import (
     SumSubtotals,
     NanSubtotals,
 )
+from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.util import lazyproperty
 
 
@@ -397,6 +398,66 @@ class SecondOrderMeasures:
         return _MarginWeightedBase(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
+    def smoothed_column_index(self):
+        """_ColumnIndexSmoothed measure object for this cube-result.
+
+        If smoothing is defined in the dimension transform a _ColumnIndexSmoothed object
+        will be returned, otherwise fallback to unsmoothed measure object.
+        """
+        column_dimension = self._dimensions[-1]
+        smoothing_spec = column_dimension.smoothing_spec
+        if smoothing_spec:
+            return _ColumnIndexSmoothed(
+                self._dimensions, self, self._cube_measures, smoothing_spec
+            )
+        return self.column_index
+
+    @lazyproperty
+    def smoothed_column_proportions(self):
+        """_ColumnProportionsSmoothed measure object for this cube-result.
+
+        If smoothing is defined in the dimension transform a _ColumnProportionsSmoothed
+        object will be returned, otherwise fallback to unsmoothed measure object.
+        """
+        column_dimension = self._dimensions[-1]
+        smoothing_spec = column_dimension.smoothing_spec
+        if smoothing_spec:
+            return _ColumnProportionsSmoothed(
+                self._dimensions, self, self._cube_measures, smoothing_spec
+            )
+        return self.column_proportions
+
+    @lazyproperty
+    def smoothed_columns_scale_mean(self):
+        """_ScaleMeanSmoothed for columns measure object for this cube-result.
+
+        If smoothing is defined in the dimension transform a _ScaleMeanSmoothed object
+        will be returned, otherwise fallback to unsmoothed measure object.
+        """
+        column_dimension = self._dimensions[-1]
+        smoothing_spec = column_dimension.smoothing_spec
+        if smoothing_spec:
+            return _ScaleMeanSmoothed(
+                self._dimensions, self, self._cube_measures, MO.COLUMNS, smoothing_spec
+            )
+        return self.columns_scale_mean
+
+    @lazyproperty
+    def smoothed_means(self):
+        """_MeansSmoothed measure object for this cube-result
+
+        If smoothing is defined in the dimension transform a _MeansSmoothed object will
+        be returned, otherwise fallback to unsmoothed measure object.
+        """
+        column_dimension = self._dimensions[-1]
+        smoothing_spec = column_dimension.smoothing_spec
+        if smoothing_spec:
+            return _MeansSmoothed(
+                self._dimensions, self, self._cube_measures, smoothing_spec
+            )
+        return self.means
+
+    @lazyproperty
     def sums(self):
         """_Sums measure object for this cube-result"""
         return _Sums(self._dimensions, self, self._cube_measures)
@@ -551,6 +612,18 @@ class _BaseSecondOrderMeasure:
             f"{type(self).__name__} must implement `._intersections`"
         )
 
+    def _smoother(self, smoothing_spec):
+        """SingleSidedMovingAvgSmoother object used for smoothed measures.
+
+        Raises `NotImplementedError` if the function in the smooting spec is different
+        from `one_sided_moving_avg` the only function available today as smoothing
+        algorithm.
+        """
+        function = smoothing_spec.function
+        if function != "one_sided_moving_avg":
+            raise NotImplementedError("Function {} is not available.".format(function))
+        return SingleSidedMovingAvgSmoother(smoothing_spec.window, self._dimensions[-1])
+
     @lazyproperty
     def _subtotal_columns(self):
         """2D np.float64 ndarray of measure values for subtotal columns.
@@ -630,7 +703,12 @@ class _ColumnIndex(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def blocks(self):
-        """Nested list of the four 2D ndarray "blocks" making up this measure.
+        """Nested list of the four 2D ndarray "blocks" making up this measure."""
+        return NanSubtotals.blocks(self._column_index, self._dimensions)
+
+    @lazyproperty
+    def _column_index(self):
+        """Column-index base values.
 
         Column-index answers the question "are respondents in this row-category more or
         less likely than the overall table population to choose the answer represented
@@ -640,9 +718,37 @@ class _ColumnIndex(_BaseSecondOrderMeasure):
         would indicate hispanics are 50% more likely to own their home than the general
         population (or the population surveyed anyway).
         """
-        proportions = self._second_order_measures.column_proportions.blocks[0][0]
+        counts = self._second_order_measures.weighted_counts.blocks[0][0]
+        weighted_base = self._second_order_measures.column_weighted_bases.blocks[0][0]
+        proportions = counts / weighted_base
         baseline = self._cube_measures.unconditional_cube_counts.baseline
-        return NanSubtotals.blocks(100 * (proportions / baseline), self._dimensions)
+        return 100 * (proportions / baseline)
+
+
+class _ColumnIndexSmoothed(_ColumnIndex):
+    """Provides the smoothed column-index measure for a matrix."""
+
+    def __init__(
+        self, dimensions, second_order_measures, cube_measures, smoothing_spec
+    ):
+        super(_ColumnIndexSmoothed, self).__init__(
+            dimensions,
+            second_order_measures,
+            cube_measures,
+        )
+        self._smoothing_spec = smoothing_spec
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        It applies the smoothing algorithm to the base column_index values.
+        """
+        smoother = self._smoother(self._smoothing_spec)
+        return NanSubtotals.blocks(
+            smoother.smooth(self._column_index),
+            self._dimensions,
+        )
 
 
 class _ColumnProportions(_BaseSecondOrderMeasure):
@@ -653,34 +759,81 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
     """
 
     @lazyproperty
-    def blocks(self):
-        """Nested list of the four 2D ndarray "blocks" making up this measure.
-
-        These are the base-values, the column-subtotals, the row-subtotals, and the
-        subtotal intersection-cell values.
-
-        Column-proportions are counts divided by the column base, except that they are
-        undefined for columns with subtotal differences.
-        """
-        count_blocks = self._second_order_measures.weighted_counts.blocks
-        weighted_base_blocks = self._second_order_measures.column_weighted_bases.blocks
-
+    def _base_values(self):
+        """2D ndarray np.float64 of the base values column proportions (1st block)."""
         # --- do not propagate divide-by-zero warnings to stderr ---
         with np.errstate(divide="ignore", invalid="ignore"):
-            return [
-                [
-                    # --- base values ---
-                    count_blocks[0][0] / weighted_base_blocks[0][0],
-                    # --- inserted columns ---
-                    count_blocks[0][1] / weighted_base_blocks[0][1],
-                ],
-                [
-                    # --- inserted rows ---
-                    count_blocks[1][0] / weighted_base_blocks[1][0],
-                    # --- intersections ---
-                    count_blocks[1][1] / weighted_base_blocks[1][1],
-                ],
-            ]
+            return self._count_blocks[0][0] / self._weighted_base_blocks[0][0]
+
+    @lazyproperty
+    def _count_blocks(self):
+        """List of four 2D ndarray of weighted counts."""
+        return self._second_order_measures.weighted_counts.blocks
+
+    @lazyproperty
+    def _intersections(self):
+        """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
+
+        An intersection value arises where a row-subtotal crosses a column-subtotal.
+        """
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return self._count_blocks[1][1] / self._weighted_base_blocks[1][1]
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D np.float64 ndarray of column proportions values.
+
+        This is the second "block" and has the shape (n_rows, n_col_subtotals).
+        """
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return self._count_blocks[0][1] / self._weighted_base_blocks[0][1]
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """2D np.float64 ndarray of column proportions values.
+
+        This is the third "block" and has the shape (n_row_subtotals, n_cols).
+        """
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return self._count_blocks[1][0] / self._weighted_base_blocks[1][0]
+
+    @lazyproperty
+    def _weighted_base_blocks(self):
+        """List of four 2D ndarray of column weighted bases."""
+        return self._second_order_measures.column_weighted_bases.blocks
+
+
+class _ColumnProportionsSmoothed(_ColumnProportions):
+    """Provides the smoothed column-proportions measure for a matrix.
+
+    Column-proportions is a 2D np.float64 ndarray of the proportion of its column margin
+    contributed by the weighted count of each matrix cell.
+    """
+
+    def __init__(
+        self, dimensions, second_order_measures, cube_measures, smoothing_spec
+    ):
+        super(_ColumnProportionsSmoothed, self).__init__(
+            dimensions,
+            second_order_measures,
+            cube_measures,
+        )
+        self._smoothing_spec = smoothing_spec
+
+    @lazyproperty
+    def _base_values(self):
+        """2D ndarray np.float64 of base values column proportions smoothed values."""
+        smoother = self._smoother(self._smoothing_spec)
+        return smoother.smooth(super(_ColumnProportionsSmoothed, self)._base_values)
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """2D np.float64 ndarray of subtotal rows column proportions smoothed values."""
+        smoother = self._smoother(self._smoothing_spec)
+        return smoother.smooth(super(_ColumnProportionsSmoothed, self)._subtotal_rows)
 
 
 class _ColumnProportionVariances(_BaseSecondOrderMeasure):
@@ -934,6 +1087,29 @@ class _Means(_BaseSecondOrderMeasure):
         """2D array of the four 2D "blocks" making up this measure."""
         return NanSubtotals.blocks(
             self._cube_measures.cube_means.means, self._dimensions
+        )
+
+
+class _MeansSmoothed(_BaseSecondOrderMeasure):
+    """Provides the smoothed mean measure for a matrix."""
+
+    def __init__(
+        self, dimensions, second_order_measures, cube_measures, smoothing_spec
+    ):
+        super(_MeansSmoothed, self).__init__(
+            dimensions,
+            second_order_measures,
+            cube_measures,
+        )
+        self._smoothing_spec = smoothing_spec
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure."""
+        smoother = self._smoother(self._smoothing_spec)
+        return NanSubtotals.blocks(
+            smoother.smooth(self._cube_measures.cube_means.means),
+            self._dimensions,
         )
 
 
@@ -2206,6 +2382,18 @@ class _BaseMarginal:
             return self._second_order_measures.column_comparable_counts.is_defined
         return self._second_order_measures.row_comparable_counts.is_defined
 
+    def _smoother(self, smoothing_spec):
+        """SingleSidedMovingAvgSmoother object used for smoothed measures.
+
+        Raises `NotImplementedError` if the function in the smooting spec is different
+        from `one_sided_moving_avg` the only function available today as smoothing
+        algorithm.
+        """
+        function = smoothing_spec.function
+        if function != "one_sided_moving_avg":
+            raise NotImplementedError("Function {} is not available.".format(function))
+        return SingleSidedMovingAvgSmoother(smoothing_spec.window, self._dimensions[-1])
+
 
 class _BaseScaledCountMarginal(_BaseMarginal):
     """A base class for marginals that depend on the scaled counts."""
@@ -2513,6 +2701,34 @@ class _ScaleMean(_BaseScaledCountMarginal):
         not_a_nan_mask = ~np.isnan(values)
         denominator = np.sum(proportions[not_a_nan_mask])
         return inner / denominator
+
+
+class _ScaleMeanSmoothed(_ScaleMean):
+    """Provides the scale mean marginals smoothed for a matrix if available."""
+
+    def __init__(
+        self,
+        dimensions,
+        second_order_measures,
+        cube_measures,
+        orientation,
+        smoothing_spec,
+    ):
+        super(_ScaleMeanSmoothed, self).__init__(
+            dimensions, second_order_measures, cube_measures, orientation
+        )
+        self._smoothing_spec = smoothing_spec
+
+    @lazyproperty
+    def _proportions(self):
+        """List of 2 ndarray of the relevant proportion blocks"""
+        smoother = self._smoother(self._smoothing_spec)
+        props = self._second_order_measures.column_proportions.blocks
+        # --- Get base values & *column* subtotals
+        return [
+            smoother.smooth(props[0][0]),
+            smoother.smooth(props[0][1]),
+        ]
 
 
 class _ScaleMedian(_BaseScaledCountMarginal):

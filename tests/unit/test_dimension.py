@@ -18,6 +18,7 @@ from cr.cube.dimension import (
     _ElementTransforms,
     _OrderSpec,
     _RawDimension,
+    _SmoothingSpec,
     _Subtotal,
     _Subtotals,
     _ValidElements,
@@ -1810,3 +1811,29 @@ class Describe_Subtotal:
     @pytest.fixture
     def valid_elements_(self, request):
         return instance_mock(request, _ValidElements)
+
+
+class Describe_SmoothingSpec(object):
+    @pytest.mark.parametrize(
+        "measure_smoothing_dict, expected_value",
+        (({"window": 3}, 3), ({"window": 2}, 2)),
+    )
+    def it_knows_its_window_parameter(self, measure_smoothing_dict, expected_value):
+        window = _SmoothingSpec(measure_smoothing_dict).window
+
+        assert window == expected_value
+
+    def but_it_raises_an_exception_when_it_is_None(self):
+        with pytest.raises(ValueError) as err:
+            _SmoothingSpec({}).window
+
+        assert str(err.value) == "Window parameter cannot be None."
+
+    @pytest.mark.parametrize(
+        "measure_smoothing_dict, expected_value",
+        (({"function": "AB"}, "AB"), ({}, None)),
+    )
+    def it_knows_its_function_parameter(self, measure_smoothing_dict, expected_value):
+        window = _SmoothingSpec(measure_smoothing_dict).function
+
+        assert window == expected_value

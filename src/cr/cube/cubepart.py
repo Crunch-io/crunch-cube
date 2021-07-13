@@ -23,7 +23,6 @@ from cr.cube.enums import CUBE_MEASURE as CM
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
-from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe.assembler import StripeAssembler
 from cr.cube.util import lazyproperty
@@ -78,25 +77,6 @@ class CubePartition:
         Items appear in rows-dimension, columns-dimension order.
         """
         return tuple(d.dimension_type for d in self._dimensions)
-
-    def evaluate(self, measure_expr):
-        """Return 1D/2D ndarray result of evaluating `measure_expr`.
-
-        `measure_expr` contains the function to apply and its parameters, like::
-
-            {
-                 "function": "one_sided_moving_avg",
-                 "base_measure": "col_percent",
-                 "window": 3
-            }
-
-        This expression specifies application of the `one_sided_moving_avg` function to
-        the `col_percent` base-measure, with a sliding window of 3 periods.
-        """
-        function = measure_expr.get("function", None)
-        if function != "one_sided_moving_avg":
-            raise NotImplementedError("Function {} is not available.".format(function))
-        return SingleSidedMovingAvgSmoother(self, measure_expr).values
 
     @lazyproperty
     def ndim(self):
@@ -1059,11 +1039,59 @@ class _Slice(CubePartition):
         return self.counts.shape
 
     @lazyproperty
-    def smoothed_dimension_dict(self):
-        """dict, smoothed column dimension definition"""
-        # TODO:  remove this property when the smoother gets the base measure directly
-        # from the matrix later on.
-        return self._columns_dimension._dimension_dict
+    def smoothed_column_index(self):
+        """2D np.float64 ndarray of smoothed column-index "percentage".
+
+        If cube has smoothing specification in the transforms it will return the
+        column index smoothed according to the algorithm and the parameters
+        specified, otherwise it fallbacks to unsmoothed values.
+        """
+        return self._assembler.smoothed_column_index
+
+    @lazyproperty
+    def smoothed_column_percentages(self):
+        """2D np.float64 ndarray of smoothed column-percentages for each matrix cell.
+
+        If cube has smoothing specification in the transforms it will return the
+        column percentages smoothed according to the algorithm and the parameters
+        specified, otherwise it fallbacks to unsmoothed values.
+        """
+        return self.smoothed_column_proportions * 100
+
+    @lazyproperty
+    def smoothed_column_proportions(self):
+        """2D np.float64 ndarray of smoothed column-proportion for each matrix cell.
+
+        If cube has smoothing specification in the transforms it will return the
+        column proportions smoothed according to the algorithm and the parameters
+        specified, otherwise it fallbacks to unsmoothed values.
+        """
+        return self._assembler.smoothed_column_proportions
+
+    @lazyproperty
+    def smoothed_columns_scale_mean(self):
+        """Optional 1D np.float64 ndarray of smoothed scale mean for each column.
+
+        If cube has smoothing specification in the transforms it will return the
+        column scale mean smoothed according to the algorithm and the parameters
+        specified, otherwise it fallbacks to unsmoothed values.
+        """
+        return self._assembler.smoothed_columns_scale_mean
+
+    @lazyproperty
+    def smoothed_means(self):
+        """2D optional np.float64 ndarray of smoothed mean value for each table cell.
+
+        If cube has smoothing specification in the transforms it will return the
+        smoothed means according to the algorithm and the parameters specified,
+        otherwise it fallbacks to unsmoothed values.
+        """
+        try:
+            return self._assembler.smoothed_means
+        except ValueError:
+            raise ValueError(
+                "`.means` is undefined for a cube-result without a mean measure"
+            )
 
     @lazyproperty
     def stddev(self):
@@ -1558,11 +1586,6 @@ class _Strand(CubePartition):
         return (self.row_count,)
 
     @lazyproperty
-    def smoothed_dimension_dict(self):
-        """dict, row dimension definition"""
-        return self._rows_dimension._dimension_dict
-
-    @lazyproperty
     def share_sum(self):
         """1D np.float64 ndarray of share of sum for each row of strand.
 
@@ -1576,6 +1599,21 @@ class _Strand(CubePartition):
         except ValueError:
             raise ValueError(
                 "`.share_sum` is undefined for a cube-result without a sum measure"
+            )
+
+    @lazyproperty
+    def smoothed_means(self):
+        """1D np.float64 ndarray of smoothed mean for each row of strand.
+
+        If cube has smoothing specification in the transforms it will return the
+        smoothed means according to the algorithm and the parameters specified,
+        otherwise it fallbacks to unsmoothed values.
+        """
+        try:
+            return self._assembler.smoothed_means
+        except ValueError:
+            raise ValueError(
+                "`.means` is undefined for a cube-result without a mean measure"
             )
 
     @lazyproperty

@@ -7,7 +7,8 @@ import pytest
 
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension
+from cr.cube.dimension import Dimension, _SmoothingSpec
+from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.stripe.cubemeasure import (
     _BaseCubeMeans,
     _BaseCubeCounts,
@@ -17,6 +18,7 @@ from cr.cube.stripe.cubemeasure import (
 from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
     _Means,
+    _MeansSmoothed,
     _PopulationProportions,
     _PopulationProportionStderrs,
     _ScaledCounts,
@@ -57,12 +59,17 @@ class DescribeStripeMeasures:
     def it_provides_access_to_various_measure_objects(
         self,
         request,
-        rows_dimension_,
         _cube_measures_prop_,
         cube_measures_,
         measure_prop_name,
         MeasureCls,
     ):
+        smoothing_spec = property_mock(
+            request, Dimension, "smoothing_spec", return_value=None
+        )
+        rows_dimension_ = class_mock(
+            request, "cr.cube.dimension.Dimension", smoothing_spec=smoothing_spec
+        )
         measure_ = instance_mock(request, MeasureCls)
         MeasureCls_ = class_mock(
             request,
@@ -75,6 +82,35 @@ class DescribeStripeMeasures:
         measure = getattr(measures, measure_prop_name)
 
         MeasureCls_.assert_called_once_with(rows_dimension_, measures, cube_measures_)
+        assert measure is measure_
+
+    def it_provides_access_to_smoothed_means_measure_objects(
+        self,
+        request,
+        _cube_measures_prop_,
+        cube_measures_,
+    ):
+        smoothing_dict = {"function": "one_sided_moving_avg", "window": 3}
+        smoothing_spec = _SmoothingSpec(smoothing_dict)
+        smoothing_spec_ = property_mock(
+            request, Dimension, "smoothing_spec", return_value=smoothing_spec
+        )
+        rows_dimension_ = class_mock(
+            request, "cr.cube.dimension.Dimension", smoothing_spec=smoothing_spec_
+        )
+        measure_ = instance_mock(request, _MeansSmoothed)
+        MeasureCls_ = class_mock(
+            request,
+            "cr.cube.stripe.measure._MeansSmoothed",
+            return_value=measure_,
+        )
+        _cube_measures_prop_.return_value = cube_measures_
+        measures = StripeMeasures(None, rows_dimension_, None, None)
+        measure = measures.means
+
+        MeasureCls_.assert_called_once_with(
+            rows_dimension_, measures, cube_measures_, smoothing_spec
+        )
         assert measure is measure_
 
     def it_provides_access_to_the_pruning_base(
@@ -153,11 +189,35 @@ class Describe_BaseSecondOrderMeasure:
 
         assert measure._weighted_cube_counts is weighted_cube_counts_
 
+    def it_knows_the_smoother_object(self, rows_dimension_):
+        smoothing_dict = {"function": "one_sided_moving_avg", "window": 3}
+        smoothing_spec = _SmoothingSpec(smoothing_dict)
+        measure = _BaseSecondOrderMeasure(rows_dimension_, None, None)
+
+        smoother = measure._smoother(smoothing_spec)
+
+        assert isinstance(smoother, SingleSidedMovingAvgSmoother)
+
+    def but_it_raises_an_exception_when_smoothing_function_is_not_available(
+        self, rows_dimension_
+    ):
+        smoothing_dict = {"function": "foo", "window": 3}
+        smoothing_spec = _SmoothingSpec(smoothing_dict)
+        measure = _BaseSecondOrderMeasure(rows_dimension_, None, None)
+
+        with pytest.raises(NotImplementedError) as e:
+            measure._smoother(smoothing_spec)
+        assert str(e.value) == "Function foo is not available."
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def cube_measures_(self, request):
         return instance_mock(request, CubeMeasures)
+
+    @pytest.fixture
+    def rows_dimension_(self, request):
+        return instance_mock(request, Dimension)
 
 
 class Describe_Means:

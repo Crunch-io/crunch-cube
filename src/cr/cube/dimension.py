@@ -481,6 +481,12 @@ class Dimension:
         return len(self.all_elements)
 
     @lazyproperty
+    def smoothing_spec(self):
+        """Optional _SmoothingSpec object for transforms.smoothing dict from payload."""
+        smoothing_dict = self._dimension_transforms_dict.get("smoother", {})
+        return _SmoothingSpec(smoothing_dict) if smoothing_dict else None
+
+    @lazyproperty
     def subtotal_labels(self):
         """tuple of string element-labels for each subtotal in this dimension.
 
@@ -1224,6 +1230,26 @@ class _OrderSpec:
         Value is `{}` if no "order": field is present.
         """
         return self._dimension_transforms_dict.get("order") or {}
+
+
+class _SmoothingSpec(object):
+    """Value object providing convenient access to details of a smoothing transform."""
+
+    def __init__(self, smoothing_dict):
+        self._smoothing_dict = smoothing_dict
+
+    @lazyproperty
+    def function(self):
+        """String representing the smoothing function specified in the payload."""
+        return self._smoothing_dict.get("function")
+
+    @lazyproperty
+    def window(self):
+        """int, the window parameter specified in the smoothing expression"""
+        window = self._smoothing_dict.get("window")
+        if not window:
+            raise ValueError("Window parameter cannot be None.")
+        return window
 
 
 class _Subtotals(Sequence):

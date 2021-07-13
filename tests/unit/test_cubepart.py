@@ -8,7 +8,6 @@ from cr.cube.cube import Cube
 from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
 from cr.cube.dimension import Dimension
 from cr.cube.matrix import Assembler
-from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.stripe.assembler import StripeAssembler
 
 from ..unitutil import class_mock, instance_mock, property_mock
@@ -60,37 +59,6 @@ class DescribeCubePartition:
         cube_index = cube_partition.cube_index
 
         assert cube_index == 42
-
-    def it_can_evaluate_a_measure_expression(self, request):
-        single_sided_moving_avg_smoother_ = instance_mock(
-            request, SingleSidedMovingAvgSmoother, values=[[0.1, 0.2], [0.3, 0.4]]
-        )
-        SingleSidedMovingAvgSmoother_ = class_mock(
-            request,
-            "cr.cube.cubepart.SingleSidedMovingAvgSmoother",
-            return_value=single_sided_moving_avg_smoother_,
-        )
-        measure_expr = {
-            "function": "one_sided_moving_avg",
-            "base_measure": "col_percent",
-            "window": 2,
-        }
-        cube_partition = CubePartition(None, None)
-
-        values = cube_partition.evaluate(measure_expr)
-
-        SingleSidedMovingAvgSmoother_.assert_called_once_with(
-            cube_partition, measure_expr
-        )
-        assert values == [[0.1, 0.2], [0.3, 0.4]]
-
-    def but_it_raises_an_exception_when_function_is_not_available(self):
-        slice_ = _Slice(None, None, None, None, None)
-
-        with pytest.raises(NotImplementedError) as err:
-            slice_.evaluate({"function": "F"})
-
-        assert str(err.value) == "Function F is not available."
 
     def it_knows_the_primary_alpha_value_to_help(self, _alpha_values_prop_):
         """alpha is the primary confidence-interval threshold specified by the user."""

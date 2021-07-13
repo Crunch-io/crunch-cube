@@ -519,6 +519,35 @@ class Assembler:
         return self._assemble_marginal(self._measures.rows_scale_median)
 
     @lazyproperty
+    def smoothed_column_index(self):
+        """2D np.float64 ndarray of smoothed column-index for each table cell."""
+        return self._assemble_matrix(self._measures.smoothed_column_index.blocks)
+
+    @lazyproperty
+    def smoothed_column_proportions(self):
+        """2D np.float64 ndarray of smoothed column-proportion for each matrix cell.
+
+        This is the proportion of the weighted-count for cell to the weighted-N of the
+        column the cell appears in (aka. column-margin). Generally a number between 0.0
+        and 1.0 inclusive, but subtotal differences can be between -1.0 and 1.0
+        inclusive.
+        """
+        return self._assemble_matrix(self._measures.smoothed_column_proportions.blocks)
+
+    @lazyproperty
+    def smoothed_columns_scale_mean(self):
+        """Optional 1D smoothed column scale mean marginal for this cube-result"""
+        return self._assemble_marginal(self._measures.smoothed_columns_scale_mean)
+
+    @lazyproperty
+    def smoothed_means(self):
+        """2D optional np.float64 ndarray of smoothed mean for each cell.
+
+        Raises `ValueError` if the cube-result does not include a means cube-measure.
+        """
+        return self._assemble_matrix(self._measures.smoothed_means.blocks)
+
+    @lazyproperty
     def sums(self):
         """2D optional np.float64 ndarray of sum for each cell.
 

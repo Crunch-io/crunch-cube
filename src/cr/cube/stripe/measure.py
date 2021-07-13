@@ -5,6 +5,7 @@
 import numpy as np
 
 from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.stripe.cubemeasure import CubeMeasures
 from cr.cube.stripe.insertion import NanSubtotals, SumSubtotals
 from cr.cube.util import lazyproperty
@@ -62,6 +63,20 @@ class StripeMeasures:
     def share_sum(self):
         """_ShareSum measure object for this stripe."""
         return _ShareSum(self._rows_dimension, self, self._cube_measures)
+
+    @lazyproperty
+    def smoothed_means(self):
+        """_MeansSmoothed measure object for this stripe.
+
+        If smoothing is defined in the dimension transform a _MeansSmoothed object will
+        be returned, otherwise fallback to unsmoothed measure object.
+        """
+        smoothing_spec = self._rows_dimension.smoothing_spec
+        if smoothing_spec is not None:
+            return _MeansSmoothed(
+                self._rows_dimension, self, self._cube_measures, smoothing_spec
+            )
+        return self.means
 
     @lazyproperty
     def stddev(self):
@@ -168,6 +183,18 @@ class _BaseSecondOrderMeasure:
             f"`{type(self).__name__}` must implement `.subtotal_values`"
         )  # pragma: no cover
 
+    def _smoother(self, smoothing_spec):
+        """SingleSidedMovingAvgSmoother object used for smoothed measures.
+
+        Raises `NotImplementedError` if the function in the smooting spec is different
+        from `one_sided_moving_avg` the only function available today as smoothing
+        algorithm.
+        """
+        function = smoothing_spec.function
+        if function != "one_sided_moving_avg":
+            raise NotImplementedError("Function {} is not available.".format(function))
+        return SingleSidedMovingAvgSmoother(smoothing_spec.window, self._rows_dimension)
+
     @lazyproperty
     def _unweighted_cube_counts(self):
         """_BaseCubeCounts for unweighted counts subclass instance for this measure.
@@ -206,6 +233,27 @@ class _Means(_BaseSecondOrderMeasure):
         np.nan.
         """
         return NanSubtotals.subtotal_values(self.base_values, self._rows_dimension)
+
+
+class _MeansSmoothed(_Means):
+    """Provides the smoothed means measure for a stripe.
+
+    Relies on the presence of a means cube-measure in the cube-result.
+    """
+
+    def __init__(self, rows_dimension, measures, cube_measures, smoothing_spec):
+        super(_MeansSmoothed, self).__init__(
+            rows_dimension,
+            measures,
+            cube_measures,
+        )
+        self._smoothing_spec = smoothing_spec
+
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of smoothed mean for each row."""
+        smoother = self._smoother(self._smoothing_spec)
+        return smoother.smooth(self._cube_measures.cube_means.means)
 
 
 class _PopulationProportions(_BaseSecondOrderMeasure):
