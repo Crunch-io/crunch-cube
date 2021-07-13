@@ -3,9 +3,15 @@ repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v1.4.0-1
     hooks:
-    -   id: flake8
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
+    - id: flake8
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+
+-   repo: https://github.com/pycqa/isort
+    rev: 5.8.0
+    hooks:
+    - id: isort
+      name: isort
 
 -   repo: https://github.com/ambv/black
     rev: stable
