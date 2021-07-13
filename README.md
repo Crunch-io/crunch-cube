@@ -65,20 +65,17 @@ After the `cr.cube` package has been successfully installed, the usage is as
 simple as:
 
 
-    from cr.cube.crunch_cube import CrunchCube
+    >>> from cr.cube.cube import Cube
 
-    ### Obtain the crunch cube JSON from the Crunch.io
-    ### And store it in the 'cube_JSON_response' variable
+    >>> ### Obtain the crunch cube JSON payload using app.crunch.io, pycrunch, rcrunch or scrunch
+    >>> ### And store it in the 'cube_JSON_response' variable
 
-    cube = CrunchCube(cube_JSON_response)
-    cube.as_array()
-
-    ### Outputs:
-    #
-    # np.array([
-    #     [5, 2],
-    #     [5, 3]
-    # ])
+    >>> cube = Cube(cube_JSON_response)
+    >>> print(cube)
+    Cube(name='MyCube', dimension_types='CAT x CAT')
+    >>> cube.counts
+    np.array([[1169, 547],
+              [1473, 1261]])
 
 ## API
 
