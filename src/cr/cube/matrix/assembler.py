@@ -767,10 +767,7 @@ class Assembler(object):
         in the sequence specified by `order`, such that labels are ordered to correspond
         with their respective data vector.
         """
-        return np.array(
-            [e.label for e in dimension.valid_elements]
-            + [s.label for s in dimension.subtotals]
-        )[order]
+        return np.array(dimension.element_labels + dimension.subtotal_labels)[order]
 
     @lazyproperty
     def _measures(self):
@@ -838,9 +835,10 @@ class _BaseOrderHelper(object):
         """
         order_spec = dimensions[0].order_spec
         HelperCls = {
+            CM.LABEL: _SortRowsByLabelHelper,
+            CM.MARGINAL: _SortRowsByMarginalHelper,
             CM.OPPOSING_ELEMENT: _SortRowsByBaseColumnHelper,
             CM.OPPOSING_INSERTION: _SortRowsByInsertedColumnHelper,
-            CM.MARGINAL: _SortRowsByMarginalHelper,
         }.get(order_spec.collation_method, _RowOrderHelper)
 
         return HelperCls(dimensions, second_order_measures)._display_order
@@ -1159,6 +1157,43 @@ class _SortRowsByInsertedColumnHelper(_RowOrderHelper):
         """
         intersections = self._measure.blocks[1][1]
         return intersections[:, self._insertion_idx]
+
+
+class _SortRowsByLabelHelper(_RowOrderHelper):
+    """Orders elements by the values of their labels (from the dimension)."""
+
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of body labels that form the basis for sort order.
+
+        There is one value per row and values appear in payload (dimension) element
+        order. These are only the "base" values and do not include insertions.
+        """
+        return np.array(self._dimensions[0].element_labels)
+
+    @lazyproperty
+    def _order(self):
+        """tuple of int element-idx specifying ordering of dimension elements."""
+        try:
+            return SortByValueCollator.display_order(
+                self._rows_dimension,
+                self._element_values,
+                self._subtotal_values,
+                self._empty_row_idxs,
+            )
+        except ValueError:
+            return PayloadOrderCollator.display_order(
+                self._rows_dimension, self._empty_row_idxs
+            )
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of row-subtotal labels that contribute to the sort basis.
+
+        There is one value per row subtotal and labels appear in payload (dimension)
+        insertion order.
+        """
+        return np.array(self._dimensions[0].subtotal_labels)
 
 
 class _SortRowsByMarginalHelper(_RowOrderHelper):
