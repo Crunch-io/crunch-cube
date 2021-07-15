@@ -459,7 +459,12 @@ class SortByValueCollator(_BaseCollator):
         keys, nans = [], []
         for i, val in enumerate(subtotal_values):
             neg_idx = i - n_values
-            group = nans if np.isnan(val) else keys
+            # --- TODO: this try except does not seem idiomatic, but np.isnan fails
+            # --- on strings, and we now sort by labels which are strings
+            try:
+                group = nans if np.isnan(val) else keys
+            except TypeError:
+                group = keys
             group.append((val, neg_idx))
 
         return tuple(idx for _, idx in (sorted(keys, reverse=self._descending) + nans))

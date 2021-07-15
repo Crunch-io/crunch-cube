@@ -1686,7 +1686,6 @@ class Describe_Slice(object):
         # --- and row bases are the same as the counts
         assert slice_.row_weighted_bases.tolist() == slice_.counts.tolist()
 
-    # @pytest.mark.xfail(reason="WIP", strict=True)
     def it_has_bases_that_dont_sum_across_ca_subvars_with_insertions(self):
         transforms = {
             "rows_dimension": {
@@ -2005,7 +2004,6 @@ class Describe_Strand(object):
         ]
         assert strand.counts.tolist() == [31506, 16275, 3480, 31506, 4262, 15231, 7742]
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_can_sort_by_label(self):
         transforms = {
             "rows_dimension": {
