@@ -18,6 +18,7 @@ from cr.cube.matrix.assembler import (
     _BaseOrderHelper,
     _ColumnOrderHelper,
     _RowOrderHelper,
+    _SortRowsBaseHelper,
     _SortRowsByBaseColumnHelper,
     _SortRowsByInsertedColumnHelper,
     _SortRowsByLabelHelper,
@@ -1333,6 +1334,79 @@ class Describe_RowOrderHelper(object):
         return instance_mock(request, Dimension)
 
 
+class Describe_SortRowsBaseHelper(object):
+    """Unit test suite for `cr.cube.matrix.assembler._SortRowsBaseHelper`."""
+
+    def it_provides_the_order(
+        self,
+        SortByValueCollator_,
+        _rows_dimension_prop_,
+        _element_values_prop_,
+        _subtotal_values_prop_,
+        _empty_row_idxs_prop_,
+    ):
+        _SortRowsBaseHelper(None, None)._order
+
+        SortByValueCollator_.display_order.assert_called_once_with(
+            _rows_dimension_prop_(),
+            _element_values_prop_(),
+            _subtotal_values_prop_(),
+            _empty_row_idxs_prop_(),
+        )
+
+    def but_it_falls_back_to_payload_order_on_value_error(
+        self,
+        request,
+        dimensions_,
+        _element_values_prop_,
+        _subtotal_values_prop_,
+        _empty_row_idxs_prop_,
+        SortByValueCollator_,
+    ):
+        _element_values_prop_.return_value = None
+        _subtotal_values_prop_.return_value = None
+        _empty_row_idxs_prop_.return_value = (4, 2)
+        SortByValueCollator_.display_order.side_effect = ValueError
+        PayloadOrderCollator_ = class_mock(
+            request, "cr.cube.matrix.assembler.PayloadOrderCollator"
+        )
+        PayloadOrderCollator_.display_order.return_value = (1, 2, 3, 4)
+        order_helper = _SortRowsBaseHelper(dimensions_, None)
+
+        order = order_helper._order
+
+        PayloadOrderCollator_.display_order.assert_called_once_with(
+            dimensions_[0], (4, 2)
+        )
+        assert order == (1, 2, 3, 4)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def _element_values_prop_(self, request):
+        return property_mock(request, _SortRowsBaseHelper, "_element_values")
+
+    @pytest.fixture
+    def _empty_row_idxs_prop_(self, request):
+        return property_mock(request, _SortRowsBaseHelper, "_empty_row_idxs")
+
+    @pytest.fixture
+    def _rows_dimension_prop_(self, request):
+        return property_mock(request, _SortRowsBaseHelper, "_rows_dimension")
+
+    @pytest.fixture
+    def SortByValueCollator_(self, request):
+        return class_mock(request, "cr.cube.matrix.assembler.SortByValueCollator")
+
+    @pytest.fixture
+    def _subtotal_values_prop_(self, request):
+        return property_mock(request, _SortRowsBaseHelper, "_subtotal_values")
+
+
 class Describe_SortRowsByBaseColumnHelper(object):
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByBaseColumnHelper`."""
 
@@ -1368,43 +1442,6 @@ class Describe_SortRowsByBaseColumnHelper(object):
             order_helper._measure
 
         assert str(e.value) == ("sort-by-value for measure 'foo' is not yet supported")
-
-    def it_computes_the_sorted_element_order_to_help(self, request, dimension_):
-        property_mock(
-            request,
-            _SortRowsByBaseColumnHelper,
-            "_rows_dimension",
-            return_value=dimension_,
-        )
-        property_mock(
-            request,
-            _SortRowsByBaseColumnHelper,
-            "_element_values",
-            # --- return type is ndarray in real life, but assert_called_once_with()
-            # --- won't match on those, so use list instead.
-            return_value=[16, 3, 12],
-        )
-        property_mock(
-            request,
-            _SortRowsByBaseColumnHelper,
-            "_subtotal_values",
-            return_value=[15, 19],  # --- ndarray in real life ---
-        )
-        property_mock(
-            request, _SortRowsByBaseColumnHelper, "_empty_row_idxs", return_value=()
-        )
-        SortByValueCollator_ = class_mock(
-            request, "cr.cube.matrix.assembler.SortByValueCollator"
-        )
-        SortByValueCollator_.display_order.return_value = (-1, -2, 0, 2, 1)
-        order_helper = _SortRowsByBaseColumnHelper(None, None)
-
-        order = order_helper._order
-
-        SortByValueCollator_.display_order.assert_called_once_with(
-            dimension_, [16, 3, 12], [15, 19], ()
-        )
-        assert order == (-1, -2, 0, 2, 1)
 
     def it_extracts_the_subtotal_values_to_help(
         self, _measure_prop_, measure_, _column_idx_prop_
@@ -1471,43 +1508,6 @@ class Describe_SortRowsByInsertedColumnHelper(object):
 
         assert order_helper._insertion_idx == 1
 
-    def it_computes_the_sorted_element_order_to_help(self, request, dimension_):
-        property_mock(
-            request,
-            _SortRowsByInsertedColumnHelper,
-            "_rows_dimension",
-            return_value=dimension_,
-        )
-        property_mock(
-            request,
-            _SortRowsByInsertedColumnHelper,
-            "_element_values",
-            # --- return type is ndarray in real life, but assert_called_once_with()
-            # --- won't match on those, so use list instead.
-            return_value=[16, 3, 12],
-        )
-        property_mock(
-            request,
-            _SortRowsByInsertedColumnHelper,
-            "_subtotal_values",
-            return_value=[15, 19],  # --- ndarray in real life ---
-        )
-        property_mock(
-            request, _SortRowsByInsertedColumnHelper, "_empty_row_idxs", return_value=()
-        )
-        SortByValueCollator_ = class_mock(
-            request, "cr.cube.matrix.assembler.SortByValueCollator"
-        )
-        SortByValueCollator_.display_order.return_value = (-1, -2, 0, 2, 1)
-        order_helper = _SortRowsByInsertedColumnHelper(None, None)
-
-        order = order_helper._order
-
-        SortByValueCollator_.display_order.assert_called_once_with(
-            dimension_, [16, 3, 12], [15, 19], ()
-        )
-        assert order == (-1, -2, 0, 2, 1)
-
     def it_extracts_the_subtotal_values_to_help(
         self, _measure_prop_, measure_, _insertion_idx_prop_
     ):
@@ -1554,49 +1554,6 @@ class Describe_SortRowsByInsertedColumnHelper(object):
 class Describe_SortRowsByLabelHelper(object):
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByLabelHelper`."""
 
-    def it_provides_the_order(
-        self,
-        SortByValueCollator_,
-        _rows_dimension_prop_,
-        _element_values_prop_,
-        _subtotal_values_prop_,
-        _empty_row_idxs_prop_,
-    ):
-        _SortRowsByLabelHelper(None, None)._order
-
-        SortByValueCollator_.display_order.assert_called_once_with(
-            _rows_dimension_prop_(),
-            _element_values_prop_(),
-            _subtotal_values_prop_(),
-            _empty_row_idxs_prop_(),
-        )
-
-    def but_it_falls_back_to_payload_order_on_value_error(
-        self,
-        request,
-        dimensions_,
-        _element_values_prop_,
-        _subtotal_values_prop_,
-        _empty_row_idxs_prop_,
-        SortByValueCollator_,
-    ):
-        _element_values_prop_.return_value = None
-        _subtotal_values_prop_.return_value = None
-        _empty_row_idxs_prop_.return_value = (4, 2)
-        SortByValueCollator_.display_order.side_effect = ValueError
-        PayloadOrderCollator_ = class_mock(
-            request, "cr.cube.matrix.assembler.PayloadOrderCollator"
-        )
-        PayloadOrderCollator_.display_order.return_value = (1, 2, 3, 4)
-        order_helper = _SortRowsByLabelHelper(dimensions_, None)
-
-        order = order_helper._order
-
-        PayloadOrderCollator_.display_order.assert_called_once_with(
-            dimensions_[0], (4, 2)
-        )
-        assert order == (1, 2, 3, 4)
-
     def it_provides_the_element_values_to_help(self, dimensions_):
         dimensions_[0].element_labels = ("c", "a", "b")
 
@@ -1621,55 +1578,9 @@ class Describe_SortRowsByLabelHelper(object):
     def dimensions_(self, request):
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
 
-    @pytest.fixture
-    def _element_values_prop_(self, request):
-        return property_mock(request, _SortRowsByLabelHelper, "_element_values")
-
-    @pytest.fixture
-    def _empty_row_idxs_prop_(self, request):
-        return property_mock(request, _SortRowsByLabelHelper, "_empty_row_idxs")
-
-    @pytest.fixture
-    def _rows_dimension_prop_(self, request):
-        return property_mock(request, _SortRowsByLabelHelper, "_rows_dimension")
-
-    @pytest.fixture
-    def SortByValueCollator_(self, request):
-        return class_mock(request, "cr.cube.matrix.assembler.SortByValueCollator")
-
-    @pytest.fixture
-    def _subtotal_values_prop_(self, request):
-        return property_mock(request, _SortRowsByLabelHelper, "_subtotal_values")
-
 
 class Describe_SortRowsByMarginalHelper(object):
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByMarginalHelper`."""
-
-    def it_provides_the_order(self, request):
-        SortByValueCollator_ = class_mock(
-            request, "cr.cube.matrix.assembler.SortByValueCollator"
-        )
-        _rows_dimension_ = property_mock(
-            request, _SortRowsByMarginalHelper, "_rows_dimension"
-        )
-        _element_values_ = property_mock(
-            request, _SortRowsByMarginalHelper, "_element_values"
-        )
-        _subtotal_values_ = property_mock(
-            request, _SortRowsByMarginalHelper, "_subtotal_values"
-        )
-        _empty_row_idxs_ = property_mock(
-            request, _SortRowsByMarginalHelper, "_empty_row_idxs"
-        )
-
-        _SortRowsByMarginalHelper(None, None)._order
-
-        SortByValueCollator_.display_order.assert_called_once_with(
-            _rows_dimension_(),
-            _element_values_(),
-            _subtotal_values_(),
-            _empty_row_idxs_(),
-        )
 
     def it_provides_the_element_values_to_help(self, _marginal_prop_, marginal_):
         marginal_.blocks = ["a", "b"]

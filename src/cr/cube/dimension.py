@@ -493,7 +493,7 @@ class Dimension(object):
 
         Element-labels appear in the order defined in the cube-result.
         """
-        return tuple(e.label for e in self.subtotals)
+        return tuple(s.label for s in self.subtotals)
 
     @lazyproperty
     def subtotals(self):

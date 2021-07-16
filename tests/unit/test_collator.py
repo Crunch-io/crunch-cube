@@ -397,6 +397,10 @@ class DescribeSortByValueCollator(object):
             ((), (1, 0), True, (8.0, 2.0, 4.0, 1.0), (2, 3)),
             # --- descending with both kinds of fixed idxs ---
             ((0,), (3,), True, (8.0, 2.0, 4.0, 1.0), (2, 1)),
+            # --- ascending sort with nans (at end in order) ---
+            ((), (), False, (8.0, np.nan, 2.0, np.nan), (2, 0, 1, 3)),
+            # --- descending sort with nans (at end in order) ---
+            ((), (), True, (8.0, np.nan, 2.0, np.nan), (0, 2, 1, 3)),
         ),
     )
     def it_computes_the_sorted_body_idxs_to_help(
@@ -483,6 +487,13 @@ class DescribeSortByValueCollator(object):
         collator = SortByValueCollator(None, None, None, None)
 
         assert collator._descending == expected_value
+
+    @pytest.mark.parametrize(
+        "value, expected",
+        ((0, False), (1.1, False), ("a", False), (np.nan, True)),
+    )
+    def it_can_compute_is_nan_to_help(self, value, expected):
+        assert SortByValueCollator._is_nan(value) == expected
 
     @pytest.mark.parametrize(
         "subtotal_values, descending, expected_value",

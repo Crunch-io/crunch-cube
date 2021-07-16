@@ -389,17 +389,17 @@ class SortByValueCollator(_BaseCollator):
         These values appear in sorted order. The sequence is determined by the
         `._target_values` property defined in the subclass and the "top" and "bottom"
         anchored elements specified in the `"order": {}` dict.
+
+        If values are nan, they are placed at the end in their original payload order.
         """
         fixed_idxs = frozenset(self._top_fixed_idxs + self._bottom_fixed_idxs)
-        sorted_value_idx_pairs = sorted(
-            (
-                (value, idx)
-                for idx, value in enumerate(self._element_values)
-                if idx not in fixed_idxs
-            ),
-            reverse=self._descending,
-        )
-        return tuple(idx for _, idx in sorted_value_idx_pairs)
+        keys, nans = [], []
+        for i, val in enumerate(self._element_values):
+            if i not in fixed_idxs:
+                group = nans if self._is_nan(val) else keys
+                group.append((val, i))
+
+        return tuple(idx for _, idx in (sorted(keys, reverse=self._descending) + nans))
 
     @lazyproperty
     def _bottom_fixed_idxs(self):
@@ -431,6 +431,19 @@ class SortByValueCollator(_BaseCollator):
         """
         return self._order_spec.descending
 
+    @staticmethod
+    def _is_nan(value):
+        """True if `value` is NaN, False otherwise.
+
+        We can't use `np.isnan` directly because we want to treat any string value as
+        non-NaN (for eg sorting by label), but numpy barfs on types without NaN
+        defined.
+        """
+        try:
+            return np.isnan(value)
+        except TypeError:
+            return False
+
     def _iter_fixed_idxs(self, fixed_element_ids):
         """Generate the element-idx of each element represented by `fixed_element_ids`.
 
@@ -451,6 +464,9 @@ class SortByValueCollator(_BaseCollator):
         These values appear in sorted order. The values are determined by the
         `._subtotal_values` property defined in the subclass and the sort direction
         is derived from the `"order": {}` dict.
+
+        If subtotal values are nan, they are placed at the end in their original
+        payload order.
         """
         subtotal_values = self._subtotal_values
         n_values = len(subtotal_values)
@@ -459,12 +475,7 @@ class SortByValueCollator(_BaseCollator):
         keys, nans = [], []
         for i, val in enumerate(subtotal_values):
             neg_idx = i - n_values
-            # --- TODO: this try except does not seem idiomatic, but np.isnan fails
-            # --- on strings, and we now sort by labels which are strings
-            try:
-                group = nans if np.isnan(val) else keys
-            except TypeError:
-                group = keys
+            group = nans if self._is_nan(val) else keys
             group.append((val, neg_idx))
 
         return tuple(idx for _, idx in (sorted(keys, reverse=self._descending) + nans))

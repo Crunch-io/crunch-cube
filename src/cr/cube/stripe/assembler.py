@@ -368,8 +368,15 @@ class _OrderHelper(_BaseOrderHelper):
         return CollatorCls.display_order(self._rows_dimension, self._empty_row_idxs)
 
 
-class _SortByLabelHelper(_BaseOrderHelper):
-    """Orders rows by the value of a specified measure."""
+class _SortBaseHelper(_BaseOrderHelper):
+    """A base class that orders elements by a set of values.
+
+    This class is intended only to serve as a base for the other sort-by-value classes
+    which must all provide their own implentations of `_element_values` and
+    `_subtotal_values`.
+
+    If `_display_order` encouters a ValueError, it falls back to the payload order.
+    """
 
     @lazyproperty
     def _display_order(self):
@@ -394,6 +401,30 @@ class _SortByLabelHelper(_BaseOrderHelper):
 
     @lazyproperty
     def _element_values(self):
+        """Sequence of body values that form the basis for sort order.
+
+        Must be implemented by child classes.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `._element_values`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of subtotal values that form the basis for sort order.
+
+        Must be implemented by child classes.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `._subtotal_values`" % type(self).__name__
+        )
+
+
+class _SortByLabelHelper(_SortBaseHelper):
+    """Orders rows by the value of a specified measure."""
+
+    @lazyproperty
+    def _element_values(self):
         """Sequence of labels that form the basis for sort order.
 
         There is one value per row and values appear in payload (dimension) element
@@ -411,29 +442,8 @@ class _SortByLabelHelper(_BaseOrderHelper):
         return np.array(self._rows_dimension.subtotal_labels)
 
 
-class _SortByMeasureHelper(_BaseOrderHelper):
+class _SortByMeasureHelper(_SortBaseHelper):
     """Orders rows by the value of a specified measure."""
-
-    @lazyproperty
-    def _display_order(self):
-        """tuple of signed int idx for each row of stripe.
-
-        Negative values represent inserted-vector locations. Returned sequence reflects
-        insertion, hiding, pruning, and ordering transforms specified in the
-        rows-dimension.
-        """
-        # --- fall back to payload order if sort-by-value failes
-        try:
-            return SortByValueCollator.display_order(
-                self._rows_dimension,
-                self._element_values,
-                self._subtotal_values,
-                self._empty_row_idxs,
-            )
-        except ValueError:
-            return PayloadOrderCollator.display_order(
-                self._rows_dimension, self._empty_row_idxs
-            )
 
     @lazyproperty
     def _element_values(self):

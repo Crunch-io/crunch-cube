@@ -939,6 +939,23 @@ class Describe_Slice(object):
         actual = slice_.row_labels.tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
+    def it_can_sort_by_marginal_with_nan_in_body(self):
+        transforms = {
+            "columns_dimension": {"insertions": {}},
+            "rows_dimension": {
+                "insertions": {},
+                "order": {
+                    "type": "marginal",
+                    "marginal": "scale_mean",
+                    "direction": "descending",
+                },
+            },
+        }
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
+        assert slice_.rows_scale_mean.tolist() == pytest.approx(
+            [2.45356177, 2.11838791, 2.0, 1.97, 1.74213625, np.nan], nan_ok=True
+        )
+
     @pytest.mark.parametrize(
         "measure, expectation",
         (

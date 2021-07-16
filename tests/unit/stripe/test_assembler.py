@@ -11,6 +11,7 @@ from cr.cube.enums import COLLATION_METHOD as CM
 from cr.cube.stripe.assembler import (
     _BaseOrderHelper,
     _OrderHelper,
+    _SortBaseHelper,
     _SortByLabelHelper,
     _SortByMeasureHelper,
     StripeAssembler,
@@ -331,8 +332,8 @@ class Describe_OrderHelper(object):
         assert display_order == (1, -2, 3, 5, -1)
 
 
-class Describe_SortByLabelHelper(object):
-    """Unit test suite for `cr.cube.strip.assembler._SortByLabelHelper`."""
+class Describe_SortBaseHelper(object):
+    """Unit test suite for `cr.cube.strip.assembler._SortBaseHelper`."""
 
     def it_computes_the_display_order_to_help(
         self,
@@ -348,7 +349,7 @@ class Describe_SortByLabelHelper(object):
         _subtotal_values_prop_.return_value = [15, 19]
         _empty_row_idxs_prop_.return_value = ()
         SortByValueCollator_.display_order.return_value = (-1, -2, 0, 2, 1)
-        order_helper = _SortByLabelHelper(dimension_, None)
+        order_helper = _SortBaseHelper(dimension_, None)
 
         order = order_helper._display_order
 
@@ -374,12 +375,38 @@ class Describe_SortByLabelHelper(object):
             request, "cr.cube.stripe.assembler.PayloadOrderCollator"
         )
         PayloadOrderCollator_.display_order.return_value = (1, 2, 3, 4)
-        order_helper = _SortByLabelHelper(dimension_, None)
+        order_helper = _SortBaseHelper(dimension_, None)
 
         order = order_helper._display_order
 
         PayloadOrderCollator_.display_order.assert_called_once_with(dimension_, (4, 2))
         assert order == (1, 2, 3, 4)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _element_values_prop_(self, request):
+        return property_mock(request, _SortBaseHelper, "_element_values")
+
+    @pytest.fixture
+    def _empty_row_idxs_prop_(self, request):
+        return property_mock(request, _SortBaseHelper, "_empty_row_idxs")
+
+    @pytest.fixture
+    def SortByValueCollator_(self, request):
+        return class_mock(request, "cr.cube.stripe.assembler.SortByValueCollator")
+
+    @pytest.fixture
+    def _subtotal_values_prop_(self, request):
+        return property_mock(request, _SortBaseHelper, "_subtotal_values")
+
+
+class Describe_SortByLabelHelper(object):
+    """Unit test suite for `cr.cube.strip.assembler._SortByLabelHelper`."""
 
     def it_extracts_the_element_values_to_help(self, dimension_):
         dimension_.element_labels = ["b", "a", "c"]
@@ -399,72 +426,9 @@ class Describe_SortByLabelHelper(object):
     def dimension_(self, request):
         return instance_mock(request, Dimension)
 
-    @pytest.fixture
-    def _element_values_prop_(self, request):
-        return property_mock(request, _SortByLabelHelper, "_element_values")
-
-    @pytest.fixture
-    def _empty_row_idxs_prop_(self, request):
-        return property_mock(request, _SortByLabelHelper, "_empty_row_idxs")
-
-    @pytest.fixture
-    def SortByValueCollator_(self, request):
-        return class_mock(request, "cr.cube.stripe.assembler.SortByValueCollator")
-
-    @pytest.fixture
-    def _subtotal_values_prop_(self, request):
-        return property_mock(request, _SortByLabelHelper, "_subtotal_values")
-
 
 class Describe_SortByMeasureHelper(object):
     """Unit test suite for `cr.cube.strip.assembler._SortByMeasureHelper`."""
-
-    def it_computes_the_display_order_to_help(
-        self,
-        dimension_,
-        _element_values_prop_,
-        _subtotal_values_prop_,
-        _empty_row_idxs_prop_,
-        SortByValueCollator_,
-    ):
-        # --- return type of first two is ndarray in real life, but
-        # --- assert_called_once_with() won't match on those, so use list instead.
-        _element_values_prop_.return_value = [16, 3, 12]
-        _subtotal_values_prop_.return_value = [15, 19]
-        _empty_row_idxs_prop_.return_value = ()
-        SortByValueCollator_.display_order.return_value = (-1, -2, 0, 2, 1)
-        order_helper = _SortByMeasureHelper(dimension_, None)
-
-        order = order_helper._display_order
-
-        SortByValueCollator_.display_order.assert_called_once_with(
-            dimension_, [16, 3, 12], [15, 19], ()
-        )
-        assert order == (-1, -2, 0, 2, 1)
-
-    def but_it_falls_back_to_payload_order_on_value_error(
-        self,
-        request,
-        dimension_,
-        _element_values_prop_,
-        _subtotal_values_prop_,
-        _empty_row_idxs_prop_,
-        SortByValueCollator_,
-    ):
-        _element_values_prop_.return_value = None
-        _subtotal_values_prop_.return_value = None
-        _empty_row_idxs_prop_.return_value = (4, 2)
-        SortByValueCollator_.display_order.side_effect = ValueError
-        PayloadOrderCollator_ = class_mock(
-            request, "cr.cube.stripe.assembler.PayloadOrderCollator"
-        )
-        PayloadOrderCollator_.display_order.return_value = (1, 2, 3, 4)
-        order_helper = _SortByMeasureHelper(dimension_, None)
-
-        order = order_helper._display_order
-
-        PayloadOrderCollator_.display_order.assert_called_once_with(dimension_, (4, 2))
-        assert order == (1, 2, 3, 4)
 
     def it_extracts_the_element_values_to_help(self, _measure_prop_, measure_):
         _measure_prop_.return_value = measure_
@@ -528,18 +492,6 @@ class Describe_SortByMeasureHelper(object):
     # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def dimension_(self, request):
-        return instance_mock(request, Dimension)
-
-    @pytest.fixture
-    def _element_values_prop_(self, request):
-        return property_mock(request, _SortByMeasureHelper, "_element_values")
-
-    @pytest.fixture
-    def _empty_row_idxs_prop_(self, request):
-        return property_mock(request, _SortByMeasureHelper, "_empty_row_idxs")
-
-    @pytest.fixture
     def measure_(self, request):
         return instance_mock(request, _BaseSecondOrderMeasure)
 
@@ -554,11 +506,3 @@ class Describe_SortByMeasureHelper(object):
     @pytest.fixture
     def _order_spec_prop_(self, request):
         return property_mock(request, _SortByMeasureHelper, "_order_spec")
-
-    @pytest.fixture
-    def SortByValueCollator_(self, request):
-        return class_mock(request, "cr.cube.stripe.assembler.SortByValueCollator")
-
-    @pytest.fixture
-    def _subtotal_values_prop_(self, request):
-        return property_mock(request, _SortByMeasureHelper, "_subtotal_values")
