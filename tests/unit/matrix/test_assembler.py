@@ -16,9 +16,9 @@ from cr.cube.enums import (
 from cr.cube.matrix.assembler import (
     Assembler,
     _BaseOrderHelper,
+    _BaseSortRowsByValueHelper,
     _ColumnOrderHelper,
     _RowOrderHelper,
-    _SortRowsBaseHelper,
     _SortRowsByBaseColumnHelper,
     _SortRowsByInsertedColumnHelper,
     _SortRowsByLabelHelper,
@@ -1334,8 +1334,8 @@ class Describe_RowOrderHelper(object):
         return instance_mock(request, Dimension)
 
 
-class Describe_SortRowsBaseHelper(object):
-    """Unit test suite for `cr.cube.matrix.assembler._SortRowsBaseHelper`."""
+class Describe_BaseSortRowsByValueHelper(object):
+    """Unit test suite for `cr.cube.matrix.assembler._BaseSortRowsByValueHelper`."""
 
     def it_provides_the_order(
         self,
@@ -1345,7 +1345,7 @@ class Describe_SortRowsBaseHelper(object):
         _subtotal_values_prop_,
         _empty_row_idxs_prop_,
     ):
-        _SortRowsBaseHelper(None, None)._order
+        _BaseSortRowsByValueHelper(None, None)._order
 
         SortByValueCollator_.display_order.assert_called_once_with(
             _rows_dimension_prop_(),
@@ -1371,7 +1371,7 @@ class Describe_SortRowsBaseHelper(object):
             request, "cr.cube.matrix.assembler.PayloadOrderCollator"
         )
         PayloadOrderCollator_.display_order.return_value = (1, 2, 3, 4)
-        order_helper = _SortRowsBaseHelper(dimensions_, None)
+        order_helper = _BaseSortRowsByValueHelper(dimensions_, None)
 
         order = order_helper._order
 
@@ -1388,15 +1388,15 @@ class Describe_SortRowsBaseHelper(object):
 
     @pytest.fixture
     def _element_values_prop_(self, request):
-        return property_mock(request, _SortRowsBaseHelper, "_element_values")
+        return property_mock(request, _BaseSortRowsByValueHelper, "_element_values")
 
     @pytest.fixture
     def _empty_row_idxs_prop_(self, request):
-        return property_mock(request, _SortRowsBaseHelper, "_empty_row_idxs")
+        return property_mock(request, _BaseSortRowsByValueHelper, "_empty_row_idxs")
 
     @pytest.fixture
     def _rows_dimension_prop_(self, request):
-        return property_mock(request, _SortRowsBaseHelper, "_rows_dimension")
+        return property_mock(request, _BaseSortRowsByValueHelper, "_rows_dimension")
 
     @pytest.fixture
     def SortByValueCollator_(self, request):
@@ -1404,7 +1404,7 @@ class Describe_SortRowsBaseHelper(object):
 
     @pytest.fixture
     def _subtotal_values_prop_(self, request):
-        return property_mock(request, _SortRowsBaseHelper, "_subtotal_values")
+        return property_mock(request, _BaseSortRowsByValueHelper, "_subtotal_values")
 
 
 class Describe_SortRowsByBaseColumnHelper(object):

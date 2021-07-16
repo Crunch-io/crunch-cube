@@ -10,8 +10,8 @@ from cr.cube.dimension import Dimension, _Element, _OrderSpec
 from cr.cube.enums import COLLATION_METHOD as CM
 from cr.cube.stripe.assembler import (
     _BaseOrderHelper,
+    _BaseSortByValueHelper,
     _OrderHelper,
-    _SortBaseHelper,
     _SortByLabelHelper,
     _SortByMeasureHelper,
     StripeAssembler,
@@ -332,8 +332,8 @@ class Describe_OrderHelper(object):
         assert display_order == (1, -2, 3, 5, -1)
 
 
-class Describe_SortBaseHelper(object):
-    """Unit test suite for `cr.cube.strip.assembler._SortBaseHelper`."""
+class Describe_BaseSortByValueHelper(object):
+    """Unit test suite for `cr.cube.strip.assembler._BaseSortByValueHelper`."""
 
     def it_computes_the_display_order_to_help(
         self,
@@ -349,7 +349,7 @@ class Describe_SortBaseHelper(object):
         _subtotal_values_prop_.return_value = [15, 19]
         _empty_row_idxs_prop_.return_value = ()
         SortByValueCollator_.display_order.return_value = (-1, -2, 0, 2, 1)
-        order_helper = _SortBaseHelper(dimension_, None)
+        order_helper = _BaseSortByValueHelper(dimension_, None)
 
         order = order_helper._display_order
 
@@ -375,7 +375,7 @@ class Describe_SortBaseHelper(object):
             request, "cr.cube.stripe.assembler.PayloadOrderCollator"
         )
         PayloadOrderCollator_.display_order.return_value = (1, 2, 3, 4)
-        order_helper = _SortBaseHelper(dimension_, None)
+        order_helper = _BaseSortByValueHelper(dimension_, None)
 
         order = order_helper._display_order
 
@@ -390,11 +390,11 @@ class Describe_SortBaseHelper(object):
 
     @pytest.fixture
     def _element_values_prop_(self, request):
-        return property_mock(request, _SortBaseHelper, "_element_values")
+        return property_mock(request, _BaseSortByValueHelper, "_element_values")
 
     @pytest.fixture
     def _empty_row_idxs_prop_(self, request):
-        return property_mock(request, _SortBaseHelper, "_empty_row_idxs")
+        return property_mock(request, _BaseSortByValueHelper, "_empty_row_idxs")
 
     @pytest.fixture
     def SortByValueCollator_(self, request):
@@ -402,7 +402,7 @@ class Describe_SortBaseHelper(object):
 
     @pytest.fixture
     def _subtotal_values_prop_(self, request):
-        return property_mock(request, _SortBaseHelper, "_subtotal_values")
+        return property_mock(request, _BaseSortByValueHelper, "_subtotal_values")
 
 
 class Describe_SortByLabelHelper(object):

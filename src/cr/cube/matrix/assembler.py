@@ -1057,7 +1057,7 @@ class _RowOrderHelper(_BaseOrderHelper):
         )
 
 
-class _SortRowsBaseHelper(_RowOrderHelper):
+class _BaseSortRowsByValueHelper(_RowOrderHelper):
     """A base class that orders elements by a set of values.
 
     This class is intended only to serve as a base for the other sort-by-value classes
@@ -1103,7 +1103,7 @@ class _SortRowsBaseHelper(_RowOrderHelper):
         )
 
 
-class _SortRowsByBaseColumnHelper(_SortRowsBaseHelper):
+class _SortRowsByBaseColumnHelper(_BaseSortRowsByValueHelper):
     """Orders elements by the values of an opposing base (not a subtotal) vector.
 
     This would be like "order rows in descending order by value of 'Strongly Agree'
@@ -1139,7 +1139,7 @@ class _SortRowsByBaseColumnHelper(_SortRowsBaseHelper):
         return measure_subtotal_rows[:, self._column_idx]
 
 
-class _SortRowsByInsertedColumnHelper(_SortRowsBaseHelper):
+class _SortRowsByInsertedColumnHelper(_BaseSortRowsByValueHelper):
     """Orders rows by the values in an inserted column.
 
     This would be like "order rows in descending order by value of 'Top 3' subtotal
@@ -1175,7 +1175,7 @@ class _SortRowsByInsertedColumnHelper(_SortRowsBaseHelper):
         return intersections[:, self._insertion_idx]
 
 
-class _SortRowsByLabelHelper(_SortRowsBaseHelper):
+class _SortRowsByLabelHelper(_BaseSortRowsByValueHelper):
     """Orders elements by the values of their labels (from the dimension)."""
 
     @lazyproperty
@@ -1197,7 +1197,7 @@ class _SortRowsByLabelHelper(_SortRowsBaseHelper):
         return np.array(self._dimensions[0].subtotal_labels)
 
 
-class _SortRowsByMarginalHelper(_SortRowsBaseHelper):
+class _SortRowsByMarginalHelper(_BaseSortRowsByValueHelper):
     """Orders elements by the values of an opposing marginal vector.
 
     This would be like "order rows in descending order by value of rows scale mean.

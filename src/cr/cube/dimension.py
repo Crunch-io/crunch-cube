@@ -489,7 +489,7 @@ class Dimension(object):
 
     @lazyproperty
     def subtotal_labels(self):
-        """tuple of string element-labels for each valid subtotal in this dimension.
+        """tuple of string element-labels for each subtotal in this dimension.
 
         Element-labels appear in the order defined in the cube-result.
         """

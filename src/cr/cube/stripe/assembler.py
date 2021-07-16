@@ -368,7 +368,7 @@ class _OrderHelper(_BaseOrderHelper):
         return CollatorCls.display_order(self._rows_dimension, self._empty_row_idxs)
 
 
-class _SortBaseHelper(_BaseOrderHelper):
+class _BaseSortByValueHelper(_BaseOrderHelper):
     """A base class that orders elements by a set of values.
 
     This class is intended only to serve as a base for the other sort-by-value classes
@@ -420,7 +420,7 @@ class _SortBaseHelper(_BaseOrderHelper):
         )
 
 
-class _SortByLabelHelper(_SortBaseHelper):
+class _SortByLabelHelper(_BaseSortByValueHelper):
     """Orders rows by the value of a specified measure."""
 
     @lazyproperty
@@ -442,7 +442,7 @@ class _SortByLabelHelper(_SortBaseHelper):
         return np.array(self._rows_dimension.subtotal_labels)
 
 
-class _SortByMeasureHelper(_SortBaseHelper):
+class _SortByMeasureHelper(_BaseSortByValueHelper):
     """Orders rows by the value of a specified measure."""
 
     @lazyproperty
