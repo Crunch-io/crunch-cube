@@ -110,6 +110,9 @@ The detailed description can be found
 
 ## Changes
 
+### 2.3.7
+- Allow sorting by label
+
 ### 2.3.6
 - Fix row share of sum denominator
 
