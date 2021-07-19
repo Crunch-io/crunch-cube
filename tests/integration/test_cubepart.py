@@ -921,6 +921,41 @@ class Describe_Slice(object):
         actual = np.round(slice_.column_percentages, 1).tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
+    def it_can_sort_by_labels(self):
+        """Responds to order:label sort-by-label."""
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "label",
+                    "direction": "ascending",
+                    # --- element-ids are 1, 2, 3, 999 ---
+                    "fixed": {"bottom": [1]},
+                }
+            }
+        }
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, transforms, None, 0)
+
+        expected = ["Enough", "N/A", "Not enough", "Plenty"]
+        actual = slice_.row_labels.tolist()
+        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+
+    def it_can_sort_by_marginal_with_nan_in_body(self):
+        transforms = {
+            "columns_dimension": {"insertions": {}},
+            "rows_dimension": {
+                "insertions": {},
+                "order": {
+                    "type": "marginal",
+                    "marginal": "scale_mean",
+                    "direction": "descending",
+                },
+            },
+        }
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
+        assert slice_.rows_scale_mean.tolist() == pytest.approx(
+            [2.45356177, 2.11838791, 2.0, 1.97, 1.74213625, np.nan], nan_ok=True
+        )
+
     @pytest.mark.parametrize(
         "measure, expectation",
         (
@@ -1667,7 +1702,6 @@ class Describe_Slice(object):
         # --- and row bases are the same as the counts
         assert slice_.row_weighted_bases.tolist() == slice_.counts.tolist()
 
-    # @pytest.mark.xfail(reason="WIP", strict=True)
     def it_has_bases_that_dont_sum_across_ca_subvars_with_insertions(self):
         transforms = {
             "rows_dimension": {
@@ -1985,6 +2019,31 @@ class Describe_Strand(object):
             "Total D-E",
         ]
         assert strand.counts.tolist() == [31506, 16275, 3480, 31506, 4262, 15231, 7742]
+
+    def it_can_sort_by_label(self):
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "label",
+                    "direction": "ascending",
+                    # --- element-ids are 1, 2, 3, 4, 5 ---
+                    "fixed": {"bottom": [1]},
+                }
+            }
+        }
+        strand_ = Cube(CR.CAT_HS_MT, transforms=transforms).partitions[0]
+
+        expected = [
+            "Both",
+            "Neither",
+            "Not sure",
+            "Republicans",
+            "President O",
+            "Test Headin",
+            "Test New He",
+        ]
+        actual = strand_.row_labels.tolist()
+        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
     def it_knows_when_it_is_empty(self):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]

@@ -767,10 +767,7 @@ class Assembler(object):
         in the sequence specified by `order`, such that labels are ordered to correspond
         with their respective data vector.
         """
-        return np.array(
-            [e.label for e in dimension.valid_elements]
-            + [s.label for s in dimension.subtotals]
-        )[order]
+        return np.array(dimension.element_labels + dimension.subtotal_labels)[order]
 
     @lazyproperty
     def _measures(self):
@@ -838,9 +835,10 @@ class _BaseOrderHelper(object):
         """
         order_spec = dimensions[0].order_spec
         HelperCls = {
+            CM.LABEL: _SortRowsByLabelHelper,
+            CM.MARGINAL: _SortRowsByMarginalHelper,
             CM.OPPOSING_ELEMENT: _SortRowsByBaseColumnHelper,
             CM.OPPOSING_INSERTION: _SortRowsByInsertedColumnHelper,
-            CM.MARGINAL: _SortRowsByMarginalHelper,
         }.get(order_spec.collation_method, _RowOrderHelper)
 
         return HelperCls(dimensions, second_order_measures)._display_order
@@ -1059,7 +1057,53 @@ class _RowOrderHelper(_BaseOrderHelper):
         )
 
 
-class _SortRowsByBaseColumnHelper(_RowOrderHelper):
+class _BaseSortRowsByValueHelper(_RowOrderHelper):
+    """A base class that orders elements by a set of values.
+
+    This class is intended only to serve as a base for the other sort-by-value classes
+    which must all provide their own implentations of `_element_values` and
+    `_subtotal_values`.
+
+    If `_order` encouters a ValueError, it falls back to the payload order.
+    """
+
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of body values that form the basis for sort order.
+
+        Must be implemented by child classes.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `._element_values`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def _order(self):
+        """tuple of int element-idx specifying ordering of dimension elements."""
+        try:
+            return SortByValueCollator.display_order(
+                self._rows_dimension,
+                self._element_values,
+                self._subtotal_values,
+                self._empty_row_idxs,
+            )
+        except ValueError:
+            return PayloadOrderCollator.display_order(
+                self._rows_dimension, self._empty_row_idxs
+            )
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of subtotal values that form the basis for sort order.
+
+        Must be implemented by child classes.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `._subtotal_values`" % type(self).__name__
+        )
+
+
+class _SortRowsByBaseColumnHelper(_BaseSortRowsByValueHelper):
     """Orders elements by the values of an opposing base (not a subtotal) vector.
 
     This would be like "order rows in descending order by value of 'Strongly Agree'
@@ -1085,21 +1129,6 @@ class _SortRowsByBaseColumnHelper(_RowOrderHelper):
         return measure_base_values[:, self._column_idx]
 
     @lazyproperty
-    def _order(self):
-        """tuple of int element-idx specifying ordering of dimension elements."""
-        try:
-            return SortByValueCollator.display_order(
-                self._rows_dimension,
-                self._element_values,
-                self._subtotal_values,
-                self._empty_row_idxs,
-            )
-        except ValueError:
-            return PayloadOrderCollator.display_order(
-                self._rows_dimension, self._empty_row_idxs
-            )
-
-    @lazyproperty
     def _subtotal_values(self):
         """Sequence of row-subtotal values that contribute to the sort basis.
 
@@ -1110,7 +1139,7 @@ class _SortRowsByBaseColumnHelper(_RowOrderHelper):
         return measure_subtotal_rows[:, self._column_idx]
 
 
-class _SortRowsByInsertedColumnHelper(_RowOrderHelper):
+class _SortRowsByInsertedColumnHelper(_BaseSortRowsByValueHelper):
     """Orders rows by the values in an inserted column.
 
     This would be like "order rows in descending order by value of 'Top 3' subtotal
@@ -1136,21 +1165,6 @@ class _SortRowsByInsertedColumnHelper(_RowOrderHelper):
         )
 
     @lazyproperty
-    def _order(self):
-        """tuple of int element-idx specifying ordering of dimension elements."""
-        try:
-            return SortByValueCollator.display_order(
-                self._rows_dimension,
-                self._element_values,
-                self._subtotal_values,
-                self._empty_row_idxs,
-            )
-        except ValueError:
-            return PayloadOrderCollator.display_order(
-                self._rows_dimension, self._empty_row_idxs
-            )
-
-    @lazyproperty
     def _subtotal_values(self):
         """Sequence of row-subtotal intersection values that contribute to sort basis.
 
@@ -1161,7 +1175,29 @@ class _SortRowsByInsertedColumnHelper(_RowOrderHelper):
         return intersections[:, self._insertion_idx]
 
 
-class _SortRowsByMarginalHelper(_RowOrderHelper):
+class _SortRowsByLabelHelper(_BaseSortRowsByValueHelper):
+    """Orders elements by the values of their labels (from the dimension)."""
+
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of body labels that form the basis for sort order.
+
+        There is one value per row and values appear in payload (dimension) element
+        order. These are only the "base" values and do not include insertions.
+        """
+        return np.array(self._dimensions[0].element_labels)
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of row-subtotal labels that contribute to the sort basis.
+
+        There is one value per row subtotal and labels appear in payload (dimension)
+        insertion order.
+        """
+        return np.array(self._dimensions[0].subtotal_labels)
+
+
+class _SortRowsByMarginalHelper(_BaseSortRowsByValueHelper):
     """Orders elements by the values of an opposing marginal vector.
 
     This would be like "order rows in descending order by value of rows scale mean.
@@ -1198,21 +1234,6 @@ class _SortRowsByMarginalHelper(_RowOrderHelper):
             )
 
         return getattr(self._second_order_measures, marginal_propname)
-
-    @lazyproperty
-    def _order(self):
-        """tuple of int element-idx specifying ordering of dimension elements."""
-        try:
-            return SortByValueCollator.display_order(
-                self._rows_dimension,
-                self._element_values,
-                self._subtotal_values,
-                self._empty_row_idxs,
-            )
-        except ValueError:
-            return PayloadOrderCollator.display_order(
-                self._rows_dimension, self._empty_row_idxs
-            )
 
     @lazyproperty
     def _subtotal_values(self):

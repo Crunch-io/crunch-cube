@@ -63,6 +63,7 @@ class COLLATION_METHOD(enum.Enum):
     """Enumerated values representing the methods of sorting dimension elements."""
 
     EXPLICIT_ORDER = "explicit"
+    LABEL = "label"
     MARGINAL = "marginal"
     OPPOSING_ELEMENT = "opposing_element"
     OPPOSING_INSERTION = "opposing_insertion"

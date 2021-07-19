@@ -394,6 +394,14 @@ class Dimension(object):
         return tuple(e.element_id for e in self.valid_elements)
 
     @lazyproperty
+    def element_labels(self):
+        """tuple of string element-labels for each valid element in this dimension.
+
+        Element-labels appear in the order defined in the cube-result.
+        """
+        return tuple(e.label for e in self.valid_elements)
+
+    @lazyproperty
     def element_subvar_ids(self):
         return tuple(e.element_subvar_id for e in self.valid_elements)
 
@@ -478,6 +486,14 @@ class Dimension(object):
     def shape(self):
         """int count of *all* elements in this dimension, both valid and missing."""
         return len(self.all_elements)
+
+    @lazyproperty
+    def subtotal_labels(self):
+        """tuple of string element-labels for each subtotal in this dimension.
+
+        Element-labels appear in the order defined in the cube-result.
+        """
+        return tuple(s.label for s in self.subtotals)
 
     @lazyproperty
     def subtotals(self):

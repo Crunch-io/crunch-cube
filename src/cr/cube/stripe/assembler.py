@@ -121,8 +121,7 @@ class StripeAssembler(object):
         row.
         """
         return np.array(
-            [e.label for e in self._rows_dimension.valid_elements]
-            + [s.label for s in self._rows_dimension.subtotals]
+            self._rows_dimension.element_labels + self._rows_dimension.subtotal_labels
         )[self._row_order]
 
     @lazyproperty
@@ -315,6 +314,8 @@ class _BaseOrderHelper(object):
         HelperCls = (
             _SortByMeasureHelper
             if order_spec.collation_method == CM.UNIVARIATE_MEASURE
+            else _SortByLabelHelper
+            if order_spec.collation_method == CM.LABEL
             else _OrderHelper
         )
         return HelperCls(rows_dimension, measures)._display_order
@@ -367,8 +368,15 @@ class _OrderHelper(_BaseOrderHelper):
         return CollatorCls.display_order(self._rows_dimension, self._empty_row_idxs)
 
 
-class _SortByMeasureHelper(_BaseOrderHelper):
-    """Orders rows by the value of a specified measure."""
+class _BaseSortByValueHelper(_BaseOrderHelper):
+    """A base class that orders elements by a set of values.
+
+    This class is intended only to serve as a base for the other sort-by-value classes
+    which must all provide their own implentations of `_element_values` and
+    `_subtotal_values`.
+
+    If `_display_order` encouters a ValueError, it falls back to the payload order.
+    """
 
     @lazyproperty
     def _display_order(self):
@@ -390,6 +398,52 @@ class _SortByMeasureHelper(_BaseOrderHelper):
             return PayloadOrderCollator.display_order(
                 self._rows_dimension, self._empty_row_idxs
             )
+
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of body values that form the basis for sort order.
+
+        Must be implemented by child classes.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `._element_values`" % type(self).__name__
+        )
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of subtotal values that form the basis for sort order.
+
+        Must be implemented by child classes.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            "%s must implement `._subtotal_values`" % type(self).__name__
+        )
+
+
+class _SortByLabelHelper(_BaseSortByValueHelper):
+    """Orders rows by the value of a specified measure."""
+
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of labels that form the basis for sort order.
+
+        There is one value per row and values appear in payload (dimension) element
+        order. These are only the "base" values and do not include insertions.
+        """
+        return np.array(self._rows_dimension.element_labels)
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of row-subtotal labels that contribute to the sort basis.
+
+        There is one value per row subtotal and values appear in payload (dimension)
+        insertion order.
+        """
+        return np.array(self._rows_dimension.subtotal_labels)
+
+
+class _SortByMeasureHelper(_BaseSortByValueHelper):
+    """Orders rows by the value of a specified measure."""
 
     @lazyproperty
     def _element_values(self):

@@ -526,6 +526,12 @@ class DescribeDimension(object):
         )
         assert Dimension(None, None).element_ids == (1, 2, 3, 4, 5, 6)
 
+    def it_knows_its_element_labels(self, request, valid_elements_prop_):
+        valid_elements_prop_.return_value = (
+            instance_mock(request, _Element, label="lbl %s" % (i + 1)) for i in range(3)
+        )
+        assert Dimension(None, None).element_labels == ("lbl 1", "lbl 2", "lbl 3")
+
     def it_computes_its_hidden_idxs(self, request, valid_elements_prop_):
         valid_elements_prop_.return_value = (
             instance_mock(request, _Element, is_hidden=bool(i % 2)) for i in range(7)
@@ -666,6 +672,13 @@ class DescribeDimension(object):
         _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_)
         assert subtotals is subtotals_
 
+    def it_knows_its_subtotal_labels(self, request, subtotals_prop_):
+        subtotals_prop_.return_value = (
+            instance_mock(request, _Subtotal, label="lbl %s" % (i + 1))
+            for i in range(3)
+        )
+        assert Dimension(None, None).subtotal_labels == ("lbl 1", "lbl 2", "lbl 3")
+
     @pytest.mark.parametrize("dimension_type", (DT.MR, DT.CA_SUBVAR))
     def but_it_suppresses_any_subtotals_on_an_array_dimension(
         self,
@@ -713,6 +726,10 @@ class DescribeDimension(object):
     @pytest.fixture
     def subtotals_(self, request):
         return instance_mock(request, _Subtotals)
+
+    @pytest.fixture
+    def subtotals_prop_(self, request):
+        return property_mock(request, Dimension, "subtotals")
 
     @pytest.fixture
     def valid_elements_(self, request):
