@@ -968,6 +968,7 @@ class Describe_Slice(object):
             }
         }
         slice_ = Cube(MRI.CAT_X_MR, transforms=transforms).partitions[0]
+        # --- MR insertion is in first column, so we're sorting by it (ascending order)
         assert slice_.counts.tolist() == [
             [0.0, 0.0, 0.0, 0.0],
             [0.0, 0.0, 0.0, 0.0],
