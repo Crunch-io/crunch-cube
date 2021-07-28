@@ -2045,6 +2045,40 @@ class Describe_Strand(object):
         actual = strand_.row_labels.tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    @pytest.mark.parametrize(
+        "id",
+        (
+            1,  # --- integer element_id (to be deprecated)
+            "A_B",  # --- alias
+        ),
+    )
+    def it_can_sort_by_value_for_mr_derived_insertions(self, id):
+        # --- Ensure that payload order is how we expect it before sorting
+        payload_order_slice_ = Cube(MRI.CAT_X_MR).partitions[0]
+        assert payload_order_slice_.counts.tolist() == [
+            [32.0, 14.4, 25.6, 36.0],
+            [37.6, 20.8, 28.0, 43.6],
+            [14.0, 9.6, 10.0, 14.4],
+            [19.2, 10.8, 15.2, 16.8],
+            [23.2, 13.6, 17.6, 22.4],
+        ]
+        # --- Now sort by MR insertion
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "direction": "ascending",
+                    "type": "opposing_insertion",
+                    "insertion_id": id,
+                    "measure": "count_weighted",
+                }
+            }
+        }
+        slice_ = Cube(MRI.CAT_X_MR, transforms=transforms).partitions[0]
+        # --- MR insertion is in first column, so we're sorting by it (ascending order)
+        assert slice_.derived_column_idxs == (0,)
+        assert slice_.counts[:, 0].tolist() == [14.0, 19.2, 23.2, 32.0, 37.6]
+
     def it_knows_when_it_is_empty(self):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]
         assert strand.is_empty is True
