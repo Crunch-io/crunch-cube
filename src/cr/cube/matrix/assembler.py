@@ -1116,6 +1116,8 @@ class _SortRowsByBaseColumnHelper(_BaseSortRowsByValueHelper):
         """int index of column whose values the sort is based on."""
         column_element_ids = self._columns_dimension.element_ids
         sort_column_id = self._order_spec.element_id
+        # --- Need to translate the element id to the shimmed element id
+        sort_column_id = self._columns_dimension.translate_element_id(sort_column_id)
         return column_element_ids.index(sort_column_id)
 
     @lazyproperty

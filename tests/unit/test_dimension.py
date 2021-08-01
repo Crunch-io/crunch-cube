@@ -717,7 +717,78 @@ class DescribeDimension(object):
         _Subtotals_.assert_called_once_with(["subtotal", "dicts"], valid_elements_)
         assert subtotals is subtotals_
 
+    @pytest.mark.parametrize(
+        "id, expected",
+        (
+            ("all", "all"),
+            ("0003", "alias2"),
+            ("1", "all"),
+            (3, "alias1"),
+            (2, "alias2"),
+            (21, None),
+            ("xyz", None),
+        ),
+    )
+    def it_translates_element_ids_for_subvariables(
+        self,
+        _raw_element_id_prop,
+        _subvar_aliases_prop_,
+        _subvar_ids_prop_,
+        id,
+        expected,
+    ):
+        _subvar_aliases_prop_.return_value = tuple(("all", "alias1", "alias2"))
+        _subvar_ids_prop_.return_value = tuple(("0001", "all", "0003"))
+        _raw_element_id_prop.return_value = tuple(("1", 3, "all"))
+
+        dimension_ = Dimension(None, DT.MR_SUBVAR)
+
+        assert dimension_.translate_element_id(id) == expected
+
+    def but_it_leaves_non_array_ids_alone(self):
+        Dimension(None, DT.CAT).translate_element_id(25) == 25
+
+    def it_provides_the_raw_element_ids_to_help(self):
+        dimension_dict = {"type": {"elements": [{"id": 1}, {"id": "b"}]}}
+        dimension_ = Dimension(dimension_dict, None)
+
+        assert dimension_._raw_element_ids == tuple((1, "b"))
+
+    def it_provides_the_subvar_ids_to_help(self):
+        dimension_dict = {
+            "type": {"elements": [{"value": {"id": "a"}}, {"value": {"id": 2}}]}
+        }
+        dimension_ = Dimension(dimension_dict, None)
+
+        assert dimension_._subvar_ids == tuple(("a", 2))
+
+    def it_provides_the_subvar_aliases_to_help(self):
+        dimension_dict = {
+            "type": {
+                "elements": [
+                    {"id": 1, "value": {"references": {"alias": "x"}}},
+                    {"id": 2, "value": {"references": {"alias": "y"}}},
+                    {"id": 3},
+                ]
+            }
+        }
+        dimension_ = Dimension(dimension_dict, None)
+
+        assert dimension_._subvar_aliases == tuple(("x", "y", 3))
+
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _raw_element_id_prop(self, request):
+        return property_mock(request, Dimension, "_raw_element_ids")
+
+    @pytest.fixture
+    def _subvar_aliases_prop_(self, request):
+        return property_mock(request, Dimension, "_subvar_aliases")
+
+    @pytest.fixture
+    def _subvar_ids_prop_(self, request):
+        return property_mock(request, Dimension, "_subvar_ids")
 
     @pytest.fixture
     def _Subtotals_(self, request):
@@ -892,59 +963,6 @@ class Describe_AllElements(object):
             (1, {"id": 2, "element": "dict_2"}, {}),
             (2, {"id": 6, "element": "dict_6"}, {"element": "xfrms_6"}),
         )
-
-    @pytest.mark.parametrize(
-        "element_transform, dimension_type, element_dict, expected_value",
-        (
-            (
-                {"S2": {"hide": True}, "key": "subvar_id"},
-                DT.NUM_ARRAY,
-                {"id": 1, "value": {"references": {"alias": "A1"}, "id": "S2"}},
-                "S2",
-            ),
-            (
-                {"A1": {"hide": True}, "key": "alias"},
-                DT.NUM_ARRAY,
-                {"id": 1, "value": {"references": {"alias": "A1"}, "id": "S2"}},
-                "A1",
-            ),
-            (
-                {"1": {"hide": True}},
-                DT.CA,
-                {"id": 1, "value": {"references": {"alias": "A1"}, "id": "S2"}},
-                "S2",
-            ),
-            (
-                {"A1": {"hide": True}, "key": "alias"},
-                DT.NUM_ARRAY,
-                {"id": 1, "value": {"references": {"alias": ""}, "id": "S2"}},
-                1,
-            ),
-            (
-                {"A1": {"hide": True}, "key": "alias"},
-                DT.NUM_ARRAY,
-                {"id": 1, "value": {"references": {"alias": None}, "id": "S2"}},
-                1,
-            ),
-            ({"1": {"hide": True}}, DT.CAT, {"id": 1, "name": "Male"}, 1),
-            ({"0001": {"hide": True}}, DT.CAT, {"id": 1, "name": "Male"}, 1),
-        ),
-    )
-    def it_knows_its_element_id_from_dict(
-        self,
-        element_transform,
-        dimension_type,
-        element_dict,
-        expected_value,
-        _element_dicts_prop_,
-    ):
-        _element_dicts_prop_.return_value = []
-        dimension_transforms_dict = {"elements": element_transform}
-        all_elements = _AllElements(None, dimension_transforms_dict, dimension_type)
-
-        _element_id_from_dict = all_elements._element_id_from_dict(element_dict)
-
-        assert _element_id_from_dict == expected_value
 
     @pytest.mark.parametrize(
         "dim_xforms, element_dicts, dim_type, expected_value",

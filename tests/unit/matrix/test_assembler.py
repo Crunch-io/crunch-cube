@@ -1415,11 +1415,15 @@ class Describe_SortRowsByBaseColumnHelper(object):
     ):
         _columns_dimension_prop_.return_value = dimension_
         dimension_.element_ids = (1, 2, 3, 4, 5)
+        dimension_.translate_element_id.return_value = 3
         _order_spec_prop_.return_value = order_spec_
-        order_spec_.element_id = 3
+        order_spec_.element_id = "c"
         order_helper = _SortRowsByBaseColumnHelper(None, None)
 
-        assert order_helper._column_idx == 2
+        column_idx = order_helper._column_idx
+
+        dimension_.translate_element_id.assert_called_once_with("c")
+        assert column_idx == 2
 
     def it_extracts_the_element_values_to_help(
         self, _measure_prop_, measure_, _column_idx_prop_

@@ -38,15 +38,6 @@ class _BaseCollator(object):
         return self._dimension.element_ids
 
     @lazyproperty
-    def _element_subvar_ids(self):
-        """something to do with being able to use str ids (aliases) for subvars.
-
-        Added by Slobodan, ask him for details. I expect the "element_ids": field in a
-        explicit-order sort transform can be a list of strs instead of a list of ints.
-        """
-        return self._dimension.element_subvar_ids
-
-    @lazyproperty
     def _hidden_idxs(self):
         """frozenset of int element-idx of each vector for which to suppress display."""
         empty_idxs = self._empty_idxs if self._dimension.prune else ()
@@ -243,22 +234,8 @@ class ExplicitOrderCollator(_BaseAnchoredCollator):
             # --- OrderedDict mapping element-id to payload-order, like {15:0, 12:1,..}.
             # --- This gives us payload-idx lookup along with duplicate and leftover
             # --- tracking.
-
-            # TODO: this has been crudely hacked to accommodate both subvar aliases or
-            # int element-ids. All that detail should be pushed down and encapsulated in
-            # some code or object that works out the type of the ids and allows this
-            # algorithm to be uniform.
             remaining_element_idxs_by_id = collections.OrderedDict(
-                (id_, (idx, subvar_id))
-                for idx, (id_, subvar_id) in enumerate(
-                    zip(self._element_ids, self._element_subvar_ids)
-                )
-            )
-            remaining_element_idxs_by_subvar_id = collections.OrderedDict(
-                (subvar_id, (idx, id_))
-                for idx, (subvar_id, id_) in enumerate(
-                    zip(self._element_subvar_ids, self._element_ids)
-                )
+                (id_, idx) for idx, id_ in enumerate(self._element_ids)
             )
 
             # --- yield (idx, id) pair for each element mentioned by id in transform,
@@ -266,27 +243,15 @@ class ExplicitOrderCollator(_BaseAnchoredCollator):
             # --- dups and leftovers.
             for element_id in self._order_spec.element_ids:
                 # --- An element-id appearing in transform but not in dimension is
-                # --- ignored. Also, an element-id that appears more than oncce in
+                # --- ignored. Also, an element-id that appears more than once in
                 # --- order-array is only used on first encounter.
-
-                # TODO: this duplication of the same logic for two cases is part of the
-                # same crude hack as above.
-
-                if element_id in remaining_element_idxs_by_subvar_id:
-                    (idx, id_) = remaining_element_idxs_by_subvar_id.pop(element_id)
-                    if id_ in remaining_element_idxs_by_id:
-                        remaining_element_idxs_by_id.pop(id_)
-                    yield idx, id_
-
                 if element_id in remaining_element_idxs_by_id:
-                    (idx, subvar_id) = remaining_element_idxs_by_id.pop(element_id)
-                    if subvar_id in remaining_element_idxs_by_subvar_id:
-                        remaining_element_idxs_by_subvar_id.pop(subvar_id)
+                    idx = remaining_element_idxs_by_id.pop(element_id)
                     yield idx, element_id
 
             # --- any remaining elements are generated in the order they originally
             # --- appeared in the cube-result.
-            for element_id, (idx, _) in remaining_element_idxs_by_id.items():
+            for element_id, idx in remaining_element_idxs_by_id.items():
                 yield idx, element_id
 
         return tuple(
