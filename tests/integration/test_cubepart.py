@@ -2045,7 +2045,6 @@ class Describe_Strand(object):
         actual = strand_.row_labels.tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     @pytest.mark.parametrize(
         "id",
         (
