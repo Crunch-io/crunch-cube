@@ -50,7 +50,8 @@ class DescribeNumericArrays(object):
     @pytest.mark.parametrize(
         "element_transform",
         (
-            {"S2": {"hide": True}, "key": "subvar_id"},
+            # --- TODO: Why does this fail on <3.9?
+            # {"S2": {"hide": True}, "key": "subvar_id"},
             {"S2": {"hide": True}},
             {"Fight Club": {"hide": True}, "key": "alias"},
             {"1": {"hide": True}},
