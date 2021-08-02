@@ -1079,7 +1079,7 @@ class Describe_DimensionShimElementIds:
     )
     def it_translates_element_ids_for_subvariables(
         self,
-        _raw_element_id_prop,
+        _raw_element_id_prop_,
         _subvar_aliases_prop_,
         _subvar_ids_prop_,
         id,
@@ -1087,7 +1087,7 @@ class Describe_DimensionShimElementIds:
     ):
         _subvar_aliases_prop_.return_value = tuple(("all", "alias1", "alias2"))
         _subvar_ids_prop_.return_value = tuple(("0001", "all", "0003"))
-        _raw_element_id_prop.return_value = tuple(("1", 3, "all"))
+        _raw_element_id_prop_.return_value = tuple(("1", 3, "all"))
 
         shim_ = _DimensionShimElementIds(DT.MR_SUBVAR, None, None)
 
@@ -1102,13 +1102,16 @@ class Describe_DimensionShimElementIds:
 
         assert shim_._raw_element_ids == tuple((1, "b"))
 
-    def it_replaces_the_element_transforms_to_help(self, translate_element_id_):
+    def it_replaces_the_element_transforms_to_help(self, _raw_element_id_prop_, _subvar_aliases_prop_, _subvar_ids_prop_):
         element_transforms = {
             "xxx": {"transform": "object"},
             "abc": {"another": "transform"},
         }
-        translate_element_id_.side_effect = (None, "alias2")
-        shim_ = _DimensionShimElementIds(None, None, None)
+        _raw_element_id_prop_.return_value = tuple((1,))
+        _subvar_aliases_prop_.return_value = tuple(("alias2",))
+        _subvar_ids_prop_.return_value = tuple(("abc",))
+
+        shim_ = _DimensionShimElementIds(DT.MR_SUBVAR, None, None)
 
         assert shim_._replaced_element_transforms(element_transforms) == {
             "alias2": {"another": "transform"}
@@ -1167,7 +1170,7 @@ class Describe_DimensionShimElementIds:
     # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def _raw_element_id_prop(self, request):
+    def _raw_element_id_prop_(self, request):
         return property_mock(request, _DimensionShimElementIds, "_raw_element_ids")
 
     @pytest.fixture
@@ -1189,10 +1192,6 @@ class Describe_DimensionShimElementIds:
     @pytest.fixture
     def _subvar_ids_prop_(self, request):
         return property_mock(request, _DimensionShimElementIds, "_subvar_ids")
-
-    @pytest.fixture
-    def translate_element_id_(self, request):
-        return method_mock(request, _DimensionShimElementIds, "translate_element_id")
 
 
 class Describe_Element(object):
