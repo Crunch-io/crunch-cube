@@ -659,18 +659,6 @@ class Dimension(object):
                 for _id in old_keys
                 if _id in self._subvar_ids
             )
-            # --- GFE TESTING ---
-            elements_v1 = {
-                nkey: element_transforms[old_keys[i]] for i, nkey in enumerate(new_keys)
-            }
-            new_keys2 = tuple(self.translate_element_id(_id) for _id in old_keys)
-            elements_v2 = {
-                nkey: element_transforms[old_keys[i]]
-                for i, nkey in enumerate(new_keys2)
-                if nkey is not None
-            }
-            assert elements_v1 == elements_v2
-            # ---
             shim["elements"] = {
                 nkey: element_transforms[old_keys[i]] for i, nkey in enumerate(new_keys)
             }
