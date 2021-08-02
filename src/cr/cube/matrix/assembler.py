@@ -1156,10 +1156,10 @@ class _SortRowsByDerivedColumnHelper(_SortRowsByBaseColumnHelper):
     cube result before this cr.cube library gets them. These insertions are always
     on a subvariable dimension, an example would be to sort "'Coke' or 'Diet Coke'"
     MR array column. An opposing-element ordering is only available on a matrix,
-    because only a matrix dimension has an opposing dimension.   
-    
+    because only a matrix dimension has an opposing dimension.
+
     For the most part, we treat these elements as regular "base" columns, in the cr.cube
-    library, but because the user-facing language treats these as subtotals, we allow 
+    library, but because the user-facing language treats these as subtotals, we allow
     specifying sort-by-value as if these were true subtotals.
     """
 
