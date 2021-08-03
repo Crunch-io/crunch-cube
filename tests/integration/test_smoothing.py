@@ -159,6 +159,7 @@ class DescribeSliceSmoothing:
         (
             (CR.CAT_X_CAT_DATE, "smoothed_column_percentages", 4, 1),
             (CR.CAT_X_CAT_DATE, "smoothed_column_index", 4, 1),
+            (CR.CAT_X_CAT_DATE, "smoothed_columns_scale_mean", 4, 1),
         ),
     )
     def it_warns_and_does_not_smooth_when_window_is_invalid(

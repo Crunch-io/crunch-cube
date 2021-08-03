@@ -103,6 +103,12 @@ class Describe_Slice:
         assert slice_.rows_margin.tolist() == [7, 8]
         assert slice_.shape == (2, 2)
         with pytest.raises(ValueError) as e:
+            slice_.smoothed_means
+        assert (
+            str(e.value)
+            == "`.means` is undefined for a cube-result without a mean measure"
+        )
+        with pytest.raises(ValueError) as e:
             slice_.sums
         assert (
             str(e.value)
@@ -1787,6 +1793,12 @@ class Describe_Strand:
             strand.share_sum
         assert str(e.value) == (
             "`.share_sum` is undefined for a cube-result without a sum measure"
+        )
+        with pytest.raises(ValueError) as e:
+            strand.smoothed_means
+        assert (
+            str(e.value)
+            == "`.means` is undefined for a cube-result without a mean measure"
         )
         with pytest.raises(ValueError) as e:
             strand.sums

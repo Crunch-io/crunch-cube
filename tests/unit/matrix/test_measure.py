@@ -133,9 +133,9 @@ class DescribeSecondOrderMeasures:
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
         (
-            ("column_index", _ColumnIndexSmoothed),
-            ("column_proportions", _ColumnProportionsSmoothed),
-            ("means", _MeansSmoothed),
+            ("smoothed_column_index", _ColumnIndexSmoothed),
+            ("smoothed_column_proportions", _ColumnProportionsSmoothed),
+            ("smoothed_means", _MeansSmoothed),
         ),
     )
     def it_provides_access_to_various_smoothed_measure_objects(
@@ -143,18 +143,13 @@ class DescribeSecondOrderMeasures:
         request,
         _cube_measures_prop_,
         cube_measures_,
+        dimensions_,
         measure_prop_name,
         MeasureCls,
     ):
         smoothing_dict = {"function": "one_sided_moving_avg", "window": 3}
         smoothing_spec = _SmoothingSpec(smoothing_dict)
-        smoothing_spec_ = property_mock(
-            request, Dimension, "smoothing_spec", return_value=smoothing_spec
-        )
-        Dimension_ = class_mock(
-            request, "cr.cube.dimension.Dimension", smoothing_spec=smoothing_spec_
-        )
-        dimensions_ = (Dimension_, Dimension_)
+        dimensions_[-1].smoothing_spec = smoothing_spec
         measure_ = instance_mock(request, MeasureCls)
         MeasureCls_ = class_mock(
             request,

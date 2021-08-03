@@ -89,15 +89,11 @@ class DescribeStripeMeasures:
         request,
         _cube_measures_prop_,
         cube_measures_,
+        rows_dimension_,
     ):
         smoothing_dict = {"function": "one_sided_moving_avg", "window": 3}
         smoothing_spec = _SmoothingSpec(smoothing_dict)
-        smoothing_spec_ = property_mock(
-            request, Dimension, "smoothing_spec", return_value=smoothing_spec
-        )
-        rows_dimension_ = class_mock(
-            request, "cr.cube.dimension.Dimension", smoothing_spec=smoothing_spec_
-        )
+        rows_dimension_.smoothing_spec = smoothing_spec
         measure_ = instance_mock(request, _MeansSmoothed)
         MeasureCls_ = class_mock(
             request,
@@ -106,7 +102,7 @@ class DescribeStripeMeasures:
         )
         _cube_measures_prop_.return_value = cube_measures_
         measures = StripeMeasures(None, rows_dimension_, None, None)
-        measure = measures.means
+        measure = measures.smoothed_means
 
         MeasureCls_.assert_called_once_with(
             rows_dimension_, measures, cube_measures_, smoothing_spec
