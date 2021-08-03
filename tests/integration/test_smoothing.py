@@ -187,6 +187,19 @@ class DescribeSliceSmoothing:
 
         np.testing.assert_array_almost_equal(smoothed_values, base_values)
 
+    def it_fallbacks_to_unsmoothed_values_if_smoother_is_not_specified(self):
+        slice_ = Cube(CR.CAT_X_CAT_DATE).partitions[0]
+
+        assert (
+            slice_.column_percentages.tolist()
+            == slice_.smoothed_column_percentages.tolist()
+        )
+        assert slice_.column_index.tolist() == slice_.smoothed_column_index.tolist()
+        assert (
+            slice_.columns_scale_mean.tolist()
+            == slice_.smoothed_columns_scale_mean.tolist()
+        )
+
 
 class DescribeStrandMeansSmoothing:
     """Integration-test suite for _Strand method."""
