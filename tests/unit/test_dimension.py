@@ -13,6 +13,7 @@ from cr.cube.dimension import (
     _BaseElements,
     Dimension,
     _DimensionFactory,
+    _ElementIdShim,
     _Element,
     _ElementTransforms,
     _OrderSpec,
@@ -894,59 +895,6 @@ class Describe_AllElements(object):
         )
 
     @pytest.mark.parametrize(
-        "element_transform, dimension_type, element_dict, expected_value",
-        (
-            (
-                {"S2": {"hide": True}, "key": "subvar_id"},
-                DT.NUM_ARRAY,
-                {"id": 1, "value": {"references": {"alias": "A1"}, "id": "S2"}},
-                "S2",
-            ),
-            (
-                {"A1": {"hide": True}, "key": "alias"},
-                DT.NUM_ARRAY,
-                {"id": 1, "value": {"references": {"alias": "A1"}, "id": "S2"}},
-                "A1",
-            ),
-            (
-                {"1": {"hide": True}},
-                DT.CA,
-                {"id": 1, "value": {"references": {"alias": "A1"}, "id": "S2"}},
-                "S2",
-            ),
-            (
-                {"A1": {"hide": True}, "key": "alias"},
-                DT.NUM_ARRAY,
-                {"id": 1, "value": {"references": {"alias": ""}, "id": "S2"}},
-                1,
-            ),
-            (
-                {"A1": {"hide": True}, "key": "alias"},
-                DT.NUM_ARRAY,
-                {"id": 1, "value": {"references": {"alias": None}, "id": "S2"}},
-                1,
-            ),
-            ({"1": {"hide": True}}, DT.CAT, {"id": 1, "name": "Male"}, 1),
-            ({"0001": {"hide": True}}, DT.CAT, {"id": 1, "name": "Male"}, 1),
-        ),
-    )
-    def it_knows_its_element_id_from_dict(
-        self,
-        element_transform,
-        dimension_type,
-        element_dict,
-        expected_value,
-        _element_dicts_prop_,
-    ):
-        _element_dicts_prop_.return_value = []
-        dimension_transforms_dict = {"elements": element_transform}
-        all_elements = _AllElements(None, dimension_transforms_dict, dimension_type)
-
-        _element_id_from_dict = all_elements._element_id_from_dict(element_dict)
-
-        assert _element_id_from_dict == expected_value
-
-    @pytest.mark.parametrize(
         "dim_xforms, element_dicts, dim_type, expected_value",
         (
             (
@@ -1040,6 +988,208 @@ class Describe_ValidElements(object):
         elements = valid_elements._elements
 
         assert elements == (elements_[0], elements_[2])
+
+
+class Describe_ElementIdShim:
+    """Unit-test suite for `cr.cube.dimension._ElementIdShim` object."""
+
+    def it_provides_the_shimmed_dimension_dict_for_subvars(self, _subvar_aliases_prop_):
+        _subvar_aliases_prop_.return_value = tuple(("alias1", "alias2"))
+        dimension_dict = {
+            "type": {
+                "elements": [{"id": 1, "element_info": 100}, {"id": 2}],
+                "other": "in type",
+            },
+            "another": "outside type",
+        }
+        shim_ = _ElementIdShim(DT.MR_SUBVAR, dimension_dict, None)
+
+        assert shim_.shimmed_dimension_dict == {
+            "type": {
+                "elements": [{"id": "alias1", "element_info": 100}, {"id": "alias2"}],
+                "other": "in type",
+            },
+            "another": "outside type",
+        }
+
+    def but_non_subvariable_dimension_is_left_alone(self):
+        dimension_dict = {"dimension": "dictionary"}
+        shim_ = _ElementIdShim(DT.CAT, dimension_dict, None)
+
+        assert shim_.shimmed_dimension_dict == dimension_dict
+
+    def it_provides_the_shimmed_dimension_transform_dict_for_subvars(
+        self, _replaced_element_transforms_, _replaced_order_element_ids_
+    ):
+        dimension_transforms_dict = {
+            "elements": "all_elements",
+            "order": {"element_ids": "a", "ignored": "string"},
+            "another": "ignored",
+        }
+        _replaced_element_transforms_.return_value = {"replaced": "element_transforms"}
+        _replaced_order_element_ids_.return_value = {"replaced": "ids"}
+        shim_ = _ElementIdShim(DT.MR_SUBVAR, None, dimension_transforms_dict)
+
+        assert shim_.shimmed_dimension_transforms_dict == {
+            "elements": {"replaced": "element_transforms"},
+            "order": {"element_ids": {"replaced": "ids"}, "ignored": "string"},
+            "another": "ignored",
+        }
+        _replaced_element_transforms_.assert_called_once_with(shim_, "all_elements")
+        _replaced_order_element_ids_.assert_called_once_with(shim_, "a")
+
+    def but_it_skips_replacing_if_not_present(
+        self, _replaced_element_transforms_, _replaced_order_element_ids_
+    ):
+        dimension_transforms_dict = {
+            "order": {"ignored": "string"},
+            "another": "ignored",
+        }
+        shim_ = _ElementIdShim(DT.MR_SUBVAR, None, dimension_transforms_dict)
+
+        assert shim_.shimmed_dimension_transforms_dict == dimension_transforms_dict
+        _replaced_element_transforms_.assert_not_called()
+        _replaced_order_element_ids_.assert_not_called()
+
+    def and_it_skips_replacing_if_not_subvars(
+        self, _replaced_element_transforms_, _replaced_order_element_ids_
+    ):
+        dimension_transforms_dict = {
+            "elements": {"replaced": "element_transforms"},
+            "order": {"element_ids": {"replaced": "ids"}, "ignored": "string"},
+            "another": "ignored",
+        }
+        shim_ = _ElementIdShim(DT.CAT, None, dimension_transforms_dict)
+
+        assert shim_.shimmed_dimension_transforms_dict == dimension_transforms_dict
+        _replaced_element_transforms_.assert_not_called()
+        _replaced_order_element_ids_.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "id, expected",
+        (
+            ("all", "all"),
+            ("0003", "alias2"),
+            ("1", "all"),
+            (3, "alias1"),
+            (2, "alias2"),
+            (21, None),
+            ("xyz", None),
+        ),
+    )
+    def it_translates_element_ids_for_subvariables(
+        self,
+        _raw_element_id_prop_,
+        _subvar_aliases_prop_,
+        _subvar_ids_prop_,
+        id,
+        expected,
+    ):
+        _subvar_aliases_prop_.return_value = tuple(("all", "alias1", "alias2"))
+        _subvar_ids_prop_.return_value = tuple(("0001", "all", "0003"))
+        _raw_element_id_prop_.return_value = tuple(("1", 3, "all"))
+
+        shim_ = _ElementIdShim(DT.MR_SUBVAR, None, None)
+
+        assert shim_.translate_element_id(id) == expected
+
+    def but_it_leaves_non_array_ids_alone(self):
+        _ElementIdShim(DT.CAT, None, None).translate_element_id(25) == 25
+
+    def it_provides_the_raw_element_ids_to_help(self):
+        dimension_dict = {"type": {"elements": [{"id": 1}, {"id": "b"}]}}
+        shim_ = _ElementIdShim(None, dimension_dict, None)
+
+        assert shim_._raw_element_ids == tuple((1, "b"))
+
+    def it_replaces_the_element_transforms_to_help(
+        self, _raw_element_id_prop_, _subvar_aliases_prop_, _subvar_ids_prop_
+    ):
+        element_transforms = {
+            "xxx": {"transform": "object"},
+            "abc": {"another": "transform"},
+        }
+        _raw_element_id_prop_.return_value = tuple((1,))
+        _subvar_aliases_prop_.return_value = tuple(("alias2",))
+        _subvar_ids_prop_.return_value = tuple(("abc",))
+
+        shim_ = _ElementIdShim(DT.MR_SUBVAR, None, None)
+
+        assert shim_._replaced_element_transforms(element_transforms) == {
+            "alias2": {"another": "transform"}
+        }
+
+    def it_replaces_the_element_transforms_to_help_with_alias_keys(self):
+        element_transforms = {
+            "alias1": {"transform": "object"},
+            "alias2": {"another": "transform"},
+            "key": "alias",
+        }
+        shim_ = _ElementIdShim(None, None, None)
+
+        assert (
+            shim_._replaced_element_transforms(element_transforms) == element_transforms
+        )
+
+    def it_replaces_the_element_transforms_to_help_with_subvar_id_keys(
+        self, _subvar_aliases_prop_, _subvar_ids_prop_
+    ):
+        _subvar_aliases_prop_.return_value = tuple(("alias1", "alias2", "alias3"))
+        _subvar_ids_prop_.return_value = tuple(("xyz", "s2", "abc"))
+        element_transforms = {
+            "s1": {"transform": "object"},
+            "s2": {"another": "transform"},
+            "key": "subvar_id",
+        }
+        shim_ = _ElementIdShim(None, None, None)
+
+        assert shim_._replaced_element_transforms(element_transforms) == {
+            "alias2": {"another": "transform"}
+        }
+
+    def it_provides_the_subvar_ids_to_help(self):
+        dimension_dict = {
+            "type": {"elements": [{"value": {"id": "a"}}, {"value": {"id": 2}}]}
+        }
+        shim_ = _ElementIdShim(None, dimension_dict, None)
+
+        assert shim_._subvar_ids == tuple(("a", 2))
+
+    def it_provides_the_subvar_aliases_to_help(self):
+        dimension_dict = {
+            "type": {
+                "elements": [
+                    {"id": 1, "value": {"references": {"alias": "x"}}},
+                    {"id": 2, "value": {"references": {"alias": "y"}}},
+                    {"id": 3},
+                ]
+            }
+        }
+        shim_ = _ElementIdShim(None, dimension_dict, None)
+
+        assert shim_._subvar_aliases == tuple(("x", "y", 3))
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _raw_element_id_prop_(self, request):
+        return property_mock(request, _ElementIdShim, "_raw_element_ids")
+
+    @pytest.fixture
+    def _replaced_element_transforms_(self, request):
+        return method_mock(request, _ElementIdShim, "_replaced_element_transforms")
+
+    @pytest.fixture
+    def _replaced_order_element_ids_(self, request):
+        return method_mock(request, _ElementIdShim, "_replaced_order_element_ids")
+
+    @pytest.fixture
+    def _subvar_aliases_prop_(self, request):
+        return property_mock(request, _ElementIdShim, "_subvar_aliases")
+
+    @pytest.fixture
+    def _subvar_ids_prop_(self, request):
+        return property_mock(request, _ElementIdShim, "_subvar_ids")
 
 
 class Describe_Element(object):

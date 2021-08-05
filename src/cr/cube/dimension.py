@@ -2,6 +2,7 @@
 
 """Provides the Dimension class."""
 
+import copy
 import sys
 
 if sys.version_info >= (3, 3):
@@ -333,9 +334,9 @@ class Dimension(object):
     """
 
     def __init__(self, dimension_dict, dimension_type, dimension_transforms=None):
-        self._dimension_dict = dimension_dict
+        self._unshimmed_dimension_dict = dimension_dict
         self._dimension_type = dimension_type
-        self._dimension_transforms_dict = dimension_transforms or {}
+        self._unshimmed_dimension_transforms_dict = dimension_transforms or {}
 
     @lazyproperty
     def alias(self):
@@ -346,9 +347,7 @@ class Dimension(object):
     def all_elements(self):
         """_AllElements object providing cats or subvars of this dimension.
 
-        Elements in this sequence appear in cube-result order. Display order (including
-        resolution of the explicit-reordering transforms cascade) is provided by
-        a separate `.display_order` attribute on _AllElements.
+        Elements in this sequence appear in cube-result order.
         """
         return _AllElements(
             self._dimension_dict["type"],
@@ -361,8 +360,10 @@ class Dimension(object):
 
         The new dimension object is the same as this one in all other respects.
         """
+        # --- Use unshimmed `._dimension_dict` because we need to re-shim it alongside
+        # --- the new dimension_transforms dictionary
         return Dimension(
-            self._dimension_dict, self._dimension_type, dimension_transforms
+            self._unshimmed_dimension_dict, self._dimension_type, dimension_transforms
         )
 
     @lazyproperty
@@ -400,10 +401,6 @@ class Dimension(object):
         Element-labels appear in the order defined in the cube-result.
         """
         return tuple(e.label for e in self.valid_elements)
-
-    @lazyproperty
-    def element_subvar_ids(self):
-        return tuple(e.element_subvar_id for e in self.valid_elements)
 
     @lazyproperty
     def hidden_idxs(self):
@@ -515,6 +512,25 @@ class Dimension(object):
             insertion_dicts = view.get("transform", {}).get("insertions", [])
         return _Subtotals(insertion_dicts, self.valid_elements)
 
+    def translate_element_id(self, _id):
+        """Optional string that is the translation of various ids to subvariable alias
+
+        This is needed for the opposing dimension's sort by opposing element, because
+        when creating a dimension, we don't have access to the other dimension's
+        ids to transform it. Therefore, the id for opposing element sort by value
+        transforms is not translated at creation time.
+
+        0) If dimension is not a subvariables dimension, return the _id.
+        1) If id matches an alias, then just use it.
+        2) If id matches a subvariable id, translate to corresponding alias.
+        3) If id matches an element id, translate to corresponding alias.
+        4) If id can be parsed to int and matches an element id, translate to alias.
+        5) If id is int (or can be parsed to int) and can be used as index (eg in range
+           0-# of elements), use _id'th alias.
+        6) If all of these fail, return None.
+        """
+        return self._element_id_shim.translate_element_id(_id)
+
     @lazyproperty
     def valid_elements(self):
         """_Elements object providing access to non-missing elements.
@@ -524,6 +540,25 @@ class Dimension(object):
         provided by `.all_elements`.
         """
         return self.all_elements.valid_elements
+
+    @lazyproperty
+    def _element_id_shim(self):
+        """_ElementIdShim for this Dimension object"""
+        return _ElementIdShim(
+            self._dimension_type,
+            self._unshimmed_dimension_dict,
+            self._unshimmed_dimension_transforms_dict,
+        )
+
+    @lazyproperty
+    def _dimension_dict(self):
+        """Copy of dimension dictionary with shimmed `element_id`s"""
+        return self._element_id_shim.shimmed_dimension_dict
+
+    @lazyproperty
+    def _dimension_transforms_dict(self):
+        """Copy of dimension transforms dictionary with shimmed `element_id`s"""
+        return self._element_id_shim.shimmed_dimension_transforms_dict
 
 
 class _BaseElements(Sequence):
@@ -607,22 +642,6 @@ class _AllElements(_BaseElements):
             else self._type_dict["elements"]
         )
 
-    def _element_id_from_dict(self, element_dict):
-        """Returns the element identifier given its dict."""
-        key = self._elements_transforms.get("key")
-        default_id = element_dict["id"]
-        if self._dimension_type in DT.ARRAY_TYPES:
-            element_value = element_dict.get("value", {})
-            if key == "alias":
-                # --- In case of specified key alias, returns the subvariable alias.
-                return element_value.get("references", {}).get("alias") or default_id
-            elif key == "subvar_id":
-                return element_value.get("id")
-            # --- Returns the subvariable id.
-            return element_value.get("id") or default_id
-        # --- Fallback case is the positional idx.
-        return default_id
-
     @lazyproperty
     def _elements(self):
         """tuple storing actual sequence of element objects."""
@@ -657,16 +676,11 @@ class _AllElements(_BaseElements):
         """
         elements_transforms = self._elements_transforms
         for idx, element_dict in enumerate(self._element_dicts):
-            element_id = self._element_id_from_dict(element_dict)
-            # TODO: Each element transforms dict is keyed by the str() version of it int
-            # value as a consequence of JSON serialization (which does not allow
-            # non-string keys). Hence the str(element_id) here.
-            element_transforms_dict = elements_transforms.get(element_id, {})
-            if not element_transforms_dict:
-                element_transforms_dict = elements_transforms.get(
-                    element_dict["id"],
-                    elements_transforms.get(str(element_dict["id"]), {}),
-                )
+            # --- convert to string for categorical ids
+            element_id = element_dict["id"]
+            element_transforms_dict = elements_transforms.get(
+                element_id, elements_transforms.get(str(element_id), {})
+            )
             yield idx, element_dict, element_transforms_dict
 
     @lazyproperty
@@ -725,6 +739,220 @@ class _ValidElements(_BaseElements):
         return tuple(element for element in self._all_elements if not element.missing)
 
 
+class _ElementIdShim(object):
+    """Object used to replace element ids with alias for subvariables.
+
+    We want to move to a world where elements on a subvariables dimension are
+    identified by their alias, but right now the "element_id" from zz9 is
+    an index, and the transforms have several different ways to refer to
+    subvariables.
+
+    Types of identifiers for subvariables (and derived insertions):
+
+    * "element_id": Stored in the cube result as the object name in
+      `dimensions[i].type.elements[j].id`. For subvariables, zz9 currently puts
+      the index integer here. Long term zz9 may change this to the the alias.
+    * "subvariable_id": Subvariables have an id stored in
+      `dimensions[i].type.elements[j].value.id`, generally this is a 4 digit,
+      0-padded index of the subvariable when it was first created (eg "0001",
+      "0002", ...), though it is not required to be. For derived insertions,
+      currently the name is used here.
+    * "alias": Subvariables also have an alias that identifies them. It is stored
+      in `dimensions[i].type.elements[j].value.
+    """
+
+    def __init__(self, dimension_type, dimension_dict, dimension_transforms_dict):
+        self._dimension_type = dimension_type
+        self._dimension_dict = dimension_dict
+        self._dimension_transforms_dict = dimension_transforms_dict
+
+    @lazyproperty
+    def shimmed_dimension_dict(self):
+        """Copy of dimension dictionary with shimmed `element_id`s
+
+        We want to move to a world where elements on a subvariables dimension are
+        identified by their alias, but right now the "element_id" from zz9 is
+        an index for subvariables.
+        """
+        shim = copy.deepcopy(self._dimension_dict)
+
+        # --- Leave non-subvariable dimension types alone, as they don't have
+        # --- subvariable aliases to use, and category ids are already the main way
+        # --- we identify elements on categorical dimensions (and this is correct).
+        if self._dimension_type not in DT.ARRAY_TYPES:
+            return shim
+
+        # --- Replace element ids with the alias
+        for idx, alias in enumerate(self._subvar_aliases):
+            shim["type"]["elements"][idx]["id"] = alias
+
+        return shim
+
+    @lazyproperty
+    def shimmed_dimension_transforms_dict(self):
+        """Copy of dimension transforms dictionary with shimmed `element_id`s
+
+        We want to move to a world where elements on a subvariables dimension are
+        identified by their alias, but right now the "element_id" from zz9 is
+        simply the subvariable's (unstable) cardinal position in subvariables
+        sequence. Different parts of the transforms have several different ways
+        to refer to subvariables.
+
+        Types of identifiers for subvariables (and derived insertions):
+        - "element_id": Stored in the cube result as the object name in
+          `dimensions[i].type.elements[j].id`. For subvariables, zz9 currently puts
+          the index integer here. Long term zz9 may change this to the the alias.
+        - "subvariable_id": Subvariables have an id stored in
+          `dimensions[i].type.elements[j].value.id`, generally this is a 4 digit,
+          0-padded index of the subvariable when it was first created (eg "0001",
+          "0002", ...), though it is not required to be. For derived insertions,
+          currently the name is used here.
+        - "alias": Subvariables also have an alias that identifies them. It is stored
+          in `dimensions[i].type.elements[j].value.references.alias`.
+        """
+        shim = copy.deepcopy(self._dimension_transforms_dict)
+
+        # --- Leave non-subvariable dimension types alone, as they don't have
+        # --- subvariable aliases to use, and category ids are already the main way
+        # --- we identify elements on categorical dimensions (and this is correct).
+        if self._dimension_type not in DT.ARRAY_TYPES:
+            return shim
+
+        # --- Replace element transform ids with the alias
+        if "elements" in shim:
+            shim["elements"] = self._replaced_element_transforms(shim["elements"])
+
+        # --- Translate explicit order element ids if present
+        if shim.get("order", {}).get("element_ids") is not None:
+            shim["order"]["element_ids"] = self._replaced_order_element_ids(
+                shim["order"]["element_ids"]
+            )
+
+        # --- sort-by-value on the opposing dimension also refers to element ids, but
+        # --- the ids refer to the opposing dimension, so do the translation later on.
+        # --- This is a little unfortunate, because this means that the ids in this shim
+        # --- version of the dimension transforms are inconsistent. But it feels easier
+        # --- than forcing the dimensions to be aware of other dimensions.
+
+        return shim
+
+    def translate_element_id(self, _id):
+        """Optional string that is the translation of various ids to subvariable alias
+
+        0) If dimension is not a subvariables dimension, return the _id.
+        1) If id matches an alias, then just use it.
+        2) If id matches a subvariable id, translate to corresponding alias.
+        3) If id matches an element id, translate to corresponding alias.
+        4) If id can be parsed to int and matches an element id, translate to alias.
+        5) If id is int (or can be parsed to int) and can be used as index (eg in range
+           0-# of elements), use _id'th alias.
+        6) If all of these fail, return None.
+        """
+        if self._dimension_type not in DT.ARRAY_TYPES:
+            return _id
+
+        if _id in self._subvar_aliases:
+            return _id
+        if _id in self._subvar_ids:
+            return self._subvar_aliases[self._subvar_ids.index(_id)]
+        if _id in self._raw_element_ids:
+            return self._subvar_aliases[self._raw_element_ids.index(_id)]
+
+        try:
+            _id = int(_id)
+            # --- If successfully converted to int, try raw element ids again
+            if _id in self._raw_element_ids:
+                return self._subvar_aliases[self._raw_element_ids.index(_id)]
+        except ValueError:
+            return None
+
+        if _id >= 0 and _id < len(self._subvar_aliases):
+            return self._subvar_aliases[_id]
+
+        return None
+
+    @lazyproperty
+    def _raw_element_ids(self):
+        """tuple of int or string element ids, as they appear in cube result
+
+        These are "raw" because they refer to the element ids before they've been
+        replaced with the alias for subvariables in the `._shimmed_dimension_dict`.
+        """
+        return tuple(
+            element["id"] for element in self._dimension_dict["type"]["elements"]
+        )
+
+    def _replaced_element_transforms(self, element_transforms):
+        """Replace the dictionary keys of element transforms with aliases
+
+        The element transforms identify which element they refer to by their key in
+        the element_transforms object. Before it is shimmed, this can identify them
+        in many different ways. The shim replaces these with the alias.
+        """
+        # --- The name of the element transform object is a string. This string is
+        # --- assumed to refer to the subvariable id, unless there is a "key", which
+        # --- can be "alias", in which case it refers to the alias, or if no
+        # --- subvariable is found with the id, in which case it's assumed to be the
+        # --- element_id
+        # --- TODO: This logic about "key" is not supported by the validation
+        # --- on the deck schema, so maybe we should remove it?
+        key = element_transforms.get("key")
+        if key == "alias":
+            # --- Already keyed by alias, no changes needed
+            return element_transforms
+
+        old_keys = tuple(element_transforms.keys())
+
+        if key == "subvar_id":
+            # --- translate from subvariable id
+            new_keys = tuple(
+                self._subvar_aliases[self._subvar_ids.index(_id)]
+                if _id in self._subvar_ids
+                else None
+                for _id in old_keys
+            )
+        else:
+            # --- Otherwise use usual translation logic
+            new_keys = tuple(self.translate_element_id(_id) for _id in old_keys)
+
+        return {
+            nkey: element_transforms[old_keys[i]]
+            for i, nkey in enumerate(new_keys)
+            if nkey is not None
+        }
+
+    def _replaced_order_element_ids(self, element_ids):
+        """Replace the list of element ids with a list of aliases
+
+        The explicit order transform includes a list of ids that can be specified in
+        many different ways, this translate them to the subvariable aliases.
+        """
+        return [self.translate_element_id(_id) for _id in element_ids]
+
+    @lazyproperty
+    def _subvar_aliases(self):
+        """tuple of str alias for each element of a subvariable dimension
+
+        Fall back to the `element_id` if the alias doesn't exist (this happens in one
+        fixture, but I don't think it can happen in production anymore.)
+        """
+        return tuple(
+            element.get("value", {}).get("references", {}).get("alias", element["id"])
+            for element in self._dimension_dict["type"]["elements"]
+        )
+
+    @lazyproperty
+    def _subvar_ids(self):
+        """tuple of str subvariable id for each element of a subvariable dimension
+
+        Only applicable to subvariables dimension (will raise KeyError if not).
+        """
+        return tuple(
+            element["value"]["id"]
+            for element in self._dimension_dict["type"]["elements"]
+        )
+
+
 class _Element(object):
     """A category or subvariable of a dimension.
 
@@ -740,14 +968,6 @@ class _Element(object):
     def element_id(self):
         """int identifier for this category or subvariable."""
         return self._element_dict["id"]
-
-    @lazyproperty
-    def element_subvar_id(self):
-        """Optional str subvar ID (from ZZ9), None if element is not a subvar."""
-        value = self._element_dict.get("value")
-        if not isinstance(value, dict):
-            return None
-        return value.get("id")
 
     @lazyproperty
     def derived(self):

@@ -171,11 +171,17 @@ class DescribeIntegrated_AllElements(object):
         assert all(isinstance(element, _Element) for element in elements)
 
     def it_hides_element_objects_by_subvariable_id_to_help(self):
-        type_dict = (
-            Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT).dimensions[0]._dimension_dict["type"]
+        transforms = {
+            "rows_dimension": {
+                "elements": {"S2": {"hide": True}},
+            },
+        }
+        all_elements = (
+            Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT, transforms=transforms)
+            .partitions[0]
+            ._dimensions[0]
+            .all_elements
         )
-        dimension_transforms = {"elements": {"S2": {"hide": True}}}
-        all_elements = _AllElements(type_dict, dimension_transforms, DT.NUM_ARRAY)
 
         elements = all_elements._elements
 

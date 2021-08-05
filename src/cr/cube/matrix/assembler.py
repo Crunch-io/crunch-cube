@@ -833,13 +833,21 @@ class _BaseOrderHelper(object):
         insertion, hiding, pruning, and ordering transforms specified in the
         rows-dimension.
         """
-        order_spec = dimensions[0].order_spec
-        HelperCls = {
-            CM.LABEL: _SortRowsByLabelHelper,
-            CM.MARGINAL: _SortRowsByMarginalHelper,
-            CM.OPPOSING_ELEMENT: _SortRowsByBaseColumnHelper,
-            CM.OPPOSING_INSERTION: _SortRowsByInsertedColumnHelper,
-        }.get(order_spec.collation_method, _RowOrderHelper)
+        collation_method = dimensions[0].order_spec.collation_method
+        dim_type = dimensions[1].dimension_type
+        HelperCls = (
+            _SortRowsByBaseColumnHelper
+            if collation_method == CM.OPPOSING_ELEMENT
+            else _SortRowsByDerivedColumnHelper
+            if collation_method == CM.OPPOSING_INSERTION and dim_type in DT.ARRAY_TYPES
+            else _SortRowsByInsertedColumnHelper
+            if collation_method == CM.OPPOSING_INSERTION
+            else _SortRowsByLabelHelper
+            if collation_method == CM.LABEL
+            else _SortRowsByMarginalHelper
+            if collation_method == CM.MARGINAL
+            else _RowOrderHelper
+        )
 
         return HelperCls(dimensions, second_order_measures)._display_order
 
@@ -1116,6 +1124,8 @@ class _SortRowsByBaseColumnHelper(_BaseSortRowsByValueHelper):
         """int index of column whose values the sort is based on."""
         column_element_ids = self._columns_dimension.element_ids
         sort_column_id = self._order_spec.element_id
+        # --- Need to translate the element id to the shimmed element id
+        sort_column_id = self._columns_dimension.translate_element_id(sort_column_id)
         return column_element_ids.index(sort_column_id)
 
     @lazyproperty
@@ -1137,6 +1147,30 @@ class _SortRowsByBaseColumnHelper(_BaseSortRowsByValueHelper):
         """
         measure_subtotal_rows = self._measure.blocks[1][0]
         return measure_subtotal_rows[:, self._column_idx]
+
+
+class _SortRowsByDerivedColumnHelper(_SortRowsByBaseColumnHelper):
+    """Orders elements by the values of an opposing "derived" element vector.
+
+    "Derived" columns are insertions that are calculated by zz9 and put into the
+    cube result before this cr.cube library gets them. These insertions are always
+    on a subvariable dimension, an example would be to sort "'Coke' or 'Diet Coke'"
+    MR array column. An opposing-element ordering is only available on a matrix,
+    because only a matrix dimension has an opposing dimension.
+
+    For the most part, we treat these elements as regular "base" columns, in the cr.cube
+    library, but because the user-facing language treats these as subtotals, we allow
+    specifying sort-by-value as if these were true subtotals.
+    """
+
+    @lazyproperty
+    def _column_idx(self):
+        """int index of column whose values the sort is based on."""
+        column_element_ids = self._columns_dimension.element_ids
+        sort_column_id = self._order_spec.insertion_id
+        # --- Need to translate the element id to the shimmed element id
+        sort_column_id = self._columns_dimension.translate_element_id(sort_column_id)
+        return column_element_ids.index(sort_column_id)
 
 
 class _SortRowsByInsertedColumnHelper(_BaseSortRowsByValueHelper):
