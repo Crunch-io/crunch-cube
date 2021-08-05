@@ -110,6 +110,10 @@ The detailed description can be found
 
 ## Changes
 
+### 2.3.8
+- Allow sorting by derived insertion on MRs
+- Refactor transforms to prefer referring to subvariables by alias
+
 ### 2.3.7
 - Allow sorting by label
 
