@@ -155,7 +155,7 @@ class DescribeIntegratedDimension(object):
         slice_ = Cube(CR.CAT_X_MR_UNICODE_SV_ALIAS).partitions[0]
         sv_dimension = slice_._dimensions[1]
 
-        assert sv_dimension.element_ids == ("\u2018dk\u2019", "fi", "is", "no", "se")
+        assert sv_dimension.element_ids == (u"\u2018dk\u2019", "fi", "is", "no", "se")
 
     # fixture components ---------------------------------------------
 
