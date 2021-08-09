@@ -117,6 +117,9 @@ class MEASURE(enum.Enum):
     ROW_SHARE_SUM = "row_share_sum"
     ROW_STDDEV = "row_std_dev"
     ROW_STDERR = "row_std_err"
+    SMOOTHED_MEAN = "smoothed_mean"
+    SMOOTHED_COL_PERCENT = "smoothed_col_percent"
+    SMOOTHED_COL_INDEX = "smoothed_col_index"
     STDDEV = "stddev"
     SUM = "sum"
     TABLE_BASE_UNWEIGHTED = "table_base_unweighted"
@@ -151,6 +154,7 @@ NUMERIC_MEASURES = frozenset(
     (
         CUBE_MEASURE.SUM,
         CUBE_MEASURE.MEAN,
+        MEASURE.SMOOTHED_MEAN,
         CUBE_MEASURE.STDDEV,
         CUBE_MEASURE.VALID_COUNT_UNWEIGHTED,
         CUBE_MEASURE.VALID_COUNT_WEIGHTED,
