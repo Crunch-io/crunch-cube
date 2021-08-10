@@ -29,6 +29,17 @@ class DescribeCubeSet(object):
 
         assert cube_set.available_measures == {"mean", "sum"}
 
+    def but_it_includes_availabe_measures_from_all_cubes_in_cube_set(
+        self, request, _cubes_prop_
+    ):
+        _cubes_prop_.return_value = tuple(
+            instance_mock(request, Cube, available_measures=measures)
+            for measures in ({"mean"}, {"sum", "counts"})
+        )
+        cube_set = CubeSet(None, None, None, None)
+
+        assert cube_set.available_measures == {"mean", "sum", "counts"}
+
     @pytest.mark.parametrize(
         ("cubes_dimtypes", "expected_value"),
         (

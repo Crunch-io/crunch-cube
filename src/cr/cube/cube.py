@@ -47,7 +47,7 @@ class CubeSet(object):
     @lazyproperty
     def available_measures(self):
         """frozenset of available measures of the first cube in this set."""
-        return self._cubes[0].available_measures
+        return frozenset(m for cube in self._cubes for m in cube.available_measures)
 
     @lazyproperty
     def can_show_pairwise(self):
