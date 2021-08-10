@@ -676,11 +676,14 @@ class _AllElements(_BaseElements):
         """
         elements_transforms = self._elements_transforms
         for idx, element_dict in enumerate(self._element_dicts):
-            # --- convert to string for categorical ids
             element_id = element_dict["id"]
-            element_transforms_dict = elements_transforms.get(
-                element_id, elements_transforms.get(str(element_id), {})
-            )
+            # --- Categorical variables have int element_id and may have
+            # --- a stringified version of the int in the transform dictionary
+            # --- if it is from JSON (because element_id is stored as the key
+            # --- and JSON can only have string dictionary keys)
+            if type(element_id) is int and element_id not in elements_transforms.keys():
+                element_id = str(element_id)
+            element_transforms_dict = elements_transforms.get(element_id) or {}
             yield idx, element_dict, element_transforms_dict
 
     @lazyproperty

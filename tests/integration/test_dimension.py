@@ -151,6 +151,19 @@ class DescribeIntegratedDimension(object):
 
         assert len(subtotals) == 0
 
+    def it_allows_unicode_characters_in_a_subvariable_alias(self):
+        slice_ = Cube(CR.CAT_X_MR_UNICODE_SV_ALIAS).partitions[0]
+        sv_dimension = slice_._dimensions[1]
+
+        assert sv_dimension.element_ids == (u"\u2018dk\u2019", "fi", "is", "no", "se")
+
+    def it_ignores_bad_types_in_transform_dictionary(self):
+        transforms = {"columns_dimension": {"elements": {"fi": None, "is": []}}}
+        slice_ = Cube(CR.CAT_X_MR, transforms=transforms).partitions[0]
+        sv_dimension = slice_._dimensions[1]
+
+        assert sv_dimension.hidden_idxs == tuple()
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
