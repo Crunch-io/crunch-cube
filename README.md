@@ -110,6 +110,10 @@ The detailed description can be found
 
 ## Changes
 
+### 2.3.9
+- Fix for available measures in a cube set
+- More forgiving about types and special characters in dimension ids
+
 ### 2.3.8
 - Allow sorting by derived insertion on MRs
 - Refactor transforms to prefer referring to subvariables by alias

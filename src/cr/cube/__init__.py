@@ -2,4 +2,4 @@
 
 """Initialization module for crunch-cube package."""
 
-__version__ = "2.3.8"
+__version__ = "2.3.9"
