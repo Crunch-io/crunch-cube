@@ -683,7 +683,7 @@ class _AllElements(_BaseElements):
             # --- and JSON can only have string dictionary keys)
             if type(element_id) is int and element_id not in elements_transforms.keys():
                 element_id = str(element_id)
-            element_transforms_dict = elements_transforms.get(element_id, {})
+            element_transforms_dict = elements_transforms.get(element_id) or {}
             yield idx, element_dict, element_transforms_dict
 
     @lazyproperty

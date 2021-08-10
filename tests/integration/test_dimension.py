@@ -157,6 +157,13 @@ class DescribeIntegratedDimension(object):
 
         assert sv_dimension.element_ids == (u"\u2018dk\u2019", "fi", "is", "no", "se")
 
+    def it_ignores_bad_types_in_transform_dictionary(self):
+        transforms = {"columns_dimension": {"elements": {"fi": None, "is": []}}}
+        slice_ = Cube(CR.CAT_X_MR, transforms=transforms).partitions[0]
+        sv_dimension = slice_._dimensions[1]
+
+        assert sv_dimension.hidden_idxs == tuple()
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
