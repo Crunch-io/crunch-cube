@@ -5,7 +5,7 @@
 import numpy as np
 
 from cr.cube.enums import DIMENSION_TYPE as DT
-from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
+from cr.cube.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.stripe.cubemeasure import CubeMeasures
 from cr.cube.stripe.insertion import NanSubtotals, SumSubtotals
 from cr.cube.util import lazyproperty

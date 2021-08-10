@@ -11,7 +11,7 @@ from cr.cube.matrix.subtotals import (
     SumSubtotals,
     NanSubtotals,
 )
-from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
+from cr.cube.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.util import lazyproperty
 
 

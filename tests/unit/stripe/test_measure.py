@@ -8,7 +8,7 @@ import pytest
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _SmoothingSpec
-from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
+from cr.cube.smoothing import SingleSidedMovingAvgSmoother
 from cr.cube.stripe.cubemeasure import (
     _BaseCubeMeans,
     _BaseCubeCounts,

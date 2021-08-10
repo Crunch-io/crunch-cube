@@ -66,7 +66,7 @@ from cr.cube.matrix.measure import (
     _WeightedCounts,
     _Zscores,
 )
-from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
+from cr.cube.smoothing import SingleSidedMovingAvgSmoother
 
 from ...unitutil import ANY, call, class_mock, instance_mock, method_mock, property_mock
 

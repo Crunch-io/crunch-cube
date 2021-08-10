@@ -7,7 +7,7 @@ import pytest
 
 from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
-from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
+from cr.cube.smoothing import SingleSidedMovingAvgSmoother
 
 from ..unitutil import initializer_mock, instance_mock
 
