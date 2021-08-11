@@ -72,11 +72,9 @@ class StripeMeasures:
         be returned, otherwise fallback to unsmoothed measure object.
         """
         smoothing_spec = self._rows_dimension.smoothing_spec
-        if smoothing_spec is not None:
-            return _MeansSmoothed(
-                self._rows_dimension, self, self._cube_measures, smoothing_spec
-            )
-        return self.means
+        return _MeansSmoothed(
+            self._rows_dimension, self, self._cube_measures, smoothing_spec
+        )
 
     @lazyproperty
     def stddev(self):

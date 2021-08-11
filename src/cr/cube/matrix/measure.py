@@ -406,11 +406,9 @@ class SecondOrderMeasures:
         """
         column_dimension = self._dimensions[-1]
         smoothing_spec = column_dimension.smoothing_spec
-        if smoothing_spec:
-            return _ColumnIndexSmoothed(
-                self._dimensions, self, self._cube_measures, smoothing_spec
-            )
-        return self.column_index
+        return _ColumnIndexSmoothed(
+            self._dimensions, self, self._cube_measures, smoothing_spec
+        )
 
     @lazyproperty
     def smoothed_column_proportions(self):
@@ -421,11 +419,9 @@ class SecondOrderMeasures:
         """
         column_dimension = self._dimensions[-1]
         smoothing_spec = column_dimension.smoothing_spec
-        if smoothing_spec:
-            return _ColumnProportionsSmoothed(
-                self._dimensions, self, self._cube_measures, smoothing_spec
-            )
-        return self.column_proportions
+        return _ColumnProportionsSmoothed(
+            self._dimensions, self, self._cube_measures, smoothing_spec
+        )
 
     @lazyproperty
     def smoothed_columns_scale_mean(self):
@@ -436,11 +432,9 @@ class SecondOrderMeasures:
         """
         column_dimension = self._dimensions[-1]
         smoothing_spec = column_dimension.smoothing_spec
-        if smoothing_spec:
-            return _ScaleMeanSmoothed(
-                self._dimensions, self, self._cube_measures, MO.COLUMNS, smoothing_spec
-            )
-        return self.columns_scale_mean
+        return _ScaleMeanSmoothed(
+            self._dimensions, self, self._cube_measures, MO.COLUMNS, smoothing_spec
+        )
 
     @lazyproperty
     def smoothed_means(self):
@@ -451,11 +445,9 @@ class SecondOrderMeasures:
         """
         column_dimension = self._dimensions[-1]
         smoothing_spec = column_dimension.smoothing_spec
-        if smoothing_spec:
-            return _MeansSmoothed(
-                self._dimensions, self, self._cube_measures, smoothing_spec
-            )
-        return self.means
+        return _MeansSmoothed(
+            self._dimensions, self, self._cube_measures, smoothing_spec
+        )
 
     @lazyproperty
     def sums(self):

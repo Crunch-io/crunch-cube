@@ -155,15 +155,27 @@ class DescribeSliceSmoothing:
         assert smoothed_values.tolist() == base_values.tolist()
 
     @pytest.mark.parametrize(
-        "fixture, prop_name, periods, window",
+        "fixture, smoothed_prop_name, prop_name, periods, window",
         (
-            (CR.CAT_X_CAT_DATE, "smoothed_column_percentages", 4, 1),
-            (CR.CAT_X_CAT_DATE, "smoothed_column_index", 4, 1),
-            (CR.CAT_X_CAT_DATE, "smoothed_columns_scale_mean", 4, 1),
+            (
+                CR.CAT_X_CAT_DATE,
+                "smoothed_column_percentages",
+                "smoothed_column_percentages",
+                4,
+                1,
+            ),
+            (CR.CAT_X_CAT_DATE, "smoothed_column_index", "column_index", 4, 1),
+            (
+                CR.CAT_X_CAT_DATE,
+                "smoothed_columns_scale_mean",
+                "columns_scale_mean",
+                4,
+                1,
+            ),
         ),
     )
     def it_warns_and_does_not_smooth_when_window_is_invalid(
-        self, fixture, prop_name, periods, window
+        self, fixture, smoothed_prop_name, prop_name, periods, window
     ):
         transforms = {
             "columns_dimension": {
@@ -180,24 +192,26 @@ class DescribeSliceSmoothing:
         )
 
         with pytest.warns(UserWarning, match=expected_warning_regex):
-            smoothed_values = getattr(slice_, prop_name)
+            smoothed_values = getattr(slice_, smoothed_prop_name)
 
-        slice_ = Cube(fixture).partitions[0]
         base_values = getattr(slice_, prop_name)
 
         np.testing.assert_array_almost_equal(smoothed_values, base_values)
 
-    def it_fallbacks_to_unsmoothed_values_if_smoother_is_not_specified(self):
+    def it_uses_default_smoothing_if_smoother_is_not_specified(self):
         slice_ = Cube(CR.CAT_X_CAT_DATE).partitions[0]
 
-        assert (
-            slice_.column_percentages.tolist()
-            == slice_.smoothed_column_percentages.tolist()
-        )
-        assert slice_.column_index.tolist() == slice_.smoothed_column_index.tolist()
-        assert (
-            slice_.columns_scale_mean.tolist()
-            == slice_.smoothed_columns_scale_mean.tolist()
+        assert slice_.smoothed_column_percentages == pytest.approx(
+            np.array(
+                [
+                    [np.nan, 28.4013529661, 30.877106856, 35.7038771792],
+                    [np.nan, 42.5027849229, 47.5045000818, 47.491543065],
+                    [np.nan, 13.8136228302, 13.0829651448, 11.170960187],
+                    [np.nan, 5.12648613614, 3.74406807396, 1.54306531355],
+                    [np.nan, 10.1557531444, 4.7913598429, 4.0905542544],
+                ]
+            ),
+            nan_ok=True,
         )
 
 
