@@ -107,6 +107,7 @@ class MEASURE(enum.Enum):
     COLUMN_STDDEV = "col_std_dev"
     COLUMN_STDERR = "col_std_err"
     MEAN = "mean"
+    PAIRWISE_T_TEST = "pairwise_t_test"
     POPULATION = "population"
     POPULATION_MOE = "population_moe"
     PVALUES = "p_value"
@@ -130,9 +131,9 @@ class MEASURE(enum.Enum):
     TABLE_STDERR = "table_std_err"
     TOTAL_SHARE_SUM = "total_share_sum"
     UNWEIGHTED_COUNT = "count_unweighted"
-    UNWEIGHTED_VALID_COUNT = "unweighted_valid_count"
+    UNWEIGHTED_VALID_COUNT = "valid_count_unweighted"
     WEIGHTED_COUNT = "count_weighted"
-    WEIGHTED_VALID_COUNT = "weighted_valid_count"
+    WEIGHTED_VALID_COUNT = "valid_count_weighted"
     Z_SCORE = "z_score"
 
 
@@ -146,18 +147,28 @@ class CUBE_MEASURE(enum.Enum):
     STDDEV = "stddev"
     SUM = "sum"
     VALID_OVERLAP = "valid_overlap"
-    VALID_COUNT_UNWEIGHTED = "valid_count_unweighted"
-    VALID_COUNT_WEIGHTED = "valid_count_weighted"
+    UNWEIGHTED_VALID_COUNT = "valid_count_unweighted"
+    WEIGHTED_VALID_COUNT = "valid_count_weighted"
 
 
-NUMERIC_MEASURES = frozenset(
+NUMERIC_CUBE_MEASURES = frozenset(
     (
-        CUBE_MEASURE.SUM,
         CUBE_MEASURE.MEAN,
-        MEASURE.SMOOTHED_MEAN,
+        CUBE_MEASURE.SUM,
         CUBE_MEASURE.STDDEV,
-        CUBE_MEASURE.VALID_COUNT_UNWEIGHTED,
-        CUBE_MEASURE.VALID_COUNT_WEIGHTED,
+        CUBE_MEASURE.UNWEIGHTED_VALID_COUNT,
+        CUBE_MEASURE.WEIGHTED_VALID_COUNT,
+    )
+)
+
+SECOND_ORDER_NUMERIC_MEASURES = frozenset(
+    (
+        MEASURE.MEAN,
+        MEASURE.SUM,
+        MEASURE.STDDEV,
+        MEASURE.WEIGHTED_VALID_COUNT,
+        MEASURE.UNWEIGHTED_VALID_COUNT,
+        MEASURE.SMOOTHED_MEAN,
         MEASURE.COLUMN_SHARE_SUM,
         MEASURE.ROW_SHARE_SUM,
         MEASURE.TOTAL_SHARE_SUM,

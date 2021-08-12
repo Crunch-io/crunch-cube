@@ -1153,8 +1153,8 @@ class Describe_BaseOrderHelper:
             ("table_std_dev", "table_proportion_variances"),
             ("table_std_err", "table_std_err"),
             ("total_share_sum", "total_share_sum"),
-            ("unweighted_valid_count", "unweighted_counts"),
-            ("weighted_valid_count", "weighted_counts"),
+            ("valid_count_unweighted", "unweighted_counts"),
+            ("valid_count_weighted", "weighted_counts"),
             ("z_score", "zscores"),
         ),
     )

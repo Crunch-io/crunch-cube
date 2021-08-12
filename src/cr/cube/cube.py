@@ -12,7 +12,7 @@ import numpy as np
 
 from cr.cube.cubepart import CubePartition
 from cr.cube.dimension import AllDimensions
-from cr.cube.enums import CUBE_MEASURE, DIMENSION_TYPE as DT, NUMERIC_MEASURES
+from cr.cube.enums import CUBE_MEASURE, DIMENSION_TYPE as DT, NUMERIC_CUBE_MEASURES
 from cr.cube.util import lazyproperty
 
 np.seterr(divide="ignore", invalid="ignore")
@@ -525,9 +525,9 @@ class Cube:
         """tuple of available numeric measures expressed in the cube_response.
 
         Basically the numeric measures are the intersection between all the measures
-        within the cube response and the defined NUMERIC_MEASURES.
+        within the cube response and the defined NUMERIC_CUBE_MEASURES.
         """
-        return tuple(self.available_measures.intersection(NUMERIC_MEASURES))
+        return tuple(self.available_measures.intersection(NUMERIC_CUBE_MEASURES))
 
     @lazyproperty
     def _ca_as_0th(self):
