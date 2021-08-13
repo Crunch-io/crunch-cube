@@ -7,12 +7,35 @@ import numpy as np
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 
-class SingleSidedMovingAvgSmoother(object):
+class BaseSmoothingSpec(object):
+    """Base object class for Smoother variants."""
+
+    def __init__(self, dimension):
+        self._dimension = dimension
+
+    @classmethod
+    def smoother(cls, dimension):
+        """Returns appropriate Smoother object according to passed function.
+
+        Raises an exception if the function is different from `one_sided_moving_avg`
+        that at the moment is the only one implemented.
+        """
+        smoothing_dict = dimension.smoothing_dict
+        function = smoothing_dict.get("function") or "one_sided_moving_avg"
+        if function != "one_sided_moving_avg":
+            raise NotImplementedError("Function {} is not available.".format(function))
+        return _SingleSidedMovingAvgSmoother(
+            window=smoothing_dict.get("window") or 2,
+            dimension_type=dimension.dimension_type,
+        )
+
+
+class _SingleSidedMovingAvgSmoother(object):
     """Create and configure smoothing function for one-sided moving average."""
 
-    def __init__(self, window, dimension):
+    def __init__(self, window, dimension_type):
         self._window = window
-        self._dimension = dimension
+        self._dimension_type = dimension_type
 
     def smooth(self, values):
         """1D/2D float64 ndarray of smoothed values including additional nans.
@@ -77,7 +100,7 @@ class SingleSidedMovingAvgSmoother(object):
             # --- when base values are empty just return them. Cannot smooth an empty
             # --- array.
             return False
-        if not self._dimension.dimension_type == DT.CAT_DATE:
+        if not self._dimension_type == DT.CAT_DATE:
             # --- smoothing can be performed only on categorical date dimension type
             orienation = "Row" if base_values.ndim == 1 else "Column"
             warnings.warn(

@@ -481,10 +481,9 @@ class Dimension:
         return len(self.all_elements)
 
     @lazyproperty
-    def smoothing_spec(self):
-        """Optional _SmoothingSpec object for transforms.smoothing dict from payload."""
-        smoothing_dict = self._dimension_transforms_dict.get("smoother", {})
-        return _SmoothingSpec(smoothing_dict)
+    def smoothing_dict(self):
+        """Optional dict of smoothing specifications."""
+        return self._dimension_transforms_dict.get("smoother", {})
 
     @lazyproperty
     def subtotal_labels(self):
@@ -1230,30 +1229,6 @@ class _OrderSpec:
         Value is `{}` if no "order": field is present.
         """
         return self._dimension_transforms_dict.get("order") or {}
-
-
-class _SmoothingSpec(object):
-    """Value object providing convenient access to details of a smoothing transform."""
-
-    def __init__(self, smoothing_dict):
-        self._smoothing_dict = smoothing_dict
-
-    @lazyproperty
-    def function(self):
-        """String representing the smoothing function specified in the payload.
-
-        Default smoothing function is ``one_sided_moving_avg``
-        """
-        return self._smoothing_dict.get("function", "one_sided_moving_avg")
-
-    @lazyproperty
-    def window(self):
-        """int, the window parameter specified in the smoothing expression.
-
-        The default value (if window is not specified) is 2 for the moving avarage
-        smoothing algorithms.
-        """
-        return self._smoothing_dict.get("window", 2)
 
 
 class _Subtotals(Sequence):

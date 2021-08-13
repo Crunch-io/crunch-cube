@@ -11,7 +11,7 @@ from cr.cube.matrix.subtotals import (
     SumSubtotals,
     NanSubtotals,
 )
-from cr.cube.smoothing import SingleSidedMovingAvgSmoother
+from cr.cube.smoothing import BaseSmoothingSpec
 from cr.cube.util import lazyproperty
 
 
@@ -405,9 +405,9 @@ class SecondOrderMeasures:
         will be returned, otherwise fallback to unsmoothed measure object.
         """
         column_dimension = self._dimensions[-1]
-        smoothing_spec = column_dimension.smoothing_spec
+        smoother = BaseSmoothingSpec.smoother(column_dimension)
         return _ColumnIndexSmoothed(
-            self._dimensions, self, self._cube_measures, smoothing_spec
+            self._dimensions, self, self._cube_measures, smoother
         )
 
     @lazyproperty
@@ -418,9 +418,9 @@ class SecondOrderMeasures:
         object will be returned, otherwise fallback to unsmoothed measure object.
         """
         column_dimension = self._dimensions[-1]
-        smoothing_spec = column_dimension.smoothing_spec
+        smoother = BaseSmoothingSpec.smoother(column_dimension)
         return _ColumnProportionsSmoothed(
-            self._dimensions, self, self._cube_measures, smoothing_spec
+            self._dimensions, self, self._cube_measures, smoother
         )
 
     @lazyproperty
@@ -431,9 +431,9 @@ class SecondOrderMeasures:
         will be returned, otherwise fallback to unsmoothed measure object.
         """
         column_dimension = self._dimensions[-1]
-        smoothing_spec = column_dimension.smoothing_spec
+        smoother = BaseSmoothingSpec.smoother(column_dimension)
         return _ScaleMeanSmoothed(
-            self._dimensions, self, self._cube_measures, MO.COLUMNS, smoothing_spec
+            self._dimensions, self, self._cube_measures, MO.COLUMNS, smoother
         )
 
     @lazyproperty
@@ -444,10 +444,8 @@ class SecondOrderMeasures:
         be returned, otherwise fallback to unsmoothed measure object.
         """
         column_dimension = self._dimensions[-1]
-        smoothing_spec = column_dimension.smoothing_spec
-        return _MeansSmoothed(
-            self._dimensions, self, self._cube_measures, smoothing_spec
-        )
+        smoother = BaseSmoothingSpec.smoother(column_dimension)
+        return _MeansSmoothed(self._dimensions, self, self._cube_measures, smoother)
 
     @lazyproperty
     def sums(self):
@@ -604,18 +602,6 @@ class _BaseSecondOrderMeasure:
             f"{type(self).__name__} must implement `._intersections`"
         )
 
-    def _smoother(self, smoothing_spec):
-        """SingleSidedMovingAvgSmoother object used for smoothed measures.
-
-        Raises `NotImplementedError` if the function in the smooting spec is different
-        from `one_sided_moving_avg` the only function available today as smoothing
-        algorithm.
-        """
-        function = smoothing_spec.function
-        if function != "one_sided_moving_avg":
-            raise NotImplementedError("Function {} is not available.".format(function))
-        return SingleSidedMovingAvgSmoother(smoothing_spec.window, self._dimensions[-1])
-
     @lazyproperty
     def _subtotal_columns(self):
         """2D np.float64 ndarray of measure values for subtotal columns.
@@ -720,15 +706,13 @@ class _ColumnIndex(_BaseSecondOrderMeasure):
 class _ColumnIndexSmoothed(_ColumnIndex):
     """Provides the smoothed column-index measure for a matrix."""
 
-    def __init__(
-        self, dimensions, second_order_measures, cube_measures, smoothing_spec
-    ):
+    def __init__(self, dimensions, second_order_measures, cube_measures, smoother):
         super(_ColumnIndexSmoothed, self).__init__(
             dimensions,
             second_order_measures,
             cube_measures,
         )
-        self._smoothing_spec = smoothing_spec
+        self._smoother = smoother
 
     @lazyproperty
     def blocks(self):
@@ -736,10 +720,9 @@ class _ColumnIndexSmoothed(_ColumnIndex):
 
         It applies the smoothing algorithm to the base column_index values.
         """
-        smoother = self._smoother(self._smoothing_spec)
+        smoother = self._smoother
         return NanSubtotals.blocks(
-            smoother.smooth(self._column_index),
-            self._dimensions,
+            smoother.smooth(self._column_index), self._dimensions
         )
 
 
@@ -805,26 +788,24 @@ class _ColumnProportionsSmoothed(_ColumnProportions):
     contributed by the weighted count of each matrix cell.
     """
 
-    def __init__(
-        self, dimensions, second_order_measures, cube_measures, smoothing_spec
-    ):
+    def __init__(self, dimensions, second_order_measures, cube_measures, smoother):
         super(_ColumnProportionsSmoothed, self).__init__(
             dimensions,
             second_order_measures,
             cube_measures,
         )
-        self._smoothing_spec = smoothing_spec
+        self._smoother = smoother
 
     @lazyproperty
     def _base_values(self):
         """2D ndarray np.float64 of base values column proportions smoothed values."""
-        smoother = self._smoother(self._smoothing_spec)
+        smoother = self._smoother
         return smoother.smooth(super(_ColumnProportionsSmoothed, self)._base_values)
 
     @lazyproperty
     def _subtotal_rows(self):
         """2D np.float64 ndarray of subtotal rows column proportions smoothed values."""
-        smoother = self._smoother(self._smoothing_spec)
+        smoother = self._smoother
         return smoother.smooth(super(_ColumnProportionsSmoothed, self)._subtotal_rows)
 
 
@@ -1085,20 +1066,18 @@ class _Means(_BaseSecondOrderMeasure):
 class _MeansSmoothed(_BaseSecondOrderMeasure):
     """Provides the smoothed mean measure for a matrix."""
 
-    def __init__(
-        self, dimensions, second_order_measures, cube_measures, smoothing_spec
-    ):
+    def __init__(self, dimensions, second_order_measures, cube_measures, smoother):
         super(_MeansSmoothed, self).__init__(
             dimensions,
             second_order_measures,
             cube_measures,
         )
-        self._smoothing_spec = smoothing_spec
+        self._smoother = smoother
 
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        smoother = self._smoother(self._smoothing_spec)
+        smoother = self._smoother
         return NanSubtotals.blocks(
             smoother.smooth(self._cube_measures.cube_means.means),
             self._dimensions,
@@ -2374,18 +2353,6 @@ class _BaseMarginal:
             return self._second_order_measures.column_comparable_counts.is_defined
         return self._second_order_measures.row_comparable_counts.is_defined
 
-    def _smoother(self, smoothing_spec):
-        """SingleSidedMovingAvgSmoother object used for smoothed measures.
-
-        Raises `NotImplementedError` if the function in the smooting spec is different
-        from `one_sided_moving_avg` the only function available today as smoothing
-        algorithm.
-        """
-        function = smoothing_spec.function
-        if function != "one_sided_moving_avg":
-            raise NotImplementedError("Function {} is not available.".format(function))
-        return SingleSidedMovingAvgSmoother(smoothing_spec.window, self._dimensions[-1])
-
 
 class _BaseScaledCountMarginal(_BaseMarginal):
     """A base class for marginals that depend on the scaled counts."""
@@ -2704,17 +2671,17 @@ class _ScaleMeanSmoothed(_ScaleMean):
         second_order_measures,
         cube_measures,
         orientation,
-        smoothing_spec,
+        smoother,
     ):
         super(_ScaleMeanSmoothed, self).__init__(
             dimensions, second_order_measures, cube_measures, orientation
         )
-        self._smoothing_spec = smoothing_spec
+        self._smoother = smoother
 
     @lazyproperty
     def _proportions(self):
         """List of 2 ndarray of the relevant proportion blocks"""
-        smoother = self._smoother(self._smoothing_spec)
+        smoother = self._smoother
         props = self._second_order_measures.column_proportions.blocks
         # --- Get base values & *column* subtotals
         return [
