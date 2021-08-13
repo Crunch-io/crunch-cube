@@ -161,7 +161,7 @@ NUMERIC_CUBE_MEASURES = frozenset(
     )
 )
 
-SECOND_ORDER_NUMERIC_MEASURES = frozenset(
+NUMERIC_MEASURES = frozenset(
     (
         MEASURE.MEAN,
         MEASURE.SUM,
