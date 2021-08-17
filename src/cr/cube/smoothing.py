@@ -11,9 +11,6 @@ from cr.cube.util import lazyproperty
 class Smoother(object):
     """Base object class for Smoother variants."""
 
-    def __init__(self, dimension):
-        self._dimension = dimension
-
     @classmethod
     def factory(cls, dimension):
         """Returns appropriate Smoother object according to passed function.

@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension, _SmoothingSpec
+from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT, MARGINAL_ORIENTATION as MO
 from cr.cube.matrix.cubemeasure import (
     CubeMeasures,
@@ -66,7 +66,6 @@ from cr.cube.matrix.measure import (
     _WeightedCounts,
     _Zscores,
 )
-from cr.cube.smoothing import SingleSidedMovingAvgSmoother
 
 from ...unitutil import ANY, call, class_mock, instance_mock, method_mock, property_mock
 
@@ -92,6 +91,9 @@ class DescribeSecondOrderMeasures:
             ("row_proportions", _RowProportions),
             ("row_unweighted_bases", _RowUnweightedBases),
             ("row_weighted_bases", _RowWeightedBases),
+            ("smoothed_column_index", _ColumnIndexSmoothed),
+            ("smoothed_column_proportions", _ColumnProportionsSmoothed),
+            ("smoothed_means", _MeansSmoothed),
             ("table_proportion_variances", _TableProportionVariances),
             ("table_std_err", _TableStandardError),
             ("table_proportions", _TableProportions),
@@ -110,12 +112,7 @@ class DescribeSecondOrderMeasures:
         measure_prop_name,
         MeasureCls,
     ):
-        smoothing_spec = property_mock(
-            request, Dimension, "smoothing_spec", return_value=None
-        )
-        Dimension_ = class_mock(
-            request, "cr.cube.dimension.Dimension", smoothing_spec=smoothing_spec
-        )
+        Dimension_ = class_mock(request, "cr.cube.dimension.Dimension")
         dimensions_ = (Dimension_, Dimension_)
         measure_ = instance_mock(request, MeasureCls)
         MeasureCls_ = class_mock(
@@ -128,42 +125,6 @@ class DescribeSecondOrderMeasures:
         measure = getattr(measures, measure_prop_name)
 
         MeasureCls_.assert_called_once_with(dimensions_, measures, cube_measures_)
-        assert measure is measure_
-
-    @pytest.mark.parametrize(
-        "measure_prop_name, MeasureCls",
-        (
-            ("smoothed_column_index", _ColumnIndexSmoothed),
-            ("smoothed_column_proportions", _ColumnProportionsSmoothed),
-            ("smoothed_means", _MeansSmoothed),
-        ),
-    )
-    def it_provides_access_to_various_smoothed_measure_objects(
-        self,
-        request,
-        _cube_measures_prop_,
-        cube_measures_,
-        dimensions_,
-        measure_prop_name,
-        MeasureCls,
-    ):
-        smoothing_dict = {"function": "one_sided_moving_avg", "window": 3}
-        smoothing_spec = _SmoothingSpec(smoothing_dict)
-        dimensions_[-1].smoothing_spec = smoothing_spec
-        measure_ = instance_mock(request, MeasureCls)
-        MeasureCls_ = class_mock(
-            request,
-            "cr.cube.matrix.measure.%s" % MeasureCls.__name__,
-            return_value=measure_,
-        )
-        _cube_measures_prop_.return_value = cube_measures_
-        measures = SecondOrderMeasures(None, dimensions_, None)
-
-        measure = getattr(measures, measure_prop_name)
-
-        MeasureCls_.assert_called_once_with(
-            dimensions_, measures, cube_measures_, smoothing_spec
-        )
         assert measure is measure_
 
     def it_provides_access_to_the_columns_pruning_base(
@@ -227,12 +188,7 @@ class DescribeSecondOrderMeasures:
         measure,
         MarginalCls,
     ):
-        smoothing_spec = property_mock(
-            request, Dimension, "smoothing_spec", return_value=None
-        )
-        Dimension_ = class_mock(
-            request, "cr.cube.dimension.Dimension", smoothing_spec=smoothing_spec
-        )
+        Dimension_ = class_mock(request, "cr.cube.dimension.Dimension")
         dimensions_ = (Dimension_, Dimension_)
         marginal_ = instance_mock(request, MarginalCls)
         MarginalCls_ = class_mock(
@@ -352,26 +308,6 @@ class Describe_BaseSecondOrderMeasure:
         blocks = measure.blocks
 
         assert blocks == [["A", "B"], ["C", "D"]]
-
-    def it_knows_the_smoother_object(self, dimensions_):
-        smoothing_dict = {"function": "one_sided_moving_avg", "window": 3}
-        smoothing_spec = _SmoothingSpec(smoothing_dict)
-        measure = _BaseSecondOrderMeasure(dimensions_, None, None)
-
-        smoother = measure._smoother(smoothing_spec)
-
-        assert isinstance(smoother, SingleSidedMovingAvgSmoother)
-
-    def but_it_raises_an_exception_when_smoothing_function_is_not_available(
-        self, dimensions_
-    ):
-        smoothing_dict = {"function": "foo", "window": 3}
-        smoothing_spec = _SmoothingSpec(smoothing_dict)
-        measure = _BaseSecondOrderMeasure(dimensions_, None, None)
-
-        with pytest.raises(NotImplementedError) as e:
-            measure._smoother(smoothing_spec)
-        assert str(e.value) == "Function foo is not available."
 
     # fixture components ---------------------------------------------
 
@@ -2206,26 +2142,6 @@ class Describe_BaseMarginal:
         actual = marginal._counts_are_defined
 
         assert actual == second_order_measures_.column_comparable_counts.is_defined
-
-    def it_knows_the_smoother_object(self, dimensions_):
-        smoothing_dict = {"function": "one_sided_moving_avg", "window": 3}
-        smoothing_spec = _SmoothingSpec(smoothing_dict)
-        measure = _BaseMarginal(dimensions_, None, None, None)
-
-        smoother = measure._smoother(smoothing_spec)
-
-        assert isinstance(smoother, SingleSidedMovingAvgSmoother)
-
-    def but_it_raises_an_exception_when_smoothing_function_is_not_available(
-        self, dimensions_
-    ):
-        smoothing_dict = {"function": "foo", "window": 3}
-        smoothing_spec = _SmoothingSpec(smoothing_dict)
-        measure = _BaseMarginal(dimensions_, None, None, None)
-
-        with pytest.raises(NotImplementedError) as e:
-            measure._smoother(smoothing_spec)
-        assert str(e.value) == "Function foo is not available."
 
     # fixture components ---------------------------------------------
 
