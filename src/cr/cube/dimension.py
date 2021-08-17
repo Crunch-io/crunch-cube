@@ -483,7 +483,7 @@ class Dimension:
     @lazyproperty
     def smoothing_dict(self):
         """Optional dict of smoothing specifications."""
-        return self._dimension_transforms_dict.get("smoother", {})
+        return self._dimension_transforms_dict.get("smoother") or {}
 
     @lazyproperty
     def subtotal_labels(self):

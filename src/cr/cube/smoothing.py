@@ -5,16 +5,17 @@ import warnings
 import numpy as np
 
 from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.util import lazyproperty
 
 
-class BaseSmoothingSpec(object):
+class Smoother(object):
     """Base object class for Smoother variants."""
 
     def __init__(self, dimension):
         self._dimension = dimension
 
     @classmethod
-    def smoother(cls, dimension):
+    def factory(cls, dimension):
         """Returns appropriate Smoother object according to passed function.
 
         Raises an exception if the function is different from `one_sided_moving_avg`
@@ -25,7 +26,7 @@ class BaseSmoothingSpec(object):
         if function != "one_sided_moving_avg":
             raise NotImplementedError("Function {} is not available.".format(function))
         return _SingleSidedMovingAvgSmoother(
-            window=smoothing_dict.get("window") or 2,
+            smoothing_dict=smoothing_dict,
             dimension_type=dimension.dimension_type,
         )
 
@@ -33,8 +34,8 @@ class BaseSmoothingSpec(object):
 class _SingleSidedMovingAvgSmoother(object):
     """Create and configure smoothing function for one-sided moving average."""
 
-    def __init__(self, window, dimension_type):
-        self._window = window
+    def __init__(self, smoothing_dict, dimension_type):
+        self._smoothing_dict = smoothing_dict
         self._dimension_type = dimension_type
 
     def smooth(self, values):
@@ -117,3 +118,8 @@ class _SingleSidedMovingAvgSmoother(object):
             )
             return False
         return True
+
+    @lazyproperty
+    def _window(self):
+        """Int representing the window for the moving avarage specified in the dict."""
+        return self._smoothing_dict.get("window") or 2

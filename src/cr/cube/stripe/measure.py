@@ -5,7 +5,7 @@
 import numpy as np
 
 from cr.cube.enums import DIMENSION_TYPE as DT
-from cr.cube.smoothing import BaseSmoothingSpec
+from cr.cube.smoothing import Smoother
 from cr.cube.stripe.cubemeasure import CubeMeasures
 from cr.cube.stripe.insertion import NanSubtotals, SumSubtotals
 from cr.cube.util import lazyproperty
@@ -71,8 +71,7 @@ class StripeMeasures:
         If smoothing is defined in the dimension transform a _MeansSmoothed object will
         be returned, otherwise fallback to unsmoothed measure object.
         """
-        smoother = BaseSmoothingSpec.smoother(self._rows_dimension)
-        return _MeansSmoothed(self._rows_dimension, self, self._cube_measures, smoother)
+        return _MeansSmoothed(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
     def stddev(self):
@@ -198,6 +197,15 @@ class _BaseSecondOrderMeasure:
         return self._cube_measures.weighted_cube_counts
 
 
+class _SmoothedMeasure(_BaseSecondOrderMeasure):
+    """Mixin providing `._smoother` property for smoothed measures."""
+
+    @lazyproperty
+    def _smoother(self):
+        """BaseSmoother subtype object providing smoothing as specified in spec."""
+        return Smoother.factory(self._rows_dimension)
+
+
 class _Means(_BaseSecondOrderMeasure):
     """Provides the means measure for a stripe.
 
@@ -219,19 +227,11 @@ class _Means(_BaseSecondOrderMeasure):
         return NanSubtotals.subtotal_values(self.base_values, self._rows_dimension)
 
 
-class _MeansSmoothed(_Means):
+class _MeansSmoothed(_Means, _SmoothedMeasure):
     """Provides the smoothed means measure for a stripe.
 
     Relies on the presence of a means cube-measure in the cube-result.
     """
-
-    def __init__(self, rows_dimension, measures, cube_measures, smoother):
-        super(_MeansSmoothed, self).__init__(
-            rows_dimension,
-            measures,
-            cube_measures,
-        )
-        self._smoother = smoother
 
     @lazyproperty
     def base_values(self):

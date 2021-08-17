@@ -11,7 +11,7 @@ from cr.cube.matrix.subtotals import (
     SumSubtotals,
     NanSubtotals,
 )
-from cr.cube.smoothing import BaseSmoothingSpec
+from cr.cube.smoothing import Smoother
 from cr.cube.util import lazyproperty
 
 
@@ -404,11 +404,7 @@ class SecondOrderMeasures:
         If smoothing is defined in the dimension transform a _ColumnIndexSmoothed object
         will be returned, otherwise fallback to unsmoothed measure object.
         """
-        column_dimension = self._dimensions[-1]
-        smoother = BaseSmoothingSpec.smoother(column_dimension)
-        return _ColumnIndexSmoothed(
-            self._dimensions, self, self._cube_measures, smoother
-        )
+        return _ColumnIndexSmoothed(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def smoothed_column_proportions(self):
@@ -417,11 +413,7 @@ class SecondOrderMeasures:
         If smoothing is defined in the dimension transform a _ColumnProportionsSmoothed
         object will be returned, otherwise fallback to unsmoothed measure object.
         """
-        column_dimension = self._dimensions[-1]
-        smoother = BaseSmoothingSpec.smoother(column_dimension)
-        return _ColumnProportionsSmoothed(
-            self._dimensions, self, self._cube_measures, smoother
-        )
+        return _ColumnProportionsSmoothed(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def smoothed_columns_scale_mean(self):
@@ -430,10 +422,8 @@ class SecondOrderMeasures:
         If smoothing is defined in the dimension transform a _ScaleMeanSmoothed object
         will be returned, otherwise fallback to unsmoothed measure object.
         """
-        column_dimension = self._dimensions[-1]
-        smoother = BaseSmoothingSpec.smoother(column_dimension)
         return _ScaleMeanSmoothed(
-            self._dimensions, self, self._cube_measures, MO.COLUMNS, smoother
+            self._dimensions, self, self._cube_measures, MO.COLUMNS
         )
 
     @lazyproperty
@@ -443,9 +433,7 @@ class SecondOrderMeasures:
         If smoothing is defined in the dimension transform a _MeansSmoothed object will
         be returned, otherwise fallback to unsmoothed measure object.
         """
-        column_dimension = self._dimensions[-1]
-        smoother = BaseSmoothingSpec.smoother(column_dimension)
-        return _MeansSmoothed(self._dimensions, self, self._cube_measures, smoother)
+        return _MeansSmoothed(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
     def sums(self):
@@ -641,6 +629,15 @@ class _BaseSecondOrderMeasure:
         return self._cube_measures.weighted_cube_counts
 
 
+class _SmoothedMeasure(_BaseSecondOrderMeasure):
+    """Mixin providing `._smoother` property for smoothed measures."""
+
+    @lazyproperty
+    def _smoother(self):
+        """BaseSmoother subtype object providing smoothing as specified in spec."""
+        return Smoother.factory(self._dimensions[-1])
+
+
 class _ColumnComparableCounts(_BaseSecondOrderMeasure):
     """Provides the column-comparable count measure for a matrix.
 
@@ -703,16 +700,8 @@ class _ColumnIndex(_BaseSecondOrderMeasure):
         return 100 * (proportions / baseline)
 
 
-class _ColumnIndexSmoothed(_ColumnIndex):
+class _ColumnIndexSmoothed(_ColumnIndex, _SmoothedMeasure):
     """Provides the smoothed column-index measure for a matrix."""
-
-    def __init__(self, dimensions, second_order_measures, cube_measures, smoother):
-        super(_ColumnIndexSmoothed, self).__init__(
-            dimensions,
-            second_order_measures,
-            cube_measures,
-        )
-        self._smoother = smoother
 
     @lazyproperty
     def blocks(self):
@@ -781,20 +770,12 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
         return self._second_order_measures.column_weighted_bases.blocks
 
 
-class _ColumnProportionsSmoothed(_ColumnProportions):
+class _ColumnProportionsSmoothed(_ColumnProportions, _SmoothedMeasure):
     """Provides the smoothed column-proportions measure for a matrix.
 
     Column-proportions is a 2D np.float64 ndarray of the proportion of its column margin
     contributed by the weighted count of each matrix cell.
     """
-
-    def __init__(self, dimensions, second_order_measures, cube_measures, smoother):
-        super(_ColumnProportionsSmoothed, self).__init__(
-            dimensions,
-            second_order_measures,
-            cube_measures,
-        )
-        self._smoother = smoother
 
     @lazyproperty
     def _base_values(self):
@@ -1063,16 +1044,8 @@ class _Means(_BaseSecondOrderMeasure):
         )
 
 
-class _MeansSmoothed(_BaseSecondOrderMeasure):
+class _MeansSmoothed(_Means, _SmoothedMeasure):
     """Provides the smoothed mean measure for a matrix."""
-
-    def __init__(self, dimensions, second_order_measures, cube_measures, smoother):
-        super(_MeansSmoothed, self).__init__(
-            dimensions,
-            second_order_measures,
-            cube_measures,
-        )
-        self._smoother = smoother
 
     @lazyproperty
     def blocks(self):
@@ -2662,21 +2635,8 @@ class _ScaleMean(_BaseScaledCountMarginal):
         return inner / denominator
 
 
-class _ScaleMeanSmoothed(_ScaleMean):
+class _ScaleMeanSmoothed(_ScaleMean, _SmoothedMeasure):
     """Provides the scale mean marginals smoothed for a matrix if available."""
-
-    def __init__(
-        self,
-        dimensions,
-        second_order_measures,
-        cube_measures,
-        orientation,
-        smoother,
-    ):
-        super(_ScaleMeanSmoothed, self).__init__(
-            dimensions, second_order_measures, cube_measures, orientation
-        )
-        self._smoother = smoother
 
     @lazyproperty
     def _proportions(self):
