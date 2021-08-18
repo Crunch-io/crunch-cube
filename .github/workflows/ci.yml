@@ -32,5 +32,7 @@ jobs:
       run: tox
     - name: Submit Coverage
       run: tox -e coverage,codecov
+    - name: Formatter
+      run: tox -e formatter
     - name: Linter
       run: tox -e lint
