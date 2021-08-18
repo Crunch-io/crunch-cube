@@ -2,8 +2,6 @@
 
 """Integrations tests for headings and subtotals behaviors."""
 
-from __future__ import division
-
 import numpy as np
 import pytest
 

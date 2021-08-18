@@ -2,8 +2,6 @@
 
 """Integration-test suite for column/row index measure behaviors."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
 
 from cr.cube.cube import Cube

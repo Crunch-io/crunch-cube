@@ -2,8 +2,6 @@
 
 """Integration-test suite for `cr.cube.cube` module."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
 import pytest
 
@@ -24,7 +22,7 @@ from ..fixtures import (
 )
 
 
-class DescribeIntegratedCube(object):
+class DescribeIntegratedCube:
     """Integration-test suite for `cr.cube.cube.Cube` object."""
 
     def it_provides_values_for_cat_x_cat(self):
@@ -177,7 +175,7 @@ class DescribeIntegratedCube(object):
         assert cube.covariance is None
 
 
-class DescribeIntegrated_Measures(object):
+class DescribeIntegrated_Measures:
     """Integration-tests that exercise the `cr.cube.cube._Measures` object."""
 
     def it_provides_access_to_the_overlaps_measure(self):
@@ -286,7 +284,7 @@ class DescribeIntegrated_Measures(object):
         assert type(weighted_counts).__name__ == expected_type_name
 
 
-class DescribeIntegrated_MeanMeasure(object):
+class DescribeIntegrated_MeanMeasure:
     def it_provides_access_to_its_raw_cube_array(self):
         cube_dict = CR.CAT_X_CAT_MEAN_WGTD
         cube = Cube(cube_dict)
@@ -337,7 +335,7 @@ class DescribeIntegrated_MeanMeasure(object):
         )
 
 
-class DescribeIntegrated_UnweightedCountMeasure(object):
+class DescribeIntegrated_UnweightedCountMeasure:
     def it_provides_access_to_its_raw_cube_array(self):
         cube_dict = CR.CAT_X_CAT
         cube = Cube(cube_dict)
@@ -350,7 +348,7 @@ class DescribeIntegrated_UnweightedCountMeasure(object):
         )
 
 
-class DescribeIntegrated_WeightedCountMeasure(object):
+class DescribeIntegrated_WeightedCountMeasure:
     def it_provides_access_to_its_raw_cube_array(self):
         cube_dict = CR.CAT_X_CAT_WGTD
         cube = Cube(cube_dict)

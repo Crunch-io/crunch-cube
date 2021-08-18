@@ -11,7 +11,7 @@ from ..fixtures import CR
 from ..util import load_python_expression
 
 
-class DescribeSliceSmoothing(object):
+class DescribeSliceSmoothing:
     """Integration-test suite for _Slice.evaluate() method."""
 
     @pytest.mark.parametrize(
@@ -158,7 +158,7 @@ class DescribeSliceSmoothing(object):
         np.testing.assert_array_almost_equal(smoothed_values, base_values)
 
 
-class DescribeStrandMeansSmoothing(object):
+class DescribeStrandMeansSmoothing:
     """Integration-test suite for _Strand.evaluate() method."""
 
     def it_provides_smoothed_means_cat_date(self):

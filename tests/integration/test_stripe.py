@@ -12,7 +12,7 @@ from cr.cube.stripe.assembler import StripeAssembler
 from ..fixtures import CR
 
 
-class DescribeStripeAssembler(object):
+class DescribeStripeAssembler:
     """Integration-test suite for `cr.cube.stripe.assembler.StripeAssembler` object."""
 
     def it_provides_values_for_univariate_cat(self):
