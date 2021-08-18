@@ -5,8 +5,6 @@
 CubeSet is the main API class for manipulating Crunch.io JSON cube responses.
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import copy
 import json
 
@@ -20,7 +18,7 @@ from cr.cube.util import lazyproperty
 np.seterr(divide="ignore", invalid="ignore")
 
 
-class CubeSet(object):
+class CubeSet:
     """Represents a multi-cube cube-response.
 
     Also works just fine for a single cube-response passed inside a sequence, allowing
@@ -198,7 +196,7 @@ class CubeSet(object):
         return Cube(self._cube_responses[0]).ndim == 0
 
 
-class Cube(object):
+class Cube:
     """Provides access to individual slices on a cube-result.
 
     It also provides some attributes of the overall cube-result.
@@ -669,7 +667,7 @@ class Cube(object):
         return tuple(valid_idxs[i] for i in self._all_dimensions.dimension_order)
 
 
-class _Measures(object):
+class _Measures:
     """Provides access to measures contained in cube response."""
 
     def __init__(self, cube_dict, all_dimensions, cube_idx_arg=None):
@@ -838,7 +836,7 @@ class _Measures(object):
         return valid_counts if valid_counts.raw_cube_array is not None else None
 
 
-class _BaseMeasure(object):
+class _BaseMeasure:
     """Base class for measure objects."""
 
     def __init__(self, cube_dict, all_dimensions, cube_idx_arg=None):
