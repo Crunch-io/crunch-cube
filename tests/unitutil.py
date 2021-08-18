@@ -2,8 +2,6 @@
 
 """Functions that make mocking with pytest easier and more readable."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from mock import ANY, call, Mock  # noqa
 from mock import create_autospec, patch, PropertyMock
 
