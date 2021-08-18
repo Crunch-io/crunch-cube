@@ -2,8 +2,6 @@
 
 """Second-order measure collection and the individual measures it composes."""
 
-from __future__ import division
-
 import numpy as np
 
 from cr.cube.enums import DIMENSION_TYPE as DT
@@ -15,7 +13,7 @@ from cr.cube.util import lazyproperty
 # === MEASURE COLLECTION ===
 
 
-class StripeMeasures(object):
+class StripeMeasures:
     """Intended to be a singleton for a given cube-result.
 
     It will give the same values if duplicated, just sacrificing some time and memory
@@ -133,7 +131,7 @@ class StripeMeasures(object):
 # === INDIVIDUAL MEASURES ===
 
 
-class _BaseSecondOrderMeasure(object):
+class _BaseSecondOrderMeasure:
     """Base class for all second-order measure objects."""
 
     def __init__(self, rows_dimension, measures, cube_measures):

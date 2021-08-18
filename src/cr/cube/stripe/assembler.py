@@ -8,8 +8,6 @@ rows according to the dimension *order* transforms, and to hide rows that are ei
 hidden by the user or "pruned" because they contain no observations.
 """
 
-from __future__ import division
-
 import numpy as np
 
 from cr.cube.collator import (
@@ -22,7 +20,7 @@ from cr.cube.stripe.measure import StripeMeasures
 from cr.cube.util import lazyproperty
 
 
-class StripeAssembler(object):
+class StripeAssembler:
     """Provides measures, marginals, and totals for a (1D) strand cube-slice.
 
     An assembled stripe measure is a 1D ndarray reflecting all ordering, insertion, and
@@ -295,7 +293,7 @@ class StripeAssembler(object):
 # === ORDER HELPERS ===
 
 
-class _BaseOrderHelper(object):
+class _BaseOrderHelper:
     """Base class for ordering helpers."""
 
     def __init__(self, rows_dimension, measures):
