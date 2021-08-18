@@ -15,8 +15,6 @@ The three types of cube partition are the *slice*, *strand*, and *nub*, which ar
 1D, and 0D respectively.
 """
 
-from __future__ import division
-
 import math
 import numpy as np
 from tabulate import tabulate
@@ -36,7 +34,7 @@ from cr.cube.util import lazyproperty
 Z_975 = 1.959964
 
 
-class CubePartition(object):
+class CubePartition:
     """A slice, a strand, or a nub drawn from a cube-response.
 
     These represent 2, 1, or 0 dimensions of a cube, respectively.
@@ -367,7 +365,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def column_unweighted_bases(self):
-        """2D np.float64 ndarray of unweighted column-proportion denominator per cell."""
+        """2D np.float64 ndarray of unweighted col-proportion denominator per cell."""
         return self._assembler.column_unweighted_bases
 
     @lazyproperty
