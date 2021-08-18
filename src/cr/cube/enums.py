@@ -7,7 +7,7 @@ import enum
 from cr.cube.util import lazyproperty
 
 
-class _DimensionType(object):
+class _DimensionType:
     """Member of the DIMENSION_TYPE enumeration."""
 
     def __init__(self, name):
@@ -25,7 +25,7 @@ class _DimensionType(object):
         return self._name
 
 
-class DIMENSION_TYPE(object):
+class DIMENSION_TYPE:
     """Enumerated values representing the various types of dimension."""
 
     # ---member definitions---
