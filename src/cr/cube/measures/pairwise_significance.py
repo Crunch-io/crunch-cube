@@ -2,8 +2,6 @@
 
 """T-score based P-values of pairwise comparison or columns of a contingency table."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import numpy as np
 from scipy.stats import t
 
