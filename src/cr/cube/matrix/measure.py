@@ -2,8 +2,6 @@
 
 """Second-order measure collection and the individual measures it composes."""
 
-from __future__ import division
-
 import numpy as np
 from scipy.stats import t, norm
 
@@ -17,7 +15,7 @@ from cr.cube.matrix.subtotals import (
 from cr.cube.util import lazyproperty
 
 
-class SecondOrderMeasures(object):
+class SecondOrderMeasures:
     """Intended to be a singleton for a given cube-result.
 
     It will give the same values if duplicated, just sacrificing some time and memory
@@ -519,7 +517,7 @@ class SecondOrderMeasures(object):
         return CubeMeasures(self._cube, self._dimensions, self._slice_idx)
 
 
-class _BaseSecondOrderMeasure(object):
+class _BaseSecondOrderMeasure:
     """Base class for all second-order measure objects."""
 
     def __init__(self, dimensions, second_order_measures, cube_measures):
@@ -2191,7 +2189,7 @@ class _Zscores(_BaseSecondOrderMeasure):
 # === MARGINALS ===
 
 
-class _BaseMarginal(object):
+class _BaseMarginal:
     """Base class for all (second-order) marginal objects."""
 
     def __init__(self, dimensions, second_order_measures, cube_measures, orientation):
@@ -2802,7 +2800,7 @@ class _ScaleMeanStderr(_BaseScaledCountMarginal):
 # === SCALAR TABLE VALUES ===
 
 
-class _BaseTableValue(object):
+class _BaseTableValue:
     """Base class for all (second-order) table values
 
     Table values are values that apply to the whole table, which are often scalars, but
@@ -2888,7 +2886,7 @@ class _TableBasesRange(_BaseTableValue):
 # === PAIRWISE HELPERS ===
 
 
-class _PairwiseSignificaneBetweenSubvariablesHelper(object):
+class _PairwiseSignificaneBetweenSubvariablesHelper:
     """Helper for calculating overlaps significance between subvariables."""
 
     def __init__(self, column_proportions, cube_overlaps, row_idx, idx_a, idx_b):

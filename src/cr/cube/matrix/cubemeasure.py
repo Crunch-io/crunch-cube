@@ -6,15 +6,13 @@ There are several cube-measures that can appear in a cube-response, including
 unweighted-counts, weighted-counts (aka. counts), means, and others.
 """
 
-from __future__ import division
-
 import numpy as np
 
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
-class CubeMeasures(object):
+class CubeMeasures:
     """Provides access to all cube-measure objects for this cube-result."""
 
     def __init__(self, cube, dimensions, slice_idx):
@@ -74,7 +72,7 @@ class CubeMeasures(object):
         )
 
 
-class _BaseCubeMeasure(object):
+class _BaseCubeMeasure:
     """Base class for all cube-measure objects."""
 
     def __init__(self, dimensions):

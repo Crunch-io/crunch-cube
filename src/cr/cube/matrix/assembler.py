@@ -9,8 +9,6 @@ columns that are either hidden by the user or "pruned" because they contain no
 observations.
 """
 
-from __future__ import division
-
 import numpy as np
 
 from cr.cube.collator import (
@@ -30,7 +28,7 @@ from cr.cube.matrix.subtotals import SumSubtotals
 from cr.cube.util import lazyproperty
 
 
-class Assembler(object):
+class Assembler:
     """Provides measure and margin methods for a cube-slice.
 
     An assembled matrix is a 2D ndarray reflecting all ordering, insertion, and hiding
@@ -803,7 +801,7 @@ class Assembler(object):
         return self._dimensions[0]
 
 
-class _BaseOrderHelper(object):
+class _BaseOrderHelper:
     """Base class for ordering helpers."""
 
     def __init__(self, dimensions, second_order_measures):

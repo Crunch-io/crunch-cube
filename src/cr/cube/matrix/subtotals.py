@@ -10,14 +10,12 @@ This module provides the various strategies required for computing subtotals and
 primarily used by measure objects as a collaborator to handle this aspect.
 """
 
-from __future__ import division
-
 import numpy as np
 
 from cr.cube.util import lazyproperty
 
 
-class _BaseSubtotals(object):
+class _BaseSubtotals:
     """Base class for Subtotals objects."""
 
     def __init__(self, base_values, dimensions):
