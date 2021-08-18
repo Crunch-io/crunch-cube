@@ -16,7 +16,7 @@ from cr.cube.matrix.subtotals import (
 from ...unitutil import ANY, initializer_mock, instance_mock, method_mock, property_mock
 
 
-class Describe_BaseSubtotals(object):
+class Describe_BaseSubtotals:
     """Unit test suite for `cr.cube.matrix._BaseSubtotals` object."""
 
     def it_provides_a_blocks_interface_method(self, request, cube_counts_):
@@ -173,7 +173,7 @@ class Describe_BaseSubtotals(object):
         return method_mock(request, _BaseSubtotals, "_subtotal_row")
 
 
-class DescribeNanSubtotals(object):
+class DescribeNanSubtotals:
     """Unit test suite for `cr.cube.matrix.NanSubtotals` object."""
 
     def it_can_compute_a_intersection_cell_value_to_help(self):
@@ -198,7 +198,7 @@ class DescribeNanSubtotals(object):
         )
 
 
-class DescribeSumSubtotals(object):
+class DescribeSumSubtotals:
     """Unit test suite for `cr.cube.matrix.SumSubtotals` object."""
 
     def it_provides_an_intersections_interface_method(

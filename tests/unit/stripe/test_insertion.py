@@ -15,7 +15,7 @@ from cr.cube.stripe.insertion import (
 from ...unitutil import ANY, initializer_mock, instance_mock, property_mock
 
 
-class Describe_BaseSubtotals(object):
+class Describe_BaseSubtotals:
     """Unit test suite for `cr.cube.stripe._BaseSubtotals` object."""
 
     def it_provides_a_subtotal_values_interface_method(self, request, rows_dimension_):
@@ -44,7 +44,7 @@ class Describe_BaseSubtotals(object):
         return instance_mock(request, Dimension)
 
 
-class DescribeNanSubtotals(object):
+class DescribeNanSubtotals:
     """Unit test suite for `cr.cube.stripe.NanSubtotals` object."""
 
     def it_computes_the_subtotal_values(self, request):
@@ -61,7 +61,7 @@ class DescribeNanSubtotals(object):
         )
 
 
-class DescribeSumSubtotals(object):
+class DescribeSumSubtotals:
     """Unit test suite for `cr.cube.matrix.SumSubtotals` object."""
 
     @pytest.mark.parametrize(

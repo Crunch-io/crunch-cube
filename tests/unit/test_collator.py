@@ -26,7 +26,7 @@ from ..unitutil import (
 )
 
 
-class Describe_BaseCollator(object):
+class Describe_BaseCollator:
     """Unit-test suite for `cr.cube.collator._BaseCollator` object."""
 
     def it_provides_access_to_the_dimension_element_ids_to_help(self, dimension_):
@@ -68,7 +68,7 @@ class Describe_BaseCollator(object):
         return instance_mock(request, Dimension)
 
 
-class Describe_BaseAnchoredCollator(object):
+class Describe_BaseAnchoredCollator:
     """Unit-test suite for `cr.cube.collator._BaseAnchoredCollator` object."""
 
     def it_provides_an_interface_classmethod(self, request, dimension_):
@@ -246,7 +246,7 @@ class Describe_BaseAnchoredCollator(object):
         return instance_mock(request, Dimension)
 
 
-class DescribeExplicitOrderCollator(object):
+class DescribeExplicitOrderCollator:
     """Unit-test suite for `cr.cube.collator.ExplicitOrderCollator` object."""
 
     @pytest.mark.parametrize(
@@ -299,7 +299,7 @@ class DescribeExplicitOrderCollator(object):
         assert collator._element_order_descriptors == expected_value
 
 
-class DescribePayloadOrderCollator(object):
+class DescribePayloadOrderCollator:
     """Unit-test suite for `cr.cube.collator.PayloadOrderCollator` object."""
 
     @pytest.mark.parametrize(
@@ -324,7 +324,7 @@ class DescribePayloadOrderCollator(object):
         assert collator._element_order_descriptors == expected_value
 
 
-class DescribeSortByValueCollator(object):
+class DescribeSortByValueCollator:
     """Unit-test suite for `cr.cube.collator.SortByValueCollator` object.
 
     SortByValueCollator computes element ordering for sort-by-value order transforms. It
@@ -413,7 +413,7 @@ class DescribeSortByValueCollator(object):
         assert collator._body_idxs == expected_value
 
     def it_computes_the_bottom_exclusion_idxs_to_help(
-        self, request, _iter_fixed_idxs_, _order_spec_prop_, order_spec_
+        self, _iter_fixed_idxs_, _order_spec_prop_, order_spec_
     ):
         _iter_fixed_idxs_.return_value = (n for n in (4, 0, 5, 2))
         _order_spec_prop_.return_value = order_spec_

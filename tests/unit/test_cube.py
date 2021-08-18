@@ -19,7 +19,7 @@ from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 from ..unitutil import call, class_mock, instance_mock, property_mock
 
 
-class DescribeCubeSet(object):
+class DescribeCubeSet:
     """Unit-test suite for `cr.cube.cube.CubeSet` object."""
 
     def it_knows_its_availabe_measures(self, cube_, _cubes_prop_):
@@ -312,7 +312,7 @@ class DescribeCubeSet(object):
         return property_mock(request, CubeSet, "_is_numeric_measure")
 
 
-class DescribeCube(object):
+class DescribeCube:
     """Unit-test suite for `cr.cube.cube.Cube` object."""
 
     def it_provides_the_default_repr_when_enhanced_repr_fails(
@@ -677,7 +677,7 @@ class DescribeCube(object):
         return property_mock(request, Cube, "dimension_types")
 
 
-class DescribeMeasures(object):
+class DescribeMeasures:
     def it_knows_the_population_fraction(self):
         cube_dict, expected_value = (
             {
@@ -776,7 +776,7 @@ class DescribeMeasures(object):
         assert population_fraction == expected_value
 
 
-class Describe_BaseMeasure(object):
+class Describe_BaseMeasure:
     def it_returns_None_when_not_able_to_reshape(
         self, _shape_prop_, _flat_values_prop_
     ):
@@ -799,7 +799,7 @@ class Describe_BaseMeasure(object):
         return property_mock(request, _BaseMeasure, "_flat_values")
 
 
-class Describe_UweightedValidCountsMeasure(object):
+class Describe_UweightedValidCountsMeasure:
     @pytest.mark.parametrize(
         "valid_counts, expected_value",
         (({"valid_count_unweighted": {"data": [3, 2, 1]}}, [3, 2, 1]), ({}, None)),

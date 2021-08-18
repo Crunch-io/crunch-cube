@@ -34,7 +34,7 @@ from cr.cube.stripe.measure import (
 from ...unitutil import class_mock, instance_mock, property_mock
 
 
-class DescribeStripeMeasures(object):
+class DescribeStripeMeasures:
     """Unit test suite for `cr.cube.stripe.measure.StripeMeasures` object."""
 
     @pytest.mark.parametrize(
@@ -123,7 +123,7 @@ class DescribeStripeMeasures(object):
         return instance_mock(request, Dimension)
 
 
-class Describe_BaseSecondOrderMeasure(object):
+class Describe_BaseSecondOrderMeasure:
     """Unit test suite for `cr.cube.stripe.measure._BaseSecondOrderMeasure` object."""
 
     def it_gathers_the_blocks_for_the_measure(self, request):
@@ -160,7 +160,7 @@ class Describe_BaseSecondOrderMeasure(object):
         return instance_mock(request, CubeMeasures)
 
 
-class Describe_Means(object):
+class Describe_Means:
     """Unit test suite for `cr.cube.stripe.measure._Means` object."""
 
     def it_computes_its_base_values_to_help(self, request):
@@ -187,7 +187,7 @@ class Describe_Means(object):
         assert subtotal_values == pytest.approx([np.nan, np.nan], nan_ok=True)
 
 
-class Describe_PopulationProportions(object):
+class Describe_PopulationProportions:
     """Unit test suite for `cr.cube.stripe.measure._PopulationProportions` object."""
 
     @pytest.mark.parametrize(
@@ -259,7 +259,7 @@ class Describe_PopulationProportions(object):
         return instance_mock(request, _TableProportions)
 
 
-class Describe_PopulationProportionStderrs(object):
+class Describe_PopulationProportionStderrs:
     """Unit test suite for `cr.cube.stripe.measure._PopulationProportionStderrs` object."""
 
     @pytest.mark.parametrize(
@@ -331,7 +331,7 @@ class Describe_PopulationProportionStderrs(object):
         return instance_mock(request, _TableProportionStderrs)
 
 
-class Describe_ScaledCounts(object):
+class Describe_ScaledCounts:
     """Unit test suite for `cr.cube.stripe.measure._ScaledCounts` object."""
 
     @pytest.mark.parametrize(
@@ -520,7 +520,7 @@ class Describe_ScaledCounts(object):
         return property_mock(request, _ScaledCounts, "_weighted_counts")
 
 
-class Describe_TableProportionStddevs(object):
+class Describe_TableProportionStddevs:
     """Unit test suite for `cr.cube.stripe.measure._TableProportionStddevs` object."""
 
     def it_computes_its_base_values_to_help(
@@ -552,7 +552,7 @@ class Describe_TableProportionStddevs(object):
         return instance_mock(request, _TableProportionVariances)
 
 
-class Describe_TableProportionStderrs(object):
+class Describe_TableProportionStderrs:
     """Unit test suite for `cr.cube.stripe.measure._TableProportionStderrs` object."""
 
     def it_computes_its_base_values_to_help(
@@ -592,7 +592,7 @@ class Describe_TableProportionStderrs(object):
         return instance_mock(request, _WeightedBases)
 
 
-class Describe_TableProportionVariances(object):
+class Describe_TableProportionVariances:
     """Unit test suite for `cr.cube.stripe.measure._TableProportionVariances` object."""
 
     def it_computes_its_base_values_to_help(self, measures_, table_proportions_):
@@ -622,7 +622,7 @@ class Describe_TableProportionVariances(object):
         return instance_mock(request, _TableProportions)
 
 
-class Describe_TableProportions(object):
+class Describe_TableProportions:
     """Unit test suite for `cr.cube.stripe.measure._TableProportions` object."""
 
     @pytest.mark.parametrize(
@@ -692,7 +692,7 @@ class Describe_TableProportions(object):
         return property_mock(request, _TableProportions, "_weighted_cube_counts")
 
 
-class Describe_UnweightedBases(object):
+class Describe_UnweightedBases:
     """Unit test suite for `cr.cube.stripe.measure._UnweightedBases` object."""
 
     def it_knows_its_base_values(
@@ -747,7 +747,7 @@ class Describe_UnweightedBases(object):
         return property_mock(request, _UnweightedBases, "_unweighted_cube_counts")
 
 
-class Describe_UnweightedCounts(object):
+class Describe_UnweightedCounts:
     """Unit test suite for `cr.cube.stripe.measure._UnweightedCounts` object."""
 
     def it_knows_its_base_values(
@@ -784,7 +784,7 @@ class Describe_UnweightedCounts(object):
         return property_mock(request, _UnweightedCounts, "_unweighted_cube_counts")
 
 
-class Describe_WeightedBases(object):
+class Describe_WeightedBases:
     """Unit test suite for `cr.cube.stripe.measure._WeightedBases` object."""
 
     def it_knows_its_base_values(
@@ -845,7 +845,7 @@ class Describe_WeightedBases(object):
         return property_mock(request, _WeightedBases, "_weighted_cube_counts")
 
 
-class Describe_WeightedCounts(object):
+class Describe_WeightedCounts:
     """Unit test suite for `cr.cube.stripe.measure._WeightedCounts` object."""
 
     def it_computes_its_base_values_to_help(

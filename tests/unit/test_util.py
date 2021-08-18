@@ -7,7 +7,7 @@ import pytest
 from cr.cube.util import lazyproperty
 
 
-class DescribeLazyPropertyDecorator(object):
+class DescribeLazyPropertyDecorator:
     """Tests @lazyproperty decorator class."""
 
     def it_is_a_property_object_on_class_access(self, Obj):
@@ -39,7 +39,7 @@ class DescribeLazyPropertyDecorator(object):
 
     @pytest.fixture
     def Obj(self):
-        class Obj(object):
+        class Obj:
             @lazyproperty
             def fget(self):
                 """Docstring of Obj.fget method definition."""

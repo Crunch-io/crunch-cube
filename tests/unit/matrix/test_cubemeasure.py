@@ -47,7 +47,7 @@ from cr.cube.matrix.cubemeasure import (
 from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
 
-class DescribeCubeMeasures(object):
+class DescribeCubeMeasures:
     """Unit test suite for `cr.cube.matrix.cubemeasure.CubeMeasures` object."""
 
     @pytest.mark.parametrize(
@@ -86,7 +86,7 @@ class DescribeCubeMeasures(object):
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
 
 
-class Describe_BaseCubeMeasure(object):
+class Describe_BaseCubeMeasure:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMeasure`."""
 
     @pytest.mark.parametrize(
@@ -109,7 +109,7 @@ class Describe_BaseCubeMeasure(object):
 # === COUNTS (UNWEIGHTED & WEIGHTED)
 
 
-class Describe_BaseCubeCounts(object):
+class Describe_BaseCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeCounts`."""
 
     @pytest.mark.parametrize(
@@ -192,7 +192,7 @@ class Describe_BaseCubeCounts(object):
         )
 
 
-class Describe_ArrXArrCubeCounts(object):
+class Describe_ArrXArrCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._ArrXArrCubeCounts`."""
 
     def it_knows_its_column_bases(self, raw_counts):
@@ -265,7 +265,7 @@ class Describe_ArrXArrCubeCounts(object):
         )
 
 
-class Describe_ArrXCatCubeCounts(object):
+class Describe_ArrXCatCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._ArrXCatCubeCounts`."""
 
     def it_knows_its_column_bases(self, raw_counts):
@@ -352,7 +352,7 @@ class Describe_ArrXCatCubeCounts(object):
         )
 
 
-class Describe_ArrXMrCubeCounts(object):
+class Describe_ArrXMrCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._ArrXMrCubeCounts`."""
 
     def it_knows_its_column_bases(self, raw_counts):
@@ -466,7 +466,7 @@ class Describe_ArrXMrCubeCounts(object):
         )
 
 
-class Describe_CatXArrCubeCounts(object):
+class Describe_CatXArrCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXArrCubeCounts`."""
 
     def it_knows_its_column_bases(self, raw_counts):
@@ -555,7 +555,7 @@ class Describe_CatXArrCubeCounts(object):
         )
 
 
-class Describe_CatXCatCubeCounts(object):
+class Describe_CatXCatCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeCounts`."""
 
     def it_knows_its_column_bases(self, raw_counts):
@@ -651,7 +651,7 @@ class Describe_CatXCatCubeCounts(object):
         )
 
 
-class Describe_CatXMrCubeCounts(object):
+class Describe_CatXMrCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeCounts`."""
 
     def it_knows_its_column_bases(self, raw_counts):
@@ -747,7 +747,7 @@ class Describe_CatXMrCubeCounts(object):
         )
 
 
-class Describe_MrXArrCubeCounts(object):
+class Describe_MrXArrCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXArrCubeCounts`."""
 
     def it_knows_its_column_bases(self, raw_counts):
@@ -838,7 +838,7 @@ class Describe_MrXArrCubeCounts(object):
         )
 
 
-class Describe_MrXCatCubeCounts(object):
+class Describe_MrXCatCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeCounts`."""
 
     def it_knows_its_column_bases(self, raw_counts):
@@ -929,7 +929,7 @@ class Describe_MrXCatCubeCounts(object):
         )
 
 
-class Describe_MrXMrCubeCounts(object):
+class Describe_MrXMrCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeCounts`."""
 
     def it_knows_its_column_bases(self, raw_counts):
@@ -1041,7 +1041,7 @@ class Describe_MrXMrCubeCounts(object):
 # === MEANS ===
 
 
-class Describe_BaseCubeMeans(object):
+class Describe_BaseCubeMeans:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMeans`."""
 
     @pytest.mark.parametrize(
@@ -1100,7 +1100,7 @@ class Describe_BaseCubeMeans(object):
         return instance_mock(request, Cube)
 
 
-class Describe_CatXCatCubeMeans(object):
+class Describe_CatXCatCubeMeans:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeMeans`."""
 
     def it_knows_its_means(self, raw_means):
@@ -1124,7 +1124,7 @@ class Describe_CatXCatCubeMeans(object):
         )
 
 
-class Describe_CatXMrCubeMeans(object):
+class Describe_CatXMrCubeMeans:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeMeans`."""
 
     def it_knows_its_means(self, raw_means):
@@ -1158,7 +1158,7 @@ class Describe_CatXMrCubeMeans(object):
         )
 
 
-class Describe_MrXCatCubeMeans(object):
+class Describe_MrXCatCubeMeans:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeMeans`."""
 
     def it_knows_its_means(self, raw_means):
@@ -1192,7 +1192,7 @@ class Describe_MrXCatCubeMeans(object):
         )
 
 
-class Describe_MrXMrCubeMeans(object):
+class Describe_MrXMrCubeMeans:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeMeans`."""
 
     def it_knows_its_means(self, raw_means):
@@ -1239,7 +1239,7 @@ class Describe_MrXMrCubeMeans(object):
 # === STD DEV ===
 
 
-class Describe_BaseCubeStdDev(object):
+class Describe_BaseCubeStdDev:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeStdDev`."""
 
     @pytest.mark.parametrize(
@@ -1297,7 +1297,7 @@ class Describe_BaseCubeStdDev(object):
         return instance_mock(request, Cube)
 
 
-class Describe_CatXCatCubeStdDev(object):
+class Describe_CatXCatCubeStdDev:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeStdDev`."""
 
     def it_knows_its_stddev(self, raw_stddev):
@@ -1321,7 +1321,7 @@ class Describe_CatXCatCubeStdDev(object):
         )
 
 
-class Describe_CatXMrCubeStdDev(object):
+class Describe_CatXMrCubeStdDev:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeStdDev`."""
 
     def it_knows_its_stddev(self, raw_stddev):
@@ -1355,7 +1355,7 @@ class Describe_CatXMrCubeStdDev(object):
         )
 
 
-class Describe_MrXCatCubeStdDev(object):
+class Describe_MrXCatCubeStdDev:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeStdDev`."""
 
     def it_knows_its_stddev(self, raw_stddev):
@@ -1389,7 +1389,7 @@ class Describe_MrXCatCubeStdDev(object):
         )
 
 
-class Describe_MrXMrCubeStdDev(object):
+class Describe_MrXMrCubeStdDev:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeStdDev`."""
 
     def it_knows_its_stddev(self, raw_stddev):
@@ -1436,7 +1436,7 @@ class Describe_MrXMrCubeStdDev(object):
 # === SUM ===
 
 
-class Describe_BaseCubeSum(object):
+class Describe_BaseCubeSum:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeSum`."""
 
     @pytest.mark.parametrize(
@@ -1494,7 +1494,7 @@ class Describe_BaseCubeSum(object):
         return instance_mock(request, Cube)
 
 
-class Describe_CatXCatCubeSums(object):
+class Describe_CatXCatCubeSums:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeSums`."""
 
     def it_knows_its_sum(self, raw_sums):
@@ -1518,7 +1518,7 @@ class Describe_CatXCatCubeSums(object):
         )
 
 
-class Describe_CatXMrCubeSum(object):
+class Describe_CatXMrCubeSum:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeSums`."""
 
     def it_knows_its_sum(self, raw_sums):
@@ -1552,7 +1552,7 @@ class Describe_CatXMrCubeSum(object):
         )
 
 
-class Describe_MrXCatCubeSum(object):
+class Describe_MrXCatCubeSum:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeSums`."""
 
     def it_knows_its_sum(self, raw_sums):
@@ -1586,7 +1586,7 @@ class Describe_MrXCatCubeSum(object):
         )
 
 
-class Describe_MrXMrCubeSum(object):
+class Describe_MrXMrCubeSum:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeSums`."""
 
     def it_knows_its_sums(self, raw_sums):
@@ -1633,7 +1633,7 @@ class Describe_MrXMrCubeSum(object):
 # === (WEIGHTED) UNCONDITIONAL COUNTS ===
 
 
-class Describe_BaseUnconditionalCubeCounts(object):
+class Describe_BaseUnconditionalCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseUnconditionalCubeCounts`."""
 
     @pytest.mark.parametrize(
@@ -1714,7 +1714,7 @@ class Describe_BaseUnconditionalCubeCounts(object):
         dimensions_[0].valid_elements = valid_elements_
         unconditional_counts = _BaseUnconditionalCubeCounts(dimensions_, None)
 
-        unconditional_counts._valid_row_idxs == np.array([0, 2, 4])
+        assert unconditional_counts._valid_row_idxs[0].tolist() == [0, 2, 4]
 
     # fixture components ---------------------------------------------
 

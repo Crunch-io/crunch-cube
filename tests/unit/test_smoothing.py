@@ -11,7 +11,7 @@ from cr.cube.noa.smoothing import SingleSidedMovingAvgSmoother
 from ..unitutil import initializer_mock, instance_mock, property_mock
 
 
-class DescribeSingleSideMovingAvgSmoother(object):
+class DescribeSingleSideMovingAvgSmoother:
     def it_constructs_single_sided_moving_avg_to_help(self, request, slice_):
         _init_ = initializer_mock(request, SingleSidedMovingAvgSmoother)
 
