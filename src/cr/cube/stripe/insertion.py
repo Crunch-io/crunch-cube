@@ -31,7 +31,7 @@ class _BaseSubtotals:
     def _subtotal_values(self):
         """(n_row_subtotals,) ndarray of subtotal values for stripe."""
         raise NotImplementedError(
-            "`%s` must implement `._subtotal_values`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `._subtotal_values`"
         )  # pragma: no cover
 
     @lazyproperty

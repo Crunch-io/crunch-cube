@@ -146,7 +146,7 @@ class _BaseCubeCounts(_BaseCubeMeasure):
     def column_bases(self):
         """2D np.float64 ndarray of column-wise bases for each matrix cell."""
         raise NotImplementedError(  # pragma: no cover
-            "`%s` must implement `.column_bases`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.column_bases`"
         )
 
     @lazyproperty
@@ -202,7 +202,7 @@ class _BaseCubeCounts(_BaseCubeMeasure):
     def counts(self):
         """2D np.float64 ndarray of the count for each matrix cell."""
         raise NotImplementedError(  # pragma: no cover
-            "`%s` must implement `.counts`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.counts`"
         )
 
     @lazyproperty
@@ -227,7 +227,7 @@ class _BaseCubeCounts(_BaseCubeMeasure):
     def row_bases(self):
         """2D np.float64 ndarray of row-wise bases for each matrix cell."""
         raise NotImplementedError(  # pragma: no cover
-            "`%s` must implement `.row_bases`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.row_bases`"
         )
 
     @lazyproperty
@@ -253,7 +253,8 @@ class _BaseCubeCounts(_BaseCubeMeasure):
         but when the row is an MR, we use the sum of selected & non-selected values from
         the row, whereas the rows_base uses just the selected values.
         """
-        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        # --- Bases are positive, so we can sum them to see if all of them are equal
+        # --- to 0.
         return self._rows_pruning_base == 0
 
     @lazyproperty
@@ -293,7 +294,7 @@ class _BaseCubeCounts(_BaseCubeMeasure):
     def table_bases(self):
         """2D np.float64 ndarray of table-wise bases for each matrix cell."""
         raise NotImplementedError(  # pragma: no cover
-            "`%s` must implement `.table_bases`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.table_bases`"
         )
 
     @lazyproperty
@@ -812,7 +813,7 @@ class _BaseCubeMeans(_BaseCubeMeasure):
     def means(self):
         """2D np.float64 ndarray of cube means."""
         raise NotImplementedError(  # pragma: no cover
-            "`%s` must implement `.means`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.means`"
         )
 
 
@@ -899,7 +900,7 @@ class _BaseCubeOverlaps(_BaseCubeMeasure):
     def overlaps(self):
         """3D np.float64 ndarray of cube overlaps."""
         raise NotImplementedError(  # pragma: no cover
-            "`%s` must implement `.overlaps`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.overlaps`"
         )
 
 
@@ -1027,7 +1028,7 @@ class _BaseCubeStdDev(_BaseCubeMeasure):
     def stddev(self):
         """2D np.float64 ndarray of cube stddev."""
         raise NotImplementedError(  # pragma: no cover
-            "`%s` must implement `.stddev`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.stddev`"
         )
 
 
@@ -1108,7 +1109,7 @@ class _BaseCubeSums(_BaseCubeMeasure):
     def sums(self):
         """2D np.float64 ndarray of cube sum."""
         raise NotImplementedError(  # pragma: no cover
-            "`%s` must implement `.sum`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.sum`"
         )
 
 

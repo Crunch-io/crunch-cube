@@ -223,10 +223,9 @@ class Cube:
         """
         try:
             dimensionality = " x ".join(dt.name for dt in self.dimension_types)
-            return "%s(name='%s', dimension_types='%s')" % (
-                type(self).__name__,
-                self.name,
-                dimensionality,
+            return (
+                f"{type(self).__name__}(name='{self.name}', "
+                f"dimension_types='{dimensionality}')"
             )
         except Exception:
             return super(Cube, self).__repr__()
@@ -570,8 +569,8 @@ class Cube:
             return cube_response.get("value", cube_response)
         except TypeError:
             raise TypeError(
-                "Unsupported type <%s> provided. Cube response must be JSON "
-                "(str) or dict." % type(self._cube_response_arg).__name__
+                f"Unsupported type <{type(self._cube_response_arg).__name__}> provided."
+                f" Cube response must be JSON (str) or dict."
             )
 
     @lazyproperty

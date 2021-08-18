@@ -51,7 +51,7 @@ class _BaseSubtotals:
     def _intersection(self, row_subtotal, column_subtotal):
         """Value for this row/column subtotal intersection."""
         raise NotImplementedError(
-            "`%s` must implement `._intersection()`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `._intersection()`"
         )  # pragma: no cover
 
     @lazyproperty
@@ -91,7 +91,7 @@ class _BaseSubtotals:
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of values for `subtotal` column."""
         raise NotImplementedError(
-            "`%s` must implement `._subtotal_column()`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `._subtotal_column()`"
         )  # pragma: no cover
 
     @lazyproperty
@@ -112,7 +112,7 @@ class _BaseSubtotals:
     def _subtotal_row(self, subtotal):
         """Return (n_cols,) ndarray of values for `subtotal` row."""
         raise NotImplementedError(
-            "`%s` must implement `._subtotal_row()`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `._subtotal_row()`"
         )  # pragma: no cover
 
     @lazyproperty

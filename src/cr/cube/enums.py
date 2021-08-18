@@ -14,10 +14,10 @@ class _DimensionType:
         self._name = name
 
     def __repr__(self):
-        return "<DIMENSION_TYPE.%s>" % self._name
+        return f"<DIMENSION_TYPE.{self._name}>"
 
     def __str__(self):
-        return "DIMENSION_TYPE.%s" % self._name
+        return f"DIMENSION_TYPE.{self._name}"
 
     @lazyproperty
     def name(self):

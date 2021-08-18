@@ -940,7 +940,7 @@ class _BaseOrderHelper:
 
         if measure_propname is None:
             raise NotImplementedError(
-                "sort-by-value for measure '%s' is not yet supported" % measure
+                f"sort-by-value for measure '{measure}' is not yet supported"
             )
 
         return getattr(self._second_order_measures, measure_propname)
@@ -954,7 +954,7 @@ class _BaseOrderHelper:
         rows-dimension.
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._order`" % type(self).__name__
+            f"{type(self).__name__} must implement `._order`"
         )
 
     @lazyproperty
@@ -964,14 +964,14 @@ class _BaseOrderHelper:
         Provides access to ordering details like measure and sort-direction.
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._order_spec`" % type(self).__name__
+            f"{type(self).__name__} must implement `._order_spec`"
         )
 
     @lazyproperty
     def _prune_subtotals(self):
         """True if subtotal vectors need to be pruned, False otherwise."""
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._prune_subtotals`" % type(self).__name__
+            f"{type(self).__name__} must implement `._prune_subtotals`"
         )
 
     @lazyproperty
@@ -1080,7 +1080,7 @@ class _BaseSortRowsByValueHelper(_RowOrderHelper):
         Must be implemented by child classes.
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._element_values`" % type(self).__name__
+            f"{type(self).__name__} must implement `._element_values`"
         )
 
     @lazyproperty
@@ -1105,7 +1105,7 @@ class _BaseSortRowsByValueHelper(_RowOrderHelper):
         Must be implemented by child classes.
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._subtotal_values`" % type(self).__name__
+            f"{type(self).__name__} must implement `._subtotal_values`"
         )
 
 
@@ -1262,7 +1262,7 @@ class _SortRowsByMarginalHelper(_BaseSortRowsByValueHelper):
 
         if marginal_propname is None:
             raise NotImplementedError(
-                "sort-by-value for marginal '%s' is not yet supported" % marginal
+                f"sort-by-value for marginal '{marginal}' is not yet supported"
             )
 
         return getattr(self._second_order_measures, marginal_propname)

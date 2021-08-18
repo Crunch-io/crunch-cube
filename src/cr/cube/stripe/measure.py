@@ -147,7 +147,7 @@ class _BaseSecondOrderMeasure:
         The values appear in payload order.
         """
         raise NotImplementedError(
-            "`%s` must implement `.base_values`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.base_values`"
         )  # pragma: no cover
 
     @lazyproperty
@@ -165,7 +165,7 @@ class _BaseSecondOrderMeasure:
     def subtotal_values(self):
         """1D ndarray of subtotal value for each row-subtotal."""
         raise NotImplementedError(
-            "`%s` must implement `.subtotal_values`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.subtotal_values`"
         )  # pragma: no cover
 
     @lazyproperty

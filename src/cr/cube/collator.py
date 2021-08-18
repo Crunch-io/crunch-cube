@@ -107,7 +107,7 @@ class _BaseAnchoredCollator(_BaseCollator):
     def _element_order_descriptors(self):
         """tuple of (position, idx, element_id) triple for each element in dimension."""
         raise NotImplementedError(
-            "`%s` must implement `._element_order_descriptors`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `._element_order_descriptors`"
         )
 
     @lazyproperty

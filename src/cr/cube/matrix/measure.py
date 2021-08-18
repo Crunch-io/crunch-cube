@@ -545,7 +545,7 @@ class _BaseSecondOrderMeasure:
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._base_values`" % type(self).__name__
+            f"{type(self).__name__} must implement `._base_values`"
         )
 
     @lazyproperty
@@ -555,7 +555,7 @@ class _BaseSecondOrderMeasure:
         An intersection value arises where a row-subtotal crosses a column-subtotal.
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._intersections`" % type(self).__name__
+            f"{type(self).__name__} must implement `._intersections`"
         )
 
     @lazyproperty
@@ -565,7 +565,7 @@ class _BaseSecondOrderMeasure:
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._subtotal_columns`" % type(self).__name__
+            f"{type(self).__name__} must implement `._subtotal_columns`"
         )
 
     @lazyproperty
@@ -575,7 +575,7 @@ class _BaseSecondOrderMeasure:
         This is the third "block" and has the shape (n_row_subtotals, n_cols).
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._subtotal_rows`" % type(self).__name__
+            f"{type(self).__name__} must implement `._subtotal_rows`"
         )
 
     @lazyproperty
@@ -2205,7 +2205,7 @@ class _BaseMarginal:
         These are the base-values and the subtotals.
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `.blocks`" % type(self).__name__
+            f"{type(self).__name__} must implement `.blocks`"
         )
 
     @lazyproperty
@@ -2527,8 +2527,8 @@ class _ScaleMean(_BaseScaledCountMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                "%s-scale-mean is undefined if no numeric values are defined on "
-                "opposing dimension." % self.orientation.value
+                f"{self.orientation.value}-scale-mean is undefined if no numeric values"
+                " are defined on opposing dimension."
             )
 
         return [
@@ -2591,8 +2591,8 @@ class _ScaleMedian(_BaseScaledCountMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                "%s-scale-median is undefined if no numeric values are defined on "
-                "opposing dimension." % self.orientation.value
+                f"{self.orientation.value}-scale-median is undefined if no numeric values are defined on "
+                "opposing dimension."
             )
 
         return [
@@ -2677,8 +2677,8 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                "%s-scale-mean-standard-deviation is undefined if no numeric values "
-                "are defined on opposing dimension." % self.orientation.value
+                f"{self.orientation.value}-scale-mean-standard-deviation is undefined if no numeric values "
+                "are defined on opposing dimension."
             )
 
         return [
@@ -2763,9 +2763,9 @@ class _ScaleMeanStderr(_BaseScaledCountMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                "%s-scale-mean-standard-error is undefined if no numeric values "
-                "are defined on opposing dimension or if the corresponding dimension "
-                "has no margin." % self.orientation.value
+                f"{self.orientation.value}-scale-mean-standard-error is undefined if "
+                "no numeric values are defined on opposing dimension or if the "
+                "corresponding dimension has no margin."
             )
 
         return [
@@ -2821,7 +2821,7 @@ class _BaseTableValue:
     @lazyproperty
     def value(self):
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `.value`" % type(self).__name__
+            f"{type(self).__name__} must implement `.value`"
         )
 
 

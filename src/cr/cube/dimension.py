@@ -185,7 +185,7 @@ class _RawDimension:
             return DT.TEXT
         if base_type == "enum.num_arr":
             return DT.NUM_ARRAY
-        raise NotImplementedError("unrecognized dimension type %s" % base_type)
+        raise NotImplementedError(f"unrecognized dimension type {base_type}")
 
     @lazyproperty
     def _alias(self):
@@ -205,8 +205,8 @@ class _RawDimension:
             return "categorical"
         if type_class == "enum":
             subclass = self._dimension_dict["type"]["subtype"]["class"]
-            return "enum.%s" % subclass
-        raise NotImplementedError("unexpected dimension type class '%s'" % type_class)
+            return f"enum.{subclass}"
+        raise NotImplementedError(f"unexpected dimension type class '{type_class}'")
 
     @lazyproperty
     def _has_selected_category(self):

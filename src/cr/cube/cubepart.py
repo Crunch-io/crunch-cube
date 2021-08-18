@@ -171,8 +171,8 @@ class CubePartition:
         # --- reject invalid types ---
         if not isinstance(value, (float, list, tuple)):
             raise TypeError(
-                "transforms.pairwise_indices.alpha, when defined, must be a list of 1 "
-                "or 2 float values between 0.0 and 1.0 exclusive. Got %r" % value
+                f"transforms.pairwise_indices.alpha, when defined, must be a list of 1 "
+                f"or 2 float values between 0.0 and 1.0 exclusive. Got {repr(value)}"
             )
 
         # --- legacy float "by-itself" case ---
@@ -180,7 +180,7 @@ class CubePartition:
             if not 0.0 < value < 1.0:
                 raise ValueError(
                     "alpha value, when provided, must be between 0.0 and 1.0 "
-                    "exclusive. Got %r" % value
+                    f"exclusive. Got {repr(value)}"
                 )
             return (value, None)
 
@@ -188,8 +188,8 @@ class CubePartition:
         for x in value[:2]:
             if not isinstance(x, float) or not 0.0 < x < 1.0:
                 raise ValueError(
-                    "transforms.pairwise_indices.alpha must be a list of 1 or 2 float "
-                    "values between 0.0 and 1.0 exclusive. Got %r" % value
+                    f"transforms.pairwise_indices.alpha must be a list of 1 or 2 float "
+                    f"values between 0.0 and 1.0 exclusive. Got {repr(value)}"
                 )
 
         if len(value) == 1:
@@ -269,20 +269,19 @@ class _Slice(CubePartition):
         """
         try:
             dimensionality = " x ".join(dt.name for dt in self.dimension_types)
-            title = "%s(name='%s', dimension_types='%s')" % (
-                type(self).__name__,
-                self.name,
-                dimensionality,
+            title = (
+                f"{type(self).__name__}(name='{self.name}', "
+                f"dimension_types='{dimensionality}')"
             )
             contents = [
                 [row_label] + row.tolist()
                 for row_label, row in zip(self.row_labels, self._default_contents)
             ]
             return (
-                title
-                + "\nShowing: %s" % self._available_measures[0].name
-                + "\n%s" % tabulate(contents, [""] + self.column_labels.tolist())
-                + "\nAvailable measures: %s" % str(self._available_measures)
+                f"{title}"
+                f"\nShowing: {self._available_measures[0].name}"
+                f"\n{tabulate(contents, [''] + self.column_labels.tolist())}"
+                f"\nAvailable measures: {str(self._available_measures)}"
             )
         except Exception:
             return super(_Slice, self).__repr__()  # noqa
@@ -1130,7 +1129,7 @@ class _Slice(CubePartition):
 
         title = self._cube.name
         table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
-        return "%s: %s" % (title, table_name)
+        return f"{title}: {table_name}"
 
     @lazyproperty
     def table_percentages(self):
@@ -1345,20 +1344,19 @@ class _Strand(CubePartition):
         instance variable values.
         """
         try:
-            title = "%s(name='%s', dimension_type='%s')" % (
-                type(self).__name__,
-                self.name,
-                self.dimension_types[0].name,
+            title = (
+                f"{type(self).__name__}(name='{self.name}', "
+                f"dimension_type='{self.dimension_types[0].name}')"
             )
             contents = [
                 [row_label, row]
                 for row_label, row in zip(self.row_labels, self._default_contents)
             ]
             return (
-                title
-                + "\nShowing: %s" % self._available_measures[0].name
-                + "\n%s" % tabulate(contents, ["", self.name])
-                + "\nAvailable measures: %s" % str(self._available_measures)
+                f"{title}"
+                f"\nShowing: {self._available_measures[0].name}"
+                f"\n{tabulate(contents, ['', self.name])}"
+                f"\nAvailable measures: {str(self._available_measures)}"
             )
         except Exception:
             return super(_Strand, self).__repr__()  # noqa
@@ -1633,7 +1631,7 @@ class _Strand(CubePartition):
         """Only for CA-as-0th case, provides differentiated names for stacked tables."""
         title = self._cube.name
         table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
-        return "%s: %s" % (title, table_name)
+        return f"{title}: {table_name}"
 
     @lazyproperty
     def table_percentages(self):
