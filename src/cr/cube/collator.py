@@ -10,11 +10,10 @@ indices work for accessing the specified vector from the payload-order collectio
 base vectors and inserted vectors, respectively.
 """
 
+import collections
 import sys
 
 import numpy as np
-
-from collections import OrderedDict
 
 from cr.cube.util import lazyproperty
 
@@ -235,7 +234,7 @@ class ExplicitOrderCollator(_BaseAnchoredCollator):
             # --- OrderedDict mapping element-id to payload-order, like {15:0, 12:1,..}.
             # --- This gives us payload-idx lookup along with duplicate and leftover
             # --- tracking.
-            remaining_element_idxs_by_id = OrderedDict(
+            remaining_element_idxs_by_id = collections.OrderedDict(
                 (id_, idx) for idx, id_ in enumerate(self._element_ids)
             )
 
