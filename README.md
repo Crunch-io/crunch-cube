@@ -110,6 +110,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.0
+- Remove Python 2.7 and 3.5 support
+
 ### 2.3.9
 - Fix for available measures in a cube set
 - More forgiving about types and special characters in dimension ids
