@@ -2,8 +2,6 @@
 
 """Unit test suite for `cr.cube.cubepart` module."""
 
-from __future__ import division
-
 import pytest
 
 from cr.cube.cube import Cube
@@ -16,7 +14,7 @@ from cr.cube.stripe.assembler import StripeAssembler
 from ..unitutil import class_mock, instance_mock, property_mock
 
 
-class DescribeCubePartition(object):
+class DescribeCubePartition:
     """Unit test suite for `cr.cube.cubepart.CubePartition` object."""
 
     def it_constructs_a_slice_with_its_factory_for_a_2D_cube(self, request, cube_):
@@ -222,7 +220,7 @@ class DescribeCubePartition(object):
         return property_mock(request, CubePartition, "_transforms_dict")
 
 
-class Describe_Slice(object):
+class Describe_Slice:
     """Unit test suite for `cr.cube.cubepart._Slice` object."""
 
     def it_provides_the_default_repr_when_enhanced_repr_fails(self):
@@ -433,7 +431,7 @@ class Describe_Slice(object):
         return property_mock(request, _Slice, "shape")
 
 
-class Describe_Strand(object):
+class Describe_Strand:
     """Unit test suite for `cr.cube.cubepart._Strand` object."""
 
     def it_provides_the_default_repr_when_enhanced_repr_fails(self):
@@ -532,7 +530,7 @@ class Describe_Strand(object):
         return property_mock(request, _Strand, "shape")
 
 
-class Describe_Nub(object):
+class Describe_Nub:
     """Unit test suite for `cr.cube.cubepart._Nub` object."""
 
     @pytest.mark.parametrize(

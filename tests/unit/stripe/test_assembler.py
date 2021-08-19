@@ -40,7 +40,7 @@ from ...unitutil import (
 )
 
 
-class DescribeStripeAssembler(object):
+class DescribeStripeAssembler:
     """Unit test suite for `cr.cube.stripe.assembler.StripeAssembler` object."""
 
     @pytest.mark.parametrize(
@@ -93,7 +93,7 @@ class DescribeStripeAssembler(object):
 
         assert assembler.row_count == 5
 
-    def it_knows_the_row_labels(self, request, rows_dimension_, _row_order_prop_):
+    def it_knows_the_row_labels(self, rows_dimension_, _row_order_prop_):
         rows_dimension_.element_labels = ("baz", "foo", "bar")
         rows_dimension_.subtotal_labels = ("bing", "bada")
         _row_order_prop_.return_value = np.array([1, 2, 0, -1, -2])
@@ -244,7 +244,7 @@ class DescribeStripeAssembler(object):
         return instance_mock(request, _ScaledCounts)
 
 
-class Describe_BaseOrderHelper(object):
+class Describe_BaseOrderHelper:
     """Unit-test suite for `cr.cube.stripe.assembler._BaseOrderHelper` object."""
 
     @pytest.mark.parametrize(
@@ -299,7 +299,7 @@ class Describe_BaseOrderHelper(object):
         return instance_mock(request, StripeMeasures)
 
 
-class Describe_OrderHelper(object):
+class Describe_OrderHelper:
     """Unit test suite for `cr.cube.stripe.assembler._OrderHelper` object."""
 
     @pytest.mark.parametrize(
@@ -332,7 +332,7 @@ class Describe_OrderHelper(object):
         assert display_order == (1, -2, 3, 5, -1)
 
 
-class Describe_BaseSortByValueHelper(object):
+class Describe_BaseSortByValueHelper:
     """Unit test suite for `cr.cube.strip.assembler._BaseSortByValueHelper`."""
 
     def it_computes_the_display_order_to_help(
@@ -405,7 +405,7 @@ class Describe_BaseSortByValueHelper(object):
         return property_mock(request, _BaseSortByValueHelper, "_subtotal_values")
 
 
-class Describe_SortByLabelHelper(object):
+class Describe_SortByLabelHelper:
     """Unit test suite for `cr.cube.strip.assembler._SortByLabelHelper`."""
 
     def it_extracts_the_element_values_to_help(self, dimension_):
@@ -427,7 +427,7 @@ class Describe_SortByLabelHelper(object):
         return instance_mock(request, Dimension)
 
 
-class Describe_SortByMeasureHelper(object):
+class Describe_SortByMeasureHelper:
     """Unit test suite for `cr.cube.strip.assembler._SortByMeasureHelper`."""
 
     def it_extracts_the_element_values_to_help(self, _measure_prop_, measure_):

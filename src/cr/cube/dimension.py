@@ -3,12 +3,8 @@
 """Provides the Dimension class."""
 
 import copy
-import sys
 
-if sys.version_info >= (3, 3):
-    from collections.abc import Sequence  # pragma: no cover
-else:
-    from collections import Sequence  # pragma: no cover
+from collections.abc import Sequence
 
 import numpy as np
 
@@ -124,7 +120,7 @@ class _ApparentDimensions(_BaseDimensions):
         return tuple(d for d in self._all_dimensions if d.dimension_type != DT.MR_CAT)
 
 
-class _DimensionFactory(object):
+class _DimensionFactory:
     """Produce Dimension objects of correct type from dimension-dicts.
 
     "type" here is primarily the `.dimension_type` value of the dimension,
@@ -156,7 +152,7 @@ class _DimensionFactory(object):
         )
 
 
-class _RawDimension(object):
+class _RawDimension:
     """Thin wrapper around dimension-dict to support dimension-type discovery.
 
     Determining dimension-type is pretty complex and requires repeated
@@ -189,7 +185,7 @@ class _RawDimension(object):
             return DT.TEXT
         if base_type == "enum.num_arr":
             return DT.NUM_ARRAY
-        raise NotImplementedError("unrecognized dimension type %s" % base_type)
+        raise NotImplementedError(f"unrecognized dimension type {base_type}")
 
     @lazyproperty
     def _alias(self):
@@ -209,8 +205,8 @@ class _RawDimension(object):
             return "categorical"
         if type_class == "enum":
             subclass = self._dimension_dict["type"]["subtype"]["class"]
-            return "enum.%s" % subclass
-        raise NotImplementedError("unexpected dimension type class '%s'" % type_class)
+            return f"enum.{subclass}"
+        raise NotImplementedError(f"unexpected dimension type class '{type_class}'")
 
     @lazyproperty
     def _has_selected_category(self):
@@ -322,7 +318,7 @@ class _RawDimension(object):
         return DT.CAT
 
 
-class Dimension(object):
+class Dimension:
     """Represents one dimension of a cube response.
 
     Each dimension represents one of the variables in a cube response. For
@@ -676,14 +672,11 @@ class _AllElements(_BaseElements):
         """
         elements_transforms = self._elements_transforms
         for idx, element_dict in enumerate(self._element_dicts):
+            # --- convert to string for categorical ids
             element_id = element_dict["id"]
-            # --- Categorical variables have int element_id and may have
-            # --- a stringified version of the int in the transform dictionary
-            # --- if it is from JSON (because element_id is stored as the key
-            # --- and JSON can only have string dictionary keys)
-            if type(element_id) is int and element_id not in elements_transforms.keys():
-                element_id = str(element_id)
-            element_transforms_dict = elements_transforms.get(element_id) or {}
+            element_transforms_dict = elements_transforms.get(
+                element_id, elements_transforms.get(str(element_id), {})
+            )
             yield idx, element_dict, element_transforms_dict
 
     @lazyproperty
@@ -742,7 +735,7 @@ class _ValidElements(_BaseElements):
         return tuple(element for element in self._all_elements if not element.missing)
 
 
-class _ElementIdShim(object):
+class _ElementIdShim:
     """Object used to replace element ids with alias for subvariables.
 
     We want to move to a world where elements on a subvariables dimension are
@@ -956,7 +949,7 @@ class _ElementIdShim(object):
         )
 
 
-class _Element(object):
+class _Element:
     """A category or subvariable of a dimension.
 
     This object resolves the transform cascade for element-level transforms.
@@ -1071,7 +1064,7 @@ class _Element(object):
         return np.nan if numeric_value is None else numeric_value
 
 
-class _ElementTransforms(object):
+class _ElementTransforms:
     """A value object providing convenient access to transforms for a single element."""
 
     def __init__(self, element_transforms_dict):
@@ -1119,7 +1112,7 @@ class _ElementTransforms(object):
         return str(name) if name else ""
 
 
-class _OrderSpec(object):
+class _OrderSpec:
     """Value object providing convenient access to details of an order transform."""
 
     def __init__(self, dimension, dimension_transforms_dict):
@@ -1311,7 +1304,7 @@ class _Subtotals(Sequence):
         )
 
 
-class _Subtotal(object):
+class _Subtotal:
     """A subtotal insertion on a cube dimension.
 
     `fallback_insertion_id` is a fallback unique identifier for this insertion, until

@@ -2,8 +2,6 @@
 
 """Second-order measure collection and the individual measures it composes."""
 
-from __future__ import division
-
 import numpy as np
 from scipy.stats import t, norm
 
@@ -17,7 +15,7 @@ from cr.cube.matrix.subtotals import (
 from cr.cube.util import lazyproperty
 
 
-class SecondOrderMeasures(object):
+class SecondOrderMeasures:
     """Intended to be a singleton for a given cube-result.
 
     It will give the same values if duplicated, just sacrificing some time and memory
@@ -519,7 +517,7 @@ class SecondOrderMeasures(object):
         return CubeMeasures(self._cube, self._dimensions, self._slice_idx)
 
 
-class _BaseSecondOrderMeasure(object):
+class _BaseSecondOrderMeasure:
     """Base class for all second-order measure objects."""
 
     def __init__(self, dimensions, second_order_measures, cube_measures):
@@ -547,7 +545,7 @@ class _BaseSecondOrderMeasure(object):
         This is the first "block" and has the shape of the cube-measure (no insertions).
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._base_values`" % type(self).__name__
+            f"{type(self).__name__} must implement `._base_values`"
         )
 
     @lazyproperty
@@ -557,7 +555,7 @@ class _BaseSecondOrderMeasure(object):
         An intersection value arises where a row-subtotal crosses a column-subtotal.
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._intersections`" % type(self).__name__
+            f"{type(self).__name__} must implement `._intersections`"
         )
 
     @lazyproperty
@@ -567,7 +565,7 @@ class _BaseSecondOrderMeasure(object):
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._subtotal_columns`" % type(self).__name__
+            f"{type(self).__name__} must implement `._subtotal_columns`"
         )
 
     @lazyproperty
@@ -577,7 +575,7 @@ class _BaseSecondOrderMeasure(object):
         This is the third "block" and has the shape (n_row_subtotals, n_cols).
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._subtotal_rows`" % type(self).__name__
+            f"{type(self).__name__} must implement `._subtotal_rows`"
         )
 
     @lazyproperty
@@ -2191,7 +2189,7 @@ class _Zscores(_BaseSecondOrderMeasure):
 # === MARGINALS ===
 
 
-class _BaseMarginal(object):
+class _BaseMarginal:
     """Base class for all (second-order) marginal objects."""
 
     def __init__(self, dimensions, second_order_measures, cube_measures, orientation):
@@ -2207,7 +2205,7 @@ class _BaseMarginal(object):
         These are the base-values and the subtotals.
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `.blocks`" % type(self).__name__
+            f"{type(self).__name__} must implement `.blocks`"
         )
 
     @lazyproperty
@@ -2529,8 +2527,8 @@ class _ScaleMean(_BaseScaledCountMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                "%s-scale-mean is undefined if no numeric values are defined on "
-                "opposing dimension." % self.orientation.value
+                f"{self.orientation.value}-scale-mean is undefined if no numeric values"
+                " are defined on opposing dimension."
             )
 
         return [
@@ -2593,8 +2591,8 @@ class _ScaleMedian(_BaseScaledCountMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                "%s-scale-median is undefined if no numeric values are defined on "
-                "opposing dimension." % self.orientation.value
+                f"{self.orientation.value}-scale-median is undefined if no numeric values are defined on "
+                "opposing dimension."
             )
 
         return [
@@ -2679,8 +2677,8 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                "%s-scale-mean-standard-deviation is undefined if no numeric values "
-                "are defined on opposing dimension." % self.orientation.value
+                f"{self.orientation.value}-scale-mean-standard-deviation is undefined if no numeric values "
+                "are defined on opposing dimension."
             )
 
         return [
@@ -2765,9 +2763,9 @@ class _ScaleMeanStderr(_BaseScaledCountMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                "%s-scale-mean-standard-error is undefined if no numeric values "
-                "are defined on opposing dimension or if the corresponding dimension "
-                "has no margin." % self.orientation.value
+                f"{self.orientation.value}-scale-mean-standard-error is undefined if "
+                "no numeric values are defined on opposing dimension or if the "
+                "corresponding dimension has no margin."
             )
 
         return [
@@ -2802,7 +2800,7 @@ class _ScaleMeanStderr(_BaseScaledCountMarginal):
 # === SCALAR TABLE VALUES ===
 
 
-class _BaseTableValue(object):
+class _BaseTableValue:
     """Base class for all (second-order) table values
 
     Table values are values that apply to the whole table, which are often scalars, but
@@ -2823,7 +2821,7 @@ class _BaseTableValue(object):
     @lazyproperty
     def value(self):
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `.value`" % type(self).__name__
+            f"{type(self).__name__} must implement `.value`"
         )
 
 
@@ -2888,7 +2886,7 @@ class _TableBasesRange(_BaseTableValue):
 # === PAIRWISE HELPERS ===
 
 
-class _PairwiseSignificaneBetweenSubvariablesHelper(object):
+class _PairwiseSignificaneBetweenSubvariablesHelper:
     """Helper for calculating overlaps significance between subvariables."""
 
     def __init__(self, column_proportions, cube_overlaps, row_idx, idx_a, idx_b):

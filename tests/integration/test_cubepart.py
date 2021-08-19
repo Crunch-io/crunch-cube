@@ -2,8 +2,6 @@
 
 """Integration-test suite for `cr.cube.cubepart` module."""
 
-from __future__ import unicode_literals
-
 import numpy as np
 import pytest
 
@@ -18,7 +16,7 @@ from ..fixtures import CR, TR, MRI
 from ..util import load_python_expression
 
 
-class Describe_Slice(object):
+class Describe_Slice:
     """Integration-test suite for _Slice object."""
 
     def it_provides_values_for_cat_x_cat(self):
@@ -1732,7 +1730,7 @@ class Describe_Slice(object):
         assert slice_.row_weighted_bases.tolist() == slice_.counts.tolist()
 
 
-class Describe_Strand(object):
+class Describe_Strand:
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
 
     def it_uses_correct_proportions_for_pop_counts_when_cat_date(self):
@@ -2179,7 +2177,7 @@ class Describe_Strand(object):
         assert slice_.inserted_row_idxs == ()
 
 
-class Describe_Nub(object):
+class Describe_Nub:
     """Integration-test suite for `cr.cube.cubepart._Nub` object."""
 
     def it_is_not_empty(self):
@@ -2193,7 +2191,7 @@ class Describe_Nub(object):
         assert nub.is_empty is True
 
 
-class Test_Slice(object):
+class Test_Slice:
     """Legacy unit tests for _Slice object.
 
     In general, these need to be consolidated into Describe_Slice above, and there are
@@ -3628,7 +3626,7 @@ class Test_Slice(object):
         ]
 
 
-class Test_Nub(object):
+class Test_Nub:
     """Legacy unit-tests for 0D cube."""
 
     def test_mean_no_dims(self):

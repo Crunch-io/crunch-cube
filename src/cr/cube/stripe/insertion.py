@@ -10,14 +10,12 @@ This module provides the various strategies required for computing subtotals and
 primarily used by measure objects as a collaborator to handle this aspect.
 """
 
-from __future__ import division
-
 import numpy as np
 
 from cr.cube.util import lazyproperty
 
 
-class _BaseSubtotals(object):
+class _BaseSubtotals:
     """Base class for Subtotals objects."""
 
     def __init__(self, base_values, rows_dimension):
@@ -33,7 +31,7 @@ class _BaseSubtotals(object):
     def _subtotal_values(self):
         """(n_row_subtotals,) ndarray of subtotal values for stripe."""
         raise NotImplementedError(
-            "`%s` must implement `._subtotal_values`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `._subtotal_values`"
         )  # pragma: no cover
 
     @lazyproperty

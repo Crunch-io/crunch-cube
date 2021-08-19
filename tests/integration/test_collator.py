@@ -15,7 +15,7 @@ from cr.cube.enums import DIMENSION_TYPE as DT
 from ..unitutil import instance_mock
 
 
-class DescribeExplicitOrderCollator(object):
+class DescribeExplicitOrderCollator:
     """Partial-integration test suite for `ExplicitOrderCollator` object."""
 
     @pytest.mark.parametrize(
@@ -46,7 +46,7 @@ class DescribeExplicitOrderCollator(object):
         assert ExplicitOrderCollator.display_order(dimension_, ()) == expected_value
 
 
-class DescribePayloadOrderCollator(object):
+class DescribePayloadOrderCollator:
     """Partial-integration test suite for `PayloadOrderCollator` object."""
 
     @pytest.mark.parametrize(
@@ -70,7 +70,7 @@ class DescribePayloadOrderCollator(object):
         assert display_order == expected_value
 
 
-class DescribeSortByValueCollator(object):
+class DescribeSortByValueCollator:
     """Partial-integration test suite for `SortByValueCollator` object."""
 
     @pytest.mark.parametrize(

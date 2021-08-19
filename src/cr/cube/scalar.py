@@ -2,12 +2,10 @@
 
 """The cube data-partion object used for 0D means cube."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from cr.cube.util import lazyproperty
 
 
-class MeansScalar(object):
+class MeansScalar:
     """Represents slices with means (and no counts)."""
 
     def __init__(self, means, unweighted_counts):

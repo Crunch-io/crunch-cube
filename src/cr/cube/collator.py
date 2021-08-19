@@ -18,7 +18,7 @@ import numpy as np
 from cr.cube.util import lazyproperty
 
 
-class _BaseCollator(object):
+class _BaseCollator:
     """Base class for all collator objects, providing shared properties.
 
     `empty_idxs` is a tuple of int element-index for each element vector with a zero
@@ -106,7 +106,7 @@ class _BaseAnchoredCollator(_BaseCollator):
     def _element_order_descriptors(self):
         """tuple of (position, idx, element_id) triple for each element in dimension."""
         raise NotImplementedError(
-            "`%s` must implement `._element_order_descriptors`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `._element_order_descriptors`"
         )
 
     @lazyproperty

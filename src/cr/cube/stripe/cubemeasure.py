@@ -6,15 +6,13 @@ There are several cube-measures that can appear in a cube-response, including
 unweighted-counts, weighted-counts (aka. counts), means, and others.
 """
 
-from __future__ import division
-
 import numpy as np
 
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
-class CubeMeasures(object):
+class CubeMeasures:
     """Provides access to all cube-measure objects for this stripe."""
 
     def __init__(self, cube, rows_dimension, ca_as_0th, slice_idx):
@@ -61,7 +59,7 @@ class CubeMeasures(object):
         )
 
 
-class _BaseCubeMeasure(object):
+class _BaseCubeMeasure:
     """Base class for all cube-measure objects."""
 
     def __init__(self, rows_dimension):
@@ -97,21 +95,21 @@ class _BaseCubeCounts(_BaseCubeMeasure):
     def bases(self):
         """1D np.float64 ndarray of unweighted table-proportion denonimator per row."""
         raise NotImplementedError(
-            "`%s` must implement `.bases`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.bases`"
         )  # pragma: no cover
 
     @lazyproperty
     def counts(self):
         """1D np.float64 ndarray of count for each row of stripe."""
         raise NotImplementedError(
-            "`%s` must implement `.unweighted_counts`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.unweighted_counts`"
         )  # pragma: no cover
 
     @lazyproperty
     def pruning_base(self):
         """1D np.float64 ndarray of N for each matrix row."""
         raise NotImplementedError(
-            "`%s` must implement `.pruning_base`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.pruning_base`"
         )  # pragma: no cover
 
     @lazyproperty
@@ -230,7 +228,7 @@ class _BaseCubeMeans(_BaseCubeMeasure):
     def means(self):
         """1D np.float64 ndarray of mean for each stripe row."""
         raise NotImplementedError(
-            "`%s` must implement `.means`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.means`"
         )  # pragma: no cover
 
 
@@ -279,7 +277,7 @@ class _BaseCubeStdDev(_BaseCubeMeasure):
     def stddev(self):
         """1D np.float64 ndarray of stddev for each stripe row."""
         raise NotImplementedError(
-            "`%s` must implement `.stddev`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.stddev`"
         )  # pragma: no cover
 
 
@@ -325,7 +323,7 @@ class _BaseCubeSums(_BaseCubeMeasure):
     def sums(self):
         """1D np.float64 ndarray of sum for each stripe row."""
         raise NotImplementedError(
-            "`%s` must implement `.sum`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `.sum`"
         )  # pragma: no cover
 
 

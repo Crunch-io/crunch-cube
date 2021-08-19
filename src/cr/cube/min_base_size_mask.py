@@ -2,12 +2,10 @@
 
 """MinBaseSize class."""
 
-from __future__ import division
-
 from cr.cube.util import lazyproperty
 
 
-class MinBaseSizeMask(object):
+class MinBaseSizeMask:
     """Helper for deciding which rows/columns to suppress, based on min base size.
 
     If a base value, that is used when calculating percentages, is less than a given

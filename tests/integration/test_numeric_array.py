@@ -10,7 +10,7 @@ from cr.cube.cube import Cube
 from ..fixtures import NA
 
 
-class DescribeNumericArrays(object):
+class DescribeNumericArrays:
     """Test-suite for numeric-array behaviors."""
 
     def it_provides_means_scale_measures(self):

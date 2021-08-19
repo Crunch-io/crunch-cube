@@ -5,8 +5,6 @@
 CubeSet is the main API class for manipulating Crunch.io JSON cube responses.
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import copy
 import json
 
@@ -20,7 +18,7 @@ from cr.cube.util import lazyproperty
 np.seterr(divide="ignore", invalid="ignore")
 
 
-class CubeSet(object):
+class CubeSet:
     """Represents a multi-cube cube-response.
 
     Also works just fine for a single cube-response passed inside a sequence, allowing
@@ -198,7 +196,7 @@ class CubeSet(object):
         return Cube(self._cube_responses[0]).ndim == 0
 
 
-class Cube(object):
+class Cube:
     """Provides access to individual slices on a cube-result.
 
     It also provides some attributes of the overall cube-result.
@@ -225,10 +223,9 @@ class Cube(object):
         """
         try:
             dimensionality = " x ".join(dt.name for dt in self.dimension_types)
-            return "%s(name='%s', dimension_types='%s')" % (
-                type(self).__name__,
-                self.name,
-                dimensionality,
+            return (
+                f"{type(self).__name__}(name='{self.name}', "
+                f"dimension_types='{dimensionality}')"
             )
         except Exception:
             return super(Cube, self).__repr__()
@@ -572,8 +569,8 @@ class Cube(object):
             return cube_response.get("value", cube_response)
         except TypeError:
             raise TypeError(
-                "Unsupported type <%s> provided. Cube response must be JSON "
-                "(str) or dict." % type(self._cube_response_arg).__name__
+                f"Unsupported type <{type(self._cube_response_arg).__name__}> provided."
+                f" Cube response must be JSON (str) or dict."
             )
 
     @lazyproperty
@@ -669,7 +666,7 @@ class Cube(object):
         return tuple(valid_idxs[i] for i in self._all_dimensions.dimension_order)
 
 
-class _Measures(object):
+class _Measures:
     """Provides access to measures contained in cube response."""
 
     def __init__(self, cube_dict, all_dimensions, cube_idx_arg=None):
@@ -838,7 +835,7 @@ class _Measures(object):
         return valid_counts if valid_counts.raw_cube_array is not None else None
 
 
-class _BaseMeasure(object):
+class _BaseMeasure:
     """Base class for measure objects."""
 
     def __init__(self, cube_dict, all_dimensions, cube_idx_arg=None):

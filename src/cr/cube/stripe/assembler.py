@@ -8,8 +8,6 @@ rows according to the dimension *order* transforms, and to hide rows that are ei
 hidden by the user or "pruned" because they contain no observations.
 """
 
-from __future__ import division
-
 import numpy as np
 
 from cr.cube.collator import (
@@ -22,7 +20,7 @@ from cr.cube.stripe.measure import StripeMeasures
 from cr.cube.util import lazyproperty
 
 
-class StripeAssembler(object):
+class StripeAssembler:
     """Provides measures, marginals, and totals for a (1D) strand cube-slice.
 
     An assembled stripe measure is a 1D ndarray reflecting all ordering, insertion, and
@@ -295,7 +293,7 @@ class StripeAssembler(object):
 # === ORDER HELPERS ===
 
 
-class _BaseOrderHelper(object):
+class _BaseOrderHelper:
     """Base class for ordering helpers."""
 
     def __init__(self, rows_dimension, measures):
@@ -329,7 +327,7 @@ class _BaseOrderHelper(object):
         rows-dimension.
         """
         raise NotImplementedError(
-            "`%s` must implement `._display_order`" % type(self).__name__
+            f"`{type(self).__name__}` must implement `._display_order`"
         )  # pragma: no cover
 
     @lazyproperty
@@ -406,7 +404,7 @@ class _BaseSortByValueHelper(_BaseOrderHelper):
         Must be implemented by child classes.
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._element_values`" % type(self).__name__
+            "{type(self).__name__} must implement `._element_values`"
         )
 
     @lazyproperty
@@ -416,7 +414,7 @@ class _BaseSortByValueHelper(_BaseOrderHelper):
         Must be implemented by child classes.
         """
         raise NotImplementedError(  # pragma: no cover
-            "%s must implement `._subtotal_values`" % type(self).__name__
+            f"{type(self).__name__} must implement `._subtotal_values`"
         )
 
 
@@ -476,7 +474,7 @@ class _SortByMeasureHelper(_BaseSortByValueHelper):
 
         if measure_propname is None:
             raise ValueError(
-                "sort-by-value for measure '%s' is not yet supported" % measure_keyname
+                f"sort-by-value for measure '{measure_keyname}' is not yet supported"
             )
 
         return getattr(self._measures, measure_propname)

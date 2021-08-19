@@ -2,12 +2,10 @@
 
 """Unit test suite for cr.cube.cube_slice module."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from cr.cube.enums import _DimensionType
 
 
-class Describe_DimensionType(object):
+class Describe_DimensionType:
     def it_provides_a_console_friendly_representation(self):
         dimension_type = _DimensionType("ALTERNATE_UNIVERSE")
         repr_ = repr(dimension_type)

@@ -80,7 +80,7 @@ from ...unitutil import (
 )
 
 
-class DescribeAssembler(object):
+class DescribeAssembler:
     """Unit test suite for `cr.cube.matrix.assembler.Assembler` object."""
 
     @pytest.mark.parametrize(
@@ -823,7 +823,6 @@ class DescribeAssembler(object):
 
     def it_knows_the_column_order_to_help(
         self,
-        request,
         _BaseOrderHelper_,
         dimensions_,
         _measures_prop_,
@@ -854,7 +853,7 @@ class DescribeAssembler(object):
         assembler = Assembler(None, (None, dimension_), None)
         assert assembler._columns_dimension is dimension_
 
-    def it_assembles_the_dimension_labels_to_help(self, request, dimension_):
+    def it_assembles_the_dimension_labels_to_help(self, dimension_):
         dimension_.element_labels = ("Alpha", "Bravo", "Charlie", "Delta")
         dimension_.subtotal_labels = ("Top 2", "All")
         order = np.array([1, 3, -2, 2, -1])
@@ -1010,7 +1009,7 @@ class DescribeAssembler(object):
         return instance_mock(request, _TableBase)
 
 
-class Describe_BaseOrderHelper(object):
+class Describe_BaseOrderHelper:
     """Unit test suite for `cr.cube.matrix.assembler._BaseOrderHelper` object."""
 
     def it_dispatches_to_the_right_column_order_helper(
@@ -1193,7 +1192,7 @@ class Describe_BaseOrderHelper(object):
         return instance_mock(request, SecondOrderMeasures)
 
 
-class Describe_ColumnOrderHelper(object):
+class Describe_ColumnOrderHelper:
     """Unit test suite for `cr.cube.matrix.assembler._ColumnOrderHelper` object."""
 
     @pytest.mark.parametrize(
@@ -1259,7 +1258,7 @@ class Describe_ColumnOrderHelper(object):
         return instance_mock(request, Dimension)
 
 
-class Describe_RowOrderHelper(object):
+class Describe_RowOrderHelper:
     """Unit test suite for `cr.cube.matrix.assembler._RowOrderHelper` object."""
 
     @pytest.mark.parametrize(
@@ -1335,7 +1334,7 @@ class Describe_RowOrderHelper(object):
         return instance_mock(request, Dimension)
 
 
-class Describe_BaseSortRowsByValueHelper(object):
+class Describe_BaseSortRowsByValueHelper:
     """Unit test suite for `cr.cube.matrix.assembler._BaseSortRowsByValueHelper`."""
 
     def it_provides_the_order(
@@ -1408,7 +1407,7 @@ class Describe_BaseSortRowsByValueHelper(object):
         return property_mock(request, _BaseSortRowsByValueHelper, "_subtotal_values")
 
 
-class Describe_SortRowsByBaseColumnHelper(object):
+class Describe_SortRowsByBaseColumnHelper:
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByBaseColumnHelper`."""
 
     def it_derives_the_sort_column_idx_from_the_order_spec_to_help(
@@ -1489,7 +1488,7 @@ class Describe_SortRowsByBaseColumnHelper(object):
         return property_mock(request, _SortRowsByBaseColumnHelper, "_order_spec")
 
 
-class Describe_SortRowsByDerivedColumnHelper(object):
+class Describe_SortRowsByDerivedColumnHelper:
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByDerivedColumnHelper`."""
 
     def it_derives_the_sort_column_idx_from_the_order_spec_to_help(
@@ -1526,7 +1525,7 @@ class Describe_SortRowsByDerivedColumnHelper(object):
         return property_mock(request, _SortRowsByBaseColumnHelper, "_order_spec")
 
 
-class Describe_SortRowsByInsertedColumnHelper(object):
+class Describe_SortRowsByInsertedColumnHelper:
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByInsertedColumnHelper`."""
 
     def it_extracts_the_element_values_to_help(
@@ -1593,7 +1592,7 @@ class Describe_SortRowsByInsertedColumnHelper(object):
         return property_mock(request, _SortRowsByInsertedColumnHelper, "_order_spec")
 
 
-class Describe_SortRowsByLabelHelper(object):
+class Describe_SortRowsByLabelHelper:
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByLabelHelper`."""
 
     def it_provides_the_element_values_to_help(self, dimensions_):
@@ -1621,7 +1620,7 @@ class Describe_SortRowsByLabelHelper(object):
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
 
 
-class Describe_SortRowsByMarginalHelper(object):
+class Describe_SortRowsByMarginalHelper:
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByMarginalHelper`."""
 
     def it_provides_the_element_values_to_help(self, _marginal_prop_, marginal_):

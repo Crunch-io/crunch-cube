@@ -14,7 +14,7 @@ from cr.cube.matrix.cubemeasure import _BaseCubeOverlaps
 from ..fixtures import CR, OL
 
 
-class DescribeAssembler(object):
+class DescribeAssembler:
     """Integration-test suite for `cr.cube.matrix.Assembler`."""
 
     def it_computes_column_proportions_for_cat_x_cat(self):
@@ -1507,7 +1507,7 @@ class DescribeAssembler(object):
         )
 
 
-class DescribeCubemeasure(object):
+class DescribeCubemeasure:
     def it_provides_overlaps_for_cat_x_mr_sub_x_mr_sel(self):
         cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
@@ -1660,7 +1660,7 @@ class DescribeCubemeasure(object):
         ]
 
 
-class Describe_BaseOrderHelper(object):
+class Describe_BaseOrderHelper:
     """Integration-test suite for `cr.cube.matrix._BaseOrderHelper`."""
 
     @pytest.mark.parametrize(
@@ -1718,7 +1718,7 @@ class Describe_BaseOrderHelper(object):
         assert column_display_order.tolist() == expected_value
 
 
-class Describe_SortRowsByColumnValueHelper(object):
+class Describe_SortRowsByColumnValueHelper:
     """Integration-test suite for `cr.cube.matrix._SortRowsByColumnValueHelper`."""
 
     @pytest.mark.parametrize(
@@ -1789,7 +1789,7 @@ class Describe_SortRowsByColumnValueHelper(object):
         assert assembler._row_order.tolist() == expected_value
 
 
-class Describe_SortRowsByInsertedColumnHelper(object):
+class Describe_SortRowsByInsertedColumnHelper:
     """Integration-test suite for `cr.cube.matrix._SortRowsByInsertedColumnHelper`."""
 
     @pytest.mark.parametrize(

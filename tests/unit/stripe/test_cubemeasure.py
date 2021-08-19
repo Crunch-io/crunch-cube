@@ -25,7 +25,7 @@ from cr.cube.stripe.cubemeasure import (
 from ...unitutil import class_mock, instance_mock, property_mock
 
 
-class DescribeCubeMeasures(object):
+class DescribeCubeMeasures:
     """Unit-test suite for `cr.cube.stripe.cubemeasure.CubeMeasures` object."""
 
     def it_provides_access_to_the_cube_means_object(
@@ -136,7 +136,7 @@ class DescribeCubeMeasures(object):
 # === COUNTS ===
 
 
-class Describe_BaseCubeCounts(object):
+class Describe_BaseCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseUnweightedCubeCounts`."""
 
     @pytest.mark.parametrize(
@@ -193,7 +193,7 @@ class Describe_BaseCubeCounts(object):
         assert unweighted_cube_counts is cube_counts_
 
 
-class Describe_CatCubeCounts(object):
+class Describe_CatCubeCounts:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeCounts`."""
 
     def it_knows_its_bases(self, request, raw_counts):
@@ -221,12 +221,12 @@ class Describe_CatCubeCounts(object):
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
-    def raw_counts(self, request):
+    def raw_counts(self):
         """(3,) np.int ndarray of cube-counts as received from Cube."""
         return np.array([1, 2, 3])
 
 
-class Describe_MrCubeCounts(object):
+class Describe_MrCubeCounts:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeCounts`."""
 
     def it_knows_its_bases(self, raw_counts):
@@ -248,12 +248,12 @@ class Describe_MrCubeCounts(object):
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
-    def raw_counts(self, request):
+    def raw_counts(self):
         """(3, 2) np.int ndarray of unweighted cube-counts as received from Cube."""
         return np.array([[1, 2], [3, 4], [5, 6]])
 
 
-class Describe_NumArrCubeCounts(object):
+class Describe_NumArrCubeCounts:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._NumArrCubeCounts`."""
 
     def it_knows_its_bases(self, raw_counts):
@@ -275,7 +275,7 @@ class Describe_NumArrCubeCounts(object):
     # fixtures -------------------------------------------------------
 
     @pytest.fixture
-    def raw_counts(self, request):
+    def raw_counts(self):
         """(3,) np.int ndarray of valid cube-counts as received from Cube."""
         return np.array([1, 2, 3])
 
@@ -283,7 +283,7 @@ class Describe_NumArrCubeCounts(object):
 # === MEANS ===
 
 
-class Describe_BaseCubeMeans(object):
+class Describe_BaseCubeMeans:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMeans`."""
 
     @pytest.mark.parametrize(
@@ -313,7 +313,7 @@ class Describe_BaseCubeMeans(object):
         assert cube_means is cube_means_
 
 
-class Describe_CatCubeMeans(object):
+class Describe_CatCubeMeans:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeMeans`."""
 
     def it_knows_its_means(self):
@@ -331,7 +331,7 @@ class Describe_CatCubeMeans(object):
         assert str(e.value) == "cube-result does not contain cube-means measure"
 
 
-class Describe_MrCubeMeans(object):
+class Describe_MrCubeMeans:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeMeans`."""
 
     def it_knows_its_means(self):
@@ -352,7 +352,7 @@ class Describe_MrCubeMeans(object):
 # === SUM ===
 
 
-class Describe_BaseCubeSums(object):
+class Describe_BaseCubeSums:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeSums`."""
 
     @pytest.mark.parametrize(
@@ -382,7 +382,7 @@ class Describe_BaseCubeSums(object):
         assert cube_sums is cube_sums_
 
 
-class Describe_CatCubeSums(object):
+class Describe_CatCubeSums:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeSum`."""
 
     def it_knows_its_sum(self):
@@ -400,7 +400,7 @@ class Describe_CatCubeSums(object):
         assert str(e.value) == "cube-result does not contain cube-sum measure"
 
 
-class Describe_MrCubeSums(object):
+class Describe_MrCubeSums:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeSum`."""
 
     def it_knows_its_sum(self):

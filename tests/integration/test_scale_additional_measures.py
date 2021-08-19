@@ -1,3 +1,7 @@
+# encoding: utf-8
+
+"""Integration tests for additional scale measures"""
+
 import numpy as np
 import pytest
 

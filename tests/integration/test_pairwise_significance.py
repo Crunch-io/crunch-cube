@@ -2,8 +2,6 @@
 
 """Integration tests for pairwise comparisons."""
 
-from unittest import TestCase
-
 import numpy as np
 import pytest
 
@@ -14,7 +12,7 @@ from ..fixtures import CR, OL, SM, NA
 from ..util import load_python_expression
 
 
-class Describe_Slice(object):
+class Describe_Slice:
     """Integration-test suite for pairwise-t aspects of _Slice object."""
 
     @pytest.mark.parametrize(
@@ -130,7 +128,7 @@ class Describe_Slice(object):
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
 
-class TestStandardizedResiduals(TestCase):
+class TestStandardizedResiduals:
     """Test cr.cube implementation of column family pairwise comparisons"""
 
     def test_ca_subvar_hs_x_cat_hs_pairwise_t_tests(self):
@@ -696,7 +694,7 @@ class TestStandardizedResiduals(TestCase):
         assert slice_.pairwise_significance_p_vals(3) == pytest.approx(expected_pvals)
 
 
-class TestOverlapsPairwiseSignificance(TestCase):
+class TestOverlapsPairwiseSignificance:
     def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_0th_subvar(self):
         slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
 
@@ -975,7 +973,7 @@ class TestOverlapsPairwiseSignificance(TestCase):
         np.testing.assert_array_equal(t_stats_mr_x_mr[0], t_stats_mr_subvar_x_mr[0])
 
 
-class TestMeanDifferenceSignificance(object):
+class TestMeanDifferenceSignificance:
     def test_mean_diff_significance_for_numeric_array_grouped_by_cat(self):
         slice_ = Cube(NA.NUM_ARR_MULTI_NUMERIC_MEASURES_GROUPED_BY_CAT).partitions[0]
         assert slice_.pairwise_significance_means_t_stats(0) == pytest.approx(

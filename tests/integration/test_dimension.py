@@ -20,7 +20,7 @@ from ..fixtures import CR, NA  # ---mnemonic: CR = 'cube-response'---
 from ..unitutil import instance_mock, property_mock
 
 
-class DescribeIntegratedAllDimensions(object):
+class DescribeIntegratedAllDimensions:
     """Integration-test suite for `cr.cube.dimension.AllDimensions` object."""
 
     @pytest.mark.parametrize(
@@ -63,7 +63,7 @@ class DescribeIntegratedAllDimensions(object):
     )
     def it_knows_if_its_dimensions_order(self, request, dim_types, expected_value):
         _dimensions_ = tuple(
-            instance_mock(request, Dimension, name="dim-%d" % idx, dimension_type=dt)
+            instance_mock(request, Dimension, name=f"dim-{idx}", dimension_type=dt)
             for idx, dt in enumerate(dim_types)
         )
         _dimensions_prop_ = property_mock(request, AllDimensions, "_dimensions")
@@ -72,7 +72,7 @@ class DescribeIntegratedAllDimensions(object):
         assert AllDimensions(None).dimension_order == expected_value
 
 
-class DescribeIntegratedDimension(object):
+class DescribeIntegratedDimension:
     """Integration-test suite for `cr.cube.dimension.Dimension` object."""
 
     def it_provides_access_to_all_elements_in_its_collection(self, dimension_dict):
@@ -155,7 +155,7 @@ class DescribeIntegratedDimension(object):
         slice_ = Cube(CR.CAT_X_MR_UNICODE_SV_ALIAS).partitions[0]
         sv_dimension = slice_._dimensions[1]
 
-        assert sv_dimension.element_ids == (u"\u2018dk\u2019", "fi", "is", "no", "se")
+        assert sv_dimension.element_ids == ("\u2018dk\u2019", "fi", "is", "no", "se")
 
     def it_ignores_bad_types_in_transform_dictionary(self):
         transforms = {"columns_dimension": {"elements": {"fi": None, "is": []}}}
@@ -171,7 +171,7 @@ class DescribeIntegratedDimension(object):
         return CR.ECON_BLAME_WITH_HS["value"]["result"]["dimensions"][0]
 
 
-class DescribeIntegrated_AllElements(object):
+class DescribeIntegrated_AllElements:
     """Integration-test suite for `cr.cube.dimension._AllElements` object."""
 
     def it_constructs_its_element_objects_to_help(self):
@@ -202,7 +202,7 @@ class DescribeIntegrated_AllElements(object):
         assert elements[1].is_hidden is True
 
 
-class DescribeIntegrated_Element(object):
+class DescribeIntegrated_Element:
     """Integration-test suite for `cr.cube.dimension._Element` object."""
 
     def it_knows_its_transformed_label(self, element_dict, element_transforms_):
@@ -254,7 +254,7 @@ class DescribeIntegrated_Element(object):
         return instance_mock(request, _ElementTransforms)
 
 
-class TestDimension(object):
+class TestDimension:
     """Legacy integration-test suite for Dimension object."""
 
     def test_subtotals(self):

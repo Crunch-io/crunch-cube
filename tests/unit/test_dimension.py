@@ -40,7 +40,7 @@ from ..unitutil import (
 )
 
 
-class Describe_BaseDimensions(object):
+class Describe_BaseDimensions:
     def it_has_sequence_behaviors(self, _dimensions_prop_):
         _dimensions_prop_.return_value = (0, 1, 2)
         base_dimensions = _BaseDimensions()
@@ -62,7 +62,7 @@ class Describe_BaseDimensions(object):
         return property_mock(request, _BaseDimensions, "_dimensions")
 
 
-class DescribeAllDimensions(object):
+class DescribeAllDimensions:
     """Unit-test suite for `cr.cube.dimension.AllDimensions` object."""
 
     def it_provides_access_to_its_ApparentDimensions(
@@ -128,7 +128,7 @@ class DescribeAllDimensions(object):
         return property_mock(request, AllDimensions, "_dimensions")
 
 
-class Describe_ApparentDimensions(object):
+class Describe_ApparentDimensions:
     def it_stores_its_dimensions_in_a_tuple_to_help(self, request):
         all_dimensions_ = tuple(
             instance_mock(request, Dimension, name="dim-%d" % idx, dimension_type=dt)
@@ -141,7 +141,7 @@ class Describe_ApparentDimensions(object):
         assert dimensions == all_dimensions_[:2]
 
 
-class Describe_DimensionFactory(object):
+class Describe_DimensionFactory:
     def it_provides_an_interface_classmethod(
         self, request, dimension_dicts_, _init_, _iter_dimensions_
     ):
@@ -234,7 +234,7 @@ class Describe_DimensionFactory(object):
         return property_mock(request, _DimensionFactory, "_raw_dimensions")
 
 
-class Describe_RawDimension(object):
+class Describe_RawDimension:
     def it_provides_access_to_the_dimension_dict(self):
         dimension_dict_ = {"dimension": "dict"}
         raw_dimension = _RawDimension(dimension_dict_, None)
@@ -493,7 +493,7 @@ class Describe_RawDimension(object):
         return method_mock(request, _RawDimension, "_resolve_categorical")
 
 
-class DescribeDimension(object):
+class DescribeDimension:
     """Unit-test suite for `cr.cube.dimension.Dimension` object."""
 
     @pytest.mark.parametrize(
@@ -741,7 +741,7 @@ class DescribeDimension(object):
         return property_mock(request, Dimension, "valid_elements")
 
 
-class Describe_BaseElements(object):
+class Describe_BaseElements:
     """Unit-test suite for `cr.cube.dimension._BaseElements` object."""
 
     def it_has_sequence_behaviors(self, request, _elements_prop_):
@@ -816,7 +816,7 @@ class Describe_BaseElements(object):
         return property_mock(request, _BaseElements, "_elements")
 
 
-class Describe_AllElements(object):
+class Describe_AllElements:
     """Unit-test suite for `cr.cube.dimension._AllElements` object."""
 
     def it_provides_access_to_the_ValidElements_object(
@@ -973,7 +973,7 @@ class Describe_AllElements(object):
         return instance_mock(request, _ValidElements)
 
 
-class Describe_ValidElements(object):
+class Describe_ValidElements:
     """Unit-test suite for `cr.cube.dimension._ValidElements` object."""
 
     def it_gets_its_Element_objects_from_an_AllElements_object(self, request):
@@ -1192,7 +1192,7 @@ class Describe_ElementIdShim:
         return property_mock(request, _ElementIdShim, "_subvar_ids")
 
 
-class Describe_Element(object):
+class Describe_Element:
     """Unit-test suite for `cr.cube.dimension._Element` object."""
 
     def it_knows_its_element_id(self):
@@ -1306,7 +1306,7 @@ class Describe_Element(object):
         return instance_mock(request, _ElementTransforms)
 
 
-class DescribeElementTransforms(object):
+class DescribeElementTransforms:
     """Unit-test suite for `cr.cube.dimension._ElementTransforms` object."""
 
     @pytest.mark.parametrize(
@@ -1359,7 +1359,7 @@ class DescribeElementTransforms(object):
         assert name == expected_value
 
 
-class Describe_OrderSpec(object):
+class Describe_OrderSpec:
     """Unit-test suite for `cr.cube.dimension._OrderSpec` object."""
 
     @pytest.mark.parametrize(
@@ -1503,7 +1503,7 @@ class Describe_OrderSpec(object):
         return property_mock(request, _OrderSpec, "_order_dict")
 
 
-class Describe_Subtotals(object):
+class Describe_Subtotals:
     """Unit-test suite for `cr.cube.dimension._Subtotals` object."""
 
     def it_has_sequence_behaviors(self, request, _subtotals_prop_):
@@ -1647,7 +1647,7 @@ class Describe_Subtotals(object):
         return instance_mock(request, _ValidElements)
 
 
-class Describe_Subtotal(object):
+class Describe_Subtotal:
     """Unit-test suite for `cr.cube.dimension._Subtotal` object."""
 
     @pytest.mark.parametrize(
