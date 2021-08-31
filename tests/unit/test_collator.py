@@ -87,15 +87,20 @@ class Describe_BaseAnchoredCollator:
         "base_orderings, insertion_orderings, hidden_idxs, expected_value",
         (
             # --- base-values but no insertions ---
-            (((0, 0), (1, 1), (2, 2)), (), (), (0, 1, 2)),
+            (((0, 0, 0), (1, 0, 1), (2, 0, 2)), (), (), (0, 1, 2)),
             # --- insertions but no base-values (not expected) ---
-            ((), ((sys.maxsize, -3), (0, -2), (sys.maxsize, -1)), (1,), (-2, -3, -1)),
+            (
+                (), 
+                ((sys.maxsize, 0, -3), (0, 1, -2), (sys.maxsize, 0, -1)), 
+                (1,), 
+                (-2, -3, -1)
+            ),
             # --- both base-values and insertions ---
             (
-                ((0, 0), (1, 1), (2, 2), (3, 3)),
-                ((0, -3), (2, -2), (sys.maxsize, -1)),
+                ((0, 0, 0), (1, 0, 1), (2, 0, 2), (3, 0, 3)),
+                ((-1, 0, -4), (1, 1, -3), (2, -1, -2), (sys.maxsize, 0, -1)),
                 (1, 3),
-                (-3, 0, -2, 2, -1),
+                (-4, 0, -3, -2, 2, -1),
             ),
         ),
     )
@@ -129,9 +134,9 @@ class Describe_BaseAnchoredCollator:
             # --- no elements in dimension (not an expected case) ---
             ((), ()),
             # --- 1 element ---
-            (((0, 0, 6),), ((0, 0),)),
+            (((0, 0, 6),), ((0, 0, 0),)),
             # --- 3 elements in dimension ---
-            (((0, 2, 18), (1, 0, 12), (2, 1, 5)), ((0, 2), (1, 0), (2, 1))),
+            (((0, 2, 18), (1, 0, 12), (2, 1, 5)), ((0, 0, 2), (1, 0, 0), (2, 0, 1))),
         ),
     )
     def it_computes_the_base_element_orderings_to_help(
@@ -185,9 +190,9 @@ class Describe_BaseAnchoredCollator:
             # --- no inserted-subtotals in dimension ---
             ((), ()),
             # --- 1 insertion ---
-            ((6,), ((6, -1),)),
+            (((6, 1),), ((6, 1, -1),)),
             # --- 3 insertions ---
-            ((7, sys.maxsize, 0), ((7, -3), (sys.maxsize, -2), (0, -1))),
+            (((7, 1), (sys.maxsize, 0), (0, 1)), ((7, 1, -3), (sys.maxsize, 0, -2), (0, 1, -1))),
         ),
     )
     def it_computes_the_insertion_orderings_to_help(
@@ -217,12 +222,12 @@ class Describe_BaseAnchoredCollator:
     @pytest.mark.parametrize(
         "anchor, expected_value",
         (
-            ("top", 0),
-            ("bottom", sys.maxsize),
-            (666, sys.maxsize),
-            (1, 1),
-            (2, 2),
-            (3, 3),
+            ("top", (-1, 0)),
+            ("bottom", (sys.maxsize, 0)),
+            (666, (sys.maxsize, 0)),
+            (1, (0, 1)),
+            (2, (1, 1)),
+            (3, (2, 1)),
         ),
     )
     def it_can_compute_the_insertion_position_for_a_subtotal_to_help(

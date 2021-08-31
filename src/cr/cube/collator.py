@@ -88,25 +88,29 @@ class _BaseAnchoredCollator(_BaseCollator):
         hidden_idxs = self._hidden_idxs
         return tuple(
             idx
-            for _, idx in sorted(
+            for _, _, idx in sorted(
                 self._base_element_orderings + self._insertion_orderings
             )
             if idx not in hidden_idxs
         )
 
     @lazyproperty
-    def _base_element_orderings(self) -> Tuple[Tuple[int, int], ...]:
-        """tuple of (int: position, int: idx) for each base-vector value.
+    def _base_element_orderings(self) -> Tuple[Tuple[int, int, int], ...]:
+        """tuple of (int: position, int: rel=0, int: idx) for each base-vector value.
 
-        The position of a base value is it's index in the ordered base vector.
+        The position of a base value is it's index in the ordered base vector. The
+        second item's value of 0 indicates that it's the base element and places it
+        between the insertions/derived values (which when anchored before the 
+        base element are given a negative value, and when before, they get a positive
+        one).
         """
         return tuple(
-            (position, idx) for position, idx, _ in self._element_order_descriptors
+            (position, 0, idx) for position, idx, _ in self._element_order_descriptors
         )
 
     @lazyproperty
     def _element_order_descriptors(self) -> Tuple[int, int, int]:
-        """tuple of (position, idx, element_id) triple for each element in dimension."""
+        """tuple of (position, idx, element_id) quad for each element in dimension."""
         raise NotImplementedError(
             f"`{type(self).__name__}` must implement `._element_order_descriptors`"
         )
@@ -124,20 +128,20 @@ class _BaseAnchoredCollator(_BaseCollator):
         }
 
     @lazyproperty
-    def _insertion_orderings(self) -> Tuple[Tuple[int, int], ...]:
-        """tuple of (int: position, int: idx) for each inserted-vector value.
+    def _insertion_orderings(self) -> Tuple[Tuple[int, int, int], ...]:
+        """tuple of (int: position, int: rel, int: idx) for each inserted-vector value.
 
-        The position for an insertion is an int representation of its anchor and its
-        idx is the *negative* offset of its position in the opposing insertions
-        sequence (like -3, -2, -1 for a sequence of length 3). The negative idx
-        works just as well as the normal one for accessing the subtotal but insures
-        that an insertion at the same position as a base row always sorts *before*
-        the base row.
+        The first item ("position") refers to position of the insertion's anchor, and
+        the second ("rel") is an integer that can (theoretically) be either -1 and 1
+        that indicates whether it should be placed before or after its anchor (though at
+        the time of writing, all categorical insertions are after and so have a positive
+        1). The idx is the *negative* offset of its position in the opposing insertions
+        sequence (like -3, -2, -1 for a sequence of length 3). The negative idx works
+        just as well as the normal one for accessing the subtotal but insures that an
+        insertion at the same position as a base row always sorts *before* the base row.
 
-        The `position` int for a subtotal is 0 for anchor "top", sys.maxsize for
-        anchor "bottom", and int(anchor) + 1 for all others. The +1 ensures
-        a subtotal appears *after* the vector it is anchored to and can be interpreted
-        as the index of the base-element it should appear *before*.
+        The `position` int for a subtotal is -1 for anchor "top", sys.maxsize for anchor
+        "bottom", and int(anchor) for all others.
 
         Multiple insertions having the same anchor appear in payload order within that
         group. The strictly increasing insertion index values (-3 < -2 < -1) ensure
@@ -147,43 +151,39 @@ class _BaseAnchoredCollator(_BaseCollator):
         n_subtotals = len(subtotals)
         neg_idxs = tuple(i - n_subtotals for i in range(n_subtotals))
         return tuple(
-            (self._insertion_position(subtotal), neg_idx)
+            (*self._insertion_position(subtotal), neg_idx)
             for subtotal, neg_idx in zip(subtotals, neg_idxs)
         )
 
-    def _insertion_position(self, subtotal) -> int:
-        """Subtotal position expressed as int index among base-vector indices.
+    def _insertion_position(self, subtotal) -> Tuple[int, int]:
+        """Subtotal position expressed as tuple of ints index among base-vector indices.
 
-        The return value represents the payload-order base-vector idx *before which* the
-        subtotal should appear (even though subtotals appear *after* the row they are
-        anchored to.
+        The first item in the return value represents the payload-order base-vector idx
+        which the subtotal is "anchor"ed to. The second item can (theoretically) be
+        either a positive 1 or negative 1 to indicate whether it should be after or
+        before that element respectively. At the time of writing, subtotal insertions
+        can only be placed after their anchor (derived elements, aka MR insertions can
+        be placed before or after).
 
-        A subtotal with position `0` appears at the top, one with an anchor of `3`
-        appears *before* the base row at offset 3; `sys.maxsize` is used as the position
-        for a "bottom" anchored subtotal.
-
-        To make this work, the position of a subtotal is idx+1 of the base row it
-        is anchored to (for subtotals anchored to a row, not "top" or "bottom").
-        Combining this +1 characteristic with placing subtotals before rows with
-        idx=insertion_position produces the right positioning and also allows top and
-        bottom anchors to work while representing the position as a single non-negative
-        int.
+        A subtotal with position `(-1, 1)` appears at the top, one with an anchor of
+        `(3, 1)` appears *after* the base row at offset 3; `(sys.maxsize, 1)` is used as
+        the position for a "bottom" anchored subtotal.
         """
         anchor = subtotal.anchor
 
         # --- "top" and "bottom" have fixed position mappings ---
         if anchor == "top":
-            return 0
+            return tuple((-1, 0))
         if anchor == "bottom":
-            return sys.maxsize
+            return tuple((sys.maxsize, 0))
 
-        # --- otherwise look up anchor-element position by id and add 1, defaulting to
-        # --- bottom if target anchor element not found ---
+        # --- otherwise look up anchor-element position by id, defaulting to bottom if
+        # --- target anchor element not found ---
         element_id = int(anchor)
         return (
-            self._element_positions_by_id[element_id] + 1
+            tuple((self._element_positions_by_id[element_id], 1))
             if element_id in self._element_positions_by_id
-            else sys.maxsize
+            else tuple((sys.maxsize, 0))
         )
 
 
