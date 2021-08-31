@@ -993,6 +993,21 @@ class Describe_Slice:
         assert slice_.derived_column_idxs == (0,)
         assert slice_.counts[:, 0].tolist() == [14.0, 19.2, 23.2, 32.0, 37.6]
 
+    @pytest.mark.xfail(reason="WIP", strict=True)
+    def it_recalculates_anchor_for_mr_insertion_with_explicit_order(self):
+        transforms = {
+            "columns_dimension": {
+                "order": {"element_ids": ["bool2", "bool1", "bool3"], "type": "explicit"},
+            }
+        }
+        slice_ = Cube(MRI.CAT_X_MR, transforms=transforms).partitions[0]
+
+        # --- derived column is anchored before response 1, so moves to second position
+        assert slice_.column_labels.tolist() == [
+            'Response #2', 'A&B', 'Response #1', 'Response #3'
+        ]
+        assert slice_.derived_column_idxs == (1,)
+
     @pytest.mark.parametrize(
         "measure, expectation",
         (
