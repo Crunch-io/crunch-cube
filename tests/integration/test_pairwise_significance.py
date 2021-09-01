@@ -964,6 +964,19 @@ class TestOverlapsPairwiseSignificance:
             abs=10e-2,
         )
 
+    def test_pairwise_significance_indices_for_realistic_example_mr_x_mr(self):
+        transforms = {"columns_dimension": {"elements": {"1": {"hide": True}}}}
+        slice_ = Cube(OL.MR_X_MR_REALISTIC_EXAMPLE, transforms=transforms).partitions[0]
+
+        assert slice_.pairwise_indices.tolist() == [
+            [(0, 1, 2, 3, 4), (1, 2, 3, 4), (4,), (4,), (1, 2, 4)],
+            [(1, 4), (1, 2, 3, 4), (4,), (1, 3, 4), (1, 4)],
+            [(4,), (4,), (0, 2, 3, 4), (4,), (0, 2, 4)],
+            [(4,), (1, 4), (4,), (0, 1, 3, 4), (1, 4)],
+            [(4,), (1, 4), (4,), (1, 4), (0, 1, 2, 4)],
+            [(1,), (1,), (), (1,), (1,)],
+        ]
+
     def test_pairwise_sig_for_mr_x_mr_vs_mr_single_subvar_x_mr(self):
         mr_x_mr_slice = Cube(OL.MR_X_MR).partitions[0]
         t_stats_mr_x_mr = mr_x_mr_slice.pairwise_significance_t_stats(1)
