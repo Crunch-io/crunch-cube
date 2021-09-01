@@ -494,7 +494,7 @@ class Describe_Slice:
         transforms = {
             "rows_dimension": {
                 "elements": {"2": {"hide": True}},
-                "order": {"type": "explicit", "element_ids": [2, 3]},
+                "order": {"type": "explicit", "element_ids": ["bool2", "bool3"]},
             },
             "columns_dimension": {
                 "insertions": [
@@ -510,9 +510,8 @@ class Describe_Slice:
             },
         }
         slice_ = Cube(MRI.MR_X_CAT, transforms=transforms).partitions[0]
-        # ---Derived subvar comes after subvars with ids 2 and 3 (but 2 is hidden),
-        # ---therefore the index of the derived subvar is 1
-        assert slice_.derived_row_idxs == (1,)
+        # ---Derived subvar is anchored to the top, so it stays there
+        assert slice_.derived_row_idxs == (0,)
         assert slice_.derived_column_idxs == ()
         assert slice_.inserted_row_idxs == ()
         assert slice_.inserted_column_idxs == (3,)
@@ -533,14 +532,13 @@ class Describe_Slice:
             },
             "columns_dimension": {
                 "elements": {"2": {"hide": True}},
-                "order": {"type": "explicit", "element_ids": [2, 3]},
+                "order": {"type": "explicit", "element_ids": ["bool2", "bool3"]},
             },
         }
         slice_ = Cube(MRI.CAT_X_MR, transforms=transforms).partitions[0]
         assert slice_.derived_row_idxs == ()
-        # ---Derived subvar comes after subvars with ids 2 and 3 (but 2 is hidden),
-        # ---therefore the index of the derived subvar is 1
-        assert slice_.derived_column_idxs == (1,)
+        # ---Derived anchored before fisrt column, which is now at end
+        assert slice_.derived_column_idxs == (2,)
         assert slice_.inserted_row_idxs == (3,)
         assert slice_.inserted_column_idxs == ()
 
@@ -551,16 +549,14 @@ class Describe_Slice:
             },
             "columns_dimension": {
                 "elements": {"2": {"hide": True}},
-                "order": {"type": "explicit", "element_ids": [2, 3]},
+                "order": {"type": "explicit", "element_ids": ["bool2", "bool3"]},
             },
         }
         slice_ = Cube(MRI.MR_X_MR, transforms=transforms).partitions[0]
-        # ---Derived subvar comes after subvars with ids 2 and 3,
-        # ---therefore the index of the derived subvar is 2
-        assert slice_.derived_row_idxs == (2,)
-        # ---Derived subvar comes after subvars with ids 2 and 3 (but 2 is hidden),
-        # ---therefore the index of the derived subvar is 1
-        assert slice_.derived_column_idxs == (1,)
+        # ---Derived subvar is anchored to the top
+        assert slice_.derived_row_idxs == (0,)
+        # ---Also anchored to the top
+        assert slice_.derived_column_idxs == (0,)
         # ---There can be no insertions on MR dimensions
         assert slice_.inserted_row_idxs == ()
         assert slice_.inserted_column_idxs == ()
@@ -993,18 +989,23 @@ class Describe_Slice:
         assert slice_.derived_column_idxs == (0,)
         assert slice_.counts[:, 0].tolist() == [14.0, 19.2, 23.2, 32.0, 37.6]
 
-    @pytest.mark.xfail(reason="WIP", strict=True)
     def it_recalculates_anchor_for_mr_insertion_with_explicit_order(self):
         transforms = {
             "columns_dimension": {
-                "order": {"element_ids": ["bool2", "bool1", "bool3"], "type": "explicit"},
+                "order": {
+                    "element_ids": ["bool2", "bool1", "bool3"],
+                    "type": "explicit",
+                },
             }
         }
         slice_ = Cube(MRI.CAT_X_MR, transforms=transforms).partitions[0]
 
         # --- derived column is anchored before response 1, so moves to second position
         assert slice_.column_labels.tolist() == [
-            'Response #2', 'A&B', 'Response #1', 'Response #3'
+            "Response #2",
+            "A&B",
+            "Response #1",
+            "Response #3",
         ]
         assert slice_.derived_column_idxs == (1,)
 
@@ -2197,9 +2198,9 @@ class Describe_Strand:
             },
         }
         slice_ = Cube(MRI.UNIVARIATE_MR, transforms=transforms).partitions[0]
-        # ---Derived subvar comes after subvars with ids 2 and 3,
+        # ---Derived subvar has "top" anchor, therefore it remains in the top
         # ---therefore the index of the derived subvar is 2
-        assert slice_.derived_row_idxs == (1,)
+        assert slice_.derived_row_idxs == (0,)
         # ---There can be no insertions on MR dimensions
         assert slice_.inserted_row_idxs == ()
 

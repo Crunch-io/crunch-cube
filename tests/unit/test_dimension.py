@@ -1201,6 +1201,22 @@ class Describe_ElementIdShim:
 class Describe_Element:
     """Unit-test suite for `cr.cube.dimension._Element` object."""
 
+    def it_knows_its_anchor(self):
+        element_dict = {"value": {"references": {"anchor": "top"}, "derived": True}}
+        element = _Element(element_dict, None, None)
+
+        anchor = element.anchor
+
+        assert anchor == "top"
+
+    def but_anchor_is_none_if_not_derived(self):
+        element_dict = {"value": {"derived": False}}
+        element = _Element(element_dict, None, None)
+
+        anchor = element.anchor
+
+        assert anchor is None
+
     def it_knows_its_element_id(self):
         element_dict = {"id": 42}
         element = _Element(element_dict, None, None)

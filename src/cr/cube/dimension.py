@@ -962,6 +962,14 @@ class _Element:
         self._element_transforms = element_transforms
 
     @lazyproperty
+    def anchor(self) -> Optional[Union[str, dict]]:
+        """Optional str or dict defining the anchor for derived elements"""
+        if not self.derived:
+            return None
+
+        return self._element_dict.get("value", {}).get("references", {}).get("anchor")
+
+    @lazyproperty
     def element_id(self) -> int:
         """int identifier for this category or subvariable."""
         return self._element_dict["id"]

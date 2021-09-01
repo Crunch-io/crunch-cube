@@ -16,7 +16,7 @@ from typing import Dict, FrozenSet, Iterator, List, Tuple, Union
 
 import numpy as np
 
-from cr.cube.dimension import Dimension, _OrderSpec, _Subtotals
+from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotals
 from cr.cube.util import lazyproperty
 
 
@@ -32,10 +32,16 @@ class _BaseCollator:
         self._empty_idxs = tuple(empty_idxs) if empty_idxs else ()
 
     @lazyproperty
-    def _element_ids(self) -> Tuple[Union[int, str], ...]:
-        """Sequence of int element-id for each category or subvar in dimension.
+    def _elements(self) -> Tuple[_Element, ...]:
+        """Sequence of non-missing elements from dimension"""
+        return self._dimension.valid_elements
 
-        Element-ids appear in the order there were defined in the cube-result.
+    @lazyproperty
+    def _element_ids(self) -> Tuple[Union[str, int], ...]:
+        """Sequence of int or str element-id for each category or subvar in dimension.
+
+        Element-ids appear in the order they were defined in the cube-result. These
+        element ids include both true element ids and also derived element ids.
         """
         return self._dimension.element_ids
 
@@ -89,7 +95,9 @@ class _BaseAnchoredCollator(_BaseCollator):
         return tuple(
             idx
             for _, _, idx in sorted(
-                self._base_element_orderings + self._insertion_orderings
+                self._base_element_orderings
+                + self._insertion_orderings
+                + self._derived_element_orderings
             )
             if idx not in hidden_idxs
         )
@@ -100,7 +108,7 @@ class _BaseAnchoredCollator(_BaseCollator):
 
         The position of a base value is it's index in the ordered base vector. The
         second item's value of 0 indicates that it's the base element and places it
-        between the insertions/derived values (which when anchored before the 
+        between the insertions/derived values (which when anchored before the
         base element are given a negative value, and when before, they get a positive
         one).
         """
@@ -109,8 +117,19 @@ class _BaseAnchoredCollator(_BaseCollator):
         )
 
     @lazyproperty
+    def _derived_element_orderings(self) -> Tuple[Tuple[int, int, int], ...]:
+        """Optional tuple of orderings for each derived-element value.
+
+        Is None for payload order, because zz9 places the derived elements in their
+        correct positions with no need for us to furhter sort them. However, when
+        an explicit order is set, this method must be overriden because we must
+        recalculate the derived element's positions.
+        """
+        return tuple()
+
+    @lazyproperty
     def _element_order_descriptors(self) -> Tuple[int, int, int]:
-        """tuple of (position, idx, element_id) quad for each element in dimension."""
+        """tuple of (position, idx, element_id) triple for each element in dimension."""
         raise NotImplementedError(
             f"`{type(self).__name__}` must implement `._element_order_descriptors`"
         )
@@ -166,7 +185,7 @@ class _BaseAnchoredCollator(_BaseCollator):
         be placed before or after).
 
         A subtotal with position `(-1, 1)` appears at the top, one with an anchor of
-        `(3, 1)` appears *after* the base row at offset 3; `(sys.maxsize, 1)` is used as
+        `(3, 1)` appears *after* the base row at offset 3; `(sys.maxsize, 0)` is used as
         the position for a "bottom" anchored subtotal.
         """
         anchor = subtotal.anchor
@@ -189,6 +208,60 @@ class _BaseAnchoredCollator(_BaseCollator):
 
 class ExplicitOrderCollator(_BaseAnchoredCollator):
     """Orders elements in the sequence specified in order transform."""
+
+    @lazyproperty
+    def _derived_element_orderings(self) -> Tuple[Tuple[int, int, int], ...]:
+        """tuple of (int: position, int: rel, int: idx) for each derived-element.
+
+        The first item ("position") refers to position of the derived element's anchor,
+        and the second ("rel") is an integer that can be either -1 and 1 that indicates
+        whether it should be placed before or after its anchor. The idx is the position
+        of the derived element in payload order.
+
+        The `position` int for a subtotal is -1 for anchor "top", sys.maxsize for anchor
+        "bottom", and the position of the anchor for all others.
+
+        Multiple insertions having the same anchor appear in payload order within that
+        group. The strictly increasing insertion index values (1 < 2 < 3) ensure
+        insertions with the same anchor appear in payload order after that anchor.
+        """
+        return tuple(
+            (*self._derived_element_position(element.element_id), idx)
+            for idx, element in enumerate(self._elements)
+            if element.derived
+        )
+
+    def _derived_element_position(self, element_id) -> Tuple[int, int]:
+        """tuple of 2 ints indicating derived element position
+
+        The first item in the return value represents the payload-order base-vector idx
+        which the derived element is "anchor"ed to. The second item can be either a positive 1
+        or negative 1 to indicate whether it should be after or before that element
+        respectively.
+
+        A subtotal with position `(-1, 0)` appears at the top, one with an anchor of
+        `(3, 1)` appears *after* the base row at offset 3; `(sys.maxsize, 0)` is used as
+        the position for a "bottom" anchored subtotal.
+        """
+        anchor = self._elements.get_by_id(element_id).anchor
+        if anchor is None:
+            return tuple((sys.maxsize, 0))
+
+        # --- "top" and "bottom" have fixed position mappings ---
+        if anchor == "top":
+            return tuple((-1, 0))
+        if anchor == "bottom":
+            return tuple((sys.maxsize, 0))
+
+        # --- otherwise the anchor is a dictionary, with an "alias" (matches the
+        # --- element id) and a "position", which can be either "before" or "after"
+        anchor_id = anchor.get("alias")
+        relative_pos = -1 if anchor.get("position") == "before" else 1
+        return (
+            tuple((self._element_positions_by_id[anchor_id], relative_pos))
+            if anchor_id in self._element_positions_by_id
+            else tuple((sys.maxsize, 0))
+        )
 
     @lazyproperty
     def _element_order_descriptors(self) -> Tuple[Tuple[int, int, int], ...]:
@@ -236,8 +309,13 @@ class ExplicitOrderCollator(_BaseAnchoredCollator):
             # --- OrderedDict mapping element-id to payload-order, like {15:0, 12:1,..}.
             # --- This gives us payload-idx lookup along with duplicate and leftover
             # --- tracking.
+            # --- Include derived element ids when enumerating, but not in the final
+            # --- collection because their position must be recalculated for explicit
+            # --- order.
             remaining_element_idxs_by_id = collections.OrderedDict(
-                (id_, idx) for idx, id_ in enumerate(self._element_ids)
+                (element.element_id, idx)
+                for idx, element in enumerate(self._elements)
+                if not element.derived
             )
 
             # --- yield (idx, id) pair for each element mentioned by id in transform,

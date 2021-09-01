@@ -14,7 +14,7 @@ from cr.cube.collator import (
     PayloadOrderCollator,
     SortByValueCollator,
 )
-from cr.cube.dimension import Dimension, _OrderSpec, _Subtotal
+from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal, _ValidElements
 
 from ..unitutil import (
     ANY,
@@ -84,28 +84,44 @@ class Describe_BaseAnchoredCollator:
         assert display_order == (-3, 0, 1, -2, 2, 3, -1)
 
     @pytest.mark.parametrize(
-        "base_orderings, insertion_orderings, hidden_idxs, expected_value",
+        "base_order, insertion_order, derived_order, hidden_idxs, expected_value",
         (
-            # --- base-values but no insertions ---
-            (((0, 0, 0), (1, 0, 1), (2, 0, 2)), (), (), (0, 1, 2)),
-            # --- insertions but no base-values (not expected) ---
+            # --- base-values but no insertions nor derived ---
+            (((0, 0, 0), (1, 0, 1), (2, 0, 2)), (), (), (), (0, 1, 2)),
+            # --- insertions but no base-values nor derived (not expected) ---
             (
-                (), 
-                ((sys.maxsize, 0, -3), (0, 1, -2), (sys.maxsize, 0, -1)), 
-                (1,), 
-                (-2, -3, -1)
+                (),
+                ((sys.maxsize, 0, -3), (0, 1, -2), (sys.maxsize, 0, -1)),
+                (),
+                (1,),
+                (-2, -3, -1),
             ),
-            # --- both base-values and insertions ---
+            # --- both base-values and insertions but no derived ---
             (
                 ((0, 0, 0), (1, 0, 1), (2, 0, 2), (3, 0, 3)),
                 ((-1, 0, -4), (1, 1, -3), (2, -1, -2), (sys.maxsize, 0, -1)),
+                (),
                 (1, 3),
                 (-4, 0, -3, -2, 2, -1),
+            ),
+            # --- base-values and derived elements (but no insertions) ---
+            (
+                ((0, 0, 0), (2, 0, 2), (3, 0, 3)),
+                (),
+                ((-1, 0, 4), (2, 1, 1)),
+                (),
+                (4, 0, 2, 1, 3),
             ),
         ),
     )
     def it_computes_the_display_order_to_help(
-        self, request, base_orderings, insertion_orderings, hidden_idxs, expected_value
+        self,
+        request,
+        base_order,
+        insertion_order,
+        derived_order,
+        hidden_idxs,
+        expected_value,
     ):
         property_mock(
             request,
@@ -117,13 +133,19 @@ class Describe_BaseAnchoredCollator:
             request,
             _BaseAnchoredCollator,
             "_insertion_orderings",
-            return_value=insertion_orderings,
+            return_value=insertion_order,
         )
         property_mock(
             request,
             _BaseAnchoredCollator,
             "_base_element_orderings",
-            return_value=base_orderings,
+            return_value=base_order,
+        )
+        property_mock(
+            request,
+            _BaseAnchoredCollator,
+            "_derived_element_orderings",
+            return_value=derived_order,
         )
 
         assert _BaseAnchoredCollator(None, None)._display_order == expected_value
@@ -151,6 +173,10 @@ class Describe_BaseAnchoredCollator:
         collator = _BaseAnchoredCollator(None, None)
 
         assert collator._base_element_orderings == expected_value
+
+    def it_has_empty_derived_element_orderings(self):
+        collator = _BaseAnchoredCollator(None, None)
+        assert collator._derived_element_orderings == tuple()
 
     def it_raises_on_element_order_descriptors_access(self):
         """Error message identifies the non-implementing subclass."""
@@ -192,7 +218,10 @@ class Describe_BaseAnchoredCollator:
             # --- 1 insertion ---
             (((6, 1),), ((6, 1, -1),)),
             # --- 3 insertions ---
-            (((7, 1), (sys.maxsize, 0), (0, 1)), ((7, 1, -3), (sys.maxsize, 0, -2), (0, 1, -1))),
+            (
+                ((7, 1), (sys.maxsize, 0), (0, 1)),
+                ((7, 1, -3), (sys.maxsize, 0, -2), (0, 1, -1)),
+            ),
         ),
     )
     def it_computes_the_insertion_orderings_to_help(
@@ -255,6 +284,84 @@ class DescribeExplicitOrderCollator:
     """Unit-test suite for `cr.cube.collator.ExplicitOrderCollator` object."""
 
     @pytest.mark.parametrize(
+        "ids, are_derived, element_positions, expected_value",
+        (
+            # --- 0 derived elements
+            (
+                ("s1", "s2"),
+                (False, False),
+                (),
+                (),
+            ),
+            # --- 2 derived elements, 1 non-derived
+            (
+                ("s1", "s2", "s3"),
+                (True, False, True),
+                ((2, 0), (-1, 0)),
+                ((2, 0, 0), (-1, 0, 2)),
+            ),
+        ),
+    )
+    def it_computes_the_derived_element_orderings_to_help(
+        self, request, ids, are_derived, element_positions, expected_value
+    ):
+        derived_elements_ = tuple(
+            instance_mock(request, _Element, element_id=id_, derived=is_derived)
+            for id_, is_derived in zip(ids, are_derived)
+        )
+        property_mock(
+            request, _BaseAnchoredCollator, "_elements", return_value=derived_elements_
+        )
+        _derived_element_position_ = method_mock(
+            request,
+            ExplicitOrderCollator,
+            "_derived_element_position",
+            side_effect=iter(element_positions),
+        )
+        collator = ExplicitOrderCollator(None, None)
+
+        derived_orderings = collator._derived_element_orderings
+
+        assert _derived_element_position_.call_args_list == [
+            call(collator, s.element_id) for s in derived_elements_ if s.derived
+        ]
+        assert derived_orderings == expected_value
+
+    @pytest.mark.parametrize(
+        "element_id, anchor, expected_value",
+        (
+            (1, "top", (-1, 0)),
+            (2, "bottom", (sys.maxsize, 0)),
+            (3, {"alias": "a", "position": "before"}, (5, -1)),
+            (4, {"alias": "c", "position": "after"}, (2, 1)),
+            (2, None, (sys.maxsize, 0)),
+        ),
+    )
+    def it_computes_the_derived_element_position_to_help(
+        self, request, element_id, anchor, expected_value
+    ):
+        element_ = instance_mock(request, _Element, anchor=anchor)
+        get_by_id_ = method_mock(
+            request, _ValidElements, "get_by_id", return_value=element_
+        )
+        valid_elements_ = _ValidElements(None, None)
+        property_mock(
+            request, ExplicitOrderCollator, "_elements", return_value=valid_elements_
+        )
+        property_mock(
+            request,
+            _BaseAnchoredCollator,
+            "_element_positions_by_id",
+            return_value={"a": 5, "b": 1, "c": 2},
+        )
+        collator = ExplicitOrderCollator(None, None)
+
+        actual_value = collator._derived_element_position(element_id)
+
+        assert actual_value == expected_value
+        get_by_id_.assert_called_once_with(valid_elements_, element_id)
+
+    @pytest.mark.parametrize(
         "element_ids, element_id_order, expected_value",
         (
             ((), [], ()),
@@ -289,9 +396,11 @@ class DescribeExplicitOrderCollator:
     def it_computes_the_element_order_descriptors_to_help(
         self, request, element_ids, element_id_order, expected_value
     ):
-        property_mock(
-            request, ExplicitOrderCollator, "_element_ids", return_value=element_ids
-        )
+        valid_elements_ = [
+            instance_mock(request, _Element, element_id=id, derived=False)
+            for id in element_ids
+        ]
+        dimension_ = instance_mock(request, Dimension, valid_elements=valid_elements_)
         order_spec_ = instance_mock(request, _OrderSpec, element_ids=element_id_order)
         property_mock(
             request,
@@ -299,7 +408,7 @@ class DescribeExplicitOrderCollator:
             "_order_spec",
             return_value=order_spec_,
         )
-        collator = ExplicitOrderCollator(None, None)
+        collator = ExplicitOrderCollator(dimension_, None)
 
         assert collator._element_order_descriptors == expected_value
 
