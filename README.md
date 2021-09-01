@@ -110,6 +110,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.1
+- Bug fix for pairwise indices with overlaps
+
 ### 3.0.0
 - Remove Python 2.7 and 3.5 support
 
