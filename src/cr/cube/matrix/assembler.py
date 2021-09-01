@@ -252,12 +252,6 @@ class Assembler:
 
         Raises `ValueError if the cube-result does not include `overlaps` cube-measures.
         """
-        if self._cube_has_overlaps:
-            # If overlaps are defined, calculate significance based on them
-            return self._assemble_matrix(
-                self._measures.pairwise_indices_for_subvar(alpha, only_larger).blocks
-            )
-
         return np.array(
             [
                 self._pairwise_indices(

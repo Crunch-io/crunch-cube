@@ -10,7 +10,6 @@ from cr.cube.matrix.cubemeasure import CubeMeasures
 from cr.cube.matrix.subtotals import (
     SumSubtotals,
     NanSubtotals,
-    NoneSubtotals,
 )
 from cr.cube.util import lazyproperty
 
@@ -184,12 +183,6 @@ class SecondOrderMeasures:
     def means(self):
         """_Means measure object for this cube-result"""
         return _Means(self._dimensions, self, self._cube_measures)
-
-    def pairwise_indices_for_subvar(self, alpha, only_larger):
-        """_PairwiseSubvarIndices measure object for this cube-result"""
-        return _PairwiseSubvarIndices(
-            self._dimensions, self, self._cube_measures, alpha, only_larger
-        )
 
     def pairwise_p_vals_for_subvar(self, subvar_idx):
         """_PairwiseSigPValsForSubvar measure object for this cube-result"""
@@ -942,55 +935,6 @@ class _Means(_BaseSecondOrderMeasure):
         return NanSubtotals.blocks(
             self._cube_measures.cube_means.means, self._dimensions
         )
-
-
-class _PairwiseSubvarIndices(_BaseSecondOrderMeasure):
-    """Provides pairwise significance indices measure for matrix."""
-
-    def __init__(
-        self, dimensions, second_order_measures, cube_measures, alpha, only_larger
-    ):
-        super(_PairwiseSubvarIndices, self).__init__(
-            dimensions, second_order_measures, cube_measures
-        )
-        self._alpha = alpha
-        self._only_larger = only_larger
-
-    @lazyproperty
-    def blocks(self):
-        """2D array of the four 2D "blocks" making up this measure."""
-        pairwise_indices = np.array(
-            [self._pairwise_indices(v.p_vals, v.t_stats) for v in self._values]
-        ).T
-        return NoneSubtotals.blocks(pairwise_indices, self._dimensions)
-
-    def _pairwise_indices(self, p_vals, t_stats):
-        """1D ndarray containing tuples of int pairwise indices of each column."""
-        significance = p_vals < self._alpha
-        if self._only_larger:
-            significance = np.logical_and(t_stats < 0, significance)
-        col_significance = np.empty((len(significance),), dtype=object)
-        col_significance[:] = [tuple(np.where(sig_row)[0]) for sig_row in significance]
-        return col_significance
-
-    @lazyproperty
-    def _values(self):
-        """list of _PairwiseSigPVals tests objects.
-
-        Result has as many elements as there are columns in the slice. Each
-        significance test contains `p_vals` and `t_stats` significance tests.
-        """
-        return [
-            _PairwiseSigPValsForSubvar(
-                self._dimensions,
-                self._second_order_measures,
-                self._cube_measures,
-                col_idx,
-            )
-            for col_idx in range(
-                self._cube_measures.cube_overlaps.selected_bases.shape[1]
-            )
-        ]
 
 
 class _PairwiseSigTStatsForSubvar(_BaseSecondOrderMeasure):

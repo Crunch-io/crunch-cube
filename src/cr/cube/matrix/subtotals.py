@@ -149,10 +149,6 @@ class NanSubtotals(_BaseSubtotals):
         return np.full(self._ncols, self.filler)
 
 
-class NoneSubtotals(NanSubtotals):
-    filler = None
-
-
 class SumSubtotals(_BaseSubtotals):
     """Subtotal "blocks" created by adding and subtracting terms for subtotals.
 
