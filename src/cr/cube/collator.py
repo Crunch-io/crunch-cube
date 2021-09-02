@@ -121,7 +121,7 @@ class _BaseAnchoredCollator(_BaseCollator):
         """Optional tuple of orderings for each derived-element value.
 
         Is None for payload order, because zz9 places the derived elements in their
-        correct positions with no need for us to furhter sort them. However, when
+        correct positions with no need for us to further sort them. However, when
         an explicit order is set, this method must be overriden because we must
         recalculate the derived element's positions.
         """
