@@ -2,18 +2,16 @@
 
 """Provides the Dimension class."""
 
-import copy
+from __future__ import annotations
 
+import copy
 from collections.abc import Sequence
 
 import numpy as np
 
-from cr.cube.enums import (
-    COLLATION_METHOD as CM,
-    DIMENSION_TYPE as DT,
-    MARGINAL,
-    MEASURE,
-)
+from cr.cube.enums import COLLATION_METHOD as CM
+from cr.cube.enums import DIMENSION_TYPE as DT, _DimensionType
+from cr.cube.enums import MARGINAL, MEASURE
 from cr.cube.util import lazyproperty
 
 
@@ -28,7 +26,7 @@ class _BaseDimensions(Sequence):
         """Implements (efficient) iterability."""
         return iter(self._dimensions)
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Implements len(elements)."""
         return len(self._dimensions)
 
@@ -51,7 +49,7 @@ class AllDimensions(_BaseDimensions):
         self._dimension_dicts = dimension_dicts
 
     @lazyproperty
-    def apparent_dimensions(self):
+    def apparent_dimensions(self) -> _ApparentDimensions:
         """_ApparentDimensions collection of the "visible" dimensions.
 
         The two dimensions for a multiple-response (MR) variable are
@@ -170,8 +168,8 @@ class _RawDimension:
         return self._dimension_dict
 
     @lazyproperty
-    def dimension_type(self):
-        """Return member of DIMENSION_TYPE appropriate to dimension_dict."""
+    def dimension_type(self) -> _DimensionType:
+        """_DimensionType (member of DIMENSION_TYPE) appropriate to dimension_dict."""
         base_type = self._base_type
         if base_type == "categorical":
             return self._resolve_categorical()
