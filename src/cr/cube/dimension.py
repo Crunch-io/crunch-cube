@@ -2,8 +2,6 @@
 
 """Provides the Dimension class."""
 
-from __future__ import annotations
-
 import copy
 from collections.abc import Sequence
 
@@ -49,7 +47,7 @@ class AllDimensions(_BaseDimensions):
         self._dimension_dicts = dimension_dicts
 
     @lazyproperty
-    def apparent_dimensions(self) -> _ApparentDimensions:
+    def apparent_dimensions(self) -> "_ApparentDimensions":
         """_ApparentDimensions collection of the "visible" dimensions.
 
         The two dimensions for a multiple-response (MR) variable are
