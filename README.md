@@ -110,6 +110,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.2
+- Smoothing measures consolidation
+
 ### 3.0.1
 - Bug fix for pairwise indices with overlaps
 
