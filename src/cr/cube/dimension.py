@@ -1373,7 +1373,7 @@ class _Subtotal:
                 for idx, vector in enumerate(self._valid_elements)
                 if vector.element_id in addend_ids
             ),
-            dtype=int,  # force int so it can be used as index even if empty
+            dtype=np.int64,  # force int so it can be used as index even if empty
         )
 
     @lazyproperty
@@ -1413,5 +1413,5 @@ class _Subtotal:
                 for idx, vector in enumerate(self._valid_elements)
                 if vector.element_id in self.subtrahend_ids
             ),
-            dtype=int,  # force int so it can be used as index even if empty
+            dtype=np.int64,  # force int so it can be used as index even if empty
         )
