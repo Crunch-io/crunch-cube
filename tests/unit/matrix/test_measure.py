@@ -20,7 +20,10 @@ from cr.cube.matrix.measure import (
     _BaseScaledCountMarginal,
     _ColumnComparableCounts,
     _ColumnProportionVariances,
+    _ColumnIndex,
+    _ColumnIndexSmoothed,
     _ColumnProportions,
+    _ColumnProportionsSmoothed,
     _ColumnShareSum,
     _ColumnStandardError,
     _ColumnUnweightedBases,
@@ -33,6 +36,8 @@ from cr.cube.matrix.measure import (
     _PopulationStandardError,
     _MarginTableProportion,
     _MarginTableBase,
+    _Means,
+    _MeansSmoothed,
     _Pvalues,
     _RowComparableCounts,
     _RowProportions,
@@ -71,11 +76,13 @@ class DescribeSecondOrderMeasures:
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
         (
+            ("column_index", _ColumnIndex),
             ("column_proportions", _ColumnProportions),
             ("column_proportion_variances", _ColumnProportionVariances),
             ("column_std_err", _ColumnStandardError),
             ("column_unweighted_bases", _ColumnUnweightedBases),
             ("column_weighted_bases", _ColumnWeightedBases),
+            ("means", _Means),
             ("population_proportions", _PopulationProportions),
             ("population_std_err", _PopulationStandardError),
             ("pvalues", _Pvalues),
@@ -84,6 +91,9 @@ class DescribeSecondOrderMeasures:
             ("row_proportions", _RowProportions),
             ("row_unweighted_bases", _RowUnweightedBases),
             ("row_weighted_bases", _RowWeightedBases),
+            ("smoothed_column_index", _ColumnIndexSmoothed),
+            ("smoothed_column_proportions", _ColumnProportionsSmoothed),
+            ("smoothed_means", _MeansSmoothed),
             ("table_proportion_variances", _TableProportionVariances),
             ("table_std_err", _TableStandardError),
             ("table_proportions", _TableProportions),
@@ -97,12 +107,13 @@ class DescribeSecondOrderMeasures:
     def it_provides_access_to_various_measure_objects(
         self,
         request,
-        dimensions_,
         _cube_measures_prop_,
         cube_measures_,
         measure_prop_name,
         MeasureCls,
     ):
+        Dimension_ = class_mock(request, "cr.cube.dimension.Dimension")
+        dimensions_ = (Dimension_, Dimension_)
         measure_ = instance_mock(request, MeasureCls)
         MeasureCls_ = class_mock(
             request,
@@ -111,7 +122,6 @@ class DescribeSecondOrderMeasures:
         )
         _cube_measures_prop_.return_value = cube_measures_
         measures = SecondOrderMeasures(None, dimensions_, None)
-
         measure = getattr(measures, measure_prop_name)
 
         MeasureCls_.assert_called_once_with(dimensions_, measures, cube_measures_)
@@ -172,13 +182,14 @@ class DescribeSecondOrderMeasures:
     def it_provides_access_to_the_marginals(
         self,
         request,
-        dimensions_,
         _cube_measures_prop_,
         cube_measures_,
         orientation,
         measure,
         MarginalCls,
     ):
+        Dimension_ = class_mock(request, "cr.cube.dimension.Dimension")
+        dimensions_ = (Dimension_, Dimension_)
         marginal_ = instance_mock(request, MarginalCls)
         MarginalCls_ = class_mock(
             request,
@@ -297,6 +308,12 @@ class Describe_BaseSecondOrderMeasure:
         blocks = measure.blocks
 
         assert blocks == [["A", "B"], ["C", "D"]]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
 
 
 class Describe_ColumnComparableCounts:
@@ -2127,6 +2144,10 @@ class Describe_BaseMarginal:
         assert actual == second_order_measures_.column_comparable_counts.is_defined
 
     # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
 
     @pytest.fixture
     def measure_(self, request):

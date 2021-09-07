@@ -481,6 +481,11 @@ class Dimension:
         return len(self.all_elements)
 
     @lazyproperty
+    def smoothing_dict(self):
+        """Optional dict of smoothing specifications."""
+        return self._dimension_transforms_dict.get("smoother") or {}
+
+    @lazyproperty
     def subtotal_labels(self):
         """tuple of string element-labels for each subtotal in this dimension.
 

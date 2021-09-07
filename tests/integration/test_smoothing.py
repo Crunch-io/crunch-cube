@@ -7,7 +7,7 @@ import pytest
 
 from cr.cube.cube import Cube
 
-from ..fixtures import CR
+from ..fixtures import CR, NA
 from ..util import load_python_expression
 
 
@@ -34,16 +34,18 @@ class DescribeSliceSmoothing:
     def it_provides_smoothed_col_index_for_compatible_cubes(
         self, fixture, window, expectation
     ):
-        slice_ = Cube(fixture).partitions[0]
-        col_index = slice_.evaluate(
-            {
-                "function": "one_sided_moving_avg",
-                "base_measure": "col_index",
-                "window": window,
+        transforms = {
+            "columns_dimension": {
+                "smoother": {
+                    "function": "one_sided_moving_avg",
+                    "window": window,
+                }
             }
-        )
+        }
+        slice_ = Cube(fixture, transforms=transforms).partitions[0]
+
         np.testing.assert_array_almost_equal(
-            col_index, load_python_expression(expectation)
+            slice_.smoothed_column_index, load_python_expression(expectation)
         )
 
     @pytest.mark.parametrize(
@@ -66,16 +68,18 @@ class DescribeSliceSmoothing:
     def it_provides_smoothed_col_percent_for_compatible_cubes(
         self, fixture, window, expectation
     ):
-        slice_ = Cube(fixture).partitions[0]
-        col_percent = slice_.evaluate(
-            {
-                "function": "one_sided_moving_avg",
-                "base_measure": "col_percent",
-                "window": window,
+        transforms = {
+            "columns_dimension": {
+                "smoother": {
+                    "function": "one_sided_moving_avg",
+                    "window": window,
+                }
             }
-        )
+        }
+        slice_ = Cube(fixture, transforms=transforms).partitions[0]
+
         np.testing.assert_array_almost_equal(
-            col_percent, load_python_expression(expectation)
+            slice_.smoothed_column_percentages, load_python_expression(expectation)
         )
 
     @pytest.mark.parametrize(
@@ -92,98 +96,153 @@ class DescribeSliceSmoothing:
     def it_provides_smoothed_scale_means_for_compatible_cubes(
         self, fixture, expectation
     ):
-
-        slice_ = Cube(fixture).partitions[0]
-        # --- window not expressed get the default value : 2
-        scale_mean = slice_.evaluate(
-            {
-                "function": "one_sided_moving_avg",
-                "base_measure": "scale_mean",
-                "window": 2,
+        transforms = {
+            "columns_dimension": {
+                "smoother": {
+                    "function": "one_sided_moving_avg",
+                    "window": 2,
+                }
             }
-        )
+        }
+        slice_ = Cube(fixture, transforms=transforms).partitions[0]
+        # --- window not expressed get the default value : 2
         np.testing.assert_array_almost_equal(
-            scale_mean, load_python_expression(expectation)
+            slice_.smoothed_columns_scale_mean, load_python_expression(expectation)
         )
+
+    def it_provides_smoothed_means_for_numeric_array(self):
+        transforms = {
+            "columns_dimension": {
+                "smoother": {
+                    "function": "one_sided_moving_avg",
+                    "window": 2,
+                }
+            }
+        }
+        slice_ = Cube(
+            NA.NUM_ARR_MEANS_GROUPED_BY_CAT_DATE, transforms=transforms
+        ).partitions[0]
+
+        expectation = np.array(
+            load_python_expression("num-array-means-grouped-by-cat-date-smoothed")
+        )
+        assert slice_.smoothed_means == pytest.approx(expectation, nan_ok=True)
 
     @pytest.mark.parametrize(
         "fixture",
         (CR.CAT_X_MR, CR.MR_X_MR, CR.MR_X_CA_CAT_X_CA_SUBVAR, CR.CAT_DATE_X_CAT),
     )
     def it_warns_and_does_not_smooth_when_dimension_is_not_smoothable(self, fixture):
-        slice_ = Cube(fixture).partitions[0]
-        base_values = slice_.column_percentages
+        transforms = {
+            "columns_dimension": {
+                "smoother": {
+                    "function": "one_sided_moving_avg",
+                    "window": 3,
+                }
+            }
+        }
+        slice_ = Cube(fixture, transforms=transforms).partitions[0]
         expected_warning_regex = (
             r"No smoothing performed. Column dimension must be a categorical date."
         )
 
         with pytest.warns(UserWarning, match=expected_warning_regex):
-            smoothed_values = slice_.evaluate(
-                {
-                    "function": "one_sided_moving_avg",
-                    "base_measure": "col_percent",
-                    "window": 3,
-                }
-            )
+            smoothed_values = slice_.smoothed_column_percentages
 
-        np.testing.assert_array_almost_equal(smoothed_values, base_values)
+        slice_ = Cube(fixture).partitions[0]
+        base_values = slice_.column_percentages
+
+        assert smoothed_values.tolist() == base_values.tolist()
 
     @pytest.mark.parametrize(
-        "fixture, base_measure, prop_name, periods, window",
+        "fixture, smoothed_prop_name, prop_name, periods, window",
         (
-            (CR.CAT_X_CAT_DATE, "col_percent", "column_percentages", 4, 1),
-            (CR.CAT_X_CAT_DATE, "col_index", "column_index", 4, 1),
-            (CR.CAT_X_CAT, "col_percent", "column_percentages", 2, 3),
+            (
+                CR.CAT_X_CAT_DATE,
+                "smoothed_column_percentages",
+                "smoothed_column_percentages",
+                4,
+                1,
+            ),
+            (CR.CAT_X_CAT_DATE, "smoothed_column_index", "column_index", 4, 1),
+            (
+                CR.CAT_X_CAT_DATE,
+                "smoothed_columns_scale_mean",
+                "columns_scale_mean",
+                4,
+                1,
+            ),
         ),
     )
     def it_warns_and_does_not_smooth_when_window_is_invalid(
-        self, fixture, base_measure, prop_name, periods, window
+        self, fixture, smoothed_prop_name, prop_name, periods, window
     ):
-        slice_ = Cube(fixture).partitions[0]
-        base_values = getattr(slice_, prop_name)
+        transforms = {
+            "columns_dimension": {
+                "smoother": {
+                    "function": "one_sided_moving_avg",
+                    "window": window,
+                }
+            }
+        }
+        slice_ = Cube(fixture, transforms=transforms).partitions[0]
         expected_warning_regex = (
             r"No smoothing performed. Smoothing window must be between 2 and the "
             r"number of periods \(%d\), got %d" % (periods, window)
         )
 
         with pytest.warns(UserWarning, match=expected_warning_regex):
-            smoothed_values = slice_.evaluate(
-                {
-                    "function": "one_sided_moving_avg",
-                    "base_measure": base_measure,
-                    "window": window,
-                }
-            )
+            smoothed_values = getattr(slice_, smoothed_prop_name)
+
+        base_values = getattr(slice_, prop_name)
 
         np.testing.assert_array_almost_equal(smoothed_values, base_values)
 
+    def it_uses_default_smoothing_if_smoother_is_not_specified(self):
+        slice_ = Cube(CR.CAT_X_CAT_DATE).partitions[0]
+
+        assert slice_.smoothed_column_percentages == pytest.approx(
+            np.array(
+                [
+                    [np.nan, 28.4013529661, 30.877106856, 35.7038771792],
+                    [np.nan, 42.5027849229, 47.5045000818, 47.491543065],
+                    [np.nan, 13.8136228302, 13.0829651448, 11.170960187],
+                    [np.nan, 5.12648613614, 3.74406807396, 1.54306531355],
+                    [np.nan, 10.1557531444, 4.7913598429, 4.0905542544],
+                ]
+            ),
+            nan_ok=True,
+        )
+
 
 class DescribeStrandMeansSmoothing:
-    """Integration-test suite for _Strand.evaluate() method."""
+    """Integration-test suite for _Strand method."""
 
     def it_provides_smoothed_means_cat_date(self):
-        strand_ = Cube(CR.CAT_DATE_MEAN).partitions[0]
-        means = strand_.evaluate(
-            {"function": "one_sided_moving_avg", "base_measure": "mean", "window": 3}
-        )
+        transforms = {
+            "rows_dimension": {
+                "smoother": {"function": "one_sided_moving_avg", "window": 3}
+            }
+        }
+        strand_ = Cube(CR.CAT_DATE_MEAN, transforms=transforms).partitions[0]
+
         np.testing.assert_array_almost_equal(
-            means, [np.nan, np.nan, 2.65670765025029, 2.5774816240050358]
+            strand_.smoothed_means,
+            [np.nan, np.nan, 2.65670765025029, 2.5774816240050358],
         )
 
     def it_does_not_smooth_means_mr_mean_filt_wgtd(self):
-        strand_ = Cube(CR.MR_MEAN_FILT_WGTD).partitions[0]
+        transforms = {
+            "rows_dimension": {
+                "smoother": {"function": "one_sided_moving_avg", "window": 3}
+            }
+        }
+        strand_ = Cube(CR.MR_MEAN_FILT_WGTD, transforms=transforms).partitions[0]
         expected_warning_regex = (
-            r"No smoothing performed. Column dimension must be a categorical date."
+            r"No smoothing performed. Row dimension must be a categorical date."
         )
 
         with pytest.warns(UserWarning, match=expected_warning_regex):
-            means = strand_.evaluate(
-                {
-                    "function": "one_sided_moving_avg",
-                    "base_measure": "mean",
-                    "window": 3,
-                }
-            )
-        np.testing.assert_array_almost_equal(
-            means, [3.724051, 2.578429, 2.218593, 1.865335]
-        )
+            means = strand_.smoothed_means
+
+        assert means == pytest.approx([3.724051, 2.578429, 2.218593, 1.865335])

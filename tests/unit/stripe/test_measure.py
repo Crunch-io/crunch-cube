@@ -17,6 +17,7 @@ from cr.cube.stripe.cubemeasure import (
 from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
     _Means,
+    _MeansSmoothed,
     _PopulationProportions,
     _PopulationProportionStderrs,
     _ScaledCounts,
@@ -48,6 +49,7 @@ class DescribeStripeMeasures:
             ("table_proportion_stderrs", _TableProportionStderrs),
             ("table_proportion_variances", _TableProportionVariances),
             ("table_proportions", _TableProportions),
+            ("smoothed_means", _MeansSmoothed),
             ("unweighted_bases", _UnweightedBases),
             ("unweighted_counts", _UnweightedCounts),
             ("weighted_bases", _WeightedBases),
@@ -57,12 +59,12 @@ class DescribeStripeMeasures:
     def it_provides_access_to_various_measure_objects(
         self,
         request,
-        rows_dimension_,
         _cube_measures_prop_,
         cube_measures_,
         measure_prop_name,
         MeasureCls,
     ):
+        rows_dimension_ = class_mock(request, "cr.cube.dimension.Dimension")
         measure_ = instance_mock(request, MeasureCls)
         MeasureCls_ = class_mock(
             request,
@@ -158,6 +160,10 @@ class Describe_BaseSecondOrderMeasure:
     @pytest.fixture
     def cube_measures_(self, request):
         return instance_mock(request, CubeMeasures)
+
+    @pytest.fixture
+    def rows_dimension_(self, request):
+        return instance_mock(request, Dimension)
 
 
 class Describe_Means:

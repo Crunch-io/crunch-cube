@@ -189,6 +189,14 @@ class StripeAssembler:
         return self._assemble_vector(self._measures.share_sum.blocks)
 
     @lazyproperty
+    def smoothed_means(self):
+        """1D np.float64 ndarray of smoothed mean for each row.
+
+        Raises ValueError when the cube-result does not include a means cube-measure.
+        """
+        return self._assemble_vector(self._measures.smoothed_means.blocks)
+
+    @lazyproperty
     def stddev(self):
         """1D np.float64 ndarray of stddev for each row.
 
