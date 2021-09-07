@@ -12,9 +12,11 @@ base vectors and inserted vectors, respectively.
 
 import collections
 import sys
+from typing import Tuple
 
 import numpy as np
 
+from cr.cube.dimension import Dimension
 from cr.cube.util import lazyproperty
 
 
@@ -25,7 +27,7 @@ class _BaseCollator:
     unweighted N (N = 0).
     """
 
-    def __init__(self, dimension, empty_idxs):
+    def __init__(self, dimension: Dimension, empty_idxs: Tuple[int]):
         self._dimension = dimension
         self._empty_idxs = tuple(empty_idxs) if empty_idxs else ()
 

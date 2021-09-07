@@ -442,10 +442,12 @@ class Describe_RawDimension:
         is_logical_type,
         expected_value,
         _is_array_cat_prop_,
+        _is_cat_date_prop_,
         _has_selected_category_prop_,
         _is_logical_type_prop_,
     ):
         _is_array_cat_prop_.return_value = is_array_cat
+        _is_cat_date_prop_.return_value = False
         _has_selected_category_prop_.return_value = has_selected_cat
         _is_logical_type_prop_.return_value = is_logical_type
         raw_dimension = _RawDimension(None, None)
@@ -471,6 +473,10 @@ class Describe_RawDimension:
     @pytest.fixture
     def _is_array_cat_prop_(self, request):
         return property_mock(request, _RawDimension, "_is_array_cat")
+
+    @pytest.fixture
+    def _is_cat_date_prop_(self, request):
+        return property_mock(request, _RawDimension, "_is_cat_date")
 
     @pytest.fixture
     def _is_logical_type_prop_(self, request):
