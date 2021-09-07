@@ -12,7 +12,7 @@ base vectors and inserted vectors, respectively.
 
 import collections
 import sys
-from typing import Dict, FrozenSet, Iterator, Tuple, Union, List
+from typing import Dict, FrozenSet, Iterator, List, Tuple, Union
 
 import numpy as np
 

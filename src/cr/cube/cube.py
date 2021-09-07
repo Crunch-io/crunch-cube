@@ -7,7 +7,7 @@ CubeSet is the main API class for manipulating Crunch.io JSON cube responses.
 
 import copy
 import json
-from typing import FrozenSet, Iterator, List, Optional, Tuple, Union, Dict
+from typing import Dict, FrozenSet, Iterator, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -1044,7 +1044,7 @@ class _UnweightedCountMeasure(_BaseMeasure):
     """Unweighted counts for cube."""
 
     @lazyproperty
-    def _flat_values(self) -> "np.ndarray":
+    def _flat_values(self) -> np.ndarray:
         """1D np.ndarray of np.float64 counts before weighting.
 
         Use np.float64s to avoid int overflow bugs and so we can use nan.
