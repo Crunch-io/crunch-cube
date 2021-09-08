@@ -7,15 +7,16 @@ CubeSet is the main API class for manipulating Crunch.io JSON cube responses.
 
 import copy
 import json
+from typing import Dict, FrozenSet, Iterator, List, Optional, Tuple, Union
 
 import numpy as np
 
 from cr.cube.cubepart import CubePartition
-from cr.cube.dimension import AllDimensions
+from cr.cube.dimension import AllDimensions, _ApparentDimensions
 from cr.cube.enums import CUBE_MEASURE, DIMENSION_TYPE as DT, NUMERIC_CUBE_MEASURES
 from cr.cube.util import lazyproperty
 
-np.seterr(divide="ignore", invalid="ignore")
+np.seterr(divide="ignore", invalid="ignore")  # type: ignore
 
 
 class CubeSet:
@@ -36,19 +37,25 @@ class CubeSet:
     insufficient sample (base).
     """
 
-    def __init__(self, cube_responses, transforms, population, min_base):
+    def __init__(
+        self,
+        cube_responses: List[Dict],
+        transforms: Dict,
+        population: int,
+        min_base: int,
+    ):
         self._cube_responses = cube_responses
         self._transforms_dicts = transforms
         self._population = population
         self._min_base = min_base
 
     @lazyproperty
-    def available_measures(self):
+    def available_measures(self) -> FrozenSet[CUBE_MEASURE]:
         """frozenset of available measures of the first cube in this set."""
         return frozenset(m for cube in self._cubes for m in cube.available_measures)
 
     @lazyproperty
-    def can_show_pairwise(self):
+    def can_show_pairwise(self) -> bool:
         """True if all 2D cubes in a multi-cube set can provide pairwise comparison."""
         if len(self._cubes) < 2:
             return False
@@ -60,17 +67,17 @@ class CubeSet:
         )
 
     @lazyproperty
-    def description(self):
+    def description(self) -> str:
         """str description of first cube in this set."""
         return self._cubes[0].description
 
     @lazyproperty
-    def has_weighted_counts(self):
+    def has_weighted_counts(self) -> bool:
         """True if cube-responses include a weighted-count measure."""
         return self._cubes[0].has_weighted_counts
 
     @lazyproperty
-    def is_ca_as_0th(self):
+    def is_ca_as_0th(self) -> bool:
         """True for multi-cube when first cube represents a categorical-array.
 
         A "CA-as-0th" tabbook tab is "3D" in the sense it is "sliced" into one table
@@ -85,17 +92,17 @@ class CubeSet:
         return cube.dimension_types[0] == DT.CA_SUBVAR
 
     @lazyproperty
-    def missing_count(self):
+    def missing_count(self) -> int:
         """The number of missing values from first cube in this set."""
         return self._cubes[0].missing
 
     @lazyproperty
-    def name(self):
+    def name(self) -> str:
         """str name of first cube in this set."""
         return self._cubes[0].name
 
     @lazyproperty
-    def partition_sets(self):
+    def partition_sets(self) -> Tuple[Tuple[CubePartition], ...]:
         """Sequence of cube-partition collections across all cubes of this cube-set.
 
         This value might look like the following for a ca-as-0th tabbook. For example::
@@ -120,7 +127,7 @@ class CubeSet:
         return tuple(zip(*(cube.partitions for cube in self._cubes)))
 
     @lazyproperty
-    def population_fraction(self):
+    def population_fraction(self) -> float:
         """The filtered/unfiltered ratio for this cube-set.
 
         This value is required for properly calculating population on a cube where
@@ -131,20 +138,20 @@ class CubeSet:
         return self._cubes[0].population_fraction
 
     @lazyproperty
-    def n_responses(self):
+    def n_responses(self) -> int:
         """Total number of responses considered from first cube in this set."""
         return self._cubes[0].n_responses
 
     @lazyproperty
-    def valid_counts_summary(self):
+    def valid_counts_summary(self) -> int:
         """The valid count summary values from first cube in this set."""
         return self._cubes[0].valid_counts_summary
 
     @lazyproperty
-    def _cubes(self):
+    def _cubes(self) -> Tuple["Cube", ...]:
         """Sequence of Cube objects containing data for this analysis."""
 
-        def iter_cubes():
+        def iter_cubes() -> Iterator[Cube]:
             """Generate a Cube object for each of cube_responses.
 
             0D cube-responses and 1D second-and-later cubes are "inflated" to add their
@@ -165,12 +172,12 @@ class CubeSet:
         return tuple(iter_cubes())
 
     @lazyproperty
-    def _is_multi_cube(self):
+    def _is_multi_cube(self) -> bool:
         """True if more than one cube-response was provided on construction."""
         return len(self._cube_responses) > 1
 
     @lazyproperty
-    def _is_numeric_measure(self):
+    def _is_numeric_measure(self) -> bool:
         """True when CubeSet is special-case "numeric-measure" case requiring inflation.
 
         When a numeric variable with `mean`, `sum` or `std_dev` summary statistic
@@ -206,7 +213,12 @@ class Cube:
     """
 
     def __init__(
-        self, response, cube_idx=None, transforms=None, population=None, mask_size=0
+        self,
+        response: Union[str, Dict],
+        cube_idx: int = None,
+        transforms: Dict = None,
+        population: int = None,
+        mask_size: int = 0,
     ):
         self._cube_response_arg = response
         self._transforms_dict = {} if transforms is None else transforms
@@ -214,7 +226,7 @@ class Cube:
         self._population = 0 if population is None else population
         self._mask_size = mask_size
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Provide text representation suitable for working at console.
 
         Falls back to a default repr on exception, such as might occur in
@@ -231,17 +243,17 @@ class Cube:
             return super(Cube, self).__repr__()
 
     @lazyproperty
-    def available_measures(self):
+    def available_measures(self) -> FrozenSet[CUBE_MEASURE]:
         """frozenset of available CUBE_MEASURE members in the cube response."""
         cube_measures = self._cube_response.get("result", {}).get("measures", {}).keys()
         return frozenset(CUBE_MEASURE(m) for m in cube_measures)
 
     @lazyproperty
-    def counts(self):
+    def counts(self) -> np.ndarray:
         return self.counts_with_missings[self._valid_idxs]
 
     @lazyproperty
-    def counts_with_missings(self):
+    def counts_with_missings(self) -> np.ndarray:
         """ndarray of weighted, unweighted or valid counts including missing values.
 
         The difference from .counts is that this property includes value for missing
@@ -258,7 +270,7 @@ class Cube:
         )
 
     @lazyproperty
-    def covariance(self):
+    def covariance(self) -> Optional[np.ndarray]:
         """Optional float64 ndarray of the cube_covariance if the measure exists."""
         if self._measures.covariance is None:
             return None
@@ -267,24 +279,24 @@ class Cube:
         )
 
     @lazyproperty
-    def cube_index(self):
+    def cube_index(self) -> int:
         """Offset of this cube within its CubeSet."""
         return 0 if self._cube_idx_arg is None else self._cube_idx_arg
 
     @lazyproperty
-    def description(self):
+    def description(self) -> Optional[str]:
         """Return the description of the cube."""
         if not self.dimensions:
             return None
         return self.dimensions[0].description
 
     @lazyproperty
-    def dimension_types(self):
+    def dimension_types(self) -> Tuple[DT, ...]:
         """Tuple of DIMENSION_TYPE member for each dimension of cube."""
         return tuple(d.dimension_type for d in self.dimensions)
 
     @lazyproperty
-    def dimensions(self):
+    def dimensions(self) -> _ApparentDimensions:
         """_ApparentDimensions object providing access to visible dimensions.
 
         A cube involving a multiple-response (MR) variable has two dimensions
@@ -296,7 +308,7 @@ class Cube:
         """
         return self._all_dimensions.apparent_dimensions
 
-    def inflate(self):
+    def inflate(self) -> "Cube":
         """Return new Cube object with rows-dimension added.
 
         A multi-cube (tabbook) response formed from a function (e.g. mean()) on
@@ -326,24 +338,24 @@ class Cube:
         )
 
     @lazyproperty
-    def has_weighted_counts(self):
+    def has_weighted_counts(self) -> bool:
         """True if cube response has weighted count data."""
         return self.weighted_counts is not None
 
     @lazyproperty
-    def means(self):
+    def means(self) -> Optional[np.ndarray]:
         """Optional float64 ndarray of the cube_means if the measure exists."""
         if self._measures.means is None:
             return None
         return self._measures.means.raw_cube_array[self._valid_idxs].astype(np.float64)
 
     @lazyproperty
-    def missing(self):
+    def missing(self) -> int:
         """Get missing count of a cube."""
         return self._measures.missing_count
 
     @lazyproperty
-    def name(self):
+    def name(self) -> Optional[str]:
         """Return the name of the cube.
 
         If the cube has 2 diensions, return the name of the second one. In case
@@ -355,17 +367,17 @@ class Cube:
         return self.dimensions[0].name
 
     @lazyproperty
-    def ndim(self):
+    def ndim(self) -> int:
         """int count of dimensions for this cube."""
         return len(self.dimensions)
 
     @lazyproperty
-    def n_responses(self):
+    def n_responses(self) -> int:
         """Total (int) number of responses considered."""
         return self._cube_response["result"].get("n", 0)
 
     @lazyproperty
-    def overlaps(self):
+    def overlaps(self) -> Optional[np.ndarray]:
         """Optional float64 ndarray of cube_overlaps if the measure exists.
 
         The array has as many dimensions as there are defined in the cube query, plus
@@ -378,7 +390,7 @@ class Cube:
         )
 
     @lazyproperty
-    def partitions(self):
+    def partitions(self) -> Tuple[CubePartition, ...]:
         """Sequence of _Slice, _Strand, or _Nub objects from this cube-result."""
         return tuple(
             CubePartition.factory(
@@ -393,7 +405,7 @@ class Cube:
         )
 
     @lazyproperty
-    def population_fraction(self):
+    def population_fraction(self) -> float:
         """The filtered/unfiltered ratio for cube response.
 
         This value is required for properly calculating population on a cube
@@ -404,21 +416,21 @@ class Cube:
         return self._measures.population_fraction
 
     @lazyproperty
-    def stddev(self):
+    def stddev(self) -> Optional[np.ndarray]:
         """Optional float64 ndarray of the cube_stddev if the measure exists."""
         if self._measures.stddev is None:
             return None
         return self._measures.stddev.raw_cube_array[self._valid_idxs].astype(np.float64)
 
     @lazyproperty
-    def sums(self):
+    def sums(self) -> Optional[np.ndarray]:
         """Optional float64 ndarray of the cube_sum if the measure exists."""
         if self._measures.sums is None:
             return None
         return self._measures.sums.raw_cube_array[self._valid_idxs].astype(np.float64)
 
     @lazyproperty
-    def title(self):
+    def title(self) -> str:
         """str alternate-name given to cube-result.
 
         This value is suitable for naming a Strand when displayed as a column. In this
@@ -428,7 +440,7 @@ class Cube:
         return self._cube_dict["result"].get("title", "Untitled")
 
     @lazyproperty
-    def unweighted_counts(self):
+    def unweighted_counts(self) -> np.ndarray:
         """ndarray of unweighted counts, valid elements only.
 
         Unweighted counts are drawn from the `result.counts` field of the cube result.
@@ -447,7 +459,7 @@ class Cube:
         return unweighted_counts.raw_cube_array[self._valid_idxs]
 
     @lazyproperty
-    def unweighted_valid_counts(self):
+    def unweighted_valid_counts(self) -> Optional[np.ndarray]:
         """Optional float64 ndarray of unweighted_valid_counts if the measure exists."""
         if self._measures.unweighted_valid_counts is None:
             return None
@@ -456,7 +468,7 @@ class Cube:
         ].astype(np.float64)
 
     @lazyproperty
-    def valid_counts_summary(self):
+    def valid_counts_summary(self) -> Optional[np.ndarray]:
         """Optional ndarray of summary valid counts"""
         if not self._measures.unweighted_valid_counts:
             return None
@@ -469,7 +481,7 @@ class Cube:
         )
 
     @lazyproperty
-    def valid_overlaps(self):
+    def valid_overlaps(self) -> Optional[np.ndarray]:
         """Optional float64 ndarray of cube_valid_overlaps if the measure exists.
 
         The array has as many dimensions as there are defined in the cube query, plus
@@ -482,7 +494,7 @@ class Cube:
         )
 
     @lazyproperty
-    def weighted_counts(self):
+    def weighted_counts(self) -> Optional[np.ndarray]:
         """ndarray of weighted counts, valid elements only.
 
         In case of presence of valid counts in the cube response the weighted counts
@@ -500,7 +512,7 @@ class Cube:
         )
 
     @lazyproperty
-    def weighted_valid_counts(self):
+    def weighted_valid_counts(self) -> Optional[np.ndarray]:
         """Optional float64 ndarray of weighted_valid_counts if the measure exists."""
         if self._measures.weighted_valid_counts is None:
             return None
@@ -509,7 +521,7 @@ class Cube:
         ].astype(np.float64)
 
     @lazyproperty
-    def _all_dimensions(self):
+    def _all_dimensions(self) -> AllDimensions:
         """The AllDimensions object for this cube.
 
         The AllDimensions object provides access to all the dimensions appearing in the
@@ -521,7 +533,7 @@ class Cube:
         return AllDimensions(dimension_dicts=self._cube_dict["result"]["dimensions"])
 
     @lazyproperty
-    def _available_numeric_measures(self):
+    def _available_numeric_measures(self) -> Tuple[CUBE_MEASURE, ...]:
         """tuple of available numeric measures expressed in the cube_response.
 
         Basically the numeric measures are the intersection between all the measures
@@ -530,7 +542,7 @@ class Cube:
         return tuple(self.available_measures.intersection(NUMERIC_CUBE_MEASURES))
 
     @lazyproperty
-    def _ca_as_0th(self):
+    def _ca_as_0th(self) -> bool:
         """True if slicing is to be performed in so-called "CA-as-0th" mode.
 
         In this mode, a categorical-array (CA) cube (2D) is sliced into a sequence of 1D
@@ -544,7 +556,7 @@ class Cube:
         )
 
     @lazyproperty
-    def _cube_dict(self):
+    def _cube_dict(self) -> Dict:
         """dict containing raw cube response, parsed from JSON payload."""
         cube_dict = copy.deepcopy(self._cube_response)
         if self._numeric_measure_subvariables:
@@ -557,7 +569,7 @@ class Cube:
         return cube_dict
 
     @lazyproperty
-    def _cube_response(self):
+    def _cube_response(self) -> Dict:
         """dict representing the parsed cube response arguments."""
         try:
             response = self._cube_response_arg
@@ -574,12 +586,12 @@ class Cube:
             )
 
     @lazyproperty
-    def _is_single_filter_col_cube(self):
+    def _is_single_filter_col_cube(self) -> float:
         """bool determines if it is a single column filter cube."""
         return self._cube_dict["result"].get("is_single_col_cube", False)
 
     @lazyproperty
-    def _measures(self):
+    def _measures(self) -> "_Measures":
         """_Measures object for this cube.
 
         Provides access to count based measures and numeric measures (e.g. mean, sum)
@@ -588,7 +600,7 @@ class Cube:
         return _Measures(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
 
     @lazyproperty
-    def _numeric_measure_references(self):
+    def _numeric_measure_references(self) -> Dict:
         """Dict of numeric measure references, typically for numeric measures."""
         if not self._available_numeric_measures:
             return {}
@@ -600,7 +612,7 @@ class Cube:
         return metadata.get("references", {})
 
     @lazyproperty
-    def _numeric_measure_subvariables(self):
+    def _numeric_measure_subvariables(self) -> List[str]:
         """List of mean subvariables, typically for numeric arrays."""
         if not self._available_numeric_measures:
             return []
@@ -612,7 +624,7 @@ class Cube:
         return metadata.get("type", {}).get("subvariables", [])
 
     @lazyproperty
-    def _numeric_array_dimension(self):
+    def _numeric_array_dimension(self) -> Optional[Dict]:
         """Rows dimension object according to the numeric-measure subvariables."""
         if not self._numeric_measure_subvariables:
             return None
@@ -645,18 +657,18 @@ class Cube:
         return rows_dimension
 
     @lazyproperty
-    def _slice_idxs(self):
+    def _slice_idxs(self) -> range:
         """Iterable of contiguous int indices for slices to be produced.
 
         This value is to help cube-section construction which does not by itself know
         how many slices are in a cube-result.
         """
         if self.ndim < 3 and not self._ca_as_0th:
-            return (0,)
+            return range(1)
         return range(len(self.dimensions[0].valid_elements))
 
     @lazyproperty
-    def _valid_idxs(self):
+    def _valid_idxs(self) -> Tuple[np.ndarray, ...]:
         """Tuple of int64 ndarrays of the valid elements idx for each dimension."""
         valid_idxs = np.ix_(
             *tuple(d.valid_elements.element_idxs for d in self._all_dimensions)
@@ -669,13 +681,15 @@ class Cube:
 class _Measures:
     """Provides access to measures contained in cube response."""
 
-    def __init__(self, cube_dict, all_dimensions, cube_idx_arg=None):
+    def __init__(
+        self, cube_dict: Dict, all_dimensions: AllDimensions, cube_idx_arg: int = None
+    ):
         self._cube_dict = cube_dict
         self._all_dimensions = all_dimensions
         self._cube_idx_arg = cube_idx_arg
 
     @lazyproperty
-    def covariance(self):
+    def covariance(self) -> 'Optional["_CovarianceMeasure"]':
         """Optional _CovarianceMeasure object providing access to covariance values.
 
         Will be None if covariance is not available int the cube response.
@@ -686,7 +700,7 @@ class _Measures:
         return None if covariance.raw_cube_array is None else covariance
 
     @lazyproperty
-    def means(self):
+    def means(self) -> 'Optional["_MeanMeasure"]':
         """Optional _MeanMeasure object providing access to means values.
 
         Will be None if no means are available on the counts.
@@ -695,7 +709,7 @@ class _Measures:
         return None if mean.raw_cube_array is None else mean
 
     @lazyproperty
-    def missing_count(self):
+    def missing_count(self) -> int:
         """numeric representing count of missing rows in cube response."""
         if self.unweighted_valid_counts is not None:
             return self.unweighted_valid_counts.missing_count
@@ -706,7 +720,7 @@ class _Measures:
         return self._cube_dict["result"].get("missing", 0)
 
     @lazyproperty
-    def overlaps(self):
+    def overlaps(self) -> 'Optional["_OverlapMeasure"]':
         """Optional _OverlapMeasure object providing access to overlaps values.
 
         Will be None if no overlaps are available on the cube result.
@@ -717,7 +731,7 @@ class _Measures:
         return None if overlap.raw_cube_array is None else overlap
 
     @lazyproperty
-    def population_fraction(self):
+    def population_fraction(self) -> float:
         """The filtered/unfiltered ratio for cube response.
 
         The filtered counts are calculated for complete-cases. This means that only the
@@ -760,7 +774,7 @@ class _Measures:
             return 1.0
 
     @lazyproperty
-    def stddev(self):
+    def stddev(self) -> 'Optional["_StdDevMeasure"]':
         """_StdDevMeasure object providing access to cube stddev values.
 
         None when the cube response does not contain a stddev measure.
@@ -771,7 +785,7 @@ class _Measures:
         return None if stddev.raw_cube_array is None else stddev
 
     @lazyproperty
-    def sums(self):
+    def sums(self) -> 'Optional["_SumMeasure"]':
         """_SumMeasure object providing access to cube sum values.
 
         None when the cube response does not contain a sum measure.
@@ -780,7 +794,7 @@ class _Measures:
         return None if sums.raw_cube_array is None else sums
 
     @lazyproperty
-    def unweighted_counts(self):
+    def unweighted_counts(self) -> "_UnweightedCountMeasure":
         """_UnweightedCountMeasure object for this cube.
 
         This object provides access to unweighted counts for this cube,
@@ -791,8 +805,8 @@ class _Measures:
         )
 
     @lazyproperty
-    def unweighted_valid_counts(self):
-        """_UnweightedValidCountsMeasure object for this cube.
+    def unweighted_valid_counts(self) -> 'Optional["_UnweightedValidCountsMeasure"]':
+        """Optional _UnweightedValidCountsMeasure object for this cube.
 
         Can be None when cube doesn't have unweighted valid counts.
         """
@@ -802,7 +816,7 @@ class _Measures:
         return valid_counts if valid_counts.raw_cube_array is not None else None
 
     @lazyproperty
-    def valid_overlaps(self):
+    def valid_overlaps(self) -> 'Optional["_ValidOverlapMeasure"]':
         """Optional _ValidOverlapMeasure object providing access to valid overlaps vals.
 
         Will be None if no valid overlaps are available on the cube result.
@@ -813,7 +827,7 @@ class _Measures:
         return None if overlap.raw_cube_array is None else overlap
 
     @lazyproperty
-    def weighted_counts(self):
+    def weighted_counts(self) -> 'Optional["_WeightedCountMeasure"]':
         """Optional _WeightedCountMeasure object for this cube.
 
         Can be None when the cube is unweighted.
@@ -824,8 +838,8 @@ class _Measures:
         return weighted_counts if weighted_counts.raw_cube_array is not None else None
 
     @lazyproperty
-    def weighted_valid_counts(self):
-        """_WeightedValidCountsMeasure object for this cube.
+    def weighted_valid_counts(self) -> 'Optional["_WeightedValidCountsMeasure"]':
+        """Optional _WeightedValidCountsMeasure object for this cube.
 
         Can be None when cube doesn't have weighted valid counts.
         """
@@ -838,13 +852,15 @@ class _Measures:
 class _BaseMeasure:
     """Base class for measure objects."""
 
-    def __init__(self, cube_dict, all_dimensions, cube_idx_arg=None):
+    def __init__(
+        self, cube_dict: Dict, all_dimensions: AllDimensions, cube_idx_arg: int = None
+    ):
         self._cube_dict = cube_dict
         self._all_dimensions = all_dimensions
         self._cube_idx_arg = cube_idx_arg
 
     @lazyproperty
-    def raw_cube_array(self):
+    def raw_cube_array(self) -> Optional[np.ndarray]:
         """Optional read-only ndarray of measure values from cube-response.
 
         The shape of the ndarray mirrors the shape of the (raw) cube
@@ -873,7 +889,7 @@ class _BaseMeasure:
         raise NotImplementedError("must be implemented by each subclass")
 
     @lazyproperty
-    def _shape(self):
+    def _shape(self) -> Tuple[int, ...]:
         """tuple(int) representing the shape of the raw-cube measure array.
 
         If needed, this property can be overridden, to accustom different measure shapes
@@ -886,7 +902,7 @@ class _CovarianceMeasure(_BaseMeasure):
     """Covariance values from a cube-response."""
 
     @lazyproperty
-    def _flat_values(self):
+    def _flat_values(self) -> Optional[np.ndarray]:
         """Optional 1D np.ndarray of np.float64 cov values as found in cube response.
 
         Covariance data may include missing items represented by a dict like
@@ -903,18 +919,18 @@ class _CovarianceMeasure(_BaseMeasure):
         ).flatten()
 
     @lazyproperty
-    def _measure_payload(self):
+    def _measure_payload(self) -> Dict:
         """dict representing the covariance measure part of the cube response."""
         return self._cube_dict["result"].get("measures", {}).get("covariance")
 
     @lazyproperty
-    def _numeric_measure_subvariables(self):
+    def _numeric_measure_subvariables(self) -> List[str]:
         """List of subvariables, typically for numeric arrays."""
         metadata = self._measure_payload.get("metadata", {})
         return metadata.get("type", {}).get("subvariables", [])
 
     @lazyproperty
-    def _shape(self):
+    def _shape(self) -> Tuple[int]:
         """tuple(int) representing the shape of the covariance."""
         return self._all_dimensions.shape + (len(self._numeric_measure_subvariables),)
 
@@ -923,12 +939,12 @@ class _MeanMeasure(_BaseMeasure):
     """Statistical mean values from a cube-response."""
 
     @lazyproperty
-    def missing_count(self):
+    def missing_count(self) -> int:
         """Numeric value representing count of missing rows in response."""
         return self._cube_dict["result"]["measures"]["mean"].get("n_missing", 0)
 
     @lazyproperty
-    def _flat_values(self):
+    def _flat_values(self) -> Optional[np.ndarray]:
         """Optional 1D np.ndarray of np.float64 mean values as found in cube response.
 
         Mean data may include missing items represented by a dict like
@@ -948,7 +964,7 @@ class _OverlapMeasure(_BaseMeasure):
     """Overlap values from a cube-response."""
 
     @lazyproperty
-    def _flat_values(self):
+    def _flat_values(self) -> Optional[np.ndarray]:
         """Optional 1D np.ndarray of np.float64 overlap values as found in cube response.
 
         Overlap data may include missing items represented by a dict like
@@ -965,12 +981,12 @@ class _OverlapMeasure(_BaseMeasure):
         ).flatten()
 
     @lazyproperty
-    def _measure_payload(self):
+    def _measure_payload(self) -> Dict:
         """dict representing the overlaps measure part of the cube response."""
         return self._cube_dict["result"].get("measures", {}).get("overlap")
 
     @lazyproperty
-    def _shape(self):
+    def _shape(self) -> Tuple[int]:
         """tuple(int) representing shape of the overlaps measure.
 
         The overlaps measure is characteristic in that it produces an additional
@@ -986,7 +1002,7 @@ class _StdDevMeasure(_BaseMeasure):
     """Statistical stddev values from a cube-response."""
 
     @lazyproperty
-    def _flat_values(self):
+    def _flat_values(self) -> Optional[np.ndarray]:
         """Optional 1D float64 ndarray of stddev values as found in cube response.
 
         StdDev data may include missing items represented by a dict like
@@ -1007,7 +1023,7 @@ class _SumMeasure(_BaseMeasure):
     """Statistical sum values from a cube-response."""
 
     @lazyproperty
-    def _flat_values(self):
+    def _flat_values(self) -> Optional[np.ndarray]:
         """Optional 1D float64 ndarray of sum values as found in cube response.
 
         Sum data may include missing items represented by a dict like
@@ -1028,7 +1044,7 @@ class _UnweightedCountMeasure(_BaseMeasure):
     """Unweighted counts for cube."""
 
     @lazyproperty
-    def _flat_values(self):
+    def _flat_values(self) -> np.ndarray:
         """1D np.ndarray of np.float64 counts before weighting.
 
         Use np.float64s to avoid int overflow bugs and so we can use nan.
@@ -1040,14 +1056,14 @@ class _UnweightedValidCountsMeasure(_BaseMeasure):
     """Unweighted Valid counts for cube."""
 
     @lazyproperty
-    def missing_count(self):
+    def missing_count(self) -> int:
         """numeric representing count of missing rows reflected in response."""
         return self._cube_dict["result"]["measures"]["valid_count_unweighted"].get(
             "n_missing", 0
         )
 
     @lazyproperty
-    def _flat_values(self):
+    def _flat_values(self) -> Optional[np.ndarray]:
         """Optional 1D np.ndarray of np.float64 unweighted valid counts."""
         valid_counts = (
             self._cube_dict["result"]["measures"]
@@ -1061,7 +1077,7 @@ class _ValidOverlapMeasure(_OverlapMeasure):
     """Valid overlap values from a cube-response."""
 
     @lazyproperty
-    def _measure_payload(self):
+    def _measure_payload(self) -> Dict:
         """dict representing the valid overlaps measure part of the cube response."""
         return self._cube_dict["result"].get("measures", {}).get("valid_overlap")
 
@@ -1070,7 +1086,7 @@ class _WeightedCountMeasure(_BaseMeasure):
     """Weighted counts for cube."""
 
     @lazyproperty
-    def _flat_values(self):
+    def _flat_values(self) -> Optional[np.ndarray]:
         """Optional 1D np.ndarray of np.float64 numeric counts after weighting."""
         unweighted_counts = self._cube_dict["result"]["counts"]
         weighted_counts = (
@@ -1086,7 +1102,7 @@ class _WeightedValidCountsMeasure(_BaseMeasure):
     """Weighted Valid counts for cube."""
 
     @lazyproperty
-    def _flat_values(self):
+    def _flat_values(self) -> Optional[np.ndarray]:
         """Optional 1D np.ndarray of np.float64 weighted valid counts."""
         valid_counts = (
             self._cube_dict["result"]["measures"]
