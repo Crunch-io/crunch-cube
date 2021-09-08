@@ -135,7 +135,7 @@ class _BaseAnchoredCollator(_BaseCollator):
         )
 
     @lazyproperty
-    def _element_positions_by_id(self) -> Dict:
+    def _element_positions_by_id(self) -> Dict[Union[int, str], int]:
         """dict of int base-element position keyed by that element's id.
 
         Allows O(1) lookup of base-element position by element-idx for purposes of
@@ -192,17 +192,17 @@ class _BaseAnchoredCollator(_BaseCollator):
 
         # --- "top" and "bottom" have fixed position mappings ---
         if anchor == "top":
-            return tuple((-1, 0))
+            return (-1, 0)
         if anchor == "bottom":
-            return tuple((sys.maxsize, 0))
+            return (sys.maxsize, 0)
 
         # --- otherwise look up anchor-element position by id, defaulting to bottom if
         # --- target anchor element not found ---
         element_id = int(anchor)
         return (
-            tuple((self._element_positions_by_id[element_id], 1))
+            (self._element_positions_by_id[element_id], 1)
             if element_id in self._element_positions_by_id
-            else tuple((sys.maxsize, 0))
+            else (sys.maxsize, 0)
         )
 
 
@@ -245,22 +245,22 @@ class ExplicitOrderCollator(_BaseAnchoredCollator):
         """
         anchor = self._elements.get_by_id(element_id).anchor
         if anchor is None:
-            return tuple((sys.maxsize, 0))
+            return (sys.maxsize, 0)
 
         # --- "top" and "bottom" have fixed position mappings ---
         if anchor == "top":
-            return tuple((-1, 0))
+            return (-1, 0)
         if anchor == "bottom":
-            return tuple((sys.maxsize, 0))
+            return (sys.maxsize, 0)
 
         # --- otherwise the anchor is a dictionary, with an "alias" (matches the
         # --- element id) and a "position", which can be either "before" or "after"
         anchor_id = anchor.get("alias")
         relative_pos = -1 if anchor.get("position") == "before" else 1
         return (
-            tuple((self._element_positions_by_id[anchor_id], relative_pos))
+            (self._element_positions_by_id[anchor_id], relative_pos)
             if anchor_id in self._element_positions_by_id
-            else tuple((sys.maxsize, 0))
+            else (sys.maxsize, 0)
         )
 
     @lazyproperty
