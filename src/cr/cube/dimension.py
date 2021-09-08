@@ -3,8 +3,8 @@
 """Provides the Dimension class."""
 
 import copy
-
 from collections.abc import Sequence
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -13,6 +13,7 @@ from cr.cube.enums import (
     DIMENSION_TYPE as DT,
     MARGINAL,
     MEASURE,
+    _DimensionType,
 )
 from cr.cube.util import lazyproperty
 
@@ -33,7 +34,7 @@ class _BaseDimensions(Sequence):
         return len(self._dimensions)
 
     @lazyproperty
-    def _dimensions(self):
+    def _dimensions(self) -> Tuple["Dimension", ...]:
         """tuple of dimension objects in this collection.
 
         This composed tuple is the source for the dimension objects in this
@@ -51,7 +52,7 @@ class AllDimensions(_BaseDimensions):
         self._dimension_dicts = dimension_dicts
 
     @lazyproperty
-    def apparent_dimensions(self):
+    def apparent_dimensions(self) -> "_ApparentDimensions":
         """_ApparentDimensions collection of the "visible" dimensions.
 
         The two dimensions for a multiple-response (MR) variable are
@@ -60,7 +61,7 @@ class AllDimensions(_BaseDimensions):
         return _ApparentDimensions(all_dimensions=self._dimensions)
 
     @lazyproperty
-    def dimension_order(self):
+    def dimension_order(self) -> Tuple[int, ...]:
         """Tuple of int representing the dimension order.
 
         The dimension order depends on the presence of numeric array in the dimensions
@@ -84,7 +85,7 @@ class AllDimensions(_BaseDimensions):
         return dim_order
 
     @lazyproperty
-    def shape(self):
+    def shape(self) -> Tuple[int, ...]:
         """Tuple of int element count for each dimension.
 
         This corresponds to the shape of the ndarray representing the raw
@@ -95,7 +96,7 @@ class AllDimensions(_BaseDimensions):
         return tuple(d.shape for d in dimensions)
 
     @lazyproperty
-    def _dimensions(self):
+    def _dimensions(self) -> Tuple["Dimension", ...]:
         """tuple of dimension objects in this collection.
 
         This composed tuple is the internal source for the dimension objects
@@ -111,7 +112,7 @@ class _ApparentDimensions(_BaseDimensions):
         self._all_dimensions = all_dimensions
 
     @lazyproperty
-    def _dimensions(self):
+    def _dimensions(self) -> Tuple["Dimension", ...]:
         """tuple of dimension objects in this collection.
 
         This composed tuple is the source for the dimension objects in this
@@ -132,11 +133,11 @@ class _DimensionFactory:
         self._dimension_dicts = dimension_dicts
 
     @classmethod
-    def iter_dimensions(cls, dimension_dicts):
+    def iter_dimensions(cls, dimension_dicts) -> Iterator["Dimension"]:
         """Generate Dimension object for each of *dimension_dicts*."""
         return cls(dimension_dicts)._iter_dimensions()
 
-    def _iter_dimensions(self):
+    def _iter_dimensions(self) -> Iterator["Dimension"]:
         """Generate Dimension object for each dimension dict."""
         return (
             Dimension(raw_dimension.dimension_dict, raw_dimension.dimension_type)
@@ -144,7 +145,7 @@ class _DimensionFactory:
         )
 
     @lazyproperty
-    def _raw_dimensions(self):
+    def _raw_dimensions(self) -> Tuple["_RawDimension", ...]:
         """Sequence of _RawDimension objects wrapping each dimension dict."""
         return tuple(
             _RawDimension(dimension_dict, self._dimension_dicts)
@@ -165,13 +166,13 @@ class _RawDimension:
         self._dimension_dicts = dimension_dicts
 
     @lazyproperty
-    def dimension_dict(self):
+    def dimension_dict(self) -> Dict:
         """dict defining this dimension in cube response."""
         return self._dimension_dict
 
     @lazyproperty
-    def dimension_type(self):
-        """Return member of DIMENSION_TYPE appropriate to dimension_dict."""
+    def dimension_type(self) -> _DimensionType:
+        """_DimensionType (member of DIMENSION_TYPE) appropriate to dimension_dict."""
         base_type = self._base_type
         if base_type == "categorical":
             return self._resolve_categorical()
@@ -188,12 +189,12 @@ class _RawDimension:
         raise NotImplementedError(f"unrecognized dimension type {base_type}")
 
     @lazyproperty
-    def _alias(self):
+    def _alias(self) -> str:
         """Return str key for variable behind *dimension_dict*."""
         return self._dimension_dict["references"]["alias"]
 
     @lazyproperty
-    def _base_type(self):
+    def _base_type(self) -> str:
         """Return str like 'enum.numeric' representing dimension type.
 
         This string is a 'type.subclass' concatenation of the str keys
@@ -209,32 +210,30 @@ class _RawDimension:
         raise NotImplementedError(f"unexpected dimension type class '{type_class}'")
 
     @lazyproperty
-    def _has_selected_category(self):
+    def _categories(self) -> List[Dict]:
+        return self._dimension_dict["type"].get("categories", [])
+
+    @lazyproperty
+    def _has_selected_category(self) -> bool:
         """True if dimension-dict includes one or more selected categories.
 
         A "selected" category-dict is one having `'selected': True`. This
         property is only meaningful for a categorical dimension dict.
         """
-        return True in {
-            category.get("selected")
-            for category in self._dimension_dict["type"].get("categories", [])
-        }
+        return any(category.get("selected") for category in self._categories)
 
     @lazyproperty
-    def _is_logical_type(self):
+    def _is_logical_type(self) -> bool:
         """True if dimension-dict has the categories equal to those of the logical type.
 
         Logical type has exactly three categories with IDs [-1, 0, 1]. This type is
         used to define the selections dimension of the multiple response type, when it
         follows the subvariables dimension.
         """
-        return [
-            category.get("id")
-            for category in self._dimension_dict["type"].get("categories", [])
-        ] == [1, 0, -1]
+        return [category.get("id") for category in self._categories] == [1, 0, -1]
 
     @lazyproperty
-    def _is_array_cat(self):
+    def _is_array_cat(self) -> bool:
         """True if a categorical dimension_dict belongs to an array pair.
 
         Returns True for a CA_CAT or MR_CAT dimension. Only meaningful when
@@ -244,21 +243,18 @@ class _RawDimension:
         return "subreferences" in self._dimension_dict["references"]
 
     @lazyproperty
-    def _is_cat_date(self):
+    def _is_cat_date(self) -> bool:
         """True if dimension is a categorical date, False otherwise.
 
         A dimension is a categorical date, if it has all the properties of a "normal"
         categorical dimension, but also a `"date"` field in any of its categories.
         """
-        dimension_dict = self._dimension_dict
-        if dimension_dict is None or dimension_dict["type"]["class"] != "categorical":
+        if self._dimension_dict["type"]["class"] != "categorical":
             return False
-        return any(
-            "date" in cat for cat in dimension_dict["type"].get("categories", [])
-        )
+        return any("date" in cat for cat in self._categories)
 
     @lazyproperty
-    def _next_raw_dimension(self):
+    def _next_raw_dimension(self) -> Optional["_RawDimension"]:
         """_RawDimension for next *dimension_dict* in sequence or None for last.
 
         Returns None if this dimension is the last in sequence for this cube.
@@ -269,7 +265,7 @@ class _RawDimension:
             return None
         return _RawDimension(dimension_dicts[this_idx + 1], self._dimension_dicts)
 
-    def _resolve_array_type(self):
+    def _resolve_array_type(self) -> _DimensionType:
         """Return one of the ARRAY_TYPES members of DIMENSION_TYPE.
 
         This method distinguishes between CA and MR dimensions. The return
@@ -288,7 +284,7 @@ class _RawDimension:
         )
         return DT.MR if is_mr_subvar else DT.CA
 
-    def _resolve_categorical(self):
+    def _resolve_categorical(self) -> _DimensionType:
         """Return one of the categorical members of DIMENSION_TYPE.
 
         This method distinguishes between CAT, CA_CAT, MR_CAT, and LOGICAL
@@ -335,12 +331,12 @@ class Dimension:
         self._unshimmed_dimension_transforms_dict = dimension_transforms or {}
 
     @lazyproperty
-    def alias(self):
+    def alias(self) -> Optional[str]:
         """Return the alias for the dimension if it exists, None otherwise."""
         return self._dimension_dict["references"].get("alias")
 
     @lazyproperty
-    def all_elements(self):
+    def all_elements(self) -> "_AllElements":
         """_AllElements object providing cats or subvars of this dimension.
 
         Elements in this sequence appear in cube-result order.
@@ -351,7 +347,7 @@ class Dimension:
             self._dimension_type,
         )
 
-    def apply_transforms(self, dimension_transforms):
+    def apply_transforms(self, dimension_transforms) -> "Dimension":
         """Return a new `Dimension` object with `dimension_transforms` applied.
 
         The new dimension object is the same as this one in all other respects.
@@ -363,7 +359,7 @@ class Dimension:
         )
 
     @lazyproperty
-    def description(self):
+    def description(self) -> str:
         """str description of this dimension."""
         # ---First authority in cascade is analysis-specific dimension transform. None
         # ---is a legitimate value, indicating suppression of any inherited subtitle.
@@ -378,12 +374,12 @@ class Dimension:
         return description if description else ""
 
     @lazyproperty
-    def dimension_type(self):
+    def dimension_type(self) -> _DimensionType:
         """Member of DIMENSION_TYPE appropriate to this cube dimension."""
         return self._dimension_type
 
     @lazyproperty
-    def element_ids(self):
+    def element_ids(self) -> Tuple[int, ...]:
         """tuple of int element-id for each valid element in this dimension.
 
         Element-ids appear in the order defined in the cube-result.
@@ -391,7 +387,7 @@ class Dimension:
         return tuple(e.element_id for e in self.valid_elements)
 
     @lazyproperty
-    def element_labels(self):
+    def element_labels(self) -> Tuple[str, ...]:
         """tuple of string element-labels for each valid element in this dimension.
 
         Element-labels appear in the order defined in the cube-result.
@@ -399,7 +395,7 @@ class Dimension:
         return tuple(e.label for e in self.valid_elements)
 
     @lazyproperty
-    def hidden_idxs(self):
+    def hidden_idxs(self) -> Tuple[int, ...]:
         """tuple of int element-idx for each hidden valid element in this dimension.
 
         An element is hidden when a "hide" transform is applied to it in its transforms
@@ -410,7 +406,7 @@ class Dimension:
         )
 
     @lazyproperty
-    def insertion_ids(self):
+    def insertion_ids(self) -> Tuple[int, ...]:
         """tuple of int insertion-id for each insertion in this dimension.
 
         Insertion-ids appear in the order insertions are defined in the dimension.
@@ -418,7 +414,7 @@ class Dimension:
         return tuple(s.insertion_id for s in self.subtotals)
 
     @lazyproperty
-    def name(self):
+    def name(self) -> str:
         """str name of this dimension, the empty string ("") if not specified."""
         references = self._dimension_dict["references"]
 
@@ -441,7 +437,7 @@ class Dimension:
         return name if name else ""
 
     @lazyproperty
-    def numeric_values(self):
+    def numeric_values(self) -> Tuple[Union[int, float], ...]:
         """tuple of numeric values for valid elements of this dimension.
 
         Each category of a categorical variable can be assigned a *numeric
@@ -458,17 +454,17 @@ class Dimension:
         return tuple(element.numeric_value for element in self.valid_elements)
 
     @lazyproperty
-    def order_spec(self):
+    def order_spec(self) -> "_OrderSpec":
         """_OrderSpec proxy object for dimension.transforms.order dict from payload."""
         return _OrderSpec(self, self._dimension_transforms_dict)
 
     @lazyproperty
-    def prune(self):
+    def prune(self) -> bool:
         """True if empty elements should be automatically hidden on this dimension."""
         return self._dimension_transforms_dict.get("prune") is True
 
     @lazyproperty
-    def selected_categories(self):
+    def selected_categories(self) -> Tuple[Dict, ...]:
         """List of selected categories specified for this dimension."""
         selected_categories = self._dimension_dict["references"].get(
             "selected_categories"
@@ -476,17 +472,17 @@ class Dimension:
         return tuple(selected_categories) if selected_categories else ()
 
     @lazyproperty
-    def shape(self):
+    def shape(self) -> int:
         """int count of *all* elements in this dimension, both valid and missing."""
         return len(self.all_elements)
 
     @lazyproperty
-    def smoothing_dict(self):
+    def smoothing_dict(self) -> Optional[Dict]:
         """Optional dict of smoothing specifications."""
         return self._dimension_transforms_dict.get("smoother") or {}
 
     @lazyproperty
-    def subtotal_labels(self):
+    def subtotal_labels(self) -> Tuple[str, ...]:
         """tuple of string element-labels for each subtotal in this dimension.
 
         Element-labels appear in the order defined in the cube-result.
@@ -494,7 +490,7 @@ class Dimension:
         return tuple(s.label for s in self.subtotals)
 
     @lazyproperty
-    def subtotals(self):
+    def subtotals(self) -> "_Subtotals":
         """_Subtotals sequence object for this dimension.
 
         Each item in the sequence is a _Subtotal object specifying a subtotal, including
@@ -513,7 +509,7 @@ class Dimension:
             insertion_dicts = view.get("transform", {}).get("insertions", [])
         return _Subtotals(insertion_dicts, self.valid_elements)
 
-    def translate_element_id(self, _id):
+    def translate_element_id(self, _id) -> Optional[str]:
         """Optional string that is the translation of various ids to subvariable alias
 
         This is needed for the opposing dimension's sort by opposing element, because
@@ -533,7 +529,7 @@ class Dimension:
         return self._element_id_shim.translate_element_id(_id)
 
     @lazyproperty
-    def valid_elements(self):
+    def valid_elements(self) -> "_ValidElements":
         """_Elements object providing access to non-missing elements.
 
         Any categories or subvariables representing missing data are excluded
@@ -543,7 +539,7 @@ class Dimension:
         return self.all_elements.valid_elements
 
     @lazyproperty
-    def _element_id_shim(self):
+    def _element_id_shim(self) -> "_ElementIdShim":
         """_ElementIdShim for this Dimension object"""
         return _ElementIdShim(
             self._dimension_type,
@@ -552,12 +548,12 @@ class Dimension:
         )
 
     @lazyproperty
-    def _dimension_dict(self):
+    def _dimension_dict(self) -> Dict:
         """Copy of dimension dictionary with shimmed `element_id`s"""
         return self._element_id_shim.shimmed_dimension_dict
 
     @lazyproperty
-    def _dimension_transforms_dict(self):
+    def _dimension_transforms_dict(self) -> Dict:
         """Copy of dimension transforms dictionary with shimmed `element_id`s"""
         return self._element_id_shim.shimmed_dimension_transforms_dict
 
@@ -578,7 +574,7 @@ class _BaseElements(Sequence):
         return len(self._elements)
 
     @lazyproperty
-    def element_ids(self):
+    def element_ids(self) -> Tuple[int, ...]:
         """tuple of element-id for each element in collection.
 
         Element ids appear in the order they occur in the cube response.
@@ -586,7 +582,7 @@ class _BaseElements(Sequence):
         return tuple(element.element_id for element in self._elements)
 
     @lazyproperty
-    def element_idxs(self):
+    def element_idxs(self) -> Tuple[int, ...]:
         """tuple of element-index for each element in collection.
 
         Element index values represent the position of this element in the
@@ -595,7 +591,7 @@ class _BaseElements(Sequence):
         """
         return tuple(element.index for element in self._elements)
 
-    def get_by_id(self, element_id):
+    def get_by_id(self, element_id: int) -> "_Element":
         """Return _Element object identified by *element_id*.
 
         Raises KeyError if not found. Only elements known to this collection
@@ -613,7 +609,7 @@ class _BaseElements(Sequence):
         raise NotImplementedError("must be implemented by each subclass")
 
     @lazyproperty
-    def _elements_by_id(self):
+    def _elements_by_id(self) -> Dict:
         """dict mapping each element by its id."""
         return {element.element_id: element for element in self._elements}
 
@@ -630,12 +626,12 @@ class _AllElements(_BaseElements):
         self._dimension_type = dimension_type
 
     @lazyproperty
-    def valid_elements(self):
+    def valid_elements(self) -> "_ValidElements":
         """_ValidElements object containing only non-missing elements."""
         return _ValidElements(self._elements, self._dimension_transforms_dict)
 
     @lazyproperty
-    def _element_dicts(self):
+    def _element_dicts(self) -> List[Dict]:
         """Sequence of element-dicts for this dimension, taken from cube-result."""
         return (
             self._type_dict["categories"]
@@ -644,7 +640,7 @@ class _AllElements(_BaseElements):
         )
 
     @lazyproperty
-    def _elements(self):
+    def _elements(self) -> Tuple["_Element", ...]:
         """tuple storing actual sequence of element objects."""
         return tuple(
             _Element(
@@ -660,7 +656,7 @@ class _AllElements(_BaseElements):
         )
 
     @lazyproperty
-    def _elements_transforms(self):
+    def _elements_transforms(self) -> Dict:
         """Element transform dict expressed in the dimension transforms expression."""
         return (
             self._shimmed_element_transforms
@@ -668,7 +664,7 @@ class _AllElements(_BaseElements):
             else self._dimension_transforms_dict.get("elements", {})
         )
 
-    def _iter_element_makings(self):
+    def _iter_element_makings(self) -> Iterator[Tuple[int, Dict, Dict]]:
         """Generate tuple of values needed to construct each element object.
 
         An (idx, element_dict, element_transforms_dict) tuple is generated for each
@@ -685,7 +681,7 @@ class _AllElements(_BaseElements):
             yield idx, element_dict, element_transforms_dict
 
     @lazyproperty
-    def _shimmed_element_transforms(self):
+    def _shimmed_element_transforms(self) -> Dict:
         """Element transforms dict for array dimensions.
 
         To provide consistency with a poorly-defined interface for categorical
@@ -735,7 +731,7 @@ class _ValidElements(_BaseElements):
         self._dimension_transforms_dict = dimension_transforms_dict
 
     @lazyproperty
-    def _elements(self):
+    def _elements(self) -> Tuple["_Element", ...]:
         """tuple containing actual sequence of element objects."""
         return tuple(element for element in self._all_elements if not element.missing)
 
@@ -768,7 +764,7 @@ class _ElementIdShim:
         self._dimension_transforms_dict = dimension_transforms_dict
 
     @lazyproperty
-    def shimmed_dimension_dict(self):
+    def shimmed_dimension_dict(self) -> Dict:
         """Copy of dimension dictionary with shimmed `element_id`s
 
         We want to move to a world where elements on a subvariables dimension are
@@ -790,7 +786,7 @@ class _ElementIdShim:
         return shim
 
     @lazyproperty
-    def shimmed_dimension_transforms_dict(self):
+    def shimmed_dimension_transforms_dict(self) -> Dict:
         """Copy of dimension transforms dictionary with shimmed `element_id`s
 
         We want to move to a world where elements on a subvariables dimension are
@@ -837,7 +833,7 @@ class _ElementIdShim:
 
         return shim
 
-    def translate_element_id(self, _id):
+    def translate_element_id(self, _id) -> Optional[str]:
         """Optional string that is the translation of various ids to subvariable alias
 
         0) If dimension is not a subvariables dimension, return the _id.
@@ -873,7 +869,7 @@ class _ElementIdShim:
         return None
 
     @lazyproperty
-    def _raw_element_ids(self):
+    def _raw_element_ids(self) -> Tuple[Union[int, str], ...]:
         """tuple of int or string element ids, as they appear in cube result
 
         These are "raw" because they refer to the element ids before they've been
@@ -883,7 +879,7 @@ class _ElementIdShim:
             element["id"] for element in self._dimension_dict["type"]["elements"]
         )
 
-    def _replaced_element_transforms(self, element_transforms):
+    def _replaced_element_transforms(self, element_transforms) -> Dict:
         """Replace the dictionary keys of element transforms with aliases
 
         The element transforms identify which element they refer to by their key in
@@ -922,7 +918,7 @@ class _ElementIdShim:
             if nkey is not None
         }
 
-    def _replaced_order_element_ids(self, element_ids):
+    def _replaced_order_element_ids(self, element_ids) -> List[Optional[str]]:
         """Replace the list of element ids with a list of aliases
 
         The explicit order transform includes a list of ids that can be specified in
@@ -931,7 +927,7 @@ class _ElementIdShim:
         return [self.translate_element_id(_id) for _id in element_ids]
 
     @lazyproperty
-    def _subvar_aliases(self):
+    def _subvar_aliases(self) -> Tuple[str, ...]:
         """tuple of str alias for each element of a subvariable dimension
 
         Fall back to the `element_id` if the alias doesn't exist (this happens in one
@@ -943,7 +939,7 @@ class _ElementIdShim:
         )
 
     @lazyproperty
-    def _subvar_ids(self):
+    def _subvar_ids(self) -> Tuple[Union[int, str], ...]:
         """tuple of str subvariable id for each element of a subvariable dimension
 
         Only applicable to subvariables dimension (will raise KeyError if not).
@@ -966,12 +962,20 @@ class _Element:
         self._element_transforms = element_transforms
 
     @lazyproperty
-    def element_id(self):
+    def anchor(self) -> Optional[Union[str, dict]]:
+        """Optional str or dict defining the anchor for derived elements"""
+        if not self.derived:
+            return None
+
+        return self._element_dict.get("value", {}).get("references", {}).get("anchor")
+
+    @lazyproperty
+    def element_id(self) -> int:
         """int identifier for this category or subvariable."""
         return self._element_dict["id"]
 
     @lazyproperty
-    def derived(self):
+    def derived(self) -> bool:
         """True if element is derived, False otherwise.
 
         Multiple Response subvariable insertions are considered derived elements.
@@ -982,7 +986,7 @@ class _Element:
         return value.get("derived", False)
 
     @lazyproperty
-    def fill(self):
+    def fill(self) -> str:
         """str RGB color like "#af032d" or None if not specified.
 
         A value of None indicates the default fill should be used for this element.
@@ -994,7 +998,7 @@ class _Element:
         return self._element_transforms.fill
 
     @lazyproperty
-    def index(self):
+    def index(self) -> int:
         """int offset at which this element appears in dimension.
 
         This position is based upon the document position of this element in
@@ -1003,14 +1007,14 @@ class _Element:
         return self._index
 
     @lazyproperty
-    def is_hidden(self):
+    def is_hidden(self) -> bool:
         """True if this element is explicitly hidden in this analysis."""
         # ---first authority is hide transform in element transforms---
         # ---default is not hidden, there is currently no prior-level hide transform---
         return {True: True, False: False, None: False}[self._element_transforms.hide]
 
     @lazyproperty
-    def label(self):
+    def label(self) -> str:
         """str display-name for this element.
 
         This value is the empty string when no value has been specified or display of
@@ -1054,7 +1058,7 @@ class _Element:
         return name if name else ""
 
     @lazyproperty
-    def missing(self):
+    def missing(self) -> bool:
         """True if this element represents missing data.
 
         False if this category or subvariable represents valid (collected)
@@ -1063,7 +1067,7 @@ class _Element:
         return bool(self._element_dict.get("missing"))
 
     @lazyproperty
-    def numeric_value(self):
+    def numeric_value(self) -> Union[int, float]:
         """Numeric value assigned to element by user, np.nan if absent."""
         numeric_value = self._element_dict.get("numeric_value")
         return np.nan if numeric_value is None else numeric_value
@@ -1076,7 +1080,7 @@ class _ElementTransforms:
         self._element_transforms_dict = element_transforms_dict
 
     @lazyproperty
-    def fill(self):
+    def fill(self) -> Optional[str]:
         """str RGB color like "#af032d" or None if not specified.
 
         A value of None indicates no fill transform was specified for this element.
@@ -1091,7 +1095,7 @@ class _ElementTransforms:
         return fill
 
     @lazyproperty
-    def hide(self):
+    def hide(self) -> Optional[bool]:
         """Tri-value, True if this element has been explicitly hidden in this analysis.
 
         False overrides any prior "hide" transform with "show" and None signifies
@@ -1106,8 +1110,8 @@ class _ElementTransforms:
         return None
 
     @lazyproperty
-    def name(self):
-        """str display-name for this element or None if not specified."""
+    def name(self) -> Optional[str]:
+        """Optional str display-name for this element (None if not specified)."""
         # ---if "name": element is omitted, no transform is specified---
         if "name" not in self._element_transforms_dict:
             return None
@@ -1125,7 +1129,7 @@ class _OrderSpec:
         self._dimension_transforms_dict = dimension_transforms_dict
 
     @lazyproperty
-    def bottom_fixed_ids(self):
+    def bottom_fixed_ids(self) -> Tuple[int, ...]:
         """Tuple of each element-id appearing in the fixed.bottom field of order dict.
 
         The element-ids appear in the order specified in the "bottom" fixed.bottom
@@ -1134,7 +1138,7 @@ class _OrderSpec:
         return tuple(self._order_dict.get("fixed", {}).get("bottom", []))
 
     @lazyproperty
-    def collation_method(self):
+    def collation_method(self) -> CM:
         """Member of COLLATION_METHOD specifying ordering of dimension elements."""
         method_keyword = self._order_dict.get("type")
         if method_keyword is None or not CM.has_value(method_keyword):
@@ -1142,12 +1146,12 @@ class _OrderSpec:
         return CM(method_keyword)
 
     @lazyproperty
-    def descending(self):
+    def descending(self) -> bool:
         """True if sort direction is descending, False otherwise."""
         return self._order_dict.get("direction", "descending") != "ascending"
 
     @lazyproperty
-    def element_id(self):
+    def element_id(self) -> int:
         """int element id appearing in an order transform.
 
         Raises KeyError if the transform dict does not contain an "element_id" field.
@@ -1157,7 +1161,7 @@ class _OrderSpec:
         return self._order_dict["element_id"]
 
     @lazyproperty
-    def element_ids(self):
+    def element_ids(self) -> Tuple[int, ...]:
         """tuple of int each element id appearing in an explicit order transform.
 
         This value is `()` if no "element_ids": field is present.
@@ -1165,7 +1169,7 @@ class _OrderSpec:
         return tuple(self._order_dict.get("element_ids") or [])
 
     @lazyproperty
-    def insertion_id(self):
+    def insertion_id(self) -> int:
         """int insertion-id in the "insertion_id" field of the transform dict.
 
         Raises KeyError if this transform dict does not contain an "insertion_id" field.
@@ -1173,7 +1177,7 @@ class _OrderSpec:
         return self._order_dict["insertion_id"]
 
     @lazyproperty
-    def marginal(self):
+    def marginal(self) -> MARGINAL:
         """Member of enums.MARGINAL corresponding to "marginal": field in order transform.
 
         Raises KeyError if the order dict has no "marginal": field and ValueError if the
@@ -1183,7 +1187,7 @@ class _OrderSpec:
         return MARGINAL(self.marginal_keyname)
 
     @lazyproperty
-    def marginal_keyname(self):
+    def marginal_keyname(self) -> str:
         """str value of "marginal": field in order transform.
 
         Raises KeyError if the order dict has no "marginal": field. Note that not all
@@ -1192,7 +1196,7 @@ class _OrderSpec:
         return self._order_dict["marginal"]
 
     @lazyproperty
-    def measure(self):
+    def measure(self) -> MEASURE:
         """Member of enums.MEASURE corresponding to "measure": field in order transform.
 
         Raises KeyError if the order dict has no "measure": field and ValueError if the
@@ -1202,7 +1206,7 @@ class _OrderSpec:
         return MEASURE(self.measure_keyname)
 
     @lazyproperty
-    def measure_keyname(self):
+    def measure_keyname(self) -> str:
         """str value of "measure": field in order transform.
 
         Raises KeyError if the order dict has no "measure": field. Note that not all
@@ -1214,7 +1218,7 @@ class _OrderSpec:
         return self._order_dict["measure"]
 
     @lazyproperty
-    def top_fixed_ids(self):
+    def top_fixed_ids(self) -> Tuple[int, ...]:
         """Tuple of each element-id appearing in the fixed.top field of order dict.
 
         The element-ids appear in the order specified in the "top" fixed.top
@@ -1223,7 +1227,7 @@ class _OrderSpec:
         return tuple(self._order_dict.get("fixed", {}).get("top", []))
 
     @lazyproperty
-    def _order_dict(self):
+    def _order_dict(self) -> Dict:
         """dict dimension.transforms.order field parsed from JSON payload.
 
         Value is `{}` if no "order": field is present.
@@ -1323,7 +1327,7 @@ class _Subtotal:
         self._fallback_insertion_id = fallback_insertion_id
 
     @lazyproperty
-    def anchor(self):
+    def anchor(self) -> Union[int, str]:
         """int or str indicating element under which to insert this subtotal.
 
         An int anchor is the id of the dimension element (category or
@@ -1350,7 +1354,7 @@ class _Subtotal:
             return anchor.lower()
 
     @lazyproperty
-    def addend_ids(self):
+    def addend_ids(self) -> Tuple[int, ...]:
         """tuple of int ids of elements contributing to this subtotal.
 
         Any element id not present in the dimension or present but
@@ -1364,7 +1368,7 @@ class _Subtotal:
         return tuple(arg for arg in positive if arg in self._valid_elements.element_ids)
 
     @lazyproperty
-    def addend_idxs(self):
+    def addend_idxs(self) -> np.ndarray:
         """ndarray of int base-element offsets contributing to this subtotal.
 
         Suitable for directly indexing a numpy array object (such as base values or
@@ -1377,22 +1381,22 @@ class _Subtotal:
                 for idx, vector in enumerate(self._valid_elements)
                 if vector.element_id in addend_ids
             ),
-            dtype=int,  # force int so it can be used as index even if empty
+            dtype=np.int64,  # force int so it can be used as index even if empty
         )
 
     @lazyproperty
-    def insertion_id(self):
+    def insertion_id(self) -> int:
         """int unique identifier of this subtotal within this dimension's insertions."""
         return self._subtotal_dict.get("id", self._fallback_insertion_id)
 
     @lazyproperty
-    def label(self):
+    def label(self) -> str:
         """str display name for this subtotal, suitable for use as label."""
         name = self._subtotal_dict.get("name")
         return name if name else ""
 
     @lazyproperty
-    def subtrahend_ids(self):
+    def subtrahend_ids(self) -> Tuple[int, ...]:
         """tuple of int ids of elements of negative part of the subtotal.
 
         Any element id not present in the dimension or present but
@@ -1405,7 +1409,7 @@ class _Subtotal:
         )
 
     @lazyproperty
-    def subtrahend_idxs(self):
+    def subtrahend_idxs(self) -> np.ndarray:
         """ndarray of int base-element offsets contributing to the negative part of subtotal.
 
         Suitable for directly indexing a numpy array object (such as base values or
@@ -1417,5 +1421,5 @@ class _Subtotal:
                 for idx, vector in enumerate(self._valid_elements)
                 if vector.element_id in self.subtrahend_ids
             ),
-            dtype=int,  # force int so it can be used as index even if empty
+            dtype=np.int64,  # force int so it can be used as index even if empty
         )

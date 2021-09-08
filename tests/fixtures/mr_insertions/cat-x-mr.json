@@ -110,9 +110,9 @@
                     "description": "My multiple response set",
                     "subreferences": [
                         {
-                            "alias": "A&B",
+                            "alias": "A_B",
                             "name": "A&B",
-                            "anchor": "top"
+                            "anchor": {"position": "before", "alias": "bool1"}
                         },
                         {
                             "alias": "bool1",
@@ -146,7 +146,7 @@
                                             "bool2"
                                         ]
                                     },
-                                    "anchor": "top",
+                                    "anchor": {"position": "before", "alias": "bool1"},
                                     "name": "A&B"
                                 }
                             ]
@@ -168,7 +168,7 @@
                                 "references": {
                                     "alias": "A_B",
                                     "name": "A&B",
-                                    "anchor": "top"
+                                    "anchor": {"position": "before", "alias": "bool1"}
                                 },
                                 "id": "A&B"
                             },
@@ -224,9 +224,9 @@
                     "description": "My multiple response set",
                     "subreferences": [
                         {
-                            "alias": "A&B",
+                            "alias": "A_B",
                             "name": "A&B",
-                            "anchor": "top"
+                            "anchor": {"position": "before", "alias": "bool1"}
                         },
                         {
                             "alias": "bool1",
@@ -253,7 +253,7 @@
                             "insertions": [
                                 {
                                     "function": "any_selected",
-                                    "anchor": "top",
+                                    "anchor": {"position": "before", "alias": "bool1"},
                                     "name": "A&B",
                                     "kwargs": {
                                         "variable": "mymrset",

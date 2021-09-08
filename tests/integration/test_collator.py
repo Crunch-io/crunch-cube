@@ -9,7 +9,7 @@ from cr.cube.collator import (
     PayloadOrderCollator,
     SortByValueCollator,
 )
-from cr.cube.dimension import Dimension, _OrderSpec, _Subtotal
+from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..unitutil import instance_mock
@@ -35,10 +35,14 @@ class DescribeExplicitOrderCollator:
     ):
         subtotals_ = [instance_mock(request, _Subtotal, anchor=a) for a in anchors]
         order_spec_ = instance_mock(request, _OrderSpec, element_ids=order)
+        elements_ = [
+            instance_mock(request, _Element, element_id=id_, derived=False)
+            for id_ in element_ids
+        ]
         dimension_ = instance_mock(
             request,
             Dimension,
-            element_ids=element_ids,
+            valid_elements=elements_,
             subtotals=subtotals_,
             order_spec=order_spec_,
         )

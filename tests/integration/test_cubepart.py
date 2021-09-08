@@ -494,7 +494,7 @@ class Describe_Slice:
         transforms = {
             "rows_dimension": {
                 "elements": {"2": {"hide": True}},
-                "order": {"type": "explicit", "element_ids": [2, 3]},
+                "order": {"type": "explicit", "element_ids": ["bool2", "bool3"]},
             },
             "columns_dimension": {
                 "insertions": [
@@ -510,9 +510,8 @@ class Describe_Slice:
             },
         }
         slice_ = Cube(MRI.MR_X_CAT, transforms=transforms).partitions[0]
-        # ---Derived subvar comes after subvars with ids 2 and 3 (but 2 is hidden),
-        # ---therefore the index of the derived subvar is 1
-        assert slice_.derived_row_idxs == (1,)
+        # ---Derived subvar is anchored to the top, so it stays there
+        assert slice_.derived_row_idxs == (0,)
         assert slice_.derived_column_idxs == ()
         assert slice_.inserted_row_idxs == ()
         assert slice_.inserted_column_idxs == (3,)
@@ -533,14 +532,13 @@ class Describe_Slice:
             },
             "columns_dimension": {
                 "elements": {"2": {"hide": True}},
-                "order": {"type": "explicit", "element_ids": [2, 3]},
+                "order": {"type": "explicit", "element_ids": ["bool2", "bool3"]},
             },
         }
         slice_ = Cube(MRI.CAT_X_MR, transforms=transforms).partitions[0]
         assert slice_.derived_row_idxs == ()
-        # ---Derived subvar comes after subvars with ids 2 and 3 (but 2 is hidden),
-        # ---therefore the index of the derived subvar is 1
-        assert slice_.derived_column_idxs == (1,)
+        # ---Derived anchored before fisrt column, which is now at end
+        assert slice_.derived_column_idxs == (2,)
         assert slice_.inserted_row_idxs == (3,)
         assert slice_.inserted_column_idxs == ()
 
@@ -551,16 +549,14 @@ class Describe_Slice:
             },
             "columns_dimension": {
                 "elements": {"2": {"hide": True}},
-                "order": {"type": "explicit", "element_ids": [2, 3]},
+                "order": {"type": "explicit", "element_ids": ["bool2", "bool3"]},
             },
         }
         slice_ = Cube(MRI.MR_X_MR, transforms=transforms).partitions[0]
-        # ---Derived subvar comes after subvars with ids 2 and 3,
-        # ---therefore the index of the derived subvar is 2
-        assert slice_.derived_row_idxs == (2,)
-        # ---Derived subvar comes after subvars with ids 2 and 3 (but 2 is hidden),
-        # ---therefore the index of the derived subvar is 1
-        assert slice_.derived_column_idxs == (1,)
+        # ---Derived subvar is anchored to the top
+        assert slice_.derived_row_idxs == (0,)
+        # ---Also anchored to the top
+        assert slice_.derived_column_idxs == (0,)
         # ---There can be no insertions on MR dimensions
         assert slice_.inserted_row_idxs == ()
         assert slice_.inserted_column_idxs == ()
@@ -959,6 +955,59 @@ class Describe_Slice:
         assert slice_.rows_scale_mean.tolist() == pytest.approx(
             [2.45356177, 2.11838791, 2.0, 1.97, 1.74213625, np.nan], nan_ok=True
         )
+
+    @pytest.mark.parametrize(
+        "id",
+        (
+            1,  # --- integer element_id (to be deprecated)
+            "A_B",  # --- alias
+        ),
+    )
+    def it_can_sort_by_value_for_mr_derived_insertions(self, id):
+        # --- Ensure that payload order is how we expect it before sorting
+        payload_order_slice_ = Cube(MRI.CAT_X_MR).partitions[0]
+        assert payload_order_slice_.counts.tolist() == [
+            [32.0, 14.4, 25.6, 36.0],
+            [37.6, 20.8, 28.0, 43.6],
+            [14.0, 9.6, 10.0, 14.4],
+            [19.2, 10.8, 15.2, 16.8],
+            [23.2, 13.6, 17.6, 22.4],
+        ]
+        # --- Now sort by MR insertion
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "direction": "ascending",
+                    "type": "opposing_insertion",
+                    "insertion_id": id,
+                    "measure": "count_weighted",
+                }
+            }
+        }
+        slice_ = Cube(MRI.CAT_X_MR, transforms=transforms).partitions[0]
+        # --- MR insertion is in first column, so we're sorting by it (ascending order)
+        assert slice_.derived_column_idxs == (0,)
+        assert slice_.counts[:, 0].tolist() == [14.0, 19.2, 23.2, 32.0, 37.6]
+
+    def it_recalculates_anchor_for_mr_insertion_with_explicit_order(self):
+        transforms = {
+            "columns_dimension": {
+                "order": {
+                    "element_ids": ["bool2", "bool1", "bool3"],
+                    "type": "explicit",
+                },
+            }
+        }
+        slice_ = Cube(MRI.CAT_X_MR, transforms=transforms).partitions[0]
+
+        # --- derived column is anchored before response 1, so moves to second position
+        assert slice_.column_labels.tolist() == [
+            "Response #2",
+            "A&B",
+            "Response #1",
+            "Response #3",
+        ]
+        assert slice_.derived_column_idxs == (1,)
 
     @pytest.mark.parametrize(
         "measure, expectation",
@@ -2055,39 +2104,6 @@ class Describe_Strand:
         actual = strand_.row_labels.tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
-    @pytest.mark.parametrize(
-        "id",
-        (
-            1,  # --- integer element_id (to be deprecated)
-            "A_B",  # --- alias
-        ),
-    )
-    def it_can_sort_by_value_for_mr_derived_insertions(self, id):
-        # --- Ensure that payload order is how we expect it before sorting
-        payload_order_slice_ = Cube(MRI.CAT_X_MR).partitions[0]
-        assert payload_order_slice_.counts.tolist() == [
-            [32.0, 14.4, 25.6, 36.0],
-            [37.6, 20.8, 28.0, 43.6],
-            [14.0, 9.6, 10.0, 14.4],
-            [19.2, 10.8, 15.2, 16.8],
-            [23.2, 13.6, 17.6, 22.4],
-        ]
-        # --- Now sort by MR insertion
-        transforms = {
-            "rows_dimension": {
-                "order": {
-                    "direction": "ascending",
-                    "type": "opposing_insertion",
-                    "insertion_id": id,
-                    "measure": "count_weighted",
-                }
-            }
-        }
-        slice_ = Cube(MRI.CAT_X_MR, transforms=transforms).partitions[0]
-        # --- MR insertion is in first column, so we're sorting by it (ascending order)
-        assert slice_.derived_column_idxs == (0,)
-        assert slice_.counts[:, 0].tolist() == [14.0, 19.2, 23.2, 32.0, 37.6]
-
     def it_knows_when_it_is_empty(self):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]
         assert strand.is_empty is True
@@ -2182,9 +2198,9 @@ class Describe_Strand:
             },
         }
         slice_ = Cube(MRI.UNIVARIATE_MR, transforms=transforms).partitions[0]
-        # ---Derived subvar comes after subvars with ids 2 and 3,
+        # ---Derived subvar has "top" anchor, therefore it remains in the top
         # ---therefore the index of the derived subvar is 2
-        assert slice_.derived_row_idxs == (1,)
+        assert slice_.derived_row_idxs == (0,)
         # ---There can be no insertions on MR dimensions
         assert slice_.inserted_row_idxs == ()
 

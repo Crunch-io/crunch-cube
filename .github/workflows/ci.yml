@@ -32,6 +32,8 @@ jobs:
       run: tox -e formatter
     - name: Linter
       run: tox -e lint
+    - name: Static Type Checker
+      run: tox -e typechecker
     - name: Test with tox
       run: tox
     - name: Submit Coverage

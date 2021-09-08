@@ -442,10 +442,12 @@ class Describe_RawDimension:
         is_logical_type,
         expected_value,
         _is_array_cat_prop_,
+        _is_cat_date_prop_,
         _has_selected_category_prop_,
         _is_logical_type_prop_,
     ):
         _is_array_cat_prop_.return_value = is_array_cat
+        _is_cat_date_prop_.return_value = False
         _has_selected_category_prop_.return_value = has_selected_cat
         _is_logical_type_prop_.return_value = is_logical_type
         raw_dimension = _RawDimension(None, None)
@@ -471,6 +473,10 @@ class Describe_RawDimension:
     @pytest.fixture
     def _is_array_cat_prop_(self, request):
         return property_mock(request, _RawDimension, "_is_array_cat")
+
+    @pytest.fixture
+    def _is_cat_date_prop_(self, request):
+        return property_mock(request, _RawDimension, "_is_cat_date")
 
     @pytest.fixture
     def _is_logical_type_prop_(self, request):
@@ -1194,6 +1200,22 @@ class Describe_ElementIdShim:
 
 class Describe_Element:
     """Unit-test suite for `cr.cube.dimension._Element` object."""
+
+    def it_knows_its_anchor(self):
+        element_dict = {"value": {"references": {"anchor": "top"}, "derived": True}}
+        element = _Element(element_dict, None, None)
+
+        anchor = element.anchor
+
+        assert anchor == "top"
+
+    def but_anchor_is_none_if_not_derived(self):
+        element_dict = {"value": {"derived": False}}
+        element = _Element(element_dict, None, None)
+
+        anchor = element.anchor
+
+        assert anchor is None
 
     def it_knows_its_element_id(self):
         element_dict = {"id": 42}
