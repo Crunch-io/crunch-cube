@@ -110,6 +110,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.3
+- MR insertions (derived elements) have anchor recalculated in explicit order
+
 ### 3.0.2
 - Smoothing measures consolidation
 
