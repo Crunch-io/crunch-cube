@@ -980,7 +980,7 @@ class _Element:
     @lazyproperty
     def alias(self) -> str:
         """str display-alias for this element."""
-        return self._retreive_value("alias")
+        return self._str_representation_for("alias")
 
     @lazyproperty
     def anchor(self) -> Optional[Union[str, dict]]:
@@ -1041,7 +1041,7 @@ class _Element:
         This value is the empty string when no value has been specified or display of
         the name has been suppressed.
         """
-        return self._retreive_value("name")
+        return self._str_representation_for("name")
 
     @lazyproperty
     def missing(self) -> bool:
@@ -1058,8 +1058,8 @@ class _Element:
         numeric_value = self._element_dict.get("numeric_value")
         return np.nan if numeric_value is None else numeric_value
 
-    def _retreive_value(self, key: str) -> str:
-        """return the value for this element given a key (e.g. `alias` or `name`).
+    def _str_representation_for(self, key: str) -> str:
+        """return str representation for this element of a given key (`alias` or `name`)
 
         This method handles elements for variables of all types, including
         categorical, array (subvariable), numeric, datetime and text.
