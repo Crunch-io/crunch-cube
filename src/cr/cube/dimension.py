@@ -379,6 +379,14 @@ class Dimension:
         return self._dimension_type
 
     @lazyproperty
+    def element_aliases(self) -> Tuple[str, ...]:
+        """tuple of string element-aliases for each valid element in this dimension.
+
+        Element-aliases appear in the order defined in the cube-result.
+        """
+        return tuple(e.alias for e in self.valid_elements)
+
+    @lazyproperty
     def element_ids(self) -> Tuple[int, ...]:
         """tuple of int element-id for each valid element in this dimension.
 
@@ -480,6 +488,14 @@ class Dimension:
     def smoothing_dict(self) -> Optional[Dict]:
         """Optional dict of smoothing specifications."""
         return self._dimension_transforms_dict.get("smoother") or {}
+
+    @lazyproperty
+    def subtotal_aliases(self) -> Tuple[str, ...]:
+        """tuple of string element-aliases for each subtotal in this dimension.
+
+        Element-aliases appear in the order defined in the cube-result.
+        """
+        return tuple(s.alias for s in self.subtotals)
 
     @lazyproperty
     def subtotal_labels(self) -> Tuple[str, ...]:
@@ -962,6 +978,11 @@ class _Element:
         self._element_transforms = element_transforms
 
     @lazyproperty
+    def alias(self) -> str:
+        """str display-alias for this element."""
+        return self._retreive_value("alias")
+
+    @lazyproperty
     def anchor(self) -> Optional[Union[str, dict]]:
         """Optional str or dict defining the anchor for derived elements"""
         if not self.derived:
@@ -1019,43 +1040,8 @@ class _Element:
 
         This value is the empty string when no value has been specified or display of
         the name has been suppressed.
-
-        This property handles elements for variables of all types, including
-        categorical, array (subvariable), numeric, datetime and text.
         """
-        # ---first authority is name transform in element transforms---
-        name = self._element_transforms.name
-        if name is not None:
-            return name if name else ""
-
-        # ---otherwise base-name from element-dict is used---
-        element_dict = self._element_dict
-
-        # ---category elements have a name item---
-        if "name" in element_dict:
-            name = element_dict["name"]
-            return name if name else ""
-
-        # ---other types are more complicated---
-        value = element_dict.get("value")
-        type_name = type(value).__name__
-
-        if type_name == "NoneType":
-            return ""
-
-        if type_name == "list":
-            # ---like '10-15' or 'A-F'---
-            return "-".join([str(item) for item in value])
-
-        if type_name in ("float", "int"):
-            return str(value)
-
-        if type_name in ("str", "unicode"):
-            return value
-
-        # ---For CA and MR subvar dimensions---
-        name = value.get("references", {}).get("name")
-        return name if name else ""
+        return self._retreive_value("name")
 
     @lazyproperty
     def missing(self) -> bool:
@@ -1071,6 +1057,45 @@ class _Element:
         """Numeric value assigned to element by user, np.nan if absent."""
         numeric_value = self._element_dict.get("numeric_value")
         return np.nan if numeric_value is None else numeric_value
+
+    def _retreive_value(self, key: str) -> str:
+        """return the value for this element given a key (e.g. `alias` or `name`).
+
+        This method handles elements for variables of all types, including
+        categorical, array (subvariable), numeric, datetime and text.
+        """
+        # ---first authority is transform in element transforms---
+        value = getattr(self._element_transforms, key) if key == "name" else None
+        if value is not None:
+            return value if value else ""
+
+        # ---otherwise base-name/alias from element-dict is used according to the key---
+        element_dict = self._element_dict
+
+        # ---category elements have a name/alias item according to the key---
+        if key in element_dict:
+            value = element_dict[key]
+            return value if value else ""
+
+        # ---other types are more complicated---
+        value = element_dict.get("value")
+        type_value = type(value).__name__
+
+        if type_value == "NoneType":
+            return ""
+
+        if type_value == "list":
+            # ---like '10-15' or 'A-F'---
+            return "-".join([str(item) for item in value])
+
+        if type_value in ("float", "int"):
+            return str(value)
+
+        if type_value in ("str", "unicode"):
+            return value
+
+        # ---For CA and MR subvar dimensions---
+        return value.get("references", {}).get(key) or ""
 
 
 class _ElementTransforms:
@@ -1325,6 +1350,12 @@ class _Subtotal:
         self._subtotal_dict = subtotal_dict
         self._valid_elements = valid_elements
         self._fallback_insertion_id = fallback_insertion_id
+
+    @lazyproperty
+    def alias(self) -> str:
+        """str display alias for this subtotal."""
+        alias = self._subtotal_dict.get("alias")
+        return alias if alias else ""
 
     @lazyproperty
     def anchor(self) -> Union[int, str]:

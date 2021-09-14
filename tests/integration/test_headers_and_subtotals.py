@@ -183,6 +183,12 @@ class TestHeadersAndSubtotals(object):
             "Not sure",
         ]
 
+    def test_aliases_on_2d_cube_with_hs_on_both_dim(self):
+        slice_ = Cube(CR.ECON_BLAME_X_IDEOLOGY_ROW_AND_COL_HS).partitions[0]
+
+        assert slice_.column_aliases.tolist() == ["", "", "", "", "", "", ""]
+        assert slice_.row_aliases.tolist() == ["", "", "", "", "", ""]
+
     def test_labels_on_2d_cube_with_hs_on_both_dim_do_not_fetch(self):
         transforms = {
             "columns_dimension": {"insertions": {}},

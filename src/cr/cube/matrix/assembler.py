@@ -56,6 +56,26 @@ class Assembler:
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def column_aliases(self):
+        """1D str ndarray of column alias for each matrix row.
+
+        These are suitable for use as column headings; alias for subtotal columns appear
+        in the sequence and alias are ordered to correspond with their respective data
+        column.
+        """
+        return self._dimension_aliases(self._columns_dimension, self._column_order)
+
+    @lazyproperty
+    def column_codes(self):
+        """1D int ndarray of column codes for each matrix row.
+
+        These are suitable for use as column headings; codes for subtotal columns appear
+        in the sequence and codes are ordered to correspond with their respective data
+        column.
+        """
+        return self._dimension_codes(self._columns_dimension, self._column_order)
+
+    @lazyproperty
     def column_comparable_counts(self):
         """2D np.float64 ndarray of counts comparable in the column dimension.
 
@@ -380,6 +400,26 @@ class Assembler:
         np.nan.
         """
         return self._assemble_matrix(self._measures.row_comparable_counts.blocks)
+
+    @lazyproperty
+    def row_aliases(self):
+        """1D str ndarray of row alias for each matrix row.
+
+        These are suitable for use as row headings; alias for subtotal rows appear in
+        the sequence and alias are ordered to correspond with their respective data
+        row.
+        """
+        return self._dimension_aliases(self._rows_dimension, self._row_order)
+
+    @lazyproperty
+    def row_codes(self):
+        """1D int ndarray of row codes for each matrix row.
+
+        These are suitable for use as row headings; codes for subtotal rows appear in
+        the sequence and codes are ordered to correspond with their respective data
+        row.
+        """
+        return self._dimension_codes(self._rows_dimension, self._row_order)
 
     @lazyproperty
     def row_labels(self):
@@ -780,6 +820,24 @@ class Assembler:
             )
             if derived
         )
+
+    def _dimension_aliases(self, dimension, order):
+        """1D str ndarray of alias for each vector of `dimension`.
+
+        These are suitable for use as row/column headings; alias for subtotals appear
+        in the sequence specified by `order`, such that aliases are ordered to
+        correspond with their respective data vector.
+        """
+        return np.array(dimension.element_aliases + dimension.subtotal_aliases)[order]
+
+    def _dimension_codes(self, dimension, order):
+        """1D str ndarray of codes for each vector of `dimension`.
+
+        These are suitable for use as row/column headings; codes for subtotals appear
+        in the sequence specified by `order`, such that codes are ordered to
+        correspond with their respective data vector.
+        """
+        return np.array(dimension.element_ids + dimension.insertion_ids)[order]
 
     def _dimension_labels(self, dimension, order):
         """1D str ndarray of name for each vector of `dimension`.
