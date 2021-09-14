@@ -22,6 +22,8 @@ class Describe_Slice:
     def it_provides_values_for_cat_x_cat(self):
         slice_ = Cube(CR.CAT_X_CAT, population=9001).partitions[0]
 
+        assert slice_.column_aliases.tolist() == ["", ""]
+        assert slice_.column_codes.tolist() == [1, 3]
         assert slice_.column_labels.tolist() == ["C", "E"]
         assert slice_.column_percentages.tolist() == [[50, 40], [50, 60]]
         assert pytest.approx(slice_.column_proportions) == [[0.5, 0.4], [0.5, 0.6]]
@@ -81,6 +83,8 @@ class Describe_Slice:
             [[0.7143930, 0.71439304], [0.71439304, 0.7143930]],
             [[0.3659625, -0.3659625], [-0.3659625, 0.3659625]],
         ]
+        assert slice_.row_aliases.tolist() == ["", ""]
+        assert slice_.row_codes.tolist() == [1, 2]
         assert slice_.row_labels.tolist() == ["B", "C"]
         assert pytest.approx(slice_.row_proportions) == [
             [0.7142857, 0.2857143],
@@ -98,6 +102,7 @@ class Describe_Slice:
         )
         assert slice_.rows_dimension_description == "Pet Owners"
         assert slice_.rows_dimension_fills == (None, None)
+        assert slice_.rows_dimension_alias == "v4"
         assert slice_.rows_dimension_name == "v4"
         assert slice_.rows_dimension_type == DT.CAT
         assert slice_.rows_margin.tolist() == [7, 8]
@@ -120,6 +125,8 @@ class Describe_Slice:
             str(e.value)
             == "`.stddev` is undefined for a cube-result without a stddev measure"
         )
+        assert slice_.tab_label == ""
+        assert slice_.tab_alias == ""
         assert slice_.table_margin == 15
         assert slice_.table_name is None
         assert pytest.approx(slice_.table_percentages) == [
@@ -1827,9 +1834,12 @@ class Describe_Strand:
         assert strand.population_counts == pytest.approx([666.6667, 333.3333])
         assert strand.population_counts_moe == pytest.approx([238.5592, 238.5592])
         assert strand.row_count == 2
+        assert strand.row_aliases.tolist() == ["", ""]
+        assert strand.row_codes.tolist() == [1, 3]
         assert strand.row_labels.tolist() == ["C", "E"]
         assert strand.rows_base.tolist() == [10, 5]
         assert strand.rows_dimension_fills == (None, None)
+        assert strand.rows_dimension_alias == "v7"
         assert strand.rows_dimension_name == "v7"
         assert strand.rows_dimension_type == DT.CAT
         assert strand.rows_margin.tolist() == [10, 5]

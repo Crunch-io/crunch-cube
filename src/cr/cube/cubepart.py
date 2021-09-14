@@ -19,7 +19,7 @@ import math
 import numpy as np
 from tabulate import tabulate
 
-from cr.cube.enums import CUBE_MEASURE as CM
+from cr.cube.enums import CUBE_MEASURE as CM, DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
@@ -267,6 +267,16 @@ class _Slice(CubePartition):
             return super(_Slice, self).__repr__()  # noqa
 
     # ---interface ---------------------------------------------------
+
+    @lazyproperty
+    def column_aliases(self):
+        """1D str ndarray of alias for each column, for use as column headings."""
+        return self._assembler.column_aliases
+
+    @lazyproperty
+    def column_codes(self):
+        """1D int ndarray of code for each column, for use as column headings."""
+        return self._assembler.column_codes
 
     @lazyproperty
     def column_index(self):
@@ -789,6 +799,16 @@ class _Slice(CubePartition):
         return np.stack([self.pvals, self.zscores])
 
     @lazyproperty
+    def row_aliases(self):
+        """1D str ndarray of alias for each row, for use as row headings."""
+        return self._assembler.row_aliases
+
+    @lazyproperty
+    def row_codes(self):
+        """1D int ndarray of code for each row, for use as row headings."""
+        return self._assembler.row_codes
+
+    @lazyproperty
     def row_labels(self):
         """1D str ndarray of name for each row, suitable for use as row headings."""
         return self._assembler.row_labels
@@ -866,6 +886,11 @@ class _Slice(CubePartition):
         In all other cases, the array is 1D, containing one value for each column.
         """
         return self._assembler.rows_base
+
+    @lazyproperty
+    def rows_dimension_alias(self):
+        """str alias assigned to rows-dimension."""
+        return self._rows_dimension.alias
 
     @lazyproperty
     def rows_dimension_description(self):
@@ -1124,6 +1149,26 @@ class _Slice(CubePartition):
         return PairwiseSignificance(
             self, self._alpha, self._only_larger
         ).summary_pairwise_indices
+
+    @lazyproperty
+    def tab_label(self):
+        """Subvar label of slice id if first dimension is a CA_SUBVAR, '"' otherwise."""
+        first_dimension = self._cube.dimensions[0]
+        return (
+            first_dimension.valid_elements[self._slice_idx].label
+            if first_dimension.dimension_type == DT.CA_SUBVAR
+            else ""
+        )
+
+    @lazyproperty
+    def tab_alias(self):
+        """Subvar alias of slice id if first dimension is a CA_SUBVAR, '"' otherwise."""
+        first_dimension = self._cube.dimensions[0]
+        return (
+            first_dimension.valid_elements[self._slice_idx].alias
+            if first_dimension.dimension_type == DT.CA_SUBVAR
+            else ""
+        )
 
     @lazyproperty
     def table_base(self):
@@ -1490,6 +1535,16 @@ class _Strand(CubePartition):
         return self._assembler.row_count
 
     @lazyproperty
+    def row_aliases(self):
+        """1D str ndarray of alias for each row, for use as row headings."""
+        return self._assembler.row_aliases
+
+    @lazyproperty
+    def row_codes(self):
+        """1D int ndarray of code for each row, for use as row headings."""
+        return self._assembler.row_codes
+
+    @lazyproperty
     def row_labels(self):
         """1D str ndarray of name for each row, suitable for use as row headings."""
         return self._assembler.row_labels
@@ -1501,6 +1556,11 @@ class _Strand(CubePartition):
         # --- alternate property so it can be accessed uniformly between a slice and a
         # --- strand.
         return self.unweighted_counts
+
+    @lazyproperty
+    def rows_dimension_alias(self):
+        """str alias assigned to rows-dimension."""
+        return self._rows_dimension.alias
 
     @lazyproperty
     def rows_dimension_fills(self):

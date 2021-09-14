@@ -111,6 +111,30 @@ class StripeAssembler:
         return len(self._row_order)
 
     @lazyproperty
+    def row_aliases(self):
+        """1D str ndarray of row alias for each matrix row.
+
+        These are suitable for use as row headings; aliases for subtotal rows appear in
+        the sequence and aliases are ordered to correspond with their respective data
+        row.
+        """
+        return np.array(
+            self._rows_dimension.element_aliases + self._rows_dimension.subtotal_aliases
+        )[self._row_order]
+
+    @lazyproperty
+    def row_codes(self):
+        """1D int ndarray of row code for each matrix row.
+
+        These are suitable for use as row headings; codes for subtotal rows appear in
+        the sequence and codes are ordered to correspond with their respective data
+        row.
+        """
+        return np.array(
+            self._rows_dimension.element_ids + self._rows_dimension.insertion_ids
+        )[self._row_order]
+
+    @lazyproperty
     def row_labels(self):
         """1D str ndarray of row name for each matrix row.
 
