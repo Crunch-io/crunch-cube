@@ -818,32 +818,22 @@ class Assembler:
         )
 
     def _derived_element_idxs(self, dimension, order):
-        """Return tuple(int) of derived elements' indices for a dimension."""
-        return tuple(
-            element_index
-            for element_index, derived in enumerate(
-                np.array(
-                    [e.derived for e in dimension.valid_elements]
-                    # ---Subtotals are not real elements and hence not derived
-                    + [False for _ in dimension.subtotals]
-                )[order]
-            )
-            if derived
-        )
+        """Return tuple(int) of derived elements' indices for a dimension.
+
+        Subtotals cannot be derived elements. Only some elements (subvariables) can.
+        """
+        n_subtotals = len(dimension.valid_elements)
+        derivs = [e.derived for e in dimension.valid_elements] + [False] * n_subtotals
+        return tuple(np.where(np.array(derivs)[order])[0])
 
     def _diff_element_idxs(self, dimension, order):
-        """Return tuple(int) of difference elements' indices for a dimension."""
-        return tuple(
-            element_index
-            for element_index, is_difference in enumerate(
-                np.array(
-                    # ---Valid elements are not differences
-                    [False for _ in dimension.valid_elements]
-                    + [element.is_difference for element in dimension.subtotals]
-                )[order]
-            )
-            if is_difference
-        )
+        """Return tuple(int) of difference elements' indices for a dimension.
+
+        Valid elements cannot be differences. Only some subtotals can.
+        """
+        n_valids = len(dimension.valid_elements)
+        diffs = [False] * n_valids + [e.is_difference for e in dimension.subtotals]
+        return tuple(np.where(np.array(diffs)[order])[0])
 
     def _dimension_aliases(self, dimension, order):
         """1D str ndarray of alias for each vector of `dimension`.
