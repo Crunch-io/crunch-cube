@@ -135,6 +135,7 @@ class TestHeadersAndSubtotals(object):
     def test_1D_subtotals_inserted_row_idxs(self):
         strand = Cube(CR.CAT_HS_MT).partitions[0]
         assert strand.inserted_row_idxs == (2, 6)
+        assert strand.diff_row_idxs == ()
 
     def test_1D_means_mr_subtotals_hidden(self):
         transforms = {
@@ -1257,6 +1258,7 @@ class TestHeadersAndSubtotals(object):
         slice_ = Cube(CR.FOOD_GROUP_X_SHAPE_PASTA_2ROWS1COL_INSERTION).partitions[0]
 
         assert slice_.inserted_column_idxs == (3,)
+        assert slice_.diff_column_idxs == ()
         assert len(slice_.inserted_column_idxs) == 1
         assert slice_.inserted_row_idxs == (2, 5)
         assert len(slice_.inserted_row_idxs) == 2
@@ -1836,6 +1838,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test zscores for 1 column insertion
         assert slice_.inserted_column_idxs == (4,)
+        assert slice_.diff_column_idxs == ()
         assert len(slice_.inserted_column_idxs) == 1
         assert slice_.zscores.tolist() == [
             pytest.approx([-0.12293906, 0.7330578, -1.284731, 0.79903932, 0.73305780]),
@@ -1908,6 +1911,7 @@ class TestHeadersAndSubtotals(object):
 
         # Test zscores for 2 columns insertion bottom and interleaved
         assert slice_.inserted_column_idxs == (3, 6)
+        assert slice_.diff_column_idxs == ()
         assert len(slice_.inserted_column_idxs) == 2
         np.testing.assert_almost_equal(
             slice_.zscores,
@@ -2374,7 +2378,9 @@ class TestHeadersAndSubtotals(object):
         slice_ = Cube(CR.CAT_X_CAT_HS_MISSING).partitions[0]
 
         assert slice_.inserted_column_idxs == (0,)
+        assert slice_.diff_column_idxs == ()
         assert slice_.inserted_row_idxs == ()
+        assert slice_.diff_row_idxs == ()
 
         # Test szcores for 1 column insertion at left
         np.testing.assert_almost_equal(
@@ -2763,6 +2769,7 @@ class DescribeIntegrated_SubtotalDifferences(object):
 
         assert strand.counts[0] == 81
         assert strand.table_proportions[0] == pytest.approx(0.1184210)
+        assert strand.diff_row_idxs == (0,)
 
     def it_computes_measures_for_cat_x_cat_with_subdiffs_on_both(self):
         slice_ = Cube(
@@ -3199,3 +3206,35 @@ class DescribeIntegrated_SubtotalDifferences(object):
             ),
             nan_ok=True,
         )
+
+    def it_computes_diff_indexes_for_cat_x_cat_with_subdiffs_on_both(self):
+        slice_ = Cube(
+            CR.CAT_4_X_CAT_4,
+            transforms={
+                "rows_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"negative": [2]},
+                            "anchor": "top",
+                            "name": "NPS",
+                        }
+                    ]
+                },
+                "columns_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"negative": [2]},
+                            "anchor": "top",
+                            "name": "NPS",
+                        }
+                    ]
+                },
+            },
+        ).partitions[0]
+
+        assert slice_.diff_row_idxs == (0,)
+        assert slice_.diff_column_idxs == (0,)

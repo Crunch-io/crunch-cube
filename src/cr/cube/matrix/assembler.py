@@ -248,6 +248,16 @@ class Assembler:
         return self._derived_element_idxs(self._rows_dimension, self._row_order)
 
     @lazyproperty
+    def diff_row_idxs(self):
+        """tuple(int) of difference row elements' indexes, can be empty."""
+        return self._diff_element_idxs(self._rows_dimension, self._row_order)
+
+    @lazyproperty
+    def diff_column_idxs(self):
+        """tuple(int) of difference column elements' indexes, can be empty."""
+        return self._diff_element_idxs(self._columns_dimension, self._column_order)
+
+    @lazyproperty
     def inserted_column_idxs(self):
         """tuple of int index of each subtotal column in slice."""
         # --- insertions have a negative idx in their order sequence ---
@@ -819,6 +829,20 @@ class Assembler:
                 )[order]
             )
             if derived
+        )
+
+    def _diff_element_idxs(self, dimension, order):
+        """Return tuple(int) of difference elements' indices for a dimension."""
+        return tuple(
+            element_index
+            for element_index, is_difference in enumerate(
+                np.array(
+                    # ---Valid elements are not differences
+                    [False for _ in dimension.valid_elements]
+                    + [element.is_difference for element in dimension.subtotals]
+                )[order]
+            )
+            if is_difference
         )
 
     def _dimension_aliases(self, dimension, order):

@@ -64,6 +64,21 @@ class StripeAssembler:
         )
 
     @lazyproperty
+    def diff_row_idxs(self):
+        """tuple of int index of each difference row-element in this stripe."""
+        return tuple(
+            element_idx
+            for element_idx, is_difference in enumerate(
+                np.array(
+                    # ---Valid elements are not differences
+                    [False for _ in self._rows_dimension.valid_elements]
+                    + [e.is_difference for e in self._rows_dimension.subtotals]
+                )[self._row_order]
+            )
+            if is_difference
+        )
+
+    @lazyproperty
     def inserted_row_idxs(self):
         """tuple of int index of each inserted row in this stripe.
 
