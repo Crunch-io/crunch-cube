@@ -44,6 +44,8 @@ class StripeAssembler:
     def derived_row_idxs(self):
         """tuple of int index of each derived row-element in this stripe.
 
+        Subtotals cannot be derived
+
         An element is derived if it's a subvariable of a multiple response dimension,
         which has been produced by the zz9, and inserted into the response data.
 
@@ -51,17 +53,21 @@ class StripeAssembler:
         categories of CAT dimensions, are not derived. Subtotals are also not derived
         in this sense, because they're not even part of the data (elements).
         """
-        return tuple(
-            element_idx
-            for element_idx, derived in enumerate(
-                np.array(
-                    [e.derived for e in self._rows_dimension.valid_elements]
-                    # ---Subtotals are not data elements, and hence not derived
-                    + [False for _ in self._rows_dimension.subtotals]
-                )[self._row_order]
-            )
-            if derived
-        )
+        rows_dim = self._rows_dimension
+        n_subtotals = len(rows_dim.subtotals)
+        derivs = [e.derived for e in rows_dim.valid_elements] + [False] * n_subtotals
+        return tuple(np.where(np.array(derivs)[self._row_order])[0])
+
+    @lazyproperty
+    def diff_row_idxs(self):
+        """tuple of int index of each difference row-element in this stripe.
+
+        Valid elements are cannot be differences, only some subtotals can.
+        """
+        rows_dim = self._rows_dimension
+        n_valids = len(rows_dim.valid_elements)
+        diffs = [False] * n_valids + [e.is_difference for e in rows_dim.subtotals]
+        return tuple(np.where(np.array(diffs)[self._row_order])[0])
 
     @lazyproperty
     def inserted_row_idxs(self):

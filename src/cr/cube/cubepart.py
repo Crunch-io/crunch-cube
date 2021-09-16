@@ -589,6 +589,16 @@ class _Slice(CubePartition):
         return self._assembler.derived_row_idxs
 
     @lazyproperty
+    def diff_column_idxs(self):
+        """tuple of int index of each difference column-element in slice."""
+        return self._assembler.diff_column_idxs
+
+    @lazyproperty
+    def diff_row_idxs(self):
+        """tuple of int index of each difference row-element in slice."""
+        return self._assembler.diff_row_idxs
+
+    @lazyproperty
     def is_empty(self):
         return any(s == 0 for s in self.shape)
 
@@ -1446,6 +1456,11 @@ class _Strand(CubePartition):
     def derived_row_idxs(self):
         """tuple of int index of each derived row-element in this strand."""
         return self._assembler.derived_row_idxs
+
+    @lazyproperty
+    def diff_row_idxs(self):
+        """tuple of int index of each difference row-element in this strand."""
+        return self._assembler.diff_row_idxs
 
     @lazyproperty
     def inserted_row_idxs(self):

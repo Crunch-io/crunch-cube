@@ -248,6 +248,16 @@ class Assembler:
         return self._derived_element_idxs(self._rows_dimension, self._row_order)
 
     @lazyproperty
+    def diff_row_idxs(self):
+        """tuple(int) of difference row elements' indexes, can be empty."""
+        return self._diff_element_idxs(self._rows_dimension, self._row_order)
+
+    @lazyproperty
+    def diff_column_idxs(self):
+        """tuple(int) of difference column elements' indexes, can be empty."""
+        return self._diff_element_idxs(self._columns_dimension, self._column_order)
+
+    @lazyproperty
     def inserted_column_idxs(self):
         """tuple of int index of each subtotal column in slice."""
         # --- insertions have a negative idx in their order sequence ---
@@ -808,18 +818,22 @@ class Assembler:
         )
 
     def _derived_element_idxs(self, dimension, order):
-        """Return tuple(int) of derived elements' indices for a dimension."""
-        return tuple(
-            element_index
-            for element_index, derived in enumerate(
-                np.array(
-                    [e.derived for e in dimension.valid_elements]
-                    # ---Subtotals are not real elements and hence not derived
-                    + [False for _ in dimension.subtotals]
-                )[order]
-            )
-            if derived
-        )
+        """Return tuple(int) of derived elements' indices for a dimension.
+
+        Subtotals cannot be derived elements. Only some elements (subvariables) can.
+        """
+        n_subtotals = len(dimension.valid_elements)
+        derivs = [e.derived for e in dimension.valid_elements] + [False] * n_subtotals
+        return tuple(np.where(np.array(derivs)[order])[0])
+
+    def _diff_element_idxs(self, dimension, order):
+        """Return tuple(int) of difference elements' indices for a dimension.
+
+        Valid elements cannot be differences. Only some subtotals can.
+        """
+        n_valids = len(dimension.valid_elements)
+        diffs = [False] * n_valids + [e.is_difference for e in dimension.subtotals]
+        return tuple(np.where(np.array(diffs)[order])[0])
 
     def _dimension_aliases(self, dimension, order):
         """1D str ndarray of alias for each vector of `dimension`.

@@ -1421,6 +1421,11 @@ class _Subtotal:
         return self._subtotal_dict.get("id", self._fallback_insertion_id)
 
     @lazyproperty
+    def is_difference(self) -> bool:
+        """True if a subtotal is a difference, False otherwise."""
+        return bool(self.subtrahend_ids)
+
+    @lazyproperty
     def label(self) -> str:
         """str display name for this subtotal, suitable for use as label."""
         name = self._subtotal_dict.get("name")
