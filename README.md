@@ -110,6 +110,10 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.5
+- Add indexes for subtotal differences
+- This is needed for the correct display of pptx graphs
+
 ### 3.0.4
 - Expose `rows_dimension_alias`
 - Expose `row_codes`
@@ -117,55 +121,6 @@ The detailed description can be found
 
 ### 3.0.3
 - MR insertions (derived elements) have anchor recalculated in explicit order
-
-### 3.0.2
-- Smoothing measures consolidation
-
-### 3.0.1
-- Bug fix for pairwise indices with overlaps
-
-### 3.0.0
-- Remove Python 2.7 and 3.5 support
-
-### 2.3.9
-- Fix for available measures in a cube set
-- More forgiving about types and special characters in dimension ids
-
-### 2.3.8
-- Allow sorting by derived insertion on MRs
-- Refactor transforms to prefer referring to subvariables by alias
-
-### 2.3.7
-- Allow sorting by label
-
-### 2.3.6
-- Fix row share of sum denominator
-
-### 2.3.5
-- Fix scorecards with MR insertions
-
-### 2.3.4
-- Consolidate stipe counts
-- Sort by value stripe
-
-### 2.3.3
-- Fix Python 2 syntax issue
-
-### 2.3.2
-- Allow hiding MR insertions
-
-### 2.3.1
-- Consolidate weighted counts
-- Fix bug with weighted counts for numeric arrays
-
-### 2.3.0
-- Consolidation of weighted counts such that bases are no longer calculated by
-  adding across subvariables.
-- Removed the `_Slice.table_margin_unpruned` property, instead use
-  `_Slice.table_margin_range` to get the unpruned range of table margins.
-
-### 2.2.3
-- More sort-by-value support including a fallback to payload order
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
