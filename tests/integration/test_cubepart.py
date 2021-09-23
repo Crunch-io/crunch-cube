@@ -1807,10 +1807,11 @@ class Describe_Strand:
         strand = Cube(
             CR.CA_AS_0TH, cube_idx=0, transforms=transforms, population=100000000
         ).partitions[0]
-
         assert strand.population_counts == pytest.approx(
             [54523323.5, 24570078.1, 15710358.3, 5072107.3]
         )
+        assert strand.tab_alias == "Q1_1"
+        assert strand.tab_label == "ATP Men's T"
         assert strand.table_name == "Level of in: ATP Men's T"
         assert strand.weighted_bases == pytest.approx([27292.0] * 4)
 
@@ -1840,6 +1841,7 @@ class Describe_Strand:
         assert strand.rows_base.tolist() == [10, 5]
         assert strand.rows_dimension_fills == (None, None)
         assert strand.rows_dimension_alias == "v7"
+        assert strand.rows_dimension_description == ""
         assert strand.rows_dimension_name == "v7"
         assert strand.rows_dimension_type == DT.CAT
         assert strand.rows_margin.tolist() == [10, 5]
@@ -1869,6 +1871,8 @@ class Describe_Strand:
         assert str(e.value) == (
             "`.stddev` is undefined for a cube-result without a stddev measure"
         )
+        assert strand.tab_label == ""
+        assert strand.tab_alias == ""
         assert strand.table_base_range.tolist() == [15, 15]
         assert strand.table_margin_range.tolist() == [15, 15]
         assert strand.table_name == "v7: C"
@@ -3679,3 +3683,4 @@ class Test_Nub:
         assert nub.ndim == 0
         np.testing.assert_almost_equal(nub.table_base, np.array([49.095]))
         np.testing.assert_array_equal(nub.unweighted_count, 1000)
+        assert nub.table_name is None

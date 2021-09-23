@@ -1206,13 +1206,18 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_name(self):
-        """Provides differentiated name for each stacked table of a 3D cube."""
+        """Optional table name for this Slice
+
+        Provides differentiated name for each stacked table of a 3D cube.
+        """
         if self._cube.ndim < 3:
             return None
-
         title = self._cube.name
-        table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
-        return f"{title}: {table_name}"
+        valid_elements = self._cube.dimensions[0].valid_elements
+        if valid_elements.element_ids:
+            table_name = valid_elements[self._slice_idx].label
+            return f"{title}: {table_name}"
+        return None
 
     @lazyproperty
     def table_percentages(self):
@@ -1578,6 +1583,14 @@ class _Strand(CubePartition):
         return self._rows_dimension.alias
 
     @lazyproperty
+    def rows_dimension_description(self):
+        """str description assigned to rows-dimension.
+
+        Reflects the resolved dimension-description transform cascade.
+        """
+        return self._rows_dimension.description
+
+    @lazyproperty
     def rows_dimension_fills(self):
         """tuple of optional RGB str like "#def032" fill color for each strand row.
 
@@ -1720,6 +1733,26 @@ class _Strand(CubePartition):
             )
 
     @lazyproperty
+    def tab_label(self):
+        """Subvar label of strand if first dimension is a CA_SUBVAR, '""' otherwise."""
+        first_dimension = self._cube.dimensions[0]
+        return (
+            first_dimension.valid_elements[self._slice_idx].label
+            if first_dimension.dimension_type == DT.CA_SUBVAR
+            else ""
+        )
+
+    @lazyproperty
+    def tab_alias(self):
+        """Subvar alias of strand if first dimension is a CA_SUBVAR, '""' otherwise."""
+        first_dimension = self._cube.dimensions[0]
+        return (
+            first_dimension.valid_elements[self._slice_idx].alias
+            if first_dimension.dimension_type == DT.CA_SUBVAR
+            else ""
+        )
+
+    @lazyproperty
     def table_base_range(self):
         """[min, max] np.float64 ndarray range of unweighted-N for this stripe.
 
@@ -1741,10 +1774,16 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def table_name(self):
-        """Only for CA-as-0th case, provides differentiated names for stacked tables."""
+        """Optional table name for this strand
+
+        Only for CA-as-0th case, provides differentiated names for stacked tables.
+        """
         title = self._cube.name
-        table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
-        return f"{title}: {table_name}"
+        valid_elements = self._cube.dimensions[0].valid_elements
+        if valid_elements.element_ids:
+            table_name = valid_elements[self._slice_idx].label
+            return f"{title}: {table_name}"
+        return None
 
     @lazyproperty
     def table_percentages(self):
@@ -1867,6 +1906,10 @@ class _Nub(CubePartition):
     def table_base(self):
         """Int scalar of the unweighted N of the table."""
         return self._scalar.table_base
+
+    @lazyproperty
+    def table_name(self):
+        return None
 
     @lazyproperty
     def unweighted_count(self):

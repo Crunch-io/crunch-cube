@@ -6,7 +6,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
-from cr.cube.dimension import Dimension
+from cr.cube.dimension import Dimension, _ValidElements
 from cr.cube.matrix import Assembler
 from cr.cube.stripe.assembler import StripeAssembler
 
@@ -356,6 +356,19 @@ class Describe_Slice:
         Assembler_.assert_called_once_with(cube_, (dimension_, dimension_), slice_idx)
         assert assembler is assembler_
 
+    @pytest.mark.parametrize("ndim, element_ids", ((2, (1, 2, 3)), (3, ())))
+    def it_knows_when_its_table_name_is_None(
+        self, request, dimension_, _dimensions_prop_, cube_, ndim, element_ids
+    ):
+        valid_elements_ = instance_mock(request, _ValidElements)
+        valid_elements_.element_ids = element_ids
+        dimension_.valid_elements = valid_elements_
+        cube_.ndim = ndim
+        cube_.dimensions = [dimension_]
+        slice_ = _Slice(cube_, 0, None, None, None)
+
+        assert slice_.table_name is None
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -475,6 +488,17 @@ class Describe_Strand:
 
         assert strand_.selected_category_labels == ()
 
+    def it_knows_when_its_table_name_is_None(
+        self, request, dimension_, _dimensions_prop_, cube_
+    ):
+        valid_elements_ = instance_mock(request, _ValidElements)
+        valid_elements_.element_ids = ()
+        dimension_.valid_elements = valid_elements_
+        cube_.dimensions = [dimension_]
+        strand = _Strand(cube_, 0, None, None, None, None)
+
+        assert strand.table_name is None
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -488,6 +512,10 @@ class Describe_Strand:
     @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
 
     @pytest.fixture
     def _dimensions_prop_(self, request):
