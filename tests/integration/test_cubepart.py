@@ -1807,10 +1807,11 @@ class Describe_Strand:
         strand = Cube(
             CR.CA_AS_0TH, cube_idx=0, transforms=transforms, population=100000000
         ).partitions[0]
-
         assert strand.population_counts == pytest.approx(
             [54523323.5, 24570078.1, 15710358.3, 5072107.3]
         )
+        assert strand.tab_alias == "Q1_1"
+        assert strand.tab_label == "ATP Men's T"
         assert strand.table_name == "Level of in: ATP Men's T"
         assert strand.weighted_bases == pytest.approx([27292.0] * 4)
 
