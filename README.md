@@ -110,6 +110,11 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.6
+- Expose `rows_dimension_alias` for `_Strand`
+- Expose `tab_alias` for `_Strand`
+- Expose `tab_label` for `_Strand`
+
 ### 3.0.5
 - Add indexes for subtotal differences
 - This is needed for the correct display of pptx graphs
