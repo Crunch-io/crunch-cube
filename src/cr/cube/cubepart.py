@@ -1196,13 +1196,18 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_name(self):
-        """Provides differentiated name for each stacked table of a 3D cube."""
+        """Optional table name for this Slice
+
+        Provides differentiated name for each stacked table of a 3D cube.
+        """
         if self._cube.ndim < 3:
             return None
-
         title = self._cube.name
-        table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
-        return f"{title}: {table_name}"
+        valid_elements = self._cube.dimensions[0].valid_elements
+        if valid_elements.element_ids:
+            table_name = valid_elements[self._slice_idx].label
+            return f"{title}: {table_name}"
+        return None
 
     @lazyproperty
     def table_percentages(self):
@@ -1754,10 +1759,16 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def table_name(self):
-        """Only for CA-as-0th case, provides differentiated names for stacked tables."""
+        """Optional table name for this strand
+
+        Only for CA-as-0th case, provides differentiated names for stacked tables.
+        """
         title = self._cube.name
-        table_name = self._cube.dimensions[0].valid_elements[self._slice_idx].label
-        return f"{title}: {table_name}"
+        valid_elements = self._cube.dimensions[0].valid_elements
+        if valid_elements.element_ids:
+            table_name = valid_elements[self._slice_idx].label
+            return f"{title}: {table_name}"
+        return None
 
     @lazyproperty
     def table_percentages(self):
@@ -1880,6 +1891,10 @@ class _Nub(CubePartition):
     def table_base(self):
         """Int scalar of the unweighted N of the table."""
         return self._scalar.table_base
+
+    @lazyproperty
+    def table_name(self):
+        return None
 
     @lazyproperty
     def unweighted_count(self):
