@@ -1840,6 +1840,7 @@ class Describe_Strand:
         assert strand.rows_base.tolist() == [10, 5]
         assert strand.rows_dimension_fills == (None, None)
         assert strand.rows_dimension_alias == "v7"
+        assert strand.rows_dimension_description == ""
         assert strand.rows_dimension_name == "v7"
         assert strand.rows_dimension_type == DT.CAT
         assert strand.rows_margin.tolist() == [10, 5]
@@ -1869,6 +1870,8 @@ class Describe_Strand:
         assert str(e.value) == (
             "`.stddev` is undefined for a cube-result without a stddev measure"
         )
+        assert strand.tab_label == ""
+        assert strand.tab_alias == ""
         assert strand.table_base_range.tolist() == [15, 15]
         assert strand.table_margin_range.tolist() == [15, 15]
         assert strand.table_name == "v7: C"

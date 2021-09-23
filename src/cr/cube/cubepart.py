@@ -1563,6 +1563,14 @@ class _Strand(CubePartition):
         return self._rows_dimension.alias
 
     @lazyproperty
+    def rows_dimension_description(self):
+        """str description assigned to rows-dimension.
+
+        Reflects the resolved dimension-description transform cascade.
+        """
+        return self._rows_dimension.description
+
+    @lazyproperty
     def rows_dimension_fills(self):
         """tuple of optional RGB str like "#def032" fill color for each strand row.
 
@@ -1703,6 +1711,26 @@ class _Strand(CubePartition):
             raise ValueError(
                 "`.sums` is undefined for a cube-result without a sum measure"
             )
+
+    @lazyproperty
+    def tab_label(self):
+        """Subvar label of strand if first dimension is a CA_SUBVAR, '""' otherwise."""
+        first_dimension = self._cube.dimensions[0]
+        return (
+            first_dimension.valid_elements[self._slice_idx].label
+            if first_dimension.dimension_type == DT.CA_SUBVAR
+            else ""
+        )
+
+    @lazyproperty
+    def tab_alias(self):
+        """Subvar alias of strand if first dimension is a CA_SUBVAR, '""' otherwise."""
+        first_dimension = self._cube.dimensions[0]
+        return (
+            first_dimension.valid_elements[self._slice_idx].alias
+            if first_dimension.dimension_type == DT.CA_SUBVAR
+            else ""
+        )
 
     @lazyproperty
     def table_base_range(self):
