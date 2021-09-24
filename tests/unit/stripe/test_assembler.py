@@ -6,38 +6,33 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension, _Element, _OrderSpec
+from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal
 from cr.cube.enums import COLLATION_METHOD as CM
 from cr.cube.stripe.assembler import (
+    StripeAssembler,
     _BaseOrderHelper,
     _BaseSortByValueHelper,
     _OrderHelper,
     _SortByLabelHelper,
     _SortByMeasureHelper,
-    StripeAssembler,
 )
 from cr.cube.stripe.measure import (
+    StripeMeasures,
     _BaseSecondOrderMeasure,
     _Means,
     _PopulationProportions,
     _PopulationProportionStderrs,
     _ScaledCounts,
-    StripeMeasures,
+    _TableProportions,
     _TableProportionStddevs,
     _TableProportionStderrs,
-    _TableProportions,
     _UnweightedBases,
     _UnweightedCounts,
     _WeightedBases,
     _WeightedCounts,
 )
 
-from ...unitutil import (
-    class_mock,
-    instance_mock,
-    method_mock,
-    property_mock,
-)
+from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
 
 class DescribeStripeAssembler:
@@ -101,24 +96,30 @@ class DescribeStripeAssembler:
 
         assert assembler.row_labels.tolist() == ["foo", "bar", "baz", "bada", "bing"]
 
+    @pytest.mark.parametrize(
+        "order, expected_fills",
+        (
+            ((2, -1, 0, -2), ("#f00ba5", "STF1", "#000000", "STF2")),
+            ((0, 1, 2, -1, -2), ("#000000", "#111111", "#f00ba5", "STF1", "STF2")),
+            ((-1, -2, 0, 1, 2), ("STF1", "STF2", "#000000", "#111111", "#f00ba5")),
+            ((-2, -1, 2, 1, 0), ("STF2", "STF1", "#f00ba5", "#111111", "#000000")),
+        ),
+    )
     def it_knows_the_rows_dimension_fills(
-        self, request, rows_dimension_, _row_order_prop_
+        self, request, rows_dimension_, _row_order_prop_, order, expected_fills
     ):
+        element_fills = ("#000000", "#111111", "#f00ba5")
+        subtotal_fills = ("STF1", "STF2")
         rows_dimension_.valid_elements = tuple(
-            instance_mock(request, _Element, fill=fill)
-            for fill in ("cdef01", "6789ab", "012345")
+            instance_mock(request, _Element, fill=fill) for fill in element_fills
         )
-        _row_order_prop_.return_value = np.array([2, -2, 1, -1, 0])
+        rows_dimension_.subtotals = tuple(
+            instance_mock(request, _Subtotal, fill=fill) for fill in subtotal_fills
+        )
+        _row_order_prop_.return_value = order
         assembler = StripeAssembler(None, rows_dimension_, None, None)
 
-        print(assembler.rows_dimension_fills)
-        assert assembler.rows_dimension_fills == (
-            "012345",
-            None,
-            "6789ab",
-            None,
-            "cdef01",
-        )
+        assert assembler.rows_dimension_fills == expected_fills
 
     def it_knows_the_scale_mean(self, _measures_prop_, measures_, scaled_counts_):
         scaled_counts_.scale_mean = 3

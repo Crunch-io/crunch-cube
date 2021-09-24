@@ -163,8 +163,13 @@ class StripeAssembler:
         color for that row should be used, probably coming from a caller-defined theme.
         """
         element_fills = tuple(e.fill for e in self._rows_dimension.valid_elements)
+        subtotal_fills = tuple(st.fill for st in self._rows_dimension.subtotals)
         return tuple(
-            (element_fills[idx] if idx > -1 else None) for idx in self._row_order
+            # ---Subtotals have negative sequential indexes (-1, -2, ..., -m)---
+            # ---To index them properly, we need to convert those indexes to---
+            # ---zero based positive indexes (0, 1, ... m - 1) i.e. -idx - 1---
+            (element_fills[idx] if idx > -1 else subtotal_fills[-idx - 1])
+            for idx in self._row_order
         )
 
     @lazyproperty
