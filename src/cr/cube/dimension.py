@@ -1416,6 +1416,18 @@ class _Subtotal:
         )
 
     @lazyproperty
+    def fill(self) -> str:
+        """str RGB color like "#af032d" or None if not specified.
+
+        A value of None indicates the default fill should be used for this element.
+        A str value must be a hash character ("#") followed by six hexadecimal digits.
+        Three-character color contractions (like "#D07") are not valid.
+        """
+        # ---first authority is fill transform in element transforms. The base value is
+        # ---the only prior authority and that is None (use default fill color).
+        return self._subtotal_dict.get("fill", None)
+
+    @lazyproperty
     def insertion_id(self) -> int:
         """int unique identifier of this subtotal within this dimension's insertions."""
         return self._subtotal_dict.get("id", self._fallback_insertion_id)

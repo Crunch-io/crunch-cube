@@ -1815,6 +1815,17 @@ class Describe_Subtotal:
 
         np.testing.assert_array_almost_equal(subtrahend_idxs, expected_value)
 
+    @pytest.mark.parametrize(
+        "subtotal_dict, expected_fill",
+        (({"fill": "fake_fill"}, "fake_fill"), ({}, None)),
+    )
+    def it_knows_its_fill(self, subtotal_dict, expected_fill):
+        subtotal = _Subtotal(subtotal_dict, None, None)
+
+        fill = subtotal.fill
+
+        assert fill == expected_fill
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

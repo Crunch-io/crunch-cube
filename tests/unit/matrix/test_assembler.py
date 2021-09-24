@@ -435,10 +435,18 @@ class DescribeAssembler:
             instance_mock(request, _Element, fill=fill)
             for fill in ("#000000", "#111111", "#f00ba5")
         )
+        dimension_.subtotals = tuple(
+            instance_mock(request, _Subtotal, fill=fill) for fill in ("STF_1", "STF_2")
+        )
         _row_order_prop_.return_value = [2, -1, 0, -2]
         assembler = Assembler(None, None, None)
 
-        assert assembler.rows_dimension_fills == ("#f00ba5", None, "#000000", None)
+        assert assembler.rows_dimension_fills == (
+            "#f00ba5",
+            "STF_1",
+            "#000000",
+            "STF_2",
+        )
 
     def it_knows_the_rows_dimension_numeric_values(
         self, request, _rows_dimension_prop_, dimension_, _row_order_prop_

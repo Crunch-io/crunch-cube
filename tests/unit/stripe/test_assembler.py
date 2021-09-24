@@ -6,38 +6,33 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension, _Element, _OrderSpec
+from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal
 from cr.cube.enums import COLLATION_METHOD as CM
 from cr.cube.stripe.assembler import (
+    StripeAssembler,
     _BaseOrderHelper,
     _BaseSortByValueHelper,
     _OrderHelper,
     _SortByLabelHelper,
     _SortByMeasureHelper,
-    StripeAssembler,
 )
 from cr.cube.stripe.measure import (
+    StripeMeasures,
     _BaseSecondOrderMeasure,
     _Means,
     _PopulationProportions,
     _PopulationProportionStderrs,
     _ScaledCounts,
-    StripeMeasures,
+    _TableProportions,
     _TableProportionStddevs,
     _TableProportionStderrs,
-    _TableProportions,
     _UnweightedBases,
     _UnweightedCounts,
     _WeightedBases,
     _WeightedCounts,
 )
 
-from ...unitutil import (
-    class_mock,
-    instance_mock,
-    method_mock,
-    property_mock,
-)
+from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
 
 class DescribeStripeAssembler:
@@ -108,15 +103,18 @@ class DescribeStripeAssembler:
             instance_mock(request, _Element, fill=fill)
             for fill in ("cdef01", "6789ab", "012345")
         )
+        rows_dimension_.subtotals = tuple(
+            instance_mock(request, _Subtotal, fill=fill) for fill in ("STF_1", "STF_2")
+        )
         _row_order_prop_.return_value = np.array([2, -2, 1, -1, 0])
         assembler = StripeAssembler(None, rows_dimension_, None, None)
 
         print(assembler.rows_dimension_fills)
         assert assembler.rows_dimension_fills == (
             "012345",
-            None,
+            "STF_2",
             "6789ab",
-            None,
+            "STF_1",
             "cdef01",
         )
 
