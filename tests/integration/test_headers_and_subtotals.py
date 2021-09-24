@@ -130,7 +130,15 @@ class TestHeadersAndSubtotals(object):
 
     def test_1D_subtotals_rows_dimension_fills(self):
         strand = Cube(CR.CAT_HS_MT).partitions[0]
-        assert strand.rows_dimension_fills == (None,) * 7
+        assert strand.rows_dimension_fills == (
+            None,
+            None,
+            "#32a852",
+            None,
+            None,
+            None,
+            "#7532a8",
+        )
 
     def test_1D_subtotals_inserted_row_idxs(self):
         strand = Cube(CR.CAT_HS_MT).partitions[0]

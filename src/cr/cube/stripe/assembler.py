@@ -168,7 +168,11 @@ class StripeAssembler:
             # ---Subtotals have negative sequential indexes (-1, -2, ..., -m)---
             # ---To index them properly, we need to convert those indexes to---
             # ---zero based positive indexes (0, 1, ... m - 1) i.e. -idx - 1---
-            (element_fills[idx] if idx > -1 else subtotal_fills[-idx - 1])
+            (
+                element_fills[idx]
+                if idx > -1
+                else subtotal_fills[idx + len(subtotal_fills)]
+            )
             for idx in self._row_order
         )
 
