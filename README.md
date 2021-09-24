@@ -110,6 +110,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.7
+- Add fills for insertions (subtotals and differences)
+
 ### 3.0.6
 - Expose `rows_dimension_alias` for `_Strand`
 - Expose `tab_alias` for `_Strand`
@@ -118,14 +121,6 @@ The detailed description can be found
 ### 3.0.5
 - Add indexes for subtotal differences
 - This is needed for the correct display of pptx graphs
-
-### 3.0.4
-- Expose `rows_dimension_alias`
-- Expose `row_codes`
-- Expose `column_codes`
-
-### 3.0.3
-- MR insertions (derived elements) have anchor recalculated in explicit order
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).

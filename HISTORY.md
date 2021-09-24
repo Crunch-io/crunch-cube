@@ -1,5 +1,13 @@
 # History of Changes
 
+### 3.0.4
+- Expose `rows_dimension_alias`
+- Expose `row_codes`
+- Expose `column_codes`
+
+### 3.0.3
+- MR insertions (derived elements) have anchor recalculated in explicit order
+
 ### 3.0.2
 - Smoothing measures consolidation
 
