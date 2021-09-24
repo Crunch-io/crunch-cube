@@ -427,26 +427,37 @@ class DescribeAssembler:
 
         assert rows_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
+    @pytest.mark.parametrize(
+        "order, expected_fills",
+        (
+            ((2, -1, 0, -2), ("#f00ba5", "STF1", "#000000", "STF2")),
+            ((0, 1, 2, -1, -2), ("#000000", "#111111", "#f00ba5", "STF1", "STF2")),
+            ((-1, -2, 0, 1, 2), ("STF1", "STF2", "#000000", "#111111", "#f00ba5")),
+            ((-2, -1, 2, 1, 0), ("STF2", "STF1", "#f00ba5", "#111111", "#000000")),
+        ),
+    )
     def it_knows_the_rows_dimension_fills(
-        self, request, _rows_dimension_prop_, dimension_, _row_order_prop_
+        self,
+        request,
+        _rows_dimension_prop_,
+        dimension_,
+        _row_order_prop_,
+        order,
+        expected_fills,
     ):
+        element_fills = ("#000000", "#111111", "#f00ba5")
+        subtotal_fills = ("STF1", "STF2")
         _rows_dimension_prop_.return_value = dimension_
         dimension_.valid_elements = tuple(
-            instance_mock(request, _Element, fill=fill)
-            for fill in ("#000000", "#111111", "#f00ba5")
+            instance_mock(request, _Element, fill=fill) for fill in element_fills
         )
         dimension_.subtotals = tuple(
-            instance_mock(request, _Subtotal, fill=fill) for fill in ("STF_1", "STF_2")
+            instance_mock(request, _Subtotal, fill=fill) for fill in subtotal_fills
         )
-        _row_order_prop_.return_value = [2, -1, 0, -2]
+        _row_order_prop_.return_value = order
         assembler = Assembler(None, None, None)
 
-        assert assembler.rows_dimension_fills == (
-            "#f00ba5",
-            "STF_1",
-            "#000000",
-            "STF_2",
-        )
+        assert assembler.rows_dimension_fills == expected_fills
 
     def it_knows_the_rows_dimension_numeric_values(
         self, request, _rows_dimension_prop_, dimension_, _row_order_prop_
