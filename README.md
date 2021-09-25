@@ -110,6 +110,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.8
+- Fix reverse order in insertions fills
+
 ### 3.0.7
 - Add fills for insertions (subtotals and differences)
 
