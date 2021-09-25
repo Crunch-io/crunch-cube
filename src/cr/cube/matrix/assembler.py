@@ -500,7 +500,7 @@ class Assembler:
             # ---Subtotals have negative sequential indexes (-1, -2, ..., -m)---
             # ---To index them properly, we need to convert those indexes to---
             # ---zero based positive indexes (0, 1, ... m - 1) i.e. -idx - 1---
-            (elements[idx].fill if idx >= 0 else subtotals[-idx - 1].fill)
+            (elements[idx].fill if idx >= 0 else subtotals[idx + len(subtotals)].fill)
             for idx in self._row_order
         )
 
