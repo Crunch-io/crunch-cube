@@ -2310,11 +2310,10 @@ class _BaseMarginal:
             counts = self._second_order_measures.column_comparable_counts.blocks
             # --- Get base values & *row* subtotals
             return [counts[0][0], counts[1][0]]
-        else:
-            # --- Use *row* comparable counts (going across columns) ---
-            counts = self._second_order_measures.row_comparable_counts.blocks
-            # --- Get base values & *column* subtotals
-            return [counts[0][0], counts[0][1]]
+        # --- Use *row* comparable counts (going across columns) ---
+        counts = self._second_order_measures.row_comparable_counts.blocks
+        # --- Get base values & *column* subtotals
+        return [counts[0][0], counts[0][1]]
 
     @lazyproperty
     def _counts_are_defined(self):
@@ -2392,14 +2391,10 @@ class _MarginTableProportion(_BaseMarginal):
         counts = self._second_order_measures.weighted_counts.blocks
 
         if self.orientation == MO.ROWS:
-            # --- Try getting the column comparable counts, to check for the error
-            self._second_order_measures.column_comparable_counts.blocks
-            # --- Now get only the base values and relevant subtotals
+            # --- Now get only the base values and relevant row subtotals
             counts = [counts[0][0], counts[1][0]]
         else:
-            # --- Try getting the row comparable counts, to check for the error
-            self._second_order_measures.row_comparable_counts
-            # --- Now get only the base values and relevant subtotals
+            # --- Now get only the base values and relevant column subtotals
             counts = [counts[0][0], counts[0][1]]
 
         return [self._apply_along_orientation(np.sum, count) for count in counts]
@@ -2409,8 +2404,7 @@ class _MarginTableProportion(_BaseMarginal):
         """list of ndarray 1D table margins to be used as denominator"""
         if self.orientation == MO.ROWS:
             return self._second_order_measures.rows_table_weighted_base.blocks
-        else:
-            return self._second_order_measures.columns_table_weighted_base.blocks
+        return self._second_order_measures.columns_table_weighted_base.blocks
 
 
 class _MarginTableBase(_BaseMarginal):
@@ -2510,9 +2504,8 @@ class _MarginUnweightedBase(_BaseMarginal):
         if self.orientation == MO.ROWS:
             bases = self._second_order_measures.row_unweighted_bases.blocks
             return [bases[0][0][:, 0], bases[1][0][:, 0]]
-        else:
-            bases = self._second_order_measures.column_unweighted_bases.blocks
-            return [bases[0][0][0, :], bases[0][1][0, :]]
+        bases = self._second_order_measures.column_unweighted_bases.blocks
+        return [bases[0][0][0, :], bases[0][1][0, :]]
 
     @lazyproperty
     def is_defined(self):
@@ -2548,9 +2541,8 @@ class _MarginWeightedBase(_BaseMarginal):
         if self.orientation == MO.ROWS:
             bases = self._second_order_measures.row_weighted_bases.blocks
             return [bases[0][0][:, 0], bases[1][0][:, 0]]
-        else:
-            bases = self._second_order_measures.column_weighted_bases.blocks
-            return [bases[0][0][0, :], bases[0][1][0, :]]
+        bases = self._second_order_measures.column_weighted_bases.blocks
+        return [bases[0][0][0, :], bases[0][1][0, :]]
 
     @lazyproperty
     def is_defined(self):
@@ -2615,11 +2607,10 @@ class _ScaleMean(_BaseScaledCountMarginal):
             props = self._second_order_measures.row_proportions.blocks
             # --- Get base values & *row* subtotals
             return [props[0][0], props[1][0]]
-        else:
-            # --- Use *column* proportions ---
-            props = self._second_order_measures.column_proportions.blocks
-            # --- Get base values & *column* subtotals
-            return [props[0][0], props[0][1]]
+        # --- Use *column* proportions ---
+        props = self._second_order_measures.column_proportions.blocks
+        # --- Get base values & *column* subtotals
+        return [props[0][0], props[0][1]]
 
     @staticmethod
     def _weighted_mean(proportions, values):
@@ -2741,8 +2732,7 @@ class _ScaleMedian(_BaseScaledCountMarginal):
         # --- TODO: Does this behave okay for large numbers (or is precision a problem)?
         if cumulative_prop[median_idx] == 0.5:
             return np.mean(sorted_values[[median_idx, median_idx + 1]])
-        else:
-            return sorted_values[median_idx]
+        return sorted_values[median_idx]
 
 
 class _ScaleMeanStddev(_BaseScaledCountMarginal):
