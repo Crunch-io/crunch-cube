@@ -1072,15 +1072,17 @@ class Describe_ElementIdShim:
         _replaced_order_element_ids_.assert_not_called()
 
     @pytest.mark.parametrize(
-        "id, expected",
+        "id, subvar_aliases, subvar_ids, raw_element_ids, expected",
         (
-            ("all", "all"),
-            ("0003", "alias2"),
-            ("1", "all"),
-            (3, "alias1"),
-            (2, "alias2"),
-            (21, None),
-            ("xyz", None),
+            ("all", ("all", "al1", "al2"), ("01", "all", "03"), ("1", 3, "all"), "all"),
+            ("03", ("all", "al1", "al2"), ("01", "all", "03"), ("1", 3, "all"), "al2"),
+            ("1", ("all", "al1", "al2"), ("01", "all", "03"), ("1", 3, "all"), "all"),
+            (3, ("all", "al1", "al2"), ("01", "all", "03"), ("1", 3, "all"), "al1"),
+            (2, ("all", "al", "al2"), ("01", "all", "03"), ("1", 3, "all"), "al2"),
+            (21, ("all", "al1", "al2"), ("01", "all", "03"), ("1", 3, "all"), None),
+            ("xyz", ("all", "al1", "al2"), ("01", "all", "03"), ("1", 3, "all"), None),
+            ("1", ("all", "al1", "al2"), ("001", "1", "003"), ("1", 3, "all"), "all"),
+            ("1", ("all", "al1", "al2"), ("001", "1", "003"), (1, 3, "all"), "al1"),
         ),
     )
     def it_translates_element_ids_for_subvariables(
@@ -1089,11 +1091,14 @@ class Describe_ElementIdShim:
         _subvar_aliases_prop_,
         _subvar_ids_prop_,
         id,
+        subvar_aliases,
+        subvar_ids,
+        raw_element_ids,
         expected,
     ):
-        _subvar_aliases_prop_.return_value = tuple(("all", "alias1", "alias2"))
-        _subvar_ids_prop_.return_value = tuple(("0001", "all", "0003"))
-        _raw_element_id_prop_.return_value = tuple(("1", 3, "all"))
+        _subvar_aliases_prop_.return_value = subvar_aliases
+        _subvar_ids_prop_.return_value = subvar_ids
+        _raw_element_id_prop_.return_value = raw_element_ids
 
         shim_ = _ElementIdShim(DT.MR_SUBVAR, None, None)
 

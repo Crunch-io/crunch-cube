@@ -853,8 +853,8 @@ class _ElementIdShim:
 
         0) If dimension is not a subvariables dimension, return the _id.
         1) If id matches an alias, then just use it.
-        2) If id matches a subvariable id, translate to corresponding alias.
-        3) If id matches an element id, translate to corresponding alias.
+        2) If id matches an element id, translate to corresponding alias.
+        3) If id matches a subvariable id, translate to corresponding alias.
         4) If id can be parsed to int and matches an element id, translate to alias.
         5) If id is int (or can be parsed to int) and can be used as index (eg in range
            0-# of elements), use _id'th alias.
@@ -865,10 +865,10 @@ class _ElementIdShim:
 
         if _id in self._subvar_aliases:
             return _id
-        if _id in self._subvar_ids:
-            return self._subvar_aliases[self._subvar_ids.index(_id)]
         if _id in self._raw_element_ids:
             return self._subvar_aliases[self._raw_element_ids.index(_id)]
+        if _id in self._subvar_ids:
+            return self._subvar_aliases[self._subvar_ids.index(_id)]
 
         try:
             _id = int(_id)
