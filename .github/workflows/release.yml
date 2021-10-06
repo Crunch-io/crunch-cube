@@ -40,8 +40,15 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_APIKEY }}
         run: twine upload dist/*
-      - name: Build wheels for Nexus
+      - name: Build wheels and upload to Nexus
         run: |
           VERSION=$(echo $GITHUB_REF | sed 's#.*/v##')
           echo -e "numpy==1.16.2\ncr.crube==${VERSION}" > requirements-whl.txt
           pip wheel -r requirements.txt
+          PYPY_NEXUS = https://ui.nexus.crint.net/repository/unstable/
+          for whl in *.whl; do
+            if [ -f $whl ]; then
+              echo "Twine uploading: $whl"
+                 twine upload -r $PYPI_NEXUS --repository-url $PYPI_NEXUS -u "$PYPI_USERNAME" -p "$PYPI_PASSWORD" $whl || echo "Package already exists on PyPI server"
+            fi
+          done
