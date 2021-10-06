@@ -32,7 +32,7 @@ version = re.search('__version__ = "([^"]+)"', init_py).group(1)
 
 install_requires = ["scipy", "tabulate"]
 
-test_requires = ["pytest", "pytest-cov", "mock", "coverage"]
+test_requires = ["pytest", "pytest-cov", "mock", "coverage==5.5"]
 
 setup(
     name="cr.cube",
