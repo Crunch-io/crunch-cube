@@ -1,4 +1,4 @@
-name: Publish cr.cube on TestPYPI and PYPI
+name: Publish cr.cube on TestPYPI, PYPI adn Nexus
 
 on:
   release:
@@ -50,10 +50,14 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.6
-      - name: Sleep for 30 seconds
+      - name: Sleep for 45 seconds
         uses: jakejarvis/wait-action@master
         with:
           time: '45s'
+            - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel twine
       - name: Build wheels and upload to Nexus
         run: |
           VERSION=$(echo $GITHUB_REF | sed 's#.*/v##')
