@@ -61,6 +61,6 @@ jobs:
           for whl in *.whl; do
             if [ -f $whl ]; then
               echo "Twine uploading: $whl"
-                 twine upload -r $PYPI_NEXUS --repository-url $PYPI_NEXUS -u "$PYPI_USERNAME" -p "$PYPI_PASSWORD" $whl
+                 twine upload -r $PYPI_NEXUS --repository-url $PYPI_NEXUS -u "${{ secrets.PYPI_USERNAME }}" -p "${{ secrets.PYPI_PASSWORD }}" $whl
             fi
           done
