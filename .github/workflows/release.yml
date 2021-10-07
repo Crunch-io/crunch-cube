@@ -50,6 +50,10 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.6
+      - name: Sleep for 30 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '45s'
       - name: Build wheels and upload to Nexus
         run: |
           VERSION=$(echo $GITHUB_REF | sed 's#.*/v##')
