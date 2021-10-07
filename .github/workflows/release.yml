@@ -62,7 +62,7 @@ jobs:
         run: |
           VERSION=$(echo $GITHUB_REF | sed 's#.*/v##')
           pip wheel cr.cube==$VERSION numpy==1.16.2
-          PYPY_NEXUS=https://ui.nexus.crint.net/repository/unstable/
+          PYPI_NEXUS=https://ui.nexus.crint.net/repository/unstable/
           for whl in *.whl; do
             if [ -f $whl ]; then
               echo "Twine uploading: $whl"
