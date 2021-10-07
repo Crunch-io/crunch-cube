@@ -1,4 +1,4 @@
-name: Publish cr.cube on TestPYPI, PYPI adn Nexus
+name: Publish cr.cube on TestPYPI, PYPI and Nexus
 
 on:
   release:
