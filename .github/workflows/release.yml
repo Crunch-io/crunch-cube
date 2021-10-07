@@ -34,26 +34,12 @@ jobs:
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.TESTPYPI_APIKEY }}
-        run: |
-          VERSION=$(echo $GITHUB_REF | sed 's#.*/v##')
-          PACKAGE=$(curl -Ls https://test.pypi.org/pypi/cr.cube/json | python -c "import json,sys;obj=json.load(sys.stdin);print(obj.get('releases').get('$VERSION'));")
-          if [ -z "$PACKAGE" ]; then
-            twine upload --repository testpypi dist/*
-          else
-            exit 0
-          fi
+        run: twine upload --repository testpypi dist/*
       - name: Publish on PYPI
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_APIKEY }}
-        run: |
-          VERSION=$(echo $GITHUB_REF | sed 's#.*/v##')
-          PACKAGE=$(curl -Ls https://pypi.org/pypi/cr.cube/json | python -c "import json,sys;obj=json.load(sys.stdin);print(obj.get('releases').get('$VERSION'));")
-          if [ -z "$PACKAGE" ]; then
-            twine upload dist/*
-          else
-            exit 0
-          fi
+        run: twine upload dist/*
 
   nexus:
     runs-on: ubuntu-latest
