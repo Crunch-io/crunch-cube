@@ -43,8 +43,7 @@ jobs:
       - name: Build wheels and upload to Nexus
         run: |
           VERSION=$(echo $GITHUB_REF | sed 's#.*/v##')
-          echo -e "numpy==1.16.2\ncr.crube==${VERSION}" > requirements-whl.txt
-          pip wheel -r requirements.txt
+          pip wheel cr.cube==$VERSION numpy==1.16.2
           PYPY_NEXUS = https://ui.nexus.crint.net/repository/unstable/
           for whl in *.whl; do
             if [ -f $whl ]; then
