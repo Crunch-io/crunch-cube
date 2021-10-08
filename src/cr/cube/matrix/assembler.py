@@ -616,6 +616,7 @@ class Assembler:
         """Optional 1D Row scale median marginal for this cube-result"""
         return self._assemble_marginal(self._measures.rows_scale_median)
 
+    @lazyproperty
     def scale_mean_pairwise_indices(self):
         """1D ndarray of tuple of int pairwise-t threshold for scale means."""
         marginal = self._measures.scale_mean_pairwise_indices

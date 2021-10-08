@@ -493,6 +493,7 @@ class SecondOrderMeasures:
         """
         return _MarginWeightedBase(self._dimensions, self, self._cube_measures, MO.ROWS)
 
+    @lazyproperty
     def scale_mean_pairwise_indices(self):
         """_ScaleMeanPairwiseIndices measure object for this cube-result"""
         return _ScaleMeanPairwiseIndices(
