@@ -451,6 +451,7 @@ class Describe_SortByMeasureHelper:
             ("percent_moe", "table_proportion_stderrs"),
             ("population", "population_proportions"),
             ("population_moe", "population_proportion_stderrs"),
+            ("share_sum", "share_sum"),
             ("sum", "sums"),
         ),
     )

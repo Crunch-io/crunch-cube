@@ -516,6 +516,7 @@ class _SortByMeasureHelper(_BaseSortByValueHelper):
             "percent_stderr": "table_proportion_stderrs",
             "population": "population_proportions",  # strictly proportional
             "population_moe": "population_proportion_stderrs",  # strictly proportional
+            "share_sum": "share_sum",
             "sum": "sums",
         }.get(measure_keyname)
 
