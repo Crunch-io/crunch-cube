@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.1.10
+- Allow sorting by share of sum
+
 ### 3.0.9
 - Fix reverse authority in `id_translation` for MR dimensions
 
