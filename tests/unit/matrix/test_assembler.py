@@ -6,7 +6,14 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal, _Subtotals
+from cr.cube.dimension import (
+    Dimension,
+    _Element,
+    _OrderSpec,
+    _Subtotal,
+    _Subtotals,
+    _PairwiseSignificanceSpec,
+)
 from cr.cube.enums import (
     COLLATION_METHOD as CM,
     DIMENSION_TYPE as DT,
@@ -36,11 +43,24 @@ from cr.cube.matrix.measure import (
     _ColumnStandardError,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
+    _MarginTableBase,
+    _MarginTableProportion,
+    _MarginUnweightedBase,
+    _MarginWeightedBase,
     _Means,
     _PopulationProportions,
     _PopulationStandardError,
-    _MarginTableProportion,
-    _MarginTableBase,
+    _PairwiseSigPvals,
+    _PairwiseSigPValsForSubvar,
+    _PairwiseSigTStatsForSubvar,
+    _PairwiseSigTstats,
+    _PairwiseIndices,
+    _PairwiseMeansIndices,
+    _PairwiseSubvarIndices,
+    _PairwiseMeansSigTStats,
+    _PairwiseMeansSigPVals,
+    _PairwiseSigTstatsScaleMeans,
+    _PairwiseSigPvalsScaleMeans,
     _Pvalues,
     _RowComparableCounts,
     _RowProportionVariances,
@@ -55,7 +75,7 @@ from cr.cube.matrix.measure import (
     _ScaleMedian,
     SecondOrderMeasures,
     _StdDev,
-    _MarginWeightedBase,
+    _ScaleMeanPairwiseIndices,
     _Sums,
     _TotalShareSum,
     _TableProportionVariances,
@@ -65,7 +85,6 @@ from cr.cube.matrix.measure import (
     _TableBase,
     _TableBasesRange,
     _TableWeightedBases,
-    _MarginUnweightedBase,
     _UnweightedCounts,
     _WeightedCounts,
     _Zscores,
@@ -152,6 +171,8 @@ class DescribeAssembler:
             ("columns_scale_mean_stderr", _ScaleMeanStderr),
             ("rows_scale_median", _ScaleMedian),
             ("columns_scale_median", _ScaleMedian),
+            ("pairwise_t_stats_scale_means", _PairwiseSigTstatsScaleMeans),
+            ("pairwise_p_vals_scale_means", _PairwiseSigPvalsScaleMeans),
         ),
     )
     def it_assembles_various_marginals(
@@ -173,6 +194,224 @@ class DescribeAssembler:
 
         _assemble_marginal_.assert_called_once_with(assembler, measure_)
         assert value == [[1, 2, 3], [4, 5, 6]]
+
+    @pytest.mark.parametrize(
+        "measure_prop_name",
+        ("scale_mean_pairwise_indices", "scale_mean_pairwise_indices_alt"),
+    )
+    def it_assembles_pairwise_indices_marginals(
+        self,
+        request,
+        _assemble_marginal_,
+        _remap_indices,
+        _measures_prop_,
+        second_order_measures_,
+        _alpha_alt_prop_,
+        _column_order_prop_,
+        measure_prop_name,
+    ):
+        _assemble_marginal_.return_value = [(0, 1), (1, 2)]
+        _remap_indices.return_value = [(0, 1), (1, 2)]
+        _alpha_alt_prop_.return_value = 0.02
+        _column_order_prop_.return_value = [1, 2, 0]
+        measure_ = instance_mock(request, _ScaleMeanPairwiseIndices)
+        measure_.is_empty = False
+        setattr(second_order_measures_, measure_prop_name, measure_)
+        _measures_prop_.return_value = second_order_measures_
+        assembler = Assembler(None, None, None)
+
+        value = getattr(assembler, measure_prop_name)
+
+        _remap_indices.assert_called_once_with(
+            assembler, _assemble_marginal_.return_value
+        )
+        assert value == [(0, 1), (1, 2)]
+
+    @pytest.mark.parametrize(
+        "measure_prop_name",
+        ("scale_mean_pairwise_indices", "scale_mean_pairwise_indices_alt"),
+    )
+    def but_it_returns_an_empty_array_if_the_marginal_is_empty(
+        self,
+        request,
+        _measures_prop_,
+        second_order_measures_,
+        _alpha_alt_prop_,
+        _column_order_prop_,
+        measure_prop_name,
+    ):
+        _alpha_alt_prop_.return_value = 0.02
+        _column_order_prop_.return_value = [1, 2, 0]
+        measure_ = instance_mock(request, _ScaleMeanPairwiseIndices)
+        measure_.is_empty = True
+        setattr(second_order_measures_, measure_prop_name, measure_)
+        _measures_prop_.return_value = second_order_measures_
+        assembler = Assembler(None, None, None)
+
+        value = getattr(assembler, measure_prop_name)
+
+        assert value.tolist() == [[], [], []]
+
+    @pytest.mark.parametrize(
+        "measure_prop_name, assembler_prop_name, has_overlaps, MeasureCls",
+        (
+            (
+                "pairwise_p_vals",
+                "pairwise_significance_p_vals",
+                False,
+                _PairwiseSigPvals,
+            ),
+            (
+                "pairwise_p_vals_for_subvar",
+                "pairwise_significance_p_vals",
+                True,
+                _PairwiseSigPValsForSubvar,
+            ),
+            (
+                "pairwise_significance_means_p_vals",
+                "pairwise_significance_means_p_vals",
+                False,
+                _PairwiseMeansSigPVals,
+            ),
+            (
+                "pairwise_significance_means_t_stats",
+                "pairwise_significance_means_t_stats",
+                False,
+                _PairwiseMeansSigTStats,
+            ),
+            (
+                "pairwise_t_stats",
+                "pairwise_significance_t_stats",
+                False,
+                _PairwiseSigTstats,
+            ),
+            (
+                "pairwise_t_stats_for_subvar",
+                "pairwise_significance_t_stats",
+                True,
+                _PairwiseSigTStatsForSubvar,
+            ),
+        ),
+    )
+    def it_assembles_pairwise_significance_measures(
+        self,
+        request,
+        _assemble_matrix_,
+        cube_,
+        _measures_prop_,
+        second_order_measures_,
+        measure_prop_name,
+        assembler_prop_name,
+        has_overlaps,
+        MeasureCls,
+    ):
+        cube_.has_overlaps = has_overlaps
+        _assemble_matrix_.return_value = [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
+        _measures_prop_.return_value = second_order_measures_
+        measure_ = instance_mock(request, MeasureCls)
+        setattr(second_order_measures_, measure_prop_name, measure_)
+        assembler = Assembler(cube_, None, None)
+
+        value = getattr(assembler, assembler_prop_name)
+
+        _assemble_matrix_.assert_called_once_with(assembler, measure_.blocks)
+        assert value == [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
+
+    @pytest.mark.parametrize(
+        "measure_prop_name, assembler_prop_name, has_overlaps, alpha_alt, MeasureCls",
+        (
+            (
+                "pairwise_indices",
+                "pairwise_indices",
+                False,
+                None,
+                _PairwiseIndices,
+            ),
+            (
+                "pairwise_indices_alt",
+                "pairwise_indices_alt",
+                False,
+                0.03,
+                _PairwiseIndices,
+            ),
+            (
+                "pairwise_means_indices",
+                "pairwise_means_indices",
+                False,
+                None,
+                _PairwiseMeansIndices,
+            ),
+            (
+                "pairwise_means_indices_alt",
+                "pairwise_means_indices_alt",
+                False,
+                0.03,
+                _PairwiseMeansIndices,
+            ),
+            (
+                "pairwise_indices_for_subvar",
+                "pairwise_indices",
+                True,
+                None,
+                _PairwiseSubvarIndices,
+            ),
+            (
+                "pairwise_indices_for_subvar_alt",
+                "pairwise_indices_alt",
+                True,
+                0.03,
+                _PairwiseSubvarIndices,
+            ),
+        ),
+    )
+    def it_assembles_pairwise_indices_measures(
+        self,
+        request,
+        _assemble_matrix_,
+        _remap_indices,
+        cube_,
+        second_order_measures_,
+        _measures_prop_,
+        _alpha_alt_prop_,
+        measure_prop_name,
+        assembler_prop_name,
+        has_overlaps,
+        alpha_alt,
+        MeasureCls,
+    ):
+        cube_.has_overlaps = has_overlaps
+        _alpha_alt_prop_.return_value = alpha_alt
+        _assemble_matrix_.return_value = [(1, 2, 0), (2, 1)]
+        _remap_indices.return_value = [(1, 2, 0), (2, 1)]
+        _measures_prop_.return_value = second_order_measures_
+        measure_ = instance_mock(request, MeasureCls)
+        setattr(second_order_measures_, measure_prop_name, measure_)
+        assembler = Assembler(cube_, None, None)
+
+        value = getattr(assembler, assembler_prop_name)
+
+        _assemble_matrix_.assert_called_once_with(
+            assembler, _remap_indices.return_value
+        )
+        assert value == [(1, 2, 0), (2, 1)]
+
+    @pytest.mark.parametrize(
+        "assembler_prop_name",
+        (
+            "pairwise_indices_alt",
+            "pairwise_means_indices_alt",
+            "scale_mean_pairwise_indices_alt",
+        ),
+    )
+    def but_it_returns_None_if_alpha_alt_is_not_defined(
+        self, _alpha_alt_prop_, assembler_prop_name
+    ):
+        _alpha_alt_prop_.return_value = None
+        assembler = Assembler(None, None, None)
+
+        value = getattr(assembler, assembler_prop_name)
+
+        assert value is None
 
     def it_knows_the_column_labels(
         self,
@@ -789,6 +1028,15 @@ class DescribeAssembler:
 
         assert assembler.table_margin_range == 42
 
+    def it_knows_the_alpha_alt_value_defined_in_transforms(self, request, dimension_):
+        pairwise_significance_spec = instance_mock(request, _PairwiseSignificanceSpec)
+        pairwise_significance_spec.alpha_values = [0.04, 0.002]
+        dimension_.pairwise_significance_spec = pairwise_significance_spec
+
+        assembler = Assembler(None, (None, dimension_), None)
+
+        assert assembler._alpha_alt == 0.002
+
     # === implementation methods/properties ===
 
     @pytest.mark.parametrize(
@@ -929,6 +1177,31 @@ class DescribeAssembler:
         assembler = Assembler(None, (dimension_, None), None)
         assert assembler._rows_dimension is dimension_
 
+    @pytest.mark.parametrize(
+        "column_idx, insertion_idx, expected_value",
+        ((0, None, 1), (1, None, 2), (None, 1, 0), (None, None, None)),
+    )
+    def it_knows_its_pairwise_selection_idx_to_help(
+        self,
+        request,
+        dimension_,
+        _column_order_prop_,
+        _columns_dimension_prop_,
+        column_idx,
+        insertion_idx,
+        expected_value,
+    ):
+        pairwise_significance_spec = instance_mock(request, _PairwiseSignificanceSpec)
+        pairwise_significance_spec.reference_insertion_idx = insertion_idx
+        pairwise_significance_spec.reference_column_idx = column_idx
+        dimension_.pairwise_significance_spec = pairwise_significance_spec
+        _column_order_prop_.return_value = np.array([-2, 0, 1, -1, 2, 3])
+        _columns_dimension_prop_.return_value = dimension_
+
+        assembler = Assembler(None, (None, dimension_), None)
+
+        assert assembler.pairwise_selection_idx == expected_value
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -940,8 +1213,16 @@ class DescribeAssembler:
         return method_mock(request, Assembler, "_assemble_matrix")
 
     @pytest.fixture
+    def _remap_indices(self, request):
+        return method_mock(request, Assembler, "_remap_indices")
+
+    @pytest.fixture
     def _BaseOrderHelper_(self, request):
         return class_mock(request, "cr.cube.matrix.assembler._BaseOrderHelper")
+
+    @pytest.fixture
+    def _alpha_alt_prop_(self, request):
+        return property_mock(request, Assembler, "_alpha_alt")
 
     @pytest.fixture
     def _column_order_prop_(self, request):

@@ -467,6 +467,11 @@ class Dimension:
         return _OrderSpec(self, self._dimension_transforms_dict)
 
     @lazyproperty
+    def pairwise_significance_spec(self):
+        """_PairwiseSignificanceSpec object for pw_significance dict from payload."""
+        return _PairwiseSignificanceSpec(self, self._dimension_transforms_dict)
+
+    @lazyproperty
     def prune(self) -> bool:
         """True if empty elements should be automatically hidden on this dimension."""
         return self._dimension_transforms_dict.get("prune") is True
@@ -1257,6 +1262,106 @@ class _OrderSpec:
         Value is `{}` if no "order": field is present.
         """
         return self._dimension_transforms_dict.get("order") or {}
+
+
+class _PairwiseSignificanceSpec(object):
+    """Value object providing access to details of pairwise significance information."""
+
+    def __init__(self, dimension, dimension_transforms_dict):
+        self._dimension = dimension
+        self._dimension_transforms_dict = dimension_transforms_dict
+
+    @lazyproperty
+    def alpha_values(self):
+        """Pair (tuple) of confidence-interval thresholds to be used for t-tests.
+
+        The second value is optional and is None when no secondary alpha value was
+        defined for the cube-set.
+        """
+        value = self._pairwise_sig_dict.get("pairwise_indices", {}).get("alpha")
+
+        # --- handle omitted, None, [], (), {}, "", 0, and 0.0 cases ---
+        if not value:
+            return (0.05, None)
+
+        # --- reject invalid types ---
+        if not isinstance(value, (float, list, tuple)):
+            raise TypeError(
+                "transforms.pairwise_indices.alpha, when defined, must be a list of 1 "
+                "or 2 float values between 0.0 and 1.0 exclusive. Got %r" % value
+            )
+
+        # --- legacy float "by-itself" case ---
+        if isinstance(value, float):
+            if not 0.0 < value < 1.0:
+                raise ValueError(
+                    "alpha value, when provided, must be between 0.0 and 1.0 "
+                    "exclusive. Got %r" % value
+                )
+            return (value, None)
+
+        # --- sequence case ---
+        for x in value[:2]:
+            if not isinstance(x, float) or not 0.0 < x < 1.0:
+                raise ValueError(
+                    "transforms.pairwise_indices.alpha must be a list of 1 or 2 float "
+                    "values between 0.0 and 1.0 exclusive. Got %r" % value
+                )
+
+        if len(value) == 1:
+            return (value[0], None)
+
+        return tuple(sorted(value[:2]))
+
+    @lazyproperty
+    def only_larger(self):
+        """True if only the larger of reciprocal pairwise-t values should appear.
+
+        In general, pairwise-t tests are reciprocal. That is, if A is significant with
+        respect to B, then B is significant with respect to A. Having a letter in both
+        columns can produce a cluttered appearance. When this flag is set by the user,
+        only the cell in the reciprocal pair having the largest value gets a letter.
+        Defaults to True unless explicitly set False.
+        """
+        only_larger_value = self._pairwise_sig_dict.get("pairwise_indices", {}).get(
+            "only_larger"
+        )
+        return only_larger_value is not False
+
+    @lazyproperty
+    def reference_column_idx(self):
+        """Optional int index of base column as reference for the pairwise sig tests."""
+        column_significance = self._pairwise_sig_dict.get("column_significance", {})
+        if column_significance is not None:
+            return column_significance.get("element_id")
+        return None
+
+    @lazyproperty
+    def reference_insertion_idx(self):
+        """Optional int index of insertion column as reference for the sig tests."""
+        if self._insertion_id:
+            return self._dimension.insertion_ids.index(self._insertion_id)
+        return None
+
+    @lazyproperty
+    def _insertion_id(self):
+        """int insertion-id in the "insertion_id" field of the transform dict.
+
+        Identifies the reference column when the reference column is an insertion rather
+        than a `base` column.
+        """
+        column_significance = self._pairwise_sig_dict.get("column_significance", {})
+        if column_significance is not None:
+            return column_significance.get("insertion_id")
+        return None
+
+    @lazyproperty
+    def _pairwise_sig_dict(self):
+        """dict dimension.transforms.pairwise_significance field parsed from payload.
+
+        Value is `{}` if no "pairwise_significance": field is present.
+        """
+        return self._dimension_transforms_dict.get("pairwise_significance") or {}
 
 
 class _Subtotals(Sequence):

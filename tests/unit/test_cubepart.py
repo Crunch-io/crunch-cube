@@ -60,132 +60,11 @@ class DescribeCubePartition:
 
         assert cube_index == 42
 
-    def it_knows_the_primary_alpha_value_to_help(self, _alpha_values_prop_):
-        """alpha is the primary confidence-interval threshold specified by the user."""
-        _alpha_values_prop_.return_value = (0.042, 0.084)
-        assert CubePartition(None)._alpha == 0.042
-
-    @pytest.mark.parametrize(
-        "alpha_values, expected_value", (((0.042, 0.084), 0.084), ((0.042, None), None))
-    )
-    def it_knows_the_secondary_alpha_value_to_help(
-        self, _alpha_values_prop_, alpha_values, expected_value
-    ):
-        _alpha_values_prop_.return_value = alpha_values
-        assert CubePartition(None)._alpha_alt == expected_value
-
-    @pytest.mark.parametrize(
-        "pw_indices_dict, expected_value",
-        (
-            # --- default value is .05 ---
-            ({}, (0.05, None)),
-            ({"alpha": {}}, (0.05, None)),
-            ({"alpha": []}, (0.05, None)),
-            # --- scalar (float) value sets alpha and sets alpha_alt to None ---
-            ({"alpha": 0.025}, (0.025, None)),
-            # --- single (float) value sets alpha and sets alpha_alt to None ---
-            ({"alpha": [0.03]}, (0.03, None)),
-            # --- two values sets alpha to lesser and alpha_alt to greater ---
-            ({"alpha": [0.07, 0.03]}, (0.03, 0.07)),
-            # --- third and later values are ignored ---
-            ({"alpha": (0.07, 0.03, "foobar")}, (0.03, 0.07)),
-        ),
-    )
-    def it_interprets_the_provided_alpha_values_to_help(
-        self, pw_indices_dict, expected_value
-    ):
-        cube_partition = CubePartition(None, {"pairwise_indices": pw_indices_dict})
-
-        alpha_values = cube_partition._alpha_values
-
-        assert alpha_values == expected_value
-
-    @pytest.mark.parametrize(
-        "pw_indices_dict, exception_type, expected_message",
-        (
-            # --- type errors ---
-            (
-                {"alpha": {"al": "pha"}},
-                TypeError,
-                "transforms.pairwise_indices.alpha, when defined, must be a list of 1 "
-                "or 2 float values between 0.0 and 1.0 exclusive. Got %s"
-                % repr({"al": "pha"}),
-            ),
-            (
-                {"alpha": "0.05"},
-                TypeError,
-                "transforms.pairwise_indices.alpha, when defined, must be a list of 1 "
-                "or 2 float values between 0.0 and 1.0 exclusive. Got %s"
-                % repr("0.05"),
-            ),
-            # --- scalar out-of-range errors ---
-            (
-                {"alpha": -0.1},
-                ValueError,
-                "alpha value, when provided, must be between 0.0 and 1.0 exclusive. "
-                "Got %s" % repr(-0.1),
-            ),
-            (
-                {"alpha": 1.0},
-                ValueError,
-                "alpha value, when provided, must be between 0.0 and 1.0 exclusive. "
-                "Got %s" % repr(1.0),
-            ),
-            # --- sequence value errors ---
-            (
-                {"alpha": [0.01, ".05"]},
-                ValueError,
-                "transforms.pairwise_indices.alpha must be a list of 1 or 2 float "
-                "values between 0.0 and 1.0 exclusive. Got %s" % repr([0.01, ".05"]),
-            ),
-        ),
-    )
-    def but_it_raises_on_invalid_alpha_values(
-        self, pw_indices_dict, exception_type, expected_message
-    ):
-        cube_partition = CubePartition(None, {"pairwise_indices": pw_indices_dict})
-
-        with pytest.raises(exception_type) as e:
-            cube_partition._alpha_values
-
-        assert str(e.value) == expected_message
-
-    @pytest.mark.parametrize(
-        "pw_indices_dict, expected_value",
-        (
-            # --- default value is True ---
-            ({}, True),
-            ({"only_larger": "foobar"}, True),
-            ({"only_larger": False}, False),
-        ),
-    )
-    def it_knows_the_only_larger_flag_state_to_help(
-        self, _transforms_dict_prop_, pw_indices_dict, expected_value
-    ):
-        _transforms_dict_prop_.return_value = {"pairwise_indices": pw_indices_dict}
-        assert CubePartition(None)._only_larger == expected_value
-
-    @pytest.mark.parametrize(
-        "transforms, expected_value",
-        ((None, {}), ({"trans": "forms"}, {"trans": "forms"})),
-    )
-    def it_provides_the_transforms_dict_to_help(self, transforms, expected_value):
-        """Handles defaulting of transforms arg."""
-        assert CubePartition(None, transforms)._transforms_dict == expected_value
-
     # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def _alpha_values_prop_(self, request):
-        return property_mock(request, CubePartition, "_alpha_values")
 
     @pytest.fixture
     def cube_(self, request):
         return instance_mock(request, Cube)
-
-    @pytest.fixture
-    def _transforms_dict_prop_(self, request):
-        return property_mock(request, CubePartition, "_transforms_dict")
 
 
 class Describe_Slice:
@@ -240,12 +119,6 @@ class Describe_Slice:
 
         assert is_empty is expected_value
 
-    def but_it_returns_None_when_no_secondary_alpha_specified(
-        self, _alpha_alt_prop_, dimension_types_prop_
-    ):
-        _alpha_alt_prop_.return_value = None
-        assert _Slice(None, None, None, None, None).pairwise_indices_alt is None
-
     def it_knows_the_population_fraction(self, cube_):
         cube_.population_fraction = 0.5
         slice_ = _Slice(cube_, None, None, None, None)
@@ -276,32 +149,45 @@ class Describe_Slice:
 
         assert slice_.population_counts_moe == pytest.approx(0.6 * 1.959964)
 
-    def it_provides_the_secondary_scale_mean_pairwise_indices(
-        self, _alpha_alt_prop_, _only_larger_prop_, PairwiseSignificance_
+    def it_provides_the_scale_mean_pairwise_indices(
+        self,
+        _assembler_prop_,
+        assembler_,
+        dimension_,
+        _dimensions_prop_,
     ):
-        PairwiseSignificance_.scale_mean_pairwise_indices.return_value = (
-            (2,),
-            (0,),
-            (),
-        )
-        _alpha_alt_prop_.return_value = 0.42
-        _only_larger_prop_.return_value = True
+        assembler_.scale_mean_pairwise_indices = ((2,), (0,), ())
+        _assembler_prop_.return_value = assembler_
+        _dimensions_prop_.return_value = (None, dimension_)
+        slice_ = _Slice(None, None, None, None, None)
+
+        columns_scale_mean_pw_idxs_alt = slice_.columns_scale_mean_pairwise_indices
+
+        assert columns_scale_mean_pw_idxs_alt == ((2,), (0,), ())
+
+    def it_provides_the_pairwise_selection_idx(self, _assembler_prop_, assembler_):
+        assembler_.pairwise_selection_idx = 5
+        _assembler_prop_.return_value = assembler_
+
+        slice_ = _Slice(None, None, None, None, None)
+
+        assert slice_.pairwise_selection_idx == 5
+
+    def it_provides_the_secondary_scale_mean_pairwise_indices(
+        self,
+        _assembler_prop_,
+        assembler_,
+        dimension_,
+        _dimensions_prop_,
+    ):
+        assembler_.scale_mean_pairwise_indices_alt = ((2,), (0,), ())
+        _assembler_prop_.return_value = assembler_
+        _dimensions_prop_.return_value = (None, dimension_)
         slice_ = _Slice(None, None, None, None, None)
 
         columns_scale_mean_pw_idxs_alt = slice_.columns_scale_mean_pairwise_indices_alt
 
-        PairwiseSignificance_.scale_mean_pairwise_indices.assert_called_once_with(
-            slice_, 0.42, True
-        )
         assert columns_scale_mean_pw_idxs_alt == ((2,), (0,), ())
-
-    def but_columns_scale_mean_pairwise_indices_alt_is_None_when_no_secondary_alpha_specified(
-        self, _alpha_alt_prop_
-    ):
-        _alpha_alt_prop_.return_value = None
-        slice_ = _Slice(None, None, None, None, None)
-
-        assert slice_.columns_scale_mean_pairwise_indices_alt is None
 
     @pytest.mark.parametrize(
         "dimensions_dicts, expected_value",
@@ -372,10 +258,6 @@ class Describe_Slice:
     # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def _alpha_alt_prop_(self, request):
-        return property_mock(request, _Slice, "_alpha_alt")
-
-    @pytest.fixture
     def assembler_(self, request):
         return instance_mock(request, Assembler)
 
@@ -398,14 +280,6 @@ class Describe_Slice:
     @pytest.fixture
     def dimension_types_prop_(self, request):
         return property_mock(request, _Slice, "dimension_types")
-
-    @pytest.fixture
-    def _only_larger_prop_(self, request):
-        return property_mock(request, _Slice, "_only_larger")
-
-    @pytest.fixture
-    def PairwiseSignificance_(self, request):
-        return class_mock(request, "cr.cube.cubepart.PairwiseSignificance")
 
     @pytest.fixture
     def shape_prop_(self, request):

@@ -203,10 +203,6 @@ def test_cat_x_cat():
     assert slice_.columns_scale_median == pytest.approx([2, 2, 2, 4])
     assert slice_.rows_scale_median == pytest.approx([0, 2, 2, 2, 4, 2])
     # Test Scale Variance
-    np.testing.assert_almost_equal(
-        slice_._columns_scale_mean_variance,
-        [5.55303858, 5.41034929, 5.31954278, 4.60847303],
-    )
     assert slice_.columns_scale_mean_stddev == pytest.approx(
         [2.3564886, 2.3260158, 2.3064134, 2.1467354]
     )

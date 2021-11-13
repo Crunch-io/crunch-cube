@@ -338,6 +338,28 @@ class Cube:
         )
 
     @lazyproperty
+    def has_overlaps(self) -> bool:
+        """True if sig testing should be based on overlaps and valid_overlaps measures.
+
+        In cases where the columns dimension is of the Multiple response type, the users
+        usually want to adjust for the "overlaps" between tested subvariables, which are
+        neither fully independent, nor fully dependent. The measures indicating this
+        are `cube_overlaps` and `valid_cube_overlaps`, and are calculated as part of
+        the ZZ9 cube response.
+
+        If such measures are present in the payload, and the `column variable is indeed
+        an MR, indicate that we want to calculate the adjusted significance testing
+        (return `True`). If they're not present, or the column dimension of interest is
+        not an MR, we should default to the unadjusted significance testing
+        (return `False`).
+        """
+        return (
+            self.dimensions[-1].dimension_type == DT.MR
+            and self.overlaps is not None
+            and self.valid_overlaps is not None
+        )
+
+    @lazyproperty
     def has_weighted_counts(self) -> bool:
         """True if cube response has weighted count data."""
         return self.weighted_counts is not None

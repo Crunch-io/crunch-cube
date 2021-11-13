@@ -22,7 +22,6 @@ from tabulate import tabulate
 from cr.cube.enums import CUBE_MEASURE as CM, DIMENSION_TYPE as DT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
-from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe.assembler import StripeAssembler
 from cr.cube.util import lazyproperty
@@ -122,62 +121,6 @@ class CubePartition:
         return self._dimensions[0 if self.ndim < 2 else 1].name
 
     @lazyproperty
-    def _alpha(self):
-        """float confidence-interval threshold for pairwise-t (sig) tests."""
-        return self._alpha_values[0]
-
-    @lazyproperty
-    def _alpha_alt(self):
-        """Alternate float confidence-interval threshold or None.
-
-        This is an optional secondary confidence interval allowing two-level
-        significance testing. Value is None if no alternate alpha was specified by user.
-        """
-        return self._alpha_values[1]
-
-    @lazyproperty
-    def _alpha_values(self):
-        """Pair (tuple) of confidence-interval thresholds to be used for t-tests.
-
-        The second value is optional and is None when no secondary alpha value was
-        defined for the cube-set.
-        """
-        value = self._transforms_dict.get("pairwise_indices", {}).get("alpha")
-
-        # --- handle omitted, None, [], (), {}, "", 0, and 0.0 cases ---
-        if not value:
-            return (0.05, None)
-
-        # --- reject invalid types ---
-        if not isinstance(value, (float, list, tuple)):
-            raise TypeError(
-                f"transforms.pairwise_indices.alpha, when defined, must be a list of 1 "
-                f"or 2 float values between 0.0 and 1.0 exclusive. Got {repr(value)}"
-            )
-
-        # --- legacy float "by-itself" case ---
-        if isinstance(value, float):
-            if not 0.0 < value < 1.0:
-                raise ValueError(
-                    "alpha value, when provided, must be between 0.0 and 1.0 "
-                    f"exclusive. Got {repr(value)}"
-                )
-            return (value, None)
-
-        # --- sequence case ---
-        for x in value[:2]:
-            if not isinstance(x, float) or not 0.0 < x < 1.0:
-                raise ValueError(
-                    f"transforms.pairwise_indices.alpha must be a list of 1 or 2 float "
-                    f"values between 0.0 and 1.0 exclusive. Got {repr(value)}"
-                )
-
-        if len(value) == 1:
-            return (value[0], None)
-
-        return tuple(sorted(value[:2]))
-
-    @lazyproperty
     def _available_measures(self):
         """sorted list of available CUBE_MEASURE members in the cube response."""
         return sorted(list(self._cube.available_measures), key=lambda el: el.name)
@@ -196,25 +139,6 @@ class CubePartition:
         raise NotImplementedError(
             "must be implemented by each subclass"
         )  # pragma: no cover
-
-    @lazyproperty
-    def _only_larger(self):
-        """True if only the larger of reciprocal pairwise-t values should appear.
-
-        In general, pairwise-t tests are reciprocal. That is, if A is significant with
-        respect to B, then B is significant with respect to A. Having a letter in both
-        columns can produce a cluttered appearance. When this flag is set by the user,
-        only the cell in the reciprocal pair having the largest value gets a letter.
-        Defaults to True unless explicitly set False.
-        """
-        return (
-            False
-            if self._transforms_dict.get("pairwise_indices", {}).get(
-                "only_larger", True
-            )
-            is False
-            else True
-        )
 
     @lazyproperty
     def _transforms_dict(self):
@@ -463,9 +387,7 @@ class _Slice(CubePartition):
         computed based on the more restrictive (lesser-value) threshold specified in the
         analysis.
         """
-        return PairwiseSignificance.scale_mean_pairwise_indices(
-            self, self._alpha, self._only_larger
-        )
+        return self._assembler.scale_mean_pairwise_indices
 
     @lazyproperty
     def columns_scale_mean_pairwise_indices_alt(self):
@@ -476,12 +398,7 @@ class _Slice(CubePartition):
         `.columns_scale_mean_pairwise_indices` computed using the less restrictive
         (greater-valued) threshold.
         """
-        if self._alpha_alt is None:
-            return None
-
-        return PairwiseSignificance.scale_mean_pairwise_indices(
-            self, self._alpha_alt, self._only_larger
-        )
+        return self._assembler.scale_mean_pairwise_indices_alt
 
     @lazyproperty
     def columns_scale_mean_stddev(self):
@@ -646,7 +563,7 @@ class _Slice(CubePartition):
         column in the same row with a confidence interval meeting the threshold defined
         for this analysis.
         """
-        return self._assembler.pairwise_indices(self._alpha, self._only_larger)
+        return self._assembler.pairwise_indices
 
     @lazyproperty
     def pairwise_indices_alt(self):
@@ -654,15 +571,14 @@ class _Slice(CubePartition):
 
         This value is None if no alternate threshold has been defined.
         """
-
-        if self._alpha_alt is None:
-            return None
-
-        return self._assembler.pairwise_indices(self._alpha_alt, self._only_larger)
+        return self._assembler.pairwise_indices_alt
 
     @lazyproperty
     def pairwise_means_indices(self):
         """Optional 2D ndarray of tuple column-idxs significance threshold for mean.
+
+        Gets the level of significance for the difference of two means from the selected
+        covariance object being different from a hypothesized value.
 
         Like::
 
@@ -677,9 +593,7 @@ class _Slice(CubePartition):
         for this analysis.
         """
         try:
-            return self._assembler.pairwise_means_indices(
-                self._alpha, self._only_larger
-            )
+            return self._assembler.pairwise_means_indices
         except ValueError:
             raise ValueError(
                 "`.pairwise_means_indices` is undefined for a cube-result "
@@ -692,42 +606,90 @@ class _Slice(CubePartition):
 
         This value is None if no alternate threshold has been defined.
         """
-        if self._alpha_alt is None:
-            return None
         try:
-            return self._assembler.pairwise_means_indices(
-                self._alpha_alt, self._only_larger
-            )
+            return self._assembler.pairwise_means_indices_alt
         except ValueError:
             raise ValueError(
                 "`.pairwise_means_indices_alt` is undefined for a cube-result "
                 "without a mean measure"
             )
 
-    def pairwise_significance_p_vals(self, column_idx):
-        """2D ndarray of pairwise-significance p-vals matrices for column idx."""
-        return self._assembler.pairwise_significance_p_vals(column_idx)
+    @lazyproperty
+    def pairwise_significance_p_vals(self):
+        """2D ndarray of p-vals for each pair of compared groups of proportions.
 
-    def pairwise_significance_t_stats(self, column_idx):
-        """return 2D ndarray of pairwise-significance t-stats for selected column."""
-        return self._assembler.pairwise_significance_t_stats(column_idx)
+        Considering a 2x3 proportions matrix and selecting the baseline column via the
+        transforms, the p-vals will be a 2x3 matrix where the compared groups are the
+        selected column with each of the other columns.
 
-    def pairwise_significance_means_p_vals(self, column_idx):
-        """Optional 2D ndarray of means significance p-vals matrices for column idx."""
-        # Significance of means difference is available only is cube contains means.
+        E.G. first col selected
+            [
+               [1.0, 0.05, 0.01],
+               [1.0, 0.01, 0.05],
+               [1.0, 0.1, 0.01],
+            ]
+        """
+        return self._assembler.pairwise_significance_p_vals
+
+    @lazyproperty
+    def pairwise_significance_p_vals_scale_means(self):
+        """1D ndarray summary row of p-vals for compared groups of scale means.
+
+        Summarizes the p values of scale means. It's basically represented by a 1D numpy
+        array like [0.04, 0.022, 0.01]. The number of elements are equal to the number
+        of the columns.
+        """
+        return self._assembler.pairwise_p_vals_scale_means
+
+    @lazyproperty
+    def pairwise_significance_t_stats(self):
+        """2D ndarray of t-stats for each pair of compared groups of proportions.
+
+        Considering a 2x3 proportions matrix and selecting the baseline column via the
+        transforms, the t-stats will be a 2x3 matrix where the compared groups are the
+        selected column with each of the other columns.
+
+        E.G. first col selected
+            [
+               [0.0, -0.004, 0.01],
+               [0.0, 0.041, -0.02],
+               [0.0, 0.001, -0.01],
+            ]
+        """
+        return self._assembler.pairwise_significance_t_stats
+
+    @lazyproperty
+    def pairwise_significance_t_stats_scale_means(self):
+        """1D ndarray summary row of t-stats for compared groups of scale means.
+
+        Summarizes the t-stats of scale means. It's basically represented by a 1D numpy
+        array like [0.004, -0.0022, 0.000001]. The number of elements are equal to the
+        number of the columns.
+        """
+        return self._assembler.pairwise_t_stats_scale_means
+
+    @lazyproperty
+    def pairwise_significance_means_p_vals(self):
+        """Optional 2D ndarray of p-vals for each pair of compared groups of means.
+
+        Raises a ValueError if cube doesn't contains mean measure
+        """
         try:
-            return self._assembler.pairwise_significance_means_p_vals(column_idx)
+            return self._assembler.pairwise_significance_means_p_vals
         except ValueError:
             raise ValueError(
                 "`.pairwise_significance_means_p_vals` is undefined for a cube-result "
                 "without a mean measure"
             )
 
-    def pairwise_significance_means_t_stats(self, column_idx):
-        """Optional 2D ndarray of means significance t-stats matrices for column idx."""
-        # Significance of means difference is available only is cube contains means.
+    @lazyproperty
+    def pairwise_significance_means_t_stats(self):
+        """Optional 2D ndarray of t-stats for each pair of compared groups of means.
+
+        Raises a ValueError if cube doesn't contains mean measure
+        """
         try:
-            return self._assembler.pairwise_significance_means_t_stats(column_idx)
+            return self._assembler.pairwise_significance_means_t_stats
         except ValueError:
             raise ValueError(
                 "`.pairwise_significance_means_t_stats` is undefined for a cube-result "
@@ -735,17 +697,9 @@ class _Slice(CubePartition):
             )
 
     @lazyproperty
-    def pairwise_significance_tests(self):
-        """tuple of _ColumnPairwiseSignificance tests.
-
-        Result has as many elements as there are columns in the slice. Each
-        significance test contains `p_vals` and `t_stats` (ndarrays that represent
-        probability values and statistical scores).
-        """
-        return tuple(
-            PairwiseSignificance(self).values[column_idx]
-            for column_idx in range(len(self.column_labels))
-        )
+    def pairwise_selection_idx(self):
+        """Optional int representing the actual selected column idx pro sig tests."""
+        return self._assembler.pairwise_selection_idx
 
     @lazyproperty
     def population_counts(self):
@@ -1155,12 +1109,6 @@ class _Slice(CubePartition):
             )
 
     @lazyproperty
-    def summary_pairwise_indices(self):
-        return PairwiseSignificance(
-            self, self._alpha, self._only_larger
-        ).summary_pairwise_indices
-
-    @lazyproperty
     def tab_label(self):
         """Subvar label of slice id if first dimension is a CA_SUBVAR, '"' otherwise."""
         first_dimension = self._cube.dimensions[0]
@@ -1343,29 +1291,6 @@ class _Slice(CubePartition):
     def _columns_have_numeric_value(self):
         """True when one or more column elements have an assigned numeric-value."""
         return not np.all(np.isnan(self._columns_dimension_numeric_values))
-
-    @lazyproperty
-    def _columns_scale_mean_variance(self):
-        """Optional 1D np.float64 ndarray of scale-mean variance for each column."""
-        if not self._rows_have_numeric_value:
-            return None
-
-        # --- Note: the variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is
-        # --- the mean of the data.
-        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
-        row_dim_numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
-        numerator = (
-            self.counts[not_a_nan_index, :]
-            * pow(
-                np.broadcast_to(
-                    row_dim_numeric_values, self.counts[not_a_nan_index, :].T.shape
-                )
-                - self.columns_scale_mean.reshape(-1, 1),
-                2,
-            ).T
-        )
-        denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
-        return np.nansum(numerator, axis=0) / denominator
 
     @lazyproperty
     def _dimensions(self):

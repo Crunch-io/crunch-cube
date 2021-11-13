@@ -185,31 +185,118 @@ class SecondOrderMeasures:
         """_Means measure object for this cube-result"""
         return _Means(self._dimensions, self, self._cube_measures)
 
-    def pairwise_p_vals_for_subvar(self, subvar_idx):
+    @lazyproperty
+    def pairwise_indices(self):
+        """_PairwiseIndices measure object for this cube-result"""
+        return _PairwiseIndices(
+            self._dimensions, self, self._cube_measures, self._alpha
+        )
+
+    @lazyproperty
+    def pairwise_indices_alt(self):
+        """_PairwiseIndices measure object for this cube-result"""
+        return _PairwiseIndices(
+            self._dimensions, self, self._cube_measures, self._alpha_alt
+        )
+
+    @lazyproperty
+    def pairwise_indices_for_subvar(self):
+        """_PairwiseSubvarIndices measure object for this cube-result"""
+        return _PairwiseSubvarIndices(
+            self._dimensions, self, self._cube_measures, self._alpha
+        )
+
+    @lazyproperty
+    def pairwise_indices_for_subvar_alt(self):
+        """_PairwiseSubvarIndices measure object for this cube-result"""
+        return _PairwiseSubvarIndices(
+            self._dimensions, self, self._cube_measures, self._alpha_alt
+        )
+
+    @lazyproperty
+    def pairwise_means_indices(self):
+        """_PairwiseMeansIndices measure object for this cube-result"""
+        return _PairwiseMeansIndices(
+            self._dimensions, self, self._cube_measures, self._alpha
+        )
+
+    @lazyproperty
+    def pairwise_means_indices_alt(self):
+        """_PairwiseMeansIndices measure object for this cube-result"""
+        return _PairwiseMeansIndices(
+            self._dimensions, self, self._cube_measures, self._alpha_alt
+        )
+
+    @lazyproperty
+    def pairwise_p_vals_for_subvar(self):
         """_PairwiseSigPValsForSubvar measure object for this cube-result"""
         return _PairwiseSigPValsForSubvar(
-            self._dimensions, self, self._cube_measures, subvar_idx
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self._reference_insertion_idx,
+            self._reference_column_idx,
         )
 
-    def pairwise_t_stats_for_subvar(self, subvar_idx):
+    @lazyproperty
+    def pairwise_t_stats_for_subvar(self):
         """_PairwiseSigTStatsForSubvar measure object for this cube-result"""
         return _PairwiseSigTStatsForSubvar(
-            self._dimensions, self, self._cube_measures, subvar_idx
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self._reference_insertion_idx,
+            self._reference_column_idx,
         )
 
-    def pairwise_p_vals(self, column_idx):
+    @lazyproperty
+    def pairwise_p_vals(self):
         """_PairwiseSigPvals measure object for this cube-result."""
         return _PairwiseSigPvals(
-            self._dimensions, self, self._cube_measures, column_idx
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self._reference_insertion_idx,
+            self._reference_column_idx,
         )
 
-    def pairwise_t_stats(self, column_idx):
+    @lazyproperty
+    def pairwise_p_vals_scale_means(self):
+        """_PairwiseSigPvalsScaleMeans measure object for this cube-result."""
+        return _PairwiseSigPvalsScaleMeans(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            MO.COLUMNS,
+            self._reference_insertion_idx,
+            self._reference_column_idx,
+        )
+
+    @lazyproperty
+    def pairwise_t_stats(self):
         """_PairwiseSigTstats measure object for this cube-result."""
         return _PairwiseSigTstats(
-            self._dimensions, self, self._cube_measures, column_idx
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self._reference_insertion_idx,
+            self._reference_column_idx,
         )
 
-    def pairwise_significance_means_p_vals(self, column_idx):
+    @lazyproperty
+    def pairwise_t_stats_scale_means(self):
+        """_PairwiseSigTstatsScaleMeans measure object for this cube-result."""
+        return _PairwiseSigTstatsScaleMeans(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            MO.COLUMNS,
+            self._reference_insertion_idx,
+            self._reference_column_idx,
+        )
+
+    @lazyproperty
+    def pairwise_significance_means_p_vals(self):
         """_PairwiseMeansSigPVals measure object for this cube-result.
 
         The `column_idx` is the reference column on which calculate the pairwise sig
@@ -217,13 +304,22 @@ class SecondOrderMeasures:
         a subvariable reference for an array type.
         """
         return _PairwiseMeansSigPVals(
-            self._dimensions, self, self._cube_measures, column_idx
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self._reference_insertion_idx,
+            self._reference_column_idx,
         )
 
-    def pairwise_significance_means_t_stats(self, column_idx):
+    @lazyproperty
+    def pairwise_significance_means_t_stats(self):
         """_PairwiseMeansSigTStats measure object for this cube-result."""
         return _PairwiseMeansSigTStats(
-            self._dimensions, self, self._cube_measures, column_idx
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self._reference_insertion_idx,
+            self._reference_column_idx,
         )
 
     @lazyproperty
@@ -398,6 +494,20 @@ class SecondOrderMeasures:
         return _MarginWeightedBase(self._dimensions, self, self._cube_measures, MO.ROWS)
 
     @lazyproperty
+    def scale_mean_pairwise_indices(self):
+        """_ScaleMeanPairwiseIndices measure object for this cube-result"""
+        return _ScaleMeanPairwiseIndices(
+            self._dimensions, self, self._cube_measures, self._alpha, MO.COLUMNS
+        )
+
+    @lazyproperty
+    def scale_mean_pairwise_indices_alt(self):
+        """_ScaleMeanPairwiseIndices measure object for this cube-result"""
+        return _ScaleMeanPairwiseIndices(
+            self._dimensions, self, self._cube_measures, self._alpha_alt, MO.COLUMNS
+        )
+
+    @lazyproperty
     def smoothed_column_index(self):
         """_ColumnIndexSmoothed measure object for this cube-result.
 
@@ -539,6 +649,24 @@ class SecondOrderMeasures:
         return _Zscores(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def _alpha(self):
+        """float confidence-interval threshold for pairwise-t (sig) tests."""
+        return self._dimensions[-1].pairwise_significance_spec.alpha_values[0]
+
+    @lazyproperty
+    def _alpha_alt(self):
+        """Alternate float confidence-interval threshold or None.
+
+        This is an optional secondary confidence interval allowing two-level
+        significance testing. Value is None if no alternate alpha was specified by user.
+        """
+        return self._dimensions[-1].pairwise_significance_spec.alpha_values[1]
+
+    @lazyproperty
+    def _columns_dimension(self):
+        return self._dimensions[-1]
+
+    @lazyproperty
     def _cube_measures(self):
         """CubeMeasures collection object for this cube-result.
 
@@ -547,6 +675,18 @@ class SecondOrderMeasures:
         measures it is based on.
         """
         return CubeMeasures(self._cube, self._dimensions, self._slice_idx)
+
+    @lazyproperty
+    def _reference_column_idx(self):
+        """Optional int of the selected column for pairwise significance tests."""
+        return self._columns_dimension.pairwise_significance_spec.reference_column_idx
+
+    @lazyproperty
+    def _reference_insertion_idx(self):
+        """Optional int of the selected inserted column for pairwise signif. tests."""
+        return (
+            self._columns_dimension.pairwise_significance_spec.reference_insertion_idx
+        )
 
 
 class _BaseSecondOrderMeasure:
@@ -1057,6 +1197,378 @@ class _MeansSmoothed(_Means, _SmoothedMeasure):
         )
 
 
+class _PairwiseIndices(_BaseSecondOrderMeasure):
+    """Provides the p_vals and t_stats measures for all the column of a matrix.
+
+    The pairwise indices calculation needs matrices of pvals and t_stats for every
+    column of the matrix including the insertions. Basically this class provides a
+    signle public property that exposes a tuple (tstats, pvals) of 3D ndarrays with
+    shape (ncols, nrows, ncols), that represents the pairwise significance for each
+    selected column.
+    """
+
+    def __init__(self, dimensions, second_order_measures, cube_measures, alpha):
+        super(_PairwiseIndices, self).__init__(
+            dimensions, second_order_measures, cube_measures
+        )
+        self._alpha = alpha
+
+    @lazyproperty
+    def values(self):
+        """Optional 2D ndarray of tuple of pairwise int indices.
+
+        Significance indices are calculated iterating over each ordered pvals and
+        t_stats column and assembled into a 2D array.
+
+        pvals:
+        [[
+           [0.1  0.2  0.3 ]    pvals_col_0_selected
+           [0.4  0.5  0.6 ]
+         ]
+         [
+           [0.01 0.02 0.3 ]    pvals_col_1_selected
+           [0.02 0.03 0.04]
+         ]]
+
+        t_stats:
+        [[
+           [0.1  0.2  0.3 ]    t_stats_col_0_selected
+           [0.4  0.5  0.6 ]
+         ]
+         [
+           [0.01 0.02 0.3 ]    t_stats_col_1_selected
+           [0.02 0.03 0.04]
+         ]]
+        Each pvals and tstats matrix is used to calculate the 1D array of tuple of int
+        that represents the significance for the selected column:
+        e.g. [(0,),(), (1,2)]
+        Iterating over each significance matrix the method assemble the complete matrix
+        of significant indices:
+        [[(0,), (), (1,2)],
+         [(), (), (0,1]]
+        """
+        return np.array(
+            [
+                self._pairwise_indices(self._p_vals[i], self._t_stats[i])
+                for i in range(self._p_vals.shape[0])
+            ],
+            dtype=object,
+        ).T
+
+    @lazyproperty
+    def _element_ids(self):
+        """tuple of int element-id for each category or subvar in column dimension."""
+        return self._dimensions[-1].element_ids
+
+    @lazyproperty
+    def _insertion_ids(self):
+        """tuple of int insertion-id for each insertion in column dimension"""
+        return self._dimensions[-1].insertion_ids
+
+    @lazyproperty
+    def _only_larger(self):
+        """True if only the larger of reciprocal pairwise-t values should appear."""
+        return self._dimensions[-1].pairwise_significance_spec.only_larger
+
+    def _pairwise_indices(self, p_vals, t_stats):
+        """1D ndarray of tuples of int pairwise significant indices of each column."""
+        significance = (
+            np.logical_and(t_stats < 0, p_vals < self._alpha)
+            if self._only_larger
+            else p_vals < self._alpha
+        )
+        col_significance = np.empty((len(significance),), dtype=object)
+        col_significance[:] = [tuple(np.where(sig_row)[0]) for sig_row in significance]
+        return col_significance
+
+    @lazyproperty
+    def _p_vals(self):
+        """3D ndarray of floats representing the p_vals for each selected column.
+
+        It is composed by the base pairwise significance pvals values, calculated
+        considering the selection of the base columns; and the subtotal pairwise
+        significance pvals values, calculated considering the selection of all the
+        column dimension insertions.
+        """
+        base_pw_sig_p_vals = [
+            self._pw_sig_pvals_measure(None, col_idx).blocks
+            for col_idx in range(len(self._element_ids))
+        ]
+        subtotal_pw_sig_p_vals = [
+            self._pw_sig_pvals_measure(insertion_idx, None).blocks
+            for insertion_idx in range(len(self._insertion_ids))
+        ]
+        return np.block(base_pw_sig_p_vals + subtotal_pw_sig_p_vals)
+
+    def _pw_sig_pvals_measure(self, insertion_idx, col_idx):
+        """_PairwiseSigPvals object representing p_values measure."""
+        return _PairwiseSigPvals(
+            self._dimensions,
+            self._second_order_measures,
+            self._cube_measures,
+            insertion_idx,
+            col_idx,
+        )
+
+    def _pw_sig_tstats_measure(self, insertion_idx, col_idx):
+        """_PairwiseSigTstats object representing t_stats measure."""
+        return _PairwiseSigTstats(
+            self._dimensions,
+            self._second_order_measures,
+            self._cube_measures,
+            insertion_idx,
+            col_idx,
+        )
+
+    @lazyproperty
+    def _t_stats(self):
+        """3D ndarray of floats representing the t_stats for each selected column.
+
+        It is composed by the base pairwise significance t_stats values, calculated
+        considering the selection of the base columns; and the subtotal pairwise
+        significance t_stats values, calculated considering the selection of all the
+        column dimension insertions.
+        """
+        base_pw_sig_t_stats = [
+            self._pw_sig_tstats_measure(None, col_idx).blocks
+            for col_idx in range(len(self._element_ids))
+        ]
+        subtotal_pw_sig_t_stats = [
+            self._pw_sig_tstats_measure(insertion_idx, None).blocks
+            for insertion_idx in range(len(self._insertion_ids))
+        ]
+        return np.block(base_pw_sig_t_stats + subtotal_pw_sig_t_stats)
+
+
+class _PairwiseMeansIndices(_PairwiseIndices):
+    def _pw_sig_pvals_measure(self, insertion_idx, col_idx):
+        """_PairwiseMeansSigPVals object representing p_values for means measure."""
+        return _PairwiseMeansSigPVals(
+            self._dimensions,
+            self._second_order_measures,
+            self._cube_measures,
+            insertion_idx,
+            col_idx,
+        )
+
+    def _pw_sig_tstats_measure(self, insertion_idx, col_idx):
+        """_PairwiseMeansSigTStats object representing t_stats for means measure."""
+        return _PairwiseMeansSigTStats(
+            self._dimensions,
+            self._second_order_measures,
+            self._cube_measures,
+            insertion_idx,
+            col_idx,
+        )
+
+
+class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
+    """Provides pairwise means significance t-stats measure for matrix.
+
+    Pairwise significance is calculated for each selected column separately.
+    """
+
+    def __init__(
+        self, dimensions, second_order_measures, cube_measures, insertion_idx, col_idx
+    ):
+        super(_PairwiseMeansSigTStats, self).__init__(
+            dimensions, second_order_measures, cube_measures
+        )
+        self._insertion_idx = insertion_idx
+        self._col_idx = col_idx
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure."""
+        return NanSubtotals.blocks(self.t_stats, self._dimensions)
+
+    @lazyproperty
+    def t_stats(self):
+        """2D ndarray of float64 representing t-stats for means pairwise testing.
+
+        Calculate the level of significance for the difference of two means from the
+        selected column different from a hypothesized value.
+        t = (x̄1 - x̄2 - (μ1 - μ2)) / √ ((s1 / N1) + (s2 / N2))
+        """
+        if self._insertion_idx is not None:
+            return np.full(self._cube_measures.cube_stddev.stddev.shape, np.nan)
+
+        means = self._cube_measures.cube_means.means
+        variance = np.power(self._cube_measures.cube_stddev.stddev, 2)
+        col_bases = self._cube_measures.unweighted_cube_counts.column_bases
+        idx = self._col_idx
+
+        ref_means = np.broadcast_to(means[:, [idx]], means.shape)
+        ref_variance = np.broadcast_to(variance[:, [idx]], variance.shape)
+        ref_col_bases = np.broadcast_to(col_bases[:, [idx]], col_bases.shape)
+
+        return (means - ref_means) / np.sqrt(
+            (variance / col_bases) + (ref_variance / ref_col_bases)
+        )
+
+
+class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
+    """Provides pairwise means significance p-vals measure for matrix.
+
+    Pairwise significance is calculated for each selected column separately.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure."""
+        return NanSubtotals.blocks(self.p_vals, self._dimensions)
+
+    @lazyproperty
+    def p_vals(self):
+        """2D ndarray of float64 representing p-vals for means pairwise testing."""
+        if self._insertion_idx is not None:
+            return np.full(self.t_stats.shape, np.nan)
+        return 2 * (1 - t.cdf(abs(self.t_stats), df=self._df))
+
+    @lazyproperty
+    def _df(self):
+        """A np.float64 ndarray of the degrees of freedom for the Pairwise mean test
+
+        We use the Welch's T Test, which has a complicated formula for the degrees of
+        freedom to account for the fact that we are allowing the variances to be
+        different between the distributions.
+
+        Formula is:
+        df = ( (s1/N1) + (s2/N2) )^2 / ( (s1/N1)^2/(N1-1) + (s2/N2)^2/(N2-1) )
+        """
+        variance = np.power(self._cube_measures.cube_stddev.stddev, 2)
+        col_bases = self._cube_measures.unweighted_cube_counts.column_bases
+        idx = self._col_idx
+
+        ref_variance = np.broadcast_to(variance[:, [idx]], variance.shape)
+        ref_col_bases = np.broadcast_to(col_bases[:, [idx]], col_bases.shape)
+
+        numerator = np.power((variance / col_bases) + (ref_variance / ref_col_bases), 2)
+        denominator1 = np.power(variance / col_bases, 2) / (col_bases - 1)
+        denominator2 = np.power(ref_variance / ref_col_bases, 2) / (ref_col_bases - 1)
+
+        return numerator / (denominator1 + denominator2)
+
+
+class _PairwiseSigTstats(_BaseSecondOrderMeasure):
+    """Provides pairwise significance t-stats measure for matrix.
+
+    The paired samples t-test is used to compare the means between two related groups
+    of samples. This measure class take care of compute the paired test given the
+    selected column.
+    """
+
+    def __init__(
+        self, dimensions, second_order_measures, cube_measures, insertion_idx, col_idx
+    ):
+        super(_PairwiseSigTstats, self).__init__(
+            dimensions, second_order_measures, cube_measures
+        )
+        self._insertion_idx = insertion_idx
+        self._col_idx = col_idx
+
+    @lazyproperty
+    def _base_values(self):
+        """2D ndarray np.float64 of the t-stats for the base values (1st block)
+
+        These are the base values t-stats considering the eventual selection on a
+        subtotal column. For a normal column selected, this property compute the t-stats
+        pairing each column with the selected one from the base column proportions.
+        +====+====+====+====+
+        | C1 | C2 | C3 | S1 |
+        +====+====+====+====+
+        |0.3 |0.4 |0.5 |0.4 |
+        +----+----+----+----+
+        |0.2 |0.1 |0.3 |0.7 |
+        +----+----+----+----+
+        Considering C3 the selected column we compute the t-stats comparing C3-C1,
+        C3-C2, C3-C3. If the selected column is a subtotal (S1 in this example) the
+        comparison will be between S1-C1, S1-C2 and S1-C3. The final shape of the
+        t-stats will be the same of the base values block of the column proportions,
+        in this example (2,3).
+        """
+        # --- Use "body" reference values for base values
+        (ref_props, ref_bases) = self._reference_values(0)
+        return self._calculate_t_stats(
+            self._proportions[0][0], self._bases[0][0], ref_props, ref_bases
+        )
+
+    @lazyproperty
+    def _bases(self):
+        """2D array of 2D ndarray "blocks" for the column unweighted bases"""
+        return self._second_order_measures.column_unweighted_bases.blocks
+
+    def _reference_values(self, block_index):
+        """Tuple of the reference proportions and bases for
+
+        Because the comparison of interest is between columns, the shape of the reference
+        is determined by whether we're in the "body" of the table (the base values and
+        subtotal columns), or the "inserted" rows (inserted rows & intersections).
+        This takes the column index and gets the needed references for the body.
+
+        The block_index parameter chooses between the body (block_index=0) and inserted
+        rows (block_index=1).
+        """
+        if self._insertion_idx is not None:
+            col_idx = self._insertion_idx
+            props = self._proportions[block_index][1]
+            bases = self._bases[block_index][1]
+        else:
+            col_idx = self._col_idx
+            props = self._proportions[block_index][0]
+            bases = self._bases[block_index][0]
+
+        return (props[:, [col_idx]], bases[:, [col_idx]])
+
+    def _calculate_t_stats(self, props, bases, ref_props, ref_bases):
+        """Calculates the 2D ndarray of np.float64 values for the tstats
+
+        This method calculates the t test on dependent samples, comparing each column
+        with the selected one.
+        """
+        if props.size == 0:
+            return props
+        var_props = props * (1.0 - props) / bases
+        ref_var_props = ref_props * (1.0 - ref_props) / ref_bases
+        diff = props - ref_props
+        # --- Absolute value to handle subtotal differences (can't get square root of
+        # --- negative number)
+        se_diff = np.sqrt(np.abs(var_props + ref_var_props))
+        return diff / se_diff
+
+    @lazyproperty
+    def _intersections(self):
+        "2D ndarray np.float64 of the t-stats for the intersections (4th block)" ""
+        # --- Use "inserted" reference values for intersections
+        (ref_props, ref_variance) = self._reference_values(1)
+        return self._calculate_t_stats(
+            self._proportions[1][1], self._bases[1][1], ref_props, ref_variance
+        )
+
+    @lazyproperty
+    def _proportions(self):
+        """2D ndarray np.float64 of the t-stats for the column proportions"""
+        return self._second_order_measures.column_proportions.blocks
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D ndarray np.float64 of the values for the subtotal columns (2nd block)"""
+        # --- Use "body" reference values for inserted columns
+        (ref_props, ref_variance) = self._reference_values(0)
+        return self._calculate_t_stats(
+            self._proportions[0][1], self._bases[0][1], ref_props, ref_variance
+        )
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """2D ndarray np.float64 of the t-stats for the subtotal rows (3rd block)"""
+        # --- Use "inserted" reference values for inserted rows
+        (ref_props, ref_variance) = self._reference_values(1)
+        return self._calculate_t_stats(
+            self._proportions[1][0], self._bases[1][0], ref_props, ref_variance
+        )
+
+
 class _PairwiseSigTStatsForSubvar(_BaseSecondOrderMeasure):
     """Provides pairwise significance t-stats measure for matrix and selected subvar.
 
@@ -1064,11 +1576,17 @@ class _PairwiseSigTStatsForSubvar(_BaseSecondOrderMeasure):
     """
 
     def __init__(
-        self, dimensions, second_order_measures, cube_measures, selected_subvar_idx
+        self,
+        dimensions,
+        second_order_measures,
+        cube_measures,
+        insertion_idx,
+        selected_subvar_idx,
     ):
         super(_PairwiseSigTStatsForSubvar, self).__init__(
             dimensions, second_order_measures, cube_measures
         )
+        self._insertion_idx = insertion_idx
         self._selected_subvar_idx = selected_subvar_idx
 
     @lazyproperty
@@ -1151,208 +1669,6 @@ class _PairwiseSigPValsForSubvar(_PairwiseSigTStatsForSubvar):
         )
 
 
-class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
-    """Provides pairwise means significance t-stats measure for matrix.
-
-    Pairwise significance is calculated for each selected column separately.
-    """
-
-    def __init__(
-        self, dimensions, second_order_measures, cube_measures, selected_column_idx
-    ):
-        super(_PairwiseMeansSigTStats, self).__init__(
-            dimensions, second_order_measures, cube_measures
-        )
-        self._selected_column_idx = selected_column_idx
-
-    @lazyproperty
-    def blocks(self):
-        """2D array of the four 2D "blocks" making up this measure."""
-        return NanSubtotals.blocks(self.t_stats, self._dimensions)
-
-    @lazyproperty
-    def t_stats(self):
-        """2D ndarray of float64 representing t-stats for means pairwise testing.
-
-        Calculate the level of significance for the difference of two means from the
-        selected column different from a hypothesized value.
-        t = (x̄1 - x̄2 - (μ1 - μ2)) / √ ((s1 / N1) + (s2 / N2))
-        """
-        if self._selected_column_idx < 0:
-            return np.full(self._cube_measures.cube_stddev.stddev.shape, np.nan)
-
-        means = self._cube_measures.cube_means.means
-        variance = np.power(self._cube_measures.cube_stddev.stddev, 2)
-        col_bases = self._cube_measures.unweighted_cube_counts.column_bases
-        idx = self._selected_column_idx
-
-        ref_means = np.broadcast_to(means[:, [idx]], means.shape)
-        ref_variance = np.broadcast_to(variance[:, [idx]], variance.shape)
-        ref_col_bases = np.broadcast_to(col_bases[:, [idx]], col_bases.shape)
-
-        return (means - ref_means) / np.sqrt(
-            (variance / col_bases) + (ref_variance / ref_col_bases)
-        )
-
-
-class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
-    """Provides pairwise means significance p-vals measure for matrix.
-
-    Pairwise significance is calculated for each selected column separately.
-    """
-
-    @lazyproperty
-    def blocks(self):
-        """2D array of the four 2D "blocks" making up this measure."""
-        return NanSubtotals.blocks(self.p_vals, self._dimensions)
-
-    @lazyproperty
-    def p_vals(self):
-        """2D ndarray of float64 representing p-vals for means pairwise testing."""
-        return 2 * (1 - t.cdf(abs(self.t_stats), df=self._df))
-
-    @lazyproperty
-    def _df(self):
-        """A np.float64 ndarray of the degrees of freedom for the Pairwise mean test
-
-        We use the Welch's T Test, which has a complicated formula for the degrees of
-        freedom to account for the fact that we are allowing the variances to be
-        different between the distributions.
-
-        Formula is:
-        df = ( (s1/N1) + (s2/N2) )^2 / ( (s1/N1)^2/(N1-1) + (s2/N2)^2/(N2-1) )
-        """
-        variance = np.power(self._cube_measures.cube_stddev.stddev, 2)
-        col_bases = self._cube_measures.unweighted_cube_counts.column_bases
-        idx = self._selected_column_idx
-
-        ref_variance = np.broadcast_to(variance[:, [idx]], variance.shape)
-        ref_col_bases = np.broadcast_to(col_bases[:, [idx]], col_bases.shape)
-
-        numerator = np.power((variance / col_bases) + (ref_variance / ref_col_bases), 2)
-        denominator1 = np.power(variance / col_bases, 2) / (col_bases - 1)
-        denominator2 = np.power(ref_variance / ref_col_bases, 2) / (ref_col_bases - 1)
-
-        return numerator / (denominator1 + denominator2)
-
-
-class _PairwiseSigTstats(_BaseSecondOrderMeasure):
-    """Provides pairwise significance t-stats measure for matrix.
-
-    The paired samples t-test is used to compare the means between two related groups
-    of samples. This measure class take care of compute the paired test given the
-    selected column.
-    """
-
-    def __init__(
-        self, dimensions, second_order_measures, cube_measures, selected_column_idx
-    ):
-        super(_PairwiseSigTstats, self).__init__(
-            dimensions, second_order_measures, cube_measures
-        )
-        self._selected_column_idx = selected_column_idx
-
-    @lazyproperty
-    def _base_values(self):
-        """2D ndarray np.float64 of the t-stats for the base values (1st block)
-
-        These are the base values t-stats considering the eventual selection on a
-        subtotal column. For a normal column selected, this property compute the t-stats
-        pairing each column with the selected one from the base column proportions.
-        +====+====+====+====+
-        | C1 | C2 | C3 | S1 |
-        +====+====+====+====+
-        |0.3 |0.4 |0.5 |0.4 |
-        +----+----+----+----+
-        |0.2 |0.1 |0.3 |0.7 |
-        +----+----+----+----+
-        Considering C3 the selected column we compute the t-stats comparing C3-C1,
-        C3-C2, C3-C3. If the selected column is a subtotal (S1 in this example) the
-        comparison will be between S1-C1, S1-C2 and S1-C3. The final shape of the
-        t-stats will be the same of the base values block of the column proportions,
-        in this example (2,3).
-        """
-        # --- Use "body" reference values for base values
-        (ref_props, ref_bases) = self._reference_values(0)
-        return self._calculate_t_stats(
-            self._proportions[0][0], self._bases[0][0], ref_props, ref_bases
-        )
-
-    @lazyproperty
-    def _bases(self):
-        """2D array of 2D ndarray "blocks" for the column unweighted bases"""
-        return self._second_order_measures.column_unweighted_bases.blocks
-
-    def _reference_values(self, block_index):
-        """Tuple of the reference proportions and bases for
-
-        Because the comparison of interest is between columns, the shape of the reference
-        is determined by whether we're in the "body" of the table (the base values and
-        subtotal columns), or the "inserted" rows (inserted rows & intersections).
-        This takes the column index and gets the needed references for the body.
-
-        The block_index parameter chooses between the body (block_index=0) and inserted
-        rows (block_index=1).
-        """
-        col_idx = self._selected_column_idx
-        if col_idx < 0:
-            props = self._proportions[block_index][1]
-            bases = self._bases[block_index][1]
-        else:
-            props = self._proportions[block_index][0]
-            bases = self._bases[block_index][0]
-
-        return (props[:, [col_idx]], bases[:, [col_idx]])
-
-    def _calculate_t_stats(self, props, bases, ref_props, ref_bases):
-        """Calculates the 2D ndarray of np.float64 values for the tstats
-
-        This method calculates the t test on dependent samples, comparing each column
-        with the selected one.
-        """
-        if props.size == 0:
-            return props
-        var_props = props * (1.0 - props) / bases
-        ref_var_props = ref_props * (1.0 - ref_props) / ref_bases
-        diff = props - ref_props
-        # --- Absolute value to handle subtotal differences (can't get square root of
-        # --- negative number)
-        se_diff = np.sqrt(np.abs(var_props + ref_var_props))
-        return diff / se_diff
-
-    @lazyproperty
-    def _intersections(self):
-        "2D ndarray np.float64 of the t-stats for the intersections (4th block)" ""
-        # --- Use "inserted" reference values for intersections
-        (ref_props, ref_variance) = self._reference_values(1)
-        return self._calculate_t_stats(
-            self._proportions[1][1], self._bases[1][1], ref_props, ref_variance
-        )
-
-    @lazyproperty
-    def _proportions(self):
-        """2D ndarray np.float64 of the t-stats for the column proportions"""
-        return self._second_order_measures.column_proportions.blocks
-
-    @lazyproperty
-    def _subtotal_columns(self):
-        """2D ndarray np.float64 of the values for the subtotal columns (2nd block)"""
-        # --- Use "body" reference values for inserted columns
-        (ref_props, ref_variance) = self._reference_values(0)
-        return self._calculate_t_stats(
-            self._proportions[0][1], self._bases[0][1], ref_props, ref_variance
-        )
-
-    @lazyproperty
-    def _subtotal_rows(self):
-        """2D ndarray np.float64 of the t-stats for the subtotal rows (3rd block)"""
-        # --- Use "inserted" reference values for inserted rows
-        (ref_props, ref_variance) = self._reference_values(1)
-        return self._calculate_t_stats(
-            self._proportions[1][0], self._bases[1][0], ref_props, ref_variance
-        )
-
-
 class _PairwiseSigPvals(_PairwiseSigTstats):
     """Provides pairwise significance p-vals measure for matrix.
 
@@ -1362,8 +1678,7 @@ class _PairwiseSigPvals(_PairwiseSigTstats):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        col_idx = self._selected_column_idx
-        t_stats = self._second_order_measures.pairwise_t_stats(col_idx).blocks
+        t_stats = self._t_stats_blocks
         column_bases = self._second_order_measures.column_unweighted_bases.blocks
         body_selected_base = self._selected_columns_base(0)
         ins_selected_base = self._selected_columns_base(1)
@@ -1399,12 +1714,46 @@ class _PairwiseSigPvals(_PairwiseSigTstats):
         intersections). By choosing between them, we get the bases in a shape that we
         don't have to broadcast.
         """
-        col_idx = self._selected_column_idx
         column_bases = self._second_order_measures.column_unweighted_bases.blocks
         return (
-            column_bases[table_index][1][:, [col_idx]]
-            if col_idx < 0
-            else column_bases[table_index][0][:, [col_idx]]
+            column_bases[table_index][1][:, [self._insertion_idx]]
+            if self._insertion_idx is not None
+            else column_bases[table_index][0][:, [self._col_idx]]
+        )
+
+    @lazyproperty
+    def _t_stats_blocks(self):
+        """2D array of the four 2D "blocks" making up the sig. t_stats measure."""
+        return _PairwiseSigTstats(
+            self._dimensions,
+            self._second_order_measures,
+            self._cube_measures,
+            self._insertion_idx,
+            self._col_idx,
+        ).blocks
+
+
+class _PairwiseSubvarIndices(_PairwiseIndices):
+    """Provides pairwise significance indices measure for matrix."""
+
+    def _pw_sig_pvals_measure(self, insertion_idx, col_idx):
+        """_PairwiseSigPValsForSubvar object representing p_values measure."""
+        return _PairwiseSigPValsForSubvar(
+            self._dimensions,
+            self._second_order_measures,
+            self._cube_measures,
+            insertion_idx,
+            col_idx,
+        )
+
+    def _pw_sig_tstats_measure(self, insertion_idx, col_idx):
+        """_PairwiseSigTStatsForSubvar object representing t_stats measure."""
+        return _PairwiseSigTStatsForSubvar(
+            self._dimensions,
+            self._second_order_measures,
+            self._cube_measures,
+            insertion_idx,
+            col_idx,
         )
 
 
@@ -2077,7 +2426,7 @@ class _TableWeightedBases(_BaseSecondOrderMeasure):
 class _TotalShareSum(_BaseSecondOrderMeasure):
     """Provides the row share of sum measure for a matrix.
 
-    Row share sum is the sum of each subvar divided by the TOTAL number of row items.
+    Total share sum is the sum of each subvar divided by the TOTAL number of items.
     """
 
     @lazyproperty
@@ -2563,6 +2912,213 @@ class _MarginWeightedBase(_BaseMarginal):
         )
 
 
+class _PairwiseSigTstatsScaleMeans(_BaseMarginal):
+    """Provides scale means pairwise significance t-stats measure for matrix.
+
+    The paired samples t-test is used to compare the means between two related groups
+    of samples. This measure class take care of compute the paired test given the
+    selected column.
+    """
+
+    def __init__(
+        self,
+        dimensions,
+        second_order_measures,
+        cube_measures,
+        orientation,
+        insertion_idx,
+        col_idx,
+    ):
+        super(_PairwiseSigTstatsScaleMeans, self).__init__(
+            dimensions, second_order_measures, cube_measures, orientation
+        )
+        self._insertion_idx = insertion_idx
+        self._col_idx = col_idx
+
+    @lazyproperty
+    def blocks(self):
+        """List of 1D arrays of the two 1D "blocks" making up t-stats measure."""
+        return [self._base_values, self._subtotal_columns]
+
+    @lazyproperty
+    def _base_counts(self):
+        """2D ndarray of counts filtered according to the row dim numeric values"""
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
+        counts = self._second_order_measures.weighted_counts.blocks[0][0]
+        return counts[not_a_nan_index, :]
+
+    @lazyproperty
+    def _base_values(self):
+        """1D ndarray of two-tailed scale mean t-test base_values."""
+        base_counts = np.sum(self._base_counts, axis=0)
+        base_variance = self._base_variance
+        base_scale_mean = self._second_order_measures.columns_scale_mean.blocks[0]
+        comparable_counts = np.sum(self._subtotal_counts, axis=0)
+        comparable_variance = self._subtotal_variance
+        comparable_scale_mean = self._second_order_measures.columns_scale_mean.blocks[1]
+        if self._insertion_idx is not None:
+            selected_counts = comparable_counts[self._insertion_idx]
+            selected_variance = comparable_variance[self._insertion_idx]
+            selected_scale_mean = comparable_scale_mean[self._insertion_idx]
+        else:
+            selected_counts = base_counts[self._col_idx]
+            selected_variance = base_variance[self._col_idx]
+            selected_scale_mean = base_scale_mean[self._col_idx]
+        return self._t_stats(
+            base_counts,
+            base_variance,
+            base_scale_mean,
+            selected_counts,
+            selected_variance,
+            selected_scale_mean,
+        )
+
+    @lazyproperty
+    def _base_variance(self):
+        """1D np.float64 ndarray of scale-mean variance for each column."""
+        scale_mean = self._second_order_measures.columns_scale_mean.blocks[0]
+        return self._variance(self._base_counts, scale_mean)
+
+    @lazyproperty
+    def _rows_dimension_numeric_values(self):
+        """1D optional np.int/float64 ndarray of numeric-value for each row element."""
+        elements = self._dimensions[0].valid_elements
+        return np.array([el.numeric_value for el in elements])
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """1D ndarray of two-tailed scale mean t-test for subtotal columns."""
+        subtotal_counts = np.sum(self._subtotal_counts, axis=0)
+        subtotal_variance = self._subtotal_variance
+        subtotal_scale_mean = self._second_order_measures.columns_scale_mean.blocks[1]
+        comparable_counts = np.sum(self._base_counts, axis=0)
+        comparable_variance = self._base_variance
+        comparable_scale_mean = self._second_order_measures.columns_scale_mean.blocks[0]
+        if self._insertion_idx is not None:
+            selected_counts = subtotal_counts[self._insertion_idx]
+            selected_variance = subtotal_variance[self._insertion_idx]
+            selected_scale_mean = subtotal_scale_mean[self._insertion_idx]
+        else:
+            selected_counts = comparable_counts[self._col_idx]
+            selected_variance = comparable_variance[self._col_idx]
+            selected_scale_mean = comparable_scale_mean[self._col_idx]
+        return self._t_stats(
+            subtotal_counts,
+            subtotal_variance,
+            subtotal_scale_mean,
+            selected_counts,
+            selected_variance,
+            selected_scale_mean,
+        )
+
+    @lazyproperty
+    def _subtotal_variance(self):
+        """1D np.float64 ndarray of scale-mean variance for each subtotal column."""
+        scale_mean = self._second_order_measures.columns_scale_mean.blocks[1]
+        return self._variance(self._subtotal_counts, scale_mean)
+
+    @lazyproperty
+    def _subtotal_counts(self):
+        """2D ndarray of counts filtered according to the row dim numeric values"""
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
+        counts = self._second_order_measures.weighted_counts.blocks[0][1]
+        return counts[not_a_nan_index, :]
+
+    def _t_stats(
+        self,
+        counts,
+        variance,
+        scale_mean,
+        selected_counts,
+        selected_variance,
+        selected_scale_mean,
+    ):
+        """Returns the pairwise Two-tailed t-test values
+
+        The formula is t = X1 - X2 / Sx1x2 * sqrt(1/n1 + 1/n2)
+        where X1 and X2 are the scale mean value for the 2 sample we're
+        comparing, n1 and n2 are the number of people from the 1st ans 2nd
+        sample who provided a response to the survey, Sx1x2 is the standard
+        deviation. In this case the standard deviation is:
+        Sx1x2 = sqrt(((n1-1)*s2x1 + (n2-2)*s2x2)/(n1+n2+2)), where s2x1 and
+        s2x2 are the is the standard deviation for sample 1 and 2.
+        """
+        standard_deviation = np.sqrt(
+            np.divide(
+                ((selected_counts - 1) * selected_variance)
+                + (counts - 1) * np.array(variance),
+                selected_counts + counts - 2,
+            )
+        )
+        tstats_scale_means = (scale_mean - selected_scale_mean) / (
+            standard_deviation * np.sqrt(1 / selected_counts + 1 / counts)
+        )
+        return tstats_scale_means
+
+    def _variance(self, counts, scale_mean):
+        """Returns 1D np.float64 ndarray of scale-mean variance for each column.
+
+        The variance for scale is defined as sum((Yi−Y~)2/(N)), where Y~ is the mean of
+        the data.
+        """
+        not_a_nan_index = ~np.isnan(self._rows_dimension_numeric_values)
+        numeric_values = self._rows_dimension_numeric_values[not_a_nan_index]
+        numerator = counts * pow(numeric_values - scale_mean[:, np.newaxis], 2).T
+        denominator = np.sum(counts, axis=0)
+        return np.nansum(numerator, axis=0) / denominator
+
+
+class _PairwiseSigPvalsScaleMeans(_PairwiseSigTstatsScaleMeans):
+    """Provides scale mean pairwise significance p-vals measure for matrix.
+
+    Pairwise significance is calculated for each selected column separately.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of 1D arrays of the two 1D "blocks" making up p-values measure."""
+        t_stats_blocks = self._t_stats_scale_means.blocks
+        base_values = 2 * (1 - t.cdf(abs(t_stats_blocks[0]), df=self._two_sample_df))
+        subtotals = 2 * (
+            1 - t.cdf(abs(t_stats_blocks[1]), df=self._two_sample_df_subtotals)
+        )
+        return [base_values, subtotals]
+
+    @lazyproperty
+    def _two_sample_df(self):
+        """1D ndarray of Degrees of Freedom (Two Samples): (N1 + N2) – 2."""
+        if self._insertion_idx is not None:
+            counts = np.sum(self._subtotal_counts, axis=0)
+            selected_counts = counts[self._insertion_idx]
+        else:
+            counts = np.sum(self._base_counts, axis=0)
+            selected_counts = counts[self._col_idx]
+        return selected_counts + counts - 2
+
+    @lazyproperty
+    def _two_sample_df_subtotals(self):
+        """1D ndarray of Degrees of Freedom for subtotal columns."""
+        base_counts = np.sum(self._base_counts, axis=0)
+        subtotal_counts = np.sum(self._subtotal_counts, axis=0)
+        if self._insertion_idx is not None:
+            selected_counts = subtotal_counts[self._insertion_idx]
+        else:
+            selected_counts = base_counts[self._col_idx]
+        return selected_counts + subtotal_counts - 2
+
+    @lazyproperty
+    def _t_stats_scale_means(self):
+        """_PairwiseSigTstatsScaleMeans measure object."""
+        return _PairwiseSigTstatsScaleMeans(
+            self._dimensions,
+            self._second_order_measures,
+            self._cube_measures,
+            MO.COLUMNS,
+            self._insertion_idx,
+            self._col_idx,
+        )
+
+
 class _ScaleMean(_BaseScaledCountMarginal):
     """Provides the scale mean marginals for a matrix if available.
 
@@ -2639,6 +3195,86 @@ class _ScaleMeanSmoothed(_ScaleMean, _SmoothedMeasure):
             smoother.smooth(props[0][0]),
             smoother.smooth(props[0][1]),
         ]
+
+
+class _ScaleMeanPairwiseIndices(_PairwiseIndices, _BaseMarginal):
+    """Provides the p_vals and t_stats measures for all the column of a matrix.
+
+    The pairwise indices calculation needs matrices of pvals and t_stats for every
+    column of the matrix including the insertions. Basically this class provides a
+    signle public property that exposes a tuple (tstats, pvals) of 3D ndarrays with
+    shape (ncols, nrows, ncols), that represents the pairwise significance for each
+    selected column.
+    """
+
+    def __init__(
+        self, dimensions, second_order_measures, cube_measures, alpha, orientation
+    ):
+        super(_ScaleMeanPairwiseIndices, self).__init__(
+            dimensions, second_order_measures, cube_measures, alpha
+        )
+        self._orientation = orientation
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" making up this measure.
+
+        These are the base-values and the column subtotals.
+        """
+        return [self._base_values, self._subtotal_columns]
+
+    @lazyproperty
+    def is_empty(self):
+        """True if the marginal is empty, False otherwise.
+
+        Empty in this case means no significance at all for the whole marginal row.
+        """
+        return self._base_values.size == 0 and self._subtotal_columns.size == 0
+
+    @lazyproperty
+    def _base_values(self):
+        """1D ndarray of tuple of int of measure's value for each column."""
+        if self._insertion_ids:
+            return self.values[: -len(self._insertion_ids)]
+        return self.values
+
+    def _pairwise_indices(self, pvals, tstats):
+        """Tuple of int pairwise indices of each column."""
+        significance = (
+            np.logical_and(tstats < 0, pvals < self._alpha)
+            if self._only_larger
+            else pvals < self._alpha
+        )
+        return tuple(np.where(significance)[0])
+
+    def _pw_sig_pvals_measure(self, insertion_idx, col_idx):
+        """_PairwiseSigPvalsScaleMeans object representing p_values measure."""
+        return _PairwiseSigPvalsScaleMeans(
+            self._dimensions,
+            self._second_order_measures,
+            self._cube_measures,
+            MO.COLUMNS,
+            insertion_idx,
+            col_idx,
+        )
+
+    def _pw_sig_tstats_measure(self, insertion_idx, col_idx):
+        """_PairwiseSigTstatsScaleMeans object representing t_stats measure."""
+        return _PairwiseSigTstatsScaleMeans(
+            self._dimensions,
+            self._second_order_measures,
+            self._cube_measures,
+            MO.COLUMNS,
+            insertion_idx,
+            col_idx,
+        )
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """1D ndarray of tuple of int of measure values for subtotal columns."""
+        if self._insertion_ids:
+            return self.values[-len(self._insertion_ids) :]
+        return np.array([])
 
 
 class _ScaleMedian(_BaseScaledCountMarginal):

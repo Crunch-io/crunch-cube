@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.cubepart import _Slice
 
 from ..fixtures import CR, OL, SM, NA
 from ..util import load_python_expression
@@ -37,13 +36,14 @@ class Describe_Slice:
         ),
     )
     def it_provides_pairwise_indices(self, fixture, pw_indices_dict, expectation):
-        slice_ = _Slice(
-            Cube(fixture),
-            slice_idx=0,
-            transforms={"pairwise_indices": pw_indices_dict},
-            population=None,
-            mask_size=0,
-        )
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"pairwise_indices": pw_indices_dict}
+            }
+        }
+        slice_ = Cube(
+            fixture, transforms=transforms, population=None, mask_size=0
+        ).partitions[0]
 
         actual = slice_.pairwise_indices
 
@@ -63,13 +63,14 @@ class Describe_Slice:
     )
     def it_provides_pairwise_indices_alt(self, fixture, pw_indices_dict, expectation):
         """Provides indicies meeting secondary sig-test threshold, when specified."""
-        slice_ = _Slice(
-            Cube(fixture),
-            slice_idx=0,
-            transforms={"pairwise_indices": pw_indices_dict},
-            population=None,
-            mask_size=0,
-        )
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"pairwise_indices": pw_indices_dict}
+            }
+        }
+        slice_ = Cube(
+            fixture, transforms=transforms, population=None, mask_size=0
+        ).partitions[0]
 
         actual = slice_.pairwise_indices_alt
 
@@ -89,12 +90,15 @@ class Describe_Slice:
     )
     def it_provides_columns_scale_mean_pairwise_indices(self, fixture, expectation):
         """Provides column-indicies meeting sig-test threshold on column scale means."""
-        slice_ = _Slice(
-            Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
-        )
-
-        actual = slice_.columns_scale_mean_pairwise_indices
-
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"insertion_id": 1}}
+            }
+        }
+        slice_ = Cube(
+            fixture, transforms=transforms, population=None, mask_size=0
+        ).partitions[0]
+        actual = slice_.columns_scale_mean_pairwise_indices.tolist()
         expected = load_python_expression(expectation)
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
@@ -114,15 +118,16 @@ class Describe_Slice:
     )
     def it_provides_columns_scale_mean_pairwise_indices_alt(self, fixture, expectation):
         """Provides col idxs meeting secondary sig-test threshold on scale mean."""
-        slice_ = _Slice(
-            Cube(fixture),
-            slice_idx=0,
-            transforms={"pairwise_indices": {"alpha": [0.01, 0.08]}},
-            population=None,
-            mask_size=0,
-        )
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"pairwise_indices": {"alpha": [0.01, 0.08]}}
+            }
+        }
+        slice_ = Cube(
+            fixture, transforms=transforms, population=None, mask_size=0
+        ).partitions[0]
 
-        actual = slice_.columns_scale_mean_pairwise_indices_alt
+        actual = slice_.columns_scale_mean_pairwise_indices_alt.tolist()
 
         expected = load_python_expression(expectation)
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
@@ -132,71 +137,96 @@ class TestStandardizedResiduals:
     """Test cr.cube implementation of column family pairwise comparisons"""
 
     def test_ca_subvar_hs_x_cat_hs_pairwise_t_tests(self):
-        slice_ = Cube(CR.CA_SUBVAR_X_CA_CAT_HS).partitions[0]
-
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 1}}
+            }
+        }
+        slice_ = Cube(CR.CA_SUBVAR_X_CA_CAT_HS, transforms=transforms).partitions[0]
         np.testing.assert_array_almost_equal(
-            slice_.pairwise_significance_t_stats(1),
+            slice_.pairwise_significance_t_stats,
             np.full((3, 5), np.nan),
         )
         np.testing.assert_array_almost_equal(
-            slice_.pairwise_significance_p_vals(1),
+            slice_.pairwise_significance_p_vals,
             np.full((3, 5), np.nan),
         )
 
     def test_cat_nps_numval_x_cat_scale_means_pariwise_t_tests(self):
-        slice_ = Cube(SM.CAT_NPS_NUMVAL_X_CAT).partitions[0]
-
-        actual = slice_.pairwise_significance_tests[0]
-        assert actual.p_vals_scale_means[0] == 1
-        assert actual.t_stats_scale_means[0] == 0
-        np.testing.assert_almost_equal(
-            actual.t_stats_scale_means, [0.0, 1.08966143, -1.27412884, -4.14629088]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 0}}
+            }
+        }
+        slice_ = Cube(SM.CAT_NPS_NUMVAL_X_CAT, transforms=transforms).partitions[0]
+        assert slice_.pairwise_significance_t_stats_scale_means == pytest.approx(
+            [0.0, 1.08966143, -1.27412884, -4.14629088]
         )
-        np.testing.assert_almost_equal(
-            actual.p_vals_scale_means,
-            [1.0000000e00, 2.7638510e-01, 2.0302047e-01, 4.0226310e-05],
+        assert slice_.pairwise_significance_p_vals_scale_means == pytest.approx(
+            [1.0000000e00, 2.7638510e-01, 2.0302047e-01, 4.0226310e-05]
         )
 
-        actual = slice_.pairwise_significance_tests[1]
-        assert actual.p_vals_scale_means[1] == 1
-        assert actual.t_stats_scale_means[1] == 0
-        np.testing.assert_almost_equal(
-            actual.p_vals_scale_means,
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 1}}
+            }
+        }
+        slice_ = Cube(SM.CAT_NPS_NUMVAL_X_CAT, transforms=transforms).partitions[0]
+
+        assert slice_.pairwise_significance_t_stats_scale_means == pytest.approx(
+            [-1.08966143, 0.0, -3.19741668, -6.10466696]
+        )
+        assert slice_.pairwise_significance_p_vals_scale_means == pytest.approx(
             [2.7638510e-01, 1.0000000e00, 1.4344585e-03, 1.7905266e-09],
-        )
-        np.testing.assert_almost_equal(
-            actual.t_stats_scale_means, [-1.08966143, 0.0, -3.19741668, -6.10466696]
         )
 
     def test_cat_x_cat_pairwise_t_tests(self):
-        slice_ = Cube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).partitions[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 2}}
+            }
+        }
+        slice_ = Cube(
+            CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS, transforms=transforms
+        ).partitions[0]
 
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats(2),
+            slice_.pairwise_significance_t_stats,
             load_python_expression("cat-x-cat-pw-tstats"),
         )
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals(2),
+            slice_.pairwise_significance_p_vals,
             load_python_expression("cat-x-cat-pw-pvals"),
         )
 
     def test_cat_x_cat_hs_pairwise_t_tests(self):
-        slice_ = Cube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).partitions[0]
-
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 0}}
+            }
+        }
+        slice_ = Cube(
+            CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS, transforms=transforms
+        ).partitions[0]
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats(0),
+            slice_.pairwise_significance_t_stats,
             load_python_expression("cat-x-cat-hs-pw-tstats"),
         )
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals(0),
+            slice_.pairwise_significance_p_vals,
             load_python_expression("cat-x-cat-hs-pw-pvals"),
         )
 
     def test_cat_hs_x_cat_hs_pairwise_t_tests(self):
-        slice_ = Cube(CR.CAT_HS_X_CAT_HS).partitions[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"insertion_id": 1}}
+            }
+        }
+        slice_ = Cube(CR.CAT_HS_X_CAT_HS, transforms=transforms).partitions[0]
 
         # test pairwise with subtotal col selected
-        assert slice_.pairwise_significance_t_stats(4) == pytest.approx(
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [1.90437719, 2.88752484, 0.38370528, -0.42342669, 0.0],
@@ -209,7 +239,7 @@ class TestStandardizedResiduals:
                 ]
             )
         )
-        assert slice_.pairwise_significance_p_vals(4) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [5.7038392e-02, 3.9323348e-03, 7.0124482e-01, 6.7203843e-01, 1.0],
@@ -243,6 +273,9 @@ class TestStandardizedResiduals:
                 ]
             },
             "columns_dimension": {
+                "pairwise_significance": {
+                    "column_significance": {"insertion_id": "nps"}
+                },
                 "insertions": [
                     {
                         "function": "subtotal",
@@ -250,6 +283,7 @@ class TestStandardizedResiduals:
                         "kwargs": {"negative": [2]},
                         "anchor": 3,
                         "name": "NPS",
+                        "id": "nps",
                     },
                     {
                         "function": "subtotal",
@@ -263,34 +297,38 @@ class TestStandardizedResiduals:
                         "anchor": 3,
                         "name": "subtotal",
                     },
-                ]
+                ],
             },
         }
         slice_ = Cube(CR.CAT_4_X_CAT_4, transforms=transforms).partitions[0]
 
         # Col idx 0 is subdiff and the pairwise sig test is nan for all the cells.
-        assert slice_.pairwise_significance_t_stats(4) == pytest.approx(
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.full((6, 7), np.nan), nan_ok=True
         )
-        assert slice_.pairwise_significance_p_vals(4) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.full((6, 7), np.nan), nan_ok=True
         )
         # Pairwise sig test for subdiffs cols and rows is always nan
-        assert slice_.pairwise_significance_t_stats(4)[0] == pytest.approx(
+        assert slice_.pairwise_significance_t_stats[0] == pytest.approx(
             np.full(7, np.nan), nan_ok=True
         )
-        assert slice_.pairwise_significance_p_vals(4)[0] == pytest.approx(
+        assert slice_.pairwise_significance_p_vals[0] == pytest.approx(
             np.full(7, np.nan), nan_ok=True
         )
-        assert slice_.pairwise_significance_t_stats(4)[:, 0] == pytest.approx(
+        assert slice_.pairwise_significance_t_stats[:, 0] == pytest.approx(
             np.full(6, np.nan), nan_ok=True
         )
-        assert slice_.pairwise_significance_p_vals(4)[:, 0] == pytest.approx(
+        assert slice_.pairwise_significance_p_vals[:, 0] == pytest.approx(
             np.full(6, np.nan), nan_ok=True
         )
 
         # Testing select a base col (6)
-        assert slice_.pairwise_significance_t_stats(6) == pytest.approx(
+        transforms["columns_dimension"]["pairwise_significance"] = {
+            "column_significance": {"element_id": 3}
+        }
+        slice_ = Cube(CR.CAT_4_X_CAT_4, transforms=transforms).partitions[0]
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [-0.5587170, 0, -0.7407835, -1.2503229, np.nan, -0.338631, 0],
@@ -304,7 +342,7 @@ class TestStandardizedResiduals:
             nan_ok=True,
             rel=1e-4,
         )
-        assert slice_.pairwise_significance_p_vals(6) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.57732344, 1.0, 0.45967235, 0.21325265, np.nan, 0.73527115, 1.0],
@@ -318,8 +356,13 @@ class TestStandardizedResiduals:
             nan_ok=True,
             rel=1e-4,
         )
+
         # Testing select a insertion col (2)
-        assert slice_.pairwise_significance_t_stats(2) == pytest.approx(
+        transforms["columns_dimension"]["pairwise_significance"] = {
+            "column_significance": {"insertion_id": 2}
+        }
+        slice_ = Cube(CR.CAT_4_X_CAT_4, transforms=transforms).partitions[0]
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [0.1026676, 0.7053229, 0, -0.7137068, np.nan, 0.4910434, 0.7407835],
@@ -333,7 +376,7 @@ class TestStandardizedResiduals:
             nan_ok=True,
             rel=1e-4,
         )
-        assert slice_.pairwise_significance_p_vals(2) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.918325, 0.481442, 1.0, 0.476164, np.nan, 0.623803, 0.459672],
@@ -349,101 +392,114 @@ class TestStandardizedResiduals:
         )
 
     def test_cat_x_cat_hs_scale_means_pairwise_t_tests(self):
-        slice_ = Cube(CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS).partitions[0]
-        actual = slice_.pairwise_significance_tests[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 0}},
+                "insertions": [
+                    {
+                        "function": "subtotal",
+                        "args": [6, 7, 8, 9, 10],
+                        "name": "above 5",
+                        "anchor": 5,
+                    },
+                    {
+                        "function": "subtotal",
+                        "args": [1, 2],
+                        "name": "Top",
+                        "anchor": "top",
+                    },
+                ],
+            },
+        }
+        slice_ = Cube(
+            CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_WITH_HS, transforms=transforms
+        ).partitions[0]
 
-        np.testing.assert_almost_equal(
-            actual.t_stats_scale_means,
-            load_python_expression("cat-x-cat-hs-scale-means-pw-tstats"),
+        assert slice_.pairwise_significance_t_stats_scale_means == pytest.approx(
+            load_python_expression("cat-x-cat-hs-scale-means-pw-tstats")
         )
-        np.testing.assert_almost_equal(
-            actual.p_vals_scale_means,
-            load_python_expression("cat-x-cat-hs-scale-means-pw-pvals"),
+        assert slice_.pairwise_significance_p_vals_scale_means == pytest.approx(
+            load_python_expression("cat-x-cat-hs-scale-means-pw-pvals")
         )
 
     def test_cat_x_cat_pruning_and_hs_scale_means_pairwise_t_tests(self):
         transforms = {
-            "columns_dimension": {"insertions": {}},
+            "columns_dimension": {
+                "insertions": {},
+                "pairwise_significance": {"column_significance": {"element_id": 0}},
+            },
             "rows_dimension": {"insertions": {}},
         }
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
-        actual = slice_.pairwise_significance_tests[0]
 
-        np.testing.assert_almost_equal(
-            actual.t_stats_scale_means,
-            [0.0, 1.64461503, 1.92387847, np.nan, 1.06912069],
+        assert slice_.pairwise_significance_t_stats_scale_means == pytest.approx(
+            [0.0, 1.64461503, 1.92387847, np.nan, 1.06912069], nan_ok=True
         )
-        np.testing.assert_almost_equal(
-            actual.p_vals_scale_means, [1.0, 0.1046981, 0.059721, np.nan, 0.2918845]
+        assert slice_.pairwise_significance_p_vals_scale_means == pytest.approx(
+            [1.0, 0.1046981, 0.059721, np.nan, 0.2918845], nan_ok=True
         )
 
         # Just H&S
-        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT).partitions[0]
-        actual = slice_.pairwise_significance_tests[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 0}}
+            }
+        }
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
 
-        np.testing.assert_almost_equal(
-            actual.t_stats_scale_means,
-            [0.0, 0.9387958, 1.644615, 1.9238785, np.nan, 1.0691207],
+        assert slice_.pairwise_significance_t_stats_scale_means == pytest.approx(
+            [0.0, 0.9387958, 1.644615, 1.9238785, np.nan, 1.0691207], nan_ok=True
         )
-
-        np.testing.assert_almost_equal(
-            actual.p_vals_scale_means,
-            [1.0, 0.3500141, 0.1046981, 0.059721, np.nan, 0.2918845],
+        assert slice_.pairwise_significance_p_vals_scale_means == pytest.approx(
+            [1.0, 0.3500141, 0.1046981, 0.059721, np.nan, 0.2918845], nan_ok=True
         )
 
         # Just pruning
         transforms = {
             "rows_dimension": {"prune": True},
-            "columns_dimension": {"prune": True},
+            "columns_dimension": {
+                "prune": True,
+                "pairwise_significance": {"column_significance": {"element_id": 0}},
+            },
         }
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
-        actual = slice_.pairwise_significance_tests[0]
 
-        np.testing.assert_almost_equal(
-            actual.t_stats_scale_means,
-            [0.0, 0.93879579, 1.64461503, 1.92387847, 1.06912069],
+        assert slice_.pairwise_significance_t_stats_scale_means == pytest.approx(
+            [0.0, 0.93879579, 1.64461503, 1.92387847, 1.06912069]
         )
-        np.testing.assert_almost_equal(
-            actual.p_vals_scale_means, [1.0, 0.3500141, 0.1046981, 0.059721, 0.2918845]
+        assert slice_.pairwise_significance_p_vals_scale_means == pytest.approx(
+            [1.0, 0.3500141, 0.1046981, 0.059721, 0.2918845],
         )
 
         # Pruning and H&S
         transforms = {
             "rows_dimension": {"insertions": {}, "prune": True},
-            "columns_dimension": {"insertions": {}, "prune": True},
+            "columns_dimension": {
+                "insertions": {},
+                "prune": True,
+                "pairwise_significance": {"column_significance": {"element_id": 0}},
+            },
         }
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
-        actual = slice_.pairwise_significance_tests[0]
 
-        np.testing.assert_almost_equal(
-            actual.t_stats_scale_means, [0.0, 1.64461503, 1.92387847, 1.06912069]
+        assert slice_.pairwise_significance_t_stats_scale_means == pytest.approx(
+            [0.0, 1.64461503, 1.92387847, 1.06912069]
         )
-        np.testing.assert_almost_equal(
-            actual.p_vals_scale_means, [1.0, 0.1046981, 0.059721, 0.2918845]
+        assert slice_.pairwise_significance_p_vals_scale_means == pytest.approx(
+            [1.0, 0.1046981, 0.059721, 0.2918845]
         )
-
-    def test_cat_x_cat_summary_pairwise_indices(self):
-        # Only larger
-        slice_ = Cube(CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS).partitions[0]
-        pairwise_indices = slice_.summary_pairwise_indices
-        expected_indices = np.array([(2,), (0, 2), ()], dtype=tuple)
-        np.testing.assert_array_equal(pairwise_indices, expected_indices)
-
-        # Larger and smaller
-        transforms = {"pairwise_indices": {"only_larger": False}}
-        slice_ = Cube(
-            CR.PAIRWISE_HIROTSU_OCCUPATION_X_ILLNESS, transforms=transforms
-        ).partitions[0]
-        pairwise_indices = slice_.summary_pairwise_indices
-        expected_indices = np.array([(1, 2), (0, 2), (0, 1)], dtype="i,i")
-        np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
     def test_cat_x_cat_wgtd_pairwise_t_tests(self):
         """The weights on this cube demonstrate much higher variance (less
         extreme t values, and higher associated p-values) than if weighted_n
         were used in the variance estimate of the test statistic.
         """
-        slice_ = Cube(CR.CAT_X_CAT_WEIGHTED_TTESTS).partitions[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 0}}
+            }
+        }
+        slice_ = Cube(CR.CAT_X_CAT_WEIGHTED_TTESTS, transforms=transforms).partitions[0]
         pairwise_indices = slice_.pairwise_indices
 
         np.testing.assert_array_equal(
@@ -451,35 +507,43 @@ class TestStandardizedResiduals:
             np.array(load_python_expression("cat-x-cat-wgtd-pw-indices"), dtype=tuple),
         )
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats(0),
+            slice_.pairwise_significance_t_stats,
             load_python_expression("cat-x-cat-wgtd-pw-tstats"),
         )
         np.testing.assert_almost_equal(
-            slice_.pairwise_significance_p_vals(0),
+            slice_.pairwise_significance_p_vals,
             load_python_expression("cat-x-cat-wgtd-pw-pvals"),
         )
 
     def test_cat_x_cat_wgtd_scale_means_pariwise_t_tests(self):
-        slice_ = Cube(CR.CAT_X_CAT_WEIGHTED_TTESTS).partitions[0]
-        actual = slice_.pairwise_significance_tests[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 0}}
+            }
+        }
+        slice_ = Cube(CR.CAT_X_CAT_WEIGHTED_TTESTS, transforms=transforms).partitions[0]
 
-        np.testing.assert_almost_equal(
-            actual.t_stats_scale_means, [0.0, -4.38871748, -3.99008596, -5.15679647]
+        assert slice_.pairwise_significance_t_stats_scale_means == pytest.approx(
+            [0.0, -4.38871748, -3.99008596, -5.15679647]
         )
-        np.testing.assert_almost_equal(
-            actual.p_vals_scale_means,
-            [1.0000000e00, 1.3839564e-05, 7.4552516e-05, 4.0145665e-07],
+        assert slice_.pairwise_significance_p_vals_scale_means == pytest.approx(
+            [1.0000000e00, 1.3839564e-05, 7.4552516e-05, 4.0145665e-07]
         )
 
     def test_mr_x_mr_pairwise_t_tests(self):
-        slice_ = Cube(CR.MR_X_MR_2).partitions[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 1}},
+            }
+        }
+        slice_ = Cube(CR.MR_X_MR_2, transforms=transforms).partitions[0]
 
         np.testing.assert_array_almost_equal(
-            slice_.pairwise_significance_t_stats(1),
+            slice_.pairwise_significance_t_stats,
             load_python_expression("mr-x-mr-pw-tstats"),
         )
         np.testing.assert_array_almost_equal(
-            slice_.pairwise_significance_p_vals(1),
+            slice_.pairwise_significance_p_vals,
             load_python_expression("mr-x-mr-pw-pvals"),
         )
 
@@ -487,10 +551,15 @@ class TestStandardizedResiduals:
         # Pruned - without insertions
         transforms = {
             "rows_dimension": {"insertions": {}, "prune": True},
-            "columns_dimension": {"insertions": {}, "prune": True},
+            "columns_dimension": {
+                "insertions": {},
+                "prune": True,
+                "pairwise_significance": {"column_significance": {"element_id": 4}},
+            },
         }
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
-        assert slice_.pairwise_significance_t_stats(3) == pytest.approx(
+
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [1.61500754, 1.000723, 0.68787199, 0.0],
@@ -502,7 +571,7 @@ class TestStandardizedResiduals:
             ),
             nan_ok=True,
         )
-        assert slice_.pairwise_significance_p_vals(3) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.11480579, 0.324030029, 0.49943424, 1.0],
@@ -516,9 +585,15 @@ class TestStandardizedResiduals:
         )
 
         # Pruned (just rows) - with insertions, col inserted id 1
-        transforms = {"rows_dimension": {"prune": True}}
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"insertion_id": 1}},
+            },
+        }
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
-        assert slice_.pairwise_significance_t_stats(1) == pytest.approx(
+
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [0.90169345, 0.0, -0.86382097, -1.33091849, np.nan, -1.34418779],
@@ -531,7 +606,7 @@ class TestStandardizedResiduals:
             ),
             nan_ok=True,
         )
-        assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.36932341, 1.0, 0.38975346, 0.18673365, np.nan, 0.183227951],
@@ -546,9 +621,14 @@ class TestStandardizedResiduals:
         )
 
         # Pruned (just columns) - with insertions
-        transforms = {"columns_dimension": {"prune": True}}
+        transforms = {
+            "columns_dimension": {
+                "prune": True,
+                "pairwise_significance": {"column_significance": {"insertion_id": 1}},
+            }
+        }
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
-        assert slice_.pairwise_significance_t_stats(1) == pytest.approx(
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [0.90169345, 0.0, -0.86382097, -1.33091849, -1.34418779],
@@ -562,7 +642,7 @@ class TestStandardizedResiduals:
             ),
             nan_ok=True,
         )
-        assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.369323414, 1.0, 0.389753462, 0.186733655, 0.18322795143],
@@ -580,10 +660,13 @@ class TestStandardizedResiduals:
         # Pruned (rows and columns) - with insertions
         transforms = {
             "rows_dimension": {"prune": True},
-            "columns_dimension": {"prune": True},
+            "columns_dimension": {
+                "prune": True,
+                "pairwise_significance": {"column_significance": {"insertion_id": 1}},
+            },
         }
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
-        assert slice_.pairwise_significance_t_stats(1) == pytest.approx(
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [0.90169345, 0.0, -0.86382097, -1.33091849, -1.34418779],
@@ -596,7 +679,7 @@ class TestStandardizedResiduals:
             ),
             nan_ok=True,
         )
-        assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.36932341401, 1.0, 0.38975346251, 0.18673365581, 0.18322795143],
@@ -611,8 +694,13 @@ class TestStandardizedResiduals:
         )
 
         # Not pruned - with insertions
-        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT).partitions[0]
-        assert slice_.pairwise_significance_t_stats(1) == pytest.approx(
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"insertion_id": 1}},
+            },
+        }
+        slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [0.90169345, 0.0, -0.86382097, -1.33091849, np.nan, -1.34418779],
@@ -626,7 +714,7 @@ class TestStandardizedResiduals:
             ),
             nan_ok=True,
         )
-        assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.369323414, 1.0, 0.389753462, 0.186733655, np.nan, 0.183227951],
@@ -651,14 +739,16 @@ class TestStandardizedResiduals:
                     "order": {"type": "explicit", "element_ids": [0, 5, 2, 1, 4]},
                 },
                 "columns_dimension": {
+                    "pairwise_significance": {
+                        "column_significance": {"insertion_id": 2}
+                    },
                     "elements": {"2": {"hide": True}},
                     "prune": True,
                     "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
                 },
             },
         ).partitions[0]
-
-        assert slice_.pairwise_significance_t_stats(2) == pytest.approx(
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [0.7768486, -3.15797218, 0.0, 1.31529737, -3.15797218],
@@ -682,7 +772,12 @@ class TestStandardizedResiduals:
         ]
 
     def test_cat_hs_subdiff_x_cat_pairwise_t_test(self):
-        slice_ = Cube(CR.CAT_HS_SUBDIFF_X_CAT).partitions[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 3}}
+            }
+        }
+        slice_ = Cube(CR.CAT_HS_SUBDIFF_X_CAT, transforms=transforms).partitions[0]
         expected_tstats = np.array(
             load_python_expression("cat-hs-subdiff-x-cat-pw-tstats")
         )
@@ -690,19 +785,24 @@ class TestStandardizedResiduals:
             load_python_expression("cat-hs-subdiff-x-cat-pw-pvals")
         )
 
-        assert slice_.pairwise_significance_t_stats(3) == pytest.approx(expected_tstats)
-        assert slice_.pairwise_significance_p_vals(3) == pytest.approx(expected_pvals)
+        assert slice_.pairwise_significance_t_stats == pytest.approx(expected_tstats)
+        assert slice_.pairwise_significance_p_vals == pytest.approx(expected_pvals)
 
 
 class TestOverlapsPairwiseSignificance:
     def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_0th_subvar(self):
-        slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 0}}
+            }
+        }
+        slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL, transforms=transforms).partitions[0]
 
         assert slice_.column_percentages.tolist() == [
             [0.0, 100.0, 100.0],
             [100.0, 0.0, 0.0],
         ]
-        assert slice_.pairwise_significance_t_stats(0) == pytest.approx(
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [0.0, 3.11420549, 2.61911361],
@@ -710,7 +810,7 @@ class TestOverlapsPairwiseSignificance:
                 ]
             )
         )
-        assert slice_.pairwise_significance_p_vals(0) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.0, 0.05270861, 0.07906174],
@@ -720,13 +820,18 @@ class TestOverlapsPairwiseSignificance:
         )
 
     def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_1st_subvar(self):
-        slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 1}}
+            }
+        }
+        slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL, transforms=transforms).partitions[0]
 
         assert slice_.column_percentages.tolist() == [
             [0.0, 100.0, 100.0],
             [100.0, 0.0, 0.0],
         ]
-        assert slice_.pairwise_significance_t_stats(1) == pytest.approx(
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [-3.11420549, 0.0, 0.0],
@@ -734,7 +839,7 @@ class TestOverlapsPairwiseSignificance:
                 ]
             )
         )
-        assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.05270861, 0.0, 1.0],
@@ -744,13 +849,18 @@ class TestOverlapsPairwiseSignificance:
         )
 
     def test_pairwise_significance_cat_x_mr_sub_x_mr_sel_2nd_subvar(self):
-        slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL).partitions[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 2}}
+            }
+        }
+        slice_ = Cube(OL.CAT_X_MR_SUB_X_MR_SEL, transforms=transforms).partitions[0]
 
         assert slice_.column_percentages.tolist() == [
             [0.0, 100.0, 100.0],
             [100.0, 0.0, 0.0],
         ]
-        assert slice_.pairwise_significance_t_stats(2) == pytest.approx(
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [-2.61911361, 0.0, 0.0],
@@ -758,7 +868,7 @@ class TestOverlapsPairwiseSignificance:
                 ],
             ),
         )
-        assert slice_.pairwise_significance_p_vals(2) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.07906174, 1.0, 0.0],
@@ -768,7 +878,14 @@ class TestOverlapsPairwiseSignificance:
         )
 
     def test_pairwise_significance_cat_x_mr_realistic_example(self):
-        slice_ = Cube(OL.CAT_X_MR_REALISTIC_EXAMPLE).partitions[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 4}}
+            }
+        }
+        slice_ = Cube(OL.CAT_X_MR_REALISTIC_EXAMPLE, transforms=transforms).partitions[
+            0
+        ]
 
         assert slice_.column_percentages == pytest.approx(
             np.array(
@@ -779,7 +896,7 @@ class TestOverlapsPairwiseSignificance:
             ),
             nan_ok=True,
         )
-        assert slice_.pairwise_significance_t_stats(4) == pytest.approx(
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [1.00337549, 0.64382181, 0.0773666, -1.3677023, 0.0, np.nan],
@@ -788,7 +905,7 @@ class TestOverlapsPairwiseSignificance:
             ),
             nan_ok=True,
         )
-        assert slice_.pairwise_significance_p_vals(4) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.31647509, 0.52017481, 0.93838264, 0.17241219, 0.0, np.nan],
@@ -799,8 +916,12 @@ class TestOverlapsPairwiseSignificance:
         )
 
     def test_pairwise_significance_mr_x_mr(self):
-        slice_ = Cube(OL.MR_X_MR).partitions[0]
-
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 1}}
+            }
+        }
+        slice_ = Cube(OL.MR_X_MR, transforms=transforms).partitions[0]
         assert slice_.column_percentages == pytest.approx(
             np.array(
                 [
@@ -811,7 +932,7 @@ class TestOverlapsPairwiseSignificance:
             ),
             nan_ok=True,
         )
-        assert slice_.pairwise_significance_t_stats(1) == pytest.approx(
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [1.22474487, 0.0, np.nan],
@@ -821,7 +942,7 @@ class TestOverlapsPairwiseSignificance:
             ),
             nan_ok=True,
         )
-        assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.28786413, 1.0, np.nan],
@@ -833,7 +954,14 @@ class TestOverlapsPairwiseSignificance:
         )
 
     def test_pairwise_cat_x_mr_gender_x_all_pets_owned_with_weighted_counts(self):
-        slice_ = Cube(OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED).partitions[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 0}}
+            }
+        }
+        slice_ = Cube(
+            OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED, transforms=transforms
+        ).partitions[0]
 
         assert slice_.column_percentages.tolist() == pytest.approx(
             np.array(
@@ -845,7 +973,7 @@ class TestOverlapsPairwiseSignificance:
         )
 
         # Assert for first column (subvariable)
-        assert slice_.pairwise_significance_t_stats(0).tolist() == pytest.approx(
+        assert slice_.pairwise_significance_t_stats.tolist() == pytest.approx(
             np.array(
                 [
                     [0.0, -2.6315597, -1.76353],
@@ -853,7 +981,7 @@ class TestOverlapsPairwiseSignificance:
                 ]
             ),
         )
-        assert slice_.pairwise_significance_p_vals(0) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.0, 0.01410448, 0.0879948],
@@ -863,7 +991,15 @@ class TestOverlapsPairwiseSignificance:
         )
 
         # Assert for second column (subvariable)
-        assert slice_.pairwise_significance_t_stats(1).tolist() == pytest.approx(
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 1}}
+            }
+        }
+        slice_ = Cube(
+            OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED, transforms=transforms
+        ).partitions[0]
+        assert slice_.pairwise_significance_t_stats.tolist() == pytest.approx(
             np.array(
                 [
                     [2.63156, 0.0, 8.10444],
@@ -871,7 +1007,7 @@ class TestOverlapsPairwiseSignificance:
                 ]
             ),
         )
-        assert slice_.pairwise_significance_p_vals(1) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.01410448, 0, 0.025067e-06],
@@ -881,7 +1017,15 @@ class TestOverlapsPairwiseSignificance:
         )
 
         # Assert for third column (subvariable)
-        assert slice_.pairwise_significance_t_stats(2).tolist() == pytest.approx(
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 2}}
+            }
+        }
+        slice_ = Cube(
+            OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED, transforms=transforms
+        ).partitions[0]
+        assert slice_.pairwise_significance_t_stats.tolist() == pytest.approx(
             np.array(
                 [
                     [1.763531, -8.104439, 0.0],
@@ -889,7 +1033,7 @@ class TestOverlapsPairwiseSignificance:
                 ]
             ),
         )
-        assert slice_.pairwise_significance_p_vals(2) == pytest.approx(
+        assert slice_.pairwise_significance_p_vals == pytest.approx(
             np.array(
                 [
                     [0.0879948, 0.025067e-06, 0],
@@ -899,7 +1043,11 @@ class TestOverlapsPairwiseSignificance:
         )
 
     def test_pairwise_significance_indices(self):
-        transforms = {"pairwise_indices": {"alpha": [0.05, 0.13]}}
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"pairwise_indices": {"alpha": [0.05, 0.13]}}
+            }
+        }
         slice_ = Cube(
             OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED, transforms=transforms
         ).partitions[0]
@@ -929,7 +1077,11 @@ class TestOverlapsPairwiseSignificance:
 
     def test_pairwise_significance_all_empty(self):
         # ---Keep the alpha value this small to demo the error found in cr.server
-        transforms = {"pairwise_indices": {"alpha": [0.0000000001]}}
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"pairwise_indices": {"alpha": [0.0000000001]}}
+            }
+        }
         slice_ = Cube(
             OL.CAT_X_MR_GENDER_X_ALL_PETS_OWNED, transforms=transforms
         ).partitions[0]
@@ -949,8 +1101,13 @@ class TestOverlapsPairwiseSignificance:
         ]
 
     def test_pairwise_sig_for_realistic_example_mr_x_mr(self):
-        slice_ = Cube(OL.MR_X_MR_REALISTIC_EXAMPLE).partitions[0]
-        assert slice_.pairwise_significance_t_stats(3) == pytest.approx(
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 3}}
+            }
+        }
+        slice_ = Cube(OL.MR_X_MR_REALISTIC_EXAMPLE, transforms=transforms).partitions[0]
+        assert slice_.pairwise_significance_t_stats == pytest.approx(
             np.array(
                 [
                     [13.40, 9.62, -0.49, 0.0, 2.27, -24.08],
@@ -965,31 +1122,50 @@ class TestOverlapsPairwiseSignificance:
         )
 
     def test_pairwise_significance_indices_for_realistic_example_mr_x_mr(self):
-        transforms = {"columns_dimension": {"elements": {"1": {"hide": True}}}}
-        slice_ = Cube(OL.MR_X_MR_REALISTIC_EXAMPLE, transforms=transforms).partitions[0]
+        transforms = {
+            "columns_dimension": {
+                "elements": {"1": {"hide": True}},
+                "pairwise_significance": {"pairwise_indices": {"alpha": [0.05]}},
+            }
+        }
 
+        slice_ = Cube(OL.MR_X_MR_REALISTIC_EXAMPLE, transforms=transforms).partitions[0]
         assert slice_.pairwise_indices.tolist() == [
-            [(0, 1, 2, 3, 4), (1, 2, 3, 4), (4,), (4,), (1, 2, 4)],
-            [(1, 4), (1, 2, 3, 4), (4,), (1, 3, 4), (1, 4)],
-            [(4,), (4,), (0, 2, 3, 4), (4,), (0, 2, 4)],
-            [(4,), (1, 4), (4,), (0, 1, 3, 4), (1, 4)],
-            [(4,), (1, 4), (4,), (1, 4), (0, 1, 2, 4)],
-            [(1,), (1,), (), (1,), (1,)],
+            [(1, 2, 3, 4), (4,), (4,), (1, 2, 4), ()],
+            [(1, 2, 3, 4), (4,), (1, 3, 4), (1, 4), ()],
+            [(4,), (0, 2, 3, 4), (4,), (0, 2, 4), ()],
+            [(1, 4), (4,), (0, 1, 3, 4), (1, 4), ()],
+            [(1, 4), (4,), (1, 4), (0, 1, 2, 4), ()],
+            [(1,), (), (1,), (1,), (0, 1, 2, 3)],
         ]
 
     def test_pairwise_sig_for_mr_x_mr_vs_mr_single_subvar_x_mr(self):
-        mr_x_mr_slice = Cube(OL.MR_X_MR).partitions[0]
-        t_stats_mr_x_mr = mr_x_mr_slice.pairwise_significance_t_stats(1)
-        mr_subvar_x_mr_slice = Cube(OL.MR_SINGLE_SUBVAR_X_MR).partitions[0]
-        t_stats_mr_subvar_x_mr = mr_subvar_x_mr_slice.pairwise_significance_t_stats(1)
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 1}}
+            }
+        }
+        mr_x_mr_slice = Cube(OL.MR_X_MR, transforms=transforms).partitions[0]
+        t_stats_mr_x_mr = mr_x_mr_slice.pairwise_significance_t_stats
+        mr_subvar_x_mr_slice = Cube(
+            OL.MR_SINGLE_SUBVAR_X_MR, transforms=transforms
+        ).partitions[0]
+        t_stats_mr_subvar_x_mr = mr_subvar_x_mr_slice.pairwise_significance_t_stats
         # Assert same row stats are the same in both cases (MR x MR and MR_SEL x MR)
         np.testing.assert_array_equal(t_stats_mr_x_mr[0], t_stats_mr_subvar_x_mr[0])
 
 
 class TestMeanDifferenceSignificance:
     def test_mean_diff_significance_for_numeric_array_grouped_by_cat(self):
-        slice_ = Cube(NA.NUM_ARR_MULTI_NUMERIC_MEASURES_GROUPED_BY_CAT).partitions[0]
-        assert slice_.pairwise_significance_means_t_stats(0) == pytest.approx(
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 0}}
+            }
+        }
+        slice_ = Cube(
+            NA.NUM_ARR_MULTI_NUMERIC_MEASURES_GROUPED_BY_CAT, transforms=transforms
+        ).partitions[0]
+        assert slice_.pairwise_significance_means_t_stats == pytest.approx(
             np.array(
                 [
                     [0.0, -0.32190273, -1.884166, -2.16152588],
@@ -998,7 +1174,7 @@ class TestMeanDifferenceSignificance:
                 ]
             )
         )
-        assert slice_.pairwise_significance_means_p_vals(0) == pytest.approx(
+        assert slice_.pairwise_significance_means_p_vals == pytest.approx(
             np.array(
                 [
                     [1.0, 0.76970151, 0.17305508, 0.15932937],
@@ -1010,8 +1186,11 @@ class TestMeanDifferenceSignificance:
 
     def test_mean_diff_significance_for_numeric_array_grouped_by_cat_hs(self):
         transforms = {
-            "pairwise_indices": {"alpha": [0.5]},
             "columns_dimension": {
+                "pairwise_significance": {
+                    "column_significance": {"insertion_id": 1},
+                    "pairwise_indices": {"alpha": [0.5]},
+                },
                 "insertions": [
                     {
                         "function": "subtotal",
@@ -1039,7 +1218,7 @@ class TestMeanDifferenceSignificance:
                         "anchor": "bottom",
                         "kwargs": {"negative": [4, 5]},
                     },
-                ]
+                ],
             },
         }
         slice_ = Cube(
@@ -1047,20 +1226,24 @@ class TestMeanDifferenceSignificance:
         ).partitions[0]
 
         # Column (0,3,5,8) are subtotals and the hypothesis testing for a subtotal
-        # computable ATM.
-        for col in slice_.inserted_column_idxs:
-            assert slice_.pairwise_significance_means_t_stats(
-                col
-            ).tolist() == pytest.approx(
-                np.full(slice_.means.shape, np.nan), nan_ok=True
-            )
-        assert slice_.pairwise_significance_means_t_stats(7) == pytest.approx(
-            np.array(
-                load_python_expression("num-arr-means-grouped-by-cat-hs-t-stats-col-7")
-            ),
-            nan_ok=True,
+        # is not computable ATM.
+        assert slice_.pairwise_significance_means_t_stats.tolist() == pytest.approx(
+            np.full(slice_.means.shape, np.nan), nan_ok=True
         )
-        assert slice_.pairwise_significance_means_p_vals(7) == pytest.approx(
+
+        transforms["columns_dimension"]["pairwise_significance"] = {
+            "column_significance": {"element_id": 4},
+            "pairwise_indices": {"alpha": [0.5]},
+        }
+        slice_ = Cube(
+            NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS, transforms=transforms
+        ).partitions[0]
+
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_means_t_stats,
+            load_python_expression("num-arr-means-grouped-by-cat-hs-t-stats-col-7"),
+        )
+        assert slice_.pairwise_significance_means_p_vals == pytest.approx(
             np.array(
                 load_python_expression("num-arr-means-grouped-by-cat-hs-p-vals-col-7")
             ),
@@ -1074,7 +1257,14 @@ class TestMeanDifferenceSignificance:
         ]
 
         # Test no subtotals
-        transforms = {"pairwise_indices": {"alpha": [0.5]}}
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {
+                    "column_significance": {"element_id": 4},
+                    "pairwise_indices": {"alpha": [0.5]},
+                }
+            }
+        }
         slice_ = Cube(
             NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS, transforms=transforms
         ).partitions[0]
@@ -1084,13 +1274,13 @@ class TestMeanDifferenceSignificance:
             [(), (0, 4), (), (0, 4), ()],
             [(), (), (), (), ()],
         ]
-        assert slice_.pairwise_significance_means_t_stats(4) == pytest.approx(
+        assert slice_.pairwise_significance_means_t_stats == pytest.approx(
             np.array(
                 load_python_expression("num-arr-means-grouped-by-cat-t-stats-col-4")
             ),
             nan_ok=True,
         )
-        assert slice_.pairwise_significance_means_p_vals(4) == pytest.approx(
+        assert slice_.pairwise_significance_means_p_vals == pytest.approx(
             np.array(
                 load_python_expression("num-arr-means-grouped-by-cat-p-vals-col-4")
             ),
@@ -1098,9 +1288,16 @@ class TestMeanDifferenceSignificance:
         )
 
     def test_mean_diff_significance_for_numeric_array_x_mr(self):
-        slice_ = Cube(NA.NUM_ARR_MULTI_NUMERIC_MEASURES_X_MR).partitions[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 0}}
+            }
+        }
+        slice_ = Cube(
+            NA.NUM_ARR_MULTI_NUMERIC_MEASURES_X_MR, transforms=transforms
+        ).partitions[0]
 
-        assert slice_.pairwise_significance_means_t_stats(0) == pytest.approx(
+        assert slice_.pairwise_significance_means_t_stats == pytest.approx(
             np.array(
                 [
                     [0, 0.461036, -0.41818914],
@@ -1111,7 +1308,7 @@ class TestMeanDifferenceSignificance:
             ),
             nan_ok=True,
         )
-        assert slice_.pairwise_significance_means_p_vals(0) == pytest.approx(
+        assert slice_.pairwise_significance_means_p_vals == pytest.approx(
             np.array(
                 [
                     [1.0, 0.67005873, 0.69845513],
@@ -1124,7 +1321,11 @@ class TestMeanDifferenceSignificance:
         )
 
     def test_mean_diff_significance_indices_for_numeric_array_grouped_by_cat(self):
-        transforms = {"pairwise_indices": {"alpha": [0.45, 0.40]}}
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"pairwise_indices": {"alpha": [0.45, 0.333]}}
+            }
+        }
         slice_ = Cube(
             NA.NUM_ARR_MULTI_NUMERIC_MEASURES_GROUPED_BY_CAT, transforms=transforms
         ).partitions[0]
@@ -1141,7 +1342,11 @@ class TestMeanDifferenceSignificance:
         ]
 
     def test_mean_diff_significance_is_not_available(self):
-        transforms = {"pairwise_indices": {"alpha": [0.05, 0.08]}}
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"pairwise_indices": {"alpha": [0.05, 0.08]}}
+            }
+        }
         slice_ = Cube(CR.CAT_X_CAT, transforms=transforms).partitions[0]
 
         with pytest.raises(ValueError) as e:
@@ -1158,14 +1363,14 @@ class TestMeanDifferenceSignificance:
             " without a mean measure"
         )
         with pytest.raises(ValueError) as e:
-            slice_.pairwise_significance_means_p_vals(0)
+            slice_.pairwise_significance_means_p_vals
         assert (
             str(e.value)
             == "`.pairwise_significance_means_p_vals` is undefined for a cube-result"
             " without a mean measure"
         )
         with pytest.raises(ValueError) as e:
-            slice_.pairwise_significance_means_t_stats(0)
+            slice_.pairwise_significance_means_t_stats
         assert (
             str(e.value)
             == "`.pairwise_significance_means_t_stats` is undefined for a cube-result"
@@ -1173,9 +1378,14 @@ class TestMeanDifferenceSignificance:
         )
 
     def test_mean_diff_significance_for_cat_x_cat(self):
-        slice_ = Cube(CR.MEAN_CAT_X_CAT).partitions[0]
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"column_significance": {"element_id": 1}}
+            }
+        }
+        slice_ = Cube(CR.MEAN_CAT_X_CAT, transforms=transforms).partitions[0]
 
-        assert slice_.pairwise_significance_means_t_stats(1) == pytest.approx(
+        assert slice_.pairwise_significance_means_t_stats == pytest.approx(
             np.array(
                 [
                     [np.nan, np.nan, np.nan, np.nan],
@@ -1185,7 +1395,7 @@ class TestMeanDifferenceSignificance:
             ),
             nan_ok=True,
         )
-        assert slice_.pairwise_significance_means_p_vals(1) == pytest.approx(
+        assert slice_.pairwise_significance_means_p_vals == pytest.approx(
             np.array(
                 [
                     [np.nan, np.nan, np.nan, np.nan],
@@ -1205,12 +1415,15 @@ class TestMeanDifferenceSignificance:
         slice_ = Cube(
             CR.MEAN_CAT_X_CAT,
             transforms={
-                "pairwise_indices": {"alpha": [0.1]},
                 "rows_dimension": {
                     "elements": {"1": {"hide": True}},
                     "prune": True,
                 },
                 "columns_dimension": {
+                    "pairwise_significance": {
+                        "column_significance": {"element_id": 1},
+                        "pairwise_indices": {"alpha": [0.1]},
+                    },
                     "elements": {"1": {"hide": True}},
                     "prune": True,
                     "order": {"type": "explicit", "element_ids": [4, 2, 5, 0]},
@@ -1222,7 +1435,7 @@ class TestMeanDifferenceSignificance:
             [(), (), (1,)],
             [(), (), ()],
         ]
-        assert slice_.pairwise_significance_means_t_stats(1) == pytest.approx(
+        assert slice_.pairwise_significance_means_t_stats == pytest.approx(
             np.array(
                 [
                     [np.nan, 0, 2.1529364],
@@ -1231,7 +1444,7 @@ class TestMeanDifferenceSignificance:
             ),
             nan_ok=True,
         )
-        assert slice_.pairwise_significance_means_p_vals(1) == pytest.approx(
+        assert slice_.pairwise_significance_means_p_vals == pytest.approx(
             np.array(
                 [
                     [np.nan, 1, 0.06332172],
@@ -1242,7 +1455,11 @@ class TestMeanDifferenceSignificance:
         )
 
     def test_mean_diff_significance_indices_for_cat_x_cat(self):
-        transforms = {"pairwise_indices": {"alpha": [0.15, 0.05]}}
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"pairwise_indices": {"alpha": [0.15, 0.05]}}
+            }
+        }
         slice_ = Cube(CR.MEAN_CAT_X_CAT, transforms=transforms).partitions[0]
 
         assert slice_.pairwise_means_indices.tolist() == [
@@ -1286,8 +1503,10 @@ class TestMeanDifferenceSignificance:
             },
         ]
         transforms = {
-            "pairwise_indices": {"alpha": [0.45, 0.333]},
-            "columns_dimension": {"insertions": insertions},
+            "columns_dimension": {
+                "insertions": insertions,
+                "pairwise_significance": {"pairwise_indices": {"alpha": [0.45, 0.333]}},
+            },
         }
         slice_ = Cube(
             NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS_WEIGHTED, transforms=transforms
@@ -1304,7 +1523,11 @@ class TestMeanDifferenceSignificance:
         ]
 
         # Test no subtotals
-        transforms = {"pairwise_indices": {"alpha": [0.45, 0.333]}}
+        transforms = {
+            "columns_dimension": {
+                "pairwise_significance": {"pairwise_indices": {"alpha": [0.45, 0.333]}},
+            },
+        }
         slice_ = Cube(
             NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS_WEIGHTED, transforms=transforms
         ).partitions[0]
@@ -1325,8 +1548,8 @@ class TestMeanDifferenceSignificance:
                 "prune": True,
                 "elements": {"1": {"hide": True}},
                 "insertions": insertions,
+                "pairwise_significance": {"pairwise_indices": {"alpha": [0.45, 0.333]}},
             },
-            "pairwise_indices": {"alpha": [0.45, 0.333]},
         }
         slice_ = Cube(
             NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS_WEIGHTED, transforms=transforms
