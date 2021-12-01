@@ -149,6 +149,81 @@ class NanSubtotals(_BaseSubtotals):
         return np.full(self._ncols, self.filler)
 
 
+class NegativeTermSubtotals(_BaseSubtotals):
+    """Subtotal blocks that are only the negative terms from differences
+
+    These values are the sum of the "negative" terms (0 for regular categories and
+    regular subtotals, and sum of just the negative terms in a subtotal difference).
+    """
+
+    @lazyproperty
+    def _blocks(self):
+        """base, row and col insertion, and intersection matrices."""
+        # --- Base values cannot have negative terms, so always 0
+        base_values = np.full(self._base_values.shape, 0)
+        return [
+            [base_values, self._subtotal_columns],
+            [self._subtotal_rows, self._intersections],
+        ]
+
+    def _intersection(self, row_subtotal, column_subtotal):
+        """Negative terms from row/column subtotal intersection."""
+        has_col_subtrahends = len(column_subtotal.subtrahend_idxs) > 0
+        has_row_subtrahends = len(row_subtotal.subtrahend_idxs) > 0
+        # --- Intersections of subtotal differences are undefined ---
+        if has_col_subtrahends and has_row_subtrahends:
+            return np.nan
+
+        # --- Otherwise use negative terms form the dimension that has them and
+        # --- positive of the other (because positive times a negative is negative)
+        if has_col_subtrahends:
+            rows = np.sum(self._base_values[row_subtotal.addend_idxs, :], axis=0)
+            return np.sum(rows[column_subtotal.subtrahend_idxs])
+
+        if has_row_subtrahends:
+            cols = np.sum(self._base_values[:, column_subtotal.addend_idxs], axis=1)
+            return np.sum(cols[row_subtotal.subtrahend_idxs])
+
+        # --- If no subtrahends, intersection is 0
+        return 0
+
+    def _subtotal_column(self, subtotal):
+        """Return (n_rows,) ndarray of negative terms values for `subtotal` col."""
+        return np.sum(self._base_values[:, subtotal.subtrahend_idxs], axis=1)
+
+    def _subtotal_row(self, subtotal):
+        """Return (n_cols,) ndarray of negative terms values for `subtotal` row."""
+        return np.sum(self._base_values[subtotal.subtrahend_idxs, :], axis=0)
+
+
+class PositiveTermSubtotals(_BaseSubtotals):
+    """Subtotal blocks that ignore the negative terms from differences
+
+    These values are the sum of the "positive" terms (the category for regular
+    categories, the terms in a regular subtotal, and the sum of just the positive terms
+    in a subtotal difference).
+    """
+
+    def _intersection(self, row_subtotal, column_subtotal):
+        """Positive terms from row/column subtotal intersection."""
+        # --- Intersections of subtotal differences are undefined ---
+        if (
+            len(column_subtotal.subtrahend_idxs) > 0
+            and len(row_subtotal.subtrahend_idxs) > 0
+        ):
+            return np.nan
+
+        return np.sum(self._subtotal_row(row_subtotal)[column_subtotal.addend_idxs])
+
+    def _subtotal_column(self, subtotal):
+        """Return (n_rows,) ndarray of positive terms values for `subtotal` col."""
+        return np.sum(self._base_values[:, subtotal.addend_idxs], axis=1)
+
+    def _subtotal_row(self, subtotal):
+        """Return (n_cols,) ndarray of positive terms values for `subtotal` row."""
+        return np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
+
+
 class SumSubtotals(_BaseSubtotals):
     """Subtotal "blocks" created by adding and subtracting terms for subtotals.
 
