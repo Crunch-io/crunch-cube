@@ -9,6 +9,8 @@ from cr.cube.dimension import Dimension, _Subtotal
 from cr.cube.stripe.insertion import (
     _BaseSubtotals,
     NanSubtotals,
+    NegativeTermSubtotals,
+    PositiveTermSubtotals,
     SumSubtotals,
 )
 
@@ -59,6 +61,74 @@ class DescribeNanSubtotals:
         assert nan_subtotals._subtotal_values == pytest.approx(
             [np.nan, np.nan, np.nan], nan_ok=True
         )
+
+
+class DescribeNegativeTermSubtotals:
+    """Unit test suite for `cr.cube.matrix.NegativeTermSubtotals` object."""
+
+    @pytest.mark.parametrize(
+        ("addend_idxs", "subtrahend_idxs", "expected"),
+        (
+            ([0, 1], [2, 3], 12),
+            ([1], [], 0),
+            ([], [1], 2),
+        ),
+    )
+    def it_computes_the_subtotal_values(
+        self, request, addend_idxs, subtrahend_idxs, expected
+    ):
+        property_mock(
+            request,
+            _Subtotal,
+            "addend_idxs",
+            return_value=np.array(addend_idxs, dtype=int),
+        )
+        property_mock(
+            request,
+            _Subtotal,
+            "subtrahend_idxs",
+            return_value=np.array(subtrahend_idxs, dtype=int),
+        )
+
+        subtotal_value = NegativeTermSubtotals(
+            np.array([1, 2, 4, 8]), None
+        )._subtotal_value(_Subtotal(None, None, None))
+
+        np.testing.assert_equal(subtotal_value, expected)
+
+
+class DescribePositiveTermSubtotals:
+    """Unit test suite for `cr.cube.matrix.PositiveTermSubtotals` object."""
+
+    @pytest.mark.parametrize(
+        ("addend_idxs", "subtrahend_idxs", "expected"),
+        (
+            ([0, 1], [2, 3], 3),
+            ([1], [], 2),
+            ([], [1], 0),
+        ),
+    )
+    def it_computes_the_subtotal_values(
+        self, request, addend_idxs, subtrahend_idxs, expected
+    ):
+        property_mock(
+            request,
+            _Subtotal,
+            "addend_idxs",
+            return_value=np.array(addend_idxs, dtype=int),
+        )
+        property_mock(
+            request,
+            _Subtotal,
+            "subtrahend_idxs",
+            return_value=np.array(subtrahend_idxs, dtype=int),
+        )
+
+        subtotal_value = PositiveTermSubtotals(
+            np.array([1, 2, 4, 8]), None
+        )._subtotal_value(_Subtotal(None, None, None))
+
+        np.testing.assert_equal(subtotal_value, expected)
 
 
 class DescribeSumSubtotals:

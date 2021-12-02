@@ -68,8 +68,11 @@ class TestHeadersAndSubtotals(object):
 
     def test_1D_one_subtotal(self):
         strand = Cube(CR.ECON_BLAME_WITH_HS).partitions[0]
-        counts = strand.counts
-        np.testing.assert_array_equal(counts, (285, 396, 681, 242, 6, 68))
+
+        assert strand.counts == pytest.approx((285, 396, 681, 242, 6, 68))
+        assert strand.table_proportion_moes == pytest.approx(
+            (0.0280458, 0.03037317, 0.02888168, 0.02661255, 0.00480085, 0.01564832)
+        )
 
     def test_1D_one_subtotal_suppressed(self):
         transforms = {
@@ -2782,6 +2785,7 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert strand.counts[0] == 81
         assert strand.table_proportions[0] == pytest.approx(0.1184210)
         assert strand.diff_row_idxs == (0,)
+        assert strand.table_proportion_moes[0] == pytest.approx(0.05216430)
 
     def it_computes_measures_for_cat_x_cat_with_subdiffs_on_both(self):
         slice_ = Cube(

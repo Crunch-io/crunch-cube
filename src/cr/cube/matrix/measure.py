@@ -813,7 +813,7 @@ class _ColumnProportionsSmoothed(_ColumnProportions, _SmoothedMeasure):
 class _ProportionVariances(_BaseSecondOrderMeasure):
     """Provides the variance of the row/col/tot-proportions measure for a matrix.
 
-    Row/col/totla-proportions-variance is a 2D np.float64 ndarray.  When there are
+    Row/col/total-proportions-variance is a 2D np.float64 ndarray.  When there are
     negative terms, the full formula is:
     (1 - p)^2 * (Np / Nt) + (0 - p)^2 * (Ni / Nt) + (-1 - p)^2 * (Nn / Nt)
 

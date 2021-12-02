@@ -14,6 +14,7 @@ from cr.cube.stripe.cubemeasure import (
     _CatCubeCounts,
     CubeMeasures,
 )
+from cr.cube.stripe.insertion import NegativeTermSubtotals, PositiveTermSubtotals
 from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
     _Means,
@@ -32,7 +33,7 @@ from cr.cube.stripe.measure import (
     _WeightedCounts,
 )
 
-from ...unitutil import class_mock, instance_mock, property_mock
+from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
 
 class DescribeStripeMeasures:
@@ -610,12 +611,45 @@ class Describe_TableProportionVariances:
             [0.16, 0.21, 0.25]
         )
 
-    def it_computes_its_subtotal_values_to_help(self, measures_, table_proportions_):
-        table_proportions_.subtotal_values = np.array([0.5, 0.8])
+    def it_computes_its_subtotal_values_to_help(
+        self, request, measures_, table_proportions_
+    ):
+        rows_dimension_ = instance_mock(request, Dimension)
+        weighted_counts_ = instance_mock(request, _WeightedCounts)
+        weighted_bases_ = instance_mock(
+            request, _WeightedCounts, subtotal_values=np.array([10, 10])
+        )
+        negative_subtotal_values_ = method_mock(
+            request,
+            NegativeTermSubtotals,
+            "subtotal_values",
+            return_value=np.array([4, 0]),
+        )
+        positive_subtotal_values_ = method_mock(
+            request,
+            PositiveTermSubtotals,
+            "subtotal_values",
+            return_value=np.array([3, 5]),
+        )
+        table_proportions_.subtotal_values = np.array([0.1, -0.5])
         measures_.table_proportions = table_proportions_
-        table_proportion_variances = _TableProportionVariances(None, measures_, None)
+        measures_.weighted_counts = weighted_counts_
+        measures_.weighted_bases = weighted_bases_
+        table_proportion_variances = _TableProportionVariances(
+            rows_dimension_, measures_, None
+        )
 
-        assert table_proportion_variances.subtotal_values == pytest.approx([0.25, 0.16])
+        actual = table_proportion_variances.subtotal_values
+
+        assert actual == pytest.approx([0.73, 1.25])
+        negative_subtotal_values_.assert_called_once_with(
+            weighted_counts_.base_values,
+            rows_dimension_,
+        )
+        positive_subtotal_values_.assert_called_once_with(
+            weighted_counts_.base_values,
+            rows_dimension_,
+        )
 
     # fixture components ---------------------------------------------
 
