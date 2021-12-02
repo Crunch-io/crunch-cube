@@ -2838,19 +2838,19 @@ class DescribeIntegrated_SubtotalDifferences(object):
             np.full(5, np.nan), nan_ok=True
         )
         assert slice_.column_proportions_moe[0, :] == pytest.approx(
-            [np.nan, np.nan, 0, np.nan, np.nan], nan_ok=True
+            [np.nan, 0.1731749, 0.18519919, 0.13934182, 0.18081228], nan_ok=True
         )
         assert slice_.column_std_dev[:, 0] == pytest.approx(
             np.full(5, np.nan), nan_ok=True
         )
         assert slice_.column_std_dev[0, :] == pytest.approx(
-            [np.nan, np.nan, 0, np.nan, np.nan], nan_ok=True
+            [np.nan, 0.72322635, 0.70710678, 0.63189792, 0.73802285], nan_ok=True
         )
         assert slice_.column_std_err[:, 0] == pytest.approx(
             np.full(5, np.nan), nan_ok=True
         )
         assert slice_.column_std_err[0, :] == pytest.approx(
-            [np.nan, np.nan, 0, np.nan, np.nan], nan_ok=True
+            [np.nan, 0.08835616, 0.09449112, 0.07109407, 0.09225286], nan_ok=True
         )
         assert slice_.row_proportions[0, :] == pytest.approx(
             np.full(5, np.nan), nan_ok=True
