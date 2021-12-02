@@ -273,8 +273,14 @@ class SecondOrderMeasures:
 
     @lazyproperty
     def row_proportion_variances(self):
-        """_RowProportions measure object for this cube-result."""
-        return _RowProportionVariances(self._dimensions, self, self._cube_measures)
+        """_ProportionVariances measure object for rows of this cube-result."""
+        return _ProportionVariances(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self.row_proportions.blocks,
+            self.row_weighted_bases.blocks,
+        )
 
     @lazyproperty
     def row_share_sum(self):
@@ -460,8 +466,14 @@ class SecondOrderMeasures:
 
     @lazyproperty
     def table_proportion_variances(self):
-        """_TableProportionVariances measure object for this cube-result."""
-        return _TableProportionVariances(self._dimensions, self, self._cube_measures)
+        """_ProportionVariances measure object for table of this cube-result."""
+        return _ProportionVariances(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self.table_proportions.blocks,
+            self.table_weighted_bases.blocks,
+        )
 
     @lazyproperty
     def table_std_err(self):
@@ -1653,38 +1665,6 @@ class _RowProportions(_BaseSecondOrderMeasure):
             ]
 
 
-class _RowProportionVariances(_BaseSecondOrderMeasure):
-    """Provides the variance of the row-proportions measure for a matrix.
-
-    Row-proportions-variance is a 2D np.float64 ndarray of p * (1 - p) where p is the
-    row-proportions.
-    """
-
-    @lazyproperty
-    def blocks(self):
-        """Nested list of the four 2D ndarray "blocks" making up this measure.
-
-        These are the base-values, the column-subtotals, the row-subtotals, and the
-        subtotal intersection-cell values.
-        """
-        p = self._second_order_measures.row_proportions.blocks
-
-        return [
-            [
-                # --- base values ---
-                p[0][0] * (1 - p[0][0]),
-                # --- inserted columns ---
-                p[0][1] * (1 - p[0][1]),
-            ],
-            [
-                # --- inserted rows ---
-                p[1][0] * (1 - p[1][0]),
-                # --- intersections ---
-                p[1][1] * (1 - p[1][1]),
-            ],
-        ]
-
-
 class _RowShareSum(_BaseSecondOrderMeasure):
     """Provides the row share of sum measure for a matrix.
 
@@ -1947,38 +1927,6 @@ class _TableProportions(_BaseSecondOrderMeasure):
                     count_blocks[1][1] / weighted_base_blocks[1][1],
                 ],
             ]
-
-
-class _TableProportionVariances(_BaseSecondOrderMeasure):
-    """Provides the variance of the table-proportions measure for a matrix.
-
-    Table-proportions-variance is a 2D np.float64 ndarray of p * (1 - p) where p is the
-    table-proportions.
-    """
-
-    @lazyproperty
-    def blocks(self):
-        """Nested list of the four 2D ndarray "blocks" making up this measure.
-
-        These are the base-values, the column-subtotals, the row-subtotals, and the
-        subtotal intersection-cell values.
-        """
-        p = self._second_order_measures.table_proportions.blocks
-
-        return [
-            [
-                # --- base values ---
-                p[0][0] * (1 - p[0][0]),
-                # --- inserted columns ---
-                p[0][1] * (1 - p[0][1]),
-            ],
-            [
-                # --- inserted rows ---
-                p[1][0] * (1 - p[1][0]),
-                # --- intersections ---
-                p[1][1] * (1 - p[1][1]),
-            ],
-        ]
 
 
 class _TableStandardError(_BaseSecondOrderMeasure):

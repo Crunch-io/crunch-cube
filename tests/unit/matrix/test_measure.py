@@ -41,7 +41,6 @@ from cr.cube.matrix.measure import (
     _Pvalues,
     _RowComparableCounts,
     _RowProportions,
-    _RowProportionVariances,
     _RowShareSum,
     _RowStandardError,
     _RowUnweightedBases,
@@ -55,7 +54,6 @@ from cr.cube.matrix.measure import (
     _Sums,
     _TableBase,
     _TableBasesRange,
-    _TableProportionVariances,
     _TableProportions,
     _TableStandardError,
     _TableUnweightedBases,
@@ -86,7 +84,6 @@ class DescribeSecondOrderMeasures:
             ("population_proportions", _PopulationProportions),
             ("population_std_err", _PopulationStandardError),
             ("pvalues", _Pvalues),
-            ("row_proportion_variances", _RowProportionVariances),
             ("row_std_err", _RowStandardError),
             ("row_proportions", _RowProportions),
             ("row_unweighted_bases", _RowUnweightedBases),
@@ -94,7 +91,6 @@ class DescribeSecondOrderMeasures:
             ("smoothed_column_index", _ColumnIndexSmoothed),
             ("smoothed_column_proportions", _ColumnProportionsSmoothed),
             ("smoothed_means", _MeansSmoothed),
-            ("table_proportion_variances", _TableProportionVariances),
             ("table_std_err", _TableStandardError),
             ("table_proportions", _TableProportions),
             ("table_unweighted_bases", _TableUnweightedBases),
@@ -135,6 +131,18 @@ class DescribeSecondOrderMeasures:
                 _ProportionVariances,
                 "column_proportions",
                 "column_weighted_bases",
+            ),
+            (
+                "row_proportion_variances",
+                _ProportionVariances,
+                "row_proportions",
+                "row_weighted_bases",
+            ),
+            (
+                "table_proportion_variances",
+                _ProportionVariances,
+                "table_proportions",
+                "table_weighted_bases",
             ),
         ),
     )
@@ -1263,33 +1271,12 @@ class Describe_RowProportions:
         assert row_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
 
 
-class Describe_RowProportionVariances:
-    """Unit test suite for `cr.cube.matrix.measure._RowProportionVariances` object."""
-
-    def it_computes_its_blocks(self, request):
-        row_proportions_ = instance_mock(
-            request, _RowProportions, blocks=[[0.1, 0.3], [0.25, 0.35]]
-        )
-        second_order_measures_ = instance_mock(
-            request,
-            SecondOrderMeasures,
-            row_proportions=row_proportions_,
-        )
-
-        variances = _RowProportionVariances(None, second_order_measures_, None)
-
-        assert variances.blocks == [
-            pytest.approx([0.09, 0.21]),
-            pytest.approx([0.1875, 0.2275]),
-        ]
-
-
 class Describe_RowStandardError:
     """Unit test suite for `cr.cube.matrix.measure._RowStandardError` object."""
 
     def it_computes_its_blocks(self, request):
         row_proportion_variances_ = instance_mock(
-            request, _RowProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
+            request, _ProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
         )
         row_weighted_bases_ = instance_mock(
             request, _RowWeightedBases, blocks=[[1.0, 2.0], [3.0, 4.0]]
@@ -1636,33 +1623,12 @@ class Describe_TableProportions:
         assert table_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
 
 
-class Describe_TableProportionVariances:
-    """Unit test suite for `cr.cube.matrix.measure._TableProportionVariances` object."""
-
-    def it_computes_its_blocks(self, request):
-        table_proportions_ = instance_mock(
-            request, _TableProportions, blocks=[[0.1, 0.3], [0.25, 0.35]]
-        )
-        second_order_measures_ = instance_mock(
-            request,
-            SecondOrderMeasures,
-            table_proportions=table_proportions_,
-        )
-
-        variances = _TableProportionVariances(None, second_order_measures_, None)
-
-        assert variances.blocks == [
-            pytest.approx([0.09, 0.21]),
-            pytest.approx([0.1875, 0.2275]),
-        ]
-
-
 class Describe_TableStandardError:
     """Unit test suite for `cr.cube.matrix.measure._TableStandardError` object."""
 
     def it_computes_its_blocks(self, request):
         table_proportion_variances_ = instance_mock(
-            request, _TableProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
+            request, _ProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
         )
         table_weighted_bases_ = instance_mock(
             request, _TableWeightedBases, blocks=[[1.0, 2.0], [3.0, 4.0]]
