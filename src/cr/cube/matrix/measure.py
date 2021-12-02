@@ -48,8 +48,14 @@ class SecondOrderMeasures:
 
     @lazyproperty
     def column_proportion_variances(self):
-        """_ColumnProportions measure object for this cube-result."""
-        return _ColumnProportionVariances(self._dimensions, self, self._cube_measures)
+        """_ProportionVariances measure object for this cube-result."""
+        return _ProportionVariances(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self.column_proportions.blocks,
+            self.column_weighted_bases.blocks,
+        )
 
     @lazyproperty
     def column_share_sum(self):
@@ -792,15 +798,15 @@ class _ColumnProportionsSmoothed(_ColumnProportions, _SmoothedMeasure):
         return smoother.smooth(super(_ColumnProportionsSmoothed, self)._subtotal_rows)
 
 
-class _ColumnProportionVariances(_BaseSecondOrderMeasure):
-    """Provides the variance of the column-proportions measure for a matrix.
+class _ProportionVariances(_BaseSecondOrderMeasure):
+    """Provides the variance of the row/col/tot-proportions measure for a matrix.
 
-    Column-proportions-variance is a 2D np.float64 ndarray.  When there are
+    Row/col/totla-proportions-variance is a 2D np.float64 ndarray.  When there are
     negative terms, the full formula is:
     (1 - p)^2 * (Np / Nt) + (0 - p)^2 * (Ni / Nt) + (-1 - p)^2 * (Nn / Nt)
 
     Where:
-    p = column-proportions (eg (Np - Nn) / Nt))
+    p = row/col/total-proportions (eg (Np - Nn) / Nt))
     Np = weighted-count of positive terms
     Ni = weighted-count of "ignored" (eg not negative nor positive) terms
     Nn = weighted-count of negative terms
@@ -808,8 +814,17 @@ class _ColumnProportionVariances(_BaseSecondOrderMeasure):
 
     When there are no negative terms (eg not subtotal differences), the formula
     can be simplified to the more familiar p * (1 - p) where p is the
-    column-proportions.
+    row/col/total-proportions.
     """
+
+    def __init__(
+        self, dimensions, second_order_measures, cube_measures, proportions, count_total
+    ):
+        super(_ProportionVariances, self).__init__(
+            dimensions, second_order_measures, cube_measures
+        )
+        self._proportions = proportions
+        self._count_total = count_total
 
     @lazyproperty
     def blocks(self):
@@ -818,7 +833,7 @@ class _ColumnProportionVariances(_BaseSecondOrderMeasure):
         These are the base-values, the column-subtotals, the row-subtotals, and the
         subtotal intersection-cell values.
         """
-        p = self._second_order_measures.column_proportions.blocks
+        p = self._proportions
         Nt = self._count_total
         Np = self._count_positive
         Ni = self._count_ignored
@@ -886,11 +901,6 @@ class _ColumnProportionVariances(_BaseSecondOrderMeasure):
             self._weighted_cube_counts.counts,
             self._dimensions,
         )
-
-    @lazyproperty
-    def _count_total(self):
-        """blocks of 2D np.float64 ndarray of the count of the base"""
-        return self._second_order_measures.column_weighted_bases.blocks
 
 
 class _ColumnShareSum(_BaseSecondOrderMeasure):

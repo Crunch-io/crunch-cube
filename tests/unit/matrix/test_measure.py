@@ -19,7 +19,6 @@ from cr.cube.matrix.measure import (
     _BaseSecondOrderMeasure,
     _BaseScaledCountMarginal,
     _ColumnComparableCounts,
-    _ColumnProportionVariances,
     _ColumnIndex,
     _ColumnIndexSmoothed,
     _ColumnProportions,
@@ -38,6 +37,7 @@ from cr.cube.matrix.measure import (
     _MarginTableBase,
     _Means,
     _MeansSmoothed,
+    _ProportionVariances,
     _Pvalues,
     _RowComparableCounts,
     _RowProportions,
@@ -79,7 +79,6 @@ class DescribeSecondOrderMeasures:
         (
             ("column_index", _ColumnIndex),
             ("column_proportions", _ColumnProportions),
-            ("column_proportion_variances", _ColumnProportionVariances),
             ("column_std_err", _ColumnStandardError),
             ("column_unweighted_bases", _ColumnUnweightedBases),
             ("column_weighted_bases", _ColumnWeightedBases),
@@ -126,6 +125,59 @@ class DescribeSecondOrderMeasures:
         measure = getattr(measures, measure_prop_name)
 
         MeasureCls_.assert_called_once_with(dimensions_, measures, cube_measures_)
+        assert measure is measure_
+
+    @pytest.mark.parametrize(
+        "measure_prop_name, MeasureCls, proportion_type, base_type",
+        (
+            (
+                "column_proportion_variances",
+                _ProportionVariances,
+                "column_proportions",
+                "column_weighted_bases",
+            ),
+        ),
+    )
+    def it_provides_access_to_proportion_variance_measures(
+        self,
+        request,
+        _cube_measures_prop_,
+        cube_measures_,
+        measure_prop_name,
+        MeasureCls,
+        proportion_type,
+        base_type,
+    ):
+        Dimension_ = class_mock(request, "cr.cube.dimension.Dimension")
+        dimensions_ = (Dimension_, Dimension_)
+        measure_ = instance_mock(request, MeasureCls)
+        MeasureCls_ = class_mock(
+            request,
+            "cr.cube.matrix.measure.%s" % MeasureCls.__name__,
+            return_value=measure_,
+        )
+        proportion_measure_ = instance_mock(request, _BaseSecondOrderMeasure)
+        property_mock(
+            request,
+            SecondOrderMeasures,
+            proportion_type,
+            return_value=proportion_measure_,
+        )
+        base_measure_ = instance_mock(request, _BaseSecondOrderMeasure)
+        property_mock(
+            request, SecondOrderMeasures, base_type, return_value=base_measure_
+        )
+        _cube_measures_prop_.return_value = cube_measures_
+        measures = SecondOrderMeasures(None, dimensions_, None)
+        measure = getattr(measures, measure_prop_name)
+
+        MeasureCls_.assert_called_once_with(
+            dimensions_,
+            measures,
+            cube_measures_,
+            proportion_measure_.blocks,
+            base_measure_.blocks,
+        )
         assert measure is measure_
 
     def it_provides_access_to_the_columns_pruning_base(
@@ -403,33 +455,33 @@ class Describe_ColumnProportions:
         assert column_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
 
 
-class Describe_ColumnProportionVariances:
-    """Unit test suite for `cr.cube.matrix.measure._ColumnProportionVariances` object."""
+class Describe_ProportionVariances:
+    """Unit test suite for `cr.cube.matrix.measure._ProportionVariances` object."""
 
     def it_computes_its_blocks(
         self,
         request,
-        second_order_measures_,
-        _count_total_prop_,
+        bases_,
         _count_positive_prop_,
         _count_negative_prop_,
         _count_ignored_prop_,
     ):
-        column_proportions_ = instance_mock(
+        proportions_ = instance_mock(
             request, _ColumnProportions, blocks=[["p1", "p2"], ["p3", "p4"]]
         )
-        second_order_measures_.column_proportions = column_proportions_
-        _count_total_prop_.return_value = [["Nt1", "Nt2"], ["Nt3", "Nt4"]]
+        bases_.blocks = [["Nt1", "Nt2"], ["Nt3", "Nt4"]]
         _count_positive_prop_.return_value = [["Np1", "Np2"], ["Np3", "Np4"]]
         _count_ignored_prop_.return_value = [["Ni1", "Ni2"], ["Ni3", "Ni4"]]
         _count_negative_prop_.return_value = [["Nn1", "Nn2"], ["Nn3", "Nn4"]]
         _calc_var_ = method_mock(
             request,
-            _ColumnProportionVariances,
+            _ProportionVariances,
             "_calc_var",
             side_effect=("a", "b", "c", "d"),
         )
-        variances = _ColumnProportionVariances(None, second_order_measures_, None)
+        variances = _ProportionVariances(
+            None, None, None, proportions_.blocks, bases_.blocks
+        )
 
         assert variances.blocks == [["a", "b"], ["c", "d"]]
         assert _calc_var_.call_args_list == [
@@ -445,7 +497,7 @@ class Describe_ColumnProportionVariances:
         Np = np.array([[4, 3], [1, 7], [4, 3]])
         Ni = np.array([[1, 7], [4, 3], [0, 0]])
         Nn = np.array([[0, 0], [0, 0], [1, 7]])
-        variances = _ColumnProportionVariances(None, None, None)
+        variances = _ProportionVariances(None, None, None, None, None)
 
         assert variances._calc_var(p, Nt, Np, Ni, Nn).tolist() == [
             pytest.approx([0.16, 0.21]),
@@ -454,12 +506,12 @@ class Describe_ColumnProportionVariances:
         ]
 
     def it_provides_the_count_ignored_to_help(
-        self, _count_total_prop_, _count_positive_prop_, _count_negative_prop_
+        self, bases_, _count_positive_prop_, _count_negative_prop_
     ):
-        _count_total_prop_.return_value = [[5, 10], [6, 11]]
+        bases_.blocks = [[5, 10], [6, 11]]
         _count_positive_prop_.return_value = [[1, 4], [2, 9]]
         _count_negative_prop_.return_value = [[0, 2], [1, 1]]
-        variances = _ColumnProportionVariances(None, None, None)
+        variances = _ProportionVariances(None, None, None, None, bases_.blocks)
 
         assert variances._count_ignored == [[4, 4], [3, 1]]
 
@@ -470,7 +522,7 @@ class Describe_ColumnProportionVariances:
             request, NegativeTermSubtotals, "blocks", return_value="b"
         )
         _weighted_cube_counts_prop_.return_value = cube_counts_
-        variances = _ColumnProportionVariances(dimensions_, None, None)
+        variances = _ProportionVariances(dimensions_, None, None, None, None)
 
         assert variances._count_negative == "b"
         negative_term_blocks.assert_called_once_with(cube_counts_.counts, dimensions_)
@@ -482,35 +534,32 @@ class Describe_ColumnProportionVariances:
             request, PositiveTermSubtotals, "blocks", return_value="b"
         )
         _weighted_cube_counts_prop_.return_value = cube_counts_
-        variances = _ColumnProportionVariances(dimensions_, None, None)
+        variances = _ProportionVariances(dimensions_, None, None, None, None)
 
         assert variances._count_positive == "b"
         positive_term_blocks.assert_called_once_with(cube_counts_.counts, dimensions_)
 
-    def it_provides_the_count_total_to_help(self, request, second_order_measures_):
-        column_weighted_bases_ = instance_mock(request, _ColumnWeightedBases)
-        second_order_measures_.column_weighted_bases = column_weighted_bases_
-        variances = _ColumnProportionVariances(None, second_order_measures_, None)
-
-        assert variances._count_total == column_weighted_bases_.blocks
-
     # fixture components ---------------------------------------------
 
     @pytest.fixture
+    def bases_(self, request):
+        return instance_mock(request, _ColumnWeightedBases)
+
+    @pytest.fixture
     def _count_ignored_prop_(self, request):
-        return property_mock(request, _ColumnProportionVariances, "_count_ignored")
+        return property_mock(request, _ProportionVariances, "_count_ignored")
 
     @pytest.fixture
     def _count_negative_prop_(self, request):
-        return property_mock(request, _ColumnProportionVariances, "_count_negative")
+        return property_mock(request, _ProportionVariances, "_count_negative")
 
     @pytest.fixture
     def _count_positive_prop_(self, request):
-        return property_mock(request, _ColumnProportionVariances, "_count_positive")
+        return property_mock(request, _ProportionVariances, "_count_positive")
 
     @pytest.fixture
     def _count_total_prop_(self, request):
-        return property_mock(request, _ColumnProportionVariances, "_count_total")
+        return property_mock(request, _ProportionVariances, "_count_total")
 
     @pytest.fixture
     def cube_counts_(self, request):
@@ -526,9 +575,7 @@ class Describe_ColumnProportionVariances:
 
     @pytest.fixture
     def _weighted_cube_counts_prop_(self, request):
-        return property_mock(
-            request, _ColumnProportionVariances, "_weighted_cube_counts"
-        )
+        return property_mock(request, _ProportionVariances, "_weighted_cube_counts")
 
 
 class Describe_ColumnShareSum:
@@ -562,7 +609,7 @@ class Describe_ColumnStandardError:
 
     def it_computes_its_blocks(self, request):
         column_proportion_variances_ = instance_mock(
-            request, _ColumnProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
+            request, _ProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
         )
         column_weighted_bases_ = instance_mock(
             request, _ColumnWeightedBases, blocks=[[1.0, 2.0], [3.0, 4.0]]
