@@ -123,61 +123,35 @@ class DescribeSecondOrderMeasures:
         MeasureCls_.assert_called_once_with(dimensions_, measures, cube_measures_)
         assert measure is measure_
 
-    @pytest.mark.parametrize(
-        "measure_prop_name, MeasureCls, proportion_type, base_type",
-        (
-            (
-                "column_proportion_variances",
-                _ProportionVariances,
-                "column_proportions",
-                "column_weighted_bases",
-            ),
-            (
-                "row_proportion_variances",
-                _ProportionVariances,
-                "row_proportions",
-                "row_weighted_bases",
-            ),
-            (
-                "table_proportion_variances",
-                _ProportionVariances,
-                "table_proportions",
-                "table_weighted_bases",
-            ),
-        ),
-    )
+    @pytest.mark.parametrize("measure_type", ("column", "row", "table"))
     def it_provides_access_to_proportion_variance_measures(
-        self,
-        request,
-        _cube_measures_prop_,
-        cube_measures_,
-        measure_prop_name,
-        MeasureCls,
-        proportion_type,
-        base_type,
+        self, request, _cube_measures_prop_, cube_measures_, measure_type
     ):
         Dimension_ = class_mock(request, "cr.cube.dimension.Dimension")
         dimensions_ = (Dimension_, Dimension_)
-        measure_ = instance_mock(request, MeasureCls)
+        measure_ = instance_mock(request, _ProportionVariances)
         MeasureCls_ = class_mock(
             request,
-            "cr.cube.matrix.measure.%s" % MeasureCls.__name__,
+            "cr.cube.matrix.measure._ProportionVariances",
             return_value=measure_,
         )
         proportion_measure_ = instance_mock(request, _BaseSecondOrderMeasure)
         property_mock(
             request,
             SecondOrderMeasures,
-            proportion_type,
+            "%s_proportions" % measure_type,
             return_value=proportion_measure_,
         )
         base_measure_ = instance_mock(request, _BaseSecondOrderMeasure)
         property_mock(
-            request, SecondOrderMeasures, base_type, return_value=base_measure_
+            request,
+            SecondOrderMeasures,
+            "%s_weighted_bases" % measure_type,
+            return_value=base_measure_,
         )
         _cube_measures_prop_.return_value = cube_measures_
         measures = SecondOrderMeasures(None, dimensions_, None)
-        measure = getattr(measures, measure_prop_name)
+        measure = getattr(measures, "%s_proportion_variances" % measure_type)
 
         MeasureCls_.assert_called_once_with(
             dimensions_,
