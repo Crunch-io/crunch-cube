@@ -10,6 +10,8 @@ from cr.cube.dimension import Dimension, _Subtotal
 from cr.cube.matrix.subtotals import (
     _BaseSubtotals,
     NanSubtotals,
+    NegativeTermSubtotals,
+    PositiveTermSubtotals,
     SumSubtotals,
 )
 
@@ -198,6 +200,161 @@ class DescribeNanSubtotals:
         )
 
 
+class DescribeNegativeTermSubtotals:
+    """Unit test suite for `cr.cube.matrix.NegativeTermSubtotals` object."""
+
+    def it_provides_blocks_to_help(self, request):
+        base_values = np.arange(12).reshape(3, 4)
+        subtotal_cols = np.array([[12], [13], [14]])
+        subtotal_rows = np.array([[15, 16, 17, 18]])
+        intersections = np.array([[19]])
+        property_mock(
+            request,
+            NegativeTermSubtotals,
+            "_subtotal_columns",
+            return_value=subtotal_cols,
+        )
+        property_mock(
+            request, NegativeTermSubtotals, "_subtotal_rows", return_value=subtotal_rows
+        )
+        property_mock(
+            request, NegativeTermSubtotals, "_intersections", return_value=intersections
+        )
+
+        actual = NegativeTermSubtotals(base_values, None)._blocks
+
+        assert actual[0][0] == pytest.approx(
+            np.array(
+                [
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0],
+                ]
+            )
+        )
+        assert actual[0][1] == pytest.approx(subtotal_cols)
+        assert actual[1][0] == pytest.approx(subtotal_rows)
+        assert actual[1][1] == pytest.approx(intersections)
+
+    @pytest.mark.parametrize(
+        "col_add_idxs, col_sub_idxs, row_add_idxs, row_sub_idxs, expected_value",
+        (
+            ([0, 1], [], [1, 2], [], 0),
+            ([0, 1], [2], [1, 2], [], 16),
+            ([0, 1], [], [1, 2], [0], 1),
+            ([0, 1], [2], [1, 2], [0], np.nan),
+        ),
+    )
+    def it_can_compute_intersection_to_help(
+        self,
+        request,
+        col_add_idxs,
+        col_sub_idxs,
+        row_add_idxs,
+        row_sub_idxs,
+        expected_value,
+    ):
+        col_subtotal_ = instance_mock(
+            request,
+            _Subtotal,
+            addend_idxs=col_add_idxs,
+            subtrahend_idxs=col_sub_idxs,
+        )
+        row_subtotal_ = instance_mock(
+            request,
+            _Subtotal,
+            addend_idxs=row_add_idxs,
+            subtrahend_idxs=row_sub_idxs,
+        )
+        base_values = np.arange(12).reshape(3, 4)
+        subtotals = NegativeTermSubtotals(base_values, None)
+
+        assert subtotals._intersection(row_subtotal_, col_subtotal_) == pytest.approx(
+            expected_value, nan_ok=True
+        )
+
+    def it_can_compute_subtotal_column_to_help(self, subtotal_):
+        base_values = np.arange(12).reshape(3, 4)
+        subtotal_.subtrahend_idxs = [1, 2]
+        subtotals = NegativeTermSubtotals(base_values, None)
+
+        assert subtotals._subtotal_column(subtotal_).tolist() == [3, 11, 19]
+
+    def it_can_compute_subtotal_row_to_help(self, subtotal_):
+        base_values = np.arange(12).reshape(3, 4)
+        subtotal_.subtrahend_idxs = [1, 2]
+        subtotals = NegativeTermSubtotals(base_values, None)
+
+        assert subtotals._subtotal_row(subtotal_).tolist() == [12, 14, 16, 18]
+
+    # --- fixture components -----------------------------------------
+
+    @pytest.fixture
+    def subtotal_(self, request):
+        return instance_mock(request, _Subtotal)
+
+
+class DescribePositiveTermSubtotals:
+    """Unit test suite for `cr.cube.matrix.PositiveTermSubtotals` object."""
+
+    @pytest.mark.parametrize(
+        "col_add_idxs, col_sub_idxs, row_add_idxs, row_sub_idxs, expected_value",
+        (
+            ([0, 1], [], [1, 2], [], 26),
+            ([0, 1], [2], [1, 2], [], 26),
+            ([0, 1], [], [1, 2], [0], 26),
+            ([0, 1], [2], [1, 2], [0], np.nan),
+        ),
+    )
+    def it_can_compute_intersection_to_help(
+        self,
+        request,
+        col_add_idxs,
+        col_sub_idxs,
+        row_add_idxs,
+        row_sub_idxs,
+        expected_value,
+    ):
+        col_subtotal_ = instance_mock(
+            request,
+            _Subtotal,
+            addend_idxs=col_add_idxs,
+            subtrahend_idxs=col_sub_idxs,
+        )
+        row_subtotal_ = instance_mock(
+            request,
+            _Subtotal,
+            addend_idxs=row_add_idxs,
+            subtrahend_idxs=row_sub_idxs,
+        )
+        base_values = np.arange(12).reshape(3, 4)
+        subtotals = PositiveTermSubtotals(base_values, None)
+
+        np.testing.assert_equal(
+            subtotals._intersection(row_subtotal_, col_subtotal_), expected_value
+        )
+
+    def it_can_compute_subtotal_column_to_help(self, subtotal_):
+        base_values = np.arange(12).reshape(3, 4)
+        subtotal_.addend_idxs = [1, 2]
+        subtotals = PositiveTermSubtotals(base_values, None)
+
+        assert subtotals._subtotal_column(subtotal_).tolist() == [3, 11, 19]
+
+    def it_can_compute_subtotal_row_to_help(self, subtotal_):
+        base_values = np.arange(12).reshape(3, 4)
+        subtotal_.addend_idxs = [1, 2]
+        subtotals = PositiveTermSubtotals(base_values, None)
+
+        assert subtotals._subtotal_row(subtotal_).tolist() == [12, 14, 16, 18]
+
+    # --- fixture components -----------------------------------------
+
+    @pytest.fixture
+    def subtotal_(self, request):
+        return instance_mock(request, _Subtotal)
+
+
 class DescribeSumSubtotals:
     """Unit test suite for `cr.cube.matrix.SumSubtotals` object."""
 
@@ -297,8 +454,8 @@ class DescribeSumSubtotals:
         base_values = np.arange(12).reshape(3, 4)
         subtotals = SumSubtotals(base_values, None, diff_cols_nan, diff_rows_nan)
 
-        np.testing.assert_equal(
-            subtotals._intersection(row_subtotal_, col_subtotal_), expected_value
+        assert subtotals._intersection(row_subtotal_, col_subtotal_) == pytest.approx(
+            expected_value, nan_ok=True
         )
 
     @pytest.mark.parametrize(

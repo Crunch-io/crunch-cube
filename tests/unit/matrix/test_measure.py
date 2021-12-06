@@ -19,7 +19,6 @@ from cr.cube.matrix.measure import (
     _BaseSecondOrderMeasure,
     _BaseScaledCountMarginal,
     _ColumnComparableCounts,
-    _ColumnProportionVariances,
     _ColumnIndex,
     _ColumnIndexSmoothed,
     _ColumnProportions,
@@ -38,10 +37,10 @@ from cr.cube.matrix.measure import (
     _MarginTableBase,
     _Means,
     _MeansSmoothed,
+    _ProportionVariances,
     _Pvalues,
     _RowComparableCounts,
     _RowProportions,
-    _RowProportionVariances,
     _RowShareSum,
     _RowStandardError,
     _RowUnweightedBases,
@@ -55,7 +54,6 @@ from cr.cube.matrix.measure import (
     _Sums,
     _TableBase,
     _TableBasesRange,
-    _TableProportionVariances,
     _TableProportions,
     _TableStandardError,
     _TableUnweightedBases,
@@ -66,6 +64,7 @@ from cr.cube.matrix.measure import (
     _WeightedCounts,
     _Zscores,
 )
+from cr.cube.matrix.subtotals import NegativeTermSubtotals, PositiveTermSubtotals
 
 from ...unitutil import ANY, call, class_mock, instance_mock, method_mock, property_mock
 
@@ -78,7 +77,6 @@ class DescribeSecondOrderMeasures:
         (
             ("column_index", _ColumnIndex),
             ("column_proportions", _ColumnProportions),
-            ("column_proportion_variances", _ColumnProportionVariances),
             ("column_std_err", _ColumnStandardError),
             ("column_unweighted_bases", _ColumnUnweightedBases),
             ("column_weighted_bases", _ColumnWeightedBases),
@@ -86,7 +84,6 @@ class DescribeSecondOrderMeasures:
             ("population_proportions", _PopulationProportions),
             ("population_std_err", _PopulationStandardError),
             ("pvalues", _Pvalues),
-            ("row_proportion_variances", _RowProportionVariances),
             ("row_std_err", _RowStandardError),
             ("row_proportions", _RowProportions),
             ("row_unweighted_bases", _RowUnweightedBases),
@@ -94,7 +91,6 @@ class DescribeSecondOrderMeasures:
             ("smoothed_column_index", _ColumnIndexSmoothed),
             ("smoothed_column_proportions", _ColumnProportionsSmoothed),
             ("smoothed_means", _MeansSmoothed),
-            ("table_proportion_variances", _TableProportionVariances),
             ("table_std_err", _TableStandardError),
             ("table_proportions", _TableProportions),
             ("table_unweighted_bases", _TableUnweightedBases),
@@ -125,6 +121,45 @@ class DescribeSecondOrderMeasures:
         measure = getattr(measures, measure_prop_name)
 
         MeasureCls_.assert_called_once_with(dimensions_, measures, cube_measures_)
+        assert measure is measure_
+
+    @pytest.mark.parametrize("measure_type", ("column", "row", "table"))
+    def it_provides_access_to_proportion_variance_measures(
+        self, request, _cube_measures_prop_, cube_measures_, measure_type
+    ):
+        Dimension_ = class_mock(request, "cr.cube.dimension.Dimension")
+        dimensions_ = (Dimension_, Dimension_)
+        measure_ = instance_mock(request, _ProportionVariances)
+        MeasureCls_ = class_mock(
+            request,
+            "cr.cube.matrix.measure._ProportionVariances",
+            return_value=measure_,
+        )
+        proportion_measure_ = instance_mock(request, _BaseSecondOrderMeasure)
+        property_mock(
+            request,
+            SecondOrderMeasures,
+            "%s_proportions" % measure_type,
+            return_value=proportion_measure_,
+        )
+        base_measure_ = instance_mock(request, _BaseSecondOrderMeasure)
+        property_mock(
+            request,
+            SecondOrderMeasures,
+            "%s_weighted_bases" % measure_type,
+            return_value=base_measure_,
+        )
+        _cube_measures_prop_.return_value = cube_measures_
+        measures = SecondOrderMeasures(None, dimensions_, None)
+        measure = getattr(measures, "%s_proportion_variances" % measure_type)
+
+        MeasureCls_.assert_called_once_with(
+            dimensions_,
+            measures,
+            cube_measures_,
+            proportion_measure_.blocks,
+            base_measure_.blocks,
+        )
         assert measure is measure_
 
     def it_provides_access_to_the_columns_pruning_base(
@@ -402,25 +437,127 @@ class Describe_ColumnProportions:
         assert column_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
 
 
-class Describe_ColumnProportionVariances:
-    """Unit test suite for `cr.cube.matrix.measure._ColumnProportionVariances` object."""
+class Describe_ProportionVariances:
+    """Unit test suite for `cr.cube.matrix.measure._ProportionVariances` object."""
 
-    def it_computes_its_blocks(self, request):
-        column_proportions_ = instance_mock(
-            request, _ColumnProportions, blocks=[[0.1, 0.3], [0.25, 0.35]]
+    def it_computes_its_blocks(
+        self,
+        request,
+        bases_,
+        _count_positive_prop_,
+        _count_negative_prop_,
+        _count_ignored_prop_,
+    ):
+        proportions_ = instance_mock(
+            request, _ColumnProportions, blocks=[["p1", "p2"], ["p3", "p4"]]
         )
-        second_order_measures_ = instance_mock(
+        bases_.blocks = [["Nt1", "Nt2"], ["Nt3", "Nt4"]]
+        _count_positive_prop_.return_value = [["Np1", "Np2"], ["Np3", "Np4"]]
+        _count_ignored_prop_.return_value = [["Ni1", "Ni2"], ["Ni3", "Ni4"]]
+        _count_negative_prop_.return_value = [["Nn1", "Nn2"], ["Nn3", "Nn4"]]
+        _calc_var_ = method_mock(
             request,
-            SecondOrderMeasures,
-            column_proportions=column_proportions_,
+            _ProportionVariances,
+            "_calc_var",
+            side_effect=("a", "b", "c", "d"),
+        )
+        variances = _ProportionVariances(
+            None, None, None, proportions_.blocks, bases_.blocks
         )
 
-        variances = _ColumnProportionVariances(None, second_order_measures_, None)
-
-        assert variances.blocks == [
-            pytest.approx([0.09, 0.21]),
-            pytest.approx([0.1875, 0.2275]),
+        assert variances.blocks == [["a", "b"], ["c", "d"]]
+        assert _calc_var_.call_args_list == [
+            call(variances, "p1", "Nt1", "Np1", "Ni1", "Nn1"),
+            call(variances, "p2", "Nt2", "Np2", "Ni2", "Nn2"),
+            call(variances, "p3", "Nt3", "Np3", "Ni3", "Nn3"),
+            call(variances, "p4", "Nt4", "Np4", "Ni4", "Nn4"),
         ]
+
+    def it_can_compute_variance_to_help(self):
+        p = np.array([[0.8, 0.3], [0.2, 0.7], [0.6, -0.4]])
+        Nt = np.array([[5, 10], [5, 10], [5, 10]])
+        Np = np.array([[4, 3], [1, 7], [4, 3]])
+        Ni = np.array([[1, 7], [4, 3], [0, 0]])
+        Nn = np.array([[0, 0], [0, 0], [1, 7]])
+        variances = _ProportionVariances(None, None, None, None, None)
+
+        assert variances._calc_var(p, Nt, Np, Ni, Nn).tolist() == [
+            pytest.approx([0.16, 0.21]),
+            pytest.approx([0.16, 0.21]),
+            pytest.approx([0.64, 0.84]),
+        ]
+
+    def it_provides_the_count_ignored_to_help(
+        self, bases_, _count_positive_prop_, _count_negative_prop_
+    ):
+        bases_.blocks = [[5, 10], [6, 11]]
+        _count_positive_prop_.return_value = [[1, 4], [2, 9]]
+        _count_negative_prop_.return_value = [[0, 2], [1, 1]]
+        variances = _ProportionVariances(None, None, None, None, bases_.blocks)
+
+        assert variances._count_ignored == [[4, 4], [3, 1]]
+
+    def it_provides_the_count_negative_to_help(
+        self, request, dimensions_, _weighted_cube_counts_prop_, cube_counts_
+    ):
+        negative_term_blocks = method_mock(
+            request, NegativeTermSubtotals, "blocks", return_value="b"
+        )
+        _weighted_cube_counts_prop_.return_value = cube_counts_
+        variances = _ProportionVariances(dimensions_, None, None, None, None)
+
+        assert variances._count_negative == "b"
+        negative_term_blocks.assert_called_once_with(cube_counts_.counts, dimensions_)
+
+    def it_provides_the_count_positive_to_help(
+        self, request, dimensions_, _weighted_cube_counts_prop_, cube_counts_
+    ):
+        positive_term_blocks = method_mock(
+            request, PositiveTermSubtotals, "blocks", return_value="b"
+        )
+        _weighted_cube_counts_prop_.return_value = cube_counts_
+        variances = _ProportionVariances(dimensions_, None, None, None, None)
+
+        assert variances._count_positive == "b"
+        positive_term_blocks.assert_called_once_with(cube_counts_.counts, dimensions_)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def bases_(self, request):
+        return instance_mock(request, _ColumnWeightedBases)
+
+    @pytest.fixture
+    def _count_ignored_prop_(self, request):
+        return property_mock(request, _ProportionVariances, "_count_ignored")
+
+    @pytest.fixture
+    def _count_negative_prop_(self, request):
+        return property_mock(request, _ProportionVariances, "_count_negative")
+
+    @pytest.fixture
+    def _count_positive_prop_(self, request):
+        return property_mock(request, _ProportionVariances, "_count_positive")
+
+    @pytest.fixture
+    def _count_total_prop_(self, request):
+        return property_mock(request, _ProportionVariances, "_count_total")
+
+    @pytest.fixture
+    def cube_counts_(self, request):
+        return instance_mock(request, _BaseCubeCounts)
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def second_order_measures_(self, request):
+        return instance_mock(request, SecondOrderMeasures)
+
+    @pytest.fixture
+    def _weighted_cube_counts_prop_(self, request):
+        return property_mock(request, _ProportionVariances, "_weighted_cube_counts")
 
 
 class Describe_ColumnShareSum:
@@ -454,7 +591,7 @@ class Describe_ColumnStandardError:
 
     def it_computes_its_blocks(self, request):
         column_proportion_variances_ = instance_mock(
-            request, _ColumnProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
+            request, _ProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
         )
         column_weighted_bases_ = instance_mock(
             request, _ColumnWeightedBases, blocks=[[1.0, 2.0], [3.0, 4.0]]
@@ -1108,33 +1245,12 @@ class Describe_RowProportions:
         assert row_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
 
 
-class Describe_RowProportionVariances:
-    """Unit test suite for `cr.cube.matrix.measure._RowProportionVariances` object."""
-
-    def it_computes_its_blocks(self, request):
-        row_proportions_ = instance_mock(
-            request, _RowProportions, blocks=[[0.1, 0.3], [0.25, 0.35]]
-        )
-        second_order_measures_ = instance_mock(
-            request,
-            SecondOrderMeasures,
-            row_proportions=row_proportions_,
-        )
-
-        variances = _RowProportionVariances(None, second_order_measures_, None)
-
-        assert variances.blocks == [
-            pytest.approx([0.09, 0.21]),
-            pytest.approx([0.1875, 0.2275]),
-        ]
-
-
 class Describe_RowStandardError:
     """Unit test suite for `cr.cube.matrix.measure._RowStandardError` object."""
 
     def it_computes_its_blocks(self, request):
         row_proportion_variances_ = instance_mock(
-            request, _RowProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
+            request, _ProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
         )
         row_weighted_bases_ = instance_mock(
             request, _RowWeightedBases, blocks=[[1.0, 2.0], [3.0, 4.0]]
@@ -1481,33 +1597,12 @@ class Describe_TableProportions:
         assert table_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
 
 
-class Describe_TableProportionVariances:
-    """Unit test suite for `cr.cube.matrix.measure._TableProportionVariances` object."""
-
-    def it_computes_its_blocks(self, request):
-        table_proportions_ = instance_mock(
-            request, _TableProportions, blocks=[[0.1, 0.3], [0.25, 0.35]]
-        )
-        second_order_measures_ = instance_mock(
-            request,
-            SecondOrderMeasures,
-            table_proportions=table_proportions_,
-        )
-
-        variances = _TableProportionVariances(None, second_order_measures_, None)
-
-        assert variances.blocks == [
-            pytest.approx([0.09, 0.21]),
-            pytest.approx([0.1875, 0.2275]),
-        ]
-
-
 class Describe_TableStandardError:
     """Unit test suite for `cr.cube.matrix.measure._TableStandardError` object."""
 
     def it_computes_its_blocks(self, request):
         table_proportion_variances_ = instance_mock(
-            request, _TableProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
+            request, _ProportionVariances, blocks=[[4.0, 18.0], [48.0, 100.0]]
         )
         table_weighted_bases_ = instance_mock(
             request, _TableWeightedBases, blocks=[[1.0, 2.0], [3.0, 4.0]]

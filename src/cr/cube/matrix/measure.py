@@ -10,6 +10,8 @@ from cr.cube.matrix.cubemeasure import CubeMeasures
 from cr.cube.matrix.subtotals import (
     SumSubtotals,
     NanSubtotals,
+    NegativeTermSubtotals,
+    PositiveTermSubtotals,
 )
 from cr.cube.smoothing import Smoother
 from cr.cube.util import lazyproperty
@@ -46,8 +48,14 @@ class SecondOrderMeasures:
 
     @lazyproperty
     def column_proportion_variances(self):
-        """_ColumnProportions measure object for this cube-result."""
-        return _ColumnProportionVariances(self._dimensions, self, self._cube_measures)
+        """_ProportionVariances measure object for this cube-result."""
+        return _ProportionVariances(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self.column_proportions.blocks,
+            self.column_weighted_bases.blocks,
+        )
 
     @lazyproperty
     def column_share_sum(self):
@@ -265,8 +273,14 @@ class SecondOrderMeasures:
 
     @lazyproperty
     def row_proportion_variances(self):
-        """_RowProportions measure object for this cube-result."""
-        return _RowProportionVariances(self._dimensions, self, self._cube_measures)
+        """_ProportionVariances measure object for rows of this cube-result."""
+        return _ProportionVariances(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self.row_proportions.blocks,
+            self.row_weighted_bases.blocks,
+        )
 
     @lazyproperty
     def row_share_sum(self):
@@ -452,8 +466,14 @@ class SecondOrderMeasures:
 
     @lazyproperty
     def table_proportion_variances(self):
-        """_TableProportionVariances measure object for this cube-result."""
-        return _TableProportionVariances(self._dimensions, self, self._cube_measures)
+        """_ProportionVariances measure object for table of this cube-result."""
+        return _ProportionVariances(
+            self._dimensions,
+            self,
+            self._cube_measures,
+            self.table_proportions.blocks,
+            self.table_weighted_bases.blocks,
+        )
 
     @lazyproperty
     def table_std_err(self):
@@ -790,12 +810,33 @@ class _ColumnProportionsSmoothed(_ColumnProportions, _SmoothedMeasure):
         return smoother.smooth(super(_ColumnProportionsSmoothed, self)._subtotal_rows)
 
 
-class _ColumnProportionVariances(_BaseSecondOrderMeasure):
-    """Provides the variance of the column-proportions measure for a matrix.
+class _ProportionVariances(_BaseSecondOrderMeasure):
+    """Provides the variance of the row/col/tot-proportions measure for a matrix.
 
-    Column-proportions-variance is a 2D np.float64 ndarray of p * (1 - p) where p is the
-    column-proportions.
+    Row/col/total-proportions-variance is a 2D np.float64 ndarray.  When there are
+    negative terms, the full formula is:
+    (1 - p)^2 * (Np / Nt) + (0 - p)^2 * (Ni / Nt) + (-1 - p)^2 * (Nn / Nt)
+
+    Where:
+    p = row/col/total-proportions (eg (Np - Nn) / Nt))
+    Np = weighted-count of positive terms
+    Ni = weighted-count of "ignored" (eg not negative nor positive) terms
+    Nn = weighted-count of negative terms
+    Nt = weighted-base (sum of all counts eg Np + Ni + Nn)
+
+    When there are no negative terms (eg not subtotal differences), the formula
+    can be simplified to the more familiar p * (1 - p) where p is the
+    row/col/total-proportions.
     """
+
+    def __init__(
+        self, dimensions, second_order_measures, cube_measures, proportions, count_total
+    ):
+        super(_ProportionVariances, self).__init__(
+            dimensions, second_order_measures, cube_measures
+        )
+        self._proportions = proportions
+        self._count_total = count_total
 
     @lazyproperty
     def blocks(self):
@@ -804,22 +845,74 @@ class _ColumnProportionVariances(_BaseSecondOrderMeasure):
         These are the base-values, the column-subtotals, the row-subtotals, and the
         subtotal intersection-cell values.
         """
-        p = self._second_order_measures.column_proportions.blocks
+        p = self._proportions
+        Nt = self._count_total
+        Np = self._count_positive
+        Ni = self._count_ignored
+        Nn = self._count_negative
 
         return [
             [
                 # --- base values ---
-                p[0][0] * (1 - p[0][0]),
+                self._calc_var(p[0][0], Nt[0][0], Np[0][0], Ni[0][0], Nn[0][0]),
                 # --- inserted columns ---
-                p[0][1] * (1 - p[0][1]),
+                self._calc_var(p[0][1], Nt[0][1], Np[0][1], Ni[0][1], Nn[0][1]),
             ],
             [
                 # --- inserted rows ---
-                p[1][0] * (1 - p[1][0]),
+                self._calc_var(p[1][0], Nt[1][0], Np[1][0], Ni[1][0], Nn[1][0]),
                 # --- intersections ---
-                p[1][1] * (1 - p[1][1]),
+                self._calc_var(p[1][1], Nt[1][1], Np[1][1], Ni[1][1], Nn[1][1]),
             ],
         ]
+
+    def _calc_var(self, p, Nt, Np, Ni, Nn):
+        """Returns a float64 2D ndarray representing variance.
+
+        See the class docstring for details on the formula.
+        """
+        p_term = ((1 - p) ** 2) * (Np / Nt)
+        i_term = ((0 - p) ** 2) * (Ni / Nt)
+        n_term = ((-1 - p) ** 2) * (Nn / Nt)
+        return p_term + i_term + n_term
+
+    @lazyproperty
+    def _count_ignored(self):
+        """blocks of 2D np.float64 ndarray of the count of ignored
+
+        The ignored values are the ones that are included in neither the positive
+        term nor the negative term.
+        """
+        negative = self._count_negative
+        positive = self._count_positive
+        total = self._count_total
+
+        return [
+            [
+                total[0][0] - positive[0][0] - negative[0][0],
+                total[0][1] - positive[0][1] - negative[0][1],
+            ],
+            [
+                total[1][0] - positive[1][0] - negative[1][0],
+                total[1][1] - positive[1][1] - negative[1][1],
+            ],
+        ]
+
+    @lazyproperty
+    def _count_negative(self):
+        """blocks of 2D np.float64 ndarray of the count of subtracted values"""
+        return NegativeTermSubtotals.blocks(
+            self._weighted_cube_counts.counts,
+            self._dimensions,
+        )
+
+    @lazyproperty
+    def _count_positive(self):
+        """blocks of 2D np.float64 ndarray of the count of positive values"""
+        return PositiveTermSubtotals.blocks(
+            self._weighted_cube_counts.counts,
+            self._dimensions,
+        )
 
 
 class _ColumnShareSum(_BaseSecondOrderMeasure):
@@ -1572,38 +1665,6 @@ class _RowProportions(_BaseSecondOrderMeasure):
             ]
 
 
-class _RowProportionVariances(_BaseSecondOrderMeasure):
-    """Provides the variance of the row-proportions measure for a matrix.
-
-    Row-proportions-variance is a 2D np.float64 ndarray of p * (1 - p) where p is the
-    row-proportions.
-    """
-
-    @lazyproperty
-    def blocks(self):
-        """Nested list of the four 2D ndarray "blocks" making up this measure.
-
-        These are the base-values, the column-subtotals, the row-subtotals, and the
-        subtotal intersection-cell values.
-        """
-        p = self._second_order_measures.row_proportions.blocks
-
-        return [
-            [
-                # --- base values ---
-                p[0][0] * (1 - p[0][0]),
-                # --- inserted columns ---
-                p[0][1] * (1 - p[0][1]),
-            ],
-            [
-                # --- inserted rows ---
-                p[1][0] * (1 - p[1][0]),
-                # --- intersections ---
-                p[1][1] * (1 - p[1][1]),
-            ],
-        ]
-
-
 class _RowShareSum(_BaseSecondOrderMeasure):
     """Provides the row share of sum measure for a matrix.
 
@@ -1866,38 +1927,6 @@ class _TableProportions(_BaseSecondOrderMeasure):
                     count_blocks[1][1] / weighted_base_blocks[1][1],
                 ],
             ]
-
-
-class _TableProportionVariances(_BaseSecondOrderMeasure):
-    """Provides the variance of the table-proportions measure for a matrix.
-
-    Table-proportions-variance is a 2D np.float64 ndarray of p * (1 - p) where p is the
-    table-proportions.
-    """
-
-    @lazyproperty
-    def blocks(self):
-        """Nested list of the four 2D ndarray "blocks" making up this measure.
-
-        These are the base-values, the column-subtotals, the row-subtotals, and the
-        subtotal intersection-cell values.
-        """
-        p = self._second_order_measures.table_proportions.blocks
-
-        return [
-            [
-                # --- base values ---
-                p[0][0] * (1 - p[0][0]),
-                # --- inserted columns ---
-                p[0][1] * (1 - p[0][1]),
-            ],
-            [
-                # --- inserted rows ---
-                p[1][0] * (1 - p[1][0]),
-                # --- intersections ---
-                p[1][1] * (1 - p[1][1]),
-            ],
-        ]
 
 
 class _TableStandardError(_BaseSecondOrderMeasure):

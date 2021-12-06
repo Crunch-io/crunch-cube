@@ -7,7 +7,12 @@ import numpy as np
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.smoothing import Smoother
 from cr.cube.stripe.cubemeasure import CubeMeasures
-from cr.cube.stripe.insertion import NanSubtotals, SumSubtotals
+from cr.cube.stripe.insertion import (
+    NanSubtotals,
+    NegativeTermSubtotals,
+    PositiveTermSubtotals,
+    SumSubtotals,
+)
 from cr.cube.util import lazyproperty
 
 
@@ -530,9 +535,37 @@ class _TableProportionVariances(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def subtotal_values(self):
-        """1D np.float64 ndarray of table-prop variance for each row subtotal."""
+        """1D np.float64 ndarray of table-prop variance for each row subtotal.
+
+        The formula for the variance is more complicated when there are negative
+        terms (eg for subtotal differences). For regular subtotals, this formula
+        reduces to the p * (1 - p) formula and so is equivalent.
+
+        (1 - p)^2 * (Np / Nt) + (0 - p)^2 * (Ni / Nt) + (-1 - p)^2 * (Nn / Nt)
+
+        Where:
+        p = row/col/total-proportions (eg (Np - Nn) / Nt))
+        Np = weighted-count of positive terms
+        Ni = weighted-count of "ignored" (eg not negative nor positive) terms
+        Nn = weighted-count of negative terms
+        Nt = weighted-base (sum of all counts eg Np + Ni + Nn)
+        """
         p = self._measures.table_proportions.subtotal_values
-        return p * (1 - p)
+
+        Np = PositiveTermSubtotals.subtotal_values(
+            self._measures.weighted_counts.base_values, self._rows_dimension
+        )
+        Nn = NegativeTermSubtotals.subtotal_values(
+            self._measures.weighted_counts.base_values, self._rows_dimension
+        )
+        Nt = self._measures.weighted_bases.subtotal_values
+        Ni = Nt - Np - Nn
+
+        p_term = (1 - p) ** 2 * (Np / Nt)
+        i_term = (0 - p) ** 2 * (Ni / Nt)
+        n_term = (-1 - p) ** 2 * (Nn / Nt)
+
+        return p_term + i_term + n_term
 
 
 class _TableProportions(_BaseSecondOrderMeasure):
