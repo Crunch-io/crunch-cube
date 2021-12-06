@@ -1,5 +1,14 @@
 # History of Changes
 
+### 3.0.6
+- Expose `rows_dimension_alias` for `_Strand`
+- Expose `tab_alias` for `_Strand`
+- Expose `tab_label` for `_Strand`
+
+### 3.0.5
+- Add indexes for subtotal differences
+- This is needed for the correct display of pptx graphs
+
 ### 3.0.4
 - Expose `rows_dimension_alias`
 - Expose `row_codes`

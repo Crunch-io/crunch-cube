@@ -111,7 +111,10 @@ The detailed description can be found
 
 ## Changes
 
-### 3.1.10
+### 3.0.11
+- Fix bug in variance calculation for subtotal differences
+
+### 3.0.10
 - Allow sorting by share of sum
 
 ### 3.0.9
@@ -122,15 +125,6 @@ The detailed description can be found
 
 ### 3.0.7
 - Add fills for insertions (subtotals and differences)
-
-### 3.0.6
-- Expose `rows_dimension_alias` for `_Strand`
-- Expose `tab_alias` for `_Strand`
-- Expose `tab_label` for `_Strand`
-
-### 3.0.5
-- Add indexes for subtotal differences
-- This is needed for the correct display of pptx graphs
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
