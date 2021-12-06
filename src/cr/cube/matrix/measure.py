@@ -867,7 +867,7 @@ class _ProportionVariances(_BaseSecondOrderMeasure):
         ]
 
     def _calc_var(self, p, Nt, Np, Ni, Nn):
-        """2D ndarray of float64 representing variance.
+        """Returns a float64 2D ndarray representing variance.
 
         See the class docstring for details on the formula.
         """

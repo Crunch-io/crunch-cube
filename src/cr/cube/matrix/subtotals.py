@@ -167,7 +167,7 @@ class NegativeTermSubtotals(_BaseSubtotals):
         ]
 
     def _intersection(self, row_subtotal, column_subtotal):
-        """Negative terms from row/column subtotal intersection."""
+        """Return negative terms from row/column subtotal intersection."""
         has_col_subtrahends = len(column_subtotal.subtrahend_idxs) > 0
         has_row_subtrahends = len(row_subtotal.subtrahend_idxs) > 0
         # --- Intersections of subtotal differences are undefined ---
@@ -205,7 +205,7 @@ class PositiveTermSubtotals(_BaseSubtotals):
     """
 
     def _intersection(self, row_subtotal, column_subtotal):
-        """Positive terms from row/column subtotal intersection."""
+        """Return Positive terms from row/column subtotal intersection."""
         # --- Intersections of subtotal differences are undefined ---
         if (
             len(column_subtotal.subtrahend_idxs) > 0
