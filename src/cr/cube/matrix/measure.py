@@ -2224,7 +2224,7 @@ class _Zscores(_BaseSecondOrderMeasure):
             * column_bases
             * (table_bases - row_bases)
             * (table_bases - column_bases)
-            / table_bases ** 3
+            / table_bases**3
         )
         return (counts - expected_counts) / np.sqrt(variance)
 
