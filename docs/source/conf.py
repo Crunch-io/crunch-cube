@@ -56,9 +56,9 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"Crunch Cube"
-copyright = u"2021, Crunch.io"
-author = u"Crunch.io"
+project = "Crunch Cube"
+copyright = "2021, Crunch.io"
+author = "Crunch.io"
 
 # Get the currenct version of cr.cube
 thisdir = os.path.dirname(__file__)
@@ -123,7 +123,7 @@ htmlhelp_basename = "CrunchCubedoc"
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "CrunchCube.tex", u"Crunch Cube Documentation", u"Crunch.io", "manual")
+    (master_doc, "CrunchCube.tex", "Crunch Cube Documentation", "Crunch.io", "manual")
 ]
 
 
@@ -131,7 +131,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "crunchcube", u"Crunch Cube Documentation", [author], 1)]
+man_pages = [(master_doc, "crunchcube", "Crunch Cube Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -143,7 +143,7 @@ texinfo_documents = [
     (
         master_doc,
         "CrunchCube",
-        u"Crunch Cube Documentation",
+        "Crunch Cube Documentation",
         author,
         "CrunchCube",
         "One line description of project.",
