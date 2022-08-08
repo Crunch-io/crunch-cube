@@ -168,11 +168,13 @@ class _BaseCubeCounts(_BaseCubeMeasure):
         """1D bool np.ndarray indicating whether all cells in column are empty
 
         The columns-pruning-mask indicates when every cell in a column has base values
-        of 0. When the column is *not* an MR, the base used is equal to the columns_base,
-        but when the column is an MR, we use the sum of selected & non-selected values from
-        the column, whereas the columns_base uses just the selected values.
+        of 0. When the column is *not* an MR, the base used is equal to the
+        columns_base, but when the column is an MR, we use the sum of selected &
+        non-selected values fromthe column, whereas the columns_base uses just the
+        selected values.
         """
-        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        # --- Bases are positive, so we can sum them to see if all of them are equal
+        # --- to 0
         return self._columns_pruning_base == 0
 
     @lazyproperty
@@ -217,9 +219,9 @@ class _BaseCubeCounts(_BaseCubeMeasure):
         calculations.
 
         The parameter must be passed in during _BaseCubeCount's creation because it has
-        no knowledge of what type of counts it's using, and the way to tell if the counts
-        are paired with a numeric variable is by knowing if it comes from `*_counts`
-        or `*_valid_counts`.
+        no knowledge of what type of counts it's using, and the way to tell if the
+        counts are paired with a numeric variable is by knowing if it comes from
+        `*_counts` or `*_valid_counts`.
         """
         return self._diff_nans
 
@@ -304,14 +306,14 @@ class _BaseCubeCounts(_BaseCubeMeasure):
         Used to calculate the columns-pruning-mask, which indicates when every cell in a
         column has base values of 0. When the column is *not* an MR, the base used is
         equal to the columns_base, but when the column is an MR, we use the sum of
-        selected & non-selected values the column, whereas the columns_base uses just the
-        selected values. These values are not meaningful on their own, but used to
+        selected & non-selected values the column, whereas the columns_base uses just
+        the selected values. These values are not meaningful on their own, but used to
         calculate the columns-pruning-mask.
 
         This method works when the column is not an MR, and must be overriden when it is
         MR.
         """
-        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        # --- Bases are positive, so we can sum them to see if all of them are = to 0
         # --- To really hammer home the point that this number is invalid, we keep it
         # --- private. But it's easier to test, so it is separate from the mask.
         return np.sum(self.column_bases, axis=0)
@@ -326,9 +328,9 @@ class _BaseCubeCounts(_BaseCubeMeasure):
         the row, whereas the rows_base uses just the selected values. These values
         are not meaningful on their own, but used to calculate the rows-pruning-mask.
 
-        This method works when the row is not an MR, and must be overriden when it is MR.
+        This method works when the row is not an MR, and must be overriden when it is MR
         """
-        # --- Bases are positive, so we can sum them to see if all of them are equal to 0
+        # --- Bases are positive, so we can sum them to see if all of them are = to 0
         # --- To really hammer home the point that this number is invalid, we keep it
         # --- private. But it's easier to test, so it is separate from the mask.
         return np.sum(self.row_bases, axis=1)

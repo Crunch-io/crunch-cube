@@ -965,7 +965,7 @@ class _OverlapMeasure(_BaseMeasure):
 
     @lazyproperty
     def _flat_values(self) -> Optional[np.ndarray]:
-        """Optional 1D np.ndarray of np.float64 overlap values as found in cube response.
+        """Optional 1D np.ndarray of np.float64 overlap values as found in cube response
 
         Overlap data may include missing items represented by a dict like
         {'?': -1} in the cube response. These are replaced by np.nan in the

@@ -108,8 +108,9 @@ ENV/
 *.swo
 *.~
 
-# idea
+# IDE
 .idea
+.vscode
 
 # .DS_Store
 .DS_Store

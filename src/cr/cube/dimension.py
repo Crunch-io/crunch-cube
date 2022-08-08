@@ -1202,11 +1202,11 @@ class _OrderSpec:
 
     @lazyproperty
     def marginal(self) -> MARGINAL:
-        """Member of enums.MARGINAL corresponding to "marginal": field in order transform.
+        """Member of enums.MARGINAL corresponding to marginal: field in order transform.
 
         Raises KeyError if the order dict has no "marginal": field and ValueError if the
-        value in that field is not a recognized marginal keyword. Note that not all order
-        types use the "marginal": field.
+        value in that field is not a recognized marginal keyword. Note that not all
+        order types use the "marginal": field.
         """
         return MARGINAL(self.marginal_keyname)
 
@@ -1457,7 +1457,7 @@ class _Subtotal:
 
     @lazyproperty
     def subtrahend_idxs(self) -> np.ndarray:
-        """ndarray of int base-element offsets contributing to the negative part of subtotal.
+        """int ndarray base-element offsets contributing to the negative part of subtot.
 
         Suitable for directly indexing a numpy array object (such as base values or
         margin) to extract the addend values for this subtotal.

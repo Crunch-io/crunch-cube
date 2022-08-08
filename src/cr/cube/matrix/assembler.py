@@ -540,8 +540,9 @@ class Assembler:
     def rows_margin_proportion(self):
         """1D/2D np.float64 ndarray of weighted-proportion for each slice row/cell."""
         # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
-        # --- TODO: Should rows_margin_proportion only be defined when it's 1D? This would
-        # --- require changes to exporter to use the bases to give a "rows_margin_range"
+        # --- TODO: Should rows_margin_proportion only be defined when it's 1D? This
+        # --- would require changes to exporter to use the bases to give a
+        # --- "rows_margin_range"
         if not self._measures.rows_table_proportion.is_defined:
             return self._assemble_matrix(
                 SumSubtotals.blocks(
@@ -626,7 +627,7 @@ class Assembler:
 
             * ARR_X_ARR - 2D ndarray with a distinct table-base value per cell.
             * ARR_X - 1D ndarray of value per *row* when only rows dimension is ARR.
-            * X_ARR - 1D ndarray of value per *column* when only columns dimension is ARR
+            * X_ARR - 1D ndarray of value per *column* when only col dimension is ARR
             * CAT_X_CAT - scalar float value when slice has no MR dimension.
 
         """

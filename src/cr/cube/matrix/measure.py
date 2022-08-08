@@ -123,16 +123,16 @@ class SecondOrderMeasures:
 
     @lazyproperty
     def columns_table_unweighted_base(self):
-        """_MarginTableBase measure object for this cube-result for columns (unweighted).
+        """_MarginTableBase measure object for this cube-result for columns unweighted.
 
         The name is a mouthful, but each component is important.
 
         * "columns": Indicates it is a marginal in the "columns" orientation (kind of
           like a stripe in the shape of a row).
         * "table": Indicates that it is the base for the whole table. When the
-          `.table_unweighted_base` exists (CAT X CAT), it is a repetition of that, but when
-          the columns are array (and therefore we can't sum across them), each cell has
-          its own value.
+          `.table_unweighted_base` exists (CAT X CAT), it is a repetition of that, but
+          when the columns are array (and therefore we can't sum across them), each cell
+          has its own value.
         * "unweighted": Indicates that weights are not used
         * "base": Indicates that it is the base, not necessarily the counts (eg the sum
           of selected and non-selected for MR variables)
@@ -154,9 +154,9 @@ class SecondOrderMeasures:
         * "columns": Indicates it is a marginal in the "columns" orientation (kind of
           like a stripe in the shape of a row).
         * "table": Indicates that it is the base for the whole table. When the
-          `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
-          the columns are array (and therefore we can't sum across them), each cell has
-          its own value.
+          `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but
+          when the columns are array (and therefore we can't sum across them), each cell
+          has its own value.
         * "weighted": Indicates that weights are used
         * "base": Indicates that it is the base, not necessarily the counts (eg the sum
           of selected and non-selected for MR variables)
@@ -355,9 +355,9 @@ class SecondOrderMeasures:
         * "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
           stripe in the shape of a column).
         * "table": Indicates that it is the base for the whole table. When the
-          `.table_unweighted_base` exists (CAT X CAT), it is a repetition of that, but when
-          the rows are array (and therefore we can't sum across them), each cell has
-          its own value.
+          `.table_unweighted_base` exists (CAT X CAT), it is a repetition of that, but
+          when the rows are array (and therefore we can't sum across them), each cell
+          has its own value.
         * "unweighted": Indicates that weights are not used
         * "base": Indicates that it is the base, not necessarily the counts (eg the sum
           of selected and non-selected for MR variables)
@@ -379,9 +379,9 @@ class SecondOrderMeasures:
         - "rows": Indicates it is a marginal in the "rows" orientation (kind of like a
           stripe in the shape of a column).
         - "table": Indicates that it is the base for the whole table. When the
-          `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but when
-          the rows are array (and therefore we can't sum across them), each cell has
-          its own value.
+          `.table_weighted_base` exists (CAT X CAT), it is a repetition of that, but
+          when the rows are array (and therefore we can't sum across them), each cell
+          has its own value.
         - "weighted": Indicates that weights are used
         - "base": Indicates that it is the base, not necessarily the counts (eg the sum
           of selected and non-selected for MR variables)
@@ -986,7 +986,7 @@ class _ColumnStandardError(_BaseSecondOrderMeasure):
 class _ColumnUnweightedBases(_BaseSecondOrderMeasure):
     """Provides the column-bases measure for a matrix.
 
-    Column-bases is a 2D np.float64 ndarray of unweighted-N "basis" for each matrix cell.
+    Column-bases is a 2D np.float64 ndarray of unweighted-N basis for each matrix cell.
     Depending on the dimensionality of the underlying cube-result some or all of these
     values may be the same.
     """
@@ -1379,10 +1379,11 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
     def _reference_values(self, block_index):
         """Tuple of the reference proportions and bases for
 
-        Because the comparison of interest is between columns, the shape of the reference
-        is determined by whether we're in the "body" of the table (the base values and
-        subtotal columns), or the "inserted" rows (inserted rows & intersections).
-        This takes the column index and gets the needed references for the body.
+        Because the comparison of interest is between columns, the shape of the
+        reference is determined by whether we're in the "body" of the table (the base
+         values and subtotal columns), or the "inserted" rows (inserted rows &
+        intersections). This takes the column index and gets the needed references for
+        the body.
 
         The block_index parameter chooses between the body (block_index=0) and inserted
         rows (block_index=1).
@@ -1826,8 +1827,8 @@ class _RowWeightedBases(_BaseSecondOrderMeasure):
         """
         # --- to broadcast one column of the subtotal-rows to the shape of the
         # --- intersections. This works in the CAT_X case because each column of
-        # --- subtotal-rows is the same. In the ARRAY_X case there can be no subtotal rows
-        # --- so an empty column is broadcast.
+        # --- subtotal-rows is the same. In the ARRAY_X case there can be no subtotal
+        # --- rows so an empty column is broadcast.
         shape = SumSubtotals.intersections(self._base_values, self._dimensions).shape
         intersection_column = self._subtotal_rows[:, 0]
         return np.broadcast_to(intersection_column[:, None], shape)
@@ -2000,8 +2001,8 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
         # --- There are two cases.
-        # --- Case 1: There are no column-subtotals, we can broadcast any column np.array
-        # --- of the right dtype and it will become the right answer because it is empty.
+        # --- Case 1: There are no column-subtotals, we can broadcast any column array
+        # --- of the right dtype and it will become the right answer because it is empty
         # --- Case 2: There are column-subtotals, so we know that the columns dimension
         # --- is not ARRAY, and therefore each column is the same. Therefore, we can
         # --- get a column from the base values (rotate it to appease numpy), and then
@@ -2020,10 +2021,10 @@ class _TableUnweightedBases(_BaseSecondOrderMeasure):
         """
         # --- There are two cases.
         # --- Case 1: There are no row-subtotal, we can broadcast any row np.array
-        # --- of the right dtype and it will become the right answer because it is empty.
+        # --- of the right dtype and it will become the right answer because it is empty
         # --- Case 2: There are row-subtotals, so we know that the columns dimension
         # --- is not ARRAY, and therefore each row is the same. Therefore, we can
-        # --- get a row from the base values, and then broadcast it to the correct shape.
+        # --- get a row from the base values, and then broadcast it to the correct shape
 
         # --- In either case, we can broadcast a row from the base values to
         # --- the shape and have the correct answer.
@@ -2072,8 +2073,8 @@ class _TableWeightedBases(_BaseSecondOrderMeasure):
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
         # --- There are two cases.
-        # --- Case 1: There are no column-subtotals, we can broadcast any column np.array
-        # --- of the right dtype and it will become the right answer because it is empty.
+        # --- Case 1: There are no column-subtotals, we can broadcast any column array
+        # --- of the right dtype and it will become the right answer because it is empty
         # --- Case 2: There are column-subtotals, so we know that the columns dimension
         # --- is not ARRAY, and therefore each column is the same. Therefore, we can
         # --- get a column from the base values (rotate it to appease numpy), and then
@@ -2092,10 +2093,10 @@ class _TableWeightedBases(_BaseSecondOrderMeasure):
         """
         # --- There are two cases.
         # --- Case 1: There are no row-subtotal, we can broadcast any row np.array
-        # --- of the right dtype and it will become the right answer because it is empty.
+        # --- of the right dtype and it will become the right answer because it is empty
         # --- Case 2: There are row-subtotals, so we know that the columns dimension
         # --- is not ARRAY, and therefore each row is the same. Therefore, we can
-        # --- get a row from the base values, and then broadcast it to the correct shape.
+        # --- get a row from the base values, and then broadcast it to the correct shape
 
         # --- In either case, we can broadcast a row from the base values to
         # --- the shape and have the correct answer.
@@ -2224,7 +2225,7 @@ class _Zscores(_BaseSecondOrderMeasure):
             * column_bases
             * (table_bases - row_bases)
             * (table_bases - column_bases)
-            / table_bases ** 3
+            / table_bases**3
         )
         return (counts - expected_counts) / np.sqrt(variance)
 
@@ -2470,11 +2471,12 @@ class _MarginTableBase(_BaseMarginal):
             )
 
         # --- There are 2 cases if defined.
-        # --- 1) The corresponding dimension is array, in which case there can be no subtotals
-        # --- and so repeating any value to the shape of the subtotals gives the correct
-        # --- empty values.
-        # --- 2) The corresponding dimension is not array, in which case, the table-margin
-        # --- is always the same, so repeating any value to the shape is correct.
+        # --- 1) The corresponding dimension is array, in which case there can be no
+        # --- subtotals and so repeating any value to the shape of the subtotals gives
+        # --- the correct empty values.
+        # --- 2) The corresponding dimension is not array, in which case, the
+        # --- table-margin is always the same, so repeating any value to the shape is
+        # --- correct.
         # --- Therefore we can just repeat the first value to the shape.
         return [
             self._base_values,
@@ -2546,9 +2548,9 @@ class _MarginWeightedBase(_BaseMarginal):
     """The 'margin-weighted base', a 1D weighted base in the margin
 
     This is the sum of the weighted counts across a non-array dimension, It is called
-    "Weighted N" when put in the margin of  the web app. Since we cannot add across array
-    variables, we cannot reduce the dimensionality to get to a margin when there are
-    arrays, each cell has it's own value.
+    "Weighted N" when put in the margin of  the web app. Since we cannot add across
+    array variables, we cannot reduce the dimensionality to get to a margin when there
+    are arrays, each cell has it's own value.
     """
 
     @lazyproperty
@@ -2690,8 +2692,8 @@ class _ScaleMedian(_BaseScaledCountMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                f"{self.orientation.value}-scale-median is undefined if no numeric values are defined on "
-                "opposing dimension."
+                f"{self.orientation.value}-scale-median is undefined if no numeric "
+                "values are defined on opposing dimension."
             )
 
         return [
@@ -2740,8 +2742,8 @@ class _ScaleMedian(_BaseScaledCountMarginal):
     def _weighted_median(sorted_counts, sorted_values):
         """Calculate the median given a set of values and their frequency in the data
 
-        `sorted_values` must be sorted in order and the `sorted_counts` must be sorted to
-        match that order.
+        `sorted_values` must be sorted in order and the `sorted_counts` must be sorted
+        to match that order.
         """
         # --- Convert nans to 0, as we don't want them to contribute to median. Counts
         # --- can possibly be nans for subtotal differences along the orientation we're
@@ -2775,8 +2777,8 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                f"{self.orientation.value}-scale-mean-standard-deviation is undefined if no numeric values "
-                "are defined on opposing dimension."
+                f"{self.orientation.value}-scale-mean-standard-deviation is undefined "
+                "if no numeric values are defined on opposing dimension."
             )
 
         return [

@@ -446,7 +446,7 @@ class _ShareSum(_BaseSecondOrderMeasure):
     def base_values(self):
         """1D np.float64 ndarray of share of sum for each row."""
         sums = self._cube_measures.cube_sum.sums
-        return sums / np.sum(sums)
+        return sums / np.nansum(sums)
 
     @lazyproperty
     def subtotal_values(self):
