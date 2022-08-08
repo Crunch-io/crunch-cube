@@ -1,0 +1,663 @@
+{
+    "result": {
+        "n": 15,
+        "counts": [
+            15
+        ],
+        "dimensions": [],
+        "measures": {
+            "count": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    },
+                    "references": {},
+                    "derived": true
+                },
+                "data": [
+                    15
+                ],
+                "n_missing": 0
+            },
+            "mean": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1,
+                            "NaN": -8
+                        },
+                        "missing_rules": {},
+                        "subvariables": [
+                            "000001",
+                            "000002",
+                            "000003",
+                            "000004",
+                            "000005",
+                            "000006",
+                            "000007"
+                        ]
+                    },
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "Q120ax2_1__1",
+                                "name": "Remdesivir (Veklury)",
+                                "description": "Remdesivir (Veklury)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_2__1",
+                                "name": "Tocilizumab (Actemra)",
+                                "description": "Tocilizumab (Actemra)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_3__1",
+                                "name": "Dexamethasone",
+                                "description": "Dexamethasone",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_12__1",
+                                "name": "Sotrovimab",
+                                "description": "Sotrovimab",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_13__1",
+                                "name": "Nirmatrelvir and ritonavir (Paxlovid)",
+                                "description": "Nirmatrelvir and ritonavir (Paxlovid)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_10__1",
+                                "name": "Baricitinib (Olumiant)",
+                                "description": "Baricitinib (Olumiant)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_9__1",
+                                "name": "Molnupiravir (Lagevrio)",
+                                "description": "Molnupiravir (Lagevrio)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            }
+                        ],
+                        "alias": "Q120ax2_Share",
+                        "name": "Treatments Received",
+                        "uniform_basis": false
+                    },
+                    "derived": true
+                },
+                "data": [
+                    7.2666666667,
+                    0.0,
+                    7.9333333333,
+                    2.0,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    0.0
+                ],
+                "n_missing": 0
+            },
+            "valid_count_unweighted": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {},
+                        "subvariables": [
+                            "000001",
+                            "000002",
+                            "000003",
+                            "000004",
+                            "000005",
+                            "000006",
+                            "000007"
+                        ]
+                    },
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "Q120ax2_1__1",
+                                "name": "Remdesivir (Veklury)",
+                                "description": "Remdesivir (Veklury)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_2__1",
+                                "name": "Tocilizumab (Actemra)",
+                                "description": "Tocilizumab (Actemra)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_3__1",
+                                "name": "Dexamethasone",
+                                "description": "Dexamethasone",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_12__1",
+                                "name": "antibodies (Xevudy)",
+                                "description": "antibodies (Xevudy)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_13__1",
+                                "name": "Nirmatrelvir and ritonavir (Paxlovid)",
+                                "description": "Nirmatrelvir and ritonavir (Paxlovid)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_10__1",
+                                "name": "Baricitinib (Olumiant)",
+                                "description": "Baricitinib (Olumiant)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_9__1",
+                                "name": "Molnupiravir (Lagevrio)",
+                                "description": "Molnupiravir (Lagevrio)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            }
+                        ],
+                        "alias": "Q120ax2_Share",
+                        "name": "Treatments Received",
+                        "uniform_basis": false
+                    },
+                    "derived": true
+                },
+                "data": [
+                    15,
+                    2,
+                    15,
+                    3,
+                    0,
+                    0,
+                    1
+                ],
+                "n_missing": 0
+            },
+            "stddev": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": null,
+                        "missing_reasons": {
+                            "No Data": -1,
+                            "NaN": -8
+                        },
+                        "missing_rules": {},
+                        "subvariables": [
+                            "000001",
+                            "000002",
+                            "000003",
+                            "000004",
+                            "000005",
+                            "000006",
+                            "000007"
+                        ]
+                    },
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "Q120ax2_1__1",
+                                "name": "Remdesivir (Veklury)",
+                                "description": "Remdesivir (Veklury)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_2__1",
+                                "name": "Tocilizumab (Actemra)",
+                                "description": "Tocilizumab (Actemra)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_3__1",
+                                "name": "Dexamethasone",
+                                "description": "Dexamethasone",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_12__1",
+                                "name": "antibodies (Xevudy)",
+                                "description": "antibodies (Xevudy)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_13__1",
+                                "name": "Nirmatrelvir and ritonavir (Paxlovid)",
+                                "description": "Nirmatrelvir and ritonavir (Paxlovid)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_10__1",
+                                "name": "Baricitinib (Olumiant)",
+                                "description": "Baricitinib (Olumiant)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_9__1",
+                                "name": "Molnupiravir (Lagevrio)",
+                                "description": "Molnupiravir (Lagevrio)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            }
+                        ],
+                        "alias": "Q120ax2_Share",
+                        "name": "Treatments Received",
+                        "uniform_basis": false
+                    },
+                    "derived": true
+                },
+                "data": [
+                    5.3913510984,
+                    0.0,
+                    6.2958792268,
+                    2.6457513111,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    }
+                ],
+                "n_missing": 0
+            },
+            "sum": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": null,
+                        "missing_reasons": {
+                            "No Data": -1,
+                            "NaN": -8
+                        },
+                        "missing_rules": {},
+                        "subvariables": [
+                            "000001",
+                            "000002",
+                            "000003",
+                            "000004",
+                            "000005",
+                            "000006",
+                            "000007"
+                        ]
+                    },
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "Q120ax2_1__1",
+                                "name": "Remdesivir (Veklury)",
+                                "description": "Remdesivir (Veklury)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_2__1",
+                                "name": "Tocilizumab (Actemra)",
+                                "description": "Tocilizumab (Actemra)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_3__1",
+                                "name": "Dexamethasone",
+                                "description": "Dexamethasone",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_12__1",
+                                "name": "antibodies (Xevudy)",
+                                "description": "antibodies (Xevudy)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_13__1",
+                                "name": "Nirmatrelvir and ritonavir (Paxlovid)",
+                                "description": "Nirmatrelvir and ritonavir (Paxlovid)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_10__1",
+                                "name": "Baricitinib (Olumiant)",
+                                "description": "Baricitinib (Olumiant)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            },
+                            {
+                                "alias": "Q120ax2_9__1",
+                                "name": "Molnupiravir (Lagevrio)",
+                                "description": "Molnupiravir (Lagevrio)",
+                                "format": {
+                                    "data": {
+                                        "digits": 2
+                                    },
+                                    "summary": {
+                                        "digits": 2
+                                    }
+                                }
+                            }
+                        ],
+                        "alias": "Q120ax2_Share",
+                        "name": "Treatments Received",
+                        "uniform_basis": false
+                    },
+                    "derived": true
+                },
+                "data": [
+                    109.0,
+                    0.0,
+                    119.0,
+                    6.0,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    0.0
+                ],
+                "n_missing": 0
+            }
+        },
+        "missing": 0,
+        "filter_stats": {
+            "is_cat_date": false,
+            "filtered": {
+                "unweighted": {
+                    "selected": 15,
+                    "other": 155,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 15,
+                    "other": 155,
+                    "missing": 0
+                }
+            },
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 15,
+                    "other": 155,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 15,
+                    "other": 155,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 170,
+            "weighted_n": 170
+        },
+        "filtered": {
+            "unweighted_n": 15,
+            "weighted_n": 15
+        },
+        "element": "crunch:cube"
+    },
+    "query": {
+        "dimensions": [],
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            },
+            "mean": {
+                "function": "cube_mean",
+                "args": [
+                    {
+                        "variable": "8c18c6ccb33c4e898ab7529a276ce300"
+                    }
+                ]
+            },
+            "valid_count_unweighted": {
+                "function": "cube_valid_count",
+                "args": [
+                    {
+                        "variable": "8c18c6ccb33c4e898ab7529a276ce300"
+                    }
+                ]
+            },
+            "stddev": {
+                "function": "cube_stddev",
+                "args": [
+                    {
+                        "variable": "8c18c6ccb33c4e898ab7529a276ce300"
+                    }
+                ]
+            },
+            "sum": {
+                "function": "cube_sum",
+                "args": [
+                    {
+                        "variable": "8c18c6ccb33c4e898ab7529a276ce300"
+                    }
+                ]
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": [
+            {
+                "function": "in",
+                "args": [
+                    {
+                        "variable": "http:\/\/127.0.0.1:8080\/datasets\/6a707e515ef34af0999df12b30ea4bca\/variables\/3klxSWNgm6BYzAytvhA2Ce000000\/"
+                    },
+                    {
+                        "column": [
+                            53
+                        ]
+                    }
+                ],
+                "name": "Country: Denmark"
+            }
+        ]
+    }
+}

@@ -491,3 +491,10 @@ class DescribeNumericArrays:
         assert slice_.column_weighted_bases == pytest.approx(
             np.array([[2.33, 7.009], [4.123, 6.777], [4.67, 6.4], [1.898, 6.1]])
         )
+
+    def it_provides_share_of_sum_for_numeric_array_with_nan_values(self):
+        strand = Cube(NA.NUM_ARR_SUMS_WITH_NAN_VALUES).partitions[0]
+
+        assert strand.share_sum == pytest.approx(
+            [0.46581197, 0.0, 0.50854701, 0.02564103, np.nan, np.nan, 0.0], nan_ok=True
+        )
