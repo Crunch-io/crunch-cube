@@ -295,7 +295,7 @@ class Describe_Slice:
         )
         assert columns_scale_mean_pw_idxs_alt == ((2,), (0,), ())
 
-    def but_columns_scale_mean_pairwise_indices_alt_is_None_when_no_secondary_alpha_specified(
+    def but_columns_scale_mean_pw_indices_alt_is_None_when_no_secondary_alpha_specified(
         self, _alpha_alt_prop_
     ):
         _alpha_alt_prop_.return_value = None

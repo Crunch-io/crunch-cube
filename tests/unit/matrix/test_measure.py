@@ -2829,8 +2829,8 @@ class Describe_ScaleMeanStddev:
 
         assert (
             str(e.value)
-            == "rows-scale-mean-standard-deviation is undefined if no numeric values are "
-            + "defined on opposing dimension."
+            == "rows-scale-mean-standard-deviation is undefined if no numeric values "
+            + "are defined on opposing dimension."
         )
 
     def it_gets_the_right_scale_mean_for_columns(self, request):
@@ -3078,8 +3078,8 @@ class Describe_ScaleMedian:
 
         assert (
             str(e.value)
-            == "rows-scale-median is undefined if no numeric values are defined on opposing "
-            + "dimension."
+            == "rows-scale-median is undefined if no numeric values are defined on "
+            + "opposing dimension."
         )
 
     @pytest.mark.parametrize(

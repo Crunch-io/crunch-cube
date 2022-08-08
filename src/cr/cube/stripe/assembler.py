@@ -288,7 +288,7 @@ class StripeAssembler:
 
     @lazyproperty
     def unweighted_bases(self):
-        """1D np.float64 ndarray of (unweighted) table-proportion denominator per row."""
+        """1D np.float64 ndarray of unweighted table-proportion denominator per row."""
         return self._assemble_vector(self._measures.unweighted_bases.blocks)
 
     @lazyproperty

@@ -275,8 +275,8 @@ class SumSubtotals(_BaseSubtotals):
         These are in the form ready for assembly.
 
         Keyword arguments:
-        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg for
-        column bases (default False)
+        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg
+        for column bases (default False)
         `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
         row bases (default False)
         """
@@ -291,8 +291,8 @@ class SumSubtotals(_BaseSubtotals):
         An intersection value arises where a row-subtotal crosses a column-subtotal.
 
         Keyword arguments:
-        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg for
-        column bases (default False)
+        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg
+        for column bases (default False)
         `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
         row bases (default False)
         """
@@ -305,8 +305,8 @@ class SumSubtotals(_BaseSubtotals):
         """Return (n_base_rows, n_col_subtotals) ndarray of subtotal columns.
 
         Keyword arguments:
-        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg for
-        column bases (default False)
+        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg
+        for column bases (default False)
         `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
         row bases (default False)
         """
@@ -321,8 +321,8 @@ class SumSubtotals(_BaseSubtotals):
         """Return (n_row_subtotals, n_base_cols) ndarray of subtotal rows.
 
         Keyword arguments:
-        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg for
-        column bases (default False)
+        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg
+        for column bases (default False)
         `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
         row bases (default False)
         """

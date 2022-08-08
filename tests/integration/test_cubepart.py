@@ -433,7 +433,7 @@ class Describe_Slice:
             "Response #1              3              2              0\n"
             "Response #2              2              4              0\n"
             "Response #3              0              0              0\n"
-            "Available measures: [<CUBE_MEASURE.COUNT: 'count'>, <CUBE_MEASURE.MEAN: 'mean'>]"
+            "Available measures: [<CUBE_MEASURE.COUNT: 'count'>, <CUBE_MEASURE.MEAN: 'mean'>]"  # noqa
         )
 
     def it_provides_values_for_mr_x_cat_hs(self):
@@ -1618,7 +1618,7 @@ class Describe_Slice:
             "Response #1              3              2              2\n"
             "Response #2              2              4              1\n"
             "Response #3              0              0              0\n"
-            "Available measures: [<CUBE_MEASURE.COUNT: 'count'>, <CUBE_MEASURE.SUM: 'sum'>]"
+            "Available measures: [<CUBE_MEASURE.COUNT: 'count'>, <CUBE_MEASURE.SUM: 'sum'>]"  # noqa
         )
 
     def it_uses_row_proportions_for_pop_counts_and_moe_when_row_dim_is_cat_date(self):

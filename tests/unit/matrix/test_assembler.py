@@ -1543,7 +1543,7 @@ class Describe_SortRowsByDerivedColumnHelper:
 
 
 class Describe_SortRowsByInsertedColumnHelper:
-    """Unit test suite for `cr.cube.matrix.assembler._SortRowsByInsertedColumnHelper`."""
+    """Unit test suite for `cr.cube.matrix.assembler._SortRowsByInsertedColumnHelper`"""
 
     def it_extracts_the_element_values_to_help(
         self, _measure_prop_, measure_, _insertion_idx_prop_

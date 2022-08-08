@@ -235,9 +235,9 @@ class ExplicitOrderCollator(_BaseAnchoredCollator):
         """tuple of 2 ints indicating derived element position
 
         The first item in the return value represents the payload-order base-vector idx
-        which the derived element is "anchor"ed to. The second item can be either a positive 1
-        or negative 1 to indicate whether it should be after or before that element
-        respectively.
+        which the derived element is "anchor"ed to. The second item can be either a
+        positive 1 or negative 1 to indicate whether it should be after or before that
+        element respectively.
 
         A subtotal with position `(-1, 0)` appears at the top, one with an anchor of
         `(3, 1)` appears *after* the base row at offset 3; `(sys.maxsize, 0)` is used as

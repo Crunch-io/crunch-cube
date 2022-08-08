@@ -1282,10 +1282,10 @@ class _Slice(CubePartition):
     def table_base_range(self):
         """[min, max] np.float64 ndarray range of the table_base (table-unweighted-base)
 
-        A CAT_X_CAT has a scalar for all table-unweighted-bases, but arrays have more than
-        one table-weighted-base. This collapses all the values them to the range, and
-        it is "unpruned", meaning that it is calculated before any hiding or removing
-        of empty rows/columns.
+        A CAT_X_CAT has a scalar for all table-unweighted-bases, but arrays have more
+        than one table-weighted-base. This collapses all the values them to the range,
+        and it is "unpruned", meaning that it is calculated before any hiding or
+        removing of empty rows/columns.
         """
         return self._assembler.table_base_range
 

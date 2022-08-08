@@ -267,7 +267,7 @@ class Describe_PopulationProportions:
 
 
 class Describe_PopulationProportionStderrs:
-    """Unit test suite for `cr.cube.stripe.measure._PopulationProportionStderrs` object."""
+    """Unit test suite for `cr.cube.stripe.measure._PopulationProportionStderrs`."""
 
     @pytest.mark.parametrize(
         "dimension_type, base_values, expected_value",
