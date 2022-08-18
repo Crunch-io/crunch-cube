@@ -1335,6 +1335,43 @@ class Describe_Slice:
             )
         )
 
+    def it_does_not_break_when_hiding_mr_insertion_that_does_not_exist(self):
+        # --- Though it doesn't actually hide anything
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "function": "any_non_missing_selected",
+                        "id": 1,
+                        "anchor": "top",
+                        "name": "DOES NOT REALLY EXIST",
+                        "kwargs": {
+                            "variable": "C15_08",
+                            "subvariable_ids": [
+                                "c15_c15_8_c15_grid1",
+                                "c15_c15_8_c15_grid2",
+                            ],
+                        },
+                        "hide": True,
+                    }
+                ]
+            }
+        }
+        slice_ = _Slice(Cube(MRI.SCORECARD), 0, transforms, None, 0)
+        assert slice_.counts == pytest.approx(
+            np.array(
+                [
+                    [1820.0, 2896.0, 1913.0],
+                    [1571.0, 1942.0, 1743.0],
+                    [943.0, 2129.0, 930.0],
+                    [1538.0, 640.0, 2101.0],
+                    [1281.0, 1374.0, 1366.0],
+                    [625.0, 390.0, 1091.0],
+                    [1279.0, 856.0, 849.0],
+                ]
+            )
+        )
+
     def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
         """Subtotal anchors follow re-ordered rows.
 
