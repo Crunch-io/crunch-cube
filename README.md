@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.13
+- Fix bug where attempting to hide an MR insertion that didn't exist raised KeyError
+
 ### 3.0.12
 - Fix bug in share of sum for Strand
 
@@ -125,9 +128,6 @@ The detailed description can be found
 
 ### 3.0.8
 - Fix reverse order in insertions fills
-
-### 3.0.7
-- Add fills for insertions (subtotals and differences)
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).

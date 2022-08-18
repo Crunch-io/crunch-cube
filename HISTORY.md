@@ -1,5 +1,8 @@
 # History of Changes
 
+### 3.0.7
+- Add fills for insertions (subtotals and differences)
+
 ### 3.0.6
 - Expose `rows_dimension_alias` for `_Strand`
 - Expose `tab_alias` for `_Strand`
