@@ -727,6 +727,7 @@ class _AllElements(_BaseElements):
         hidden_transforms = {
             element_id_from_name[name]: {"hide": True}
             for name in hidden_insertion_names
+            if name in element_id_from_name
         }
         element_transforms = self._dimension_transforms_dict.get("elements", {})
         return {**hidden_transforms, **element_transforms}
