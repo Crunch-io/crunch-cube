@@ -908,7 +908,7 @@ class DescribeAssembler:
         )
         assembler = Assembler(None, dimensions_, None)
 
-        row_order = assembler._row_order
+        row_order = assembler.row_order
 
         _BaseOrderHelper_.row_display_order.assert_called_once_with(
             dimensions_, second_order_measures_
@@ -991,7 +991,7 @@ class DescribeAssembler:
 
     @pytest.fixture
     def _row_order_prop_(self, request):
-        return property_mock(request, Assembler, "_row_order")
+        return property_mock(request, Assembler, "row_order")
 
     @pytest.fixture
     def _rows_dimension_prop_(self, request):
