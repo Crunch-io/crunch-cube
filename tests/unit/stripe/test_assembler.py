@@ -207,7 +207,7 @@ class DescribeStripeAssembler:
         _BaseOrderHelper_.display_order.return_value = (-1, 1, -2, 2, -3, 3)
         assembler = StripeAssembler(None, rows_dimension_, None, None)
 
-        row_order = assembler._row_order
+        row_order = assembler.row_order
 
         _BaseOrderHelper_.display_order.assert_called_once_with(
             rows_dimension_, measures_
@@ -234,7 +234,7 @@ class DescribeStripeAssembler:
 
     @pytest.fixture
     def _row_order_prop_(self, request):
-        return property_mock(request, StripeAssembler, "_row_order")
+        return property_mock(request, StripeAssembler, "row_order")
 
     @pytest.fixture
     def rows_dimension_(self, request):
