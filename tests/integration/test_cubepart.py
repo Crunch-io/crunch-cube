@@ -2130,6 +2130,25 @@ class Describe_Strand:
         ]
         assert strand.counts.tolist() == [31506, 16275, 3480, 31506, 4262, 15231, 7742]
 
+    def it_knows_the_row_order_and_the_payload_order(self):
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "anchor": "bottom",
+                        "args": [4, 5],
+                        "function": "subtotal",
+                        "name": "Total D-E",
+                    },
+                ],
+                "order": {"element_ids": [2, 4, 5, 1], "type": "explicit"},
+            }
+        }
+        strand = Cube(CR.CAT_SUBTOT_ORDER, transforms=transforms).partitions[0]
+
+        assert strand.payload_order.tolist() == [0, 1, 2, 3, -1]
+        assert strand.row_order.tolist() == [1, 2, 3, 0, -1]
+
     def it_can_sort_by_label(self):
         transforms = {
             "rows_dimension": {

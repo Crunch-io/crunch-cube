@@ -214,6 +214,21 @@ class DescribeStripeAssembler:
         )
         assert row_order.tolist() == [-1, 1, -2, 2, -3, 3]
 
+    def it_knows_the_payload_order_to_help(
+        self, request, rows_dimension_, _measures_prop_, measures_
+    ):
+        _measures_prop_.return_value = measures_
+        _OrderHelper_ = class_mock(
+            request, "cr.cube.stripe.assembler.PayloadOrderCollator"
+        )
+        _OrderHelper_.display_order.return_value = (0, 1, 2, 3, -1)
+        assembler = StripeAssembler(None, rows_dimension_, None, None)
+
+        payload_order = assembler.payload_order
+
+        _OrderHelper_.display_order.assert_called_once_with(rows_dimension_, ())
+        assert payload_order.tolist() == [0, 1, 2, 3, -1]
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
