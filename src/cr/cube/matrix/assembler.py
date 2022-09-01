@@ -378,6 +378,17 @@ class Assembler:
         )
 
     @lazyproperty
+    def payload_order(self):
+        """1D np.int64 ndarray of signed int idx for each assembled row in payload order
+
+        Negative values represent inserted subtotal-row locations.
+        """
+        empty_rows_idxs = tuple(np.where(self._measures.rows_pruning_mask)[0])
+        return np.array(
+            PayloadOrderCollator.display_order(self._rows_dimension, empty_rows_idxs)
+        )
+
+    @lazyproperty
     def population_proportions(self):
         """2D np.float64 ndarray of proportions
 

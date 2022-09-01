@@ -748,6 +748,11 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
+    def payload_order(self):
+        """1D np.int64 ndarray of signed int idx respecting the payload order"""
+        return self._assembler.payload_order
+
+    @lazyproperty
     def population_counts(self):
         """2D np.float64 ndarray of population counts per cell.
 
@@ -822,6 +827,11 @@ class _Slice(CubePartition):
     def row_labels(self):
         """1D str ndarray of name for each row, suitable for use as row headings."""
         return self._assembler.row_labels
+
+    @lazyproperty
+    def row_order(self):
+        """1D np.int64 ndarray of signed int idx for each assembled row of stripe."""
+        return self._assembler.row_order
 
     @lazyproperty
     def row_percentages(self):

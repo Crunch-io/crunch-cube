@@ -915,6 +915,26 @@ class DescribeAssembler:
         )
         assert row_order.tolist() == [-1, 1, -2, 2, -3, 3]
 
+    def it_knows_the_payload_order_to_help(
+        self,
+        request,
+        dimensions_,
+        _measures_prop_,
+        second_order_measures_,
+    ):
+        _measures_prop_.return_value = second_order_measures_
+        _OrderHelper_ = class_mock(
+            request, "cr.cube.matrix.assembler.PayloadOrderCollator"
+        )
+        _OrderHelper_.display_order.return_value = np.array([1, 2, 3])
+        assembler = Assembler(None, dimensions_, None)
+
+        row_order = assembler.row_order
+
+        _OrderHelper_.display_order.assert_called_once_with(dimensions_[0], ())
+
+        assert row_order.tolist() == [1, 2, 3]
+
     def it_provides_access_to_the_row_subtotals_to_help(
         self, _rows_dimension_prop_, dimension_, subtotals_
     ):

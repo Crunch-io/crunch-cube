@@ -549,6 +549,17 @@ class Describe_Slice:
         assert slice_.inserted_row_idxs == (3,)
         assert slice_.inserted_column_idxs == ()
 
+    def it_knows_the_row_order_and_the_payload_order(self):
+        transforms = {
+            "rows_dimension": {
+                "order": {"type": "explicit", "element_ids": [1, 4, 2, 3]},
+            },
+        }
+        slice_ = Cube(CR.CAT_X_CAT_HS, transforms=transforms).partitions[0]
+
+        assert slice_.payload_order.tolist() == [0, 1, 2, 3]
+        assert slice_.row_order.tolist() == [0, 3, 1, 2]
+
     def it_provides_derived_indexes_for_mr_x_mr_with_transforms(self):
         transforms = {
             "rows_dimension": {
