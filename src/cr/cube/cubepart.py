@@ -749,7 +749,13 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def payload_order(self):
-        """1D np.int64 ndarray of signed int idx respecting the payload order"""
+        """1D np.int64 ndarray of signed int idx respecting the payload order.
+
+        Positive integers indicate the 1-indexed position in payload of regular
+        elements, while negative integers are the subtotal insertions.
+
+        Needed for reordering color palette in exporter.
+        """
         return self._assembler.payload_order
 
     @lazyproperty
@@ -830,7 +836,13 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def row_order(self):
-        """1D np.int64 ndarray of signed int idx for each assembled row of stripe."""
+        """1D np.int64 ndarray of signed int idx for each assembled row of stripe.
+
+        Positive integers indicate the 1-indexed position in payload of regular
+        elements, while negative integers are the subtotal insertions.
+
+        Needed for reordering color palette in exporter.
+        """
         return self._assembler.row_order
 
     @lazyproperty
@@ -1527,7 +1539,13 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def payload_order(self):
-        """1D np.int64 ndarray of signed int idx respecting the payload order"""
+        """1D np.int64 ndarray of signed int idx respecting the payload order.
+
+        Positive integers indicate the 1-indexed position in payload of regular
+        elements, while negative integers are the subtotal insertions.
+
+        Needed for reordering color palette in exporter.
+        """
         return self._assembler.payload_order
 
     @lazyproperty
@@ -1586,7 +1604,13 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def row_order(self):
-        """1D np.int64 ndarray of signed int idx for each assembled row of stripe."""
+        """1D np.int64 ndarray of signed int idx for each assembled row of stripe.
+
+        Positive integers indicate the 1-indexed position in payload of regular
+        elements, while negative integers are the subtotal insertions.
+
+        Needed for reordering color palette in exporter.
+        """
         return self._assembler.row_order
 
     @lazyproperty
