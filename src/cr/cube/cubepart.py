@@ -748,6 +748,17 @@ class _Slice(CubePartition):
         )
 
     @lazyproperty
+    def payload_order(self):
+        """1D np.int64 ndarray of signed int idx respecting the payload order.
+
+        Positive integers indicate the 1-indexed position in payload of regular
+        elements, while negative integers are the subtotal insertions.
+
+        Needed for reordering color palette in exporter.
+        """
+        return self._assembler.payload_order
+
+    @lazyproperty
     def population_counts(self):
         """2D np.float64 ndarray of population counts per cell.
 
@@ -822,6 +833,17 @@ class _Slice(CubePartition):
     def row_labels(self):
         """1D str ndarray of name for each row, suitable for use as row headings."""
         return self._assembler.row_labels
+
+    @lazyproperty
+    def row_order(self):
+        """1D np.int64 ndarray of signed int idx for each assembled row of stripe.
+
+        Positive integers indicate the 1-indexed position in payload of regular
+        elements, while negative integers are the subtotal insertions.
+
+        Needed for reordering color palette in exporter.
+        """
+        return self._assembler.row_order
 
     @lazyproperty
     def row_percentages(self):
@@ -1516,6 +1538,17 @@ class _Strand(CubePartition):
         return self.rows_dimension_name
 
     @lazyproperty
+    def payload_order(self):
+        """1D np.int64 ndarray of signed int idx respecting the payload order.
+
+        Positive integers indicate the 1-indexed position in payload of regular
+        elements, while negative integers are the subtotal insertions.
+
+        Needed for reordering color palette in exporter.
+        """
+        return self._assembler.payload_order
+
+    @lazyproperty
     def population_counts(self):
         """1D np.float64 ndarray of population count for each row of strand.
 
@@ -1568,6 +1601,17 @@ class _Strand(CubePartition):
     def row_labels(self):
         """1D str ndarray of name for each row, suitable for use as row headings."""
         return self._assembler.row_labels
+
+    @lazyproperty
+    def row_order(self):
+        """1D np.int64 ndarray of signed int idx for each assembled row of stripe.
+
+        Positive integers indicate the 1-indexed position in payload of regular
+        elements, while negative integers are the subtotal insertions.
+
+        Needed for reordering color palette in exporter.
+        """
+        return self._assembler.row_order
 
     @lazyproperty
     def rows_base(self):

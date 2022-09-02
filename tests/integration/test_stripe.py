@@ -239,4 +239,4 @@ class DescribeStripeAssembler:
         stripe = _Strand(cube, transforms, None, False, 0, None)
         assembler = stripe._assembler
 
-        assert assembler._row_order.tolist() == expected_value
+        assert assembler.row_order.tolist() == expected_value

@@ -56,7 +56,7 @@ class StripeAssembler:
         rows_dim = self._rows_dimension
         n_subtotals = len(rows_dim.subtotals)
         derivs = [e.derived for e in rows_dim.valid_elements] + [False] * n_subtotals
-        return tuple(np.where(np.array(derivs)[self._row_order])[0])
+        return tuple(np.where(np.array(derivs)[self.row_order])[0])
 
     @lazyproperty
     def diff_row_idxs(self):
@@ -67,7 +67,7 @@ class StripeAssembler:
         rows_dim = self._rows_dimension
         n_valids = len(rows_dim.valid_elements)
         diffs = [False] * n_valids + [e.is_difference for e in rows_dim.subtotals]
-        return tuple(np.where(np.array(diffs)[self._row_order])[0])
+        return tuple(np.where(np.array(diffs)[self.row_order])[0])
 
     @lazyproperty
     def inserted_row_idxs(self):
@@ -76,7 +76,7 @@ class StripeAssembler:
         Provided index values correspond rows after any insertion of subtotals,
         re-ordering, and hiding/pruning.
         """
-        return tuple(i for i, row_idx in enumerate(self._row_order) if row_idx < 0)
+        return tuple(i for i, row_idx in enumerate(self.row_order) if row_idx < 0)
 
     @lazyproperty
     def means(self):
@@ -85,6 +85,17 @@ class StripeAssembler:
         Raises ValueError when the cube-result does not include a means cube-measure.
         """
         return self._assemble_vector(self._measures.means.blocks)
+
+    @lazyproperty
+    def payload_order(self):
+        """1D np.int64 ndarray of signed int idx respecting the payload order"""
+        empty_row_idxs = tuple(
+            i for i, N in enumerate(self._measures.pruning_base) if N == 0
+        )
+        return np.array(
+            PayloadOrderCollator.display_order(self._rows_dimension, empty_row_idxs),
+            dtype=int,
+        )
 
     @lazyproperty
     def population_proportions(self):
@@ -114,7 +125,7 @@ class StripeAssembler:
 
         This count includes inserted rows but not rows that have been hidden/pruned.
         """
-        return len(self._row_order)
+        return len(self.row_order)
 
     @lazyproperty
     def row_aliases(self):
@@ -126,7 +137,7 @@ class StripeAssembler:
         """
         return np.array(
             self._rows_dimension.element_aliases + self._rows_dimension.subtotal_aliases
-        )[self._row_order]
+        )[self.row_order]
 
     @lazyproperty
     def row_codes(self):
@@ -138,7 +149,7 @@ class StripeAssembler:
         """
         return np.array(
             self._rows_dimension.element_ids + self._rows_dimension.insertion_ids
-        )[self._row_order]
+        )[self.row_order]
 
     @lazyproperty
     def row_labels(self):
@@ -150,7 +161,21 @@ class StripeAssembler:
         """
         return np.array(
             self._rows_dimension.element_labels + self._rows_dimension.subtotal_labels
-        )[self._row_order]
+        )[self.row_order]
+
+    @lazyproperty
+    def row_order(self):
+        """1D np.int64 ndarray of signed int idx for each assembled row of stripe.
+
+        Negative values represent inserted subtotal-row locations. Indices appear in the
+        order rows are to appear in the final result.
+        """
+        # --- specify dtype explicitly to prevent error when display-order is empty. The
+        # --- default dtype is float, which cannot be used to index an array.
+        return np.array(
+            _BaseOrderHelper.display_order(self._rows_dimension, self._measures),
+            dtype=int,
+        )
 
     @lazyproperty
     def rows_dimension_fills(self):
@@ -173,7 +198,7 @@ class StripeAssembler:
                 if idx > -1
                 else subtotal_fills[idx + len(subtotal_fills)]
             )
-            for idx in self._row_order
+            for idx in self.row_order
         )
 
     @lazyproperty
@@ -313,27 +338,13 @@ class StripeAssembler:
         values of the stripe vector. The returned array is sequenced in the computed
         row order including possibly removing hidden or pruned values.
         """
-        return np.concatenate(blocks)[self._row_order]
+        return np.concatenate(blocks)[self.row_order]
 
     @lazyproperty
     def _measures(self):
         """StripeMeasures collection object for this stripe."""
         return StripeMeasures(
             self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
-        )
-
-    @lazyproperty
-    def _row_order(self):
-        """1D np.int64 ndarray of signed int idx for each assembled row of stripe.
-
-        Negative values represent inserted subtotal-row locations. Indices appear in the
-        order rows are to appear in the final result.
-        """
-        # --- specify dtype explicitly to prevent error when display-order is empty. The
-        # --- default dtype is float, which cannot be used to index an array.
-        return np.array(
-            _BaseOrderHelper.display_order(self._rows_dimension, self._measures),
-            dtype=int,
         )
 
 

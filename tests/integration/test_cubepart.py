@@ -549,6 +549,17 @@ class Describe_Slice:
         assert slice_.inserted_row_idxs == (3,)
         assert slice_.inserted_column_idxs == ()
 
+    def it_knows_the_row_order_and_the_payload_order(self):
+        transforms = {
+            "rows_dimension": {
+                "order": {"type": "explicit", "element_ids": [1, 4, 2, 3]},
+            },
+        }
+        slice_ = Cube(CR.CAT_X_CAT_HS, transforms=transforms).partitions[0]
+
+        assert slice_.payload_order.tolist() == [0, 1, 2, 3]
+        assert slice_.row_order.tolist() == [0, 3, 1, 2]
+
     def it_provides_derived_indexes_for_mr_x_mr_with_transforms(self):
         transforms = {
             "rows_dimension": {
@@ -2129,6 +2140,25 @@ class Describe_Strand:
             "Total D-E",
         ]
         assert strand.counts.tolist() == [31506, 16275, 3480, 31506, 4262, 15231, 7742]
+
+    def it_knows_the_row_order_and_the_payload_order(self):
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "anchor": "bottom",
+                        "args": [4, 5],
+                        "function": "subtotal",
+                        "name": "Total D-E",
+                    },
+                ],
+                "order": {"element_ids": [2, 4, 5, 1], "type": "explicit"},
+            }
+        }
+        strand = Cube(CR.CAT_SUBTOT_ORDER, transforms=transforms).partitions[0]
+
+        assert strand.payload_order.tolist() == [0, 1, 2, 3, -1]
+        assert strand.row_order.tolist() == [1, 2, 3, 0, -1]
 
     def it_can_sort_by_label(self):
         transforms = {
