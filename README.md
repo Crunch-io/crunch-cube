@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.14
+- Expose `row_order` and `payload_order` properties for `_Slice` and `_Strand`
+
 ### 3.0.13
 - Fix bug where attempting to hide an MR insertion that didn't exist raised KeyError
 
