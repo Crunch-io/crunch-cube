@@ -324,12 +324,12 @@ class Assembler:
         Raises `ValueError if the cube-result does not include `overlaps`
         and `valid_overlaps` cube-measures.
         """
+        base_column_idx = self._column_order[column_idx]
         if self._cube_has_overlaps:
             # If overlaps are defined, calculate significance based on them
             return self._assemble_matrix(
-                self._measures.pairwise_p_vals_for_subvar(column_idx).blocks
+                self._measures.pairwise_p_vals_for_subvar(base_column_idx).blocks
             )
-        base_column_idx = self._column_order[column_idx]
         return self._assemble_matrix(
             self._measures.pairwise_p_vals(base_column_idx).blocks
         )
@@ -347,12 +347,12 @@ class Assembler:
         Raises `ValueError if the cube-result does not include `overlaps`
         and `valid_overlaps` cube-measures.
         """
+        base_column_idx = self._column_order[column_idx]
         if self._cube_has_overlaps:
             # If overlaps are defined, calculate significance based on them
             return self._assemble_matrix(
-                self._measures.pairwise_t_stats_for_subvar(column_idx).blocks
+                self._measures.pairwise_t_stats_for_subvar(base_column_idx).blocks
             )
-        base_column_idx = self._column_order[column_idx]
         return self._assemble_matrix(
             self._measures.pairwise_t_stats(base_column_idx).blocks
         )
