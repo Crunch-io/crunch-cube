@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.15
+- Fix pairwise indices for overlaps, when hiding or reordering columns
+
 ### 3.0.14
 - Expose `row_order` and `payload_order` properties for `_Slice` and `_Strand`
 
