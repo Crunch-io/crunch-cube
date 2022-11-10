@@ -472,10 +472,12 @@ class Cube:
         """Optional (min, max) tuple of summary valid counts"""
         if not self._measures.unweighted_valid_counts:
             return None
-        # --- In case of ndim >= 2 the sum should be done on the second axes to get
-        # --- the correct sequence of valid count (e.g. CA_SUBVAR).
+        # the axis where we have to sum the valid counts are all the nonarray dimensions
+        # of the cube.
         axis = tuple(
-            i for i, dim in enumerate(self.dimension_types) if dim not in DT.ARRAY_TYPES
+            i
+            for i, dim_type in enumerate(self.dimension_types)
+            if dim_type not in DT.ARRAY_TYPES
         )
         valid_counts_summary = np.sum(
             self._measures.unweighted_valid_counts.raw_cube_array[self._valid_idxs],
