@@ -143,9 +143,9 @@ class CubeSet:
         return self._cubes[0].n_responses
 
     @lazyproperty
-    def valid_counts_summary(self) -> int:
+    def valid_counts_summary_range(self) -> int:
         """The valid count summary values from first cube in this set."""
-        return self._cubes[0].valid_counts_summary
+        return self._cubes[0].valid_counts_summary_range
 
     @lazyproperty
     def _cubes(self) -> Tuple["Cube", ...]:
@@ -468,17 +468,20 @@ class Cube:
         ].astype(np.float64)
 
     @lazyproperty
-    def valid_counts_summary(self) -> Optional[np.ndarray]:
-        """Optional ndarray of summary valid counts"""
+    def valid_counts_summary_range(self) -> Optional[np.ndarray]:
+        """Optional (min, max) tuple of summary valid counts"""
         if not self._measures.unweighted_valid_counts:
             return None
         # --- In case of ndim >= 2 the sum should be done on the second axes to get
         # --- the correct sequence of valid count (e.g. CA_SUBVAR).
-        axis = 1 if len(self._all_dimensions) >= 2 else 0
-        return np.sum(
+        axis = tuple(
+            i for i, dim in enumerate(self.dimension_types) if dim not in DT.ARRAY_TYPES
+        )
+        valid_counts_summary = np.sum(
             self._measures.unweighted_valid_counts.raw_cube_array[self._valid_idxs],
             axis=axis,
         )
+        return np.min(valid_counts_summary), np.max(valid_counts_summary)
 
     @lazyproperty
     def valid_overlaps(self) -> Optional[np.ndarray]:

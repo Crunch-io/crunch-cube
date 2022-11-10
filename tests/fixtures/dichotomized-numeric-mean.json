@@ -1,0 +1,3020 @@
+{
+    "result": {
+        "n": 210,
+        "counts": [
+            39,
+            20,
+            10,
+            70,
+            11,
+            12,
+            5,
+            8,
+            3,
+            20,
+            7,
+            4,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            19,
+            12,
+            6,
+            33,
+            6,
+            10,
+            24,
+            16,
+            6,
+            48,
+            11,
+            6,
+            1,
+            0,
+            1,
+            9,
+            1,
+            1,
+            32,
+            17,
+            6,
+            57,
+            7,
+            9,
+            11,
+            10,
+            3,
+            27,
+            10,
+            7,
+            1,
+            1,
+            4,
+            6,
+            1,
+            1,
+            42,
+            21,
+            10,
+            73,
+            14,
+            11,
+            1,
+            5,
+            2,
+            16,
+            4,
+            5,
+            1,
+            2,
+            1,
+            1,
+            0,
+            1,
+            60,
+            15,
+            18,
+            43,
+            22,
+            4,
+            13,
+            6,
+            3,
+            11,
+            11,
+            3,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            30,
+            6,
+            10,
+            24,
+            13,
+            3,
+            41,
+            14,
+            9,
+            27,
+            16,
+            4,
+            2,
+            1,
+            2,
+            4,
+            4,
+            0,
+            48,
+            13,
+            15,
+            32,
+            16,
+            4,
+            17,
+            7,
+            6,
+            20,
+            15,
+            3,
+            8,
+            1,
+            0,
+            3,
+            2,
+            0,
+            57,
+            19,
+            20,
+            44,
+            25,
+            6,
+            13,
+            1,
+            1,
+            10,
+            7,
+            1,
+            3,
+            1,
+            0,
+            1,
+            1,
+            0,
+            16,
+            39,
+            49,
+            13,
+            39,
+            6,
+            3,
+            18,
+            15,
+            3,
+            6,
+            2,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            7,
+            21,
+            28,
+            7,
+            19,
+            4,
+            11,
+            32,
+            33,
+            6,
+            25,
+            4,
+            1,
+            4,
+            4,
+            3,
+            1,
+            0,
+            12,
+            29,
+            38,
+            10,
+            34,
+            5,
+            6,
+            24,
+            22,
+            6,
+            9,
+            1,
+            1,
+            4,
+            5,
+            0,
+            2,
+            2,
+            17,
+            47,
+            56,
+            14,
+            30,
+            7,
+            2,
+            9,
+            7,
+            0,
+            14,
+            1,
+            0,
+            1,
+            2,
+            2,
+            1,
+            0,
+            17,
+            15,
+            31,
+            78,
+            12,
+            9,
+            3,
+            2,
+            14,
+            22,
+            3,
+            3,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            8,
+            4,
+            18,
+            43,
+            7,
+            6,
+            11,
+            11,
+            24,
+            51,
+            8,
+            6,
+            1,
+            2,
+            3,
+            7,
+            0,
+            0,
+            14,
+            14,
+            20,
+            67,
+            7,
+            6,
+            5,
+            3,
+            21,
+            28,
+            6,
+            5,
+            1,
+            0,
+            4,
+            6,
+            2,
+            1,
+            16,
+            16,
+            36,
+            83,
+            10,
+            10,
+            3,
+            1,
+            9,
+            14,
+            4,
+            2,
+            1,
+            0,
+            0,
+            4,
+            1,
+            0
+        ],
+        "dimensions": [
+            {
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "id": "1",
+                                "references": {
+                                    "description": "Vegetables are healthy (5 point scale)",
+                                    "format": {
+                                        "summary": {
+                                            "digits": 0
+                                        }
+                                    },
+                                    "notes": "Do you eat vegetables because: they are healthy",
+                                    "name": "Healthy",
+                                    "alias": "veg_enjoy_ca_healthy",
+                                    "view": {
+                                        "show_counts": false,
+                                        "show_numeric_values": false,
+                                        "include_missing": false,
+                                        "column_width": null
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "id": "2",
+                                "references": {
+                                    "description": "Vegetables are Tasty (5 point scale)",
+                                    "format": {
+                                        "summary": {
+                                            "digits": 0
+                                        }
+                                    },
+                                    "notes": "Do you eat vegetables because: they taste good",
+                                    "name": "Tasty",
+                                    "alias": "veg_enjoy_ca_tasty",
+                                    "view": {
+                                        "show_counts": false,
+                                        "show_numeric_values": false,
+                                        "include_missing": false,
+                                        "column_width": null
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "id": "3",
+                                "references": {
+                                    "description": "Vegetables are filling (5 point scale)",
+                                    "format": {
+                                        "summary": {
+                                            "digits": 0
+                                        }
+                                    },
+                                    "notes": "Do you eat vegetables because: they are filling",
+                                    "name": "Filling",
+                                    "alias": "veg_enjoy_ca_filling",
+                                    "view": {
+                                        "show_counts": false,
+                                        "show_numeric_values": false,
+                                        "include_missing": false,
+                                        "column_width": null
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "id": "4",
+                                "references": {
+                                    "description": "Vegetables are environmental (5 point scale)",
+                                    "format": {
+                                        "summary": {
+                                            "digits": 0
+                                        }
+                                    },
+                                    "notes": "Do you eat vegetables because: eating them is good for the environment",
+                                    "name": "Environmental",
+                                    "alias": "veg_enjoy_ca_env",
+                                    "view": {
+                                        "show_counts": false,
+                                        "show_numeric_values": false,
+                                        "include_missing": false,
+                                        "column_width": null
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                },
+                "references": {
+                    "uniform_basis": false,
+                    "description": "Enjoy vegetables reasons (5 point scale)",
+                    "subreferences": [
+                        {
+                            "description": "Vegetables are healthy (5 point scale)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you eat vegetables because: they are healthy",
+                            "name": "Healthy",
+                            "alias": "veg_enjoy_ca_healthy",
+                            "view": {
+                                "show_counts": false,
+                                "show_numeric_values": false,
+                                "include_missing": false,
+                                "column_width": null
+                            }
+                        },
+                        {
+                            "description": "Vegetables are Tasty (5 point scale)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you eat vegetables because: they taste good",
+                            "name": "Tasty",
+                            "alias": "veg_enjoy_ca_tasty",
+                            "view": {
+                                "show_counts": false,
+                                "show_numeric_values": false,
+                                "include_missing": false,
+                                "column_width": null
+                            }
+                        },
+                        {
+                            "description": "Vegetables are filling (5 point scale)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you eat vegetables because: they are filling",
+                            "name": "Filling",
+                            "alias": "veg_enjoy_ca_filling",
+                            "view": {
+                                "show_counts": false,
+                                "show_numeric_values": false,
+                                "include_missing": false,
+                                "column_width": null
+                            }
+                        },
+                        {
+                            "description": "Vegetables are environmental (5 point scale)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you eat vegetables because: eating them is good for the environment",
+                            "name": "Environmental",
+                            "alias": "veg_enjoy_ca_env",
+                            "view": {
+                                "show_counts": false,
+                                "show_numeric_values": false,
+                                "include_missing": false,
+                                "column_width": null
+                            }
+                        }
+                    ],
+                    "notes": "To what extent do you enjoy vegetables because of...?",
+                    "alias": "veg_enjoy_ca",
+                    "name": "Reasons for Enjoying Vegetables"
+                },
+                "derived": true
+            },
+            {
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "id": "sav and spicy",
+                                "references": {
+                                    "name": "sav and spicy",
+                                    "anchor": "top",
+                                    "alias": "sav_and_spicy_at_top"
+                                },
+                                "derived": true
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "id": "1",
+                                "references": {
+                                    "description": "Enjoyment of savory food (binary)",
+                                    "format": {
+                                        "summary": {
+                                            "digits": 0
+                                        }
+                                    },
+                                    "notes": "Do you typically enjoy food that is savory?",
+                                    "name": "Savory",
+                                    "alias": "enjoy_mr_savory__3",
+                                    "view": {
+                                        "column_width": null,
+                                        "include_noneoftheabove": false,
+                                        "show_counts": false,
+                                        "include_missing": false,
+                                        "transform": {
+                                            "insertions": [
+                                                {
+                                                    "anchor": "top",
+                                                    "name": "sav and spicy",
+                                                    "function": "any_non_missing_selected",
+                                                    "kwargs": {
+                                                        "variable": "mr_copy_subtotal",
+                                                        "subvariable_ids": [
+                                                            "enjoy_mr_savory__3",
+                                                            "enjoy_mr_spicy__3"
+                                                        ]
+                                                    },
+                                                    "id": 1
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "id": "2",
+                                "references": {
+                                    "description": "Enjoyment of spicy food (binary)",
+                                    "format": {
+                                        "summary": {
+                                            "digits": 0
+                                        }
+                                    },
+                                    "notes": "Do you typically enjoy food that is spicy?",
+                                    "name": "Spicy",
+                                    "alias": "enjoy_mr_spicy__3",
+                                    "view": {
+                                        "column_width": null,
+                                        "include_noneoftheabove": false,
+                                        "show_counts": false,
+                                        "include_missing": false,
+                                        "transform": {
+                                            "insertions": [
+                                                {
+                                                    "anchor": "top",
+                                                    "name": "sav and spicy",
+                                                    "function": "any_non_missing_selected",
+                                                    "kwargs": {
+                                                        "variable": "mr_copy_subtotal",
+                                                        "subvariable_ids": [
+                                                            "enjoy_mr_savory__3",
+                                                            "enjoy_mr_spicy__3"
+                                                        ]
+                                                    },
+                                                    "id": 1
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "id": "3",
+                                "references": {
+                                    "description": "Enjoyment of sweet food (binary)",
+                                    "format": {
+                                        "summary": {
+                                            "digits": 0
+                                        }
+                                    },
+                                    "notes": "Do you typically enjoy food that is sweet?",
+                                    "name": "Sweet",
+                                    "alias": "enjoy_mr_sweet__3",
+                                    "view": {
+                                        "column_width": null,
+                                        "include_noneoftheabove": false,
+                                        "show_counts": false,
+                                        "include_missing": false,
+                                        "transform": {
+                                            "insertions": [
+                                                {
+                                                    "anchor": "top",
+                                                    "name": "sav and spicy",
+                                                    "function": "any_non_missing_selected",
+                                                    "kwargs": {
+                                                        "variable": "mr_copy_subtotal",
+                                                        "subvariable_ids": [
+                                                            "enjoy_mr_savory__3",
+                                                            "enjoy_mr_spicy__3"
+                                                        ]
+                                                    },
+                                                    "id": 1
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                },
+                "references": {
+                    "uniform_basis": false,
+                    "description": "Typically enjoy foods with flavors",
+                    "subreferences": [
+                        {
+                            "name": "sav and spicy",
+                            "anchor": "top",
+                            "alias": "sav_and_spicy_at_top"
+                        },
+                        {
+                            "description": "Enjoyment of savory food (binary)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you typically enjoy food that is savory?",
+                            "name": "Savory",
+                            "alias": "enjoy_mr_savory__3",
+                            "view": {
+                                "column_width": null,
+                                "include_noneoftheabove": false,
+                                "show_counts": false,
+                                "include_missing": false,
+                                "transform": {
+                                    "insertions": [
+                                        {
+                                            "anchor": "top",
+                                            "name": "sav and spicy",
+                                            "function": "any_non_missing_selected",
+                                            "kwargs": {
+                                                "variable": "mr_copy_subtotal",
+                                                "subvariable_ids": [
+                                                    "enjoy_mr_savory__3",
+                                                    "enjoy_mr_spicy__3"
+                                                ]
+                                            },
+                                            "id": 1
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "description": "Enjoyment of spicy food (binary)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you typically enjoy food that is spicy?",
+                            "name": "Spicy",
+                            "alias": "enjoy_mr_spicy__3",
+                            "view": {
+                                "column_width": null,
+                                "include_noneoftheabove": false,
+                                "show_counts": false,
+                                "include_missing": false,
+                                "transform": {
+                                    "insertions": [
+                                        {
+                                            "anchor": "top",
+                                            "name": "sav and spicy",
+                                            "function": "any_non_missing_selected",
+                                            "kwargs": {
+                                                "variable": "mr_copy_subtotal",
+                                                "subvariable_ids": [
+                                                    "enjoy_mr_savory__3",
+                                                    "enjoy_mr_spicy__3"
+                                                ]
+                                            },
+                                            "id": 1
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "description": "Enjoyment of sweet food (binary)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you typically enjoy food that is sweet?",
+                            "name": "Sweet",
+                            "alias": "enjoy_mr_sweet__3",
+                            "view": {
+                                "column_width": null,
+                                "include_noneoftheabove": false,
+                                "show_counts": false,
+                                "include_missing": false,
+                                "transform": {
+                                    "insertions": [
+                                        {
+                                            "anchor": "top",
+                                            "name": "sav and spicy",
+                                            "function": "any_non_missing_selected",
+                                            "kwargs": {
+                                                "variable": "mr_copy_subtotal",
+                                                "subvariable_ids": [
+                                                    "enjoy_mr_savory__3",
+                                                    "enjoy_mr_spicy__3"
+                                                ]
+                                            },
+                                            "id": 1
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "notes": "Do you typically enjoy foods that taste..?",
+                    "alias": "mr_copy_subtotal",
+                    "name": "Enjoy MR with subtotal",
+                    "format": {
+                        "summary": {
+                            "digits": 0
+                        }
+                    },
+                    "view": {
+                        "column_width": null,
+                        "include_noneoftheabove": false,
+                        "show_counts": false,
+                        "include_missing": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "anchor": "top",
+                                    "function": "any_non_missing_selected",
+                                    "name": "sav and spicy",
+                                    "id": 1,
+                                    "kwargs": {
+                                        "variable": "mr_copy_subtotal",
+                                        "subvariable_ids": [
+                                            "enjoy_mr_savory__3",
+                                            "enjoy_mr_spicy__3"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                "derived": true
+            },
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "id": 1,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true,
+                            "missing": false
+                        },
+                        {
+                            "id": 0,
+                            "name": "Other",
+                            "numeric_value": 0,
+                            "missing": false
+                        },
+                        {
+                            "id": -1,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "missing": true
+                        }
+                    ],
+                    "subvariables": [
+                        "sav and spicy",
+                        "1",
+                        "2",
+                        "3"
+                    ]
+                },
+                "references": {
+                    "uniform_basis": false,
+                    "description": "Typically enjoy foods with flavors",
+                    "subreferences": [
+                        {
+                            "name": "sav and spicy",
+                            "anchor": "top",
+                            "alias": "sav_and_spicy_at_top"
+                        },
+                        {
+                            "description": "Enjoyment of savory food (binary)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you typically enjoy food that is savory?",
+                            "name": "Savory",
+                            "alias": "enjoy_mr_savory__3",
+                            "view": {
+                                "column_width": null,
+                                "include_noneoftheabove": false,
+                                "show_counts": false,
+                                "include_missing": false,
+                                "transform": {
+                                    "insertions": [
+                                        {
+                                            "anchor": "top",
+                                            "name": "sav and spicy",
+                                            "function": "any_non_missing_selected",
+                                            "kwargs": {
+                                                "variable": "mr_copy_subtotal",
+                                                "subvariable_ids": [
+                                                    "enjoy_mr_savory__3",
+                                                    "enjoy_mr_spicy__3"
+                                                ]
+                                            },
+                                            "id": 1
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "description": "Enjoyment of spicy food (binary)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you typically enjoy food that is spicy?",
+                            "name": "Spicy",
+                            "alias": "enjoy_mr_spicy__3",
+                            "view": {
+                                "column_width": null,
+                                "include_noneoftheabove": false,
+                                "show_counts": false,
+                                "include_missing": false,
+                                "transform": {
+                                    "insertions": [
+                                        {
+                                            "anchor": "top",
+                                            "name": "sav and spicy",
+                                            "function": "any_non_missing_selected",
+                                            "kwargs": {
+                                                "variable": "mr_copy_subtotal",
+                                                "subvariable_ids": [
+                                                    "enjoy_mr_savory__3",
+                                                    "enjoy_mr_spicy__3"
+                                                ]
+                                            },
+                                            "id": 1
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "description": "Enjoyment of sweet food (binary)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you typically enjoy food that is sweet?",
+                            "name": "Sweet",
+                            "alias": "enjoy_mr_sweet__3",
+                            "view": {
+                                "column_width": null,
+                                "include_noneoftheabove": false,
+                                "show_counts": false,
+                                "include_missing": false,
+                                "transform": {
+                                    "insertions": [
+                                        {
+                                            "anchor": "top",
+                                            "name": "sav and spicy",
+                                            "function": "any_non_missing_selected",
+                                            "kwargs": {
+                                                "variable": "mr_copy_subtotal",
+                                                "subvariable_ids": [
+                                                    "enjoy_mr_savory__3",
+                                                    "enjoy_mr_spicy__3"
+                                                ]
+                                            },
+                                            "id": 1
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "notes": "Do you typically enjoy foods that taste..?",
+                    "alias": "mr_copy_subtotal",
+                    "name": "Enjoy MR with subtotal",
+                    "format": {
+                        "summary": {
+                            "digits": 0
+                        }
+                    },
+                    "view": {
+                        "column_width": null,
+                        "include_noneoftheabove": false,
+                        "show_counts": false,
+                        "include_missing": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "anchor": "top",
+                                    "function": "any_non_missing_selected",
+                                    "name": "sav and spicy",
+                                    "id": 1,
+                                    "kwargs": {
+                                        "variable": "mr_copy_subtotal",
+                                        "subvariable_ids": [
+                                            "enjoy_mr_savory__3",
+                                            "enjoy_mr_spicy__3"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                "derived": true
+            },
+            {
+                "derived": true,
+                "references": {
+                    "uniform_basis": false,
+                    "description": "Enjoy vegetables reasons (5 point scale)",
+                    "subreferences": [
+                        {
+                            "description": "Vegetables are healthy (5 point scale)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you eat vegetables because: they are healthy",
+                            "name": "Healthy",
+                            "alias": "veg_enjoy_ca_healthy",
+                            "view": {
+                                "show_counts": false,
+                                "show_numeric_values": false,
+                                "include_missing": false,
+                                "column_width": null
+                            }
+                        },
+                        {
+                            "description": "Vegetables are Tasty (5 point scale)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you eat vegetables because: they taste good",
+                            "name": "Tasty",
+                            "alias": "veg_enjoy_ca_tasty",
+                            "view": {
+                                "show_counts": false,
+                                "show_numeric_values": false,
+                                "include_missing": false,
+                                "column_width": null
+                            }
+                        },
+                        {
+                            "description": "Vegetables are filling (5 point scale)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you eat vegetables because: they are filling",
+                            "name": "Filling",
+                            "alias": "veg_enjoy_ca_filling",
+                            "view": {
+                                "show_counts": false,
+                                "show_numeric_values": false,
+                                "include_missing": false,
+                                "column_width": null
+                            }
+                        },
+                        {
+                            "description": "Vegetables are environmental (5 point scale)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you eat vegetables because: eating them is good for the environment",
+                            "name": "Environmental",
+                            "alias": "veg_enjoy_ca_env",
+                            "view": {
+                                "show_counts": false,
+                                "show_numeric_values": false,
+                                "include_missing": false,
+                                "column_width": null
+                            }
+                        }
+                    ],
+                    "notes": "To what extent do you enjoy vegetables because of...?",
+                    "alias": "veg_enjoy_ca",
+                    "name": "Reasons for Enjoying Vegetables"
+                },
+                "type": {
+                    "ordinal": false,
+                    "subvariables": [
+                        "1",
+                        "2",
+                        "3",
+                        "4"
+                    ],
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "id": 1,
+                            "name": "Strongly Disagree",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 2,
+                            "id": 2,
+                            "name": "Disagree",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 3,
+                            "id": 3,
+                            "name": "Neither",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 4,
+                            "id": 4,
+                            "name": "Agree",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 5,
+                            "id": 5,
+                            "name": "Strongly Agree",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data",
+                            "missing": true
+                        }
+                    ]
+                }
+            }
+        ],
+        "measures": {
+            "count": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    },
+                    "references": {},
+                    "derived": true
+                },
+                "data": [
+                    39,
+                    20,
+                    10,
+                    70,
+                    11,
+                    12,
+                    5,
+                    8,
+                    3,
+                    20,
+                    7,
+                    4,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    19,
+                    12,
+                    6,
+                    33,
+                    6,
+                    10,
+                    24,
+                    16,
+                    6,
+                    48,
+                    11,
+                    6,
+                    1,
+                    0,
+                    1,
+                    9,
+                    1,
+                    1,
+                    32,
+                    17,
+                    6,
+                    57,
+                    7,
+                    9,
+                    11,
+                    10,
+                    3,
+                    27,
+                    10,
+                    7,
+                    1,
+                    1,
+                    4,
+                    6,
+                    1,
+                    1,
+                    42,
+                    21,
+                    10,
+                    73,
+                    14,
+                    11,
+                    1,
+                    5,
+                    2,
+                    16,
+                    4,
+                    5,
+                    1,
+                    2,
+                    1,
+                    1,
+                    0,
+                    1,
+                    60,
+                    15,
+                    18,
+                    43,
+                    22,
+                    4,
+                    13,
+                    6,
+                    3,
+                    11,
+                    11,
+                    3,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    30,
+                    6,
+                    10,
+                    24,
+                    13,
+                    3,
+                    41,
+                    14,
+                    9,
+                    27,
+                    16,
+                    4,
+                    2,
+                    1,
+                    2,
+                    4,
+                    4,
+                    0,
+                    48,
+                    13,
+                    15,
+                    32,
+                    16,
+                    4,
+                    17,
+                    7,
+                    6,
+                    20,
+                    15,
+                    3,
+                    8,
+                    1,
+                    0,
+                    3,
+                    2,
+                    0,
+                    57,
+                    19,
+                    20,
+                    44,
+                    25,
+                    6,
+                    13,
+                    1,
+                    1,
+                    10,
+                    7,
+                    1,
+                    3,
+                    1,
+                    0,
+                    1,
+                    1,
+                    0,
+                    16,
+                    39,
+                    49,
+                    13,
+                    39,
+                    6,
+                    3,
+                    18,
+                    15,
+                    3,
+                    6,
+                    2,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    7,
+                    21,
+                    28,
+                    7,
+                    19,
+                    4,
+                    11,
+                    32,
+                    33,
+                    6,
+                    25,
+                    4,
+                    1,
+                    4,
+                    4,
+                    3,
+                    1,
+                    0,
+                    12,
+                    29,
+                    38,
+                    10,
+                    34,
+                    5,
+                    6,
+                    24,
+                    22,
+                    6,
+                    9,
+                    1,
+                    1,
+                    4,
+                    5,
+                    0,
+                    2,
+                    2,
+                    17,
+                    47,
+                    56,
+                    14,
+                    30,
+                    7,
+                    2,
+                    9,
+                    7,
+                    0,
+                    14,
+                    1,
+                    0,
+                    1,
+                    2,
+                    2,
+                    1,
+                    0,
+                    17,
+                    15,
+                    31,
+                    78,
+                    12,
+                    9,
+                    3,
+                    2,
+                    14,
+                    22,
+                    3,
+                    3,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    8,
+                    4,
+                    18,
+                    43,
+                    7,
+                    6,
+                    11,
+                    11,
+                    24,
+                    51,
+                    8,
+                    6,
+                    1,
+                    2,
+                    3,
+                    7,
+                    0,
+                    0,
+                    14,
+                    14,
+                    20,
+                    67,
+                    7,
+                    6,
+                    5,
+                    3,
+                    21,
+                    28,
+                    6,
+                    5,
+                    1,
+                    0,
+                    4,
+                    6,
+                    2,
+                    1,
+                    16,
+                    16,
+                    36,
+                    83,
+                    10,
+                    10,
+                    3,
+                    1,
+                    9,
+                    14,
+                    4,
+                    2,
+                    1,
+                    0,
+                    0,
+                    4,
+                    1,
+                    0
+                ],
+                "n_missing": 0
+            },
+            "mean": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1,
+                            "NaN": -8
+                        },
+                        "missing_rules": {}
+                    },
+                    "references": {
+                        "description": "Age of respondent",
+                        "format": {
+                            "data": {
+                                "digits": 2
+                            },
+                            "summary": {
+                                "digits": 2
+                            }
+                        },
+                        "notes": "How old are you?",
+                        "name": "Age",
+                        "alias": "age",
+                        "view": {
+                            "column_width": null
+                        }
+                    },
+                    "derived": true
+                },
+                "data": [
+                    40.7714285714,
+                    42.85,
+                    44.1,
+                    41.1846153846,
+                    44.1818181818,
+                    45.8181818182,
+                    43.8,
+                    41.125,
+                    40,
+                    42.1578947368,
+                    41.8571428571,
+                    38.5,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    18,
+                    29.875,
+                    37.4166666667,
+                    45,
+                    36.6774193548,
+                    38.3333333333,
+                    45.8888888889,
+                    48.8695652174,
+                    46.0625,
+                    43.6666666667,
+                    45.2954545455,
+                    45.5454545455,
+                    40.8333333333,
+                    44,
+                    {
+                        "?": -8
+                    },
+                    29,
+                    38.6666666667,
+                    48,
+                    18,
+                    44.1379310345,
+                    45.2941176471,
+                    49.1666666667,
+                    42.5849056604,
+                    48.2857142857,
+                    48.75,
+                    34.4,
+                    35.6,
+                    33.3333333333,
+                    40.36,
+                    40.4,
+                    38.2857142857,
+                    22,
+                    60,
+                    41.5,
+                    35.3333333333,
+                    37,
+                    18,
+                    41.0263157895,
+                    44.4285714286,
+                    46.1,
+                    40.8656716418,
+                    44.5,
+                    42.1,
+                    59,
+                    38.6,
+                    35.5,
+                    44,
+                    39,
+                    41.4,
+                    28,
+                    30,
+                    29,
+                    36,
+                    {
+                        "?": -8
+                    },
+                    48,
+                    46.2413793103,
+                    45,
+                    38.4705882353,
+                    39.8,
+                    35.6666666667,
+                    43.3333333333,
+                    46.5,
+                    38.3333333333,
+                    41,
+                    39.9090909091,
+                    40.4545454545,
+                    40.3333333333,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    18,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    41.6551724138,
+                    40.2,
+                    31.5555555556,
+                    34.2272727273,
+                    32.7692307692,
+                    52.5,
+                    50.1538461538,
+                    43.8461538462,
+                    46.5555555556,
+                    44.1538461538,
+                    41.5333333333,
+                    36.5,
+                    38,
+                    44,
+                    37,
+                    37,
+                    36.25,
+                    {
+                        "?": -8
+                    },
+                    49.8695652174,
+                    44.0909090909,
+                    40.1333333333,
+                    41.7333333333,
+                    37.8,
+                    43.3333333333,
+                    40.375,
+                    40.4285714286,
+                    35,
+                    37.7368421053,
+                    35.9333333333,
+                    40.3333333333,
+                    37.5,
+                    47,
+                    {
+                        "?": -8
+                    },
+                    26.6666666667,
+                    44,
+                    {
+                        "?": -8
+                    },
+                    46.4259259259,
+                    42.6470588235,
+                    39.1052631579,
+                    39.7317073171,
+                    38.375,
+                    42,
+                    49.6153846154,
+                    42,
+                    34,
+                    38.4,
+                    34.8571428571,
+                    41,
+                    29.3333333333,
+                    48,
+                    {
+                        "?": -8
+                    },
+                    36,
+                    29,
+                    {
+                        "?": -8
+                    },
+                    43.6153846154,
+                    40.4444444444,
+                    42.1304347826,
+                    37.3076923077,
+                    44.4210526316,
+                    43,
+                    52.3333333333,
+                    42.5294117647,
+                    41.8666666667,
+                    33.6666666667,
+                    39.3333333333,
+                    35.5,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    18,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    35.3333333333,
+                    35.2631578947,
+                    38.2307692308,
+                    32.2857142857,
+                    39.3333333333,
+                    41.75,
+                    50.6666666667,
+                    43.8333333333,
+                    46.09375,
+                    43.6666666667,
+                    47.68,
+                    40.5,
+                    56,
+                    48.5,
+                    28.75,
+                    32.6666666667,
+                    24,
+                    {
+                        "?": -8
+                    },
+                    48.1,
+                    43.4074074074,
+                    43.5714285714,
+                    39.7,
+                    46.0909090909,
+                    46.8,
+                    40.4,
+                    37.9090909091,
+                    40.6363636364,
+                    31.5,
+                    36.4444444444,
+                    34,
+                    41,
+                    43.25,
+                    33,
+                    {
+                        "?": -8
+                    },
+                    37.5,
+                    30.5,
+                    45.5714285714,
+                    41.6046511628,
+                    41.4905660377,
+                    37.7857142857,
+                    44.6206896552,
+                    40.8571428571,
+                    43,
+                    38,
+                    45.7142857143,
+                    {
+                        "?": -8
+                    },
+                    42.7857142857,
+                    43,
+                    {
+                        "?": -8
+                    },
+                    48,
+                    32.5,
+                    28.5,
+                    31,
+                    {
+                        "?": -8
+                    },
+                    50,
+                    44.2,
+                    38.8,
+                    41.5774647887,
+                    39.4166666667,
+                    43.3333333333,
+                    32.3333333333,
+                    37.5,
+                    40.7142857143,
+                    43,
+                    45.6666666667,
+                    44.6666666667,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    18,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    42,
+                    37.75,
+                    33.2352941176,
+                    37.4358974359,
+                    36.5714285714,
+                    41.8333333333,
+                    49.7,
+                    47.5454545455,
+                    44.7083333333,
+                    45.5744680851,
+                    44.25,
+                    45.5,
+                    56,
+                    32,
+                    32,
+                    38.7142857143,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    52,
+                    45.8571428571,
+                    41.85,
+                    43.65,
+                    43.2857142857,
+                    42.1666666667,
+                    33.5,
+                    32,
+                    38.5,
+                    38.4814814815,
+                    38,
+                    42.8,
+                    37,
+                    {
+                        "?": -8
+                    },
+                    31.75,
+                    35.8333333333,
+                    39.5,
+                    57,
+                    47.1428571429,
+                    44,
+                    39.9142857143,
+                    42.04,
+                    41.4,
+                    40.7,
+                    52.6666666667,
+                    34,
+                    37.4444444444,
+                    41.1428571429,
+                    42,
+                    58.5,
+                    29,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    36,
+                    28,
+                    {
+                        "?": -8
+                    }
+                ],
+                "n_missing": 11
+            },
+            "valid_count_unweighted": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    },
+                    "references": {
+                        "description": "Age of respondent",
+                        "format": {
+                            "data": {
+                                "digits": 2
+                            },
+                            "summary": {
+                                "digits": 2
+                            }
+                        },
+                        "notes": "How old are you?",
+                        "name": "Age",
+                        "alias": "age",
+                        "view": {
+                            "column_width": null
+                        }
+                    },
+                    "derived": true
+                },
+                "data": [
+                    35,
+                    20,
+                    10,
+                    65,
+                    11,
+                    11,
+                    5,
+                    8,
+                    3,
+                    19,
+                    7,
+                    4,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    16,
+                    12,
+                    6,
+                    31,
+                    6,
+                    9,
+                    23,
+                    16,
+                    6,
+                    44,
+                    11,
+                    6,
+                    1,
+                    0,
+                    1,
+                    9,
+                    1,
+                    1,
+                    29,
+                    17,
+                    6,
+                    53,
+                    7,
+                    8,
+                    10,
+                    10,
+                    3,
+                    25,
+                    10,
+                    7,
+                    1,
+                    1,
+                    4,
+                    6,
+                    1,
+                    1,
+                    38,
+                    21,
+                    10,
+                    67,
+                    14,
+                    10,
+                    1,
+                    5,
+                    2,
+                    16,
+                    4,
+                    5,
+                    1,
+                    2,
+                    1,
+                    1,
+                    0,
+                    1,
+                    58,
+                    13,
+                    17,
+                    40,
+                    21,
+                    3,
+                    12,
+                    6,
+                    3,
+                    11,
+                    11,
+                    3,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    29,
+                    5,
+                    9,
+                    22,
+                    13,
+                    2,
+                    39,
+                    13,
+                    9,
+                    26,
+                    15,
+                    4,
+                    2,
+                    1,
+                    2,
+                    4,
+                    4,
+                    0,
+                    46,
+                    11,
+                    15,
+                    30,
+                    15,
+                    3,
+                    16,
+                    7,
+                    5,
+                    19,
+                    15,
+                    3,
+                    8,
+                    1,
+                    0,
+                    3,
+                    2,
+                    0,
+                    54,
+                    17,
+                    19,
+                    41,
+                    24,
+                    5,
+                    13,
+                    1,
+                    1,
+                    10,
+                    7,
+                    1,
+                    3,
+                    1,
+                    0,
+                    1,
+                    1,
+                    0,
+                    13,
+                    36,
+                    46,
+                    13,
+                    38,
+                    6,
+                    3,
+                    17,
+                    15,
+                    3,
+                    6,
+                    2,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    6,
+                    19,
+                    26,
+                    7,
+                    18,
+                    4,
+                    9,
+                    30,
+                    32,
+                    6,
+                    25,
+                    4,
+                    1,
+                    4,
+                    4,
+                    3,
+                    1,
+                    0,
+                    10,
+                    27,
+                    35,
+                    10,
+                    33,
+                    5,
+                    5,
+                    22,
+                    22,
+                    6,
+                    9,
+                    1,
+                    1,
+                    4,
+                    5,
+                    0,
+                    2,
+                    2,
+                    14,
+                    43,
+                    53,
+                    14,
+                    29,
+                    7,
+                    2,
+                    9,
+                    7,
+                    0,
+                    14,
+                    1,
+                    0,
+                    1,
+                    2,
+                    2,
+                    1,
+                    0,
+                    15,
+                    15,
+                    30,
+                    71,
+                    12,
+                    9,
+                    3,
+                    2,
+                    14,
+                    21,
+                    3,
+                    3,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    7,
+                    4,
+                    17,
+                    39,
+                    7,
+                    6,
+                    10,
+                    11,
+                    24,
+                    47,
+                    8,
+                    6,
+                    1,
+                    2,
+                    3,
+                    7,
+                    0,
+                    0,
+                    13,
+                    14,
+                    20,
+                    60,
+                    7,
+                    6,
+                    4,
+                    3,
+                    20,
+                    27,
+                    6,
+                    5,
+                    1,
+                    0,
+                    4,
+                    6,
+                    2,
+                    1,
+                    14,
+                    16,
+                    35,
+                    75,
+                    10,
+                    10,
+                    3,
+                    1,
+                    9,
+                    14,
+                    4,
+                    2,
+                    1,
+                    0,
+                    0,
+                    4,
+                    1,
+                    0
+                ],
+                "n_missing": 11
+            },
+            "stddev": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": null,
+                        "missing_reasons": {
+                            "No Data": -1,
+                            "NaN": -8
+                        },
+                        "missing_rules": {}
+                    },
+                    "references": {
+                        "description": "Age of respondent",
+                        "format": {
+                            "data": {
+                                "digits": 2
+                            },
+                            "summary": {
+                                "digits": 2
+                            }
+                        },
+                        "notes": "How old are you?",
+                        "name": "Age",
+                        "alias": "age",
+                        "view": {
+                            "column_width": null
+                        }
+                    },
+                    "derived": true
+                },
+                "data": [
+                    14.6570314671,
+                    14.2469756717,
+                    12.8707247487,
+                    15.1026615077,
+                    13.695387412,
+                    11.2766855221,
+                    7.5960516059,
+                    10.1056914657,
+                    9.643650761,
+                    12.5532782699,
+                    12.3211007548,
+                    7.9372539332,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    11.6382988448,
+                    12.6380258336,
+                    16,
+                    15.393477183,
+                    9.6884811331,
+                    12.5443657118,
+                    9.8410288996,
+                    12.4336572791,
+                    6.5319726474,
+                    12.4910750379,
+                    14.5421018863,
+                    7.3052492542,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    16.5981926727,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    13.6792964991,
+                    14.0790833592,
+                    11.8392004235,
+                    14.8834367959,
+                    15.4996159707,
+                    10.3751075726,
+                    11.805836598,
+                    7.4714270539,
+                    11.1504857891,
+                    13.2692627276,
+                    10.9056560249,
+                    8.7123338954,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    9.1104335791,
+                    16.6212715117,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    13.8358852696,
+                    12.1760889803,
+                    11.0095917777,
+                    14.5621921452,
+                    10.3756371445,
+                    14.4564480039,
+                    {
+                        "?": -8
+                    },
+                    16.994116629,
+                    14.8492424049,
+                    14.823404917,
+                    20.9443707632,
+                    9.0443352437,
+                    {
+                        "?": -8
+                    },
+                    1.4142135624,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    14.9035617371,
+                    10.9392260543,
+                    14.4183808343,
+                    13.5480152771,
+                    12.248809466,
+                    19.60442127,
+                    8.1742389137,
+                    12.6121634412,
+                    10.5830052443,
+                    12.9340986965,
+                    11.2726539587,
+                    4.7258156263,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    15.9827493211,
+                    12.8335497817,
+                    11.2928197443,
+                    11.6534557236,
+                    13.077677203,
+                    16.2634559673,
+                    10.5793703462,
+                    11.9222911238,
+                    10.477489097,
+                    12.9203476972,
+                    10.1549893906,
+                    8.5829287931,
+                    25.4558441227,
+                    {
+                        "?": -8
+                    },
+                    25.4558441227,
+                    18.9208879284,
+                    11.5578256317,
+                    {
+                        "?": -8
+                    },
+                    13.1277631092,
+                    11.6572256172,
+                    14.2571619429,
+                    14.1077951877,
+                    13.0613934938,
+                    19.60442127,
+                    12.5850440338,
+                    12.7783298708,
+                    12.4699639133,
+                    11.8126208648,
+                    10.0531918646,
+                    4.7258156263,
+                    14.6287388383,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    12.503332889,
+                    22.627416998,
+                    {
+                        "?": -8
+                    },
+                    13.3127855297,
+                    12.2113736762,
+                    14.0273333842,
+                    13.6308921026,
+                    12.4893432835,
+                    14.3701078632,
+                    15.7878564174,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    14.2999611499,
+                    10.884676866,
+                    {
+                        "?": -8
+                    },
+                    1.5275252317,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    14.4253160655,
+                    13.3168946282,
+                    14.4616100159,
+                    13.634420996,
+                    14.9424690947,
+                    17.4355957742,
+                    9.0184995056,
+                    11.598047503,
+                    10.7893245298,
+                    14.2243921956,
+                    5.2408650685,
+                    2.1213203436,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    15.5263217365,
+                    12.0270163718,
+                    14.0408196123,
+                    10.9501032828,
+                    16.1354560263,
+                    22.2766694099,
+                    9.1515026089,
+                    12.5974363384,
+                    12.0733226979,
+                    11.9275591244,
+                    11.1419627236,
+                    6.2449979984,
+                    {
+                        "?": -8
+                    },
+                    6.1373175465,
+                    13.6961065027,
+                    19.5021366351,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    12.4047481949,
+                    13.1156373471,
+                    14.587032344,
+                    14.825278712,
+                    14.4921608904,
+                    16.4833249073,
+                    17.6295206968,
+                    12.4016477051,
+                    10.9350700764,
+                    9.3541434669,
+                    6.2472216047,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    10.3400515795,
+                    18.3030052177,
+                    {
+                        "?": -8
+                    },
+                    27.5771644663,
+                    9.1923881554,
+                    12.9657198069,
+                    12.7972086519,
+                    14.0802953442,
+                    13.9127974925,
+                    13.0477523875,
+                    16.3546993392,
+                    25.4558441227,
+                    13.1624465811,
+                    12.8674561811,
+                    {
+                        "?": -8
+                    },
+                    16.5677098897,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    4.9497474683,
+                    0.7071067812,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    14.8131215964,
+                    13.7799025499,
+                    12.4496226227,
+                    14.6440255705,
+                    13.5274692475,
+                    16.07015868,
+                    5.0332229568,
+                    4.9497474683,
+                    11.7566908703,
+                    11.0950439386,
+                    11.0151410946,
+                    8.6216781043,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    15.9164485151,
+                    15.585784121,
+                    9.9594767167,
+                    14.9081307236,
+                    14.2227182453,
+                    18.7980495442,
+                    15.1073933335,
+                    10.8107690417,
+                    11.1685862508,
+                    11.8903407653,
+                    11.4361581961,
+                    9.071934744,
+                    {
+                        "?": -8
+                    },
+                    16.9705627485,
+                    13.8564064606,
+                    16.5601357252,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    14.588808496,
+                    12.6543221127,
+                    13.1320219311,
+                    14.2136542135,
+                    16.0490320135,
+                    14.4833237438,
+                    8.0622577483,
+                    10.1488915651,
+                    10.4049583322,
+                    12.4232114341,
+                    9.4445751625,
+                    15.6108936323,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    14.4077525428,
+                    16.8809557391,
+                    16.2634559673,
+                    {
+                        "?": -8
+                    },
+                    15.195430198,
+                    13.3366662501,
+                    11.3406386078,
+                    14.3756926978,
+                    11.9647630798,
+                    13.6873826733,
+                    15.502687939,
+                    {
+                        "?": -8
+                    },
+                    15.452435982,
+                    13.6373759198,
+                    17.2046505341,
+                    2.1213203436,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    8.5244745684,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    }
+                ],
+                "n_missing": 11
+            },
+            "sum": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": null,
+                        "missing_reasons": {
+                            "No Data": -1,
+                            "NaN": -8
+                        },
+                        "missing_rules": {}
+                    },
+                    "references": {
+                        "description": "Age of respondent",
+                        "format": {
+                            "data": {
+                                "digits": 2
+                            },
+                            "summary": {
+                                "digits": 2
+                            }
+                        },
+                        "notes": "How old are you?",
+                        "name": "Age",
+                        "alias": "age",
+                        "view": {
+                            "column_width": null
+                        }
+                    },
+                    "derived": true
+                },
+                "data": [
+                    1427,
+                    857,
+                    441,
+                    2677,
+                    486,
+                    504,
+                    219,
+                    329,
+                    120,
+                    801,
+                    293,
+                    154,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    18,
+                    478,
+                    449,
+                    270,
+                    1137,
+                    230,
+                    413,
+                    1124,
+                    737,
+                    262,
+                    1993,
+                    501,
+                    245,
+                    44,
+                    {
+                        "?": -8
+                    },
+                    29,
+                    348,
+                    48,
+                    18,
+                    1280,
+                    770,
+                    295,
+                    2257,
+                    338,
+                    390,
+                    344,
+                    356,
+                    100,
+                    1009,
+                    404,
+                    268,
+                    22,
+                    60,
+                    166,
+                    212,
+                    37,
+                    18,
+                    1559,
+                    933,
+                    461,
+                    2738,
+                    623,
+                    421,
+                    59,
+                    193,
+                    71,
+                    704,
+                    156,
+                    207,
+                    28,
+                    60,
+                    29,
+                    36,
+                    {
+                        "?": -8
+                    },
+                    48,
+                    2682,
+                    585,
+                    654,
+                    1592,
+                    749,
+                    130,
+                    558,
+                    230,
+                    123,
+                    439,
+                    445,
+                    121,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    18,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    1208,
+                    201,
+                    284,
+                    753,
+                    426,
+                    105,
+                    1956,
+                    570,
+                    419,
+                    1148,
+                    623,
+                    146,
+                    76,
+                    44,
+                    74,
+                    148,
+                    145,
+                    {
+                        "?": -8
+                    },
+                    2294,
+                    485,
+                    602,
+                    1252,
+                    567,
+                    130,
+                    646,
+                    283,
+                    175,
+                    717,
+                    539,
+                    121,
+                    300,
+                    47,
+                    {
+                        "?": -8
+                    },
+                    80,
+                    88,
+                    {
+                        "?": -8
+                    },
+                    2507,
+                    725,
+                    743,
+                    1629,
+                    921,
+                    210,
+                    645,
+                    42,
+                    34,
+                    384,
+                    244,
+                    41,
+                    88,
+                    48,
+                    {
+                        "?": -8
+                    },
+                    36,
+                    29,
+                    {
+                        "?": -8
+                    },
+                    567,
+                    1456,
+                    1938,
+                    485,
+                    1688,
+                    258,
+                    157,
+                    723,
+                    628,
+                    101,
+                    236,
+                    71,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    18,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    212,
+                    670,
+                    994,
+                    226,
+                    708,
+                    167,
+                    456,
+                    1315,
+                    1475,
+                    262,
+                    1192,
+                    162,
+                    56,
+                    194,
+                    115,
+                    98,
+                    24,
+                    {
+                        "?": -8
+                    },
+                    481,
+                    1172,
+                    1525,
+                    397,
+                    1521,
+                    234,
+                    202,
+                    834,
+                    894,
+                    189,
+                    328,
+                    34,
+                    41,
+                    173,
+                    165,
+                    {
+                        "?": -8
+                    },
+                    75,
+                    61,
+                    638,
+                    1789,
+                    2199,
+                    529,
+                    1294,
+                    286,
+                    86,
+                    342,
+                    320,
+                    {
+                        "?": -8
+                    },
+                    599,
+                    43,
+                    {
+                        "?": -8
+                    },
+                    48,
+                    65,
+                    57,
+                    31,
+                    {
+                        "?": -8
+                    },
+                    750,
+                    663,
+                    1164,
+                    2952,
+                    473,
+                    390,
+                    97,
+                    75,
+                    570,
+                    903,
+                    137,
+                    134,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    18,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    294,
+                    151,
+                    565,
+                    1460,
+                    256,
+                    251,
+                    497,
+                    523,
+                    1073,
+                    2142,
+                    354,
+                    273,
+                    56,
+                    64,
+                    96,
+                    271,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    676,
+                    642,
+                    837,
+                    2619,
+                    303,
+                    253,
+                    134,
+                    96,
+                    770,
+                    1039,
+                    228,
+                    214,
+                    37,
+                    {
+                        "?": -8
+                    },
+                    127,
+                    215,
+                    79,
+                    57,
+                    660,
+                    704,
+                    1397,
+                    3153,
+                    414,
+                    407,
+                    158,
+                    34,
+                    337,
+                    576,
+                    168,
+                    117,
+                    29,
+                    {
+                        "?": -8
+                    },
+                    {
+                        "?": -8
+                    },
+                    144,
+                    28,
+                    {
+                        "?": -8
+                    }
+                ],
+                "n_missing": 11
+            }
+        },
+        "missing": 0,
+        "filter_stats": {
+            "is_cat_date": false,
+            "filtered": {
+                "unweighted": {
+                    "selected": 210,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 210,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 210,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 210,
+                    "other": 0,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 210,
+            "weighted_n": 210
+        },
+        "filtered": {
+            "unweighted_n": 210,
+            "weighted_n": 210
+        },
+        "element": "crunch:cube"
+    }
+}

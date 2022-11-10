@@ -271,14 +271,14 @@ class DescribeCubeSet:
         assert Cube_.call_args_list == ([call({"cube": 0})] if is_multi_cube else [])
         assert is_numeric_mean == expected_value
 
-    def it_knows_its_valid_counts_summary_to_help(self, _cubes_prop_, cube_):
-        cube_.valid_counts_summary = np.array([1, 2, 3])
+    def it_knows_its_valid_counts_summary_range_to_help(self, _cubes_prop_, cube_):
+        cube_.valid_counts_summary_range = (1, 3)
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
 
-        valid_counts_summary = cube_set.valid_counts_summary
+        valid_counts_summary_range = cube_set.valid_counts_summary_range
 
-        np.testing.assert_array_equal(valid_counts_summary, [1, 2, 3])
+        np.testing.assert_array_equal(valid_counts_summary_range, (1, 3))
 
     def it_knows_its_n_reposnes_to_help(self, _cubes_prop_, cube_):
         cube_.n_responses = 6
