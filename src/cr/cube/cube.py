@@ -215,9 +215,9 @@ class Cube:
     def __init__(
         self,
         response: Union[str, Dict],
-        cube_idx: int = None,
-        transforms: Dict = None,
-        population: int = None,
+        cube_idx: Optional[int] = None,
+        transforms: Optional[Dict] = None,
+        population: Optional[int] = None,
         mask_size: int = 0,
     ):
         self._cube_response_arg = response
@@ -468,7 +468,7 @@ class Cube:
         ].astype(np.float64)
 
     @lazyproperty
-    def valid_counts_summary_range(self) -> Optional[np.ndarray]:
+    def valid_counts_summary_range(self) -> Optional[Tuple[float, float]]:
         """Optional (min, max) tuple of summary valid counts"""
         if not self._measures.unweighted_valid_counts:
             return None
@@ -685,7 +685,10 @@ class _Measures:
     """Provides access to measures contained in cube response."""
 
     def __init__(
-        self, cube_dict: Dict, all_dimensions: AllDimensions, cube_idx_arg: int = None
+        self,
+        cube_dict: Dict,
+        all_dimensions: AllDimensions,
+        cube_idx_arg: Optional[int] = None,
     ):
         self._cube_dict = cube_dict
         self._all_dimensions = all_dimensions
@@ -856,7 +859,10 @@ class _BaseMeasure:
     """Base class for measure objects."""
 
     def __init__(
-        self, cube_dict: Dict, all_dimensions: AllDimensions, cube_idx_arg: int = None
+        self,
+        cube_dict: Dict,
+        all_dimensions: AllDimensions,
+        cube_idx_arg: Optional[int] = None,
     ):
         self._cube_dict = cube_dict
         self._all_dimensions = all_dimensions
