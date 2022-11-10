@@ -112,15 +112,29 @@ class DescribeIntegratedCube:
             np.array([[3, 2], [3, 1], [1, 1]])
         )
 
-    def it_provides_valid_counts_summary_for_NUM_ARRAY_GROUPED_BY_CAT(self):
-        cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
+    @pytest.mark.parametrize(
+        "cube, valid_counts_summary_range",
+        (
+            (NA.NUM_ARR_MEANS_GROUPED_BY_CAT, (2, 5)),
+            (CR.SUM_MR_X_CAT, (1, 2)),
+            (CR.CAT_SUM_X_MR, (1, 2)),
+            (CR.CA_SUBVAR_X_CA_CAT_MEAN, (1000, 1000)),
+            (CR.DICHOTOMIZED_NUMERIC_MEAN, (9, 92)),
+        ),
+    )
+    def it_provides_valid_counts_summary_range_for_various_cubes(
+        self, cube, valid_counts_summary_range
+    ):
+        cube = Cube(cube)
 
-        np.testing.assert_array_equal(cube.valid_counts_summary, [5, 4, 2])
+        np.testing.assert_array_equal(
+            cube.valid_counts_summary_range, valid_counts_summary_range
+        )
 
     def and_it_returns_empty_array_for_summary_if_valid_counts_are_not_available(self):
         cube = Cube(CR.CAT_X_CAT)
 
-        np.testing.assert_array_equal(cube.valid_counts_summary, [])
+        np.testing.assert_array_equal(cube.valid_counts_summary_range, [])
 
     def it_provides_n_responses_for_NUM_ARRAY_GROUPED_BY_CAT(self):
         cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)

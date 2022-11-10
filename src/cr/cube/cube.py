@@ -143,9 +143,9 @@ class CubeSet:
         return self._cubes[0].n_responses
 
     @lazyproperty
-    def valid_counts_summary(self) -> int:
+    def valid_counts_summary_range(self) -> int:
         """The valid count summary values from first cube in this set."""
-        return self._cubes[0].valid_counts_summary
+        return self._cubes[0].valid_counts_summary_range
 
     @lazyproperty
     def _cubes(self) -> Tuple["Cube", ...]:
@@ -215,9 +215,9 @@ class Cube:
     def __init__(
         self,
         response: Union[str, Dict],
-        cube_idx: int = None,
-        transforms: Dict = None,
-        population: int = None,
+        cube_idx: Optional[int] = None,
+        transforms: Optional[Dict] = None,
+        population: Optional[int] = None,
         mask_size: int = 0,
     ):
         self._cube_response_arg = response
@@ -468,17 +468,22 @@ class Cube:
         ].astype(np.float64)
 
     @lazyproperty
-    def valid_counts_summary(self) -> Optional[np.ndarray]:
-        """Optional ndarray of summary valid counts"""
+    def valid_counts_summary_range(self) -> Optional[Tuple[float, float]]:
+        """Optional (min, max) tuple of summary valid counts"""
         if not self._measures.unweighted_valid_counts:
             return None
-        # --- In case of ndim >= 2 the sum should be done on the second axes to get
-        # --- the correct sequence of valid count (e.g. CA_SUBVAR).
-        axis = 1 if len(self._all_dimensions) >= 2 else 0
-        return np.sum(
+        # the axis where we have to sum the valid counts are all the nonarray dimensions
+        # of the cube.
+        axis = tuple(
+            i
+            for i, dim_type in enumerate(self.dimension_types)
+            if dim_type not in DT.ARRAY_TYPES
+        )
+        valid_counts_summary = np.sum(
             self._measures.unweighted_valid_counts.raw_cube_array[self._valid_idxs],
             axis=axis,
         )
+        return np.min(valid_counts_summary), np.max(valid_counts_summary)
 
     @lazyproperty
     def valid_overlaps(self) -> Optional[np.ndarray]:
@@ -682,7 +687,10 @@ class _Measures:
     """Provides access to measures contained in cube response."""
 
     def __init__(
-        self, cube_dict: Dict, all_dimensions: AllDimensions, cube_idx_arg: int = None
+        self,
+        cube_dict: Dict,
+        all_dimensions: AllDimensions,
+        cube_idx_arg: Optional[int] = None,
     ):
         self._cube_dict = cube_dict
         self._all_dimensions = all_dimensions
@@ -853,7 +861,10 @@ class _BaseMeasure:
     """Base class for measure objects."""
 
     def __init__(
-        self, cube_dict: Dict, all_dimensions: AllDimensions, cube_idx_arg: int = None
+        self,
+        cube_dict: Dict,
+        all_dimensions: AllDimensions,
+        cube_idx_arg: Optional[int] = None,
     ):
         self._cube_dict = cube_dict
         self._all_dimensions = all_dimensions
