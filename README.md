@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.17
+- Fix valid count summary range
+
 ### 3.0.16
 - Fix pairwise indices for overlaps, when hiding or reordering columns
 
