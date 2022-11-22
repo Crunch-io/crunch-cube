@@ -71,6 +71,45 @@ class DescribeIntegratedAllDimensions:
 
         assert AllDimensions(None).dimension_order == expected_value
 
+    @pytest.mark.parametrize(
+        "cube_response, expected_str_representation",
+        (
+            (
+                CR.CAT_X_CAT,
+                "Dimensions:\nDIMENSION_TYPE.CAT: v4\nDIMENSION_TYPE.CAT: v7\n",
+            ),
+            (
+                CR.CA_X_MR_WEIGHTED_HS,
+                (
+                    "Dimensions:\n"
+                    "DIMENSION_TYPE.CA_SUBVAR: q1. Aftensmad\n"
+                    "DIMENSION_TYPE.CA_CAT: q1. Aftensmad\n"
+                    "DIMENSION_TYPE.MR_SUBVAR: Family Life Cycle\n"
+                    "DIMENSION_TYPE.MR_CAT: Family Life Cycle\n"
+                ),
+            ),
+            (
+                CR.MR_X_MR_SELECTED_CATEGORIES,
+                (
+                    "Dimensions:\n"
+                    "DIMENSION_TYPE.MR_SUBVAR: my_facebook_uses\n"
+                    "DIMENSION_TYPE.MR_CAT: my_facebook_uses\n"
+                    "DIMENSION_TYPE.MR_SUBVAR: facebook_and_twitter\n"
+                    "DIMENSION_TYPE.MR_CAT: facebook_and_twitter\n"
+                ),
+            ),
+        ),
+    )
+    def it_know_how_to_repr_all_dimensions(
+        self, cube_response, expected_str_representation
+    ):
+        dimension_dicts = cube_response["result"]["dimensions"]
+        all_dimensions = AllDimensions(dimension_dicts)
+
+        str_representation = str(all_dimensions)
+
+        assert str_representation == expected_str_representation.strip()
+
 
 class DescribeIntegratedDimension:
     """Integration-test suite for `cr.cube.dimension.Dimension` object."""
@@ -164,6 +203,13 @@ class DescribeIntegratedDimension:
 
         assert sv_dimension.hidden_idxs == tuple()
 
+    def it_knows_how_to_repr_itself(self):
+        dim = Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]
+
+        str_representation = str(dim)
+
+        assert str_representation == "DIMENSION_TYPE.CAT: ShutdownBlame"
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -200,6 +246,17 @@ class DescribeIntegrated_AllElements:
 
         assert len(elements) == 3
         assert elements[1].is_hidden is True
+
+    def it_knows_how_to_repr_its_elements(self):
+        type_dict = Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
+        all_elements = _AllElements(type_dict, {}, None)
+
+        str_representation = str(all_elements)
+
+        assert str_representation == (
+            "[President Obama, Republicans in Congress, "
+            "Both, Neither, Not sure, Skipped, Not Asked, No Data]"
+        )
 
 
 class DescribeIntegrated_Element:
@@ -238,6 +295,14 @@ class DescribeIntegrated_Element:
         is_hidden = element.is_hidden
 
         assert is_hidden is False
+
+    def it_knows_how_to_repr(self, element_dict, element_transforms_):
+        element_transforms_.name = None
+        element = _Element(element_dict, None, element_transforms_)
+
+        str_representation = str(element)
+
+        assert str_representation == "President Obama"
 
     # fixture components ---------------------------------------------
 
