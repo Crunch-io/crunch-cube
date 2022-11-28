@@ -33,6 +33,11 @@ class _BaseDimensions(Sequence):
         """Implements len(elements)."""
         return len(self._dimensions)
 
+    def __repr__(self) -> str:
+        "str representation of this dimension sequence." ""
+        dim_lines = "\n".join(f"{d}" for d in self._dimensions)
+        return f"Dimensions:\n{dim_lines}"
+
     @lazyproperty
     def _dimensions(self) -> Tuple["Dimension", ...]:
         """tuple of dimension objects in this collection.
@@ -330,6 +335,10 @@ class Dimension:
         self._dimension_type = dimension_type
         self._unshimmed_dimension_transforms_dict = dimension_transforms or {}
 
+    def __repr__(self) -> str:
+        """str representation of this dimension."""
+        return f"{self.dimension_type}: {self.name}"
+
     @lazyproperty
     def alias(self) -> Optional[str]:
         """Return the alias for the dimension if it exists, None otherwise."""
@@ -588,6 +597,10 @@ class _BaseElements(Sequence):
     def __len__(self):
         """Implements len(elements)."""
         return len(self._elements)
+
+    def __repr__(self) -> str:
+        """str representation of this sequence."""
+        return str(list(el for el in self._elements))
 
     @lazyproperty
     def element_ids(self) -> Tuple[int, ...]:
@@ -976,6 +989,10 @@ class _Element:
         self._element_dict = element_dict
         self._index = index
         self._element_transforms = element_transforms
+
+    def __repr__(self) -> str:
+        """str of this element, which makes it easier to work in cosole."""
+        return self.label or self.alias
 
     @lazyproperty
     def alias(self) -> str:
