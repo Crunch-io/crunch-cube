@@ -971,12 +971,17 @@ class _ElementIdShim:
     def _subvar_ids(self) -> Tuple[Union[int, str], ...]:
         """tuple of str subvariable id for each element of a subvariable dimension
 
-        Only applicable to subvariables dimension (will raise KeyError if not).
+        Only applicable to subvariables dimension (will return empty tuple if not
+        because a fused variables dimension reports nearly identical to a regular
+        MR dimension but does not have subvariable ids).
         """
-        return tuple(
-            element["value"]["id"]
-            for element in self._dimension_dict["type"]["elements"]
-        )
+        try:
+            return tuple(
+                element["value"]["id"]
+                for element in self._dimension_dict["type"]["elements"]
+            )
+        except KeyError:
+            return tuple()
 
 
 class _Element:

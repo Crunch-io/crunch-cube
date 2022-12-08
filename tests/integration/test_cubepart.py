@@ -1383,6 +1383,26 @@ class Describe_Slice:
             )
         )
 
+    def it_renders_scorecard_transforms(self):
+        transforms = {
+            "rows_dimension": {
+                "elements": {
+                    "1": {"name": "RENAMED AAA"},
+                    "2": {"hide": True},
+                },
+                "order": {"type": "explicit", "element_ids": [3, 1, 2]},
+            },
+            "columns_dimension": {
+                "elements": {
+                    "1": {"name": "RENAMED Simple MR2"},
+                },
+                "order": {"type": "explicit", "element_ids": [1, 0]},
+            },
+        }
+        slice_ = _Slice(Cube(CR.SCORECARD), 0, transforms, None, 0)
+        assert slice_.row_labels.tolist() == ["CCC", "RENAMED AAA"]
+        assert slice_.column_labels.tolist() == ["RENAMED Simple MR2", "Simple MR1"]
+
     def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
         """Subtotal anchors follow re-ordered rows.
 

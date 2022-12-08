@@ -1,0 +1,333 @@
+{
+  "result": {
+    "n": 210,
+    "counts": [
+      40,
+      63,
+      170,
+      147,
+      0,
+      0,
+      50,
+      56,
+      160,
+      154,
+      0,
+      0,
+      54,
+      45,
+      156,
+      165,
+      0,
+      0
+    ],
+    "dimensions": [
+      {
+        "type": {
+          "class": "enum",
+          "elements": [
+            {
+              "id": 1,
+              "value": {
+                "id": "0001",
+                "references": {
+                  "name": "AAA",
+                  "description": null
+                },
+                "derived": false
+              },
+              "missing": false
+            },
+            {
+              "id": 2,
+              "value": {
+                "id": "0002",
+                "references": {
+                  "name": "BBB",
+                  "description": null
+                },
+                "derived": false
+              },
+              "missing": false
+            },
+            {
+              "id": 3,
+              "value": {
+                "id": "0003",
+                "references": {
+                  "name": "CCC",
+                  "description": null
+                },
+                "derived": false
+              },
+              "missing": false
+            }
+          ],
+          "subtype": {
+            "class": "variable"
+          }
+        },
+        "references": {
+          "name": "fused: ['Simple MR1', 'Simple MR2']",
+          "description": "fused variables: [None, None]",
+          "alias": "fused_variables_simple_mr1_simple_mr2",
+          "subreferences": [
+            {
+              "name": "AAA",
+              "description": null
+            },
+            {
+              "name": "BBB",
+              "description": null
+            },
+            {
+              "name": "CCC",
+              "description": null
+            }
+          ],
+          "view": {
+            "transform": {
+              "insertions": []
+            }
+          }
+        },
+        "derived": true
+      },
+      {
+        "derived": true,
+        "type": {
+          "class": "categorical",
+          "ordinal": false,
+          "categories": [
+            {
+              "id": 1,
+              "name": "Selected",
+              "numeric_value": 1,
+              "selected": true,
+              "missing": false
+            },
+            {
+              "id": 0,
+              "name": "Other",
+              "numeric_value": 0,
+              "missing": false
+            },
+            {
+              "id": -1,
+              "name": "No Data",
+              "numeric_value": null,
+              "missing": true
+            }
+          ],
+          "subvariables": [
+            "0001",
+            "0002",
+            "0003"
+          ],
+          "variables": [
+            {
+              "id": "0000",
+              "name": "Simple MR1",
+              "alias": "simple_mr1"
+            },
+            {
+              "id": "0001",
+              "name": "Simple MR2",
+              "alias": "simple_mr2"
+            }
+          ]
+        },
+        "references": {
+          "name": "fused: ['Simple MR1', 'Simple MR2']",
+          "description": "fused variables: [None, None]",
+          "alias": "fused_variables_simple_mr1_simple_mr2",
+          "subreferences": [
+            {
+              "name": "AAA",
+              "description": null
+            },
+            {
+              "name": "BBB",
+              "description": null
+            },
+            {
+              "name": "CCC",
+              "description": null
+            }
+          ],
+          "view": {
+            "transform": {
+              "insertions": []
+            }
+          }
+        }
+      },
+      {
+        "type": {
+          "class": "enum",
+          "elements": [
+            {
+              "id": 0,
+              "name": "Simple MR1"
+            },
+            {
+              "id": 1,
+              "name": "Simple MR2"
+            }
+          ],
+          "subtype": {
+            "class": "variable"
+          }
+        },
+        "references": {
+          "name": "fused: ['Simple MR1', 'Simple MR2']",
+          "description": "fused variables: [None, None]",
+          "alias": "fused_variables_simple_mr1_simple_mr2",
+          "subreferences": [
+            {
+              "name": "AAA",
+              "description": null
+            },
+            {
+              "name": "BBB",
+              "description": null
+            },
+            {
+              "name": "CCC",
+              "description": null
+            }
+          ],
+          "view": {
+            "transform": {
+              "insertions": []
+            }
+          }
+        },
+        "derived": true
+      }
+    ],
+    "measures": {
+      "count": {
+        "metadata": {
+          "type": {
+            "class": "numeric",
+            "integer": true,
+            "missing_reasons": {
+              "No Data": -1
+            },
+            "missing_rules": {}
+          },
+          "references": {},
+          "derived": true
+        },
+        "data": [
+          40,
+          63,
+          170,
+          147,
+          0,
+          0,
+          50,
+          56,
+          160,
+          154,
+          0,
+          0,
+          54,
+          45,
+          156,
+          165,
+          0,
+          0
+        ],
+        "n_missing": 0,
+        "measure_type": "count"
+      }
+    },
+    "missing": 0,
+    "filter_stats": {
+      "is_cat_date": false,
+      "filtered": {
+        "unweighted": {
+          "selected": 210,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 210,
+          "other": 0,
+          "missing": 0
+        }
+      },
+      "filtered_complete": {
+        "unweighted": {
+          "selected": 210,
+          "other": 0,
+          "missing": 0
+        },
+        "weighted": {
+          "selected": 210,
+          "other": 0,
+          "missing": 0
+        }
+      }
+    },
+    "unfiltered": {
+      "unweighted_n": 210,
+      "weighted_n": 210
+    },
+    "filtered": {
+      "unweighted_n": 210,
+      "weighted_n": 210
+    },
+    "element": "crunch:cube"
+  },
+  "query": {
+    "dimensions": [
+      {
+        "local": "v1.subvariables"
+      },
+      {
+        "local": "v1.categories"
+      },
+      {
+        "local": "v1.variables"
+      }
+    ],
+    "measures": {
+      "count": {
+        "function": "cube_count",
+        "args": []
+      }
+    },
+    "weight": null,
+    "with": {
+      "v1": {
+        "function": "fuse",
+        "args": [
+          [
+            {
+              "function": "as_selected",
+              "args": [
+                {
+                  "variable": "4894590ebc4e4ff9a57360bd9b20f3a4"
+                }
+              ]
+            },
+            {
+              "function": "as_selected",
+              "args": [
+                {
+                  "variable": "d98c789794fc48bc8aa095b42e375afb"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    }
+  },
+  "query_environment": {
+    "filter": []
+  }
+}
