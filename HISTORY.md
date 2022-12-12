@@ -1,5 +1,17 @@
 # History of Changes
 
+### 3.0.11
+- Fix bug in variance calculation for subtotal differences
+
+### 3.0.10
+- Allow sorting by share of sum
+
+### 3.0.9
+- Fix reverse authority in `id_translation` for MR dimensions
+
+### 3.0.8
+- Fix reverse order in insertions fills
+
 ### 3.0.7
 - Add fills for insertions (subtotals and differences)
 

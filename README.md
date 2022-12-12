@@ -111,6 +111,10 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.18
+- Fix for transforms on scorecard dimensions
+- Add `repr` to various sequence classes
+
 ### 3.0.17
 - Fix valid count summary range
 
@@ -128,18 +132,6 @@ The detailed description can be found
 
 ### 3.0.12
 - Fix bug in share of sum for Strand
-
-### 3.0.11
-- Fix bug in variance calculation for subtotal differences
-
-### 3.0.10
-- Allow sorting by share of sum
-
-### 3.0.9
-- Fix reverse authority in `id_translation` for MR dimensions
-
-### 3.0.8
-- Fix reverse order in insertions fills
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
