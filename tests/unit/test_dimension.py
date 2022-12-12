@@ -1158,13 +1158,32 @@ class Describe_ElementIdShim:
             "alias2": {"another": "transform"}
         }
 
-    def it_provides_the_subvar_ids_to_help(self):
-        dimension_dict = {
-            "type": {"elements": [{"value": {"id": "a"}}, {"value": {"id": 2}}]}
-        }
-        shim_ = _ElementIdShim(None, dimension_dict, None)
-
-        assert shim_._subvar_ids == tuple(("a", 2))
+    @pytest.mark.parametrize(
+        "dim_dict, expected",
+        (
+            (
+                {
+                    "type": {
+                        "elements": [{"value": {"id": "a"}}, {"value": {"id": 2}}],
+                        "subtype": {"class": "enum"},
+                    }
+                },
+                ("a", 2),
+            ),
+            (
+                {
+                    "type": {
+                        "elements": [{"id": "a"}, {"id": 2}],
+                        "subtype": {"class": "variable"},
+                    }
+                },
+                (),  # --- Not structured like a true subvars dim so returns empty
+            ),
+        ),
+    )
+    def it_provides_the_subvar_ids_to_help(self, dim_dict, expected):
+        shim_ = _ElementIdShim(None, dim_dict, None)
+        assert shim_._subvar_ids == expected
 
     def it_provides_the_subvar_aliases_to_help(self):
         dimension_dict = {
