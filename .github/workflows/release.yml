@@ -6,7 +6,7 @@ on:
 
 jobs:
   pypi:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -42,7 +42,7 @@ jobs:
         run: twine upload dist/*
 
   nexus:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: pypi
     steps:
       - uses: actions/checkout@v2
