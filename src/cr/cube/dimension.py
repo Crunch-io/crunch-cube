@@ -530,8 +530,36 @@ class Dimension:
             insertion_dicts = self._dimension_transforms_dict["insertions"]
         # --- otherwise insertions defined on dimension/variable apply ---
         else:
-            view = self._dimension_dict.get("references", {}).get("view") or {}
-            insertion_dicts = view.get("transform", {}).get("insertions", [])
+            insertion_dicts = self._view_insertion_dicts
+        return _Subtotals(insertion_dicts, self.valid_elements)
+
+    @lazyproperty
+    def subtotals_with_payload_order(self) -> "_Subtotals":
+        """_Subtotals sequence object for this dimension respecting the payload order.
+
+        Each item in the sequence is a _Subtotal object specifying a subtotal, including
+        its addends and anchor.
+        """
+
+        def apply_order(insertion, view_insertions):
+            """
+            Change the anchor of the dimension transforms insertions with the
+            original paylod anchor.
+            """
+            name = insertion.get("name")
+            occurence = [el for el in view_insertions if el["name"] == name]
+            if occurence:
+                insertion["anchor"] = occurence[0]["anchor"]
+            return insertion
+
+        if self.dimension_type in (DT.MR, DT.CA_SUBVAR):
+            insertion_dicts = []
+        elif "insertions" in self._dimension_transforms_dict:
+            insertion_dicts = []
+            for ins in self._dimension_transforms_dict["insertions"]:
+                insertion_dicts.append(apply_order(ins, self._view_insertion_dicts))
+        else:
+            insertion_dicts = self._view_insertion_dicts
         return _Subtotals(insertion_dicts, self.valid_elements)
 
     def translate_element_id(self, _id) -> Optional[str]:
@@ -581,6 +609,12 @@ class Dimension:
     def _dimension_transforms_dict(self) -> Dict:
         """Copy of dimension transforms dictionary with shimmed `element_id`s"""
         return self._element_id_shim.shimmed_dimension_transforms_dict
+
+    @lazyproperty
+    def _view_insertion_dicts(self) -> List[Optional[Dict]]:
+        """List of insertion dicts included in the dimension view."""
+        view = self._dimension_dict.get("references", {}).get("view") or {}
+        return view.get("transform", {}).get("insertions", [])
 
 
 class _BaseElements(Sequence):

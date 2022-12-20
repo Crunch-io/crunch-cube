@@ -363,6 +363,11 @@ class PayloadOrderCollator(_BaseAnchoredCollator):
         return tuple(
             (idx, idx, element_id) for idx, element_id in enumerate(self._element_ids)
         )
+    
+    @lazyproperty
+    def _subtotals(self) -> _Subtotals:
+        """Sequence of _Subtotal object for each inserted subtotal in dimension."""
+        return self._dimension.subtotals_with_payload_order
 
 
 class SortByValueCollator(_BaseCollator):
