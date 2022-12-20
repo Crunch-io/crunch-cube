@@ -553,7 +553,7 @@ class Dimension:
             return insertion
 
         if self.dimension_type in (DT.MR, DT.CA_SUBVAR):
-            insertion_dicts = []
+            insertion_dicts: List[Optional[Dict]] = []
         elif "insertions" in self._dimension_transforms_dict:
             insertion_dicts = []
             for ins in self._dimension_transforms_dict["insertions"]:
