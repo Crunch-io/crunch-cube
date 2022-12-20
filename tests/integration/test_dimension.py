@@ -181,8 +181,10 @@ class DescribeIntegratedDimension:
         subtotals = dimension.subtotals
 
         assert len(subtotals) == 1
-    
-    def it_provides_access_to_its_inserted_subtotal_in_payload_order(self, dimension_dict):
+
+    def it_provides_access_to_its_inserted_subtotal_in_payload_order(
+        self, dimension_dict
+    ):
         dimension_transforms = {}
         dimension = Dimension(dimension_dict, None, dimension_transforms)
 
