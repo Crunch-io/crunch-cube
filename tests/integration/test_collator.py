@@ -66,7 +66,10 @@ class DescribePayloadOrderCollator:
     ):
         subtotals_ = [instance_mock(request, _Subtotal, anchor=a) for a in anchors]
         dimension_ = instance_mock(
-            request, Dimension, element_ids=element_ids, subtotals=subtotals_
+            request,
+            Dimension,
+            element_ids=element_ids,
+            subtotals_with_payload_order=subtotals_,
         )
 
         display_order = PayloadOrderCollator.display_order(dimension_, ())
