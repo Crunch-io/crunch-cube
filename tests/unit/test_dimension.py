@@ -656,7 +656,7 @@ class DescribeDimension:
                         }
                     }
                 },
-                [{"insertion": "dict-1"}, {"insertion": "dict-2"}],
+                [{"insertion": "dict-1", "id": 1}, {"insertion": "dict-2", "id": 2}],
             ),
         ),
     )
@@ -731,32 +731,49 @@ class DescribeDimension:
             (DT.CA_SUBVAR, [], {}, []),
             (
                 DT.CAT,
-                [{"anchor": "top", "name": "a"}],
-                {"insertions": [{"anchor": "3", "name": "a", "hide": True}]},
-                [{"anchor": "top", "name": "a", "hide": True}],
+                [{"anchor": "top", "name": "a", "id": 1}],
+                {"insertions": [{"anchor": "3", "name": "a", "hide": True, "id": 1}]},
+                [{"anchor": "top", "name": "a", "hide": True, "id": 1}],
             ),
             (
                 DT.CAT,
                 [
-                    {"anchor": "top", "name": "a"},
-                    {"anchor": "bottom", "name": "b", "hide": True},
+                    {"anchor": "top", "name": "a", "id": 1},
+                    {"anchor": "bottom", "name": "b", "hide": True, "id": 2},
                 ],
                 {
                     "insertions": [
-                        {"anchor": "3", "name": "a", "hide": True},
-                        {"anchor": "2", "name": "b", "hide": True},
+                        {"anchor": "3", "name": "a", "hide": True, "id": 1},
+                        {"anchor": "2", "name": "b", "hide": True, "id": 2},
                     ]
                 },
                 [
-                    {"anchor": "top", "name": "a", "hide": True},
-                    {"anchor": "bottom", "name": "b", "hide": True},
+                    {"anchor": "top", "name": "a", "hide": True, "id": 1},
+                    {"anchor": "bottom", "name": "b", "hide": True, "id": 2},
                 ],
             ),
             (
                 DT.CAT,
-                [{"anchor": "top", "name": "a"}],
+                [{"anchor": "top", "name": "a", "id": 1}],
                 {},
-                [{"anchor": "top", "name": "a"}],
+                [{"anchor": "top", "name": "a", "id": 1}],
+            ),
+            (
+                DT.CAT,
+                [
+                    {"anchor": 1, "name": "a", "id": 1},
+                    {"anchor": 1, "name": "b", "id": 2},
+                ],
+                {
+                    "insertions": [
+                        {"anchor": 1, "name": "b", "id": 1},
+                        {"anchor": 1, "name": "a", "id": 2},
+                    ]
+                },
+                [
+                    {"anchor": 1, "name": "b", "id": 1},
+                    {"anchor": 1, "name": "a", "id": 2},
+                ],
             ),
         ),
     )

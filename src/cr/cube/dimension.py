@@ -546,8 +546,8 @@ class Dimension:
             Change the anchor of the dimension transforms insertions with the
             original paylod anchor.
             """
-            name = insertion.get("name")
-            occurence = [el for el in view_insertions if el["name"] == name]
+            id = insertion.get("id")
+            occurence = [el for el in view_insertions if el["id"] == id]
             if occurence:
                 insertion["anchor"] = occurence[0]["anchor"]
             return insertion
@@ -614,7 +614,12 @@ class Dimension:
     def _view_insertion_dicts(self) -> List[Optional[Dict]]:
         """List of insertion dicts included in the dimension view."""
         view = self._dimension_dict.get("references", {}).get("view") or {}
-        return view.get("transform", {}).get("insertions", [])
+        insertions = view.get("transform", {}).get("insertions", [])
+        view_insertions = [
+            ins if "id" in ins else {"id": idx + 1, **ins}
+            for idx, ins in enumerate(insertions)
+        ]
+        return view_insertions
 
 
 class _BaseElements(Sequence):
