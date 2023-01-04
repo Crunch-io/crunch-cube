@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.19
+- Add `subtotals_with_payload_order` property in dimension
+
 ### 3.0.18
 - Fix for transforms on scorecard dimensions
 - Add `repr` to various sequence classes
