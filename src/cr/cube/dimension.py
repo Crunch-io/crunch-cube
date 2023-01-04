@@ -615,6 +615,8 @@ class Dimension:
         """List of insertion dicts included in the dimension view."""
         view = self._dimension_dict.get("references", {}).get("view") or {}
         insertions = view.get("transform", {}).get("insertions", [])
+        # ---If there's no id defined on the insertion defined on the variable view, use
+        # ---the 1-based positional index as the id to match frontend behavior
         view_insertions = [
             ins if "id" in ins else {"id": idx + 1, **ins}
             for idx, ins in enumerate(insertions)
