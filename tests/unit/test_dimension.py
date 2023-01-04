@@ -656,7 +656,7 @@ class DescribeDimension:
                         }
                     }
                 },
-                [{"insertion": "dict-1"}, {"insertion": "dict-2"}],
+                [{"insertion": "dict-1", "id": 1}, {"insertion": "dict-2", "id": 2}],
             ),
         ),
     )
@@ -722,6 +722,93 @@ class DescribeDimension:
         subtotals = dimension.subtotals
 
         _Subtotals_.assert_called_once_with(["subtotal", "dicts"], valid_elements_)
+        assert subtotals is subtotals_
+
+    @pytest.mark.parametrize(
+        "dim_type, view_insertion_dicts, dimension_transforms_dict, insertion_dicts",
+        (
+            (DT.MR, [], {}, []),
+            (DT.CA_SUBVAR, [], {}, []),
+            (
+                DT.CAT,
+                [{"anchor": "top", "name": "a", "id": 1}],
+                {"insertions": [{"anchor": "3", "name": "a", "hide": True, "id": 1}]},
+                [{"anchor": "top", "name": "a", "hide": True, "id": 1}],
+            ),
+            (
+                DT.CAT,
+                [
+                    {"anchor": "top", "name": "a", "id": 1},
+                    {"anchor": "bottom", "name": "b", "hide": True, "id": 2},
+                ],
+                {
+                    "insertions": [
+                        {"anchor": "3", "name": "a", "hide": True, "id": 1},
+                        {"anchor": "2", "name": "b", "hide": True, "id": 2},
+                    ]
+                },
+                [
+                    {"anchor": "top", "name": "a", "hide": True, "id": 1},
+                    {"anchor": "bottom", "name": "b", "hide": True, "id": 2},
+                ],
+            ),
+            (
+                DT.CAT,
+                [{"anchor": "top", "name": "a", "id": 1}],
+                {},
+                [{"anchor": "top", "name": "a", "id": 1}],
+            ),
+            (
+                DT.CAT,
+                [
+                    {"anchor": 1, "name": "a", "id": 1},
+                    {"anchor": 1, "name": "b", "id": 2},
+                ],
+                {
+                    "insertions": [
+                        {"anchor": 1, "name": "b", "id": 1},
+                        {"anchor": 1, "name": "a", "id": 2},
+                    ]
+                },
+                [
+                    {"anchor": 1, "name": "b", "id": 1},
+                    {"anchor": 1, "name": "a", "id": 2},
+                ],
+            ),
+        ),
+    )
+    def it_provides_access_to_its_subtotals_in_payload_order_to_help(
+        self,
+        request,
+        dim_type,
+        view_insertion_dicts,
+        dimension_transforms_dict,
+        insertion_dicts,
+        _Subtotals_,
+        subtotals_,
+        valid_elements_prop_,
+        valid_elements_,
+    ):
+        valid_elements_prop_.return_value = valid_elements_
+        _Subtotals_.return_value = subtotals_
+        dimension = Dimension(None, None)
+        property_mock(
+            request,
+            Dimension,
+            "_view_insertion_dicts",
+            return_value=view_insertion_dicts,
+        )
+        property_mock(
+            request,
+            Dimension,
+            "_dimension_transforms_dict",
+            return_value=dimension_transforms_dict,
+        )
+        property_mock(request, Dimension, "dimension_type", return_value=dim_type)
+
+        subtotals = dimension.subtotals_with_payload_order
+
+        _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_)
         assert subtotals is subtotals_
 
     # fixture components ---------------------------------------------
