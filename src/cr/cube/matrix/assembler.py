@@ -63,7 +63,7 @@ class Assembler:
         in the sequence and alias are ordered to correspond with their respective data
         column.
         """
-        return self._dimension_aliases(self._columns_dimension, self._column_order)
+        return self._dimension_aliases(self._columns_dimension, self.column_order)
 
     @lazyproperty
     def column_codes(self):
@@ -73,7 +73,7 @@ class Assembler:
         in the sequence and codes are ordered to correspond with their respective data
         column.
         """
-        return self._dimension_codes(self._columns_dimension, self._column_order)
+        return self._dimension_codes(self._columns_dimension, self.column_order)
 
     @lazyproperty
     def column_comparable_counts(self):
@@ -99,7 +99,15 @@ class Assembler:
         appear in the sequence and labels are ordered to correspond with their
         respective data column.
         """
-        return self._dimension_labels(self._columns_dimension, self._column_order)
+        return self._dimension_labels(self._columns_dimension, self.column_order)
+
+    @lazyproperty
+    def column_order(self):
+        """1D np.int64 ndarray of signed int idx for each assembled column.
+
+        Negative values represent inserted subtotal-column locations.
+        """
+        return _BaseOrderHelper.column_display_order(self._dimensions, self._measures)
 
     @lazyproperty
     def column_proportions(self):
@@ -165,7 +173,7 @@ class Assembler:
         return np.array(
             [
                 (elements[idx].numeric_value if idx >= 0 else np.nan)
-                for idx in self._column_order
+                for idx in self.column_order
             ]
         )
 
@@ -232,7 +240,7 @@ class Assembler:
         categories of CAT dimensions, are not derived. Subtotals are also not derived
         in this sense, because they're not even part of the data (elements).
         """
-        return self._derived_element_idxs(self._columns_dimension, self._column_order)
+        return self._derived_element_idxs(self._columns_dimension, self.column_order)
 
     @lazyproperty
     def derived_row_idxs(self):
@@ -255,13 +263,13 @@ class Assembler:
     @lazyproperty
     def diff_column_idxs(self):
         """tuple(int) of difference column elements' indexes, can be empty."""
-        return self._diff_element_idxs(self._columns_dimension, self._column_order)
+        return self._diff_element_idxs(self._columns_dimension, self.column_order)
 
     @lazyproperty
     def inserted_column_idxs(self):
         """tuple of int index of each subtotal column in slice."""
         # --- insertions have a negative idx in their order sequence ---
-        return tuple(i for i, col_idx in enumerate(self._column_order) if col_idx < 0)
+        return tuple(i for i, col_idx in enumerate(self.column_order) if col_idx < 0)
 
     @lazyproperty
     def inserted_row_idxs(self):
@@ -290,7 +298,7 @@ class Assembler:
                     alpha,
                     only_larger,
                 )
-                for col in range(len(self._column_order))
+                for col in range(len(self.column_order))
             ]
         ).T
 
@@ -307,7 +315,7 @@ class Assembler:
                     alpha,
                     only_larger,
                 )
-                for col in range(len(self._column_order))
+                for col in range(len(self.column_order))
             ]
         ).T
 
@@ -324,7 +332,7 @@ class Assembler:
         Raises `ValueError if the cube-result does not include `overlaps`
         and `valid_overlaps` cube-measures.
         """
-        base_column_idx = self._column_order[column_idx]
+        base_column_idx = self.column_order[column_idx]
         if self._cube_has_overlaps:
             # If overlaps are defined, calculate significance based on them
             return self._assemble_matrix(
@@ -347,7 +355,7 @@ class Assembler:
         Raises `ValueError if the cube-result does not include `overlaps`
         and `valid_overlaps` cube-measures.
         """
-        base_column_idx = self._column_order[column_idx]
+        base_column_idx = self.column_order[column_idx]
         if self._cube_has_overlaps:
             # If overlaps are defined, calculate significance based on them
             return self._assemble_matrix(
@@ -362,7 +370,7 @@ class Assembler:
 
         Raises `ValueError if the cube-result does not include `mean` cube-measures.
         """
-        base_column_idx = self._column_order[column_idx]
+        base_column_idx = self.column_order[column_idx]
         return self._assemble_matrix(
             self._measures.pairwise_significance_means_p_vals(base_column_idx).blocks
         )
@@ -372,7 +380,7 @@ class Assembler:
 
         Raises `ValueError if the cube-result does not include `mean` cube-measures.
         """
-        base_column_idx = self._column_order[column_idx]
+        base_column_idx = self.column_order[column_idx]
         return self._assemble_matrix(
             self._measures.pairwise_significance_means_t_stats(base_column_idx).blocks
         )
@@ -770,9 +778,7 @@ class Assembler:
         if not marginal.is_defined:
             return None
 
-        order = (
-            self.row_order if marginal.orientation == MO.ROWS else self._column_order
-        )
+        order = self.row_order if marginal.orientation == MO.ROWS else self.column_order
 
         return np.hstack(marginal.blocks)[order]
 
@@ -790,7 +796,7 @@ class Assembler:
         # --- the ordering method has been applied to determine the sequence each idx
         # --- appears in. This directly produces a final array that is exactly the
         # --- desired output.
-        return np.block(blocks)[np.ix_(self.row_order, self._column_order)]
+        return np.block(blocks)[np.ix_(self.row_order, self.column_order)]
 
     def _assemble_vector(self, base_vector, subtotals, order, diffs_nan=False):
         """Return 1D ndarray of `base_vector` with inserted `subtotals`, in `order`.
@@ -814,14 +820,6 @@ class Assembler:
             ]
         )
         return np.hstack([base_vector, vector_subtotals])[order]
-
-    @lazyproperty
-    def _column_order(self):
-        """1D np.int64 ndarray of signed int idx for each assembled column.
-
-        Negative values represent inserted subtotal-column locations.
-        """
-        return _BaseOrderHelper.column_display_order(self._dimensions, self._measures)
 
     @lazyproperty
     def _column_subtotals(self):

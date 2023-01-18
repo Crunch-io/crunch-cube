@@ -851,7 +851,7 @@ class DescribeAssembler:
         )
         assembler = Assembler(None, dimensions_, None)
 
-        column_order = assembler._column_order
+        column_order = assembler.column_order
 
         _BaseOrderHelper_.column_display_order.assert_called_once_with(
             dimensions_, second_order_measures_
@@ -963,7 +963,7 @@ class DescribeAssembler:
 
     @pytest.fixture
     def _column_order_prop_(self, request):
-        return property_mock(request, Assembler, "_column_order")
+        return property_mock(request, Assembler, "column_order")
 
     @pytest.fixture
     def _columns_dimension_prop_(self, request):
