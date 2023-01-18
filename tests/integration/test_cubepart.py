@@ -560,6 +560,11 @@ class Describe_Slice:
         assert slice_.payload_order.tolist() == [0, 1, 2, 3]
         assert slice_.row_order.tolist() == [0, 3, 1, 2]
 
+    def it_knows_the_column_order(self):
+        slice_ = Cube(CR.CAT_X_CAT_HS).partitions[0]
+
+        assert slice_.column_order.tolist() == [0, 1, -2, 2, 3, -1]
+
     def it_provides_derived_indexes_for_mr_x_mr_with_transforms(self):
         transforms = {
             "rows_dimension": {

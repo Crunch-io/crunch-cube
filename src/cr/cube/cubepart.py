@@ -294,6 +294,15 @@ class _Slice(CubePartition):
         return self._assembler.column_labels
 
     @lazyproperty
+    def column_order(self):
+        """1D np.int64 ndarray of signed int idx for each assembled column.
+
+        Positive integers indicate the 1-indexed position in payload of regular
+        elements, while negative integers are the subtotal insertions.
+        """
+        return self._assembler.column_order
+
+    @lazyproperty
     def column_percentages(self):
         return self.column_proportions * 100
 
