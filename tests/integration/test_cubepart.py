@@ -981,13 +981,13 @@ class Describe_Slice:
                     "type": "label",
                     "direction": "descending",
                     # --- Front-end uses idx to refer to MR subvariables
-                    "fixed": {"top": [2]},
+                    "fixed": {"top": [2], "bottom": [3]},
                 }
             }
         }
         slice_ = _Slice(Cube(CR.MR_X_CAT), 0, transforms, None, 0)
 
-        expected = ["Finland", "Sweden", "Norway", "Iceland", "Denmark"]
+        expected = ["Finland", "Sweden", "Norway", "Denmark", "Iceland"]
         actual = slice_.row_labels.tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
