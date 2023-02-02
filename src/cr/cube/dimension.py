@@ -895,6 +895,13 @@ class _ElementIdShim:
                 shim["order"]["element_ids"]
             )
 
+        # --- Translate fixed element ids if present
+        fixed = shim.get("order", {}).get("fixed", {})
+        if fixed.get("top"):
+            fixed["top"] = self._replaced_order_element_ids(fixed["top"])
+        if fixed.get("bottom"):
+            fixed["bottom"] = self._replaced_order_element_ids(fixed["bottom"])
+
         # --- sort-by-value on the opposing dimension also refers to element ids, but
         # --- the ids refer to the opposing dimension, so do the translation later on.
         # --- This is a little unfortunate, because this means that the ids in this shim
