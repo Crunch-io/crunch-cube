@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.20
+- Shim subvariable "zz9" ids that are `fixed` in a sort-by-value transform
+
 ### 3.0.19
 - Add `subtotals_with_payload_order` property in dimension
 
@@ -132,9 +135,6 @@ The detailed description can be found
 
 ### 3.0.13
 - Fix bug where attempting to hide an MR insertion that didn't exist raised KeyError
-
-### 3.0.12
-- Fix bug in share of sum for Strand
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).

@@ -1,5 +1,8 @@
 # History of Changes
 
+### 3.0.12
+- Fix bug in share of sum for Strand
+
 ### 3.0.11
 - Fix bug in variance calculation for subtotal differences
 
