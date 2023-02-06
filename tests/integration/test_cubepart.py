@@ -974,6 +974,23 @@ class Describe_Slice:
             [2.45356177, 2.11838791, 2.0, 1.97, 1.74213625, np.nan], nan_ok=True
         )
 
+    def it_can_fix_order_of_subvars_identified_by_bogus_id(self):
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "label",
+                    "direction": "descending",
+                    # --- Front-end uses idx to refer to MR subvariables
+                    "fixed": {"top": [2], "bottom": [3]},
+                }
+            }
+        }
+        slice_ = _Slice(Cube(CR.MR_X_CAT), 0, transforms, None, 0)
+
+        expected = ["Finland", "Sweden", "Norway", "Denmark", "Iceland"]
+        actual = slice_.row_labels.tolist()
+        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+
     @pytest.mark.parametrize(
         "id",
         (
