@@ -540,24 +540,34 @@ class Dimension:
         Each item in the sequence is a _Subtotal object specifying a subtotal, including
         its addends and anchor.
         """
-
-        def apply_order(insertion, view_insertions):
-            """
-            Change the anchor of the dimension transforms insertions with the
-            original paylod anchor.
-            """
-            id = insertion.get("id")
-            occurence = [el for el in view_insertions if el["id"] == id]
-            if occurence:
-                insertion["anchor"] = occurence[0]["anchor"]
-            return insertion
-
         if self.dimension_type in (DT.MR, DT.CA_SUBVAR):
             insertion_dicts: List[Optional[Dict]] = []
         elif "insertions" in self._dimension_transforms_dict:
             insertion_dicts = []
+            used_ids = []
+            # --- Remove insertions that are defined on the view but are not in the
+            # --- insertions defined on the transform
+            # --- Earlier in the code we have added ids to the view insertions so know
+            # --- that the view insertions have ids
+            # --- Assumes that all modern transform insertions have ids (and so only
+            # --- really have to care about case where xform insertions have ids)
+            xform_ids = [
+                ins["id"]
+                for ins in self._dimension_transforms_dict["insertions"]
+                if "id" in ins
+            ]
+            for ins in self._view_insertion_dicts:
+                if ins["id"] in xform_ids:
+                    insertion_dicts.append(ins)
+                    used_ids.append(ins["id"])
+            # --- For insertions that are only in the analysis, add them on at end
+            # --- This could affect order if some match and others don't, but
+            # --- I'm not sure how frontend behaves when insertions are defined on
+            # --- analysis that don't match to any on variable view, but some tests
+            # --- fail without adding them back in
             for ins in self._dimension_transforms_dict["insertions"]:
-                insertion_dicts.append(apply_order(ins, self._view_insertion_dicts))
+                if ins.get("id") not in used_ids:
+                    insertion_dicts.append(ins)
         else:
             insertion_dicts = self._view_insertion_dicts
         return _Subtotals(insertion_dicts, self.valid_elements)
@@ -894,6 +904,13 @@ class _ElementIdShim:
             shim["order"]["element_ids"] = self._replaced_order_element_ids(
                 shim["order"]["element_ids"]
             )
+
+        # --- Translate fixed element ids if present
+        fixed = shim.get("order", {}).get("fixed", {})
+        if fixed.get("top"):
+            fixed["top"] = self._replaced_order_element_ids(fixed["top"])
+        if fixed.get("bottom"):
+            fixed["bottom"] = self._replaced_order_element_ids(fixed["bottom"])
 
         # --- sort-by-value on the opposing dimension also refers to element ids, but
         # --- the ids refer to the opposing dimension, so do the translation later on.
