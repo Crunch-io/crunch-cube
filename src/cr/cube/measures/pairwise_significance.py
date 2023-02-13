@@ -82,10 +82,13 @@ class _ColumnPairwiseSignificance(object):
         index 0 (26) indicates that it differs significantly only from the
         element at index 3 (11)
         """
-        significance = self.p_vals_scale_means < self._alpha
-        if self._only_larger:
-            significance = np.logical_and(self.t_stats_scale_means < 0, significance)
-        return tuple(np.where(significance)[0])
+        with np.errstate(divide="ignore", invalid="ignore"):
+            significance = self.p_vals_scale_means < self._alpha
+            if self._only_larger:
+                significance = np.logical_and(
+                    self.t_stats_scale_means < 0, significance
+                )
+            return tuple(np.where(significance)[0])
 
     @lazyproperty
     def summary_p_vals(self):
@@ -138,20 +141,22 @@ class _ColumnPairwiseSignificance(object):
         not_a_nan_index = ~np.isnan(self._slice._rows_dimension_numeric_values)
         counts = np.sum(self._slice.counts[not_a_nan_index, :], axis=0)
 
-        standard_deviation = np.sqrt(
-            np.divide(
-                ((counts[self._col_idx] - 1) * variance[self._col_idx])
-                + ((counts - 1) * np.array(variance)),
-                (counts[self._col_idx] + counts - 2),
+        with np.errstate(divide="ignore", invalid="ignore"):
+            standard_deviation = np.sqrt(
+                np.divide(
+                    ((counts[self._col_idx] - 1) * variance[self._col_idx])
+                    + ((counts - 1) * np.array(variance)),
+                    (counts[self._col_idx] + counts - 2),
+                )
             )
-        )
 
-        tstats_scale_means = (
-            self._slice.columns_scale_mean
-            - self._slice.columns_scale_mean[self._col_idx]
-        ) / (standard_deviation * np.sqrt((1 / counts[self._col_idx]) + (1 / counts)))
-
-        return tstats_scale_means
+            tstats_scale_means = (
+                self._slice.columns_scale_mean
+                - self._slice.columns_scale_mean[self._col_idx]
+            ) / (
+                standard_deviation * np.sqrt((1 / counts[self._col_idx]) + (1 / counts))
+            )
+            return tstats_scale_means
 
     @lazyproperty
     def _df(self):

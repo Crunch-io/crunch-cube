@@ -895,12 +895,15 @@ class Assembler:
     @staticmethod
     def _pairwise_indices(p_vals, t_stats, alpha, only_larger):
         """1D ndarray containing tuples of int pairwise indices of each column."""
-        significance = p_vals < alpha
-        if only_larger:
-            significance = np.logical_and(t_stats < 0, significance)
-        col_significance = np.empty((len(significance),), dtype=object)
-        col_significance[:] = [tuple(np.where(sig_row)[0]) for sig_row in significance]
-        return col_significance
+        with np.errstate(divide="ignore", invalid="ignore"):
+            significance = p_vals < alpha
+            if only_larger:
+                significance = np.logical_and(t_stats < 0, significance)
+            col_significance = np.empty((len(significance),), dtype=object)
+            col_significance[:] = [
+                tuple(np.where(sig_row)[0]) for sig_row in significance
+            ]
+            return col_significance
 
     @lazyproperty
     def _row_subtotals(self):

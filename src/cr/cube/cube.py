@@ -16,8 +16,6 @@ from cr.cube.dimension import AllDimensions, _ApparentDimensions
 from cr.cube.enums import CUBE_MEASURE, DIMENSION_TYPE as DT, NUMERIC_CUBE_MEASURES
 from cr.cube.util import lazyproperty
 
-np.seterr(divide="ignore", invalid="ignore")  # type: ignore
-
 
 class CubeSet:
     """Represents a multi-cube cube-response.

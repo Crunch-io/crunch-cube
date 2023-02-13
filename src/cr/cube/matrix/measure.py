@@ -715,9 +715,10 @@ class _ColumnIndex(_BaseSecondOrderMeasure):
         """
         counts = self._second_order_measures.weighted_counts.blocks[0][0]
         weighted_base = self._second_order_measures.column_weighted_bases.blocks[0][0]
-        proportions = counts / weighted_base
-        baseline = self._cube_measures.unconditional_cube_counts.baseline
-        return 100 * (proportions / baseline)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            proportions = counts / weighted_base
+            baseline = self._cube_measures.unconditional_cube_counts.baseline
+            return 100 * (proportions / baseline)
 
 
 class _ColumnIndexSmoothed(_ColumnIndex, _SmoothedMeasure):
@@ -871,10 +872,11 @@ class _ProportionVariances(_BaseSecondOrderMeasure):
 
         See the class docstring for details on the formula.
         """
-        p_term = ((1 - p) ** 2) * (Np / Nt)
-        i_term = ((0 - p) ** 2) * (Ni / Nt)
-        n_term = ((-1 - p) ** 2) * (Nn / Nt)
-        return p_term + i_term + n_term
+        with np.errstate(divide="ignore", invalid="ignore"):
+            p_term = ((1 - p) ** 2) * (Np / Nt)
+            i_term = ((0 - p) ** 2) * (Ni / Nt)
+            n_term = ((-1 - p) ** 2) * (Nn / Nt)
+            return p_term + i_term + n_term
 
     @lazyproperty
     def _count_ignored(self):
@@ -1283,9 +1285,10 @@ class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
         ref_variance = np.broadcast_to(variance[:, [idx]], variance.shape)
         ref_col_bases = np.broadcast_to(col_bases[:, [idx]], col_bases.shape)
 
-        return (means - ref_means) / np.sqrt(
-            (variance / col_bases) + (ref_variance / ref_col_bases)
-        )
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return (means - ref_means) / np.sqrt(
+                (variance / col_bases) + (ref_variance / ref_col_bases)
+            )
 
 
 class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
@@ -1302,7 +1305,8 @@ class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
     @lazyproperty
     def p_vals(self):
         """2D ndarray of float64 representing p-vals for means pairwise testing."""
-        return 2 * (1 - t.cdf(abs(self.t_stats), df=self._df))
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return 2 * (1 - t.cdf(abs(self.t_stats), df=self._df))
 
     @lazyproperty
     def _df(self):
@@ -1326,7 +1330,8 @@ class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
         denominator1 = np.power(variance / col_bases, 2) / (col_bases - 1)
         denominator2 = np.power(ref_variance / ref_col_bases, 2) / (ref_col_bases - 1)
 
-        return numerator / (denominator1 + denominator2)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return numerator / (denominator1 + denominator2)
 
 
 class _PairwiseSigTstats(_BaseSecondOrderMeasure):
@@ -1412,7 +1417,8 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
         # --- Absolute value to handle subtotal differences (can't get square root of
         # --- negative number)
         se_diff = np.sqrt(np.abs(var_props + ref_var_props))
-        return diff / se_diff
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return diff / se_diff
 
     @lazyproperty
     def _intersections(self):
@@ -1480,7 +1486,8 @@ class _PairwiseSigPvals(_PairwiseSigTstats):
         evaluated at the t_stats values with specific degrees of freedom.
         """
         df = (columns_base + selected_columns_base - 2) if t_stats.size > 0 else 0
-        return 2 * (1 - t.cdf(abs(t_stats), df=df))
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return 2 * (1 - t.cdf(abs(t_stats), df=df))
 
     def _selected_columns_base(self, table_index):
         """1D int64 ndarray of the selected columns base values.
@@ -1593,7 +1600,8 @@ class _Pvalues(_BaseSecondOrderMeasure):
         """np.array of floats of the pvalues calculated form np.array of zscores"""
         if 0 in zscores.shape:
             return zscores
-        return 2 * (1 - norm.cdf(np.abs(zscores)))
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return 2 * (1 - norm.cdf(np.abs(zscores)))
 
 
 class _RowComparableCounts(_BaseSecondOrderMeasure):
@@ -2219,15 +2227,16 @@ class _Zscores(_BaseSecondOrderMeasure):
         if np.all(table_bases == row_bases) or np.all(table_bases == column_bases):
             return np.full(counts.shape, np.nan)
 
-        expected_counts = row_bases * column_bases / table_bases
-        variance = (
-            row_bases
-            * column_bases
-            * (table_bases - row_bases)
-            * (table_bases - column_bases)
-            / table_bases**3
-        )
-        return (counts - expected_counts) / np.sqrt(variance)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            expected_counts = row_bases * column_bases / table_bases
+            variance = (
+                row_bases
+                * column_bases
+                * (table_bases - row_bases)
+                * (table_bases - column_bases)
+                / table_bases**3
+            )
+            return (counts - expected_counts) / np.sqrt(variance)
 
     @lazyproperty
     def _intersections(self):
@@ -2392,10 +2401,11 @@ class _MarginTableProportion(_BaseMarginal):
 
         These are the base-values and the subtotals.
         """
-        return [
-            self._proportion_numerators[0] / self._proportion_denominators[0],
-            self._proportion_numerators[1] / self._proportion_denominators[1],
-        ]
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return [
+                self._proportion_numerators[0] / self._proportion_denominators[0],
+                self._proportion_numerators[1] / self._proportion_denominators[1],
+            ]
 
     @lazyproperty
     def is_defined(self):
@@ -2654,7 +2664,8 @@ class _ScaleMean(_BaseScaledCountMarginal):
         # --- that don't have numeric values defined.
         not_a_nan_mask = ~np.isnan(values)
         denominator = np.sum(proportions[not_a_nan_mask])
-        return inner / denominator
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return inner / denominator
 
 
 class _ScaleMeanSmoothed(_ScaleMean, _SmoothedMeasure):
@@ -2811,8 +2822,9 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
             ).T
         )
         denominator = np.sum(counts[not_a_nan_index, :], axis=0)
-        variance = np.nansum(numerator, axis=0) / denominator
-        return np.sqrt(variance)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            variance = np.nansum(numerator, axis=0) / denominator
+            return np.sqrt(variance)
 
     @staticmethod
     def _rows_weighted_mean_stddev(counts, values, scale_mean):
@@ -2830,8 +2842,9 @@ class _ScaleMeanStddev(_BaseScaledCountMarginal):
             2,
         )
         denominator = np.sum(counts[:, not_a_nan_index], axis=1)
-        variance = np.nansum(numerator, axis=1) / denominator
-        return np.sqrt(variance)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            variance = np.nansum(numerator, axis=1) / denominator
+            return np.sqrt(variance)
 
     @lazyproperty
     def _scale_means(self):
@@ -3013,15 +3026,16 @@ class _PairwiseSignificaneBetweenSubvariablesHelper:
 
         Sa, Sb, Sab = self._selected_counts
         Na, Nb, Nab = self._valid_counts
-        pa, pb, pab = Sa / Na, Sb / Nb, Sab / Nab
-        col_prop_a = self._column_proportions[self._row_idx, self._idx_a]
-        col_prop_b = self._column_proportions[self._row_idx, self._idx_b]
+        with np.errstate(divide="ignore", invalid="ignore"):
+            pa, pb, pab = Sa / Na, Sb / Nb, Sab / Nab
+            col_prop_a = self._column_proportions[self._row_idx, self._idx_a]
+            col_prop_b = self._column_proportions[self._row_idx, self._idx_b]
 
-        # ---Subtract the selected column from the "variable" column, to get
-        # ---the correct sign of the test statistic (hence b-a, and not a-b).
-        return (col_prop_b - col_prop_a) / np.sqrt(
-            1 / self._df * (pa * (1 - pa) + pb * (1 - pb) + 2 * pa * pb - 2 * pab)
-        )
+            # ---Subtract the selected column from the "variable" column, to get
+            # ---the correct sign of the test statistic (hence b-a, and not a-b).
+            return (col_prop_b - col_prop_a) / np.sqrt(
+                1 / self._df * (pa * (1 - pa) + pb * (1 - pb) + 2 * pa * pb - 2 * pab)
+            )
 
     @lazyproperty
     def _df(self):
