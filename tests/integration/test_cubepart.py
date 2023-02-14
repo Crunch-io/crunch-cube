@@ -377,7 +377,7 @@ class Describe_Slice:
                 {"1": {"hide": True}},
                 {"type": "explicit", "element_ids": [3, 0, 2]},
             ),
-            pytest.param(  # --- Dashboard format (not shimmed back to deck format)
+            (  # --- Dashboard format (not shimmed back to deck format)
                 {"1950-12-24T00:00:00": {"hide": True}},
                 {
                     "type": "explicit",
@@ -387,7 +387,6 @@ class Describe_Slice:
                         "2000-01-01T00:00:00",
                     ],
                 },
-                marks=pytest.mark.xfail(reason="WIP", strict=True),
             ),
         ),
     )
