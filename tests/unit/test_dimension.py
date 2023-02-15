@@ -1105,7 +1105,33 @@ class Describe_ElementIdShim:
             "another": "outside type",
         }
 
-    def but_non_subvariable_dimension_is_left_alone(self):
+    def and_it_provides_the_shimmed_dimension_dict_for_datetime(self):
+        dimension_dict = {
+            "type": {
+                "elements": [
+                    {"id": 1, "value": "val1", "element_info": 100},
+                    {"id": 2, "value": {"?": -1}},
+                    {"id": 3, "value": "another val"},
+                ],
+                "other": "in type",
+            },
+            "another": "outside type",
+        }
+        shim_ = _ElementIdShim(DT.DATETIME, dimension_dict, None)
+
+        assert shim_.shimmed_dimension_dict == {
+            "type": {
+                "elements": [
+                    {"id": "val1", "value": "val1", "element_info": 100},
+                    {"id": 2, "value": {"?": -1}},
+                    {"id": "another val", "value": "another val"},
+                ],
+                "other": "in type",
+            },
+            "another": "outside type",
+        }
+
+    def but_other_types_of_dimensions_are_left_alone(self):
         dimension_dict = {"dimension": "dictionary"}
         shim_ = _ElementIdShim(DT.CAT, dimension_dict, None)
 
@@ -1193,6 +1219,25 @@ class Describe_ElementIdShim:
 
     def but_it_leaves_non_array_ids_alone(self):
         _ElementIdShim(DT.CAT, None, None).translate_element_id(25) == 25
+
+    @pytest.mark.parametrize(
+        "id_, expected",
+        (
+            (1, "2023"),
+            ("0", "2022"),
+            ("a", "a"),
+            ("2021", "2021"),
+        ),
+    )
+    def and_it_translates_for_datetime(self, request, id_, expected):
+        property_mock(
+            request,
+            _ElementIdShim,
+            "_element_values_dict",
+            return_value={0: "2022", 1: "2023"},
+        )
+        shim = _ElementIdShim(DT.DATETIME, None, None)
+        assert shim.translate_element_id(id_) == expected
 
     def it_provides_the_raw_element_ids_to_help(self):
         dimension_dict = {"type": {"elements": [{"id": 1}, {"id": "b"}]}}
