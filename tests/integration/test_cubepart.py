@@ -370,6 +370,35 @@ class Describe_Slice:
             [0.0, 0.0, 0.0, 0.0],
         ]
 
+    @pytest.mark.parametrize(
+        "elements, order",
+        (
+            (  # --- Deck format
+                {"1": {"hide": True}},
+                {"type": "explicit", "element_ids": [3, 0, 2]},
+            ),
+            (  # --- Dashboard format (not shimmed back to deck format)
+                {"1950-12-24T00:00:00": {"hide": True}},
+                {
+                    "type": "explicit",
+                    "element_ids": [
+                        "2000-01-02T00:00:00",
+                        "1776-07-04T00:00:00",
+                        "2000-01-01T00:00:00",
+                    ],
+                },
+            ),
+        ),
+    )
+    def and_it_accepts_transforms_for_datetimes_in_both_formats(self, elements, order):
+        transforms = {"columns_dimension": {"elements": elements, "order": order}}
+        slice_ = Cube(CR.CAT_X_DATETIME, transforms=transforms).partitions[0]
+        assert slice_.column_labels.tolist() == [
+            "2000-01-02T00:00:00",
+            "1776-07-04T00:00:00",
+            "2000-01-01T00:00:00",
+        ]
+
     def it_provides_values_for_cat_hs_x_mr(self):
         slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
 

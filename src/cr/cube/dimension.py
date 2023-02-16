@@ -843,16 +843,20 @@ class _ElementIdShim:
         """
         shim = copy.deepcopy(self._dimension_dict)
 
-        # --- Leave non-subvariable dimension types alone, as they don't have
-        # --- subvariable aliases to use, and category ids are already the main way
-        # --- we identify elements on categorical dimensions (and this is correct).
-        if self._dimension_type not in DT.ARRAY_TYPES:
-            return shim
+        # --- array variables are identified by thier aliases
+        if self._dimension_type in DT.ARRAY_TYPES:
+            # --- Replace element ids with the alias
+            for idx, alias in enumerate(self._subvar_aliases):
+                shim["type"]["elements"][idx]["id"] = alias
 
-        # --- Replace element ids with the alias
-        for idx, alias in enumerate(self._subvar_aliases):
-            shim["type"]["elements"][idx]["id"] = alias
+        # --- datetimes are identified by their value
+        if self._dimension_type == DT.DATETIME:
+            for el in shim["type"]["elements"]:
+                # --- Missing data comes in as a dict and should be ignored
+                if not isinstance(el["value"], dict):
+                    el["id"] = el["value"]
 
+        # --- Leave other types alone
         return shim
 
     @lazyproperty
@@ -882,7 +886,8 @@ class _ElementIdShim:
         # --- Leave non-subvariable dimension types alone, as they don't have
         # --- subvariable aliases to use, and category ids are already the main way
         # --- we identify elements on categorical dimensions (and this is correct).
-        if self._dimension_type not in DT.ARRAY_TYPES:
+        dim_type = self._dimension_type
+        if dim_type not in DT.SHIMMED_TYPES:
             return shim
 
         # --- Replace element transform ids with the alias
@@ -922,9 +927,14 @@ class _ElementIdShim:
            0-# of elements), use _id'th alias.
         6) If all of these fail, return None.
         """
-        if self._dimension_type not in DT.ARRAY_TYPES:
+        if self._dimension_type not in DT.SHIMMED_TYPES:
             return _id
 
+        if self._dimension_type == DT.DATETIME:
+            int_id = int(_id) if isinstance(_id, str) and _id.isnumeric() else _id
+            return self._element_values_dict.get(int_id, _id)
+
+        # --- Otherwise is an array type
         if _id in self._subvar_aliases:
             return _id
         if _id in self._raw_element_ids:
@@ -944,6 +954,19 @@ class _ElementIdShim:
             return self._subvar_aliases[_id]
 
         return None
+
+    @lazyproperty
+    def _element_values_dict(self) -> Dict:
+        """dict where the keys are the "ids" from zz9 dimension and elements are "value"
+
+        zz9 makes integer ids based on the position of the value, but puts the original
+        value in "value" for some dimension types, like datetime, numeric and text.
+        Since we've been using that "id" as if it were stable, we want a crossalk that
+        goes from that id to the real value.
+        """
+        return {
+            el["id"]: el["value"] for el in self._dimension_dict["type"]["elements"]
+        }
 
     @lazyproperty
     def _raw_element_ids(self) -> Tuple[Union[int, str], ...]:

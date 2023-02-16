@@ -58,6 +58,9 @@ class DIMENSION_TYPE:
         (BINNED_NUMERIC, CA, CAT, CA_CAT, DATETIME, MR, TEXT)
     )
 
+    # ---types that should be shimmed--
+    SHIMMED_TYPES = frozenset((CA_SUBVAR, MR_SUBVAR, NUM_ARRAY, DATETIME))
+
 
 class COLLATION_METHOD(enum.Enum):
     """Enumerated values representing the methods of sorting dimension elements."""
