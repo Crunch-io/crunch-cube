@@ -2,6 +2,8 @@
 
 """MinBaseSize class."""
 
+import numpy as np
+
 from cr.cube.util import lazyproperty
 
 
@@ -23,12 +25,14 @@ class MinBaseSizeMask:
     @lazyproperty
     def column_mask(self):
         """ndarray, True where column unweighted bases <= min_base_size"""
-        return self._slice.column_unweighted_bases < self._size
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return self._slice.column_unweighted_bases < self._size
 
     @lazyproperty
     def row_mask(self):
         """ndarray, True where row unweighted bases <= min_base_size"""
-        return self._slice.row_unweighted_bases < self._size
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return self._slice.row_unweighted_bases < self._size
 
     @lazyproperty
     def table_mask(self):

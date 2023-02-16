@@ -1387,7 +1387,8 @@ class _Slice(CubePartition):
             ).T
         )
         denominator = np.sum(self.counts[not_a_nan_index, :], axis=0)
-        return np.nansum(numerator, axis=0) / denominator
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return np.nansum(numerator, axis=0) / denominator
 
     @lazyproperty
     def _dimensions(self):

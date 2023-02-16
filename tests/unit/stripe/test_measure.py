@@ -670,6 +670,7 @@ class Describe_TableProportions:
         (
             (np.array([4.5, 6.7]), [0.7555556, 0.8358209]),
             (42.42, [0.08015087, 0.1320132]),
+            (0, [np.inf, np.inf]),
         ),
     )
     def it_computes_its_base_values_to_help(
