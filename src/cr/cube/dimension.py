@@ -931,10 +931,7 @@ class _ElementIdShim:
             return _id
 
         if self._dimension_type == DT.DATETIME:
-            try:
-                int_id = int(_id)
-            except ValueError:
-                int_id = _id
+            int_id = int(_id) if isinstance(_id, str) and _id.isnumeric() else _id
             return self._element_values_dict.get(int_id, _id)
 
         # --- Otherwise is an array type
