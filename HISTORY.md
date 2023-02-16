@@ -1,5 +1,8 @@
 # History of Changes
 
+### 3.0.13
+- Fix bug where attempting to hide an MR insertion that didn't exist raised KeyError
+
 ### 3.0.12
 - Fix bug in share of sum for Strand
 
