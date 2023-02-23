@@ -375,6 +375,11 @@ class _Slice(CubePartition):
         return self._assembler.columns_base
 
     @lazyproperty
+    def columns_dimension_description(self):
+        """str description assigned to columns-dimension."""
+        return self._columns_dimension.description
+
+    @lazyproperty
     def columns_dimension_name(self):
         """str name assigned to columns-dimension.
 

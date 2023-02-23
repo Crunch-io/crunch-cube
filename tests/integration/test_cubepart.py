@@ -35,6 +35,7 @@ class Describe_Slice:
             "measure"
         )
         assert slice_.columns_dimension_name == "v7"
+        assert slice_.columns_dimension_description == "V7 Desc"
         assert slice_.columns_dimension_type == DT.CAT
         assert slice_.columns_margin.tolist() == [10, 5]
         assert slice_.counts.tolist() == [[5, 2], [5, 3]]
