@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.22
+- Expose `columns_dimension_description` for _Slice
+
 ### 3.0.21
 - Shim datetimes so that element transforms and sorting can refer to items in
   both old format (position) and new format (label).
