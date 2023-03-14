@@ -7,7 +7,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal
-from cr.cube.enums import COLLATION_METHOD as CM
+from cr.cube.enums import COLLATION_METHOD as CM, ORDER_FORMAT
 from cr.cube.stripe.assembler import (
     StripeAssembler,
     _BaseOrderHelper,
@@ -210,24 +210,9 @@ class DescribeStripeAssembler:
         row_order = assembler.row_order
 
         _BaseOrderHelper_.display_order.assert_called_once_with(
-            rows_dimension_, measures_
+            rows_dimension_, measures_, ORDER_FORMAT.NEGATIVE_INDEXES
         )
         assert row_order.tolist() == [-1, 1, -2, 2, -3, 3]
-
-    def it_knows_the_payload_order_to_help(
-        self, request, rows_dimension_, _measures_prop_, measures_
-    ):
-        _measures_prop_.return_value = measures_
-        _OrderHelper_ = class_mock(
-            request, "cr.cube.stripe.assembler.PayloadOrderCollator"
-        )
-        _OrderHelper_.display_order.return_value = (0, 1, 2, 3, -1)
-        assembler = StripeAssembler(None, rows_dimension_, None, None)
-
-        payload_order = assembler.payload_order
-
-        _OrderHelper_.display_order.assert_called_once_with(rows_dimension_, ())
-        assert payload_order.tolist() == [0, 1, 2, 3, -1]
 
     # fixture components ---------------------------------------------
 
@@ -291,9 +276,13 @@ class Describe_BaseOrderHelper:
             return_value=order_helper_,
         )
 
-        display_order = _BaseOrderHelper.display_order(rows_dimension_, measures_)
+        display_order = _BaseOrderHelper.display_order(
+            rows_dimension_, measures_, format=ORDER_FORMAT.NEGATIVE_INDEXES
+        )
 
-        HelperCls_.assert_called_once_with(rows_dimension_, measures_)
+        HelperCls_.assert_called_once_with(
+            rows_dimension_, measures_, ORDER_FORMAT.NEGATIVE_INDEXES
+        )
         assert display_order.tolist() == [-2, 1, -1, 2]
 
     @pytest.mark.parametrize(
@@ -344,7 +333,9 @@ class Describe_OrderHelper:
 
         display_order = order_helper._display_order
 
-        CollatorCls_.display_order.assert_called_once_with(rows_dimension_, (2, 4, 6))
+        CollatorCls_.display_order.assert_called_once_with(
+            rows_dimension_, (2, 4, 6), ORDER_FORMAT.NEGATIVE_INDEXES
+        )
         assert display_order == (1, -2, 3, 5, -1)
 
 
@@ -370,7 +361,7 @@ class Describe_BaseSortByValueHelper:
         order = order_helper._display_order
 
         SortByValueCollator_.display_order.assert_called_once_with(
-            dimension_, [16, 3, 12], [15, 19], ()
+            dimension_, [16, 3, 12], [15, 19], (), ORDER_FORMAT.NEGATIVE_INDEXES
         )
         assert order == (-1, -2, 0, 2, 1)
 
@@ -395,7 +386,9 @@ class Describe_BaseSortByValueHelper:
 
         order = order_helper._display_order
 
-        PayloadOrderCollator_.display_order.assert_called_once_with(dimension_, (4, 2))
+        PayloadOrderCollator_.display_order.assert_called_once_with(
+            dimension_, (4, 2), ORDER_FORMAT.NEGATIVE_INDEXES
+        )
         assert order == (1, 2, 3, 4)
 
     # fixture components ---------------------------------------------

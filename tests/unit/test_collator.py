@@ -15,6 +15,7 @@ from cr.cube.collator import (
     SortByValueCollator,
 )
 from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal, _ValidElements
+from cr.cube.enums import ORDER_FORMAT
 
 from ..unitutil import (
     ANY,
@@ -78,9 +79,13 @@ class Describe_BaseAnchoredCollator:
         )
         _display_order_.return_value = (-3, 0, 1, -2, 2, 3, -1)
 
-        display_order = _BaseAnchoredCollator.display_order(dimension_, empty_idxs=(2,))
+        display_order = _BaseAnchoredCollator.display_order(
+            dimension_, empty_idxs=(2,), format=ORDER_FORMAT.NEGATIVE_INDEXES
+        )
 
-        _init_.assert_called_once_with(ANY, dimension_, (2,))
+        _init_.assert_called_once_with(
+            ANY, dimension_, (2,), ORDER_FORMAT.NEGATIVE_INDEXES
+        )
         assert display_order == (-3, 0, 1, -2, 2, 3, -1)
 
     @pytest.mark.parametrize(
@@ -461,11 +466,20 @@ class DescribeSortByValueCollator:
         empty_idxs = [3]
 
         display_order = SortByValueCollator.display_order(
-            dimension_, element_values, subtotal_values, empty_idxs
+            dimension_,
+            element_values,
+            subtotal_values,
+            empty_idxs,
+            ORDER_FORMAT.NEGATIVE_INDEXES,
         )
 
         _init_.assert_called_once_with(
-            ANY, dimension_, element_values, subtotal_values, empty_idxs
+            ANY,
+            dimension_,
+            element_values,
+            subtotal_values,
+            empty_idxs,
+            ORDER_FORMAT.NEGATIVE_INDEXES,
         )
         assert display_order == (-3, -1, -2, 1, 0, 2, 3)
 
@@ -484,7 +498,7 @@ class DescribeSortByValueCollator:
             request, SortByValueCollator, "_bottom_subtotal_idxs", return_value=()
         )
         property_mock(request, SortByValueCollator, "_hidden_idxs", return_value=(5,))
-        collator = SortByValueCollator(None, None, None, None)
+        collator = SortByValueCollator(None, None, None, None, None)
 
         assert collator._display_order
 
@@ -522,7 +536,9 @@ class DescribeSortByValueCollator:
         _top_fixed_idxs_prop_.return_value = top_fixed_idxs
         _bottom_fixed_idxs_prop_.return_value = bottom_fixed_idxs
         _descending_prop_.return_value = descending
-        collator = SortByValueCollator(None, element_values, None, None)
+        collator = SortByValueCollator(
+            None, element_values, None, None, ORDER_FORMAT.NEGATIVE_INDEXES
+        )
 
         assert collator._body_idxs == expected_value
 
@@ -532,7 +548,7 @@ class DescribeSortByValueCollator:
         _iter_fixed_idxs_.return_value = (n for n in (4, 0, 5, 2))
         _order_spec_prop_.return_value = order_spec_
         order_spec_.bottom_fixed_ids = (0, 1, 2)
-        collator = SortByValueCollator(None, None, None, None)
+        collator = SortByValueCollator(None, None, None, None, None)
 
         bottom_exclusion_idxs = collator._bottom_fixed_idxs
 
@@ -558,7 +574,7 @@ class DescribeSortByValueCollator:
     ):
         _descending_prop_.return_value = descending
         _subtotal_idxs_prop_.return_value = subtotal_idxs
-        collator = SortByValueCollator(None, None, None, None)
+        collator = SortByValueCollator(None, None, None, None, None)
 
         assert collator._bottom_subtotal_idxs == expected_value
 
@@ -572,7 +588,7 @@ class DescribeSortByValueCollator:
         property_mock(
             request, SortByValueCollator, "_element_ids", return_value=(1, 2, 3, 4, 5)
         )
-        collator = SortByValueCollator(None, None, None, None)
+        collator = SortByValueCollator(None, None, None, None, None)
 
         assert tuple(collator._iter_fixed_idxs(fixed_element_ids)) == expected_value
 
@@ -588,7 +604,7 @@ class DescribeSortByValueCollator:
     ):
         _order_spec_prop_.return_value = order_spec_
         order_spec_.descending = descending
-        collator = SortByValueCollator(None, None, None, None)
+        collator = SortByValueCollator(None, None, None, None, None)
 
         assert collator._descending == expected_value
 
@@ -614,7 +630,7 @@ class DescribeSortByValueCollator:
         self, _descending_prop_, descending, subtotal_values, expected_value
     ):
         _descending_prop_.return_value = descending
-        collator = SortByValueCollator(None, None, subtotal_values, None)
+        collator = SortByValueCollator(None, None, subtotal_values, None, None)
 
         assert collator._subtotal_idxs == expected_value
 
@@ -624,7 +640,7 @@ class DescribeSortByValueCollator:
         _order_spec_prop_.return_value = order_spec_
         order_spec_.top_fixed_ids = (4, 2)
         _iter_fixed_idxs_.return_value = (i for i in (1, 2, 4))
-        collator = SortByValueCollator(None, None, None, None)
+        collator = SortByValueCollator(None, None, None, None, None)
 
         top_exclusion_idxs = collator._top_fixed_idxs
 
@@ -645,7 +661,7 @@ class DescribeSortByValueCollator:
     ):
         _subtotal_idxs_prop_.return_value = subtotal_idxs
         _descending_prop_.return_value = descending
-        collator = SortByValueCollator(None, None, None, None)
+        collator = SortByValueCollator(None, None, None, None, None)
 
         assert collator._top_subtotal_idxs == expected_value
 

@@ -8,6 +8,7 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
 from cr.cube.dimension import AllDimensions
+from cr.cube.enums import ORDER_FORMAT
 from cr.cube.matrix.assembler import _BaseOrderHelper
 from cr.cube.matrix.cubemeasure import _BaseCubeOverlaps
 
@@ -1685,7 +1686,7 @@ class Describe_BaseOrderHelper:
         }
         assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
         row_display_order = _BaseOrderHelper.row_display_order(
-            assembler._dimensions, assembler._measures
+            assembler._dimensions, assembler._measures, ORDER_FORMAT.NEGATIVE_INDEXES
         )
 
         assert row_display_order.tolist() == expected_value

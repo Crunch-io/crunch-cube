@@ -188,7 +188,7 @@ class DescribeIntegratedDimension:
         dimension_transforms = {}
         dimension = Dimension(dimension_dict, None, dimension_transforms)
 
-        subtotals = dimension.subtotals_with_payload_order
+        subtotals = dimension.subtotals_in_payload_order
 
         assert len(subtotals) == 1
 

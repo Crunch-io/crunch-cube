@@ -733,7 +733,7 @@ class DescribeDimension:
                 DT.CAT,
                 [{"anchor": "top", "name": "a", "id": 1}],
                 {"insertions": [{"anchor": "3", "name": "a", "hide": True, "id": 1}]},
-                [{"anchor": "top", "name": "a", "hide": True, "id": 1}],
+                [{"anchor": "top", "name": "a", "id": 1}],
             ),
             (
                 DT.CAT,
@@ -748,8 +748,8 @@ class DescribeDimension:
                     ]
                 },
                 [
-                    {"anchor": "top", "name": "a", "hide": True, "id": 1},
-                    {"anchor": "bottom", "name": "b", "hide": True, "id": 2},
+                    {"anchor": "top", "name": "a", "id": 1},
+                    {"anchor": "bottom", "name": "b", "id": 2, "hide": True},
                 ],
             ),
             (
@@ -771,8 +771,8 @@ class DescribeDimension:
                     ]
                 },
                 [
-                    {"anchor": 1, "name": "b", "id": 1},
-                    {"anchor": 1, "name": "a", "id": 2},
+                    {"anchor": 1, "name": "a", "id": 1},
+                    {"anchor": 1, "name": "b", "id": 2},
                 ],
             ),
         ),
@@ -806,7 +806,7 @@ class DescribeDimension:
         )
         property_mock(request, Dimension, "dimension_type", return_value=dim_type)
 
-        subtotals = dimension.subtotals_with_payload_order
+        subtotals = dimension.subtotals_in_payload_order
 
         _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_)
         assert subtotals is subtotals_

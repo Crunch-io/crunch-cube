@@ -10,7 +10,7 @@ from cr.cube.collator import (
     SortByValueCollator,
 )
 from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT, ORDER_FORMAT
 
 from ..unitutil import instance_mock
 
@@ -47,7 +47,12 @@ class DescribeExplicitOrderCollator:
             order_spec=order_spec_,
         )
 
-        assert ExplicitOrderCollator.display_order(dimension_, ()) == expected_value
+        assert (
+            ExplicitOrderCollator.display_order(
+                dimension_, (), ORDER_FORMAT.NEGATIVE_INDEXES
+            )
+            == expected_value
+        )
 
 
 class DescribePayloadOrderCollator:
@@ -56,7 +61,7 @@ class DescribePayloadOrderCollator:
     @pytest.mark.parametrize(
         "element_ids, anchors, expected_value",
         (
-            ((9, 3, 7), ("bottom", 3, 3, "top"), (-1, 0, 1, -3, -2, 2, -4)),
+            ((1, 2, 3), ("bottom", 3, 3, "top"), (-1, 0, 1, 2, -3, -2, -4)),
             ((9, 3, 7), (), (0, 1, 2)),
             ((), ("bottom", 3, 3, "top"), (-1, -4, -3, -2)),
         ),
@@ -65,15 +70,21 @@ class DescribePayloadOrderCollator:
         self, request, element_ids, anchors, expected_value
     ):
         subtotals_ = [instance_mock(request, _Subtotal, anchor=a) for a in anchors]
+        elements_ = [
+            instance_mock(request, _Element, element_id=id_, derived=False)
+            for id_ in element_ids
+        ]
         dimension_ = instance_mock(
             request,
             Dimension,
             element_ids=element_ids,
-            subtotals_with_payload_order=subtotals_,
+            valid_elements=elements_,
+            subtotals=subtotals_,
         )
 
-        display_order = PayloadOrderCollator.display_order(dimension_, ())
-
+        display_order = PayloadOrderCollator.display_order(
+            dimension_, (), ORDER_FORMAT.NEGATIVE_INDEXES
+        )
         assert display_order == expected_value
 
 
@@ -123,7 +134,11 @@ class DescribeSortByValueCollator:
         )
 
         display_order = SortByValueCollator.display_order(
-            dimension, element_vals, subtot_vals, empty_idxs
+            dimension,
+            element_vals,
+            subtot_vals,
+            empty_idxs,
+            ORDER_FORMAT.NEGATIVE_INDEXES,
         )
 
         assert display_order == expected_value
