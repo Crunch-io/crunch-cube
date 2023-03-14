@@ -9,10 +9,10 @@ from cr.cube.collator import (
     PayloadOrderCollator,
     SortByValueCollator,
 )
-from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal
+from cr.cube.dimension import _Subtotals, Dimension, _Element, _OrderSpec, _Subtotal
 from cr.cube.enums import DIMENSION_TYPE as DT, ORDER_FORMAT
 
-from ..unitutil import instance_mock
+from ..unitutil import instance_mock, property_mock
 
 
 class DescribeExplicitOrderCollator:
@@ -86,6 +86,47 @@ class DescribePayloadOrderCollator:
             dimension_, (), ORDER_FORMAT.NEGATIVE_INDEXES
         )
         assert display_order == expected_value
+
+    @pytest.mark.parametrize(
+        "element_ids, anchors, expected_value",
+        (
+            ((1, 2, 3), ("bottom", 3, 3, "top"), ("ins_4", 0, 1, 2, "ins_2", "ins_3")),
+            ((9, 3, 7), (), (0, 1, 2)),
+            ((), ("bottom", 3, 3, "top"), ("ins_4", "ins_2", "ins_3")),
+        ),
+    )
+    def it_knows_the_payload_order_for_a_dimension(
+        self, request, element_ids, anchors, expected_value
+    ):
+        subtotals_ = [
+            instance_mock(request, _Subtotal, anchor=a, insertion_id=i)
+            for i, a in enumerate(anchors)
+        ]
+        _Subtotals_ = instance_mock(request, _Subtotals)
+        _Subtotals_.insertion_ids = (1, 2, 3, 4)
+        property_mock(
+            request,
+            PayloadOrderCollator,
+            "_subtotals_bogus_ids",
+            return_value=("ins_1", "ins_2", "ins_3", "ins_4"),
+        )
+        elements_ = [
+            instance_mock(request, _Element, element_id=id_, derived=False)
+            for id_ in element_ids
+        ]
+        dimension_ = instance_mock(
+            request,
+            Dimension,
+            element_ids=element_ids,
+            valid_elements=elements_,
+            subtotals=_Subtotals_,
+            subtotals_in_payload_order=subtotals_,
+        )
+
+        payload_order = PayloadOrderCollator(
+            dimension_, (), ORDER_FORMAT.NEGATIVE_INDEXES
+        ).payload_order
+        assert payload_order == expected_value
 
 
 class DescribeSortByValueCollator:
