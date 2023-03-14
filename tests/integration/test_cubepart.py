@@ -590,6 +590,28 @@ class Describe_Slice:
         assert slice_.payload_order == (0, 1, 2, 3)
         assert slice_.row_order.tolist() == [0, 3, 1, 2]
 
+    def it_knows_final_row_order(self):
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "function": "subtotal",
+                        "name": "colors",
+                        "args": [1, 2, 3],
+                        "anchor": 3,
+                        "kwargs": {"positive": [1, 2, 3]},
+                        "id": 1,
+                    }
+                ]
+            },
+            "columns_dimension": {
+                "elements": {"2": {"hide": True}},
+                "order": {"type": "explicit", "element_ids": ["bool2", "bool3"]},
+            },
+        }
+        slice_ = Cube(MRI.CAT_X_MR, transforms=transforms).partitions[0]
+        assert slice_.final_row_order == ("0", "1", "2", "ins_1", "3", "4")
+
     def it_provides_derived_indexes_for_mr_x_mr_with_transforms(self):
         transforms = {
             "rows_dimension": {
@@ -2251,6 +2273,11 @@ class Describe_Strand:
         ]
         actual = strand_.row_labels.tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+
+    def it_knows_the_final_order(self):
+        strand_ = Cube(CR.CAT_HS_MT).partitions[0]
+
+        assert strand_.final_order == (0, 1, "ins_1", 2, 3, 4, "ins_2")
 
     def it_knows_when_it_is_empty(self):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]

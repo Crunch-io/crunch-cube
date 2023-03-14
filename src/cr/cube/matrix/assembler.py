@@ -975,7 +975,6 @@ class _BaseOrderHelper:
             if collation_method == CM.MARGINAL
             else _RowOrderHelper
         )
-
         return HelperCls(dimensions, second_order_measures, format)._display_order
 
     @lazyproperty
@@ -989,9 +988,10 @@ class _BaseOrderHelper:
         # --- Returning as np.array suits its intended purpose, which is to participate
         # --- in an np._ix() call. It works fine as a sequence too for any alternate
         # --- use. Specifying int type prevents failure when there are zero elements.
+        dtype = None if self._format == ORDER_FORMAT.BOGUS_IDS else int
         if self._prune_subtotals:
-            return np.array([idx for idx in self._order if idx >= 0], dtype=int)
-        return np.array(self._order, dtype=int)
+            return np.array([idx for idx in self._order if idx >= 0], dtype=dtype)
+        return np.array(self._order, dtype=dtype)
 
     @lazyproperty
     def _columns_dimension(self):

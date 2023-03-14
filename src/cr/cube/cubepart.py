@@ -574,7 +574,7 @@ class _Slice(CubePartition):
 
         Uses bogus id for insertions elements, positive integers for std elements.
         """
-        return self._assembler.final_row_order
+        return tuple(self._assembler.final_row_order)
 
     @lazyproperty
     def has_scale_means(self):
