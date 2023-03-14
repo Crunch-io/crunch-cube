@@ -14,7 +14,14 @@ from cr.cube.collator import (
     PayloadOrderCollator,
     SortByValueCollator,
 )
-from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal, _ValidElements
+from cr.cube.dimension import (
+    Dimension,
+    _Element,
+    _OrderSpec,
+    _Subtotal,
+    _Subtotals,
+    _ValidElements,
+)
 from cr.cube.enums import ORDER_FORMAT
 
 from ..unitutil import (
@@ -61,6 +68,12 @@ class Describe_BaseCollator:
 
     def it_provides_access_to_the_dimension_subtotals_to_help(self, dimension_):
         assert _BaseCollator(dimension_, None)._subtotals is dimension_.subtotals
+
+    def it_provides_access_to_subtotal_bogus_ids(self, request, dimension_):
+        _Subtotals_ = instance_mock(request, _Subtotals)
+        _Subtotals_.bogus_ids = ("i1", "i2")
+        dimension_.subtotals = _Subtotals_
+        assert _BaseCollator(dimension_, None)._subtotals_bogus_ids == ("i1", "i2")
 
     # fixture components ---------------------------------------------
 
