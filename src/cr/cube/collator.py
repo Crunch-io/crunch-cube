@@ -97,7 +97,9 @@ class _BaseAnchoredCollator(_BaseCollator):
     """
 
     @classmethod
-    def display_order(cls, dimension, empty_idxs, format) -> Tuple[int, ...]:
+    def display_order(
+        cls, dimension, empty_idxs, format
+    ) -> Tuple[Union[int, str], ...]:
         """Return sequence of int element-idx specifying ordering of dimension elements.
 
         The returned indices are "signed", with positive indices applying to base
@@ -492,7 +494,7 @@ class SortByValueCollator(_BaseCollator):
     @classmethod
     def display_order(
         cls, dimension, element_values, subtotal_values, empty_idxs, format
-    ) -> Tuple[int, ...]:
+    ) -> Tuple[Union[int, str], ...]:
         """Return sequence of int element-idxs ordered by sort on `element_values`.
 
         The returned tuple contains a signed-int value for each vector and subtotal of
