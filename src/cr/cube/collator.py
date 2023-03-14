@@ -18,6 +18,7 @@ import numpy as np
 
 from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotals
 from cr.cube.util import lazyproperty
+from cr.cube.enums import ORDER_FORMAT
 
 
 class _BaseCollator:
@@ -27,9 +28,15 @@ class _BaseCollator:
     unweighted N (N = 0).
     """
 
-    def __init__(self, dimension: Dimension, empty_idxs: Tuple[int]):
+    def __init__(
+        self,
+        dimension: Dimension,
+        empty_idxs: Tuple[int],
+        format: int = ORDER_FORMAT.NEGATIVE_INDEXES,
+    ):
         self._dimension = dimension
         self._empty_idxs = tuple(empty_idxs) if empty_idxs else ()
+        self._format = format
 
     @lazyproperty
     def _elements(self) -> Tuple[_Element, ...]:
@@ -52,6 +59,16 @@ class _BaseCollator:
         return frozenset(empty_idxs + self._dimension.hidden_idxs)
 
     @lazyproperty
+    def _order_mapping(self) -> Dict:
+        """Map between negative sequential indexes and bogus ids.
+
+        E.g. {-4: "ins_5", -3: "ins_2", -2: "ins_1"}
+        """
+        n_subtotals = len(self._subtotals_bogus_ids)
+        neg_idxs = tuple(i - n_subtotals for i in range(n_subtotals))
+        return dict(zip(neg_idxs, self._subtotals_bogus_ids))
+
+    @lazyproperty
     def _order_spec(self) -> _OrderSpec:
         """_OrderSpec object specifying ordering details."""
         return self._dimension.order_spec
@@ -60,6 +77,15 @@ class _BaseCollator:
     def _subtotals(self) -> _Subtotals:
         """Sequence of _Subtotal object for each inserted subtotal in dimension."""
         return self._dimension.subtotals
+
+    @lazyproperty
+    def _subtotals_bogus_ids(self) -> Tuple[str, ...]:
+        """Tuple of bogus id for all the subtotals.
+
+        It enumerates the insertions id adding the `ins_` prefix:
+        ("ins_1", "ins_5", "ins_2")
+        """
+        return self._dimension.subtotals.bogus_ids
 
 
 class _BaseAnchoredCollator(_BaseCollator):
@@ -71,7 +97,7 @@ class _BaseAnchoredCollator(_BaseCollator):
     """
 
     @classmethod
-    def display_order(cls, dimension, empty_idxs) -> Tuple[int, ...]:
+    def display_order(cls, dimension, empty_idxs, format) -> Tuple[int, ...]:
         """Return sequence of int element-idx specifying ordering of dimension elements.
 
         The returned indices are "signed", with positive indices applying to base
@@ -81,18 +107,22 @@ class _BaseAnchoredCollator(_BaseCollator):
         `empty_idxs` identifies vectors with N=0, which may be "pruned", depending on
         a user setting in the dimension.
         """
-        return cls(dimension, empty_idxs)._display_order
+        return cls(dimension, empty_idxs, format)._display_order
 
     @lazyproperty
-    def _display_order(self) -> Tuple[int, ...]:
-        """tuple of int element-idx for each element in assembly order.
+    def _display_order(self) -> Tuple[Union[int, str], ...]:
+        """tuple of element-id for each element in assembly order.
 
-        An assembled vector contains both base and inserted cells. The returned
-        element-indices are signed; positive indices are base-elements and negative
-        indices refer to inserted subtotals.
+        If the order format is negative indexes, returns an assembled vector containing
+        both base and inserted cells. The returned element-indices are signed; positive
+        indices are base-elements and negative indices refer to inserted subtotals.
+
+        If the order is in bogus ids format, returns an assembled vector containing
+        both base and inserted cells. The returned element-indices are positive indices
+        for the base-elements and bogus_id (ins_x) for inserted subtotals.
         """
         hidden_idxs = self._hidden_idxs
-        return tuple(
+        display_order = tuple(
             idx
             for _, _, idx in sorted(
                 self._base_element_orderings
@@ -101,6 +131,12 @@ class _BaseAnchoredCollator(_BaseCollator):
             )
             if idx not in hidden_idxs
         )
+        if self._format == ORDER_FORMAT.BOGUS_IDS:
+            # replace the netagive index with the bogus id using the order mapping.
+            return tuple(
+                self._order_mapping[idx] if idx < 0 else idx for idx in display_order
+            )
+        return display_order
 
     @lazyproperty
     def _base_element_orderings(self) -> Tuple[Tuple[int, int, int], ...]:
@@ -365,9 +401,72 @@ class PayloadOrderCollator(_BaseAnchoredCollator):
         )
 
     @lazyproperty
-    def _subtotals(self) -> _Subtotals:
-        """Sequence of _Subtotal object for each inserted subtotal in dimension."""
-        return self._dimension.subtotals_with_payload_order
+    def payload_order(self) -> Tuple[Union[int, str], ...]:
+        """tuple of int element-idx for each element in assembly order.
+
+        An assembled vector contains both base and inserted cells. The returned
+        element-indices are signed; positive indices are base-elements and negative
+        indices refer to inserted subtotals.
+        """
+        hidden_idxs = self._hidden_idxs
+        display_order = tuple(
+            idx
+            for _, _, idx in sorted(
+                self._base_element_orderings
+                + self._view_insertions_ordering
+                + self._derived_element_orderings
+            )
+            if idx not in hidden_idxs
+        )
+        return tuple(
+            self._order_mapping[idx] if idx < 0 else idx for idx in display_order
+        )
+
+    @lazyproperty
+    def _view_insertions_ordering(self) -> Tuple[Tuple[int, int, int], ...]:
+        """tuple of (int: position, int: rel, int: idx) for each inserted-vector value.
+
+        The first item ("position") refers to position of the insertion's anchor, and
+        the second ("rel") is an integer that can (theoretically) be either -1 and 1
+        that indicates whether it should be placed before or after its anchor (though at
+        the time of writing, all categorical insertions are after and so have a positive
+        1). The idx is the *negative* offset of its position in the opposing insertions
+        sequence (like -3, -2, -1 for a sequence of length 3). The negative idx works
+        just as well as the normal one for accessing the subtotal but insures that an
+        insertion at the same position as a base row always sorts *before* the base row.
+
+        The `position` int for a subtotal is -1 for anchor "top", sys.maxsize for anchor
+        "bottom", and int(anchor) for all others.
+
+        Multiple insertions having the same anchor appear in payload order within that
+        group. The strictly increasing insertion index values (-3 < -2 < -1) ensure
+        insertions with the same anchor appear in payload order after that anchor.
+        """
+        dim = self._dimension
+        # Consider only view subtotals that have reference in the transform insertions.
+        subtotals = [
+            sub
+            for sub in dim.subtotals_in_payload_order
+            if sub.insertion_id in dim.subtotals.insertion_ids
+        ]
+        n_subtotals = len(subtotals)
+        neg_idxs = tuple(i - n_subtotals for i in range(n_subtotals))
+        return tuple(
+            (*self._insertion_position(subtotal), neg_idx)
+            for subtotal, neg_idx in zip(subtotals, neg_idxs)
+        )
+
+    @lazyproperty
+    def _subtotals_bogus_ids(self):
+        """Tuple of bogus id for all the subtotals.
+
+        It enumerates the insertions id adding the `ins_` prefix:
+        ("ins_1", "ins_5", "ins_2")
+        """
+        view_subtotals = self._dimension.subtotals_in_payload_order.bogus_ids
+        transforms_subtotals = self._dimension.subtotals.bogus_ids
+        # Returns only the subtotals bogus ids that have reference in the transforms.
+        return tuple(idx for idx in view_subtotals if idx in transforms_subtotals)
 
 
 class SortByValueCollator(_BaseCollator):
@@ -385,14 +484,14 @@ class SortByValueCollator(_BaseCollator):
     directly in number and sequence with the subtotals defined on `dimension`.
     """
 
-    def __init__(self, dimension, element_values, subtotal_values, empty_idxs):
-        super(SortByValueCollator, self).__init__(dimension, empty_idxs)
+    def __init__(self, dimension, element_values, subtotal_values, empty_idxs, format):
+        super(SortByValueCollator, self).__init__(dimension, empty_idxs, format)
         self._element_values = element_values
         self._subtotal_values = subtotal_values
 
     @classmethod
     def display_order(
-        cls, dimension, element_values, subtotal_values, empty_idxs
+        cls, dimension, element_values, subtotal_values, empty_idxs, format
     ) -> Tuple[int, ...]:
         """Return sequence of int element-idxs ordered by sort on `element_values`.
 
@@ -400,15 +499,19 @@ class SortByValueCollator(_BaseCollator):
         `dimension` that is not hidden, sorted (primarily) by the element value.
         """
         return cls(
-            dimension, element_values, subtotal_values, empty_idxs
+            dimension, element_values, subtotal_values, empty_idxs, format
         )._display_order
 
     @property
-    def _display_order(self) -> Tuple[int, ...]:
-        """tuple of int element-idx specifying ordering of dimension elements.
+    def _display_order(self) -> Tuple[Union[int, str], ...]:
+        """tuple of element-id specifying ordering of dimension elements.
 
-        The element-indices are signed; positive indices are base-elements and negative
-        indices refer to inserted subtotals.
+        If the order format is negative indexes the returned element-indices are signed;
+        positive indices are base-elements and negative indices refer to inserted
+        subtotals.
+
+        If the order is in bogus ids format, the returned element-indices are positive
+        indices for the base-elements and bogus_id (ins_x) for inserted subtotals.
 
         Subtotal elements all appear at the top when the sort direction is descending
         and all appear at the bottom when sort-direction is ascending. Top-anchored
@@ -422,7 +525,7 @@ class SortByValueCollator(_BaseCollator):
         value-sorted order within their grouping.
         """
         hidden_idxs = self._hidden_idxs
-        return tuple(
+        display_order = tuple(
             idx
             for idx in (
                 self._top_subtotal_idxs
@@ -433,6 +536,11 @@ class SortByValueCollator(_BaseCollator):
             )
             if idx not in hidden_idxs
         )
+        if self._format == ORDER_FORMAT.BOGUS_IDS:
+            return tuple(
+                self._order_mapping[idx] if idx < 0 else idx for idx in display_order
+            )
+        return display_order
 
     @lazyproperty
     def _body_idxs(self) -> Tuple[int, ...]:
