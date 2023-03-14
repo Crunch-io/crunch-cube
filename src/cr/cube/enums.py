@@ -62,6 +62,17 @@ class DIMENSION_TYPE:
     SHIMMED_TYPES = frozenset((CA_SUBVAR, MR_SUBVAR, NUM_ARRAY, DATETIME))
 
 
+class ORDER_FORMAT(enum.IntEnum):
+    """Enumeration representing the order formats.
+
+    e.g. negative idxs = (-4, 0, -1, 1)
+         bogus ids = ("ins_1", 0, "ins_2", 1)
+    """
+
+    NEGATIVE_INDEXES = 0
+    BOGUS_IDS = 1
+
+
 class COLLATION_METHOD(enum.Enum):
     """Enumerated values representing the methods of sorting dimension elements."""
 
