@@ -569,6 +569,14 @@ class _Slice(CubePartition):
         return self._rows_dimension.description
 
     @lazyproperty
+    def final_row_order(self):
+        """Tuple of mixed string and integers representing the final order.
+
+        Uses bogus id for insertions elements, positive integers for std elements.
+        """
+        return self._assembler.final_row_order
+
+    @lazyproperty
     def has_scale_means(self):
         """True if the slice has valid columns scale mean."""
         return True if self.columns_scale_mean is not None else False
@@ -761,7 +769,7 @@ class _Slice(CubePartition):
 
         Needed for reordering color palette in exporter.
         """
-        return self._assembler.payload_order
+        return tuple(self._assembler.payload_order)
 
     @lazyproperty
     def population_counts(self):
@@ -1552,7 +1560,15 @@ class _Strand(CubePartition):
 
         Needed for reordering color palette in exporter.
         """
-        return self._assembler.payload_order
+        return tuple(self._assembler.payload_order)
+
+    @lazyproperty
+    def final_order(self):
+        """Tuple of mixed string and integers representing the final order.
+
+        Uses bogus id for insertions elements, positive integers for std elements.
+        """
+        return self._assembler.final_order
 
     @lazyproperty
     def population_counts(self):
