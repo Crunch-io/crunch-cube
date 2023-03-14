@@ -15,7 +15,7 @@ from cr.cube.collator import (
     PayloadOrderCollator,
     SortByValueCollator,
 )
-from cr.cube.enums import COLLATION_METHOD as CM
+from cr.cube.enums import COLLATION_METHOD as CM, ORDER_FORMAT
 from cr.cube.stripe.measure import StripeMeasures
 from cr.cube.util import lazyproperty
 
@@ -70,6 +70,16 @@ class StripeAssembler:
         return tuple(np.where(np.array(diffs)[self.row_order])[0])
 
     @lazyproperty
+    def final_order(self):
+        """Tuple of mixed string and integers representing the final order.
+
+        Uses bogus id for insertions elements, positive integers for std elements.
+        """
+        return _BaseOrderHelper.display_order(
+            self._rows_dimension, self._measures, format=ORDER_FORMAT.BOGUS_IDS
+        )
+
+    @lazyproperty
     def inserted_row_idxs(self):
         """tuple of int index of each inserted row in this stripe.
 
@@ -92,10 +102,7 @@ class StripeAssembler:
         empty_row_idxs = tuple(
             i for i, N in enumerate(self._measures.pruning_base) if N == 0
         )
-        return np.array(
-            PayloadOrderCollator.display_order(self._rows_dimension, empty_row_idxs),
-            dtype=int,
-        )
+        return PayloadOrderCollator(self._rows_dimension, empty_row_idxs).payload_order
 
     @lazyproperty
     def population_proportions(self):
@@ -173,7 +180,11 @@ class StripeAssembler:
         # --- specify dtype explicitly to prevent error when display-order is empty. The
         # --- default dtype is float, which cannot be used to index an array.
         return np.array(
-            _BaseOrderHelper.display_order(self._rows_dimension, self._measures),
+            _BaseOrderHelper.display_order(
+                self._rows_dimension,
+                self._measures,
+                format=ORDER_FORMAT.NEGATIVE_INDEXES,
+            ),
             dtype=int,
         )
 
@@ -354,12 +365,13 @@ class StripeAssembler:
 class _BaseOrderHelper:
     """Base class for ordering helpers."""
 
-    def __init__(self, rows_dimension, measures):
+    def __init__(self, rows_dimension, measures, format=ORDER_FORMAT.NEGATIVE_INDEXES):
         self._rows_dimension = rows_dimension
         self._measures = measures
+        self._format = format
 
     @classmethod
-    def display_order(cls, rows_dimension, measures):
+    def display_order(cls, rows_dimension, measures, format):
         """1D np.int64 ndarray of signed int idx for each row of stripe.
 
         Negative values represent inserted-vector locations. Returned sequence reflects
@@ -374,7 +386,7 @@ class _BaseOrderHelper:
             if order_spec.collation_method == CM.LABEL
             else _OrderHelper
         )
-        return HelperCls(rows_dimension, measures)._display_order
+        return HelperCls(rows_dimension, measures, format)._display_order
 
     @lazyproperty
     def _display_order(self):
@@ -421,7 +433,9 @@ class _OrderHelper(_BaseOrderHelper):
             if self._order_spec.collation_method == CM.EXPLICIT_ORDER
             else PayloadOrderCollator
         )
-        return CollatorCls.display_order(self._rows_dimension, self._empty_row_idxs)
+        return CollatorCls.display_order(
+            self._rows_dimension, self._empty_row_idxs, self._format
+        )
 
 
 class _BaseSortByValueHelper(_BaseOrderHelper):
@@ -449,10 +463,11 @@ class _BaseSortByValueHelper(_BaseOrderHelper):
                 self._element_values,
                 self._subtotal_values,
                 self._empty_row_idxs,
+                self._format,
             )
         except ValueError:
             return PayloadOrderCollator.display_order(
-                self._rows_dimension, self._empty_row_idxs
+                self._rows_dimension, self._empty_row_idxs, self._format
             )
 
     @lazyproperty

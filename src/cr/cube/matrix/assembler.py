@@ -26,6 +26,7 @@ from cr.cube.enums import (
 from cr.cube.matrix.measure import SecondOrderMeasures
 from cr.cube.matrix.subtotals import SumSubtotals
 from cr.cube.util import lazyproperty
+from cr.cube.enums import ORDER_FORMAT
 
 
 class Assembler:
@@ -258,6 +259,16 @@ class Assembler:
         return self._diff_element_idxs(self._columns_dimension, self._column_order)
 
     @lazyproperty
+    def final_row_order(self):
+        """Tuple of mixed string and integers representing the final order.
+
+        Uses bogus id for insertions elements, positive integers for std elements.
+        """
+        return _BaseOrderHelper.row_display_order(
+            self._dimensions, self._measures, format=ORDER_FORMAT.BOGUS_IDS
+        )
+
+    @lazyproperty
     def inserted_column_idxs(self):
         """tuple of int index of each subtotal column in slice."""
         # --- insertions have a negative idx in their order sequence ---
@@ -384,9 +395,7 @@ class Assembler:
         Negative values represent inserted subtotal-row locations.
         """
         empty_rows_idxs = tuple(np.where(self._measures.rows_pruning_mask)[0])
-        return np.array(
-            PayloadOrderCollator.display_order(self._rows_dimension, empty_rows_idxs)
-        )
+        return PayloadOrderCollator(self._rows_dimension, empty_rows_idxs).payload_order
 
     @lazyproperty
     def population_proportions(self):
@@ -458,7 +467,9 @@ class Assembler:
 
         Negative values represent inserted subtotal-row locations.
         """
-        return _BaseOrderHelper.row_display_order(self._dimensions, self._measures)
+        return _BaseOrderHelper.row_display_order(
+            self._dimensions, self._measures, format=ORDER_FORMAT.NEGATIVE_INDEXES
+        )
 
     @lazyproperty
     def row_proportions(self):
@@ -919,9 +930,12 @@ class Assembler:
 class _BaseOrderHelper:
     """Base class for ordering helpers."""
 
-    def __init__(self, dimensions, second_order_measures):
+    def __init__(
+        self, dimensions, second_order_measures, format=ORDER_FORMAT.NEGATIVE_INDEXES
+    ):
         self._dimensions = dimensions
         self._second_order_measures = second_order_measures
+        self._format = format
 
     @classmethod
     def column_display_order(cls, dimensions, second_order_measures):
@@ -939,7 +953,7 @@ class _BaseOrderHelper:
         return _ColumnOrderHelper(dimensions, second_order_measures)._display_order
 
     @classmethod
-    def row_display_order(cls, dimensions, second_order_measures):
+    def row_display_order(cls, dimensions, second_order_measures, format):
         """1D np.int64 ndarray of signed int idx for each row of measure matrix.
 
         Negative values represent inserted-vector locations. Returned sequence reflects
@@ -962,7 +976,7 @@ class _BaseOrderHelper:
             else _RowOrderHelper
         )
 
-        return HelperCls(dimensions, second_order_measures)._display_order
+        return HelperCls(dimensions, second_order_measures, format)._display_order
 
     @lazyproperty
     def _display_order(self):
@@ -1112,7 +1126,7 @@ class _ColumnOrderHelper(_BaseOrderHelper):
             else PayloadOrderCollator
         )
         return CollatorCls.display_order(
-            self._columns_dimension, self._empty_column_idxs
+            self._columns_dimension, self._empty_column_idxs, self._format
         )
 
     @lazyproperty
@@ -1154,7 +1168,9 @@ class _RowOrderHelper(_BaseOrderHelper):
             if self._order_spec.collation_method == CM.EXPLICIT_ORDER
             else PayloadOrderCollator
         )
-        return CollatorCls.display_order(self._rows_dimension, self._empty_row_idxs)
+        return CollatorCls.display_order(
+            self._rows_dimension, self._empty_row_idxs, self._format
+        )
 
     @lazyproperty
     def _order_spec(self):
@@ -1207,10 +1223,11 @@ class _BaseSortRowsByValueHelper(_RowOrderHelper):
                 self._element_values,
                 self._subtotal_values,
                 self._empty_row_idxs,
+                self._format,
             )
         except ValueError:
             return PayloadOrderCollator.display_order(
-                self._rows_dimension, self._empty_row_idxs
+                self._rows_dimension, self._empty_row_idxs, self._format
             )
 
     @lazyproperty
