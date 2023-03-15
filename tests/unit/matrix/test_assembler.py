@@ -1021,7 +1021,7 @@ class DescribeAssembler:
 
     @pytest.fixture
     def _row_order_prop_(self, request):
-        return method_mock(request, Assembler, "row_order")
+        return property_mock(request, Assembler, "_row_order_signed_indexes")
 
     @pytest.fixture
     def _rows_dimension_prop_(self, request):

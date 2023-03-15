@@ -246,12 +246,16 @@ class Assembler:
         categories of CAT dimensions, are not derived. Subtotals are also not derived
         in this sense, because they're not even part of the data (elements).
         """
-        return self._derived_element_idxs(self._rows_dimension, self._row_order)
+        return self._derived_element_idxs(
+            self._rows_dimension, self._row_order_signed_indexes
+        )
 
     @lazyproperty
     def diff_row_idxs(self):
         """tuple(int) of difference row elements' indexes, can be empty."""
-        return self._diff_element_idxs(self._rows_dimension, self._row_order)
+        return self._diff_element_idxs(
+            self._rows_dimension, self._row_order_signed_indexes
+        )
 
     @lazyproperty
     def diff_column_idxs(self):
@@ -268,7 +272,9 @@ class Assembler:
     def inserted_row_idxs(self):
         """tuple of int index of each subtotal row in slice."""
         # --- insertions have a negative idx in their order sequence ---
-        return tuple(i for i, row_idx in enumerate(self._row_order) if row_idx < 0)
+        return tuple(
+            i for i, row_idx in enumerate(self._row_order_signed_indexes) if row_idx < 0
+        )
 
     @lazyproperty
     def means(self):
@@ -429,7 +435,9 @@ class Assembler:
         the sequence and alias are ordered to correspond with their respective data
         row.
         """
-        return self._dimension_aliases(self._rows_dimension, self._row_order)
+        return self._dimension_aliases(
+            self._rows_dimension, self._row_order_signed_indexes
+        )
 
     @lazyproperty
     def row_codes(self):
@@ -439,7 +447,9 @@ class Assembler:
         the sequence and codes are ordered to correspond with their respective data
         row.
         """
-        return self._dimension_codes(self._rows_dimension, self._row_order)
+        return self._dimension_codes(
+            self._rows_dimension, self._row_order_signed_indexes
+        )
 
     @lazyproperty
     def row_labels(self):
@@ -449,7 +459,9 @@ class Assembler:
         the sequence and labels are ordered to correspond with their respective data
         row.
         """
-        return self._dimension_labels(self._rows_dimension, self._row_order)
+        return self._dimension_labels(
+            self._rows_dimension, self._row_order_signed_indexes
+        )
 
     def row_order(self, format=ORDER_FORMAT.SIGNED_INDEXES):
         """1D np.int64 ndarray of signed int idx for each assembled row.
@@ -458,9 +470,9 @@ class Assembler:
         subtotal-row locations; for `BOGUS_IDS` insertios are represented by
         `ins_{insertion_id}` string.
         """
-        return _BaseOrderHelper.row_display_order(
-            self._dimensions, self._measures, format=format
-        )
+        if format == ORDER_FORMAT.BOGUS_IDS:
+            return self._row_order_bogus_ids
+        return self._row_order_signed_indexes
 
     @lazyproperty
     def row_proportions(self):
@@ -522,7 +534,7 @@ class Assembler:
             # ---To index them properly, we need to convert those indexes to---
             # ---zero based positive indexes (0, 1, ... m - 1) i.e. -idx - 1---
             (elements[idx].fill if idx >= 0 else subtotals[idx + len(subtotals)].fill)
-            for idx in self._row_order
+            for idx in self._row_order_signed_indexes
         )
 
     @lazyproperty
@@ -536,7 +548,7 @@ class Assembler:
         return np.array(
             [
                 (elements[idx].numeric_value if idx >= 0 else np.nan)
-                for idx in self._row_order
+                for idx in self._row_order_signed_indexes
             ]
         )
 
@@ -773,7 +785,9 @@ class Assembler:
             return None
 
         order = (
-            self._row_order if marginal.orientation == MO.ROWS else self._column_order
+            self._row_order_signed_indexes
+            if marginal.orientation == MO.ROWS
+            else self._column_order
         )
 
         return np.hstack(marginal.blocks)[order]
@@ -792,7 +806,9 @@ class Assembler:
         # --- the ordering method has been applied to determine the sequence each idx
         # --- appears in. This directly produces a final array that is exactly the
         # --- desired output.
-        return np.block(blocks)[np.ix_(self._row_order, self._column_order)]
+        return np.block(blocks)[
+            np.ix_(self._row_order_signed_indexes, self._column_order)
+        ]
 
     def _assemble_vector(self, base_vector, subtotals, order, diffs_nan=False):
         """Return 1D ndarray of `base_vector` with inserted `subtotals`, in `order`.
@@ -908,9 +924,18 @@ class Assembler:
             return col_significance
 
     @lazyproperty
-    def _row_order(self):
-        """Row order ifx with signed idxs."""
-        return self.row_order(format=ORDER_FORMAT.SIGNED_INDEXES)
+    def _row_order_bogus_ids(self):
+        """Row order with bogus ids."""
+        return _BaseOrderHelper.row_display_order(
+            self._dimensions, self._measures, format=ORDER_FORMAT.BOGUS_IDS
+        )
+
+    @lazyproperty
+    def _row_order_signed_indexes(self):
+        """Row order idx with signed idxs."""
+        return _BaseOrderHelper.row_display_order(
+            self._dimensions, self._measures, format=ORDER_FORMAT.SIGNED_INDEXES
+        )
 
     @lazyproperty
     def _row_subtotals(self):

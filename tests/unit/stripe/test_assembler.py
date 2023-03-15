@@ -241,7 +241,7 @@ class DescribeStripeAssembler:
 
     @pytest.fixture
     def _row_order_prop_(self, request):
-        return method_mock(request, StripeAssembler, "row_order")
+        return property_mock(request, StripeAssembler, "_row_order_signed_indexes")
 
     @pytest.fixture
     def rows_dimension_(self, request):

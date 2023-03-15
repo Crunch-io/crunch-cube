@@ -56,7 +56,7 @@ class StripeAssembler:
         rows_dim = self._rows_dimension
         n_subtotals = len(rows_dim.subtotals)
         derivs = [e.derived for e in rows_dim.valid_elements] + [False] * n_subtotals
-        return tuple(np.where(np.array(derivs)[self._row_order])[0])
+        return tuple(np.where(np.array(derivs)[self._row_order_signed_indexes])[0])
 
     @lazyproperty
     def diff_row_idxs(self):
@@ -67,7 +67,7 @@ class StripeAssembler:
         rows_dim = self._rows_dimension
         n_valids = len(rows_dim.valid_elements)
         diffs = [False] * n_valids + [e.is_difference for e in rows_dim.subtotals]
-        return tuple(np.where(np.array(diffs)[self._row_order])[0])
+        return tuple(np.where(np.array(diffs)[self._row_order_signed_indexes])[0])
 
     @lazyproperty
     def inserted_row_idxs(self):
@@ -76,7 +76,9 @@ class StripeAssembler:
         Provided index values correspond rows after any insertion of subtotals,
         re-ordering, and hiding/pruning.
         """
-        return tuple(i for i, row_idx in enumerate(self._row_order) if row_idx < 0)
+        return tuple(
+            i for i, row_idx in enumerate(self._row_order_signed_indexes) if row_idx < 0
+        )
 
     @lazyproperty
     def means(self):
@@ -122,7 +124,7 @@ class StripeAssembler:
 
         This count includes inserted rows but not rows that have been hidden/pruned.
         """
-        return len(self._row_order)
+        return len(self._row_order_signed_indexes)
 
     @lazyproperty
     def row_aliases(self):
@@ -134,7 +136,7 @@ class StripeAssembler:
         """
         return np.array(
             self._rows_dimension.element_aliases + self._rows_dimension.subtotal_aliases
-        )[self._row_order]
+        )[self._row_order_signed_indexes]
 
     @lazyproperty
     def row_codes(self):
@@ -146,7 +148,7 @@ class StripeAssembler:
         """
         return np.array(
             self._rows_dimension.element_ids + self._rows_dimension.insertion_ids
-        )[self._row_order]
+        )[self._row_order_signed_indexes]
 
     @lazyproperty
     def row_labels(self):
@@ -158,7 +160,7 @@ class StripeAssembler:
         """
         return np.array(
             self._rows_dimension.element_labels + self._rows_dimension.subtotal_labels
-        )[self._row_order]
+        )[self._row_order_signed_indexes]
 
     def row_order(self, format=ORDER_FORMAT.SIGNED_INDEXES):
         """1D np.int64 ndarray of idx for each assembled row of stripe.
@@ -170,13 +172,9 @@ class StripeAssembler:
         """
         # --- specify dtype explicitly to prevent error when display-order is empty. The
         # --- default dtype is float, which cannot be used to index an array.
-        dtype = None if format == ORDER_FORMAT.BOGUS_IDS else int
-        return np.array(
-            _BaseOrderHelper.display_order(
-                self._rows_dimension, self._measures, format=format
-            ),
-            dtype=dtype,
-        )
+        if format == ORDER_FORMAT.BOGUS_IDS:
+            return self._row_order_bogus_ids
+        return self._row_order_signed_indexes
 
     @lazyproperty
     def rows_dimension_fills(self):
@@ -199,7 +197,7 @@ class StripeAssembler:
                 if idx > -1
                 else subtotal_fills[idx + len(subtotal_fills)]
             )
-            for idx in self._row_order
+            for idx in self._row_order_signed_indexes
         )
 
     @lazyproperty
@@ -339,7 +337,7 @@ class StripeAssembler:
         values of the stripe vector. The returned array is sequenced in the computed
         row order including possibly removing hidden or pruned values.
         """
-        return np.concatenate(blocks)[self._row_order]
+        return np.concatenate(blocks)[self._row_order_signed_indexes]
 
     @lazyproperty
     def _measures(self):
@@ -349,9 +347,23 @@ class StripeAssembler:
         )
 
     @lazyproperty
-    def _row_order(self):
-        """Row order ifx with signed idxs."""
-        return self.row_order(format=ORDER_FORMAT.SIGNED_INDEXES)
+    def _row_order_bogus_ids(self):
+        """Row order with bogus ids."""
+        return np.array(
+            _BaseOrderHelper.display_order(
+                self._rows_dimension, self._measures, format=ORDER_FORMAT.BOGUS_IDS
+            )
+        )
+
+    @lazyproperty
+    def _row_order_signed_indexes(self):
+        """Row order idx with signed idxs."""
+        return np.array(
+            _BaseOrderHelper.display_order(
+                self._rows_dimension, self._measures, format=ORDER_FORMAT.SIGNED_INDEXES
+            ),
+            dtype=int,
+        )
 
 
 # === ORDER HELPERS ===
