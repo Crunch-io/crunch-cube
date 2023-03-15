@@ -461,10 +461,10 @@ class Assembler:
         """
         return self._dimension_labels(self._rows_dimension, self._row_order)
 
-    def row_order(self, format=ORDER_FORMAT.NEGATIVE_INDEXES):
+    def row_order(self, format=ORDER_FORMAT.SIGNED_INDEXES):
         """1D np.int64 ndarray of signed int idx for each assembled row.
 
-        If order format is `NEGATIVE_INDEXES` negative values represent inserted
+        If order format is `SIGNED_INDEXES` negative values represent inserted
         subtotal-row locations; for `BOGUS_IDS` insertios are represented by
         `ins_{insertion_id}` string.
         """
@@ -920,7 +920,7 @@ class Assembler:
     @lazyproperty
     def _row_order(self):
         """Row order ifx with signed idxs."""
-        return self.row_order(format=ORDER_FORMAT.NEGATIVE_INDEXES)
+        return self.row_order(format=ORDER_FORMAT.SIGNED_INDEXES)
 
     @lazyproperty
     def _row_subtotals(self):
@@ -937,7 +937,7 @@ class _BaseOrderHelper:
     """Base class for ordering helpers."""
 
     def __init__(
-        self, dimensions, second_order_measures, format=ORDER_FORMAT.NEGATIVE_INDEXES
+        self, dimensions, second_order_measures, format=ORDER_FORMAT.SIGNED_INDEXES
     ):
         self._dimensions = dimensions
         self._second_order_measures = second_order_measures

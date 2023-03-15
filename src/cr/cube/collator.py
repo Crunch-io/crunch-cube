@@ -32,7 +32,7 @@ class _BaseCollator:
         self,
         dimension: Dimension,
         empty_idxs: Tuple[int],
-        format: int = ORDER_FORMAT.NEGATIVE_INDEXES,
+        format: int = ORDER_FORMAT.SIGNED_INDEXES,
     ):
         self._dimension = dimension
         self._empty_idxs = tuple(empty_idxs) if empty_idxs else ()

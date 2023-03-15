@@ -160,10 +160,10 @@ class StripeAssembler:
             self._rows_dimension.element_labels + self._rows_dimension.subtotal_labels
         )[self._row_order]
 
-    def row_order(self, format=ORDER_FORMAT.NEGATIVE_INDEXES):
+    def row_order(self, format=ORDER_FORMAT.SIGNED_INDEXES):
         """1D np.int64 ndarray of idx for each assembled row of stripe.
 
-        If order format is `NEGATIVE_INDEXES` negative values represent inserted
+        If order format is `SIGNED_INDEXES` negative values represent inserted
         subtotal-row locations; for `BOGUS_IDS` insertios are represented by
         `ins_{insertion_id}` string.
         Indices appear in the order rows are to appear in the final result.
@@ -351,7 +351,7 @@ class StripeAssembler:
     @lazyproperty
     def _row_order(self):
         """Row order ifx with signed idxs."""
-        return self.row_order(format=ORDER_FORMAT.NEGATIVE_INDEXES)
+        return self.row_order(format=ORDER_FORMAT.SIGNED_INDEXES)
 
 
 # === ORDER HELPERS ===
@@ -360,7 +360,7 @@ class StripeAssembler:
 class _BaseOrderHelper:
     """Base class for ordering helpers."""
 
-    def __init__(self, rows_dimension, measures, format=ORDER_FORMAT.NEGATIVE_INDEXES):
+    def __init__(self, rows_dimension, measures, format=ORDER_FORMAT.SIGNED_INDEXES):
         self._rows_dimension = rows_dimension
         self._measures = measures
         self._format = format

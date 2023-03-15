@@ -1686,7 +1686,7 @@ class Describe_BaseOrderHelper:
         }
         assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
         row_display_order = _BaseOrderHelper.row_display_order(
-            assembler._dimensions, assembler._measures, ORDER_FORMAT.NEGATIVE_INDEXES
+            assembler._dimensions, assembler._measures, ORDER_FORMAT.SIGNED_INDEXES
         )
 
         assert row_display_order.tolist() == expected_value

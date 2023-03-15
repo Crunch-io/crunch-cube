@@ -69,7 +69,7 @@ class ORDER_FORMAT(enum.IntEnum):
          bogus ids = ("ins_1", 0, "ins_2", 1)
     """
 
-    NEGATIVE_INDEXES = 0
+    SIGNED_INDEXES = 0
     BOGUS_IDS = 1
 
 

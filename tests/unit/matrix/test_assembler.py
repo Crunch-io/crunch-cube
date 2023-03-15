@@ -899,7 +899,7 @@ class DescribeAssembler:
     @pytest.mark.parametrize(
         "format, row_order",
         (
-            (ORDER_FORMAT.NEGATIVE_INDEXES, (-1, 1, -2, 2, -3, 3)),
+            (ORDER_FORMAT.SIGNED_INDEXES, (-1, 1, -2, 2, -3, 3)),
             (ORDER_FORMAT.BOGUS_IDS, ("ins_1", 1, "ins_2", 2, "ins_3", 3)),
         ),
     )
@@ -940,7 +940,7 @@ class DescribeAssembler:
         row_order = assembler.row_order()
 
         _OrderHelper_.display_order.assert_called_once_with(
-            dimensions_[0], (), ORDER_FORMAT.NEGATIVE_INDEXES
+            dimensions_[0], (), ORDER_FORMAT.SIGNED_INDEXES
         )
 
         assert row_order.tolist() == [1, 2, 3]
@@ -1104,11 +1104,11 @@ class Describe_BaseOrderHelper:
         )
 
         row_order = _BaseOrderHelper.row_display_order(
-            dimensions_, second_order_measures_, ORDER_FORMAT.NEGATIVE_INDEXES
+            dimensions_, second_order_measures_, ORDER_FORMAT.SIGNED_INDEXES
         )
 
         HelperCls_.assert_called_once_with(
-            dimensions_, second_order_measures_, ORDER_FORMAT.NEGATIVE_INDEXES
+            dimensions_, second_order_measures_, ORDER_FORMAT.SIGNED_INDEXES
         )
         assert row_order.tolist() == [-1, 1, -2, 2]
 
@@ -1272,7 +1272,7 @@ class Describe_ColumnOrderHelper:
         order = order_helper._order
 
         CollatorCls_.display_order.assert_called_once_with(
-            dimension_, (1, 3), ORDER_FORMAT.NEGATIVE_INDEXES
+            dimension_, (1, 3), ORDER_FORMAT.SIGNED_INDEXES
         )
         assert order == (3, -1, 5, 1, -2)
 
@@ -1340,7 +1340,7 @@ class Describe_RowOrderHelper:
         order = order_helper._order
 
         CollatorCls_.display_order.assert_called_once_with(
-            dimension_, (2, 4, 6), ORDER_FORMAT.NEGATIVE_INDEXES
+            dimension_, (2, 4, 6), ORDER_FORMAT.SIGNED_INDEXES
         )
         assert order == (1, -2, 3, 5, -1)
 
@@ -1405,7 +1405,7 @@ class Describe_BaseSortRowsByValueHelper:
             _element_values_prop_(),
             _subtotal_values_prop_(),
             _empty_row_idxs_prop_(),
-            ORDER_FORMAT.NEGATIVE_INDEXES,
+            ORDER_FORMAT.SIGNED_INDEXES,
         )
 
     def but_it_falls_back_to_payload_order_on_value_error(
@@ -1430,7 +1430,7 @@ class Describe_BaseSortRowsByValueHelper:
         order = order_helper._order
 
         PayloadOrderCollator_.display_order.assert_called_once_with(
-            dimensions_[0], (4, 2), ORDER_FORMAT.NEGATIVE_INDEXES
+            dimensions_[0], (4, 2), ORDER_FORMAT.SIGNED_INDEXES
         )
         assert order == (1, 2, 3, 4)
 

@@ -839,10 +839,10 @@ class _Slice(CubePartition):
         """1D str ndarray of name for each row, suitable for use as row headings."""
         return self._assembler.row_labels
 
-    def row_order(self, format=ORDER_FORMAT.NEGATIVE_INDEXES):
+    def row_order(self, format=ORDER_FORMAT.SIGNED_INDEXES):
         """1D np.int64 ndarray of idx for each assembled row of matrix.
 
-        If order format is `NEGATIVE_INDEXES` negative values represent inserted
+        If order format is `SIGNED_INDEXES` negative values represent inserted
         subtotal-row locations; for `BOGUS_IDS` insertios are represented by
         `ins_{insertion_id}` string.
 
@@ -1610,10 +1610,10 @@ class _Strand(CubePartition):
         """1D str ndarray of name for each row, suitable for use as row headings."""
         return self._assembler.row_labels
 
-    def row_order(self, format=ORDER_FORMAT.NEGATIVE_INDEXES):
+    def row_order(self, format=ORDER_FORMAT.SIGNED_INDEXES):
         """1D np.int64 ndarray of idx for each assembled row of stripe.
 
-        If order format is `NEGATIVE_INDEXES` negative values represent inserted
+        If order format is `SIGNED_INDEXES` negative values represent inserted
         subtotal-row locations; for `BOGUS_IDS` insertios are represented by
         `ins_{insertion_id}` string.
         Indices appear in the order rows are to appear in the final result.

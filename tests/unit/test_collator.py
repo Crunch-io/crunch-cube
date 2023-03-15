@@ -93,11 +93,11 @@ class Describe_BaseAnchoredCollator:
         _display_order_.return_value = (-3, 0, 1, -2, 2, 3, -1)
 
         display_order = _BaseAnchoredCollator.display_order(
-            dimension_, empty_idxs=(2,), format=ORDER_FORMAT.NEGATIVE_INDEXES
+            dimension_, empty_idxs=(2,), format=ORDER_FORMAT.SIGNED_INDEXES
         )
 
         _init_.assert_called_once_with(
-            ANY, dimension_, (2,), ORDER_FORMAT.NEGATIVE_INDEXES
+            ANY, dimension_, (2,), ORDER_FORMAT.SIGNED_INDEXES
         )
         assert display_order == (-3, 0, 1, -2, 2, 3, -1)
 
@@ -483,7 +483,7 @@ class DescribeSortByValueCollator:
             element_values,
             subtotal_values,
             empty_idxs,
-            ORDER_FORMAT.NEGATIVE_INDEXES,
+            ORDER_FORMAT.SIGNED_INDEXES,
         )
 
         _init_.assert_called_once_with(
@@ -492,7 +492,7 @@ class DescribeSortByValueCollator:
             element_values,
             subtotal_values,
             empty_idxs,
-            ORDER_FORMAT.NEGATIVE_INDEXES,
+            ORDER_FORMAT.SIGNED_INDEXES,
         )
         assert display_order == (-3, -1, -2, 1, 0, 2, 3)
 
@@ -550,7 +550,7 @@ class DescribeSortByValueCollator:
         _bottom_fixed_idxs_prop_.return_value = bottom_fixed_idxs
         _descending_prop_.return_value = descending
         collator = SortByValueCollator(
-            None, element_values, None, None, ORDER_FORMAT.NEGATIVE_INDEXES
+            None, element_values, None, None, ORDER_FORMAT.SIGNED_INDEXES
         )
 
         assert collator._body_idxs == expected_value

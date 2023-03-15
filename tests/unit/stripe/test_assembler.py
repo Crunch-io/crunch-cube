@@ -200,7 +200,7 @@ class DescribeStripeAssembler:
     @pytest.mark.parametrize(
         "format, row_order",
         (
-            (ORDER_FORMAT.NEGATIVE_INDEXES, (-1, 1, -2, 2, -3, 3)),
+            (ORDER_FORMAT.SIGNED_INDEXES, (-1, 1, -2, 2, -3, 3)),
             (ORDER_FORMAT.BOGUS_IDS, ("ins_1", 1, "ins_2", 2, "ins_3", 3)),
         ),
     )
@@ -284,11 +284,11 @@ class Describe_BaseOrderHelper:
         )
 
         display_order = _BaseOrderHelper.display_order(
-            rows_dimension_, measures_, format=ORDER_FORMAT.NEGATIVE_INDEXES
+            rows_dimension_, measures_, format=ORDER_FORMAT.SIGNED_INDEXES
         )
 
         HelperCls_.assert_called_once_with(
-            rows_dimension_, measures_, ORDER_FORMAT.NEGATIVE_INDEXES
+            rows_dimension_, measures_, ORDER_FORMAT.SIGNED_INDEXES
         )
         assert display_order.tolist() == [-2, 1, -1, 2]
 
@@ -341,7 +341,7 @@ class Describe_OrderHelper:
         display_order = order_helper._display_order
 
         CollatorCls_.display_order.assert_called_once_with(
-            rows_dimension_, (2, 4, 6), ORDER_FORMAT.NEGATIVE_INDEXES
+            rows_dimension_, (2, 4, 6), ORDER_FORMAT.SIGNED_INDEXES
         )
         assert display_order == (1, -2, 3, 5, -1)
 
@@ -368,7 +368,7 @@ class Describe_BaseSortByValueHelper:
         order = order_helper._display_order
 
         SortByValueCollator_.display_order.assert_called_once_with(
-            dimension_, [16, 3, 12], [15, 19], (), ORDER_FORMAT.NEGATIVE_INDEXES
+            dimension_, [16, 3, 12], [15, 19], (), ORDER_FORMAT.SIGNED_INDEXES
         )
         assert order == (-1, -2, 0, 2, 1)
 
@@ -394,7 +394,7 @@ class Describe_BaseSortByValueHelper:
         order = order_helper._display_order
 
         PayloadOrderCollator_.display_order.assert_called_once_with(
-            dimension_, (4, 2), ORDER_FORMAT.NEGATIVE_INDEXES
+            dimension_, (4, 2), ORDER_FORMAT.SIGNED_INDEXES
         )
         assert order == (1, 2, 3, 4)
 

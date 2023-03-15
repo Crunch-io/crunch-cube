@@ -49,7 +49,7 @@ class DescribeExplicitOrderCollator:
 
         assert (
             ExplicitOrderCollator.display_order(
-                dimension_, (), ORDER_FORMAT.NEGATIVE_INDEXES
+                dimension_, (), ORDER_FORMAT.SIGNED_INDEXES
             )
             == expected_value
         )
@@ -83,7 +83,7 @@ class DescribePayloadOrderCollator:
         )
 
         display_order = PayloadOrderCollator.display_order(
-            dimension_, (), ORDER_FORMAT.NEGATIVE_INDEXES
+            dimension_, (), ORDER_FORMAT.SIGNED_INDEXES
         )
         assert display_order == expected_value
 
@@ -124,7 +124,7 @@ class DescribePayloadOrderCollator:
         )
 
         payload_order = PayloadOrderCollator(
-            dimension_, (), ORDER_FORMAT.NEGATIVE_INDEXES
+            dimension_, (), ORDER_FORMAT.SIGNED_INDEXES
         ).payload_order
         assert payload_order == expected_value
 
@@ -179,7 +179,7 @@ class DescribeSortByValueCollator:
             element_vals,
             subtot_vals,
             empty_idxs,
-            ORDER_FORMAT.NEGATIVE_INDEXES,
+            ORDER_FORMAT.SIGNED_INDEXES,
         )
 
         assert display_order == expected_value
