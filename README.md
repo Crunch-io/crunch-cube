@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.23
+- Fix payload order using bogus ids
+
 ### 3.0.22
 - Expose `columns_dimension_description` for _Slice
 
