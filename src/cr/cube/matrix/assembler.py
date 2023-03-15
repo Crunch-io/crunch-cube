@@ -259,16 +259,6 @@ class Assembler:
         return self._diff_element_idxs(self._columns_dimension, self._column_order)
 
     @lazyproperty
-    def final_row_order(self):
-        """Tuple of mixed string and integers representing the final order.
-
-        Uses bogus id for insertions elements, positive integers for std elements.
-        """
-        return _BaseOrderHelper.row_display_order(
-            self._dimensions, self._measures, format=ORDER_FORMAT.BOGUS_IDS
-        )
-
-    @lazyproperty
     def inserted_column_idxs(self):
         """tuple of int index of each subtotal column in slice."""
         # --- insertions have a negative idx in their order sequence ---

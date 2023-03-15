@@ -590,7 +590,7 @@ class Describe_Slice:
         assert slice_.payload_order == (0, 1, 2, 3)
         assert slice_.row_order().tolist() == [0, 3, 1, 2]
 
-    def it_knows_final_row_order(self):
+    def it_knows_bogus_ids_row_order(self):
         transforms = {
             "rows_dimension": {
                 "insertions": [
