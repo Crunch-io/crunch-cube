@@ -534,32 +534,19 @@ class Dimension:
         return _Subtotals(insertion_dicts, self.valid_elements)
 
     @lazyproperty
-    def subtotals_with_payload_order(self) -> "_Subtotals":
+    def subtotals_in_payload_order(self) -> "_Subtotals":
         """_Subtotals sequence object for this dimension respecting the payload order.
 
         Each item in the sequence is a _Subtotal object specifying a subtotal, including
         its addends and anchor.
         """
 
-        def apply_order(insertion, view_insertions):
-            """
-            Change the anchor of the dimension transforms insertions with the
-            original paylod anchor.
-            """
-            id = insertion.get("id")
-            occurence = [el for el in view_insertions if el["id"] == id]
-            if occurence:
-                insertion["anchor"] = occurence[0]["anchor"]
-            return insertion
-
         if self.dimension_type in (DT.MR, DT.CA_SUBVAR):
             insertion_dicts: List[Optional[Dict]] = []
-        elif "insertions" in self._dimension_transforms_dict:
-            insertion_dicts = []
-            for ins in self._dimension_transforms_dict["insertions"]:
-                insertion_dicts.append(apply_order(ins, self._view_insertion_dicts))
-        else:
+        elif self._view_insertion_dicts:
             insertion_dicts = self._view_insertion_dicts
+        else:
+            insertion_dicts = self._dimension_transforms_dict.get("insertions", {})
         return _Subtotals(insertion_dicts, self.valid_elements)
 
     def translate_element_id(self, _id) -> Optional[str]:
@@ -1377,6 +1364,20 @@ class _Subtotals(Sequence):
     def __len__(self):
         """Implements len(subtotals)."""
         return len(self._subtotals)
+
+    @lazyproperty
+    def bogus_ids(self) -> Tuple[str, ...]:
+        """Tuple of bogus id for all the subtotals.
+
+        It enumerates the insertions id adding the `ins_` prefix:
+        ("ins_1", "ins_5", "ins_2")
+        """
+        return tuple([f"ins_{subtotal.insertion_id}" for subtotal in self._subtotals])
+
+    @lazyproperty
+    def insertion_ids(self) -> Tuple[int, ...]:
+        """Tuple of insertion ids"""
+        return tuple([subtotal.insertion_id for subtotal in self._subtotals])
 
     @lazyproperty
     def _element_ids(self):

@@ -12,6 +12,7 @@ from cr.cube.enums import (
     DIMENSION_TYPE as DT,
     MARGINAL,
     MEASURE as M,
+    ORDER_FORMAT,
 )
 from cr.cube.matrix.assembler import (
     Assembler,
@@ -895,25 +896,32 @@ class DescribeAssembler:
         SecondOrderMeasures_.assert_called_once_with(cube_, dimensions_, 17)
         assert measures == second_order_measures_
 
+    @pytest.mark.parametrize(
+        "format, row_order",
+        (
+            (ORDER_FORMAT.SIGNED_INDEXES, (-1, 1, -2, 2, -3, 3)),
+            (ORDER_FORMAT.BOGUS_IDS, ("ins_1", 1, "ins_2", 2, "ins_3", 3)),
+        ),
+    )
     def it_knows_the_row_order_to_help(
         self,
         _BaseOrderHelper_,
         dimensions_,
         _measures_prop_,
         second_order_measures_,
+        format,
+        row_order,
     ):
         _measures_prop_.return_value = second_order_measures_
-        _BaseOrderHelper_.row_display_order.return_value = np.array(
-            [-1, 1, -2, 2, -3, 3]
-        )
+        _BaseOrderHelper_.row_display_order.return_value = np.array(row_order)
         assembler = Assembler(None, dimensions_, None)
 
-        row_order = assembler.row_order
+        row_order = assembler.row_order(format)
 
         _BaseOrderHelper_.row_display_order.assert_called_once_with(
-            dimensions_, second_order_measures_
+            dimensions_, second_order_measures_, format
         )
-        assert row_order.tolist() == [-1, 1, -2, 2, -3, 3]
+        assert row_order.tolist() == list(row_order)
 
     def it_knows_the_payload_order_to_help(
         self,
@@ -929,9 +937,11 @@ class DescribeAssembler:
         _OrderHelper_.display_order.return_value = np.array([1, 2, 3])
         assembler = Assembler(None, dimensions_, None)
 
-        row_order = assembler.row_order
+        row_order = assembler.row_order()
 
-        _OrderHelper_.display_order.assert_called_once_with(dimensions_[0], ())
+        _OrderHelper_.display_order.assert_called_once_with(
+            dimensions_[0], (), ORDER_FORMAT.SIGNED_INDEXES
+        )
 
         assert row_order.tolist() == [1, 2, 3]
 
@@ -1011,7 +1021,7 @@ class DescribeAssembler:
 
     @pytest.fixture
     def _row_order_prop_(self, request):
-        return property_mock(request, Assembler, "row_order")
+        return property_mock(request, Assembler, "_row_order_signed_indexes")
 
     @pytest.fixture
     def _rows_dimension_prop_(self, request):
@@ -1094,10 +1104,12 @@ class Describe_BaseOrderHelper:
         )
 
         row_order = _BaseOrderHelper.row_display_order(
-            dimensions_, second_order_measures_
+            dimensions_, second_order_measures_, ORDER_FORMAT.SIGNED_INDEXES
         )
 
-        HelperCls_.assert_called_once_with(dimensions_, second_order_measures_)
+        HelperCls_.assert_called_once_with(
+            dimensions_, second_order_measures_, ORDER_FORMAT.SIGNED_INDEXES
+        )
         assert row_order.tolist() == [-1, 1, -2, 2]
 
     def it_provides_access_to_the_columns_dimension_to_help(self, dimension_):
@@ -1259,7 +1271,9 @@ class Describe_ColumnOrderHelper:
 
         order = order_helper._order
 
-        CollatorCls_.display_order.assert_called_once_with(dimension_, (1, 3))
+        CollatorCls_.display_order.assert_called_once_with(
+            dimension_, (1, 3), ORDER_FORMAT.SIGNED_INDEXES
+        )
         assert order == (3, -1, 5, 1, -2)
 
     @pytest.mark.parametrize(
@@ -1325,7 +1339,9 @@ class Describe_RowOrderHelper:
 
         order = order_helper._order
 
-        CollatorCls_.display_order.assert_called_once_with(dimension_, (2, 4, 6))
+        CollatorCls_.display_order.assert_called_once_with(
+            dimension_, (2, 4, 6), ORDER_FORMAT.SIGNED_INDEXES
+        )
         assert order == (1, -2, 3, 5, -1)
 
     def it_provides_access_to_the_order_spec_to_help(self, request, dimension_):
@@ -1389,6 +1405,7 @@ class Describe_BaseSortRowsByValueHelper:
             _element_values_prop_(),
             _subtotal_values_prop_(),
             _empty_row_idxs_prop_(),
+            ORDER_FORMAT.SIGNED_INDEXES,
         )
 
     def but_it_falls_back_to_payload_order_on_value_error(
@@ -1413,7 +1430,7 @@ class Describe_BaseSortRowsByValueHelper:
         order = order_helper._order
 
         PayloadOrderCollator_.display_order.assert_called_once_with(
-            dimensions_[0], (4, 2)
+            dimensions_[0], (4, 2), ORDER_FORMAT.SIGNED_INDEXES
         )
         assert order == (1, 2, 3, 4)
 
