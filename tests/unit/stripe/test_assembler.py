@@ -197,22 +197,29 @@ class DescribeStripeAssembler:
         StripeMeasures_.assert_called_once_with(cube_, rows_dimension_, False, 7)
         assert measures is measures_
 
+    @pytest.mark.parametrize(
+        "format, row_order",
+        (
+            (ORDER_FORMAT.NEGATIVE_INDEXES, (-1, 1, -2, 2, -3, 3)),
+            (ORDER_FORMAT.BOGUS_IDS, ("ins_1", 1, "ins_2", 2, "ins_3", 3)),
+        ),
+    )
     def it_knows_the_row_order_to_help(
-        self, request, rows_dimension_, _measures_prop_, measures_
+        self, request, rows_dimension_, _measures_prop_, measures_, format, row_order
     ):
         _measures_prop_.return_value = measures_
         _BaseOrderHelper_ = class_mock(
             request, "cr.cube.stripe.assembler._BaseOrderHelper"
         )
-        _BaseOrderHelper_.display_order.return_value = (-1, 1, -2, 2, -3, 3)
+        _BaseOrderHelper_.display_order.return_value = row_order
         assembler = StripeAssembler(None, rows_dimension_, None, None)
 
-        row_order = assembler.row_order
+        row_order = assembler.row_order(format)
 
         _BaseOrderHelper_.display_order.assert_called_once_with(
-            rows_dimension_, measures_, ORDER_FORMAT.NEGATIVE_INDEXES
+            rows_dimension_, measures_, format
         )
-        assert row_order.tolist() == [-1, 1, -2, 2, -3, 3]
+        assert row_order.tolist() == list(row_order)
 
     # fixture components ---------------------------------------------
 
@@ -234,7 +241,7 @@ class DescribeStripeAssembler:
 
     @pytest.fixture
     def _row_order_prop_(self, request):
-        return property_mock(request, StripeAssembler, "row_order")
+        return method_mock(request, StripeAssembler, "row_order")
 
     @pytest.fixture
     def rows_dimension_(self, request):

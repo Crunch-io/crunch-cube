@@ -7,7 +7,7 @@ import pytest
 
 from cr.cube.cubepart import _Slice
 from cr.cube.cube import Cube
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT, ORDER_FORMAT
 
 # ---mnemonic: CR = 'cube-response'---
 # ---mnemonic: TR = 'transforms'---
@@ -588,7 +588,7 @@ class Describe_Slice:
         slice_ = Cube(CR.CAT_X_CAT_HS, transforms=transforms).partitions[0]
 
         assert slice_.payload_order == (0, 1, 2, 3)
-        assert slice_.row_order.tolist() == [0, 3, 1, 2]
+        assert slice_.row_order().tolist() == [0, 3, 1, 2]
 
     def it_knows_final_row_order(self):
         transforms = {
@@ -610,7 +610,14 @@ class Describe_Slice:
             },
         }
         slice_ = Cube(MRI.CAT_X_MR, transforms=transforms).partitions[0]
-        assert slice_.final_row_order == ("0", "1", "2", "ins_1", "3", "4")
+        assert tuple(slice_.row_order(ORDER_FORMAT.BOGUS_IDS)) == (
+            "0",
+            "1",
+            "2",
+            "ins_1",
+            "3",
+            "4",
+        )
 
     def it_provides_derived_indexes_for_mr_x_mr_with_transforms(self):
         transforms = {
@@ -2247,7 +2254,7 @@ class Describe_Strand:
         strand = Cube(CR.CAT_SUBTOT_ORDER, transforms=transforms).partitions[0]
 
         assert strand.payload_order == (0, 1, 2, 3, "ins_1")
-        assert strand.row_order.tolist() == [1, 2, 3, 0, -1]
+        assert strand.row_order().tolist() == [1, 2, 3, 0, -1]
 
     def it_can_sort_by_label(self):
         transforms = {
@@ -2274,10 +2281,18 @@ class Describe_Strand:
         actual = strand_.row_labels.tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
-    def it_knows_the_final_order(self):
+    def it_knows_the_bogus_id_row_order(self):
         strand_ = Cube(CR.CAT_HS_MT).partitions[0]
 
-        assert strand_.final_order == (0, 1, "ins_1", 2, 3, 4, "ins_2")
+        assert tuple(strand_.row_order(format=ORDER_FORMAT.BOGUS_IDS)) == (
+            "0",
+            "1",
+            "ins_1",
+            "2",
+            "3",
+            "4",
+            "ins_2",
+        )
 
     def it_knows_when_it_is_empty(self):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]

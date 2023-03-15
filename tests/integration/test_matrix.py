@@ -1491,7 +1491,7 @@ class DescribeAssembler:
         slice_ = _Slice(Cube(fixture), 0, transforms, None, 0)
         assembler = slice_._assembler
 
-        assert assembler.row_order.tolist() == expected_value
+        assert assembler.row_order().tolist() == expected_value
 
     def it_computes_sum_cat_x_mr(self):
         slice_ = Cube(CR.SUM_CAT_X_MR).partitions[0]
@@ -1787,7 +1787,7 @@ class Describe_SortRowsByColumnValueHelper:
         }
         assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
 
-        assert assembler.row_order.tolist() == expected_value
+        assert assembler.row_order().tolist() == expected_value
 
 
 class Describe_SortRowsByInsertedColumnHelper:
@@ -1828,7 +1828,7 @@ class Describe_SortRowsByInsertedColumnHelper:
         }
         assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
 
-        assert assembler.row_order.tolist() == expected_value
+        assert assembler.row_order().tolist() == expected_value
 
     def but_it_fallback_to_payload_order_when_sort_by_value_is_not_supported(self):
         transforms = {
@@ -1843,4 +1843,4 @@ class Describe_SortRowsByInsertedColumnHelper:
         }
         assembler = _Slice(Cube(CR.CAT_HS_X_CAT_HS), 0, transforms, None, 0)._assembler
 
-        assert assembler.row_order.tolist() == [0, 1, -2, 2, 3, 4, -1]
+        assert assembler.row_order().tolist() == [0, 1, -2, 2, 3, 4, -1]

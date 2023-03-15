@@ -19,7 +19,7 @@ import math
 import numpy as np
 from tabulate import tabulate
 
-from cr.cube.enums import CUBE_MEASURE as CM, DIMENSION_TYPE as DT
+from cr.cube.enums import CUBE_MEASURE as CM, DIMENSION_TYPE as DT, ORDER_FORMAT
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
@@ -569,14 +569,6 @@ class _Slice(CubePartition):
         return self._rows_dimension.description
 
     @lazyproperty
-    def final_row_order(self):
-        """Tuple of mixed string and integers representing the final order.
-
-        Uses bogus id for insertions elements, positive integers for std elements.
-        """
-        return tuple(self._assembler.final_row_order)
-
-    @lazyproperty
     def has_scale_means(self):
         """True if the slice has valid columns scale mean."""
         return True if self.columns_scale_mean is not None else False
@@ -847,16 +839,18 @@ class _Slice(CubePartition):
         """1D str ndarray of name for each row, suitable for use as row headings."""
         return self._assembler.row_labels
 
-    @lazyproperty
-    def row_order(self):
-        """1D np.int64 ndarray of signed int idx for each assembled row of stripe.
+    def row_order(self, format=ORDER_FORMAT.NEGATIVE_INDEXES):
+        """1D np.int64 ndarray of idx for each assembled row of matrix.
 
-        Positive integers indicate the 1-indexed position in payload of regular
-        elements, while negative integers are the subtotal insertions.
+        If order format is `NEGATIVE_INDEXES` negative values represent inserted
+        subtotal-row locations; for `BOGUS_IDS` insertios are represented by
+        `ins_{insertion_id}` string.
+
+        Indices appear in the order rows are to appear in the final result.
 
         Needed for reordering color palette in exporter.
         """
-        return self._assembler.row_order
+        return self._assembler.row_order(format)
 
     @lazyproperty
     def row_percentages(self):
@@ -1563,14 +1557,6 @@ class _Strand(CubePartition):
         return tuple(self._assembler.payload_order)
 
     @lazyproperty
-    def final_order(self):
-        """Tuple of mixed string and integers representing the final order.
-
-        Uses bogus id for insertions elements, positive integers for std elements.
-        """
-        return self._assembler.final_order
-
-    @lazyproperty
     def population_counts(self):
         """1D np.float64 ndarray of population count for each row of strand.
 
@@ -1624,16 +1610,17 @@ class _Strand(CubePartition):
         """1D str ndarray of name for each row, suitable for use as row headings."""
         return self._assembler.row_labels
 
-    @lazyproperty
-    def row_order(self):
-        """1D np.int64 ndarray of signed int idx for each assembled row of stripe.
+    def row_order(self, format=ORDER_FORMAT.NEGATIVE_INDEXES):
+        """1D np.int64 ndarray of idx for each assembled row of stripe.
 
-        Positive integers indicate the 1-indexed position in payload of regular
-        elements, while negative integers are the subtotal insertions.
+        If order format is `NEGATIVE_INDEXES` negative values represent inserted
+        subtotal-row locations; for `BOGUS_IDS` insertios are represented by
+        `ins_{insertion_id}` string.
+        Indices appear in the order rows are to appear in the final result.
 
         Needed for reordering color palette in exporter.
         """
-        return self._assembler.row_order
+        return self._assembler.row_order(format)
 
     @lazyproperty
     def rows_base(self):

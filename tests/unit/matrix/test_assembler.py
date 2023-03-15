@@ -896,25 +896,32 @@ class DescribeAssembler:
         SecondOrderMeasures_.assert_called_once_with(cube_, dimensions_, 17)
         assert measures == second_order_measures_
 
+    @pytest.mark.parametrize(
+        "format, row_order",
+        (
+            (ORDER_FORMAT.NEGATIVE_INDEXES, (-1, 1, -2, 2, -3, 3)),
+            (ORDER_FORMAT.BOGUS_IDS, ("ins_1", 1, "ins_2", 2, "ins_3", 3)),
+        ),
+    )
     def it_knows_the_row_order_to_help(
         self,
         _BaseOrderHelper_,
         dimensions_,
         _measures_prop_,
         second_order_measures_,
+        format,
+        row_order,
     ):
         _measures_prop_.return_value = second_order_measures_
-        _BaseOrderHelper_.row_display_order.return_value = np.array(
-            [-1, 1, -2, 2, -3, 3]
-        )
+        _BaseOrderHelper_.row_display_order.return_value = np.array(row_order)
         assembler = Assembler(None, dimensions_, None)
 
-        row_order = assembler.row_order
+        row_order = assembler.row_order(format)
 
         _BaseOrderHelper_.row_display_order.assert_called_once_with(
-            dimensions_, second_order_measures_, ORDER_FORMAT.NEGATIVE_INDEXES
+            dimensions_, second_order_measures_, format
         )
-        assert row_order.tolist() == [-1, 1, -2, 2, -3, 3]
+        assert row_order.tolist() == list(row_order)
 
     def it_knows_the_payload_order_to_help(
         self,
@@ -930,7 +937,7 @@ class DescribeAssembler:
         _OrderHelper_.display_order.return_value = np.array([1, 2, 3])
         assembler = Assembler(None, dimensions_, None)
 
-        row_order = assembler.row_order
+        row_order = assembler.row_order()
 
         _OrderHelper_.display_order.assert_called_once_with(
             dimensions_[0], (), ORDER_FORMAT.NEGATIVE_INDEXES
@@ -1014,7 +1021,7 @@ class DescribeAssembler:
 
     @pytest.fixture
     def _row_order_prop_(self, request):
-        return property_mock(request, Assembler, "row_order")
+        return method_mock(request, Assembler, "row_order")
 
     @pytest.fixture
     def _rows_dimension_prop_(self, request):
