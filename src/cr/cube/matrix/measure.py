@@ -3,15 +3,15 @@
 """Second-order measure collection and the individual measures it composes."""
 
 import numpy as np
-from scipy.stats import t, norm
+from scipy.stats import norm, t
 
 from cr.cube.enums import DIMENSION_TYPE as DT, MARGINAL_ORIENTATION as MO
 from cr.cube.matrix.cubemeasure import CubeMeasures
 from cr.cube.matrix.subtotals import (
-    SumSubtotals,
     NanSubtotals,
     NegativeTermSubtotals,
     PositiveTermSubtotals,
+    SumSubtotals,
 )
 from cr.cube.smoothing import Smoother
 from cr.cube.util import lazyproperty
@@ -2194,9 +2194,6 @@ class _Zscores(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        dimension_types = tuple(d.dimension_type for d in self._dimensions)
-        if DT.MR_SUBVAR in dimension_types:
-            return NanSubtotals.blocks(self._base_values, self._dimensions)
         return [
             [self._base_values, self._subtotal_columns],
             [self._subtotal_rows, self._intersections],
