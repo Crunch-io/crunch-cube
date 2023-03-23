@@ -111,6 +111,10 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.24
+- Drop support for diff subtotals in population measure
+- Enable Cat insertions across Multiple Response
+
 ### 3.0.23
 - Fix payload order using bogus ids
 
