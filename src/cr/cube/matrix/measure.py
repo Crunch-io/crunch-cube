@@ -3,15 +3,15 @@
 """Second-order measure collection and the individual measures it composes."""
 
 import numpy as np
-from scipy.stats import t, norm
+from scipy.stats import norm, t
 
 from cr.cube.enums import DIMENSION_TYPE as DT, MARGINAL_ORIENTATION as MO
 from cr.cube.matrix.cubemeasure import CubeMeasures
 from cr.cube.matrix.subtotals import (
-    SumSubtotals,
     NanSubtotals,
     NegativeTermSubtotals,
     PositiveTermSubtotals,
+    SumSubtotals,
 )
 from cr.cube.smoothing import Smoother
 from cr.cube.util import lazyproperty
