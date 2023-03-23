@@ -636,6 +636,90 @@ class DescribeDimension:
         assert Dimension(dimension_dict, None).selected_categories == expected_value
 
     @pytest.mark.parametrize(
+        "refs, expected",
+        (({"format": {"data": "%Y %b"}}, "%Y %b"), ({"format": {}}, None), ({}, None)),
+    )
+    def it_provides_access_to_element_data_format_to_help(self, refs, expected):
+        dimension = Dimension({"references": refs}, None)
+        assert dimension._element_data_format == expected
+
+    @pytest.mark.parametrize(
+        "in_format, out_format, x, expected",
+        (
+            ("%Y", "%Y-%m-%d", "2023", "2023-01-01"),
+            ("%Y-%m", "%m/%d/%Y", "2022-08", "08/01/2022"),
+            ("%Y-%m-%d", "%d/%m/%Y", "1999-12-31", "31/12/1999"),
+            ("%Y-%m-%dT%H", "%d %B, %Y", "2023-06-06T11", "06 June, 2023"),
+            ("%Y-%m-%dT%H:%M", "%d %B, %Y", "2023-07-04T09:20", "04 July, 2023"),
+            ("%Y-%m-%dT%H:%M:%S", "%d %b %Y", "2023-12-01T09:20:04", "01 Dec 2023"),
+            ("%Y-%m-%dT%H:%M:%S.%f", "%B %Y", "2022-06-22T09:48:35.921", "June 2022"),
+            ("%Y-%m-%dT%H:%M:%S.%f", "%Y", "2020-03-22T09:15:03.237821", "2020"),
+            ("%Y-%m-%d", "%b %Y", "2021-08-11", "Aug 2021"),
+            ("%Y-%m", "%d %B %Y", "2023-11", "01 November 2023"),
+            (None, "%Y", "2023", "2023"),  # ------------ No in_format, no change
+            ("%Y", None, "2023", "2023"),  # ----------- No out_format, no change
+            ("%Y", "%Y-%m-%d", "2023-01", "2023-01"),  # --- invalid x, no change
+            ("%Y-%m", "%Y-%m-%d", "2023", "2023"),  # ------ invalid x, no change
+            ("%Y", "%Y", "abc", "abc"),  # ----------------- invalid x, no change
+        ),
+    )
+    def it_can_format_datetime_element_label_to_help(
+        self, request, in_format, out_format, x, expected
+    ):
+        property_mock(
+            request,
+            Dimension,
+            "_incoming_element_datetime_format",
+            return_value=in_format,
+        )
+        property_mock(
+            request, Dimension, "_element_data_format", return_value=out_format
+        )
+        dimension = Dimension(None, None)
+        assert dimension._format_datetime_element_label(x) == expected
+
+    def it_can_format_element_label_if_datetime_to_help(self, request):
+        _format_datetime_element_label_ = method_mock(
+            request,
+            Dimension,
+            "_format_datetime_element_label",
+            return_value="formatted",
+        )
+        dimension = Dimension(None, DT.DATETIME)
+
+        actual = dimension._format_element_label("el value")
+
+        assert actual == "formatted"
+        _format_datetime_element_label_.assert_called_once_with(dimension, "el value")
+
+    @pytest.mark.parametrize(
+        "dim_type, value, expected",
+        ((DT.CATEGORICAL, "cat a", "cat a"), (DT.BINNED_NUMERIC, 123, "123")),
+    )
+    def and_it_can_format_non_datetime_element_label(self, dim_type, value, expected):
+        dimension = Dimension(None, dim_type)
+        assert dimension._format_element_label(value) == expected
+
+    @pytest.mark.parametrize(
+        "dim_type, resolution, expected",
+        (
+            (DT.DATETIME, "Y", "%Y"),
+            (DT.DATETIME, "M", "%Y-%m"),
+            (DT.DATETIME, "D", "%Y-%m-%d"),
+            (DT.DATETIME, "INVALID", None),
+            (DT.CATEGORICAL, "Y", None),
+        ),
+    )
+    def it_provides_incoming_element_datetime_format_to_help(
+        self, dim_type, resolution, expected
+    ):
+        dimension_dict = {
+            "type": {"elements": [], "subtype": {"resolution": resolution}}
+        }
+        dimension = Dimension(dimension_dict, dim_type)
+        assert dimension._incoming_element_datetime_format == expected
+
+    @pytest.mark.parametrize(
         "dimension_dict, insertion_dicts",
         (
             ({}, []),
@@ -921,7 +1005,7 @@ class Describe_AllElements:
         dimension_transforms_dict = {"dimension": "transforms"}
         _elements_prop_.return_value = elements_
         _ValidElements_.return_value = valid_elements_
-        all_elements = _AllElements(None, dimension_transforms_dict, None)
+        all_elements = _AllElements(None, dimension_transforms_dict, None, None)
 
         valid_elements = all_elements.valid_elements
 
@@ -952,7 +1036,7 @@ class Describe_AllElements:
             for idx in range(3)
         )
         _Element_.side_effect = iter(elements_)
-        all_elements = _AllElements(None, None, None)
+        all_elements = _AllElements(None, None, None, "lbl_formatter")
 
         elements = all_elements._elements
 
@@ -962,9 +1046,9 @@ class Describe_AllElements:
             call({"xfrms": 2}),
         ]
         assert _Element_.call_args_list == [
-            call({"element": "dict-A"}, 0, element_transforms_[0]),
-            call({"element": "dict-B"}, 1, element_transforms_[1]),
-            call({"element": "dict-C"}, 2, element_transforms_[2]),
+            call({"element": "dict-A"}, 0, element_transforms_[0], "lbl_formatter"),
+            call({"element": "dict-B"}, 1, element_transforms_[1], "lbl_formatter"),
+            call({"element": "dict-C"}, 2, element_transforms_[2], "lbl_formatter"),
         ]
         assert elements == (elements_[0], elements_[1], elements_[2])
 
@@ -977,7 +1061,7 @@ class Describe_AllElements:
             {"id": 2, "element": "dict_2"},
             {"id": 6, "element": "dict_6"},
         )
-        all_elements = _AllElements(None, dimension_transforms_dict, None)
+        all_elements = _AllElements(None, dimension_transforms_dict, None, None)
 
         element_makings = tuple(all_elements._iter_element_makings())
 
@@ -1029,7 +1113,7 @@ class Describe_AllElements:
         self, dim_xforms, element_dicts, dim_type, expected_value, _element_dicts_prop_
     ):
         _element_dicts_prop_.return_value = element_dicts
-        all_elements = _AllElements(None, dim_xforms, dim_type)
+        all_elements = _AllElements(None, dim_xforms, dim_type, None)
 
         elements_transforms = all_elements._elements_transforms
 
@@ -1359,7 +1443,7 @@ class Describe_Element:
 
     def it_knows_its_anchor(self):
         element_dict = {"value": {"references": {"anchor": "top"}, "derived": True}}
-        element = _Element(element_dict, None, None)
+        element = _Element(element_dict, None, None, None)
 
         anchor = element.anchor
 
@@ -1367,7 +1451,7 @@ class Describe_Element:
 
     def but_anchor_is_none_if_not_derived(self):
         element_dict = {"value": {"derived": False}}
-        element = _Element(element_dict, None, None)
+        element = _Element(element_dict, None, None, None)
 
         anchor = element.anchor
 
@@ -1375,7 +1459,7 @@ class Describe_Element:
 
     def it_knows_its_element_id(self):
         element_dict = {"id": 42}
-        element = _Element(element_dict, None, None)
+        element = _Element(element_dict, None, None, None)
 
         element_id = element.element_id
 
@@ -1383,52 +1467,65 @@ class Describe_Element:
 
     def it_knows_its_fill_RGB_color_str(self, element_transforms_):
         element_transforms_.fill = [255, 255, 248]
-        element = _Element(None, None, element_transforms_)
+        element = _Element(None, None, element_transforms_, None)
 
         rgb_color_fill = element.fill
 
         assert rgb_color_fill == [255, 255, 248]
 
     def it_knows_its_position_among_all_the_dimension_elements(self):
-        element = _Element(None, 17, None)
+        element = _Element(None, 17, None, None)
         index = element.index
         assert index == 17
 
     @pytest.mark.parametrize(
-        ("element_dict", "transform_name", "expected_value"),
+        ("element_dict", "transform_name", "expected_value", "fmt_calls"),
         (
-            ({}, None, ""),
-            ({}, "Garf", "Garf"),
-            ({"name": ""}, None, ""),
-            ({"name": None}, None, ""),
-            ({"name": "Bob"}, None, "Bob"),
-            ({"name": "Hinzufägen"}, None, "Hinzufägen"),
-            ({"value": ["A", "F"]}, None, "A-F"),
-            ({"value": [1.2, 3.4]}, None, "1.2-3.4"),
-            ({"value": 42}, None, "42"),
-            ({"value": 4.2}, None, "4.2"),
-            ({"value": "Bill"}, None, "Bill"),
-            ({"value": "Fähig"}, None, "Fähig"),
-            ({"value": {"references": {}}}, None, ""),
-            ({"value": {"references": {"name": "Tom"}}}, None, "Tom"),
-            ({"value": {"references": {"name": "Tom"}}}, "Harry", "Harry"),
-            ({"value": {"references": {"name": "Tom"}}}, "", ""),
+            ({}, None, "", ()),
+            ({}, "Garf", "Garf", ()),
+            ({"name": ""}, None, "", ()),
+            ({"name": None}, None, "", ()),
+            ({"name": "Bob"}, None, "Bob", ()),
+            ({"name": "Hinzufägen"}, None, "Hinzufägen", ()),
+            ({"value": ["A", "F"]}, None, "A-F", ("A", "F")),
+            ({"value": [1.2, 3.4]}, None, "1.2-3.4", (1.2, 3.4)),
+            ({"value": 42}, None, "42", (42,)),
+            ({"value": 4.2}, None, "4.2", (4.2,)),
+            ({"value": "Bill"}, None, "Bill", ("Bill",)),
+            ({"value": "Fähig"}, None, "Fähig", ("Fähig",)),
+            ({"value": {"references": {}}}, None, "", ()),
+            ({"value": {"references": {"name": "Tom"}}}, None, "Tom", ()),
+            ({"value": {"references": {"name": "Tom"}}}, "Harry", "Harry", ()),
+            ({"value": {"references": {"name": "Tom"}}}, "", "", ()),
         ),
     )
     def it_knows_its_label(
-        self, element_dict, transform_name, expected_value, element_transforms_
+        self,
+        request,
+        element_dict,
+        transform_name,
+        expected_value,
+        element_transforms_,
+        fmt_calls,
     ):
+        dim_ = class_mock(request, "cr.cube.dimension.Dimension")
+        dim_._format_element_label.side_effect = lambda x: str(x)
         element_transforms_.name = transform_name
-        element = _Element(element_dict, None, element_transforms_)
+        element = _Element(
+            element_dict, None, element_transforms_, dim_._format_element_label
+        )
 
         assert element.label == expected_value
+        assert dim_._format_element_label.call_args_list == [
+            call(fmt) for fmt in fmt_calls
+        ]
 
     @pytest.mark.parametrize(
         ("hide", "expected_value"), ((True, True), (False, False), (None, False))
     )
     def it_knows_whether_it_is_explicitly_hidden(self, request, hide, expected_value):
         element_transforms_ = instance_mock(request, _ElementTransforms, hide=hide)
-        element = _Element(None, None, element_transforms_)
+        element = _Element(None, None, element_transforms_, None)
 
         is_hidden = element.is_hidden
 
@@ -1447,7 +1544,7 @@ class Describe_Element:
         ),
     )
     def it_knows_whether_its_missing_or_valid(self, element_dict, expected_value):
-        element = _Element(element_dict, None, None)
+        element = _Element(element_dict, None, None, None)
 
         missing = element.missing
 
@@ -1470,7 +1567,7 @@ class Describe_Element:
         ),
     )
     def it_knows_its_numeric_value(self, element_dict, expected_value):
-        element = _Element(element_dict, None, None)
+        element = _Element(element_dict, None, None, None)
 
         numeric_value = element.numeric_value
 
@@ -1849,11 +1946,11 @@ class Describe_Subtotal:
     ):
         addend_ids_.return_value = addend_ids
         elements_ = (
-            _Element({"id": 1}, None, None),
-            _Element({"id": 2}, None, None),
-            _Element({"id": 3}, None, None),
-            _Element({"id": 4}, None, None),
-            _Element({"id": 99}, None, None),
+            _Element({"id": 1}, None, None, None),
+            _Element({"id": 2}, None, None, None),
+            _Element({"id": 3}, None, None, None),
+            _Element({"id": 4}, None, None, None),
+            _Element({"id": 99}, None, None, None),
         )
         all_elements_.__iter__.return_value = iter(elements_)
         valid_elements = _ValidElements(all_elements_, None)
@@ -1957,11 +2054,11 @@ class Describe_Subtotal:
     ):
         subtrahend_ids_.return_value = subtrahend_ids
         elements_ = (
-            _Element({"id": 1}, None, None),
-            _Element({"id": 2}, None, None),
-            _Element({"id": 3}, None, None),
-            _Element({"id": 4}, None, None),
-            _Element({"id": 99}, None, None),
+            _Element({"id": 1}, None, None, None),
+            _Element({"id": 2}, None, None, None),
+            _Element({"id": 3}, None, None, None),
+            _Element({"id": 4}, None, None, None),
+            _Element({"id": 99}, None, None, None),
         )
         all_elements_.__iter__.return_value = iter(elements_)
         valid_elements = _ValidElements(all_elements_, None)
