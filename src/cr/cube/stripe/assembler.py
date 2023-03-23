@@ -104,7 +104,13 @@ class StripeAssembler:
         population when the row is a CAT_DATE, can also be all 1s. Used to calculate
         the population_counts.
         """
-        return self._assemble_vector(self._measures.population_proportions.blocks)
+        population_proportions = self._assemble_vector(
+            self._measures.population_proportions.blocks
+        )
+        # Diff subtotals not allowed in population measure
+        if self.diff_row_idxs:
+            population_proportions[self.diff_row_idxs] = np.nan
+        return population_proportions
 
     @lazyproperty
     def population_proportion_stderrs(self):
