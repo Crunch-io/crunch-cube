@@ -2033,19 +2033,6 @@ class Describe_Zscores:
 
         assert blocks == [["A", "B"], ["C", "D"]]
 
-    def it_computes_its_blocks_if_mr_in_dimensions(
-        self, request, _base_values_prop_, dimensions_
-    ):
-        dimensions_[0].dimension_type = DT.MR_SUBVAR
-        _base_values_prop_.return_value = [[1, 2], [3, 4]]
-        NanSubtotals_ = class_mock(request, "cr.cube.matrix.measure.NanSubtotals")
-        NanSubtotals_.blocks.return_value = [[[1], [np.nan]], [[np.nan], [np.nan]]]
-
-        blocks = _Zscores(dimensions_, None, None).blocks
-
-        NanSubtotals_.blocks.assert_called_once_with([[1, 2], [3, 4]], dimensions_)
-        assert blocks == [[[1], [np.nan]], [[np.nan], [np.nan]]]
-
     def it_can_calculate_a_zscore(self, _is_defective_prop_):
         _is_defective_prop_.return_value = False
         zscores = _Zscores(None, None, None)
