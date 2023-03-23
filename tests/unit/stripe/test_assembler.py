@@ -68,6 +68,7 @@ class DescribeStripeAssembler:
             measure_prop_name,
             instance_mock(request, MeasureCls, blocks=("A", "B")),
         )
+        property_mock(request, StripeAssembler, "diff_row_idxs", return_value=())
         _assemble_vector_.return_value = np.array([1, 2, 3, 4, 5])
         assembler = StripeAssembler(None, None, None, None)
 

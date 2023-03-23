@@ -400,7 +400,15 @@ class Assembler:
         The proportion used to calculate proportion counts depends on the dimension
         types.
         """
-        return self._assemble_matrix(self._measures.population_proportions.blocks)
+        population_proportions = self._assemble_matrix(
+            self._measures.population_proportions.blocks
+        )
+        # Diff subtotals not allowed in population measure
+        if self.diff_row_idxs:
+            population_proportions[self.diff_row_idxs, :] = np.nan
+        if self.diff_column_idxs:
+            population_proportions[:, self.diff_column_idxs] = np.nan
+        return population_proportions
 
     @lazyproperty
     def population_std_err(self):

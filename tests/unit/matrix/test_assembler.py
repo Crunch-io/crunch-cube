@@ -132,6 +132,8 @@ class DescribeAssembler:
             measure_prop_name,
             instance_mock(request, MeasureCls, blocks=[["A", "B"], ["C", "D"]]),
         )
+        property_mock(request, Assembler, "diff_row_idxs", return_value=())
+        property_mock(request, Assembler, "diff_column_idxs", return_value=())
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
         assembler = Assembler(None, None, None)
 

@@ -2780,12 +2780,14 @@ class DescribeIntegrated_SubtotalDifferences(object):
                     ]
                 }
             },
+            population=100,
         ).partitions[0]
 
         assert strand.counts[0] == 81
         assert strand.table_proportions[0] == pytest.approx(0.1184210)
         assert strand.diff_row_idxs == (0,)
         assert strand.table_proportion_moes[0] == pytest.approx(0.05216430)
+        assert strand.population_counts[0] == pytest.approx(np.nan, nan_ok=True)
 
     def it_computes_measures_for_cat_x_cat_with_subdiffs_on_both(self):
         slice_ = Cube(
@@ -2814,6 +2816,7 @@ class DescribeIntegrated_SubtotalDifferences(object):
                     ]
                 },
             },
+            population=200,
         ).partitions[0]
 
         assert slice_.counts[0, :].tolist() == pytest.approx(
@@ -2894,6 +2897,12 @@ class DescribeIntegrated_SubtotalDifferences(object):
         assert slice_.zscores[0, :] == pytest.approx(np.full(5, np.nan), nan_ok=True)
         assert slice_.pvals[:, 0] == pytest.approx(np.full(5, np.nan), nan_ok=True)
         assert slice_.pvals[0, :] == pytest.approx(np.full(5, np.nan), nan_ok=True)
+        assert slice_.population_counts[0, :] == pytest.approx(
+            np.full(5, np.nan), nan_ok=True
+        )
+        assert slice_.population_counts[:, 0] == pytest.approx(
+            np.full(5, np.nan), nan_ok=True
+        )
 
     def it_computes_measures_for_cat_x_cat_with_subdiffs_and_subtot_on_both(self):
         slice_ = Cube(
