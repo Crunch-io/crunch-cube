@@ -2194,9 +2194,6 @@ class _Zscores(_BaseSecondOrderMeasure):
     @lazyproperty
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
-        dimension_types = tuple(d.dimension_type for d in self._dimensions)
-        if DT.MR_SUBVAR in dimension_types:
-            return NanSubtotals.blocks(self._base_values, self._dimensions)
         return [
             [self._base_values, self._subtotal_columns],
             [self._subtotal_rows, self._intersections],
