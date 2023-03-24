@@ -644,82 +644,6 @@ class DescribeDimension:
         assert dimension._element_data_format == expected
 
     @pytest.mark.parametrize(
-        "in_format, out_format, x, expected",
-        (
-            ("%Y", "%Y-%m-%d", "2023", "2023-01-01"),
-            ("%Y-%m", "%m/%d/%Y", "2022-08", "08/01/2022"),
-            ("%Y-%m-%d", "%d/%m/%Y", "1999-12-31", "31/12/1999"),
-            ("%Y-%m-%dT%H", "%d %B, %Y", "2023-06-06T11", "06 June, 2023"),
-            ("%Y-%m-%dT%H:%M", "%d %B, %Y", "2023-07-04T09:20", "04 July, 2023"),
-            ("%Y-%m-%dT%H:%M:%S", "%d %b %Y", "2023-12-01T09:20:04", "01 Dec 2023"),
-            ("%Y-%m-%dT%H:%M:%S.%f", "%B %Y", "2022-06-22T09:48:35.921", "June 2022"),
-            ("%Y-%m-%dT%H:%M:%S.%f", "%Y", "2020-03-22T09:15:03.237821", "2020"),
-            ("%Y-%m-%d", "%b %Y", "2021-08-11", "Aug 2021"),
-            ("%Y-%m", "%d %B %Y", "2023-11", "01 November 2023"),
-            (None, "%Y", "2023", "2023"),  # ------------ No in_format, no change
-            ("%Y", None, "2023", "2023"),  # ----------- No out_format, no change
-            ("%Y", "%Y-%m-%d", "2023-01", "2023-01"),  # --- invalid x, no change
-            ("%Y-%m", "%Y-%m-%d", "2023", "2023"),  # ------ invalid x, no change
-            ("%Y", "%Y", "abc", "abc"),  # ----------------- invalid x, no change
-        ),
-    )
-    def it_can_format_datetime_element_label_to_help(
-        self, request, in_format, out_format, x, expected
-    ):
-        property_mock(
-            request,
-            Dimension,
-            "_incoming_element_datetime_format",
-            return_value=in_format,
-        )
-        property_mock(
-            request, Dimension, "_element_data_format", return_value=out_format
-        )
-        dimension = Dimension(None, None)
-        assert dimension._format_datetime_element_label(x) == expected
-
-    def it_can_format_element_label_if_datetime_to_help(self, request):
-        _format_datetime_element_label_ = method_mock(
-            request,
-            Dimension,
-            "_format_datetime_element_label",
-            return_value="formatted",
-        )
-        dimension = Dimension(None, DT.DATETIME)
-
-        actual = dimension._format_element_label("el value")
-
-        assert actual == "formatted"
-        _format_datetime_element_label_.assert_called_once_with(dimension, "el value")
-
-    @pytest.mark.parametrize(
-        "dim_type, value, expected",
-        ((DT.CATEGORICAL, "cat a", "cat a"), (DT.BINNED_NUMERIC, 123, "123")),
-    )
-    def and_it_can_format_non_datetime_element_label(self, dim_type, value, expected):
-        dimension = Dimension(None, dim_type)
-        assert dimension._format_element_label(value) == expected
-
-    @pytest.mark.parametrize(
-        "dim_type, resolution, expected",
-        (
-            (DT.DATETIME, "Y", "%Y"),
-            (DT.DATETIME, "M", "%Y-%m"),
-            (DT.DATETIME, "D", "%Y-%m-%d"),
-            (DT.DATETIME, "INVALID", None),
-            (DT.CATEGORICAL, "Y", None),
-        ),
-    )
-    def it_provides_incoming_element_datetime_format_to_help(
-        self, dim_type, resolution, expected
-    ):
-        dimension_dict = {
-            "type": {"elements": [], "subtype": {"resolution": resolution}}
-        }
-        dimension = Dimension(dimension_dict, dim_type)
-        assert dimension._incoming_element_datetime_format == expected
-
-    @pytest.mark.parametrize(
         "dimension_dict, insertion_dicts",
         (
             ({}, []),
@@ -1031,12 +955,13 @@ class Describe_AllElements:
                 (2, {"element": "dict-C"}, {"xfrms": 2}),
             )
         )
+        property_mock(request, _AllElements, "_format_label", return_value="fmter")
         elements_ = tuple(
             instance_mock(request, _Element, name="element-%s" % idx)
             for idx in range(3)
         )
         _Element_.side_effect = iter(elements_)
-        all_elements = _AllElements(None, None, None, "lbl_formatter")
+        all_elements = _AllElements(None, None, None, None)
 
         elements = all_elements._elements
 
@@ -1046,9 +971,9 @@ class Describe_AllElements:
             call({"xfrms": 2}),
         ]
         assert _Element_.call_args_list == [
-            call({"element": "dict-A"}, 0, element_transforms_[0], "lbl_formatter"),
-            call({"element": "dict-B"}, 1, element_transforms_[1], "lbl_formatter"),
-            call({"element": "dict-C"}, 2, element_transforms_[2], "lbl_formatter"),
+            call({"element": "dict-A"}, 0, element_transforms_[0], "fmter"),
+            call({"element": "dict-B"}, 1, element_transforms_[1], "fmter"),
+            call({"element": "dict-C"}, 2, element_transforms_[2], "fmter"),
         ]
         assert elements == (elements_[0], elements_[1], elements_[2])
 
@@ -1118,6 +1043,78 @@ class Describe_AllElements:
         elements_transforms = all_elements._elements_transforms
 
         assert elements_transforms == expected_value
+
+    @pytest.mark.parametrize(
+        "in_format, out_format, x, expected",
+        (
+            ("%Y", "%Y-%m-%d", "2023", "2023-01-01"),
+            ("%Y-%m", "%m/%d/%Y", "2022-08", "08/01/2022"),
+            ("%Y-%m-%d", "%d/%m/%Y", "1999-12-31", "31/12/1999"),
+            ("%Y-%m-%dT%H", "%d %B, %Y", "2023-06-06T11", "06 June, 2023"),
+            ("%Y-%m-%dT%H:%M", "%d %B, %Y", "2023-07-04T09:20", "04 July, 2023"),
+            ("%Y-%m-%dT%H:%M:%S", "%d %b %Y", "2023-12-01T09:20:04", "01 Dec 2023"),
+            ("%Y-%m-%dT%H:%M:%S.%f", "%B %Y", "2022-06-22T09:48:35.921", "June 2022"),
+            ("%Y-%m-%dT%H:%M:%S.%f", "%Y", "2020-03-22T09:15:03.237821", "2020"),
+            ("%Y-%m-%d", "%b %Y", "2021-08-11", "Aug 2021"),
+            ("%Y-%m", "%d %B %Y", "2023-11", "01 November 2023"),
+            (None, "%Y", "2023", "2023"),  # ------------ No in_format, no change
+            ("%Y", None, "2023", "2023"),  # ----------- No out_format, no change
+            ("%Y", "%Y-%m-%d", "2023-01", "2023-01"),  # --- invalid x, no change
+            ("%Y-%m", "%Y-%m-%d", "2023", "2023"),  # ------- invalid x, no change
+            ("%Y", "%Y", "abc", "abc"),  # ----------------- invalid x, no change
+        ),
+    )
+    def it_can_format_datetime_label_to_help(
+        self, request, in_format, out_format, x, expected
+    ):
+        property_mock(
+            request,
+            _AllElements,
+            "_incoming_element_datetime_format",
+            return_value=in_format,
+        )
+
+        all_elements = _AllElements(None, None, None, out_format)
+        assert all_elements._format_datetime_label(x) == expected
+
+    def it_can_format_label_if_datetime_to_help(self, request):
+        _format_label_ = method_mock(
+            request,
+            _AllElements,
+            "_format_label",
+            return_value="formatted",
+        )
+        all_elements = _AllElements(None, None, DT.DATETIME, None)
+
+        actual = all_elements._format_label("el value")
+
+        assert actual == "formatted"
+        _format_label_.assert_called_once_with(all_elements, "el value")
+
+    @pytest.mark.parametrize(
+        "dim_type, value, expected",
+        ((DT.CATEGORICAL, "cat a", "cat a"), (DT.BINNED_NUMERIC, 123, "123")),
+    )
+    def and_it_can_format_non_datetime_element_label(self, dim_type, value, expected):
+        dimension = _AllElements(None, dim_type, None, None)
+        assert dimension._format_label(value) == expected
+
+    @pytest.mark.parametrize(
+        "dim_type, resolution, expected",
+        (
+            (DT.DATETIME, "Y", "%Y"),
+            (DT.DATETIME, "M", "%Y-%m"),
+            (DT.DATETIME, "D", "%Y-%m-%d"),
+            (DT.DATETIME, "INVALID", None),
+            (DT.CATEGORICAL, "Y", None),
+        ),
+    )
+    def it_provides_incoming_element_datetime_format_to_help(
+        self, dim_type, resolution, expected
+    ):
+        type_dict = {"subtype": {"resolution": resolution}}
+        all_elements = _AllElements(type_dict, None, dim_type, None)
+        assert all_elements._incoming_element_datetime_format == expected
 
     # fixture components ---------------------------------------------
 
@@ -1508,15 +1505,15 @@ class Describe_Element:
         element_transforms_,
         fmt_calls,
     ):
-        dim_ = class_mock(request, "cr.cube.dimension.Dimension")
-        dim_._format_element_label.side_effect = lambda x: str(x)
+        all_elements_ = class_mock(request, "cr.cube.dimension._AllElements")
+        all_elements_._format_label.side_effect = lambda x: str(x)
         element_transforms_.name = transform_name
         element = _Element(
-            element_dict, None, element_transforms_, dim_._format_element_label
+            element_dict, None, element_transforms_, all_elements_._format_label
         )
 
         assert element.label == expected_value
-        assert dim_._format_element_label.call_args_list == [
+        assert all_elements_._format_label.call_args_list == [
             call(fmt) for fmt in fmt_calls
         ]
 

@@ -273,10 +273,10 @@ class DescribeIntegrated_Element:
     """Integration-test suite for `cr.cube.dimension._Element` object."""
 
     def it_knows_its_transformed_label(self, element_dict, element_transforms_):
-        dimension = Dimension(None, None)
+        all_elements = _AllElements(None, None, None, None)
         element_transforms_.name = "Xfinity Lounge"
         element = _Element(
-            element_dict, None, element_transforms_, dimension._format_element_label
+            element_dict, None, element_transforms_, all_elements._format_label
         )
 
         label = element.label
