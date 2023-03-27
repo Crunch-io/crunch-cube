@@ -1,0 +1,1248 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "variable": "3xhdBhEBEBcSqbK2GbVrAo000acb"
+            },
+            {
+                "function": "dimension",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "variable": "5d7bf158af70443bbe927e07cce48e3b"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "subvariables"
+                    }
+                ]
+            },
+            {
+                "function": "as_selected",
+                "args": [
+                    {
+                        "variable": "5d7bf158af70443bbe927e07cce48e3b"
+                    }
+                ]
+            }
+        ],
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "weight": null
+    },
+    "result": {
+        "n": 784,
+        "counts": [
+            88,
+            101,
+            0,
+            101,
+            88,
+            0,
+            83,
+            269,
+            0,
+            269,
+            83,
+            0,
+            23,
+            136,
+            0,
+            136,
+            23,
+            0,
+            6,
+            54,
+            0,
+            54,
+            6,
+            0,
+            1,
+            22,
+            0,
+            22,
+            1,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0
+        ],
+        "dimensions": [
+            {
+                "type": {
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "numeric_value": 5.0,
+                            "name": "Very appealing"
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "numeric_value": 4.0,
+                            "name": "Appealing"
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "numeric_value": 3.0,
+                            "name": "Neither appealing nor unappealing"
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "numeric_value": 2.0,
+                            "name": "Unappealing"
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "numeric_value": 1.0,
+                            "name": "Very unappealing"
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "ordinal": false
+                },
+                "references": {
+                    "alias": "q3101",
+                    "name": "Appeal|Signal Integral 8 Nature Elements Charbon ",
+                    "description": "(Q3101) To what extent does this package appeal to you?",
+                    "view": {
+                        "column_width": null,
+                        "show_numeric_values": false,
+                        "show_counts": false,
+                        "include_missing": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "anchor": "top",
+                                    "function": "subtotal",
+                                    "name": "Top 2 Box (Net)",
+                                    "kwargs": {
+                                        "positive": [
+                                            1,
+                                            2
+                                        ]
+                                    },
+                                    "id": 1,
+                                    "args": [
+                                        1,
+                                        2
+                                    ]
+                                },
+                                {
+                                    "anchor": "top",
+                                    "function": "subtotal",
+                                    "name": "Test",
+                                    "kwargs": {
+                                        "positive": [
+                                            1,
+                                            2
+                                        ]
+                                    },
+                                    "id": 3,
+                                    "args": [
+                                        1,
+                                        2
+                                    ]
+                                },
+                                {
+                                    "anchor": 5,
+                                    "function": "subtotal",
+                                    "name": "Bottom 2 Box (Net)",
+                                    "kwargs": {
+                                        "positive": [
+                                            4,
+                                            5
+                                        ]
+                                    },
+                                    "id": 2,
+                                    "args": [
+                                        4,
+                                        5
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                "derived": false
+            },
+            {
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "id": "000001",
+                                "references": {
+                                    "alias": "q302_1__1",
+                                    "name": "Natural Variant User",
+                                    "description": "(NATURAL VARIANT USER CLASSIFICATION)  NATURAL VARIANT USER CLASSIFICATION"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "id": "000002",
+                                "references": {
+                                    "alias": "q302_2__1",
+                                    "name": "Non-Natural Variant User",
+                                    "description": null,
+                                    "view": null
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                },
+                "references": {
+                    "subreferences": [
+                        {
+                            "alias": "q302_1__1",
+                            "name": "Natural Variant User",
+                            "description": "(NATURAL VARIANT USER CLASSIFICATION)  NATURAL VARIANT USER CLASSIFICATION"
+                        },
+                        {
+                            "alias": "q302_2__1",
+                            "name": "Non-Natural Variant User",
+                            "description": null,
+                            "view": null
+                        }
+                    ],
+                    "name": "Natural Variant User Classification (FR)",
+                    "alias": "q302_Multi_DP",
+                    "description": "(Q302) ",
+                    "uniform_basis": false,
+                    "format": null,
+                    "view": null,
+                    "dichotomous": true,
+                    "notes": null,
+                    "api_derivation": {
+                        "function": "alter_array",
+                        "args": [
+                            {
+                                "function": "exclude_empty",
+                                "args": [
+                                    {
+                                        "function": "array",
+                                        "args": [
+                                            {
+                                                "function": "make_frame",
+                                                "args": [
+                                                    {
+                                                        "map": {
+                                                            "000001": {
+                                                                "function": "as_selected",
+                                                                "args": [
+                                                                    {
+                                                                        "function": "select_categories",
+                                                                        "args": [
+                                                                            {
+                                                                                "function": "combine_categories",
+                                                                                "args": [
+                                                                                    {
+                                                                                        "variable": "3xhdBhEBEBcSqbK2GbVrAo00016d"
+                                                                                    },
+                                                                                    {
+                                                                                        "value": [
+                                                                                            {
+                                                                                                "id": 1,
+                                                                                                "name": "Selected",
+                                                                                                "selected": true,
+                                                                                                "missing": false,
+                                                                                                "numeric_value": 1,
+                                                                                                "mapped ids": [
+                                                                                                    1
+                                                                                                ]
+                                                                                            },
+                                                                                            {
+                                                                                                "id": 0,
+                                                                                                "name": "Other",
+                                                                                                "selected": false,
+                                                                                                "missing": false,
+                                                                                                "numeric_value": 0,
+                                                                                                "mapped ids": [
+                                                                                                    -1
+                                                                                                ]
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                ]
+                                                                            },
+                                                                            {
+                                                                                "value": [
+                                                                                    1
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        "references": {
+                                                                            "name": "Natural Variant User &QUOTA_COMPLETES_Q302_1_9999;",
+                                                                            "alias": "q302_1__1"
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            "000002": {
+                                                                "function": "as_selected",
+                                                                "args": [
+                                                                    {
+                                                                        "function": "select_categories",
+                                                                        "args": [
+                                                                            {
+                                                                                "function": "combine_categories",
+                                                                                "args": [
+                                                                                    {
+                                                                                        "variable": "3xhdBhEBEBcSqbK2GbVrAo00016e"
+                                                                                    },
+                                                                                    {
+                                                                                        "value": [
+                                                                                            {
+                                                                                                "id": 1,
+                                                                                                "name": "Selected",
+                                                                                                "selected": true,
+                                                                                                "missing": false,
+                                                                                                "numeric_value": 1,
+                                                                                                "mapped ids": [
+                                                                                                    2
+                                                                                                ]
+                                                                                            },
+                                                                                            {
+                                                                                                "id": 0,
+                                                                                                "name": "Other",
+                                                                                                "selected": false,
+                                                                                                "missing": false,
+                                                                                                "numeric_value": 0,
+                                                                                                "mapped ids": [
+                                                                                                    -1
+                                                                                                ]
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                ]
+                                                                            },
+                                                                            {
+                                                                                "value": [
+                                                                                    1
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        "references": {
+                                                                            "name": "Non-Natural Variant User &QUOTA_COMPLETES_Q302_2_9999;",
+                                                                            "alias": "q302_2__1"
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "value": [
+                                                            "000001",
+                                                            "000002"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "references": {
+                                    "name": "Natural Variant User Classification (FR)",
+                                    "alias": "q302_Multi_DP",
+                                    "description": "(Q302) ",
+                                    "uniform_basis": false
+                                }
+                            }
+                        ],
+                        "kwargs": {
+                            "subreferences": {
+                                "value": {
+                                    "000001": {
+                                        "alias": "q302_1__1",
+                                        "name": "Natural Variant User",
+                                        "description": "(NATURAL VARIANT USER CLASSIFICATION)  NATURAL VARIANT USER CLASSIFICATION"
+                                    },
+                                    "000002": {
+                                        "alias": "q302_2__1",
+                                        "name": "Non-Natural Variant User",
+                                        "description": null
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "derived": true
+            },
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "id": 1,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true,
+                            "missing": false
+                        },
+                        {
+                            "id": 0,
+                            "name": "Other",
+                            "numeric_value": 0,
+                            "missing": false
+                        },
+                        {
+                            "id": -1,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "missing": true
+                        }
+                    ],
+                    "subvariables": [
+                        "000001",
+                        "000002"
+                    ]
+                },
+                "references": {
+                    "subreferences": [
+                        {
+                            "alias": "q302_1__1",
+                            "name": "Natural Variant User",
+                            "description": "(NATURAL VARIANT USER CLASSIFICATION)  NATURAL VARIANT USER CLASSIFICATION"
+                        },
+                        {
+                            "alias": "q302_2__1",
+                            "name": "Non-Natural Variant User",
+                            "description": null,
+                            "view": null
+                        }
+                    ],
+                    "name": "Natural Variant User Classification (FR)",
+                    "alias": "q302_Multi_DP",
+                    "description": "(Q302) ",
+                    "uniform_basis": false,
+                    "format": null,
+                    "view": null,
+                    "dichotomous": true,
+                    "notes": null,
+                    "api_derivation": {
+                        "function": "alter_array",
+                        "args": [
+                            {
+                                "function": "exclude_empty",
+                                "args": [
+                                    {
+                                        "function": "array",
+                                        "args": [
+                                            {
+                                                "function": "make_frame",
+                                                "args": [
+                                                    {
+                                                        "map": {
+                                                            "000001": {
+                                                                "function": "as_selected",
+                                                                "args": [
+                                                                    {
+                                                                        "function": "select_categories",
+                                                                        "args": [
+                                                                            {
+                                                                                "function": "combine_categories",
+                                                                                "args": [
+                                                                                    {
+                                                                                        "variable": "3xhdBhEBEBcSqbK2GbVrAo00016d"
+                                                                                    },
+                                                                                    {
+                                                                                        "value": [
+                                                                                            {
+                                                                                                "id": 1,
+                                                                                                "name": "Selected",
+                                                                                                "selected": true,
+                                                                                                "missing": false,
+                                                                                                "numeric_value": 1,
+                                                                                                "mapped ids": [
+                                                                                                    1
+                                                                                                ]
+                                                                                            },
+                                                                                            {
+                                                                                                "id": 0,
+                                                                                                "name": "Other",
+                                                                                                "selected": false,
+                                                                                                "missing": false,
+                                                                                                "numeric_value": 0,
+                                                                                                "mapped ids": [
+                                                                                                    -1
+                                                                                                ]
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                ]
+                                                                            },
+                                                                            {
+                                                                                "value": [
+                                                                                    1
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        "references": {
+                                                                            "name": "Natural Variant User &QUOTA_COMPLETES_Q302_1_9999;",
+                                                                            "alias": "q302_1__1"
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            "000002": {
+                                                                "function": "as_selected",
+                                                                "args": [
+                                                                    {
+                                                                        "function": "select_categories",
+                                                                        "args": [
+                                                                            {
+                                                                                "function": "combine_categories",
+                                                                                "args": [
+                                                                                    {
+                                                                                        "variable": "3xhdBhEBEBcSqbK2GbVrAo00016e"
+                                                                                    },
+                                                                                    {
+                                                                                        "value": [
+                                                                                            {
+                                                                                                "id": 1,
+                                                                                                "name": "Selected",
+                                                                                                "selected": true,
+                                                                                                "missing": false,
+                                                                                                "numeric_value": 1,
+                                                                                                "mapped ids": [
+                                                                                                    2
+                                                                                                ]
+                                                                                            },
+                                                                                            {
+                                                                                                "id": 0,
+                                                                                                "name": "Other",
+                                                                                                "selected": false,
+                                                                                                "missing": false,
+                                                                                                "numeric_value": 0,
+                                                                                                "mapped ids": [
+                                                                                                    -1
+                                                                                                ]
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                ]
+                                                                            },
+                                                                            {
+                                                                                "value": [
+                                                                                    1
+                                                                                ]
+                                                                            }
+                                                                        ],
+                                                                        "references": {
+                                                                            "name": "Non-Natural Variant User &QUOTA_COMPLETES_Q302_2_9999;",
+                                                                            "alias": "q302_2__1"
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "value": [
+                                                            "000001",
+                                                            "000002"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "references": {
+                                    "name": "Natural Variant User Classification (FR)",
+                                    "alias": "q302_Multi_DP",
+                                    "description": "(Q302) ",
+                                    "uniform_basis": false
+                                }
+                            }
+                        ],
+                        "kwargs": {
+                            "subreferences": {
+                                "value": {
+                                    "000001": {
+                                        "alias": "q302_1__1",
+                                        "name": "Natural Variant User",
+                                        "description": "(NATURAL VARIANT USER CLASSIFICATION)  NATURAL VARIANT USER CLASSIFICATION"
+                                    },
+                                    "000002": {
+                                        "alias": "q302_2__1",
+                                        "name": "Non-Natural Variant User",
+                                        "description": null
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "derived": true
+            }
+        ],
+        "measures": {
+            "count": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    },
+                    "references": {},
+                    "derived": true
+                },
+                "data": [
+                    88,
+                    101,
+                    0,
+                    101,
+                    88,
+                    0,
+                    83,
+                    269,
+                    0,
+                    269,
+                    83,
+                    0,
+                    23,
+                    136,
+                    0,
+                    136,
+                    23,
+                    0,
+                    6,
+                    54,
+                    0,
+                    54,
+                    6,
+                    0,
+                    1,
+                    22,
+                    0,
+                    22,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    1,
+                    0,
+                    0
+                ],
+                "n_missing": 1
+            },
+            "overlap": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {},
+                        "subvariables": [
+                            "000001",
+                            "000002"
+                        ]
+                    },
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "q302_1__1",
+                                "name": "Natural Variant User",
+                                "description": "(NATURAL VARIANT USER CLASSIFICATION)  NATURAL VARIANT USER CLASSIFICATION"
+                            },
+                            {
+                                "alias": "q302_2__1",
+                                "name": "Non-Natural Variant User",
+                                "description": null,
+                                "view": null
+                            }
+                        ],
+                        "name": "Natural Variant User Classification (FR)",
+                        "alias": "q302_Multi_DP",
+                        "description": "(Q302) ",
+                        "uniform_basis": false,
+                        "format": null,
+                        "view": null,
+                        "dichotomous": true,
+                        "notes": null,
+                        "api_derivation": {
+                            "function": "alter_array",
+                            "args": [
+                                {
+                                    "function": "exclude_empty",
+                                    "args": [
+                                        {
+                                            "function": "array",
+                                            "args": [
+                                                {
+                                                    "function": "make_frame",
+                                                    "args": [
+                                                        {
+                                                            "map": {
+                                                                "000001": {
+                                                                    "function": "as_selected",
+                                                                    "args": [
+                                                                        {
+                                                                            "function": "select_categories",
+                                                                            "args": [
+                                                                                {
+                                                                                    "function": "combine_categories",
+                                                                                    "args": [
+                                                                                        {
+                                                                                            "variable": "3xhdBhEBEBcSqbK2GbVrAo00016d"
+                                                                                        },
+                                                                                        {
+                                                                                            "value": [
+                                                                                                {
+                                                                                                    "id": 1,
+                                                                                                    "name": "Selected",
+                                                                                                    "selected": true,
+                                                                                                    "missing": false,
+                                                                                                    "numeric_value": 1,
+                                                                                                    "mapped ids": [
+                                                                                                        1
+                                                                                                    ]
+                                                                                                },
+                                                                                                {
+                                                                                                    "id": 0,
+                                                                                                    "name": "Other",
+                                                                                                    "selected": false,
+                                                                                                    "missing": false,
+                                                                                                    "numeric_value": 0,
+                                                                                                    "mapped ids": [
+                                                                                                        -1
+                                                                                                    ]
+                                                                                                }
+                                                                                            ]
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                {
+                                                                                    "value": [
+                                                                                        1
+                                                                                    ]
+                                                                                }
+                                                                            ],
+                                                                            "references": {
+                                                                                "name": "Natural Variant User &QUOTA_COMPLETES_Q302_1_9999;",
+                                                                                "alias": "q302_1__1"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "000002": {
+                                                                    "function": "as_selected",
+                                                                    "args": [
+                                                                        {
+                                                                            "function": "select_categories",
+                                                                            "args": [
+                                                                                {
+                                                                                    "function": "combine_categories",
+                                                                                    "args": [
+                                                                                        {
+                                                                                            "variable": "3xhdBhEBEBcSqbK2GbVrAo00016e"
+                                                                                        },
+                                                                                        {
+                                                                                            "value": [
+                                                                                                {
+                                                                                                    "id": 1,
+                                                                                                    "name": "Selected",
+                                                                                                    "selected": true,
+                                                                                                    "missing": false,
+                                                                                                    "numeric_value": 1,
+                                                                                                    "mapped ids": [
+                                                                                                        2
+                                                                                                    ]
+                                                                                                },
+                                                                                                {
+                                                                                                    "id": 0,
+                                                                                                    "name": "Other",
+                                                                                                    "selected": false,
+                                                                                                    "missing": false,
+                                                                                                    "numeric_value": 0,
+                                                                                                    "mapped ids": [
+                                                                                                        -1
+                                                                                                    ]
+                                                                                                }
+                                                                                            ]
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                {
+                                                                                    "value": [
+                                                                                        1
+                                                                                    ]
+                                                                                }
+                                                                            ],
+                                                                            "references": {
+                                                                                "name": "Non-Natural Variant User &QUOTA_COMPLETES_Q302_2_9999;",
+                                                                                "alias": "q302_2__1"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "value": [
+                                                                "000001",
+                                                                "000002"
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "references": {
+                                        "name": "Natural Variant User Classification (FR)",
+                                        "alias": "q302_Multi_DP",
+                                        "description": "(Q302) ",
+                                        "uniform_basis": false
+                                    }
+                                }
+                            ],
+                            "kwargs": {
+                                "subreferences": {
+                                    "value": {
+                                        "000001": {
+                                            "alias": "q302_1__1",
+                                            "name": "Natural Variant User",
+                                            "description": "(NATURAL VARIANT USER CLASSIFICATION)  NATURAL VARIANT USER CLASSIFICATION"
+                                        },
+                                        "000002": {
+                                            "alias": "q302_2__1",
+                                            "name": "Non-Natural Variant User",
+                                            "description": null
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "derived": true
+                },
+                "data": [
+                    88,
+                    0,
+                    0,
+                    101,
+                    0,
+                    0,
+                    0,
+                    101,
+                    88,
+                    0,
+                    0,
+                    0,
+                    83,
+                    0,
+                    0,
+                    269,
+                    0,
+                    0,
+                    0,
+                    269,
+                    83,
+                    0,
+                    0,
+                    0,
+                    23,
+                    0,
+                    0,
+                    136,
+                    0,
+                    0,
+                    0,
+                    136,
+                    23,
+                    0,
+                    0,
+                    0,
+                    6,
+                    0,
+                    0,
+                    54,
+                    0,
+                    0,
+                    0,
+                    54,
+                    6,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    22,
+                    0,
+                    0,
+                    0,
+                    22,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 1
+            },
+            "valid_overlap": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {},
+                        "subvariables": [
+                            "000001",
+                            "000002"
+                        ]
+                    },
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "q302_1__1",
+                                "name": "Natural Variant User",
+                                "description": "(NATURAL VARIANT USER CLASSIFICATION)  NATURAL VARIANT USER CLASSIFICATION"
+                            },
+                            {
+                                "alias": "q302_2__1",
+                                "name": "Non-Natural Variant User",
+                                "description": null,
+                                "view": null
+                            }
+                        ],
+                        "name": "Natural Variant User Classification (FR)",
+                        "alias": "q302_Multi_DP",
+                        "description": "(Q302) ",
+                        "uniform_basis": false,
+                        "format": null,
+                        "view": null,
+                        "dichotomous": true,
+                        "notes": null,
+                        "api_derivation": {
+                            "function": "alter_array",
+                            "args": [
+                                {
+                                    "function": "exclude_empty",
+                                    "args": [
+                                        {
+                                            "function": "array",
+                                            "args": [
+                                                {
+                                                    "function": "make_frame",
+                                                    "args": [
+                                                        {
+                                                            "map": {
+                                                                "000001": {
+                                                                    "function": "as_selected",
+                                                                    "args": [
+                                                                        {
+                                                                            "function": "select_categories",
+                                                                            "args": [
+                                                                                {
+                                                                                    "function": "combine_categories",
+                                                                                    "args": [
+                                                                                        {
+                                                                                            "variable": "3xhdBhEBEBcSqbK2GbVrAo00016d"
+                                                                                        },
+                                                                                        {
+                                                                                            "value": [
+                                                                                                {
+                                                                                                    "id": 1,
+                                                                                                    "name": "Selected",
+                                                                                                    "selected": true,
+                                                                                                    "missing": false,
+                                                                                                    "numeric_value": 1,
+                                                                                                    "mapped ids": [
+                                                                                                        1
+                                                                                                    ]
+                                                                                                },
+                                                                                                {
+                                                                                                    "id": 0,
+                                                                                                    "name": "Other",
+                                                                                                    "selected": false,
+                                                                                                    "missing": false,
+                                                                                                    "numeric_value": 0,
+                                                                                                    "mapped ids": [
+                                                                                                        -1
+                                                                                                    ]
+                                                                                                }
+                                                                                            ]
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                {
+                                                                                    "value": [
+                                                                                        1
+                                                                                    ]
+                                                                                }
+                                                                            ],
+                                                                            "references": {
+                                                                                "name": "Natural Variant User &QUOTA_COMPLETES_Q302_1_9999;",
+                                                                                "alias": "q302_1__1"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "000002": {
+                                                                    "function": "as_selected",
+                                                                    "args": [
+                                                                        {
+                                                                            "function": "select_categories",
+                                                                            "args": [
+                                                                                {
+                                                                                    "function": "combine_categories",
+                                                                                    "args": [
+                                                                                        {
+                                                                                            "variable": "3xhdBhEBEBcSqbK2GbVrAo00016e"
+                                                                                        },
+                                                                                        {
+                                                                                            "value": [
+                                                                                                {
+                                                                                                    "id": 1,
+                                                                                                    "name": "Selected",
+                                                                                                    "selected": true,
+                                                                                                    "missing": false,
+                                                                                                    "numeric_value": 1,
+                                                                                                    "mapped ids": [
+                                                                                                        2
+                                                                                                    ]
+                                                                                                },
+                                                                                                {
+                                                                                                    "id": 0,
+                                                                                                    "name": "Other",
+                                                                                                    "selected": false,
+                                                                                                    "missing": false,
+                                                                                                    "numeric_value": 0,
+                                                                                                    "mapped ids": [
+                                                                                                        -1
+                                                                                                    ]
+                                                                                                }
+                                                                                            ]
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                {
+                                                                                    "value": [
+                                                                                        1
+                                                                                    ]
+                                                                                }
+                                                                            ],
+                                                                            "references": {
+                                                                                "name": "Non-Natural Variant User &QUOTA_COMPLETES_Q302_2_9999;",
+                                                                                "alias": "q302_2__1"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "value": [
+                                                                "000001",
+                                                                "000002"
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "references": {
+                                        "name": "Natural Variant User Classification (FR)",
+                                        "alias": "q302_Multi_DP",
+                                        "description": "(Q302) ",
+                                        "uniform_basis": false
+                                    }
+                                }
+                            ],
+                            "kwargs": {
+                                "subreferences": {
+                                    "value": {
+                                        "000001": {
+                                            "alias": "q302_1__1",
+                                            "name": "Natural Variant User",
+                                            "description": "(NATURAL VARIANT USER CLASSIFICATION)  NATURAL VARIANT USER CLASSIFICATION"
+                                        },
+                                        "000002": {
+                                            "alias": "q302_2__1",
+                                            "name": "Non-Natural Variant User",
+                                            "description": null
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "derived": true
+                },
+                "data": [
+                    88,
+                    88,
+                    101,
+                    101,
+                    0,
+                    0,
+                    101,
+                    101,
+                    88,
+                    88,
+                    0,
+                    0,
+                    83,
+                    83,
+                    269,
+                    269,
+                    0,
+                    0,
+                    269,
+                    269,
+                    83,
+                    83,
+                    0,
+                    0,
+                    23,
+                    23,
+                    136,
+                    136,
+                    0,
+                    0,
+                    136,
+                    136,
+                    23,
+                    23,
+                    0,
+                    0,
+                    6,
+                    6,
+                    54,
+                    54,
+                    0,
+                    0,
+                    54,
+                    54,
+                    6,
+                    6,
+                    0,
+                    0,
+                    1,
+                    1,
+                    22,
+                    22,
+                    0,
+                    0,
+                    22,
+                    22,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 1
+            }
+        },
+        "missing": 1,
+        "filter_stats": {
+            "is_cat_date": false,
+            "filtered": {
+                "unweighted": {
+                    "selected": 784,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 784,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 784,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 784,
+                    "other": 0,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 784,
+            "weighted_n": 784
+        },
+        "filtered": {
+            "unweighted_n": 784,
+            "weighted_n": 784
+        },
+        "element": "crunch:cube"
+    },
+    "query_environment": {
+        "filter": []
+    }
+}
