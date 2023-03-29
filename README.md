@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.25
+- Support date formatting on datetime dimension labels
+
 ### 3.0.24
 - Drop support for diff subtotals in population measure
 - Enable Cat insertions across Multiple Response
@@ -145,9 +148,6 @@ The detailed description can be found
 
 ### 3.0.15
 - This version was skipped because of the publishing errors
-
-### 3.0.14
-- Expose `row_order` and `payload_order` properties for `_Slice` and `_Strand`
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
