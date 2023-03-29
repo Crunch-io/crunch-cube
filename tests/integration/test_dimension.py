@@ -233,7 +233,7 @@ class DescribeIntegrated_AllElements:
     def it_constructs_its_element_objects_to_help(self):
         type_dict = Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
         dimension_transforms = {}
-        all_elements = _AllElements(type_dict, dimension_transforms, None)
+        all_elements = _AllElements(type_dict, dimension_transforms, None, None)
 
         elements = all_elements._elements
 
@@ -259,7 +259,7 @@ class DescribeIntegrated_AllElements:
 
     def it_knows_how_to_repr_its_elements(self):
         type_dict = Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
-        all_elements = _AllElements(type_dict, {}, None)
+        all_elements = _AllElements(type_dict, {}, None, None)
 
         str_representation = str(all_elements)
 
@@ -273,8 +273,11 @@ class DescribeIntegrated_Element:
     """Integration-test suite for `cr.cube.dimension._Element` object."""
 
     def it_knows_its_transformed_label(self, element_dict, element_transforms_):
+        all_elements = _AllElements(None, None, None, None)
         element_transforms_.name = "Xfinity Lounge"
-        element = _Element(element_dict, None, element_transforms_)
+        element = _Element(
+            element_dict, None, element_transforms_, all_elements._format_label
+        )
 
         label = element.label
 
@@ -284,7 +287,7 @@ class DescribeIntegrated_Element:
         self, element_dict, element_transforms_
     ):
         element_transforms_.name = None
-        element = _Element(element_dict, None, element_transforms_)
+        element = _Element(element_dict, None, element_transforms_, None)
 
         label = element.label
 
@@ -292,7 +295,7 @@ class DescribeIntegrated_Element:
 
     def it_knows_when_it_is_explicitly_hidden(self, element_dict, element_transforms_):
         element_transforms_.hide = True
-        element = _Element(element_dict, None, element_transforms_)
+        element = _Element(element_dict, None, element_transforms_, None)
 
         is_hidden = element.is_hidden
 
@@ -300,7 +303,7 @@ class DescribeIntegrated_Element:
 
     def but_it_is_not_hidden_by_default(self, element_transforms_):
         element_transforms_.hide = None
-        element = _Element(None, None, element_transforms_)
+        element = _Element(None, None, element_transforms_, None)
 
         is_hidden = element.is_hidden
 
@@ -308,7 +311,7 @@ class DescribeIntegrated_Element:
 
     def it_knows_how_to_repr(self, element_dict, element_transforms_):
         element_transforms_.name = None
-        element = _Element(element_dict, None, element_transforms_)
+        element = _Element(element_dict, None, element_transforms_, None)
 
         str_representation = str(element)
 

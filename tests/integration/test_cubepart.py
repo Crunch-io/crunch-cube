@@ -330,10 +330,10 @@ class Describe_Slice:
         slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
 
         assert slice_.column_labels.tolist() == [
-            "1776-07-04T00:00:00",
-            "1950-12-24T00:00:00",
-            "2000-01-01T00:00:00",
-            "2000-01-02T00:00:00",
+            "1776-07-04",
+            "1950-12-24",
+            "2000-01-01",
+            "2000-01-02",
         ]
         assert slice_.column_proportions.tolist() == [
             [0.0, 0.0, 1.0, 0.0],
@@ -395,9 +395,9 @@ class Describe_Slice:
         transforms = {"columns_dimension": {"elements": elements, "order": order}}
         slice_ = Cube(CR.CAT_X_DATETIME, transforms=transforms).partitions[0]
         assert slice_.column_labels.tolist() == [
-            "2000-01-02T00:00:00",
-            "1776-07-04T00:00:00",
-            "2000-01-01T00:00:00",
+            "2000-01-02",
+            "1776-07-04",
+            "2000-01-01",
         ]
 
     def it_provides_values_for_cat_hs_x_mr(self):

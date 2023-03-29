@@ -4,7 +4,8 @@
 
 import copy
 from collections.abc import Sequence
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from datetime import datetime
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -354,6 +355,7 @@ class Dimension:
             self._dimension_dict["type"],
             self._dimension_transforms_dict,
             self._dimension_type,
+            self._element_data_format,
         )
 
     def apply_transforms(self, dimension_transforms) -> "Dimension":
@@ -598,6 +600,11 @@ class Dimension:
         return self._element_id_shim.shimmed_dimension_transforms_dict
 
     @lazyproperty
+    def _element_data_format(self) -> Optional[Union[str, int]]:
+        """optional str format for datetimes or int number of decimals for numeric"""
+        return self._dimension_dict.get("references", {}).get("format", {}).get("data")
+
+    @lazyproperty
     def _view_insertion_dicts(self) -> List[Optional[Dict]]:
         """List of insertion dicts included in the dimension view."""
         view = self._dimension_dict.get("references", {}).get("view") or {}
@@ -677,10 +684,17 @@ class _AllElements(_BaseElements):
     Each element is either a category or a subvariable.
     """
 
-    def __init__(self, type_dict, dimension_transforms_dict, dimension_type):
+    def __init__(
+        self,
+        type_dict,
+        dimension_transforms_dict,
+        dimension_type,
+        element_data_format,
+    ):
         self._type_dict = type_dict
         self._dimension_transforms_dict = dimension_transforms_dict
         self._dimension_type = dimension_type
+        self._element_data_format = element_data_format
 
     @lazyproperty
     def valid_elements(self) -> "_ValidElements":
@@ -704,6 +718,7 @@ class _AllElements(_BaseElements):
                 element_dict,
                 idx,
                 _ElementTransforms(element_transforms_dict),
+                self._format_label,
             )
             for (
                 idx,
@@ -720,6 +735,45 @@ class _AllElements(_BaseElements):
             if self._dimension_type == DT.MR
             else self._dimension_transforms_dict.get("elements", {})
         )
+
+    def _format_datetime_label(self, x: Any) -> str:
+        """returns str of x formatted for use in labels with desired date format"""
+        orig_format = self._incoming_element_datetime_format
+        out_format = self._element_data_format
+        if orig_format is None or out_format is None:
+            return str(x)
+        try:
+            return datetime.strptime(x, orig_format).strftime(out_format)
+        except ValueError:
+            return str(x)
+
+    def _format_label(self, x: Any) -> str:
+        """returns str of x formatted for use in labels"""
+        if self._dimension_type == DT.DATETIME:
+            return self._format_datetime_label(x)
+        else:  # --- TODO: Should round numeric values like the frontend does
+            return str(x)
+
+    @lazyproperty
+    def _incoming_element_datetime_format(self) -> Optional[str]:
+        """optional str of date formatting requested if datetime and is found"""
+        if self._dimension_type != DT.DATETIME:
+            return None
+
+        resolution = self._type_dict["subtype"].get("resolution")
+        return {
+            "Y": "%Y",
+            "Q": "%Y-%m",
+            "3M": "%Y-%m",
+            "M": "%Y-%m",
+            "W": "%Y-%m-%d",
+            "D": "%Y-%m-%d",
+            "h": "%Y-%m-%dT%H",
+            "m": "%Y-%m-%dT%H:%M",
+            "s": "%Y-%m-%dT%H:%M:%S",
+            "ms": "%Y-%m-%dT%H:%M:%S.%f",
+            "us": "%Y-%m-%dT%H:%M:%S.%f",
+        }.get(resolution)
 
     def _iter_element_makings(self) -> Iterator[Tuple[int, Dict, Dict]]:
         """Generate tuple of values needed to construct each element object.
@@ -1048,10 +1102,11 @@ class _Element:
     This object resolves the transform cascade for element-level transforms.
     """
 
-    def __init__(self, element_dict, index, element_transforms):
+    def __init__(self, element_dict, index, element_transforms, label_formatter):
         self._element_dict = element_dict
         self._index = index
         self._element_transforms = element_transforms
+        self._label_formatter = label_formatter
 
     def __repr__(self) -> str:
         """str of this element, which makes it easier to work in cosole."""
@@ -1166,13 +1221,10 @@ class _Element:
 
         if type_value == "list":
             # ---like '10-15' or 'A-F'---
-            return "-".join([str(item) for item in value])
+            return "-".join([self._label_formatter(item) for item in value])
 
-        if type_value in ("float", "int"):
-            return str(value)
-
-        if type_value in ("str", "unicode"):
-            return value
+        if type_value in ("float", "int", "str", "unicode"):
+            return self._label_formatter(value)
 
         # ---For CA and MR subvar dimensions---
         return value.get("references", {}).get(key) or ""

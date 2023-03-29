@@ -63,7 +63,8 @@
                     "references": {
                         "alias": "y",
                         "name": "y",
-                        "description": "Date variable"
+                        "description": "Date variable",
+                        "format": {"data": "%Y-%m-%d"}
                     },
                     "derived": true,
                     "type": {
