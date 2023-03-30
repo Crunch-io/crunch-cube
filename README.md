@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.26
+- Fix bug when dimension's format is set to null in JSON
+
 ### 3.0.25
 - Support date formatting on datetime dimension labels
 
@@ -145,9 +148,6 @@ The detailed description can be found
 
 ### 3.0.16
 - Fix pairwise indices for overlaps, when hiding or reordering columns
-
-### 3.0.15
-- This version was skipped because of the publishing errors
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).

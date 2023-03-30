@@ -1,5 +1,8 @@
 # History of Changes
 
+### 3.0.15
+- This version was skipped because of the publishing errors
+
 ### 3.0.14
 - Expose `row_order` and `payload_order` properties for `_Slice` and `_Strand`
 
