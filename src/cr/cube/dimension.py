@@ -602,7 +602,9 @@ class Dimension:
     @lazyproperty
     def _element_data_format(self) -> Optional[Union[str, int]]:
         """optional str format for datetimes or int number of decimals for numeric"""
-        return self._dimension_dict.get("references", {}).get("format", {}).get("data")
+        # --- return None even if format is explicitly set to None
+        fmt = self._dimension_dict.get("references", {}).get("format")
+        return fmt.get("data") if fmt else None
 
     @lazyproperty
     def _view_insertion_dicts(self) -> List[Optional[Dict]]:
