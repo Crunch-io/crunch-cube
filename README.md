@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.27
+- Implement overlaps for CAT H&S
+
 ### 3.0.26
 - Fix bug when dimension's format is set to null in JSON
 
