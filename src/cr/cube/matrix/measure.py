@@ -1168,8 +1168,14 @@ class _PairwiseSigTStatsForSubvar(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def blocks(self):
-        """2D array of the four 2D "blocks" making up this measure."""
-        return NanSubtotals.blocks(self.t_stats, self._dimensions)
+        """2D array of the four 2D "blocks" making up this measure.
+
+        Column insertions, as well as intersections, are always empty, because there
+        aren't any insertions on the MR dimensions (the subnets are part of the data).
+        """
+        subtotal_columns = np.zeros(self.t_stats.shape[:1] + (0,))  # always empty
+        intersections = np.zeros(self._hs_t_stats.shape[:1] + (0,))  # always empty
+        return [[self.t_stats, subtotal_columns], [self._hs_t_stats, intersections]]
 
     @lazyproperty
     def _n_rows(self):
@@ -1207,6 +1213,35 @@ class _PairwiseSigTStatsForSubvar(_BaseSecondOrderMeasure):
             ]
         )
 
+    @lazyproperty
+    def _hs_t_stats(self):
+        """2D ndarray of float64 representing t-stats for pairwise MR insertions.
+
+        For each (insertion) row, we calculate the test statistic of the overlap between
+        columns (subvariables) of the crossing MR variable. To do that we have to
+        iterate across all insertions (rows), and then across all subvars (columns).
+        Each of these iterations produces a single number for the test statistic, so we
+        end up with n_insertions x n_cols 2-dimensional ndarray.
+        """
+        rows_ins = self._second_order_measures.column_proportions.blocks[1][0]
+        if np.prod(rows_ins.shape) == 0:
+            return np.zeros((0, self.t_stats.shape[1]))
+        return np.array(
+            [
+                [
+                    _PairwiseSignificaneBetweenSubvariablesHelper(
+                        rows_ins,
+                        self._cube_measures.cube_overlaps,
+                        row_idx,
+                        self._selected_subvar_idx,
+                        subvar_idx,
+                    ).t_stats
+                    for subvar_idx in range(self._n_subvars)
+                ]
+                for row_idx in range(rows_ins.shape[0])
+            ]
+        )
+
 
 class _PairwiseSigPValsForSubvar(_PairwiseSigTStatsForSubvar):
     """Provides pairwise significance p-vals measure for matrix and selected subvar.
@@ -1216,8 +1251,14 @@ class _PairwiseSigPValsForSubvar(_PairwiseSigTStatsForSubvar):
 
     @lazyproperty
     def blocks(self):
-        """2D array of the four 2D "blocks" making up this measure."""
-        return NanSubtotals.blocks(self.p_vals, self._dimensions)
+        """2D array of the four 2D "blocks" making up this measure.
+
+        Column insertions, as well as intersections, are always empty, because there
+        aren't any insertions on the MR dimensions (the subnets are part of the data).
+        """
+        column_insertions = np.zeros(self.p_vals.shape[:1] + (0,))  # always empty
+        intersections = np.zeros(self._hs_p_vals.shape[:1] + (0,))
+        return [[self.p_vals, column_insertions], [self._hs_p_vals, intersections]]
 
     @lazyproperty
     def p_vals(self):
@@ -1242,6 +1283,35 @@ class _PairwiseSigPValsForSubvar(_PairwiseSigTStatsForSubvar):
                     for subvar_idx in range(self._n_subvars)
                 ]
                 for row_idx in range(self._n_rows)
+            ]
+        )
+
+    @lazyproperty
+    def _hs_p_vals(self):
+        """2D ndarray of float64 representing p-vals for pairwise MR insertions.
+
+        For each (insertion) row, we calculate the test significance of the overlap
+        between columns (subvariables) of the crossing MR variable. To do that we have
+        to iterate across all insertions (rows), and then across all subvars (columns).
+        Each of these iterations produces a single number for the significance, so we
+        end up with n_insertions x n_cols 2-dimensional ndarray.
+        """
+        rows_ins = self._second_order_measures.column_proportions.blocks[1][0]
+        if np.prod(rows_ins.shape) == 0:
+            return np.zeros((0, self.t_stats.shape[1]))
+        return np.array(
+            [
+                [
+                    _PairwiseSignificaneBetweenSubvariablesHelper(
+                        rows_ins,
+                        self._cube_measures.cube_overlaps,
+                        row_idx,
+                        self._selected_subvar_idx,
+                        subvar_idx,
+                    ).p_vals
+                    for subvar_idx in range(self._n_subvars)
+                ]
+                for row_idx in range(rows_ins.shape[0])
             ]
         )
 

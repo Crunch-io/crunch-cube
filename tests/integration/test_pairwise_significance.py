@@ -985,6 +985,48 @@ class TestOverlapsPairwiseSignificance:
         # Assert same row stats are the same in both cases (MR x MR and MR_SEL x MR)
         np.testing.assert_array_equal(t_stats_mr_x_mr[0], t_stats_mr_subvar_x_mr[0])
 
+    def test_pw_sig_with_insertions(self):
+        slice_ = Cube(OL.CAT_HS_X_MR).partitions[0]
+
+        assert slice_.column_percentages.tolist() == [
+            [85.07462686567165, 63.57388316151202],  # H&S row
+            [85.07462686567165, 63.57388316151202],  # H&S row
+            [43.78109452736319, 17.353951890034363],
+            [41.29353233830846, 46.21993127147766],
+            [11.442786069651742, 23.367697594501717],
+            [2.9850746268656714, 9.278350515463918],
+            [0.4975124378109453, 3.7800687285223367],
+            [3.482587064676617, 13.058419243986256],  # H&S row
+        ]
+        assert slice_.pairwise_significance_t_stats(0) == pytest.approx(
+            np.array(
+                [
+                    [0.0, -6.88662776],  # H&S row
+                    [0.0, -6.88662776],  # H&S row
+                    [0.0, -8.46453948],
+                    [0.0, 1.57791173],
+                    [0.0, 3.81951563],
+                    [0.0, 2.01571857],
+                    [0.0, 1.05139355],
+                    [0.0, 3.06711212],  # H&S row
+                ]
+            )
+        )
+        assert slice_.pairwise_significance_p_vals(0) == pytest.approx(
+            np.array(
+                [
+                    [0.00000000e00, 1.17523768e-11],  # H&S row
+                    [0.00000000e00, 1.17523768e-11],  # H&S row
+                    [0.00000000e00, 0.00000000e00],
+                    [0.00000000e00, 1.14990816e-01],
+                    [0.00000000e00, 1.44321520e-04],
+                    [0.00000000e00, 4.41714435e-02],
+                    [0.00000000e00, 2.93403077e-01],
+                    [0.00000000e00, 2.23595375e-03],  # H&S row
+                ]
+            )
+        )
+
 
 class TestMeanDifferenceSignificance:
     def test_mean_diff_significance_for_numeric_array_grouped_by_cat(self):
