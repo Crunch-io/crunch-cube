@@ -12,6 +12,7 @@ from cr.cube.matrix.subtotals import (
     NegativeTermSubtotals,
     PositiveTermSubtotals,
     SumSubtotals,
+    OverlapSubtotals,
 )
 from cr.cube.smoothing import Smoother
 from cr.cube.util import lazyproperty
@@ -1202,7 +1203,8 @@ class _PairwiseSigTStatsForSubvar(_BaseSecondOrderMeasure):
                 [
                     _PairwiseSignificaneBetweenSubvariablesHelper(
                         self._second_order_measures.column_proportions.blocks[0][0],
-                        self._cube_measures.cube_overlaps,
+                        self._cube_measures.cube_overlaps.selected_bases,
+                        self._cube_measures.cube_overlaps.valid_bases,
                         row_idx,
                         self._selected_subvar_idx,
                         subvar_idx,
@@ -1223,24 +1225,43 @@ class _PairwiseSigTStatsForSubvar(_BaseSecondOrderMeasure):
         Each of these iterations produces a single number for the test statistic, so we
         end up with n_insertions x n_cols 2-dimensional ndarray.
         """
-        rows_ins = self._second_order_measures.column_proportions.blocks[1][0]
-        if np.prod(rows_ins.shape) == 0:
+        rows_ins_col_props = self._second_order_measures.column_proportions.blocks[1][0]
+        if np.prod(rows_ins_col_props.shape) == 0:
             return np.zeros((0, self.t_stats.shape[1]))
-        return np.array(
-            [
-                [
-                    _PairwiseSignificaneBetweenSubvariablesHelper(
-                        rows_ins,
-                        self._cube_measures.cube_overlaps,
-                        row_idx,
-                        self._selected_subvar_idx,
-                        subvar_idx,
-                    ).t_stats
-                    for subvar_idx in range(self._n_subvars)
-                ]
-                for row_idx in range(rows_ins.shape[0])
-            ]
-        )
+
+        tstats_matrix = []
+        for row_idx in range(rows_ins_col_props.shape[0]):
+            row = []
+            for subvar_idx in range(self._n_subvars):
+                # --- Prepare overlaps for insertions from cube measure ---
+                rows_ins_selected_bases = OverlapSubtotals.blocks(
+                    self._cube_measures.cube_overlaps.selected_bases,
+                    self._dimensions,
+                    diff_cols_nan=True,
+                )[1][0]
+                rows_ins_valid_bases = OverlapSubtotals.blocks(
+                    self._cube_measures.cube_overlaps.valid_bases,
+                    self._dimensions,
+                    diff_cols_nan=True,
+                )[1][0]
+
+                # --- Calculate tstats for a given row x subvar ---
+                tstats = _PairwiseSignificaneBetweenSubvariablesHelper(
+                    rows_ins_col_props,
+                    rows_ins_selected_bases,
+                    rows_ins_valid_bases,
+                    row_idx,
+                    self._selected_subvar_idx,
+                    subvar_idx,
+                ).t_stats
+
+                # --- Update result row ---
+                row.append(tstats)
+
+            # --- Update result matrix ---
+            tstats_matrix.append(row)
+
+        return np.array(tstats_matrix)
 
 
 class _PairwiseSigPValsForSubvar(_PairwiseSigTStatsForSubvar):
@@ -1275,7 +1296,8 @@ class _PairwiseSigPValsForSubvar(_PairwiseSigTStatsForSubvar):
                 [
                     _PairwiseSignificaneBetweenSubvariablesHelper(
                         self._second_order_measures.column_proportions.blocks[0][0],
-                        self._cube_measures.cube_overlaps,
+                        self._cube_measures.cube_overlaps.selected_bases,
+                        self._cube_measures.cube_overlaps.valid_bases,
                         row_idx,
                         self._selected_subvar_idx,
                         subvar_idx,
@@ -1296,24 +1318,43 @@ class _PairwiseSigPValsForSubvar(_PairwiseSigTStatsForSubvar):
         Each of these iterations produces a single number for the significance, so we
         end up with n_insertions x n_cols 2-dimensional ndarray.
         """
-        rows_ins = self._second_order_measures.column_proportions.blocks[1][0]
-        if np.prod(rows_ins.shape) == 0:
+        rows_ins_col_props = self._second_order_measures.column_proportions.blocks[1][0]
+        if np.prod(rows_ins_col_props.shape) == 0:
             return np.zeros((0, self.t_stats.shape[1]))
-        return np.array(
-            [
-                [
-                    _PairwiseSignificaneBetweenSubvariablesHelper(
-                        rows_ins,
-                        self._cube_measures.cube_overlaps,
-                        row_idx,
-                        self._selected_subvar_idx,
-                        subvar_idx,
-                    ).p_vals
-                    for subvar_idx in range(self._n_subvars)
-                ]
-                for row_idx in range(rows_ins.shape[0])
-            ]
-        )
+
+        pvals_matrix = []
+        for row_idx in range(rows_ins_col_props.shape[0]):
+            pvals_row = []
+            for subvar_idx in range(self._n_subvars):
+                # --- Prepare overlaps for insertions from cube measure ---
+                rows_ins_selected_bases = OverlapSubtotals.blocks(
+                    self._cube_measures.cube_overlaps.selected_bases,
+                    self._dimensions,
+                    diff_cols_nan=True,
+                )[1][0]
+                rows_ins_valid_bases = OverlapSubtotals.blocks(
+                    self._cube_measures.cube_overlaps.valid_bases,
+                    self._dimensions,
+                    diff_cols_nan=True,
+                )[1][0]
+
+                # --- Calculate pvals for a given row x subvar ---
+                pvals = _PairwiseSignificaneBetweenSubvariablesHelper(
+                    rows_ins_col_props,
+                    rows_ins_selected_bases,
+                    rows_ins_valid_bases,
+                    row_idx,
+                    self._selected_subvar_idx,
+                    subvar_idx,
+                ).p_vals
+
+                # --- Update result row ---
+                pvals_row.append(pvals)
+
+            # --- Update result matrix ---
+            pvals_matrix.append(pvals_row)
+
+        return np.array(pvals_matrix)
 
 
 class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
@@ -3069,9 +3110,12 @@ class _TableBasesRange(_BaseTableValue):
 class _PairwiseSignificaneBetweenSubvariablesHelper:
     """Helper for calculating overlaps significance between subvariables."""
 
-    def __init__(self, column_proportions, cube_overlaps, row_idx, idx_a, idx_b):
+    def __init__(
+        self, column_proportions, selected_bases, valid_bases, row_idx, idx_a, idx_b
+    ):
         self._column_proportions = column_proportions
-        self._cube_overlaps = cube_overlaps
+        self._selected_bases = selected_bases
+        self._valid_bases = valid_bases
         self._row_idx = row_idx
         self._idx_a = idx_a
         self._idx_b = idx_b
@@ -3122,9 +3166,9 @@ class _PairwiseSignificaneBetweenSubvariablesHelper:
         be float64 when the overlaps result is weighted.
         """
         return (
-            self._cube_overlaps.selected_bases[self._row_idx, self._idx_a, self._idx_a],
-            self._cube_overlaps.selected_bases[self._row_idx, self._idx_b, self._idx_b],
-            self._cube_overlaps.selected_bases[self._row_idx, self._idx_a, self._idx_b],
+            self._selected_bases[self._row_idx, self._idx_a, self._idx_a],
+            self._selected_bases[self._row_idx, self._idx_b, self._idx_b],
+            self._selected_bases[self._row_idx, self._idx_a, self._idx_b],
         )
 
     @lazyproperty
@@ -3136,7 +3180,7 @@ class _PairwiseSignificaneBetweenSubvariablesHelper:
         They can only be float64 when the overlaps result is weighted.
         """
         return (
-            self._cube_overlaps.valid_bases[self._row_idx, self._idx_a, self._idx_a],
-            self._cube_overlaps.valid_bases[self._row_idx, self._idx_b, self._idx_b],
-            self._cube_overlaps.valid_bases[self._row_idx, self._idx_a, self._idx_b],
+            self._valid_bases[self._row_idx, self._idx_a, self._idx_a],
+            self._valid_bases[self._row_idx, self._idx_b, self._idx_b],
+            self._valid_bases[self._row_idx, self._idx_a, self._idx_b],
         )
