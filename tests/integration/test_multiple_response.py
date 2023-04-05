@@ -7,7 +7,7 @@ import pytest
 
 from cr.cube.cube import Cube
 
-from ..fixtures import CR
+from ..fixtures import CR, MRI
 from ..util import load_python_expression
 
 
@@ -1745,3 +1745,71 @@ def test_mr_x_mr_min_base_size_mask():
     expected = np.array([[False, False], [False, False], [True, True]])
     slice_ = Cube(CR.CAT_X_MR_X_MR, mask_size=1000).partitions[0]
     np.testing.assert_array_equal(slice_.min_base_size_mask.row_mask, expected)
+
+
+@pytest.mark.parametrize(
+    "hidden_elements, hidden_insertions, expected_visible_cols",
+    (
+        ({"2": {"hide": True}}, [0, 1], ["Spicy", "savory + sweet", "Sweet"]),
+        ({"4": {"hide": True}}, [0, 1], ["Savory", "savory + sweet", "Sweet"]),
+        (
+            {"6": {"hide": True}},
+            [2],
+            ["savory + spicy", "Savory", "spicy + sweet", "Spicy"],
+        ),
+        ({}, [0, 1, 2], ["Savory", "Spicy", "Sweet"]),
+        (
+            {"2": {"hide": True}, "4": {"hide": True}, "6": {"hide": True}},
+            [],
+            ["savory + spicy", "spicy + sweet", "savory + sweet"],
+        ),
+    ),
+)
+def test_cat_x_mr_hs_hidden_cols(
+    hidden_elements, hidden_insertions, expected_visible_cols
+):
+    transforms = {
+        "columns_dimension": {
+            "elements": hidden_elements,
+            "insertions": [
+                {
+                    "anchor": "top",
+                    "function": "any_non_missing_selected",
+                    "name": "savory + spicy",
+                    "id": 1,
+                    "kwargs": {
+                        "variable": "enjoy_mr_multi_ins",
+                        "subvariable_ids": ["enjoy_mr_savory__4", "enjoy_mr_spicy__4"],
+                    },
+                },
+                {
+                    "anchor": {"position": "after", "alias": "enjoy_mr_savory__4"},
+                    "function": "any_non_missing_selected",
+                    "name": "spicy + sweet",
+                    "id": 2,
+                    "kwargs": {
+                        "variable": "enjoy_mr_multi_ins",
+                        "subvariable_ids": ["enjoy_mr_spicy__4", "enjoy_mr_sweet__4"],
+                    },
+                },
+                {
+                    "anchor": {"position": "after", "alias": "enjoy_mr_spicy__4"},
+                    "function": "any_non_missing_selected",
+                    "name": "savory + sweet",
+                    "id": 3,
+                    "kwargs": {
+                        "variable": "enjoy_mr_multi_ins",
+                        "subvariable_ids": ["enjoy_mr_savory__4", "enjoy_mr_sweet__4"],
+                    },
+                },
+            ],
+        },
+        "rows_dimension": {
+            "order": {"element_ids": [1, 2, 3, 4], "type": "explicit"},
+        },
+    }
+    for idx in hidden_insertions:
+        transforms["columns_dimension"]["insertions"][idx].update({"hide": True})
+    slice_ = Cube(MRI.CAT_X_MR_HS, transforms=transforms).partitions[0]
+
+    assert slice_.column_labels.tolist() == expected_visible_cols

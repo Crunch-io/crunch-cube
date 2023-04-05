@@ -1,0 +1,2168 @@
+{
+    "result": {
+        "n": 210,
+        "counts": [
+            45,
+            11,
+            0,
+            30,
+            23,
+            3,
+            47,
+            9,
+            0,
+            35,
+            18,
+            3,
+            53,
+            3,
+            0,
+            43,
+            11,
+            2,
+            35,
+            10,
+            1,
+            20,
+            23,
+            3,
+            44,
+            2,
+            0,
+            24,
+            16,
+            6,
+            39,
+            6,
+            1,
+            38,
+            7,
+            1,
+            42,
+            15,
+            0,
+            19,
+            33,
+            5,
+            50,
+            7,
+            0,
+            34,
+            19,
+            4,
+            51,
+            6,
+            0,
+            44,
+            11,
+            2,
+            40,
+            11,
+            0,
+            17,
+            32,
+            2,
+            48,
+            3,
+            0,
+            35,
+            15,
+            1,
+            49,
+            2,
+            0,
+            46,
+            4,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "dimensions": [
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "missing": false,
+                            "numeric_value": 1,
+                            "id": 1,
+                            "name": "a"
+                        },
+                        {
+                            "missing": false,
+                            "numeric_value": 2,
+                            "id": 2,
+                            "name": "b"
+                        },
+                        {
+                            "missing": false,
+                            "numeric_value": 3,
+                            "id": 3,
+                            "name": "c"
+                        },
+                        {
+                            "missing": false,
+                            "numeric_value": 4,
+                            "id": 4,
+                            "name": "d"
+                        },
+                        {
+                            "missing": true,
+                            "numeric_value": null,
+                            "id": -1,
+                            "name": "No Data"
+                        }
+                    ]
+                },
+                "references": {
+                    "name": "cat simple 5",
+                    "alias": "cat_simple5"
+                },
+                "derived": false
+            },
+            {
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "id": "savory + spicy",
+                                "references": {
+                                    "name": "savory + spicy",
+                                    "anchor": "top",
+                                    "alias": "savory___spicy_at_top"
+                                },
+                                "derived": true
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "id": "1",
+                                "references": {
+                                    "description": "Enjoyment of savory food (binary)",
+                                    "format": {
+                                        "summary": {
+                                            "digits": 0
+                                        }
+                                    },
+                                    "notes": "Do you typically enjoy food that is savory?",
+                                    "name": "Savory",
+                                    "alias": "enjoy_mr_savory__4",
+                                    "view": {
+                                        "show_counts": false,
+                                        "column_width": null,
+                                        "include_missing": false,
+                                        "show_numeric_values": false
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "id": "spicy + sweet",
+                                "references": {
+                                    "name": "spicy + sweet",
+                                    "anchor": {
+                                        "position": "after",
+                                        "alias": "enjoy_mr_savory__4"
+                                    },
+                                    "alias": "spicy___sweet_after_enjoy_mr_savory__4"
+                                },
+                                "derived": true
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "id": "2",
+                                "references": {
+                                    "description": "Enjoyment of spicy food (binary)",
+                                    "format": {
+                                        "summary": {
+                                            "digits": 0
+                                        }
+                                    },
+                                    "notes": "Do you typically enjoy food that is spicy?",
+                                    "name": "Spicy",
+                                    "alias": "enjoy_mr_spicy__4",
+                                    "view": {
+                                        "show_counts": false,
+                                        "column_width": null,
+                                        "include_missing": false,
+                                        "show_numeric_values": false
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 5,
+                            "value": {
+                                "id": "savory + sweet",
+                                "references": {
+                                    "name": "savory + sweet",
+                                    "anchor": {
+                                        "position": "after",
+                                        "alias": "enjoy_mr_spicy__4"
+                                    },
+                                    "alias": "savory___sweet_after_enjoy_mr_spicy__4"
+                                },
+                                "derived": true
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 6,
+                            "value": {
+                                "id": "3",
+                                "references": {
+                                    "description": "Enjoyment of sweet food (binary)",
+                                    "format": {
+                                        "summary": {
+                                            "digits": 0
+                                        }
+                                    },
+                                    "notes": "Do you typically enjoy food that is sweet?",
+                                    "name": "Sweet",
+                                    "alias": "enjoy_mr_sweet__4",
+                                    "view": {
+                                        "show_counts": false,
+                                        "column_width": null,
+                                        "include_missing": false,
+                                        "show_numeric_values": false
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                },
+                "references": {
+                    "uniform_basis": false,
+                    "description": "Typically enjoy foods with flavors",
+                    "subreferences": [
+                        {
+                            "name": "savory + spicy",
+                            "anchor": "top",
+                            "alias": "savory___spicy_at_top"
+                        },
+                        {
+                            "description": "Enjoyment of savory food (binary)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you typically enjoy food that is savory?",
+                            "name": "Savory",
+                            "alias": "enjoy_mr_savory__4",
+                            "view": {
+                                "show_counts": false,
+                                "column_width": null,
+                                "include_missing": false,
+                                "show_numeric_values": false
+                            }
+                        },
+                        {
+                            "name": "spicy + sweet",
+                            "anchor": {
+                                "position": "after",
+                                "alias": "enjoy_mr_savory__4"
+                            },
+                            "alias": "spicy___sweet_after_enjoy_mr_savory__4"
+                        },
+                        {
+                            "description": "Enjoyment of spicy food (binary)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you typically enjoy food that is spicy?",
+                            "name": "Spicy",
+                            "alias": "enjoy_mr_spicy__4",
+                            "view": {
+                                "show_counts": false,
+                                "column_width": null,
+                                "include_missing": false,
+                                "show_numeric_values": false
+                            }
+                        },
+                        {
+                            "name": "savory + sweet",
+                            "anchor": {
+                                "position": "after",
+                                "alias": "enjoy_mr_spicy__4"
+                            },
+                            "alias": "savory___sweet_after_enjoy_mr_spicy__4"
+                        },
+                        {
+                            "description": "Enjoyment of sweet food (binary)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you typically enjoy food that is sweet?",
+                            "name": "Sweet",
+                            "alias": "enjoy_mr_sweet__4",
+                            "view": {
+                                "show_counts": false,
+                                "column_width": null,
+                                "include_missing": false,
+                                "show_numeric_values": false
+                            }
+                        }
+                    ],
+                    "notes": "Do you typically enjoy foods that taste..?",
+                    "alias": "enjoy_mr_multi_ins",
+                    "name": "enjoy_mr_multi_ins",
+                    "view": {
+                        "column_width": null,
+                        "include_noneoftheabove": false,
+                        "show_counts": false,
+                        "include_missing": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "anchor": "top",
+                                    "function": "any_non_missing_selected",
+                                    "name": "savory + spicy",
+                                    "id": 1,
+                                    "kwargs": {
+                                        "variable": "enjoy_mr_multi_ins",
+                                        "subvariable_ids": [
+                                            "enjoy_mr_savory__4",
+                                            "enjoy_mr_spicy__4"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "anchor": {
+                                        "position": "after",
+                                        "alias": "enjoy_mr_savory__4"
+                                    },
+                                    "function": "any_non_missing_selected",
+                                    "name": "spicy + sweet",
+                                    "id": 2,
+                                    "kwargs": {
+                                        "variable": "enjoy_mr_multi_ins",
+                                        "subvariable_ids": [
+                                            "enjoy_mr_spicy__4",
+                                            "enjoy_mr_sweet__4"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "anchor": {
+                                        "position": "after",
+                                        "alias": "enjoy_mr_spicy__4"
+                                    },
+                                    "function": "any_non_missing_selected",
+                                    "name": "savory + sweet",
+                                    "id": 3,
+                                    "kwargs": {
+                                        "variable": "enjoy_mr_multi_ins",
+                                        "subvariable_ids": [
+                                            "enjoy_mr_savory__4",
+                                            "enjoy_mr_sweet__4"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                "derived": true
+            },
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "id": 1,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true,
+                            "missing": false
+                        },
+                        {
+                            "id": 0,
+                            "name": "Other",
+                            "numeric_value": 0,
+                            "missing": false
+                        },
+                        {
+                            "id": -1,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "missing": true
+                        }
+                    ],
+                    "subvariables": [
+                        "savory + spicy",
+                        "1",
+                        "spicy + sweet",
+                        "2",
+                        "savory + sweet",
+                        "3"
+                    ]
+                },
+                "references": {
+                    "uniform_basis": false,
+                    "description": "Typically enjoy foods with flavors",
+                    "subreferences": [
+                        {
+                            "name": "savory + spicy",
+                            "anchor": "top",
+                            "alias": "savory___spicy_at_top"
+                        },
+                        {
+                            "description": "Enjoyment of savory food (binary)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you typically enjoy food that is savory?",
+                            "name": "Savory",
+                            "alias": "enjoy_mr_savory__4",
+                            "view": {
+                                "show_counts": false,
+                                "column_width": null,
+                                "include_missing": false,
+                                "show_numeric_values": false
+                            }
+                        },
+                        {
+                            "name": "spicy + sweet",
+                            "anchor": {
+                                "position": "after",
+                                "alias": "enjoy_mr_savory__4"
+                            },
+                            "alias": "spicy___sweet_after_enjoy_mr_savory__4"
+                        },
+                        {
+                            "description": "Enjoyment of spicy food (binary)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you typically enjoy food that is spicy?",
+                            "name": "Spicy",
+                            "alias": "enjoy_mr_spicy__4",
+                            "view": {
+                                "show_counts": false,
+                                "column_width": null,
+                                "include_missing": false,
+                                "show_numeric_values": false
+                            }
+                        },
+                        {
+                            "name": "savory + sweet",
+                            "anchor": {
+                                "position": "after",
+                                "alias": "enjoy_mr_spicy__4"
+                            },
+                            "alias": "savory___sweet_after_enjoy_mr_spicy__4"
+                        },
+                        {
+                            "description": "Enjoyment of sweet food (binary)",
+                            "format": {
+                                "summary": {
+                                    "digits": 0
+                                }
+                            },
+                            "notes": "Do you typically enjoy food that is sweet?",
+                            "name": "Sweet",
+                            "alias": "enjoy_mr_sweet__4",
+                            "view": {
+                                "show_counts": false,
+                                "column_width": null,
+                                "include_missing": false,
+                                "show_numeric_values": false
+                            }
+                        }
+                    ],
+                    "notes": "Do you typically enjoy foods that taste..?",
+                    "alias": "enjoy_mr_multi_ins",
+                    "name": "enjoy_mr_multi_ins",
+                    "view": {
+                        "column_width": null,
+                        "include_noneoftheabove": false,
+                        "show_counts": false,
+                        "include_missing": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "anchor": "top",
+                                    "function": "any_non_missing_selected",
+                                    "name": "savory + spicy",
+                                    "id": 1,
+                                    "kwargs": {
+                                        "variable": "enjoy_mr_multi_ins",
+                                        "subvariable_ids": [
+                                            "enjoy_mr_savory__4",
+                                            "enjoy_mr_spicy__4"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "anchor": {
+                                        "position": "after",
+                                        "alias": "enjoy_mr_savory__4"
+                                    },
+                                    "function": "any_non_missing_selected",
+                                    "name": "spicy + sweet",
+                                    "id": 2,
+                                    "kwargs": {
+                                        "variable": "enjoy_mr_multi_ins",
+                                        "subvariable_ids": [
+                                            "enjoy_mr_spicy__4",
+                                            "enjoy_mr_sweet__4"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "anchor": {
+                                        "position": "after",
+                                        "alias": "enjoy_mr_spicy__4"
+                                    },
+                                    "function": "any_non_missing_selected",
+                                    "name": "savory + sweet",
+                                    "id": 3,
+                                    "kwargs": {
+                                        "variable": "enjoy_mr_multi_ins",
+                                        "subvariable_ids": [
+                                            "enjoy_mr_savory__4",
+                                            "enjoy_mr_sweet__4"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                "derived": true
+            }
+        ],
+        "measures": {
+            "count": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": false,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    },
+                    "references": {},
+                    "derived": true
+                },
+                "data": [
+                    42.8,
+                    10,
+                    0,
+                    29.6,
+                    20.4,
+                    2.8,
+                    44.8,
+                    8,
+                    0,
+                    33.6,
+                    16.4,
+                    2.8,
+                    50.4,
+                    2.4,
+                    0,
+                    40.8,
+                    10,
+                    2,
+                    35.2,
+                    8.8,
+                    0.8,
+                    21.6,
+                    20.8,
+                    2.4,
+                    42.8,
+                    2,
+                    0,
+                    22.4,
+                    15.6,
+                    6.8,
+                    39.2,
+                    4.8,
+                    0.8,
+                    38,
+                    6,
+                    0.8,
+                    41.6,
+                    12.8,
+                    0,
+                    18.4,
+                    31.6,
+                    4.4,
+                    48.4,
+                    6,
+                    0,
+                    33.6,
+                    17.2,
+                    3.6,
+                    49.6,
+                    4.8,
+                    0,
+                    43.6,
+                    8.8,
+                    2,
+                    40,
+                    10.8,
+                    0,
+                    16.4,
+                    32,
+                    2.4,
+                    48.4,
+                    2.4,
+                    0,
+                    35.6,
+                    14.4,
+                    0.8,
+                    49.2,
+                    1.6,
+                    0,
+                    46.8,
+                    3.2,
+                    0.8,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 0
+            },
+            "overlap": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {},
+                        "subvariables": [
+                            "savory + spicy",
+                            "1",
+                            "spicy + sweet",
+                            "2",
+                            "savory + sweet",
+                            "3"
+                        ]
+                    },
+                    "references": {
+                        "uniform_basis": false,
+                        "description": "Typically enjoy foods with flavors",
+                        "subreferences": [
+                            {
+                                "name": "savory + spicy",
+                                "anchor": "top",
+                                "alias": "savory___spicy_at_top"
+                            },
+                            {
+                                "description": "Enjoyment of savory food (binary)",
+                                "format": {
+                                    "summary": {
+                                        "digits": 0
+                                    }
+                                },
+                                "notes": "Do you typically enjoy food that is savory?",
+                                "name": "Savory",
+                                "alias": "enjoy_mr_savory__4",
+                                "view": {
+                                    "show_counts": false,
+                                    "column_width": null,
+                                    "include_missing": false,
+                                    "show_numeric_values": false
+                                }
+                            },
+                            {
+                                "name": "spicy + sweet",
+                                "anchor": {
+                                    "position": "after",
+                                    "alias": "enjoy_mr_savory__4"
+                                },
+                                "alias": "spicy___sweet_after_enjoy_mr_savory__4"
+                            },
+                            {
+                                "description": "Enjoyment of spicy food (binary)",
+                                "format": {
+                                    "summary": {
+                                        "digits": 0
+                                    }
+                                },
+                                "notes": "Do you typically enjoy food that is spicy?",
+                                "name": "Spicy",
+                                "alias": "enjoy_mr_spicy__4",
+                                "view": {
+                                    "show_counts": false,
+                                    "column_width": null,
+                                    "include_missing": false,
+                                    "show_numeric_values": false
+                                }
+                            },
+                            {
+                                "name": "savory + sweet",
+                                "anchor": {
+                                    "position": "after",
+                                    "alias": "enjoy_mr_spicy__4"
+                                },
+                                "alias": "savory___sweet_after_enjoy_mr_spicy__4"
+                            },
+                            {
+                                "description": "Enjoyment of sweet food (binary)",
+                                "format": {
+                                    "summary": {
+                                        "digits": 0
+                                    }
+                                },
+                                "notes": "Do you typically enjoy food that is sweet?",
+                                "name": "Sweet",
+                                "alias": "enjoy_mr_sweet__4",
+                                "view": {
+                                    "show_counts": false,
+                                    "column_width": null,
+                                    "include_missing": false,
+                                    "show_numeric_values": false
+                                }
+                            }
+                        ],
+                        "notes": "Do you typically enjoy foods that taste..?",
+                        "alias": "enjoy_mr_multi_ins",
+                        "name": "enjoy_mr_multi_ins",
+                        "view": {
+                            "column_width": null,
+                            "include_noneoftheabove": false,
+                            "show_counts": false,
+                            "include_missing": false,
+                            "transform": {
+                                "insertions": [
+                                    {
+                                        "anchor": "top",
+                                        "function": "any_non_missing_selected",
+                                        "name": "savory + spicy",
+                                        "id": 1,
+                                        "kwargs": {
+                                            "variable": "enjoy_mr_multi_ins",
+                                            "subvariable_ids": [
+                                                "enjoy_mr_savory__4",
+                                                "enjoy_mr_spicy__4"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "anchor": {
+                                            "position": "after",
+                                            "alias": "enjoy_mr_savory__4"
+                                        },
+                                        "function": "any_non_missing_selected",
+                                        "name": "spicy + sweet",
+                                        "id": 2,
+                                        "kwargs": {
+                                            "variable": "enjoy_mr_multi_ins",
+                                            "subvariable_ids": [
+                                                "enjoy_mr_spicy__4",
+                                                "enjoy_mr_sweet__4"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "anchor": {
+                                            "position": "after",
+                                            "alias": "enjoy_mr_spicy__4"
+                                        },
+                                        "function": "any_non_missing_selected",
+                                        "name": "savory + sweet",
+                                        "id": 3,
+                                        "kwargs": {
+                                            "variable": "enjoy_mr_multi_ins",
+                                            "subvariable_ids": [
+                                                "enjoy_mr_savory__4",
+                                                "enjoy_mr_sweet__4"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "derived": true
+                },
+                "data": [
+                    45,
+                    30,
+                    39,
+                    35,
+                    45,
+                    35,
+                    0,
+                    0,
+                    8,
+                    0,
+                    8,
+                    8,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    30,
+                    30,
+                    24,
+                    20,
+                    30,
+                    20,
+                    14,
+                    0,
+                    21,
+                    14,
+                    21,
+                    21,
+                    1,
+                    0,
+                    2,
+                    1,
+                    2,
+                    2,
+                    39,
+                    24,
+                    47,
+                    35,
+                    47,
+                    43,
+                    6,
+                    6,
+                    0,
+                    0,
+                    6,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    35,
+                    20,
+                    35,
+                    35,
+                    35,
+                    31,
+                    10,
+                    10,
+                    9,
+                    0,
+                    15,
+                    9,
+                    0,
+                    0,
+                    3,
+                    0,
+                    3,
+                    3,
+                    45,
+                    30,
+                    47,
+                    35,
+                    53,
+                    43,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    35,
+                    20,
+                    43,
+                    31,
+                    43,
+                    43,
+                    8,
+                    8,
+                    4,
+                    4,
+                    8,
+                    0,
+                    2,
+                    2,
+                    0,
+                    0,
+                    2,
+                    0,
+                    35,
+                    20,
+                    34,
+                    24,
+                    29,
+                    28,
+                    0,
+                    0,
+                    9,
+                    0,
+                    9,
+                    9,
+                    0,
+                    0,
+                    1,
+                    0,
+                    1,
+                    1,
+                    20,
+                    20,
+                    19,
+                    9,
+                    20,
+                    19,
+                    14,
+                    0,
+                    23,
+                    14,
+                    17,
+                    17,
+                    1,
+                    0,
+                    2,
+                    1,
+                    2,
+                    2,
+                    34,
+                    19,
+                    44,
+                    24,
+                    38,
+                    38,
+                    1,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    24,
+                    9,
+                    24,
+                    24,
+                    18,
+                    18,
+                    7,
+                    7,
+                    15,
+                    0,
+                    15,
+                    15,
+                    4,
+                    4,
+                    5,
+                    0,
+                    6,
+                    5,
+                    29,
+                    20,
+                    38,
+                    18,
+                    39,
+                    38,
+                    6,
+                    0,
+                    6,
+                    6,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    28,
+                    19,
+                    38,
+                    18,
+                    38,
+                    38,
+                    7,
+                    1,
+                    6,
+                    6,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    42,
+                    19,
+                    39,
+                    34,
+                    40,
+                    33,
+                    0,
+                    0,
+                    11,
+                    0,
+                    11,
+                    11,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    19,
+                    19,
+                    16,
+                    11,
+                    19,
+                    12,
+                    20,
+                    0,
+                    30,
+                    20,
+                    28,
+                    28,
+                    3,
+                    0,
+                    4,
+                    3,
+                    4,
+                    4,
+                    39,
+                    16,
+                    50,
+                    34,
+                    48,
+                    44,
+                    3,
+                    3,
+                    0,
+                    0,
+                    3,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    34,
+                    11,
+                    34,
+                    34,
+                    32,
+                    28,
+                    6,
+                    6,
+                    13,
+                    0,
+                    15,
+                    13,
+                    2,
+                    2,
+                    3,
+                    0,
+                    4,
+                    3,
+                    40,
+                    19,
+                    48,
+                    32,
+                    51,
+                    44,
+                    2,
+                    0,
+                    2,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    33,
+                    12,
+                    44,
+                    28,
+                    44,
+                    44,
+                    7,
+                    5,
+                    6,
+                    6,
+                    5,
+                    0,
+                    2,
+                    2,
+                    0,
+                    0,
+                    2,
+                    0,
+                    40,
+                    17,
+                    38,
+                    35,
+                    39,
+                    36,
+                    0,
+                    0,
+                    10,
+                    0,
+                    10,
+                    10,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    17,
+                    17,
+                    15,
+                    12,
+                    17,
+                    14,
+                    21,
+                    0,
+                    31,
+                    21,
+                    30,
+                    30,
+                    2,
+                    0,
+                    2,
+                    2,
+                    2,
+                    2,
+                    38,
+                    15,
+                    48,
+                    35,
+                    47,
+                    46,
+                    2,
+                    2,
+                    0,
+                    0,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    35,
+                    12,
+                    35,
+                    35,
+                    34,
+                    33,
+                    4,
+                    4,
+                    12,
+                    0,
+                    14,
+                    12,
+                    1,
+                    1,
+                    1,
+                    0,
+                    1,
+                    1,
+                    39,
+                    17,
+                    47,
+                    34,
+                    49,
+                    46,
+                    1,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    36,
+                    14,
+                    46,
+                    33,
+                    46,
+                    46,
+                    4,
+                    3,
+                    2,
+                    2,
+                    3,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 0
+            },
+            "valid_overlap": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {},
+                        "subvariables": [
+                            "savory + spicy",
+                            "1",
+                            "spicy + sweet",
+                            "2",
+                            "savory + sweet",
+                            "3"
+                        ]
+                    },
+                    "references": {
+                        "uniform_basis": false,
+                        "description": "Typically enjoy foods with flavors",
+                        "subreferences": [
+                            {
+                                "name": "savory + spicy",
+                                "anchor": "top",
+                                "alias": "savory___spicy_at_top"
+                            },
+                            {
+                                "description": "Enjoyment of savory food (binary)",
+                                "format": {
+                                    "summary": {
+                                        "digits": 0
+                                    }
+                                },
+                                "notes": "Do you typically enjoy food that is savory?",
+                                "name": "Savory",
+                                "alias": "enjoy_mr_savory__4",
+                                "view": {
+                                    "show_counts": false,
+                                    "column_width": null,
+                                    "include_missing": false,
+                                    "show_numeric_values": false
+                                }
+                            },
+                            {
+                                "name": "spicy + sweet",
+                                "anchor": {
+                                    "position": "after",
+                                    "alias": "enjoy_mr_savory__4"
+                                },
+                                "alias": "spicy___sweet_after_enjoy_mr_savory__4"
+                            },
+                            {
+                                "description": "Enjoyment of spicy food (binary)",
+                                "format": {
+                                    "summary": {
+                                        "digits": 0
+                                    }
+                                },
+                                "notes": "Do you typically enjoy food that is spicy?",
+                                "name": "Spicy",
+                                "alias": "enjoy_mr_spicy__4",
+                                "view": {
+                                    "show_counts": false,
+                                    "column_width": null,
+                                    "include_missing": false,
+                                    "show_numeric_values": false
+                                }
+                            },
+                            {
+                                "name": "savory + sweet",
+                                "anchor": {
+                                    "position": "after",
+                                    "alias": "enjoy_mr_spicy__4"
+                                },
+                                "alias": "savory___sweet_after_enjoy_mr_spicy__4"
+                            },
+                            {
+                                "description": "Enjoyment of sweet food (binary)",
+                                "format": {
+                                    "summary": {
+                                        "digits": 0
+                                    }
+                                },
+                                "notes": "Do you typically enjoy food that is sweet?",
+                                "name": "Sweet",
+                                "alias": "enjoy_mr_sweet__4",
+                                "view": {
+                                    "show_counts": false,
+                                    "column_width": null,
+                                    "include_missing": false,
+                                    "show_numeric_values": false
+                                }
+                            }
+                        ],
+                        "notes": "Do you typically enjoy foods that taste..?",
+                        "alias": "enjoy_mr_multi_ins",
+                        "name": "enjoy_mr_multi_ins",
+                        "view": {
+                            "column_width": null,
+                            "include_noneoftheabove": false,
+                            "show_counts": false,
+                            "include_missing": false,
+                            "transform": {
+                                "insertions": [
+                                    {
+                                        "anchor": "top",
+                                        "function": "any_non_missing_selected",
+                                        "name": "savory + spicy",
+                                        "id": 1,
+                                        "kwargs": {
+                                            "variable": "enjoy_mr_multi_ins",
+                                            "subvariable_ids": [
+                                                "enjoy_mr_savory__4",
+                                                "enjoy_mr_spicy__4"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "anchor": {
+                                            "position": "after",
+                                            "alias": "enjoy_mr_savory__4"
+                                        },
+                                        "function": "any_non_missing_selected",
+                                        "name": "spicy + sweet",
+                                        "id": 2,
+                                        "kwargs": {
+                                            "variable": "enjoy_mr_multi_ins",
+                                            "subvariable_ids": [
+                                                "enjoy_mr_spicy__4",
+                                                "enjoy_mr_sweet__4"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "anchor": {
+                                            "position": "after",
+                                            "alias": "enjoy_mr_spicy__4"
+                                        },
+                                        "function": "any_non_missing_selected",
+                                        "name": "savory + sweet",
+                                        "id": 3,
+                                        "kwargs": {
+                                            "variable": "enjoy_mr_multi_ins",
+                                            "subvariable_ids": [
+                                                "enjoy_mr_savory__4",
+                                                "enjoy_mr_sweet__4"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "derived": true
+                },
+                "data": [
+                    45,
+                    44,
+                    45,
+                    45,
+                    45,
+                    43,
+                    11,
+                    9,
+                    11,
+                    8,
+                    11,
+                    11,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    30,
+                    30,
+                    30,
+                    30,
+                    30,
+                    28,
+                    23,
+                    23,
+                    23,
+                    20,
+                    23,
+                    23,
+                    3,
+                    0,
+                    3,
+                    3,
+                    3,
+                    3,
+                    47,
+                    45,
+                    47,
+                    44,
+                    47,
+                    47,
+                    9,
+                    8,
+                    9,
+                    9,
+                    9,
+                    7,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    35,
+                    34,
+                    35,
+                    35,
+                    35,
+                    35,
+                    18,
+                    16,
+                    18,
+                    18,
+                    18,
+                    16,
+                    3,
+                    3,
+                    3,
+                    0,
+                    3,
+                    3,
+                    53,
+                    51,
+                    53,
+                    50,
+                    53,
+                    51,
+                    3,
+                    2,
+                    3,
+                    3,
+                    3,
+                    3,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    43,
+                    41,
+                    43,
+                    40,
+                    43,
+                    43,
+                    11,
+                    10,
+                    11,
+                    11,
+                    11,
+                    11,
+                    2,
+                    2,
+                    2,
+                    2,
+                    2,
+                    0,
+                    35,
+                    34,
+                    35,
+                    31,
+                    35,
+                    35,
+                    10,
+                    9,
+                    10,
+                    9,
+                    9,
+                    9,
+                    0,
+                    0,
+                    1,
+                    0,
+                    1,
+                    1,
+                    20,
+                    20,
+                    20,
+                    16,
+                    20,
+                    20,
+                    23,
+                    23,
+                    23,
+                    22,
+                    23,
+                    23,
+                    2,
+                    0,
+                    3,
+                    2,
+                    2,
+                    2,
+                    43,
+                    42,
+                    44,
+                    39,
+                    44,
+                    44,
+                    2,
+                    1,
+                    2,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    24,
+                    23,
+                    24,
+                    24,
+                    24,
+                    24,
+                    16,
+                    15,
+                    16,
+                    16,
+                    15,
+                    15,
+                    5,
+                    5,
+                    6,
+                    0,
+                    6,
+                    6,
+                    38,
+                    37,
+                    39,
+                    33,
+                    39,
+                    39,
+                    6,
+                    6,
+                    6,
+                    6,
+                    6,
+                    6,
+                    1,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    37,
+                    36,
+                    38,
+                    33,
+                    38,
+                    38,
+                    7,
+                    7,
+                    7,
+                    6,
+                    7,
+                    7,
+                    1,
+                    0,
+                    1,
+                    1,
+                    0,
+                    0,
+                    42,
+                    39,
+                    42,
+                    40,
+                    42,
+                    40,
+                    15,
+                    13,
+                    15,
+                    13,
+                    15,
+                    15,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    19,
+                    19,
+                    19,
+                    17,
+                    19,
+                    17,
+                    33,
+                    33,
+                    33,
+                    31,
+                    33,
+                    33,
+                    5,
+                    0,
+                    5,
+                    5,
+                    5,
+                    5,
+                    50,
+                    46,
+                    50,
+                    47,
+                    50,
+                    50,
+                    7,
+                    6,
+                    7,
+                    6,
+                    7,
+                    5,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    34,
+                    31,
+                    34,
+                    34,
+                    34,
+                    34,
+                    19,
+                    17,
+                    19,
+                    19,
+                    19,
+                    17,
+                    4,
+                    4,
+                    4,
+                    0,
+                    4,
+                    4,
+                    51,
+                    47,
+                    51,
+                    47,
+                    51,
+                    49,
+                    6,
+                    5,
+                    6,
+                    6,
+                    6,
+                    6,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    44,
+                    40,
+                    44,
+                    41,
+                    44,
+                    44,
+                    11,
+                    10,
+                    11,
+                    10,
+                    11,
+                    11,
+                    2,
+                    2,
+                    2,
+                    2,
+                    2,
+                    0,
+                    40,
+                    38,
+                    40,
+                    39,
+                    40,
+                    40,
+                    11,
+                    11,
+                    11,
+                    11,
+                    11,
+                    10,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    17,
+                    17,
+                    17,
+                    16,
+                    17,
+                    17,
+                    32,
+                    32,
+                    32,
+                    32,
+                    32,
+                    31,
+                    2,
+                    0,
+                    2,
+                    2,
+                    2,
+                    2,
+                    48,
+                    46,
+                    48,
+                    47,
+                    48,
+                    48,
+                    3,
+                    3,
+                    3,
+                    3,
+                    3,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    35,
+                    33,
+                    35,
+                    35,
+                    35,
+                    35,
+                    15,
+                    15,
+                    15,
+                    15,
+                    15,
+                    14,
+                    1,
+                    1,
+                    1,
+                    0,
+                    1,
+                    1,
+                    49,
+                    47,
+                    49,
+                    48,
+                    49,
+                    49,
+                    2,
+                    2,
+                    2,
+                    2,
+                    2,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    46,
+                    44,
+                    46,
+                    45,
+                    46,
+                    46,
+                    4,
+                    4,
+                    4,
+                    4,
+                    4,
+                    4,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 0
+            }
+        },
+        "missing": 0,
+        "filter_stats": {
+            "is_cat_date": false,
+            "filtered": {
+                "unweighted": {
+                    "selected": 210,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 202.8,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 210,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 202.8,
+                    "other": 0,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 210,
+            "weighted_n": 202.8
+        },
+        "filtered": {
+            "unweighted_n": 210,
+            "weighted_n": 202.8
+        },
+        "element": "crunch:cube"
+    },
+    "query": {
+        "dimensions": [
+            {
+                "variable": "7ffdaf8aceb140abb920c91a75808cf3"
+            },
+            {
+                "function": "dimension",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "variable": "8bbb7e34a13a4c4d9fa1bc7ff153ec68"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "subvariables"
+                    }
+                ]
+            },
+            {
+                "function": "as_selected",
+                "args": [
+                    {
+                        "variable": "8bbb7e34a13a4c4d9fa1bc7ff153ec68"
+                    }
+                ]
+            }
+        ],
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "weight": "http://127.0.0.1:8080/datasets/832c8fd42871467fbfb4cbfcb085ab97/variables/6FFefyKVSLW3IkaBfdvVHj000019/"
+    },
+    "query_environment": {
+        "filter": []
+    }
+}

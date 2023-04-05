@@ -982,6 +982,35 @@ class _ElementIdShim:
             return _id
         if _id in self._raw_element_ids:
             return self._subvar_aliases[self._raw_element_ids.index(_id)]
+        # --- In case of MR dimensions with HS there's an edge case where the hidden
+        # --- column refers to the subvariable idx position defined in the raw
+        # --- elements elements ids.
+        # --- For example id = "2",
+        # --- subvar_ids = ('savory+spicy','1','spicy+sweet','2','savory+sweet','3')
+        # --- subvar_aliases = ('savory___spicy_at_top',
+        #                       'enjoy_mr_savory__4',
+        #                       'spicy___sweet_after_enjoy_mr_savory__4',
+        #                       'enjoy_mr_spicy__4',
+        #                       'savory___sweet_after_enjoy_mr_spicy__4',
+        #                       'enjoy_mr_sweet__4')
+        # --- Relying on the subvar_ids this will get the self._subvar_ids.index(_id)
+        # --- that corresponds to 3 and so subvar_aliases[3] == enjoy_mr_spicy__4.
+        # --- This means that we're hiding the col Spicy rather than Savory.
+        # --- Using the _raw_element_ids instead will return the correct hidden alias.
+        # --- NOTE: this goes away when we will use aliases rather than id.
+        if self._has_mr_insertion:
+            elements = self._dimension_dict["type"]["elements"]
+            insertions_mask = [
+                1 if el["value"].get("references", {}).get("anchor") else 0
+                for el in elements
+            ]
+            element_ids_without_insertions = [
+                str(el)
+                for is_ins, el in zip(insertions_mask, self._raw_element_ids)
+                if not is_ins
+            ]
+            if _id in element_ids_without_insertions:
+                return self._subvar_aliases[self._raw_element_ids.index(int(_id))]
         if _id in self._subvar_ids:
             return self._subvar_aliases[self._subvar_ids.index(_id)]
 
@@ -1010,6 +1039,17 @@ class _ElementIdShim:
         return {
             el["id"]: el["value"] for el in self._dimension_dict["type"]["elements"]
         }
+
+    @lazyproperty
+    def _has_mr_insertion(self) -> bool:
+        """True if dimension type is MR and has insertions. False otherwise."""
+        if self._dimension_type == DT.MR_SUBVAR:
+            references = self._dimension_dict.get("references") or {}
+            mr_insertions = (
+                references.get("view", {}).get("transform", {}).get("insertions", [])
+            )
+            return True if mr_insertions else False
+        return False
 
     @lazyproperty
     def _raw_element_ids(self) -> Tuple[Union[int, str], ...]:
