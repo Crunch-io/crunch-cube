@@ -1001,7 +1001,7 @@ class _ElementIdShim:
         if self._has_mr_insertion:
             elements = self._dimension_dict["type"]["elements"]
             insertions_mask = [
-                1 if el["value"].get("references", {}).get("anchor") else 0
+                1 if "anchor" in el["value"].get("references", {}) else 0
                 for el in elements
             ]
             element_ids_without_insertions = [
