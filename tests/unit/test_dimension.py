@@ -1294,7 +1294,7 @@ class Describe_ElementIdShim:
         _subvar_ids_prop_.return_value = subvar_ids
         _raw_element_id_prop_.return_value = raw_element_ids
 
-        shim_ = _ElementIdShim(DT.MR_SUBVAR, None, None)
+        shim_ = _ElementIdShim(DT.MR_SUBVAR, {}, None)
 
         assert shim_.translate_element_id(id) == expected
 
@@ -1337,7 +1337,7 @@ class Describe_ElementIdShim:
         _subvar_aliases_prop_.return_value = tuple(("alias2",))
         _subvar_ids_prop_.return_value = tuple(("abc",))
 
-        shim_ = _ElementIdShim(DT.MR_SUBVAR, None, None)
+        shim_ = _ElementIdShim(DT.MR_SUBVAR, {}, None)
 
         assert shim_._replaced_element_transforms(element_transforms) == {
             "alias2": {"another": "transform"}
