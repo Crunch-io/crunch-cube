@@ -453,6 +453,7 @@ class PayloadOrderCollator(_BaseAnchoredCollator):
         ]
         n_subtotals = len(subtotals)
         neg_idxs = tuple(i - n_subtotals for i in range(n_subtotals))
+        __import__("pdb").set_trace()
         return tuple(
             (*self._insertion_position(subtotal), neg_idx)
             for subtotal, neg_idx in zip(subtotals, neg_idxs)
