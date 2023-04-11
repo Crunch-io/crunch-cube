@@ -602,9 +602,26 @@ class Dimension:
     @lazyproperty
     def _element_data_format(self) -> Optional[Union[str, int]]:
         """optional str format for datetimes or int number of decimals for numeric"""
-        # --- return None even if format is explicitly set to None
-        fmt = self._dimension_dict.get("references", {}).get("format")
-        return fmt.get("data") if fmt else None
+        dim_dict = self._dimension_dict
+        fmt = dim_dict.get("references", {}).get("format")
+        # --- Be careful, format can be set to None so check before using `get`
+        if fmt and fmt.get("data"):
+            return fmt.get("data")
+
+        # --- Determine a fallback format from the resolution to match whaam
+        # --- github.com/Crunch-io/whaam/blob/master/base/utility/dtype-to-strf.js
+        resolution = dim_dict.get("type", {}).get("subtype", {}).get("resolution")
+        # --- If there's no resolution then probably isn't a date
+        if resolution:
+            return {
+                "s": ":%S",
+                "m": "%H:%M",
+                "h": "%H:00",
+                "D": "%d %b %Y",
+                "W": "%Y W%W",
+                "M": "%b %Y",
+                "Y": "%Y",
+            }.get(resolution, "%Y-%m-%d")
 
     @lazyproperty
     def _view_insertion_dicts(self) -> List[Optional[Dict]]:
