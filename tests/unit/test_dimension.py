@@ -839,7 +839,7 @@ class DescribeDimension:
 
         subtotals = dimension.subtotals_in_payload_order
 
-        _Subtotals_.assert_called_with(insertion_dicts, valid_elements_)
+        _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_)
         assert subtotals is subtotals_
 
     # fixture components ---------------------------------------------
