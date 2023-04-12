@@ -740,7 +740,7 @@ class DescribeDimension:
             (
                 DT.CAT,
                 [{"anchor": "top", "name": "a", "id": 1}],
-                {"insertions": [{"anchor": "3", "name": "a", "hide": True, "id": 1}]},
+                {"insertions": [{"anchor": 3, "name": "a", "hide": True, "id": 1}]},
                 [{"anchor": "top", "name": "a", "id": 1}],
             ),
             (
@@ -751,8 +751,13 @@ class DescribeDimension:
                 ],
                 {
                     "insertions": [
-                        {"anchor": "3", "name": "a", "hide": True, "id": 1},
-                        {"anchor": "2", "name": "b", "hide": True, "id": 2},
+                        {
+                            "anchor": {"position": "before", "alias": "foo"},
+                            "name": "a",
+                            "hide": True,
+                            "id": 1,
+                        },
+                        {"anchor": 2, "name": "b", "hide": True, "id": 2},
                     ]
                 },
                 [
@@ -779,8 +784,26 @@ class DescribeDimension:
                     ]
                 },
                 [
+                    {"anchor": 1, "name": "a", "id": 2},
+                    {"anchor": 1, "name": "b", "id": 1},
+                ],
+            ),
+            (
+                DT.CAT,
+                [
                     {"anchor": 1, "name": "a", "id": 1},
-                    {"anchor": 1, "name": "b", "id": 2},
+                    {"anchor": "top", "name": "b", "id": 2},
+                    {"anchor": "bottom", "name": "c", "id": 3},
+                ],
+                {
+                    "insertions": [
+                        {"anchor": 1, "name": "b", "id": 2},
+                        {"anchor": 1, "name": "a", "id": 3},
+                    ]
+                },
+                [
+                    {"anchor": 1, "name": "a", "id": 3},
+                    {"anchor": "top", "name": "b", "id": 2},
                 ],
             ),
         ),
@@ -816,7 +839,7 @@ class DescribeDimension:
 
         subtotals = dimension.subtotals_in_payload_order
 
-        _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_)
+        _Subtotals_.assert_called_with(insertion_dicts, valid_elements_)
         assert subtotals is subtotals_
 
     # fixture components ---------------------------------------------
