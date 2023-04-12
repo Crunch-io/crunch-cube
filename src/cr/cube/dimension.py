@@ -612,16 +612,18 @@ class Dimension:
         # --- github.com/Crunch-io/whaam/blob/master/base/utility/dtype-to-strf.js
         resolution = dim_dict.get("type", {}).get("subtype", {}).get("resolution")
         # --- If there's no resolution then probably isn't a date
-        if resolution:
-            return {
-                "s": ":%S",
-                "m": "%H:%M",
-                "h": "%H:00",
-                "D": "%d %b %Y",
-                "W": "%Y W%W",
-                "M": "%b %Y",
-                "Y": "%Y",
-            }.get(resolution, "%Y-%m-%d")
+        if not resolution:
+            return None
+
+        return {
+            "s": ":%S",
+            "m": "%H:%M",
+            "h": "%H:00",
+            "D": "%d %b %Y",
+            "W": "%Y W%W",
+            "M": "%b %Y",
+            "Y": "%Y",
+        }.get(resolution, "%Y-%m-%d")
 
     @lazyproperty
     def _view_insertion_dicts(self) -> List[Optional[Dict]]:
