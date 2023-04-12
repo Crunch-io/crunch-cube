@@ -667,8 +667,8 @@ class DescribeDimension:
                         "view": {
                             "transform": {
                                 "insertions": [
-                                    {"insertion": "dict-1"},
-                                    {"insertion": "dict-2"},
+                                    {"insertion": "dict-1", "id": 1},
+                                    {"insertion": "dict-2", "id": 2},
                                 ]
                             }
                         }
