@@ -5,7 +5,7 @@
 import copy
 from collections.abc import Sequence
 from datetime import datetime
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union, cast
 
 import numpy as np
 
@@ -538,14 +538,15 @@ class Dimension:
         elif self._view_insertion_dicts:
             insertion_dicts = copy.deepcopy(self._view_insertion_dicts)
             for ins in insertion_dicts:
-                original_id = ins["id"]
+                ins_dict: dict = cast(dict, ins)
+                original_id = ins_dict["id"]
                 # adapt view insertions with ids of the final transform insertions
                 insertions_map = {
                     insertion["name"]: insertion["id"]
                     for insertion in self._insertion_dicts
                 }
-                if ins["name"] in insertions_map:
-                    ins["id"] = insertions_map.get(ins["name"], original_id)
+                if ins_dict["name"] in insertions_map:
+                    ins_dict["id"] = insertions_map.get(ins_dict["name"], original_id)
                 else:
                     # remove the view insertion if it is not in the final transform
                     insertion_dicts.remove(ins)
