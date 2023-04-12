@@ -523,17 +523,7 @@ class Dimension:
         Each item in the sequence is a _Subtotal object specifying a subtotal, including
         its addends and anchor.
         """
-        # --- elements of an aggregate/array dimension cannot meaningfully be summed, so
-        # --- an array dimension cannot have subtotals
-        if self.dimension_type in (DT.MR, DT.CA_SUBVAR):
-            insertion_dicts = []
-        # --- insertions in dimension-transforms override those on dimension itself ---
-        elif "insertions" in self._dimension_transforms_dict:
-            insertion_dicts = self._dimension_transforms_dict["insertions"]
-        # --- otherwise insertions defined on dimension/variable apply ---
-        else:
-            insertion_dicts = self._view_insertion_dicts
-        return _Subtotals(insertion_dicts, self.valid_elements)
+        return _Subtotals(self._insertion_dicts, self.valid_elements)
 
     @lazyproperty
     def subtotals_in_payload_order(self) -> "_Subtotals":
@@ -546,9 +536,22 @@ class Dimension:
         if self.dimension_type in (DT.MR, DT.CA_SUBVAR):
             insertion_dicts: List[Optional[Dict]] = []
         elif self._view_insertion_dicts:
-            insertion_dicts = self._view_insertion_dicts
+            insertion_dicts = copy.deepcopy(self._view_insertion_dicts)
+            for ins in insertion_dicts:
+                original_id = ins["id"]
+                # adapt view insertions with ids of the final transform insertions
+                insertions_map = {
+                    insertion["name"]: insertion["id"]
+                    for insertion in self._insertion_dicts
+                }
+                if ins["name"] in insertions_map:
+                    ins["id"] = insertions_map.get(ins["name"], original_id)
+                else:
+                    # remove the view insertion if it is not in the final transform
+                    insertion_dicts.remove(ins)
         else:
-            insertion_dicts = self._dimension_transforms_dict.get("insertions", {})
+            insertion_dicts = self._dimension_transforms_dict.get("insertions", [])
+
         return _Subtotals(insertion_dicts, self.valid_elements)
 
     def translate_element_id(self, _id) -> Optional[str]:
@@ -605,6 +608,21 @@ class Dimension:
         # --- return None even if format is explicitly set to None
         fmt = self._dimension_dict.get("references", {}).get("format")
         return fmt.get("data") if fmt else None
+
+    @lazyproperty
+    def _insertion_dicts(self):
+        """List of insertions objects."""
+        # --- elements of an aggregate/array dimension cannot meaningfully be summed, so
+        # --- an array dimension cannot have subtotals
+        if self.dimension_type in (DT.MR, DT.CA_SUBVAR):
+            insertion_dicts = []
+        # --- insertions in dimension-transforms override those on dimension itself ---
+        elif "insertions" in self._dimension_transforms_dict:
+            insertion_dicts = self._dimension_transforms_dict["insertions"]
+        # --- otherwise insertions defined on dimension/variable apply ---
+        else:
+            insertion_dicts = self._view_insertion_dicts
+        return insertion_dicts
 
     @lazyproperty
     def _view_insertion_dicts(self) -> List[Optional[Dict]]:
