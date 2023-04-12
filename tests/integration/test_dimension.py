@@ -13,6 +13,7 @@ from cr.cube.dimension import (
     _Element,
     _ElementTransforms,
     _Subtotal,
+    _Subtotals,
 )
 from cr.cube.enums import DIMENSION_TYPE as DT
 
@@ -267,6 +268,35 @@ class DescribeIntegrated_AllElements:
             "[President Obama, Republicans in Congress, "
             "Both, Neither, Not sure, Skipped, Not Asked, No Data]"
         )
+
+
+class DescribeIntegrated_Subtotals:
+    def it_can_generate_insertion_ids_from_view_when_needed(self):
+        base_ins = {"function": "subtotal", "args": [1]}
+        insertion_dicts = [
+            {"name": "1, 1", "anchor": 1, **base_ins},
+            {"name": "2, top", "anchor": "top", **base_ins},
+            {"name": "3, bottom", "anchor": "bottom", **base_ins},
+            {"name": "4, 2", "anchor": 2, **base_ins},
+            {"name": "5, bottom", "anchor": "bottom", **base_ins},
+        ]
+        type_dict = Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
+        all_elements = _AllElements(type_dict, {}, None, None)
+
+        subtotals = _Subtotals(insertion_dicts, all_elements.valid_elements, True)
+
+        # --- Assert that element ids and insertions are in order we expected
+        assert all_elements.valid_elements.element_ids == (1, 2, 3, 4, 5)
+        assert tuple(ins.label for ins in subtotals) == (
+            "1, 1",
+            "2, top",
+            "3, bottom",
+            "4, 2",
+            "5, bottom",
+        )
+        # --- Now check that the insertion ids are defined in payload order, not in the
+        # --- order they were defined in
+        assert subtotals.insertion_ids == (2, 1, 4, 3, 5)
 
 
 class DescribeIntegrated_Element:
