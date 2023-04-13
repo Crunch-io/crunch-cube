@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.29
+- Bug fix for H&S overlaps for MR
+
 ### 3.0.28
 - Bug fix hidden subvars in MR with insertions
 
