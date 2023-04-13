@@ -368,3 +368,25 @@ class SumSubtotals(_BaseSubtotals):
         addend_sum = np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
         subtrahend_sum = np.sum(self._base_values[subtotal.subtrahend_idxs, :], axis=0)
         return addend_sum - subtrahend_sum
+
+
+class OverlapSubtotals(SumSubtotals):
+    """Subtotal blocks used exclusively for the "overlap" cube measure.
+
+    The specificity of the overlaps measure is that it has a duplicated last dimension,
+    that represents subvariables. In that regard, it's neither a table, nor a slice.
+    Rather, it's a base from which statistics are calculated, i.e. it doesn't
+    represent anything immediately useful by itself. For that reason, we cannot
+    "stack" it as we do with other cube measures. We only need to group them
+    together, to be able to return it to the second order measure processor,
+    which will calculate the relevant statistics.
+    """
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        # --- We're using np.array here, instead of np.vstack (or np.hstack). ---
+        # --- The reason is that overlaps are not immediately observable as a ---
+        # --- table or a slice, and are only needed as bases for stats. ---
+        return np.array(
+            [self._subtotal_row(subtotal) for subtotal in self._row_subtotals]
+        )
