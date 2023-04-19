@@ -92,7 +92,7 @@ class DescribeNegativeTermSubtotals:
 
         subtotal_value = NegativeTermSubtotals(
             np.array([1, 2, 4, 8]), None
-        )._subtotal_value(_Subtotal(None, None, None))
+        )._subtotal_value(_Subtotal(None, None))
 
         np.testing.assert_equal(subtotal_value, expected)
 
@@ -126,7 +126,7 @@ class DescribePositiveTermSubtotals:
 
         subtotal_value = PositiveTermSubtotals(
             np.array([1, 2, 4, 8]), None
-        )._subtotal_value(_Subtotal(None, None, None))
+        )._subtotal_value(_Subtotal(None, None))
 
         np.testing.assert_equal(subtotal_value, expected)
 
@@ -159,7 +159,7 @@ class DescribeSumSubtotals:
         )
 
         subtotal_value = SumSubtotals(np.array([1, 2, 4, 8]), None)._subtotal_value(
-            _Subtotal(None, None, None)
+            _Subtotal(None, None)
         )
 
         np.testing.assert_equal(subtotal_value, expected)

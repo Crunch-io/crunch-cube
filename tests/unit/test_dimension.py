@@ -667,8 +667,8 @@ class DescribeDimension:
                         "view": {
                             "transform": {
                                 "insertions": [
-                                    {"insertion": "dict-1"},
-                                    {"insertion": "dict-2"},
+                                    {"insertion": "dict-1", "id": 1},
+                                    {"insertion": "dict-2", "id": 2},
                                 ]
                             }
                         }
@@ -739,7 +739,9 @@ class DescribeDimension:
 
         subtotals = dimension.subtotals
 
-        _Subtotals_.assert_called_once_with(["subtotal", "dicts"], valid_elements_)
+        _Subtotals_.assert_called_once_with(
+            ["subtotal", "dicts"], valid_elements_, False
+        )
         assert subtotals is subtotals_
 
     @pytest.mark.parametrize(
@@ -1897,7 +1899,9 @@ class Describe_Subtotals:
     def it_constructs_its_subtotal_objects_to_help(
         self, request, _iter_valid_subtotal_dicts_, valid_elements_, _Subtotal_
     ):
-        subtotal_dicts_ = tuple({"subtotal-dict": idx} for idx in range(3))
+        subtotal_dicts_ = tuple(
+            {"subtotal-dict": idx, "anchor": "top", "id": idx + 1} for idx in range(3)
+        )
         subtotal_objs_ = tuple(
             instance_mock(request, _Subtotal, name="subtotal-%d" % idx)
             for idx in range(3)
@@ -1909,9 +1913,9 @@ class Describe_Subtotals:
         subtotal_objs = subtotals._subtotals
 
         assert _Subtotal_.call_args_list == [
-            call(subtotal_dicts_[0], valid_elements_, 1),
-            call(subtotal_dicts_[1], valid_elements_, 2),
-            call(subtotal_dicts_[2], valid_elements_, 3),
+            call(subtotal_dicts_[0], valid_elements_),
+            call(subtotal_dicts_[1], valid_elements_),
+            call(subtotal_dicts_[2], valid_elements_),
         ]
         assert subtotal_objs == subtotal_objs_
 
@@ -1970,7 +1974,7 @@ class Describe_Subtotal:
         )
         all_elements_.__iter__.return_value = iter(elements_)
         valid_elements = _ValidElements(all_elements_, None)
-        subtotal = _Subtotal(subtotal_dict, valid_elements, None)
+        subtotal = _Subtotal(subtotal_dict, valid_elements)
 
         addend_idxs = subtotal.addend_idxs
 
@@ -1990,7 +1994,7 @@ class Describe_Subtotal:
         self, subtotal_dict, element_ids, expected_value, valid_elements_
     ):
         valid_elements_.element_ids = element_ids
-        subtotal = _Subtotal(subtotal_dict, valid_elements_, None)
+        subtotal = _Subtotal(subtotal_dict, valid_elements_)
 
         assert subtotal.anchor == expected_value
 
@@ -2012,22 +2016,19 @@ class Describe_Subtotal:
         self, subtotal_dict, element_ids, expected_value, valid_elements_
     ):
         valid_elements_.element_ids = element_ids
-        subtotal = _Subtotal(subtotal_dict, valid_elements_, None)
+        subtotal = _Subtotal(subtotal_dict, valid_elements_)
 
         assert subtotal.addend_ids == expected_value
 
     def it_knows_its_insertion_id_when_it_has_been_assigned_one(self):
-        assert _Subtotal({"id": 42}, None, None).insertion_id == 42
-
-    def and_it_uses_its_fallback_insertion_id_when_not_assigned_one(self):
-        assert _Subtotal({}, None, 24).insertion_id == 24
+        assert _Subtotal({"id": 42}, None).insertion_id == 42
 
     @pytest.mark.parametrize(
         "subtotal_dict, expected_value",
         (({}, ""), ({"name": None}, ""), ({"name": ""}, ""), ({"name": "Joe"}, "Joe")),
     )
     def it_knows_the_subtotal_label(self, subtotal_dict, expected_value):
-        assert _Subtotal(subtotal_dict, None, None).label == expected_value
+        assert _Subtotal(subtotal_dict, None).label == expected_value
 
     @pytest.mark.parametrize(
         "subtotal_dict, element_ids, expected_value",
@@ -2045,7 +2046,7 @@ class Describe_Subtotal:
         self, subtotal_dict, element_ids, expected_value, valid_elements_
     ):
         valid_elements_.element_ids = element_ids
-        subtotal = _Subtotal(subtotal_dict, valid_elements_, None)
+        subtotal = _Subtotal(subtotal_dict, valid_elements_)
 
         assert subtotal.subtrahend_ids == expected_value
 
@@ -2078,7 +2079,7 @@ class Describe_Subtotal:
         )
         all_elements_.__iter__.return_value = iter(elements_)
         valid_elements = _ValidElements(all_elements_, None)
-        subtotal = _Subtotal(subtotal_dict, valid_elements, None)
+        subtotal = _Subtotal(subtotal_dict, valid_elements)
 
         subtrahend_idxs = subtotal.subtrahend_idxs
 
@@ -2089,7 +2090,7 @@ class Describe_Subtotal:
         (({"fill": "fake_fill"}, "fake_fill"), ({}, None)),
     )
     def it_knows_its_fill(self, subtotal_dict, expected_fill):
-        subtotal = _Subtotal(subtotal_dict, None, None)
+        subtotal = _Subtotal(subtotal_dict, None)
 
         fill = subtotal.fill
 

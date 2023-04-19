@@ -526,14 +526,15 @@ class Dimension:
         # --- elements of an aggregate/array dimension cannot meaningfully be summed, so
         # --- an array dimension cannot have subtotals
         if self.dimension_type in (DT.MR, DT.CA_SUBVAR):
-            insertion_dicts = []
+            return _Subtotals([], self.valid_elements)
         # --- insertions in dimension-transforms override those on dimension itself ---
         elif "insertions" in self._dimension_transforms_dict:
             insertion_dicts = self._dimension_transforms_dict["insertions"]
+            return _Subtotals(insertion_dicts, self.valid_elements, False)
         # --- otherwise insertions defined on dimension/variable apply ---
         else:
             insertion_dicts = self._view_insertion_dicts
-        return _Subtotals(insertion_dicts, self.valid_elements)
+            return _Subtotals(insertion_dicts, self.valid_elements)
 
     @lazyproperty
     def subtotals_in_payload_order(self) -> "_Subtotals":
@@ -542,14 +543,13 @@ class Dimension:
         Each item in the sequence is a _Subtotal object specifying a subtotal, including
         its addends and anchor.
         """
-
         if self.dimension_type in (DT.MR, DT.CA_SUBVAR):
-            insertion_dicts: List[Optional[Dict]] = []
+            return _Subtotals([], self.valid_elements)
         elif self._view_insertion_dicts:
-            insertion_dicts = self._view_insertion_dicts
+            return _Subtotals(self._view_insertion_dicts, self.valid_elements)
         else:
             insertion_dicts = self._dimension_transforms_dict.get("insertions", {})
-        return _Subtotals(insertion_dicts, self.valid_elements)
+            return _Subtotals(insertion_dicts, self.valid_elements, False)
 
     def translate_element_id(self, _id) -> Optional[str]:
         """Optional string that is the translation of various ids to subvariable alias
@@ -630,13 +630,7 @@ class Dimension:
         """List of insertion dicts included in the dimension view."""
         view = self._dimension_dict.get("references", {}).get("view") or {}
         insertions = view.get("transform", {}).get("insertions", [])
-        # ---If there's no id defined on the insertion defined on the variable view, use
-        # ---the 1-based positional index as the id to match frontend behavior
-        view_insertions = [
-            ins if "id" in ins else {"id": idx + 1, **ins}
-            for idx, ins in enumerate(insertions)
-        ]
-        return view_insertions
+        return insertions
 
 
 class _BaseElements(Sequence):
@@ -1462,9 +1456,10 @@ class _Subtotals(Sequence):
     A subtotal can only involve valid (i.e. non-missing) elements.
     """
 
-    def __init__(self, insertion_dicts, valid_elements):
+    def __init__(self, insertion_dicts, valid_elements, from_view=True):
         self._insertion_dicts = insertion_dicts
         self._valid_elements = valid_elements
+        self._from_view = from_view
 
     def __getitem__(self, idx_or_slice):
         """Implements indexed access."""
@@ -1536,27 +1531,92 @@ class _Subtotals(Sequence):
             # ---is a valid subtotal dict
             yield insertion_dict
 
+    def _position_crosswalk(self, subtotal_dicts):
+        """dict mapping position in definition with position in payload order."""
+        element_ids = self._valid_elements.element_ids
+        # --- Divide insertions by anchor type
+        # --- Since MR insertions come from zz9, only concerned with categorical ones
+        first = []
+        after = {}
+        last = []
+
+        for idx, ins in enumerate(subtotal_dicts):
+            if ins["anchor"] == "top":
+                first.append(idx)
+            elif ins["anchor"] == "bottom":
+                last.append(idx)
+            elif ins["anchor"] in element_ids:
+                cat_str = str(ins["anchor"])
+                new = after.get(cat_str, [])
+                new.append(idx)
+                after[cat_str] = new
+            else:
+                # --- put on bottom if anchor is malformed
+                last.append(idx)
+
+        insertion_order = first
+        # --- Go through elements in order, and add the insertions anchored to them
+        for element in element_ids:
+            if str(element) in after:
+                insertion_order = insertion_order + after[str(element)]
+        insertion_order = insertion_order + last
+
+        return {pos: idx + 1 for idx, pos in enumerate(insertion_order)}
+
     @lazyproperty
     def _subtotals(self):
         """Composed tuple storing actual sequence of _Subtotal objects."""
         return tuple(
-            _Subtotal(subtotal_dict, self._valid_elements, idx + 1)
-            for idx, subtotal_dict in enumerate(self._iter_valid_subtotal_dicts())
+            _Subtotal(subtotal_dict, self._valid_elements)
+            for subtotal_dict in self._valid_subtotal_dicts_with_ids
         )
+
+    @lazyproperty
+    def _valid_subtotal_dicts_with_ids(self):
+        """list of valid subtotal dicts guaranteed to have ids."""
+        subtotal_dicts = list(self._iter_valid_subtotal_dicts())
+        # --- Case 1: All insertions have ids so we don't have to worry about
+        # --- generating them
+        if all("id" in ins for ins in subtotal_dicts):
+            return subtotal_dicts
+
+        # --- Case 2: Not all insertions have ids, and we're working with insertions
+        # --- from the variable view. Unfortunately, the frontend determines insertion
+        # --- id based on the position in payload order, not based on their position
+        # --- in the list they are defined in. In this codebase, we want to pass the
+        # --- complete _Subtotals object into the collator, and so need to duplicate
+        # --- the collating logic for payload order in `_position_crosswalk`.
+        if self._from_view:
+            position_crosswalk = self._position_crosswalk(subtotal_dicts)
+            return [
+                ins if "id" in ins else {**ins, "id": position_crosswalk[idx]}
+                for idx, ins in enumerate(subtotal_dicts)
+            ]
+
+        # --- Case 3: Not all insertions have ids, and we're working with the insertions
+        # --- from the transform. There is no way to match insertions on transform
+        # --- without an id to the view insertions because both name and position can
+        # --- change. Generate ids starting from 1 in their defined order because this
+        # --- matches old behavior and we haven't noticed a bug yet.
+        # --- It's possible that the correct thing to do would be to generate ids
+        # --- that are guaranteed not to clash with the view insertion ids, because
+        # --- we don't want to accidentally match such an insertion to a view one,
+        # --- but I'm not sure it matters.
+        return [
+            ins if "id" in ins else {**ins, "id": idx + 1}
+            for idx, ins in enumerate(subtotal_dicts)
+        ]
 
 
 class _Subtotal:
     """A subtotal insertion on a cube dimension.
 
-    `fallback_insertion_id` is a fallback unique identifier for this insertion, until
-    real insertion-ids can be added. Its value is just the index+1 of this subtotal
-    within the insertions transform collection.
+    Assumes that the caller has already handled adding ids to `_subtotal_dict`.
     """
 
-    def __init__(self, subtotal_dict, valid_elements, fallback_insertion_id):
+    def __init__(self, subtotal_dict, valid_elements):
         self._subtotal_dict = subtotal_dict
         self._valid_elements = valid_elements
-        self._fallback_insertion_id = fallback_insertion_id
 
     @lazyproperty
     def alias(self) -> str:
@@ -1637,7 +1697,7 @@ class _Subtotal:
     @lazyproperty
     def insertion_id(self) -> int:
         """int unique identifier of this subtotal within this dimension's insertions."""
-        return self._subtotal_dict.get("id", self._fallback_insertion_id)
+        return self._subtotal_dict["id"]
 
     @lazyproperty
     def is_difference(self) -> bool:
