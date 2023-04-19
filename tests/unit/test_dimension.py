@@ -636,11 +636,21 @@ class DescribeDimension:
         assert Dimension(dimension_dict, None).selected_categories == expected_value
 
     @pytest.mark.parametrize(
-        "refs, expected",
-        (({"format": {"data": "%Y %b"}}, "%Y %b"), ({"format": {}}, None), ({}, None)),
+        "refs, resolution, expected",
+        (
+            ({"format": {"data": "%Y %b"}}, None, "%Y %b"),
+            ({"format": None}, "M", "%b %Y"),
+            ({"format": {}}, "Y", "%Y"),
+            ({}, "h", "%H:00"),
+            ({}, None, None),
+        ),
     )
-    def it_provides_access_to_element_data_format_to_help(self, refs, expected):
-        dimension = Dimension({"references": refs}, None)
+    def it_provides_access_to_element_data_format_to_help(
+        self, refs, resolution, expected
+    ):
+        dimension = Dimension(
+            {"references": refs, "type": {"subtype": {"resolution": resolution}}}, None
+        )
         assert dimension._element_data_format == expected
 
     @pytest.mark.parametrize(
@@ -1057,6 +1067,15 @@ class Describe_AllElements:
             ("%Y-%m-%dT%H:%M:%S.%f", "%Y", "2020-03-22T09:15:03.237821", "2020"),
             ("%Y-%m-%d", "%b %Y", "2021-08-11", "Aug 2021"),
             ("%Y-%m", "%d %B %Y", "2023-11", "01 November 2023"),
+            # --- Default formats based on resolution
+            ("%Y", "%Y", "2023", "2023"),
+            ("%Y-%m", "%b %Y", "2022-08", "Aug 2022"),
+            ("%Y-%m-%d", "%Y W%W", "1999-12-31", "1999 W52"),
+            ("%Y-%m-%d", "%d %b %Y", "1999-12-31", "31 Dec 1999"),
+            ("%Y-%m-%dT%H", "%H:00", "2023-06-06T11", "11:00"),
+            ("%Y-%m-%dT%H:%M", "%H:%M", "2023-07-04T09:20", "09:20"),
+            ("%Y-%m-%dT%H:%M:%S", ":%S", "2023-12-01T09:20:04", ":04"),
+            # --- Edge cases
             (None, "%Y", "2023", "2023"),  # ------------ No in_format, no change
             ("%Y", None, "2023", "2023"),  # ----------- No out_format, no change
             ("%Y", "%Y-%m-%d", "2023-01", "2023-01"),  # --- invalid x, no change
