@@ -1058,9 +1058,8 @@ class _ElementIdShim:
         """True if dimension type is MR and has insertions. False otherwise."""
         if self._dimension_type == DT.MR_SUBVAR:
             references = self._dimension_dict.get("references") or {}
-            mr_insertions = (
-                references.get("view", {}).get("transform", {}).get("insertions", [])
-            )
+            view = references.get("view") or {}
+            mr_insertions = view.get("transform", {}).get("insertions", [])
             return True if mr_insertions else False
         return False
 
