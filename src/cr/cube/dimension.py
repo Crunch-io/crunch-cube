@@ -94,9 +94,6 @@ class Dimensions(tuple):
                 return DT.TEXT
             elif subclass == "num_arr":
                 return DT.NUM_ARRAY
-            raise NotImplementedError(
-                f"unrecognized dimension type {type_class}.{subclass}"
-            )
         raise NotImplementedError(f"unrecognized dimension type {type_class}")
 
     @lazyproperty
