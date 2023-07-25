@@ -42,7 +42,10 @@ class Dimensions(tuple):
                 # Apparently, this library relies on these higher axes
                 # continuing to be marked as CA_SUBVAR to hint that
                 # features like insertions are not supported.
-                if any("value" not in e for e in dim._unshimmed_dimension_dict["type"]["elements"]):
+                if any(
+                    "value" not in e
+                    for e in dim._unshimmed_dimension_dict["type"]["elements"]
+                ):
                     continue
 
                 for other in dims:
@@ -64,10 +67,9 @@ class Dimensions(tuple):
         type_class = typedef["class"]
         if type_class == "categorical":
             cats = typedef.get("categories", [])
-            is_logical = (
-                any(cat.get("selected") for cat in cats)
-                and [cat.get("id") for cat in cats] == [1, 0, -1]
-            )
+            is_logical = any(cat.get("selected") for cat in cats) and [
+                cat.get("id") for cat in cats
+            ] == [1, 0, -1]
             if "subreferences" in dimension_dict.get("references", {}):
                 if is_logical:
                     return DT.MR_CAT
@@ -93,7 +95,9 @@ class Dimensions(tuple):
                 return DT.TEXT
             elif subclass == "num_arr":
                 return DT.NUM_ARRAY
-            raise NotImplementedError(f"unrecognized dimension type {type_class}.{subclass}")
+            raise NotImplementedError(
+                f"unrecognized dimension type {type_class}.{subclass}"
+            )
         raise NotImplementedError(f"unrecognized dimension type {type_class}")
 
     @lazyproperty
@@ -123,9 +127,7 @@ class Dimensions(tuple):
         dim_order = tuple(range(len(self)))
         if len(self) >= 2 and DT.NUM_ARRAY in dimension_types:
             return (
-                dim_order[-2:] + (dim_order[0],)
-                if len(self) == 3
-                else dim_order[::-1]
+                dim_order[-2:] + (dim_order[0],) if len(self) == 3 else dim_order[::-1]
             )
         return dim_order
 

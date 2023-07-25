@@ -40,10 +40,14 @@ class DescribeDimensions:
     """Unit-test suite for `cr.cube.dimension.Dimensions` object."""
 
     def it_knows_its_shape(self, request):
-        dims = Dimensions([
-            instance_mock(request, Dimension, name="dim-%d" % idx, shape=element_count)
-            for idx, element_count in enumerate((3, 2, 1))
-        ])
+        dims = Dimensions(
+            [
+                instance_mock(
+                    request, Dimension, name="dim-%d" % idx, shape=element_count
+                )
+                for idx, element_count in enumerate((3, 2, 1))
+            ]
+        )
         assert dims.shape == (3, 2, 1)
 
     @pytest.mark.parametrize(
@@ -85,7 +89,13 @@ class DescribeDimensions:
                 DT.CAT_DATE,
             ),
             (
-                {"type": {"class": "enum", "subtype": {"class": "variable"}, "categories": [{"date": "2019-01"}, {}]}},
+                {
+                    "type": {
+                        "class": "enum",
+                        "subtype": {"class": "variable"},
+                        "categories": [{"date": "2019-01"}, {}],
+                    }
+                },
                 DT.CA_SUBVAR,
             ),
         ),
@@ -116,8 +126,28 @@ class DescribeDimensions:
             ({"type": {"class": "categorical"}}, DT.CAT),
             ({"type": {"class": "categorical", "categories": []}}, DT.CAT),
             ({"type": {"class": "categorical", "categories": [{}, {}]}}, DT.CAT),
-            ({"type": {"class": "categorical", "categories": [{"selected": False}, {}]}}, DT.CAT),
-            ({"type": {"class": "categorical", "categories": [{"id": 1, "selected": True}, {"id": 0}, {"id": -1}]}}, DT.LOGICAL),
+            (
+                {
+                    "type": {
+                        "class": "categorical",
+                        "categories": [{"selected": False}, {}],
+                    }
+                },
+                DT.CAT,
+            ),
+            (
+                {
+                    "type": {
+                        "class": "categorical",
+                        "categories": [
+                            {"id": 1, "selected": True},
+                            {"id": 0},
+                            {"id": -1},
+                        ],
+                    }
+                },
+                DT.LOGICAL,
+            ),
         ),
     )
     def it_can_tell_when_a_dimension_has_a_selected_category_to_help(
@@ -129,7 +159,11 @@ class DescribeDimensions:
         "dimension_dict, expected_value",
         (
             ({"type": {"class": "categorical"}, "references": {}}, DT.CAT),
-            ({"type": {"class": "categorical"}, "references": {"subreferences": {}}}, DT.CA_CAT)),
+            (
+                {"type": {"class": "categorical"}, "references": {"subreferences": {}}},
+                DT.CA_CAT,
+            ),
+        ),
     )
     def it_distinguishes_an_array_categorical_type_to_help(
         self, dimension_dict, expected_value
@@ -147,11 +181,54 @@ class DescribeDimensions:
         "dimdef, expected_value",
         (
             ({"type": {"class": "categorical", "categories": []}}, DT.CAT),
-            ({"type": {"class": "categorical", "categories": [{"selected": True}]}}, DT.CAT),
-            ({"type": {"class": "categorical", "categories": [{"id": 1, "selected": True}, {"id": 0}, {"id": -1}]}}, DT.LOGICAL),
-            ({"type": {"class": "categorical", "categories": [{}]}, "references": {"subreferences": [{}]}}, DT.CA_CAT),
-            ({"type": {"class": "categorical", "categories": [{"id": 1, "selected": True}, {"id": 0}, {"id": -1}]}, "references": {"subreferences": [{}]}}, DT.MR_CAT),
-            ({"type": {"class": "categorical", "categories": [{"selected": True}]}, "references": {"subreferences": [{}]}}, DT.CA_CAT),
+            (
+                {"type": {"class": "categorical", "categories": [{"selected": True}]}},
+                DT.CAT,
+            ),
+            (
+                {
+                    "type": {
+                        "class": "categorical",
+                        "categories": [
+                            {"id": 1, "selected": True},
+                            {"id": 0},
+                            {"id": -1},
+                        ],
+                    }
+                },
+                DT.LOGICAL,
+            ),
+            (
+                {
+                    "type": {"class": "categorical", "categories": [{}]},
+                    "references": {"subreferences": [{}]},
+                },
+                DT.CA_CAT,
+            ),
+            (
+                {
+                    "type": {
+                        "class": "categorical",
+                        "categories": [
+                            {"id": 1, "selected": True},
+                            {"id": 0},
+                            {"id": -1},
+                        ],
+                    },
+                    "references": {"subreferences": [{}]},
+                },
+                DT.MR_CAT,
+            ),
+            (
+                {
+                    "type": {
+                        "class": "categorical",
+                        "categories": [{"selected": True}],
+                    },
+                    "references": {"subreferences": [{}]},
+                },
+                DT.CA_CAT,
+            ),
         ),
     )
     def it_resolves_a_categorical_type_to_help(self, dimdef, expected_value):
