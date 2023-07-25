@@ -7,7 +7,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
-from cr.cube.dimension import AllDimensions
+from cr.cube.dimension import Dimensions
 from cr.cube.enums import ORDER_FORMAT
 from cr.cube.matrix.assembler import _BaseOrderHelper
 from cr.cube.matrix.cubemeasure import _BaseCubeOverlaps
@@ -1513,7 +1513,7 @@ class DescribeCubemeasure:
         cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
-            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            dimensions=Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
             slice_idx=0,
         )
 
@@ -1535,7 +1535,7 @@ class DescribeCubemeasure:
         cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
-            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            dimensions=Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
             slice_idx=0,
         )
 
@@ -1557,7 +1557,7 @@ class DescribeCubemeasure:
         cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
-            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            dimensions=Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
             slice_idx=0,
         )
 
@@ -1584,7 +1584,7 @@ class DescribeCubemeasure:
         cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
-            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            dimensions=Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
             slice_idx=0,
         )
 
@@ -1611,7 +1611,7 @@ class DescribeCubemeasure:
         cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
-            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            dimensions=Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
             slice_idx=1,
         )
 
@@ -1638,7 +1638,7 @@ class DescribeCubemeasure:
         cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
-            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            dimensions=Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
             slice_idx=1,
         )
 

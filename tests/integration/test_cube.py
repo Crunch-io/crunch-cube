@@ -12,7 +12,7 @@ from cr.cube.cube import (
     _UnweightedCountMeasure,
     _WeightedCountMeasure,
 )
-from cr.cube.dimension import _ApparentDimensions, AllDimensions
+from cr.cube.dimension import Dimensions
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import (
@@ -36,7 +36,7 @@ class DescribeIntegratedCube:
         assert cube.cube_index == 0
         assert cube.description == "Pet Owners"
         assert cube.dimension_types == (DT.CAT, DT.CAT)
-        assert isinstance(cube.dimensions, _ApparentDimensions)
+        assert isinstance(cube.dimensions, Dimensions)
         assert cube.has_weighted_counts is False
         assert cube.missing == 5
         assert cube.name == "v4"
@@ -196,7 +196,7 @@ class DescribeIntegrated_Measures:
         cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
         measures = _Measures(
             cube_dict,
-            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
         )
 
         overlaps = measures.overlaps
@@ -215,7 +215,7 @@ class DescribeIntegrated_Measures:
         cube_dict = CR.CAT_X_CAT_MEAN_WGTD
         measures = _Measures(
             cube_dict,
-            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
         )
 
         means = measures.means
@@ -234,7 +234,7 @@ class DescribeIntegrated_Measures:
         cube_dict = CR.CAT_X_CAT_MEAN_WGTD
         measures = _Measures(
             cube_dict,
-            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
         )
         missing_count = measures.missing_count
         assert missing_count == 3
@@ -243,7 +243,7 @@ class DescribeIntegrated_Measures:
         cube_dict = CR.SUM_CAT_X_MR
         measures = _Measures(
             cube_dict,
-            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
         )
         missing_count = measures.missing_count
         assert missing_count == 1
@@ -290,7 +290,7 @@ class DescribeIntegrated_Measures:
     def it_provides_access_to_wgtd_count_measure(self, cube_dict, expected_type_name):
         measures = _Measures(
             cube_dict,
-            AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
         )
 
         weighted_counts = measures.weighted_counts

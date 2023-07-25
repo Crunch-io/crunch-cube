@@ -19,52 +19,91 @@ from cr.cube.enums import (
 from cr.cube.util import lazyproperty
 
 
-class _BaseDimensions(Sequence):
-    """Base class for dimension collections."""
-
-    def __getitem__(self, idx_or_slice):
-        """Implements indexed access."""
-        return self._dimensions[idx_or_slice]
-
-    def __iter__(self):
-        """Implements (efficient) iterability."""
-        return iter(self._dimensions)
-
-    def __len__(self):
-        """Implements len(elements)."""
-        return len(self._dimensions)
+class Dimensions(tuple):
+    """Collection containing every dimension defined in cube response."""
 
     def __repr__(self) -> str:
         "str representation of this dimension sequence." ""
-        dim_lines = "\n".join(f"{d}" for d in self._dimensions)
+        dim_lines = "\n".join(str(d) for d in self)
         return f"Dimensions:\n{dim_lines}"
 
-    @lazyproperty
-    def _dimensions(self) -> Tuple["Dimension", ...]:
-        """tuple of dimension objects in this collection.
+    @classmethod
+    def from_dicts(cls, dicts):
+        dims = [Dimension(d, cls.dimension_type(d)) for d in dicts]
 
-        This composed tuple is the source for the dimension objects in this
-        collection.
+        # Promote any DT.CA_SUBVAR to DT.MR_SUBVAR
+        # based on the type of its related "values" dim.
+        for dim in dims:
+            if dim.dimension_type == DT.CA_SUBVAR:
+                # Okay, not ANY but only the first axis ("subvariables").
+                # Additional axes (e.g. "fused" variables / scorecards) are
+                # incompletely implemented, and their cube output is different
+                # from subvariable axes (no "value" field in elements).
+                # Apparently, this library relies on these higher axes
+                # continuing to be marked as CA_SUBVAR to hint that
+                # features like insertions are not supported.
+                if any("value" not in e for e in dim._unshimmed_dimension_dict["type"]["elements"]):
+                    continue
+
+                for other in dims:
+                    if other is not dim and other.alias == dim.alias:
+                        if other.dimension_type == DT.MR_CAT:
+                            dim.dimension_type = DT.MR_SUBVAR
+
+        return cls(dims)
+
+    @classmethod
+    def dimension_type(cls, dimension_dict):
+        """Return the appropriate DIMENSION_TYPE.
+
+        Note that the returned type may depend on BOTH the current dimension
+        AND the next one, since arrays always place the higher dimension
+        first.
         """
-        raise NotImplementedError(
-            "must be implemented by each subclass"
-        )  # pragma: no cover
-
-
-class AllDimensions(_BaseDimensions):
-    """Collection containing every dimension defined in cube response."""
-
-    def __init__(self, dimension_dicts):
-        self._dimension_dicts = dimension_dicts
+        typedef = dimension_dict["type"]
+        type_class = typedef["class"]
+        if type_class == "categorical":
+            cats = typedef.get("categories", [])
+            is_logical = (
+                any(cat.get("selected") for cat in cats)
+                and [cat.get("id") for cat in cats] == [1, 0, -1]
+            )
+            if "subreferences" in dimension_dict.get("references", {}):
+                if is_logical:
+                    return DT.MR_CAT
+                else:
+                    return DT.CA_CAT
+            else:
+                if is_logical:
+                    return DT.LOGICAL
+                if any("date" in cat for cat in cats):
+                    return DT.CAT_DATE
+                return DT.CAT
+        elif type_class == "enum":
+            subclass = dimension_dict["type"]["subtype"]["class"]
+            if subclass == "variable":
+                # This may be overridden to DT.MR_SUBVAR by the caller
+                # if it detects related dims are DT.MR_CAT
+                return DT.CA_SUBVAR
+            elif subclass == "datetime":
+                return DT.DATETIME
+            elif subclass == "numeric":
+                return DT.BINNED_NUMERIC
+            elif subclass == "text":
+                return DT.TEXT
+            elif subclass == "num_arr":
+                return DT.NUM_ARRAY
+            raise NotImplementedError(f"unrecognized dimension type {type_class}.{subclass}")
+        raise NotImplementedError(f"unrecognized dimension type {type_class}")
 
     @lazyproperty
-    def apparent_dimensions(self) -> "_ApparentDimensions":
-        """_ApparentDimensions collection of the "visible" dimensions.
+    def apparent_dimensions(self) -> list:
+        """List of the "visible" dimensions.
 
         The two dimensions for a multiple-response (MR) variable are
         conflated into a single dimensions in this collection.
         """
-        return _ApparentDimensions(all_dimensions=self._dimensions)
+        return self.__class__(d for d in self if d.dimension_type != DT.MR_CAT)
 
     @lazyproperty
     def dimension_order(self) -> Tuple[int, ...]:
@@ -80,12 +119,12 @@ class AllDimensions(_BaseDimensions):
         # NOTE: this is a temporary hack that goes away when we introduce the dim_order
         # concept. We should receive the actual order directly in the cube_response.
         # So, all this logic will be deleted.
-        dimension_types = tuple(d.dimension_type for d in self._dimensions)
-        dim_order = tuple(range(len(self._dimensions)))
-        if len(self._dimensions) >= 2 and DT.NUM_ARRAY in dimension_types:
+        dimension_types = tuple(d.dimension_type for d in self)
+        dim_order = tuple(range(len(self)))
+        if len(self) >= 2 and DT.NUM_ARRAY in dimension_types:
             return (
                 dim_order[-2:] + (dim_order[0],)
-                if len(self._dimensions) == 3
+                if len(self) == 3
                 else dim_order[::-1]
             )
         return dim_order
@@ -98,226 +137,8 @@ class AllDimensions(_BaseDimensions):
         cube response values (raw meaning including missing and prunable
         elements and any MR_CAT dimensions).
         """
-        dimensions = [self._dimensions[i] for i in self.dimension_order]
+        dimensions = [self[i] for i in self.dimension_order]
         return tuple(d.shape for d in dimensions)
-
-    @lazyproperty
-    def _dimensions(self) -> Tuple["Dimension", ...]:
-        """tuple of dimension objects in this collection.
-
-        This composed tuple is the internal source for the dimension objects
-        in this collection.
-        """
-        return tuple(_DimensionFactory.iter_dimensions(self._dimension_dicts))
-
-
-class _ApparentDimensions(_BaseDimensions):
-    """Collection containing only "user" dimensions of a cube."""
-
-    def __init__(self, all_dimensions):
-        self._all_dimensions = all_dimensions
-
-    @lazyproperty
-    def _dimensions(self) -> Tuple["Dimension", ...]:
-        """tuple of dimension objects in this collection.
-
-        This composed tuple is the source for the dimension objects in this
-        collection.
-        """
-        return tuple(d for d in self._all_dimensions if d.dimension_type != DT.MR_CAT)
-
-
-class _DimensionFactory:
-    """Produce Dimension objects of correct type from dimension-dicts.
-
-    "type" here is primarily the `.dimension_type` value of the dimension,
-    although if `Dimension` becomes an object hierarchy, this factory would
-    make dimension class choices as well.
-    """
-
-    def __init__(self, dimension_dicts):
-        self._dimension_dicts = dimension_dicts
-
-    @classmethod
-    def iter_dimensions(cls, dimension_dicts) -> Iterator["Dimension"]:
-        """Generate Dimension object for each of *dimension_dicts*."""
-        return cls(dimension_dicts)._iter_dimensions()
-
-    def _iter_dimensions(self) -> Iterator["Dimension"]:
-        """Generate Dimension object for each dimension dict."""
-        return (
-            Dimension(raw_dimension.dimension_dict, raw_dimension.dimension_type)
-            for raw_dimension in self._raw_dimensions
-        )
-
-    @lazyproperty
-    def _raw_dimensions(self) -> Tuple["_RawDimension", ...]:
-        """Sequence of _RawDimension objects wrapping each dimension dict."""
-        return tuple(
-            _RawDimension(dimension_dict, self._dimension_dicts)
-            for dimension_dict in self._dimension_dicts
-        )
-
-
-class _RawDimension:
-    """Thin wrapper around dimension-dict to support dimension-type discovery.
-
-    Determining dimension-type is pretty complex and requires repeated
-    partial parsing of both the dimension dict and its siblings. This class
-    abstracts that access for clarity.
-    """
-
-    def __init__(self, dimension_dict, dimension_dicts):
-        self._dimension_dict = dimension_dict
-        self._dimension_dicts = dimension_dicts
-
-    @lazyproperty
-    def dimension_dict(self) -> Dict:
-        """dict defining this dimension in cube response."""
-        return self._dimension_dict
-
-    @lazyproperty
-    def dimension_type(self) -> _DimensionType:
-        """_DimensionType (member of DIMENSION_TYPE) appropriate to dimension_dict."""
-        base_type = self._base_type
-        if base_type == "categorical":
-            return self._resolve_categorical()
-        if base_type == "enum.variable":
-            return self._resolve_array_type()
-        if base_type == "enum.datetime":
-            return DT.DATETIME
-        if base_type == "enum.numeric":
-            return DT.BINNED_NUMERIC
-        if base_type == "enum.text":
-            return DT.TEXT
-        if base_type == "enum.num_arr":
-            return DT.NUM_ARRAY
-        raise NotImplementedError(f"unrecognized dimension type {base_type}")
-
-    @lazyproperty
-    def _alias(self) -> str:
-        """Return str key for variable behind *dimension_dict*."""
-        return self._dimension_dict["references"]["alias"]
-
-    @lazyproperty
-    def _base_type(self) -> str:
-        """Return str like 'enum.numeric' representing dimension type.
-
-        This string is a 'type.subclass' concatenation of the str keys
-        used to identify the dimension type in the cube response JSON.
-        The '.subclass' suffix only appears where a subtype is present.
-        """
-        type_class = self._dimension_dict["type"]["class"]
-        if type_class == "categorical":
-            return "categorical"
-        if type_class == "enum":
-            subclass = self._dimension_dict["type"]["subtype"]["class"]
-            return f"enum.{subclass}"
-        raise NotImplementedError(f"unexpected dimension type class '{type_class}'")
-
-    @lazyproperty
-    def _categories(self) -> List[Dict]:
-        return self._dimension_dict["type"].get("categories", [])
-
-    @lazyproperty
-    def _has_selected_category(self) -> bool:
-        """True if dimension-dict includes one or more selected categories.
-
-        A "selected" category-dict is one having `'selected': True`. This
-        property is only meaningful for a categorical dimension dict.
-        """
-        return any(category.get("selected") for category in self._categories)
-
-    @lazyproperty
-    def _is_logical_type(self) -> bool:
-        """True if dimension-dict has the categories equal to those of the logical type.
-
-        Logical type has exactly three categories with IDs [-1, 0, 1]. This type is
-        used to define the selections dimension of the multiple response type, when it
-        follows the subvariables dimension.
-        """
-        return [category.get("id") for category in self._categories] == [1, 0, -1]
-
-    @lazyproperty
-    def _is_array_cat(self) -> bool:
-        """True if a categorical dimension_dict belongs to an array pair.
-
-        Returns True for a CA_CAT or MR_CAT dimension. Only meaningful when
-        the dimension is known to be categorical (has base-type
-        'categorical').
-        """
-        return "subreferences" in self._dimension_dict["references"]
-
-    @lazyproperty
-    def _is_cat_date(self) -> bool:
-        """True if dimension is a categorical date, False otherwise.
-
-        A dimension is a categorical date, if it has all the properties of a "normal"
-        categorical dimension, but also a `"date"` field in any of its categories.
-        """
-        if self._dimension_dict["type"]["class"] != "categorical":
-            return False
-        return any("date" in cat for cat in self._categories)
-
-    @lazyproperty
-    def _next_raw_dimension(self) -> Optional["_RawDimension"]:
-        """_RawDimension for next *dimension_dict* in sequence or None for last.
-
-        Returns None if this dimension is the last in sequence for this cube.
-        """
-        dimension_dicts = self._dimension_dicts
-        this_idx = dimension_dicts.index(self._dimension_dict)
-        if this_idx > len(dimension_dicts) - 2:
-            return None
-        return _RawDimension(dimension_dicts[this_idx + 1], self._dimension_dicts)
-
-    def _resolve_array_type(self) -> _DimensionType:
-        """Return one of the ARRAY_TYPES members of DIMENSION_TYPE.
-
-        This method distinguishes between CA and MR dimensions. The return
-        value is only meaningful if the dimension is known to be of array
-        type (i.e. either CA or MR, base-type 'enum.variable').
-        """
-        next_raw_dimension = self._next_raw_dimension
-        if next_raw_dimension is None:
-            return DT.CA
-
-        is_mr_subvar = (
-            next_raw_dimension._base_type == "categorical"
-            and next_raw_dimension._has_selected_category
-            and next_raw_dimension._alias == self._alias
-            and next_raw_dimension._is_logical_type
-        )
-        return DT.MR if is_mr_subvar else DT.CA
-
-    def _resolve_categorical(self) -> _DimensionType:
-        """Return one of the categorical members of DIMENSION_TYPE.
-
-        This method distinguishes between CAT, CA_CAT, MR_CAT, and LOGICAL
-        dimension types, all of which have the base type 'categorical'. The
-        return value is only meaningful if the dimension is known to be one
-        of the categorical types (has base-type 'categorical').
-        """
-        # ---an array categorical is either CA_CAT or MR_CAT---
-        if self._is_array_cat:
-            return (
-                DT.MR_CAT
-                if self._has_selected_category and self._is_logical_type
-                else DT.CA_CAT
-            )
-
-        # ---what's left is three different versions of categorical dimension---
-
-        # ---first the logical---
-        if self._has_selected_category and self._is_logical_type:
-            return DT.LOGICAL
-
-        # ---or a categorical date---
-        if self._is_cat_date:
-            return DT.CAT_DATE
-
-        # ---or the plain-old categorical---
-        return DT.CAT
 
 
 class Dimension:
@@ -331,9 +152,11 @@ class Dimension:
     :attr:`.CrunchCube.dimensions`.
     """
 
+    dimension_type = None
+
     def __init__(self, dimension_dict, dimension_type, dimension_transforms=None):
         self._unshimmed_dimension_dict = dimension_dict
-        self._dimension_type = dimension_type
+        self.dimension_type = dimension_type
         self._unshimmed_dimension_transforms_dict = dimension_transforms or {}
 
     def __repr__(self) -> str:
@@ -354,7 +177,7 @@ class Dimension:
         return _AllElements(
             self._dimension_dict["type"],
             self._dimension_transforms_dict,
-            self._dimension_type,
+            self.dimension_type,
             self._element_data_format,
         )
 
@@ -366,7 +189,7 @@ class Dimension:
         # --- Use unshimmed `._dimension_dict` because we need to re-shim it alongside
         # --- the new dimension_transforms dictionary
         return Dimension(
-            self._unshimmed_dimension_dict, self._dimension_type, dimension_transforms
+            self._unshimmed_dimension_dict, self.dimension_type, dimension_transforms
         )
 
     @lazyproperty
@@ -383,11 +206,6 @@ class Dimension:
         # ---Normalize to "" so return value is always a str and callers don't need to
         # ---deal with None as a possible return type.
         return description if description else ""
-
-    @lazyproperty
-    def dimension_type(self) -> _DimensionType:
-        """Member of DIMENSION_TYPE appropriate to this cube dimension."""
-        return self._dimension_type
 
     @lazyproperty
     def element_aliases(self) -> Tuple[str, ...]:
@@ -525,7 +343,7 @@ class Dimension:
         """
         # --- elements of an aggregate/array dimension cannot meaningfully be summed, so
         # --- an array dimension cannot have subtotals
-        if self.dimension_type in (DT.MR, DT.CA_SUBVAR):
+        if self.dimension_type in (DT.MR_SUBVAR, DT.CA_SUBVAR):
             return _Subtotals([], self.valid_elements)
         # --- insertions in dimension-transforms override those on dimension itself ---
         elif "insertions" in self._dimension_transforms_dict:
@@ -543,7 +361,7 @@ class Dimension:
         Each item in the sequence is a _Subtotal object specifying a subtotal, including
         its addends and anchor.
         """
-        if self.dimension_type in (DT.MR, DT.CA_SUBVAR):
+        if self.dimension_type in (DT.MR_SUBVAR, DT.CA_SUBVAR):
             return _Subtotals([], self.valid_elements)
         elif self._view_insertion_dicts:
             return _Subtotals(self._view_insertion_dicts, self.valid_elements)
@@ -584,7 +402,7 @@ class Dimension:
     def _element_id_shim(self) -> "_ElementIdShim":
         """_ElementIdShim for this Dimension object"""
         return _ElementIdShim(
-            self._dimension_type,
+            self.dimension_type,
             self._unshimmed_dimension_dict,
             self._unshimmed_dimension_transforms_dict,
         )
@@ -708,7 +526,7 @@ class _AllElements(_BaseElements):
     ):
         self._type_dict = type_dict
         self._dimension_transforms_dict = dimension_transforms_dict
-        self._dimension_type = dimension_type
+        self.dimension_type = dimension_type
         self._element_data_format = element_data_format
 
     @lazyproperty
@@ -747,7 +565,7 @@ class _AllElements(_BaseElements):
         """Element transform dict expressed in the dimension transforms expression."""
         return (
             self._shimmed_element_transforms
-            if self._dimension_type == DT.MR
+            if self.dimension_type == DT.MR_SUBVAR
             else self._dimension_transforms_dict.get("elements", {})
         )
 
@@ -764,7 +582,7 @@ class _AllElements(_BaseElements):
 
     def _format_label(self, x: Any) -> str:
         """returns str of x formatted for use in labels"""
-        if self._dimension_type == DT.DATETIME:
+        if self.dimension_type == DT.DATETIME:
             return self._format_datetime_label(x)
         else:  # --- TODO: Should round numeric values like the frontend does
             return str(x)
@@ -772,7 +590,7 @@ class _AllElements(_BaseElements):
     @lazyproperty
     def _incoming_element_datetime_format(self) -> Optional[str]:
         """optional str of date formatting requested if datetime and is found"""
-        if self._dimension_type != DT.DATETIME:
+        if self.dimension_type != DT.DATETIME:
             return None
 
         resolution = self._type_dict["subtype"].get("resolution")
@@ -885,7 +703,7 @@ class _ElementIdShim:
     """
 
     def __init__(self, dimension_type, dimension_dict, dimension_transforms_dict):
-        self._dimension_type = dimension_type
+        self.dimension_type = dimension_type
         self._dimension_dict = dimension_dict
         self._dimension_transforms_dict = dimension_transforms_dict
 
@@ -900,13 +718,13 @@ class _ElementIdShim:
         shim = copy.deepcopy(self._dimension_dict)
 
         # --- array variables are identified by thier aliases
-        if self._dimension_type in DT.ARRAY_TYPES:
+        if self.dimension_type in DT.ARRAY_TYPES:
             # --- Replace element ids with the alias
             for idx, alias in enumerate(self._subvar_aliases):
                 shim["type"]["elements"][idx]["id"] = alias
 
         # --- datetimes are identified by their value
-        if self._dimension_type == DT.DATETIME:
+        if self.dimension_type == DT.DATETIME:
             for el in shim["type"]["elements"]:
                 # --- Missing data comes in as a dict and should be ignored
                 if not isinstance(el["value"], dict):
@@ -942,7 +760,7 @@ class _ElementIdShim:
         # --- Leave non-subvariable dimension types alone, as they don't have
         # --- subvariable aliases to use, and category ids are already the main way
         # --- we identify elements on categorical dimensions (and this is correct).
-        dim_type = self._dimension_type
+        dim_type = self.dimension_type
         if dim_type not in DT.SHIMMED_TYPES:
             return shim
 
@@ -983,10 +801,10 @@ class _ElementIdShim:
            0-# of elements), use _id'th alias.
         6) If all of these fail, return None.
         """
-        if self._dimension_type not in DT.SHIMMED_TYPES:
+        if self.dimension_type not in DT.SHIMMED_TYPES:
             return _id
 
-        if self._dimension_type == DT.DATETIME:
+        if self.dimension_type == DT.DATETIME:
             int_id = int(_id) if isinstance(_id, str) and _id.isnumeric() else _id
             return self._element_values_dict.get(int_id, _id)
 
@@ -1056,7 +874,7 @@ class _ElementIdShim:
     @lazyproperty
     def _has_mr_insertion(self) -> bool:
         """True if dimension type is MR and has insertions. False otherwise."""
-        if self._dimension_type == DT.MR_SUBVAR:
+        if self.dimension_type == DT.MR_SUBVAR:
             references = self._dimension_dict.get("references") or {}
             mr_insertions = (
                 references.get("view", {}).get("transform", {}).get("insertions", [])

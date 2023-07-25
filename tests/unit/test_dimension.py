@@ -2,22 +2,19 @@
 
 """Unit test suite for cr.cube.dimension module."""
 
+import mock
 import numpy as np
 import pytest
 
 from cr.cube.dimension import (
-    AllDimensions,
     _AllElements,
-    _ApparentDimensions,
-    _BaseDimensions,
     _BaseElements,
     Dimension,
-    _DimensionFactory,
+    Dimensions,
     _ElementIdShim,
     _Element,
     _ElementTransforms,
     _OrderSpec,
-    _RawDimension,
     _Subtotal,
     _Subtotals,
     _ValidElements,
@@ -30,7 +27,6 @@ from cr.cube.enums import (
 )
 
 from ..unitutil import (
-    ANY,
     call,
     class_mock,
     initializer_mock,
@@ -40,242 +36,44 @@ from ..unitutil import (
 )
 
 
-class Describe_BaseDimensions:
-    def it_has_sequence_behaviors(self, _dimensions_prop_):
-        _dimensions_prop_.return_value = (0, 1, 2)
-        base_dimensions = _BaseDimensions()
+class DescribeDimensions:
+    """Unit-test suite for `cr.cube.dimension.Dimensions` object."""
 
-        assert base_dimensions[1] == 1
-        assert base_dimensions[1:3] == (1, 2)
-        assert len(base_dimensions) == 3
-        assert list(n for n in base_dimensions) == [0, 1, 2]
-
-    def it_stores_its_dimension_objects_in_a_tuple_to_help(self):
-        base_dimensions = _BaseDimensions()
-        with pytest.raises(NotImplementedError):
-            base_dimensions._dimensions
-
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def _dimensions_prop_(self, request):
-        return property_mock(request, _BaseDimensions, "_dimensions")
-
-
-class DescribeAllDimensions:
-    """Unit-test suite for `cr.cube.dimension.AllDimensions` object."""
-
-    def it_provides_access_to_its_ApparentDimensions(
-        self,
-        _ApparentDimensions_,
-        apparent_dimensions_,
-        _dimensions_prop_,
-        all_dimensions_,
-    ):
-        _dimensions_prop_.return_value = all_dimensions_
-        _ApparentDimensions_.return_value = apparent_dimensions_
-        all_dimensions = AllDimensions(None)
-
-        apparent_dimensions = all_dimensions.apparent_dimensions
-
-        _ApparentDimensions_.assert_called_once_with(all_dimensions=all_dimensions_)
-        assert apparent_dimensions is apparent_dimensions_
-
-    def it_knows_its_shape(self, request, _dimensions_prop_):
-        _dimensions_prop_.return_value = tuple(
+    def it_knows_its_shape(self, request):
+        dims = Dimensions([
             instance_mock(request, Dimension, name="dim-%d" % idx, shape=element_count)
             for idx, element_count in enumerate((3, 2, 1))
-        )
-        all_dimensions = AllDimensions(None)
-
-        shape = all_dimensions.shape
-
-        assert shape == (3, 2, 1)
-
-    def it_stores_its_dimensions_in_a_tuple_to_help(self, request, _DimensionFactory_):
-        dimension_dicts_ = [{"d": 0}, {"d": 1}, {"d": 2}]
-        dimensions_ = tuple(
-            instance_mock(request, Dimension, name="dim-%d" % idx) for idx in range(3)
-        )
-        _DimensionFactory_.iter_dimensions.return_value = iter(dimensions_)
-        all_dimensions = AllDimensions(dimension_dicts_)
-
-        dimensions = all_dimensions._dimensions
-
-        _DimensionFactory_.iter_dimensions.assert_called_once_with(dimension_dicts_)
-        assert dimensions == dimensions_
-
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def all_dimensions_(self, request):
-        return instance_mock(request, AllDimensions)
-
-    @pytest.fixture
-    def _ApparentDimensions_(self, request):
-        return class_mock(request, "cr.cube.dimension._ApparentDimensions")
-
-    @pytest.fixture
-    def apparent_dimensions_(self, request):
-        return instance_mock(request, _ApparentDimensions)
-
-    @pytest.fixture
-    def _DimensionFactory_(self, request):
-        return class_mock(request, "cr.cube.dimension._DimensionFactory")
-
-    @pytest.fixture
-    def _dimensions_prop_(self, request):
-        return property_mock(request, AllDimensions, "_dimensions")
-
-
-class Describe_ApparentDimensions:
-    def it_stores_its_dimensions_in_a_tuple_to_help(self, request):
-        all_dimensions_ = tuple(
-            instance_mock(request, Dimension, name="dim-%d" % idx, dimension_type=dt)
-            for idx, dt in enumerate((DT.CAT, DT.MR, DT.MR_CAT))
-        )
-        apparent_dimensions = _ApparentDimensions(all_dimensions_)
-
-        dimensions = apparent_dimensions._dimensions
-
-        assert dimensions == all_dimensions_[:2]
-
-
-class Describe_DimensionFactory:
-    def it_provides_an_interface_classmethod(
-        self, request, dimension_dicts_, _init_, _iter_dimensions_
-    ):
-        dimensions_ = tuple(
-            instance_mock(request, Dimension, name="dim-%d" % idx) for idx in range(3)
-        )
-        _iter_dimensions_.return_value = iter(dimensions_)
-
-        dimension_iter = _DimensionFactory.iter_dimensions(dimension_dicts_)
-
-        # ---ANY is for dimension_factory object (self), which we can't see---
-        _init_.assert_called_once_with(ANY, dimension_dicts_)
-        _iter_dimensions_.assert_called_once_with(ANY)
-        assert tuple(dimension_iter) == dimensions_
-
-    def it_generates_the_dimensions_for_a_cube(
-        self, request, dimension_dicts_, _raw_dimensions_prop_, Dimension_
-    ):
-        dimension_types_ = (DT.CAT, DT.CA_SUBVAR, DT.CA_CAT)
-        _raw_dimensions_prop_.return_value = tuple(
-            instance_mock(
-                request,
-                _RawDimension,
-                name="raw-dim-%d" % idx,
-                dimension_dict=dimension_dicts_[idx],
-                dimension_type=dimension_types_[idx],
-            )
-            for idx in range(3)
-        )
-        dimensions_ = tuple(
-            instance_mock(request, Dimension, name="dim-%d" % idx) for idx in range(3)
-        )
-        Dimension_.side_effect = iter(dimensions_)
-        dimension_factory = _DimensionFactory(None)
-
-        dimension_iter = dimension_factory._iter_dimensions()
-
-        # ---exercising the iterator needs to come first---
-        assert tuple(dimension_iter) == dimensions_
-        assert Dimension_.call_args_list == [
-            call(dimension_dicts_[0], dimension_types_[0]),
-            call(dimension_dicts_[1], dimension_types_[1]),
-            call(dimension_dicts_[2], dimension_types_[2]),
-        ]
-
-    def it_constructs_RawDimension_objects_to_help(
-        self, request, dimension_dicts_, _RawDimension_
-    ):
-        raw_dimensions_ = tuple(
-            instance_mock(request, _RawDimension, name="raw-dim-%d" % idx)
-            for idx in range(3)
-        )
-        _RawDimension_.side_effect = iter(raw_dimensions_)
-        dimension_factory = _DimensionFactory(dimension_dicts_)
-
-        raw_dimensions = dimension_factory._raw_dimensions
-
-        assert _RawDimension_.call_args_list == [
-            call(dimension_dicts_[0], dimension_dicts_),
-            call(dimension_dicts_[1], dimension_dicts_),
-            call(dimension_dicts_[2], dimension_dicts_),
-        ]
-        assert raw_dimensions == raw_dimensions_
-
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def Dimension_(self, request):
-        return class_mock(request, "cr.cube.dimension.Dimension")
-
-    @pytest.fixture
-    def dimension_dicts_(self, request):
-        """Tuple of three shallow dimension-dict placeholders."""
-        return ({"d": 0}, {"d": 1}, {"d": 2})
-
-    @pytest.fixture
-    def _init_(self, request):
-        return initializer_mock(request, _DimensionFactory)
-
-    @pytest.fixture
-    def _iter_dimensions_(self, request):
-        return method_mock(request, _DimensionFactory, "_iter_dimensions")
-
-    @pytest.fixture
-    def _RawDimension_(self, request):
-        return class_mock(request, "cr.cube.dimension._RawDimension")
-
-    @pytest.fixture
-    def _raw_dimensions_prop_(self, request):
-        return property_mock(request, _DimensionFactory, "_raw_dimensions")
-
-
-class Describe_RawDimension:
-    def it_provides_access_to_the_dimension_dict(self):
-        dimension_dict_ = {"dimension": "dict"}
-        raw_dimension = _RawDimension(dimension_dict_, None)
-
-        dimension_dict = raw_dimension.dimension_dict
-
-        assert dimension_dict == dimension_dict_
+        ])
+        assert dims.shape == (3, 2, 1)
 
     @pytest.mark.parametrize(
         "dimension_dict, expected_value",
         (
-            ({"type": {"class": "categorical"}}, "categorical"),
+            ({"type": {"class": "categorical"}}, DT.CAT),
             (
                 {"type": {"class": "enum", "subtype": {"class": "variable"}}},
-                "enum.variable",
+                DT.CA,
             ),
         ),
     )
-    def it_parses_the_base_type_to_help(self, dimension_dict, expected_value):
-        raw_dimension = _RawDimension(dimension_dict, None)
-
-        base_type = raw_dimension._base_type
-
-        assert base_type == expected_value
+    def it_parses_the_base_type(self, dimension_dict, expected_value):
+        assert Dimensions.dimension_type(dimension_dict) == expected_value
 
     def but_it_raises_on_unrecognized_type_class(self):
-        raw_dimension = _RawDimension({"type": {"class": "crunched"}}, None)
         with pytest.raises(NotImplementedError):
-            raw_dimension._base_type
+            Dimensions.from_dicts([{"type": {"class": "crunched"}}])
 
     @pytest.mark.parametrize(
         ("dimension_dict", "expected_value"),
         (
-            ({"type": {"class": "categorical", "categories": []}}, False),
+            ({"type": {"class": "categorical", "categories": []}}, DT.CAT),
             (
                 {"type": {"class": "categorical", "categories": [{}, {}]}},
-                False,
+                DT.CAT,
             ),
             (
                 {"type": {"class": "categorical", "categories": [{"foo": "bar"}, {}]}},
-                False,
+                DT.CAT,
             ),
             (
                 {
@@ -284,177 +82,80 @@ class Describe_RawDimension:
                         "categories": [{"date": "2019-01"}, {}],
                     }
                 },
-                True,
+                DT.CAT_DATE,
             ),
             (
-                {"type": {"class": "enum", "categories": [{"date": "2019-01"}, {}]}},
-                False,
+                {"type": {"class": "enum", "subtype": {"class": "variable"}, "categories": [{"date": "2019-01"}, {}]}},
+                DT.CA_SUBVAR,
             ),
         ),
     )
     def and_it_knows_if_it_is_a_categorical_date(self, dimension_dict, expected_value):
-        raw_dimension = _RawDimension(dimension_dict, None)
-
-        is_cat_date = raw_dimension._is_cat_date
-
-        assert is_cat_date == expected_value
+        assert Dimensions.dimension_type(dimension_dict) == expected_value
 
     @pytest.mark.parametrize(
-        "base_type, cat_type, arr_type, expected_value",
+        "typedef, expected_value",
         (
-            ("categorical", DT.CAT, None, DT.CAT),
-            ("enum.variable", None, DT.MR, DT.MR),
-            ("enum.datetime", None, None, DT.DATETIME),
-            ("enum.numeric", None, None, DT.BINNED_NUMERIC),
-            ("enum.text", None, None, DT.TEXT),
+            ({"class": "categorical"}, DT.CAT),
+            ({"class": "enum", "subtype": {"class": "variable"}}, DT.CA),
+            ({"class": "enum", "subtype": {"class": "datetime"}}, DT.DATETIME),
+            ({"class": "enum", "subtype": {"class": "numeric"}}, DT.BINNED_NUMERIC),
+            ({"class": "enum", "subtype": {"class": "text"}}, DT.TEXT),
         ),
     )
-    def it_determines_the_dimension_type(
-        self,
-        base_type,
-        cat_type,
-        arr_type,
-        expected_value,
-        _base_type_prop_,
-        _resolve_categorical_,
-        _resolve_array_type_,
-    ):
-        _base_type_prop_.return_value = base_type
-        _resolve_categorical_.return_value = cat_type if cat_type else None
-        _resolve_array_type_.return_value = arr_type if arr_type else None
-        raw_dimension = _RawDimension(None, None)
-        resolve_cat_calls = [call(raw_dimension)] if cat_type else []
-        resolve_arr_calls = [call(raw_dimension)] if arr_type else []
+    def it_determines_the_dimension_type(self, typedef, expected_value):
+        assert Dimensions.dimension_type({"type": typedef}) == expected_value
 
-        dimension_type = raw_dimension.dimension_type
-
-        assert _resolve_categorical_.call_args_list == resolve_cat_calls
-        assert _resolve_array_type_.call_args_list == resolve_arr_calls
-        assert dimension_type == expected_value
-
-    def but_it_raises_on_unrecognized_base_type(self, _base_type_prop_):
-        raw_dimension = _RawDimension(None, None)
-        _base_type_prop_.return_value = "hyper.dimensional"
+    def but_it_raises_on_unrecognized_base_type(self):
         with pytest.raises(NotImplementedError):
-            raw_dimension.dimension_type
-
-    def it_knows_the_dimension_variable_identifier_to_help(self):
-        dimension_dict = {"references": {"alias": "varski"}}
-        raw_dimension = _RawDimension(dimension_dict, None)
-
-        alias = raw_dimension._alias
-
-        assert alias == "varski"
+            Dimensions.dimension_type({"type": {"class": "hyper.dimensional"}})
 
     @pytest.mark.parametrize(
         "dimension_dict, expected_value",
         (
-            ({"type": {}}, False),
-            ({"type": {"categories": []}}, False),
-            ({"type": {"categories": [{}, {}]}}, False),
-            ({"type": {"categories": [{"selected": False}, {}]}}, False),
-            ({"type": {"categories": [{"selected": True}, {}]}}, True),
+            ({"type": {"class": "categorical"}}, DT.CAT),
+            ({"type": {"class": "categorical", "categories": []}}, DT.CAT),
+            ({"type": {"class": "categorical", "categories": [{}, {}]}}, DT.CAT),
+            ({"type": {"class": "categorical", "categories": [{"selected": False}, {}]}}, DT.CAT),
+            ({"type": {"class": "categorical", "categories": [{"id": 1, "selected": True}, {"id": 0}, {"id": -1}]}}, DT.LOGICAL),
         ),
     )
     def it_can_tell_when_a_dimension_has_a_selected_category_to_help(
         self, dimension_dict, expected_value
     ):
-        raw_dimension = _RawDimension(dimension_dict, None)
-
-        has_selected_category = raw_dimension._has_selected_category
-
-        assert has_selected_category is expected_value
+        assert Dimensions.dimension_type(dimension_dict) == expected_value
 
     @pytest.mark.parametrize(
         "dimension_dict, expected_value",
-        (({"references": {}}, False), ({"references": {"subreferences": {}}}, True)),
+        (
+            ({"type": {"class": "categorical"}, "references": {}}, DT.CAT),
+            ({"type": {"class": "categorical"}, "references": {"subreferences": {}}}, DT.CA_CAT)),
     )
     def it_distinguishes_an_array_categorical_type_to_help(
         self, dimension_dict, expected_value
     ):
-        raw_dimension = _RawDimension(dimension_dict, None)
-
-        is_array_cat = raw_dimension._is_array_cat
-
-        assert is_array_cat == expected_value
-
-    def it_finds_the_subsequent_raw_dimension_to_help(self, request, dimension_dicts_):
-        dimension_dict_ = dimension_dicts_[1]
-        next_dimension_dict_ = dimension_dicts_[2]
-        raw_dimension = _RawDimension(dimension_dict_, dimension_dicts_)
-        # --initializer must be mocked after contructing raw_dimension
-        # --otherwise it would have no instance variables
-        _init_ = initializer_mock(request, _RawDimension)
-
-        next_raw_dimension = raw_dimension._next_raw_dimension
-
-        _init_.assert_called_once_with(
-            next_raw_dimension, next_dimension_dict_, dimension_dicts_
-        )
-        assert type(next_raw_dimension).__name__ == "_RawDimension"
-
-    def but_it_returns_None_for_the_last_dimension(self, dimension_dicts_):
-        dimension_dict_ = dimension_dicts_[2]
-        raw_dimension = _RawDimension(dimension_dict_, dimension_dicts_)
-        next_raw_dimension = raw_dimension._next_raw_dimension
-        assert next_raw_dimension is None
+        assert Dimensions.dimension_type(dimension_dict) == expected_value
 
     @pytest.mark.parametrize(
-        "is_last, base_type, has_sel_cat, alias, expected_value",
-        ((False, None, None, None, DT.CA),),
+        "typedef, expected_value",
+        (({"class": "enum", "subtype": {"class": "variable"}}, DT.CA),),
     )
-    def it_resolves_an_array_type_to_help(
-        self,
-        is_last,
-        base_type,
-        has_sel_cat,
-        alias,
-        expected_value,
-        raw_dimension_,
-        _next_raw_dimension_prop_,
-    ):
-        raw_dimension_._base_type = base_type
-        raw_dimension_._has_selected_category = has_sel_cat
-        raw_dimension_._alias = alias
-        next_raw_dimension = None if is_last else raw_dimension_
-        _next_raw_dimension_prop_.return_value = next_raw_dimension
-        raw_dimension = _RawDimension(None, None)
-
-        dimension_type = raw_dimension._resolve_array_type()
-
-        assert dimension_type == expected_value
+    def it_resolves_an_array_type_to_help(self, typedef, expected_value):
+        assert Dimensions.dimension_type({"type": typedef}) == expected_value
 
     @pytest.mark.parametrize(
-        "is_array_cat, has_selected_cat, is_logical_type, expected_value",
+        "dimdef, expected_value",
         (
-            (False, False, False, DT.CAT),
-            (False, True, False, DT.CAT),
-            (False, True, True, DT.LOGICAL),
-            (True, False, False, DT.CA_CAT),
-            (True, True, True, DT.MR_CAT),
-            (True, True, False, DT.CA_CAT),
+            ({"type": {"class": "categorical", "categories": []}}, DT.CAT),
+            ({"type": {"class": "categorical", "categories": [{"selected": True}]}}, DT.CAT),
+            ({"type": {"class": "categorical", "categories": [{"id": 1, "selected": True}, {"id": 0}, {"id": -1}]}}, DT.LOGICAL),
+            ({"type": {"class": "categorical", "categories": [{}]}, "references": {"subreferences": [{}]}}, DT.CA_CAT),
+            ({"type": {"class": "categorical", "categories": [{"id": 1, "selected": True}, {"id": 0}, {"id": -1}]}, "references": {"subreferences": [{}]}}, DT.MR_CAT),
+            ({"type": {"class": "categorical", "categories": [{"selected": True}]}, "references": {"subreferences": [{}]}}, DT.CA_CAT),
         ),
     )
-    def it_resolves_a_categorical_type_to_help(
-        self,
-        is_array_cat,
-        has_selected_cat,
-        is_logical_type,
-        expected_value,
-        _is_array_cat_prop_,
-        _is_cat_date_prop_,
-        _has_selected_category_prop_,
-        _is_logical_type_prop_,
-    ):
-        _is_array_cat_prop_.return_value = is_array_cat
-        _is_cat_date_prop_.return_value = False
-        _has_selected_category_prop_.return_value = has_selected_cat
-        _is_logical_type_prop_.return_value = is_logical_type
-        raw_dimension = _RawDimension(None, None)
-
-        dimension_type = raw_dimension._resolve_categorical()
-
-        assert dimension_type == expected_value
+    def it_resolves_a_categorical_type_to_help(self, dimdef, expected_value):
+        assert Dimensions.dimension_type(dimdef) == expected_value
 
     # fixture components ---------------------------------------------
 

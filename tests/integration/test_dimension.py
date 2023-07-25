@@ -7,7 +7,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import (
-    AllDimensions,
+    Dimensions,
     _AllElements,
     Dimension,
     _Element,
@@ -21,8 +21,8 @@ from ..fixtures import CR, NA  # ---mnemonic: CR = 'cube-response'---
 from ..unitutil import instance_mock, property_mock
 
 
-class DescribeIntegratedAllDimensions:
-    """Integration-test suite for `cr.cube.dimension.AllDimensions` object."""
+class DescribeIntegratedDimensions:
+    """Integration-test suite for `cr.cube.dimension.Dimensions` object."""
 
     @pytest.mark.parametrize(
         "cube_response, expected_types",
@@ -37,7 +37,7 @@ class DescribeIntegratedAllDimensions:
     )
     def it_resolves_the_type_of_each_dimension(self, cube_response, expected_types):
         dimension_dicts = cube_response["result"]["dimensions"]
-        all_dimensions = AllDimensions(dimension_dicts)
+        all_dimensions = Dimensions.from_dicts(dimension_dicts)
 
         dimension_types = tuple(d.dimension_type for d in all_dimensions)
 
@@ -45,7 +45,7 @@ class DescribeIntegratedAllDimensions:
 
     def it_provides_access_to_the_apparent_dimensions(self):
         dimension_dicts = CR.CA_X_MR_WEIGHTED_HS["result"]["dimensions"]
-        all_dimensions = AllDimensions(dimension_dicts)
+        all_dimensions = Dimensions.from_dicts(dimension_dicts)
 
         apparent_dimension_types = tuple(
             d.dimension_type for d in all_dimensions.apparent_dimensions
@@ -63,14 +63,8 @@ class DescribeIntegratedAllDimensions:
         ),
     )
     def it_knows_if_its_dimensions_order(self, request, dim_types, expected_value):
-        _dimensions_ = tuple(
-            instance_mock(request, Dimension, name=f"dim-{idx}", dimension_type=dt)
-            for idx, dt in enumerate(dim_types)
-        )
-        _dimensions_prop_ = property_mock(request, AllDimensions, "_dimensions")
-        _dimensions_prop_.return_value = _dimensions_
-
-        assert AllDimensions(None).dimension_order == expected_value
+        dims = Dimensions([Dimension({}, dt) for dt in dim_types])
+        assert dims.dimension_order == expected_value
 
     @pytest.mark.parametrize(
         "cube_response, expected_str_representation",
@@ -105,7 +99,7 @@ class DescribeIntegratedAllDimensions:
         self, cube_response, expected_str_representation
     ):
         dimension_dicts = cube_response["result"]["dimensions"]
-        all_dimensions = AllDimensions(dimension_dicts)
+        all_dimensions = Dimensions.from_dicts(dimension_dicts)
 
         str_representation = str(all_dimensions)
 
