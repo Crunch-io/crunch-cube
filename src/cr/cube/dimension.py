@@ -14,7 +14,6 @@ from cr.cube.enums import (
     DIMENSION_TYPE as DT,
     MARGINAL,
     MEASURE,
-    _DimensionType,
 )
 from cr.cube.util import lazyproperty
 

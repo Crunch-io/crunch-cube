@@ -2,7 +2,6 @@
 
 """Unit test suite for cr.cube.dimension module."""
 
-import mock
 import numpy as np
 import pytest
 
@@ -29,7 +28,6 @@ from cr.cube.enums import (
 from ..unitutil import (
     call,
     class_mock,
-    initializer_mock,
     instance_mock,
     method_mock,
     property_mock,
@@ -233,48 +231,6 @@ class DescribeDimensions:
     )
     def it_resolves_a_categorical_type_to_help(self, dimdef, expected_value):
         assert Dimensions.dimension_type(dimdef) == expected_value
-
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def _base_type_prop_(self, request):
-        return property_mock(request, _RawDimension, "_base_type")
-
-    @pytest.fixture
-    def dimension_dicts_(self):
-        return ({"dim", 0}, {"dim", 1}, {"dim", 2})
-
-    @pytest.fixture
-    def _has_selected_category_prop_(self, request):
-        return property_mock(request, _RawDimension, "_has_selected_category")
-
-    @pytest.fixture
-    def _is_array_cat_prop_(self, request):
-        return property_mock(request, _RawDimension, "_is_array_cat")
-
-    @pytest.fixture
-    def _is_cat_date_prop_(self, request):
-        return property_mock(request, _RawDimension, "_is_cat_date")
-
-    @pytest.fixture
-    def _is_logical_type_prop_(self, request):
-        return property_mock(request, _RawDimension, "_is_logical_type")
-
-    @pytest.fixture
-    def _next_raw_dimension_prop_(self, request):
-        return property_mock(request, _RawDimension, "_next_raw_dimension")
-
-    @pytest.fixture
-    def raw_dimension_(self, request):
-        return instance_mock(request, _RawDimension)
-
-    @pytest.fixture
-    def _resolve_array_type_(self, request):
-        return method_mock(request, _RawDimension, "_resolve_array_type")
-
-    @pytest.fixture
-    def _resolve_categorical_(self, request):
-        return method_mock(request, _RawDimension, "_resolve_categorical")
 
 
 class DescribeDimension:
