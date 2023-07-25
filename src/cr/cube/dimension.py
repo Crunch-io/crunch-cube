@@ -100,7 +100,7 @@ class Dimensions(tuple):
         raise NotImplementedError(f"unrecognized dimension type {type_class}")
 
     @lazyproperty
-    def apparent_dimensions(self) -> Dimensions:
+    def apparent_dimensions(self) -> "Dimensions":
         """List of the "visible" dimensions.
 
         The two dimensions for a multiple-response (MR) variable are
