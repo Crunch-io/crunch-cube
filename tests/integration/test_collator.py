@@ -9,7 +9,7 @@ from cr.cube.collator import (
     PayloadOrderCollator,
     SortByValueCollator,
 )
-from cr.cube.dimension import _Subtotals, Dimension, _Element, _OrderSpec, _Subtotal
+from cr.cube.dimension import _Subtotals, Dimension, Element, _OrderSpec, _Subtotal
 from cr.cube.enums import DIMENSION_TYPE as DT, ORDER_FORMAT
 
 from ..unitutil import instance_mock, property_mock
@@ -36,7 +36,7 @@ class DescribeExplicitOrderCollator:
         subtotals_ = [instance_mock(request, _Subtotal, anchor=a) for a in anchors]
         order_spec_ = instance_mock(request, _OrderSpec, element_ids=order)
         elements_ = [
-            instance_mock(request, _Element, element_id=id_, derived=False)
+            instance_mock(request, Element, element_id=id_, derived=False)
             for id_ in element_ids
         ]
         dimension_ = instance_mock(
@@ -71,7 +71,7 @@ class DescribePayloadOrderCollator:
     ):
         subtotals_ = [instance_mock(request, _Subtotal, anchor=a) for a in anchors]
         elements_ = [
-            instance_mock(request, _Element, element_id=id_, derived=False)
+            instance_mock(request, Element, element_id=id_, derived=False)
             for id_ in element_ids
         ]
         dimension_ = instance_mock(
@@ -111,7 +111,7 @@ class DescribePayloadOrderCollator:
             return_value=("ins_1", "ins_2", "ins_3", "ins_4"),
         )
         elements_ = [
-            instance_mock(request, _Element, element_id=id_, derived=False)
+            instance_mock(request, Element, element_id=id_, derived=False)
             for id_ in element_ids
         ]
         dimension_ = instance_mock(

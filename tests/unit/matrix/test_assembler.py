@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal, _Subtotals
+from cr.cube.dimension import Dimension, Element, _OrderSpec, _Subtotal, _Subtotals
 from cr.cube.enums import (
     COLLATION_METHOD as CM,
     DIMENSION_TYPE as DT,
@@ -237,7 +237,7 @@ class DescribeAssembler:
     ):
         _columns_dimension_prop_.return_value = dimension_
         dimension_.valid_elements = tuple(
-            instance_mock(request, _Element, numeric_value=numeric_value)
+            instance_mock(request, Element, numeric_value=numeric_value)
             for numeric_value in (1, 2, 3)
         )
         _column_order_prop_.return_value = [2, -1, 0, -2]
@@ -450,7 +450,7 @@ class DescribeAssembler:
         subtotal_fills = ("STF1", "STF2")
         _rows_dimension_prop_.return_value = dimension_
         dimension_.valid_elements = tuple(
-            instance_mock(request, _Element, fill=fill) for fill in element_fills
+            instance_mock(request, Element, fill=fill) for fill in element_fills
         )
         dimension_.subtotals = tuple(
             instance_mock(request, _Subtotal, fill=fill) for fill in subtotal_fills
@@ -465,7 +465,7 @@ class DescribeAssembler:
     ):
         _rows_dimension_prop_.return_value = dimension_
         dimension_.valid_elements = tuple(
-            instance_mock(request, _Element, numeric_value=numeric_value)
+            instance_mock(request, Element, numeric_value=numeric_value)
             for numeric_value in (1, 2, 3)
         )
         _row_order_prop_.return_value = [2, -1, 0, -2]

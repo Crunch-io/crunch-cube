@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotal
+from cr.cube.dimension import Dimension, Element, _OrderSpec, _Subtotal
 from cr.cube.enums import COLLATION_METHOD as CM, ORDER_FORMAT
 from cr.cube.stripe.assembler import (
     StripeAssembler,
@@ -112,7 +112,7 @@ class DescribeStripeAssembler:
         element_fills = ("#000000", "#111111", "#f00ba5")
         subtotal_fills = ("STF1", "STF2")
         rows_dimension_.valid_elements = tuple(
-            instance_mock(request, _Element, fill=fill) for fill in element_fills
+            instance_mock(request, Element, fill=fill) for fill in element_fills
         )
         rows_dimension_.subtotals = tuple(
             instance_mock(request, _Subtotal, fill=fill) for fill in subtotal_fills

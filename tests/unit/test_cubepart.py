@@ -6,7 +6,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
-from cr.cube.dimension import Dimension, _ValidElements
+from cr.cube.dimension import Dimension, Elements
 from cr.cube.matrix import Assembler
 from cr.cube.stripe.assembler import StripeAssembler
 
@@ -360,7 +360,7 @@ class Describe_Slice:
     def it_knows_when_its_table_name_is_None(
         self, request, dimension_, _dimensions_prop_, cube_, ndim, element_ids
     ):
-        valid_elements_ = instance_mock(request, _ValidElements)
+        valid_elements_ = instance_mock(request, Elements)
         valid_elements_.element_ids = element_ids
         dimension_.valid_elements = valid_elements_
         cube_.ndim = ndim
@@ -491,7 +491,7 @@ class Describe_Strand:
     def it_knows_when_its_table_name_is_None(
         self, request, dimension_, _dimensions_prop_, cube_
     ):
-        valid_elements_ = instance_mock(request, _ValidElements)
+        valid_elements_ = instance_mock(request, Elements)
         valid_elements_.element_ids = ()
         dimension_.valid_elements = valid_elements_
         cube_.dimensions = [dimension_]

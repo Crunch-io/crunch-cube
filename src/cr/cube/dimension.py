@@ -5,7 +5,7 @@
 import copy
 from collections.abc import Sequence
 from datetime import datetime
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -28,6 +28,11 @@ class Dimensions(tuple):
 
     @classmethod
     def from_dicts(cls, dicts):
+        """Populate a Dimensions instance from the given cube response pieces.
+
+        Each dict in the given dicts should be a ZCL dimension definition,
+        with "type" and "references" members.
+        """
         dims = [Dimension(d, cls.dimension_type(d)) for d in dicts]
 
         # Promote any DT.CA_SUBVAR to DT.MR_SUBVAR
@@ -167,12 +172,12 @@ class Dimension:
         return self._dimension_dict["references"].get("alias")
 
     @lazyproperty
-    def all_elements(self) -> "_AllElements":
-        """_AllElements object providing cats or subvars of this dimension.
+    def all_elements(self) -> "Elements":
+        """Elements object providing cats or subvars of this dimension.
 
         Elements in this sequence appear in cube-result order.
         """
-        return _AllElements(
+        return Elements.from_typedef(
             self._dimension_dict["type"],
             self._dimension_transforms_dict,
             self.dimension_type,
@@ -387,8 +392,8 @@ class Dimension:
         return self._element_id_shim.translate_element_id(_id)
 
     @lazyproperty
-    def valid_elements(self) -> "_ValidElements":
-        """_Elements object providing access to non-missing elements.
+    def valid_elements(self) -> "Elements":
+        """Elements object providing access to non-missing elements.
 
         Any categories or subvariables representing missing data are excluded
         from the collection; this sequence represents a subset of that
@@ -449,181 +454,81 @@ class Dimension:
         return insertions
 
 
-class _BaseElements(Sequence):
-    """Base class for element sequence containers."""
-
-    def __getitem__(self, idx_or_slice):
-        """Implements indexed access."""
-        return self._elements[idx_or_slice]
-
-    def __iter__(self):
-        """Implements (efficient) iterability."""
-        return iter(self._elements)
-
-    def __len__(self):
-        """Implements len(elements)."""
-        return len(self._elements)
-
-    def __repr__(self) -> str:
-        """str representation of this sequence."""
-        return str(list(el for el in self._elements))
-
-    @lazyproperty
-    def element_ids(self) -> Tuple[int, ...]:
-        """tuple of element-id for each element in collection.
-
-        Element ids appear in the order they occur in the cube response.
-        """
-        return tuple(element.element_id for element in self._elements)
-
-    @lazyproperty
-    def element_idxs(self) -> Tuple[int, ...]:
-        """tuple of element-index for each element in collection.
-
-        Element index values represent the position of this element in the
-        dimension-dict it came from. In the case of an _AllElements object,
-        it will simply be a tuple(range(len(all_elements))).
-        """
-        return tuple(element.index for element in self._elements)
-
-    def get_by_id(self, element_id: int) -> "_Element":
-        """Return _Element object identified by *element_id*.
-
-        Raises KeyError if not found. Only elements known to this collection
-        are accessible for lookup. For example, a _ValidElements object will
-        raise KeyError for the id of a missing element.
-        """
-        return self._elements_by_id[element_id]
-
-    @lazyproperty
-    def _elements(self):
-        """tuple storing actual sequence of element objects.
-
-        Must be implemented by each subclass.
-        """
-        raise NotImplementedError("must be implemented by each subclass")
-
-    @lazyproperty
-    def _elements_by_id(self) -> Dict:
-        """dict mapping each element by its id."""
-        return {element.element_id: element for element in self._elements}
-
-
-class _AllElements(_BaseElements):
-    """Sequence of _BaseElement subclass objects for a dimension.
+class Elements(tuple):
+    """Sequence of Element objects for a dimension.
 
     Each element is either a category or a subvariable.
     """
 
-    def __init__(
-        self,
-        type_dict,
-        dimension_transforms_dict,
-        dimension_type,
-        element_data_format,
-    ):
-        self._type_dict = type_dict
-        self._dimension_transforms_dict = dimension_transforms_dict
-        self.dimension_type = dimension_type
-        self._element_data_format = element_data_format
+    datetime_formats = {
+        "Y": "%Y",
+        "Q": "%Y-%m",
+        "3M": "%Y-%m",
+        "M": "%Y-%m",
+        "W": "%Y-%m-%d",
+        "D": "%Y-%m-%d",
+        "h": "%Y-%m-%dT%H",
+        "m": "%Y-%m-%dT%H:%M",
+        "s": "%Y-%m-%dT%H:%M:%S",
+        "ms": "%Y-%m-%dT%H:%M:%S.%f",
+        "us": "%Y-%m-%dT%H:%M:%S.%f",
+    }
 
-    @lazyproperty
-    def valid_elements(self) -> "_ValidElements":
-        """_ValidElements object containing only non-missing elements."""
-        return _ValidElements(self._elements, self._dimension_transforms_dict)
-
-    @lazyproperty
-    def _element_dicts(self) -> List[Dict]:
-        """Sequence of element-dicts for this dimension, taken from cube-result."""
-        return (
-            self._type_dict["categories"]
-            if self._type_dict["class"] == "categorical"
-            else self._type_dict["elements"]
+    @classmethod
+    def from_typedef(
+        cls, typedef, dimension_transforms_dict, dimension_type, element_data_format
+    ) -> "Elements":
+        """Populate an Elements instance from the given ZCL type definition."""
+        element_defs = (
+            typedef["categories"]
+            if typedef["class"] == "categorical"
+            else typedef["elements"]
         )
 
-    @lazyproperty
-    def _elements(self) -> Tuple["_Element", ...]:
-        """tuple storing actual sequence of element objects."""
-        return tuple(
-            _Element(
-                element_dict,
-                idx,
-                _ElementTransforms(element_transforms_dict),
-                self._format_label,
+        all_xforms = dimension_transforms_dict.get("elements", {})
+        if dimension_type == DT.MR_SUBVAR:
+            hidden_xforms = cls._hidden_transforms(
+                element_defs,
+                dimension_transforms_dict.get("insertions", []),
             )
-            for (
-                idx,
-                element_dict,
-                element_transforms_dict,
-            ) in self._iter_element_makings()
-        )
+            all_xforms = {**hidden_xforms, **all_xforms}
 
-    @lazyproperty
-    def _elements_transforms(self) -> Dict:
-        """Element transform dict expressed in the dimension transforms expression."""
-        return (
-            self._shimmed_element_transforms
-            if self.dimension_type == DT.MR_SUBVAR
-            else self._dimension_transforms_dict.get("elements", {})
-        )
-
-    def _format_datetime_label(self, x: Any) -> str:
-        """returns str of x formatted for use in labels with desired date format"""
-        orig_format = self._incoming_element_datetime_format
-        out_format = self._element_data_format
-        if orig_format is None or out_format is None:
-            return str(x)
-        try:
-            return datetime.strptime(x, orig_format).strftime(out_format)
-        except ValueError:
-            return str(x)
-
-    def _format_label(self, x: Any) -> str:
-        """returns str of x formatted for use in labels"""
-        if self.dimension_type == DT.DATETIME:
-            return self._format_datetime_label(x)
-        else:  # --- TODO: Should round numeric values like the frontend does
-            return str(x)
-
-    @lazyproperty
-    def _incoming_element_datetime_format(self) -> Optional[str]:
-        """optional str of date formatting requested if datetime and is found"""
-        if self.dimension_type != DT.DATETIME:
-            return None
-
-        resolution = self._type_dict["subtype"].get("resolution")
-        return {
-            "Y": "%Y",
-            "Q": "%Y-%m",
-            "3M": "%Y-%m",
-            "M": "%Y-%m",
-            "W": "%Y-%m-%d",
-            "D": "%Y-%m-%d",
-            "h": "%Y-%m-%dT%H",
-            "m": "%Y-%m-%dT%H:%M",
-            "s": "%Y-%m-%dT%H:%M:%S",
-            "ms": "%Y-%m-%dT%H:%M:%S.%f",
-            "us": "%Y-%m-%dT%H:%M:%S.%f",
-        }.get(resolution)
-
-    def _iter_element_makings(self) -> Iterator[Tuple[int, Dict, Dict]]:
-        """Generate tuple of values needed to construct each element object.
-
-        An (idx, element_dict, element_transforms_dict) tuple is generated for each
-        element in this dimension, in the order they appear in the cube-result. All
-        elements are included (including missing).
-        """
-        elements_transforms = self._elements_transforms
-        for idx, element_dict in enumerate(self._element_dicts):
+        elements = []
+        for idx, element_dict in enumerate(element_defs):
             # --- convert to string for categorical ids
             element_id = element_dict["id"]
-            element_transforms_dict = elements_transforms.get(
-                element_id, elements_transforms.get(str(element_id), {})
+            xforms = _ElementTransforms(
+                all_xforms.get(element_id, all_xforms.get(str(element_id), {}))
             )
-            yield idx, element_dict, element_transforms_dict
 
-    @lazyproperty
-    def _shimmed_element_transforms(self) -> Dict:
+            formatter = str
+            if dimension_type == DT.DATETIME:
+                orig_format = cls.datetime_formats.get(
+                    typedef["subtype"].get("resolution")
+                )
+                out_format = element_data_format
+                if orig_format is not None and out_format is not None:
+
+                    def format_datetime(x):
+                        try:
+                            return datetime.strptime(x, orig_format).strftime(
+                                out_format
+                            )
+                        except ValueError:
+                            return str(x)
+
+                    formatter = format_datetime
+            else:
+                # --- TODO: Should round numeric values like the frontend does
+                formatter = str
+
+            element = Element(element_dict, idx, xforms, formatter)
+            elements.append(element)
+
+        return cls(elements)
+
+    @classmethod
+    def _hidden_transforms(cls, element_defs, insertions) -> Dict:
         """Element transforms dict for array dimensions.
 
         To provide consistency with a poorly-defined interface for categorical
@@ -637,45 +542,56 @@ class _AllElements(_BaseElements):
         # --- currently an inserted-subvariable can only be identified by name, there is
         # --- no alias for an inserted-subvariable and it does not receive a "normal"
         # --- element.id like "0001".
-        hidden_insertion_names = tuple(
-            insertion["name"]
-            for insertion in self._dimension_transforms_dict.get("insertions", [])
-            if insertion.get("hide", False)
-        )
+        hidden = [i["name"] for i in insertions if i.get("hide", False)]
 
         # --- however, the hide-transform must be identified by element-id, so we need a
         # --- mapping of insertion-name to element-id
         element_id_from_name = {
-            element["value"]["id"]: element["id"] for element in self._element_dicts
+            element["value"]["id"]: element["id"] for element in element_defs
         }
 
-        # --- merge hide transforms with (a copy of) the existing element transforms ---
-        hidden_transforms = {
+        return {
             element_id_from_name[name]: {"hide": True}
-            for name in hidden_insertion_names
+            for name in hidden
             if name in element_id_from_name
         }
-        element_transforms = self._dimension_transforms_dict.get("elements", {})
-        return {**hidden_transforms, **element_transforms}
-
-
-class _ValidElements(_BaseElements):
-    """Sequence of non-missing element objects for a dimension.
-
-    *all_elements* is an instance of _AllElements containing all the elements
-    of a dimension. This object is only intended to be constructed by
-    _AllElements.valid_elements and there should be no reason to construct it
-    directly.
-    """
-
-    def __init__(self, all_elements, dimension_transforms_dict):
-        self._all_elements = all_elements
-        self._dimension_transforms_dict = dimension_transforms_dict
 
     @lazyproperty
-    def _elements(self) -> Tuple["_Element", ...]:
-        """tuple containing actual sequence of element objects."""
-        return tuple(element for element in self._all_elements if not element.missing)
+    def element_ids(self) -> Tuple[int, ...]:
+        """tuple of element-id for each element in collection.
+
+        Element ids appear in the order they occur in the cube response.
+        """
+        return tuple(element.element_id for element in self)
+
+    @lazyproperty
+    def element_idxs(self) -> Tuple[int, ...]:
+        """tuple of element-index for each element in collection.
+
+        Element index values represent the position of this element in the
+        dimension-dict it came from. In the case of all elements,
+        it will simply be a tuple(range(len(all_elements))).
+        """
+        return tuple(element.index for element in self)
+
+    def get_by_id(self, element_id: int) -> "Element":
+        """Return Element object identified by *element_id*.
+
+        Raises KeyError if not found. Only elements known to this collection
+        are accessible for lookup. For example, a_"valid elements" object will
+        raise KeyError for the id of a missing element.
+        """
+        return self._elements_by_id[element_id]
+
+    @lazyproperty
+    def _elements_by_id(self) -> Dict:
+        """dict mapping each element by its id."""
+        return {element.element_id: element for element in self}
+
+    @lazyproperty
+    def valid_elements(self) -> "Elements":
+        """Elements object containing only non-missing elements."""
+        return Elements(element for element in self if not element.missing)
 
 
 class _ElementIdShim:
@@ -967,7 +883,7 @@ class _ElementIdShim:
             return tuple()
 
 
-class _Element:
+class Element:
     """A category or subvariable of a dimension.
 
     This object resolves the transform cascade for element-level transforms.

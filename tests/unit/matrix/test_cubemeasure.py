@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension, _ValidElements
+from cr.cube.dimension import Dimension, Elements
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.cubemeasure import (
     _ArrXArrCubeCounts,
@@ -1710,7 +1710,7 @@ class Describe_BaseUnconditionalCubeCounts:
         assert weighted_cube_counts is uncond_cube_counts_
 
     def it_provides_valid_row_idxs_to_help(self, request, dimensions_):
-        valid_elements_ = instance_mock(request, _ValidElements, element_idxs=(0, 2, 4))
+        valid_elements_ = instance_mock(request, Elements, element_idxs=(0, 2, 4))
         dimensions_[0].valid_elements = valid_elements_
         unconditional_counts = _BaseUnconditionalCubeCounts(dimensions_, None)
 
