@@ -1007,6 +1007,38 @@ class Describe_ElementIdShim:
 
         assert shim_._subvar_aliases == tuple(("x", "y", 3))
 
+    @pytest.mark.parametrize(
+        "dimension_dict, dimension_type, expected_has_mr_insertion",
+        (
+            ({"references": {"view": None}}, DT.MR_SUBVAR, False),
+            ({"references": {"view": {}}}, DT.MR_SUBVAR, False),
+            ({"references": {"view": {"transform": {}}}}, DT.MR_SUBVAR, False),
+            (
+                {"references": {"view": {"transform": {"insertions": []}}}},
+                DT.MR_SUBVAR,
+                False,
+            ),
+            (
+                {"references": {"view": {"transform": {"insertions": ["foo"]}}}},
+                DT.MR_SUBVAR,
+                True,
+            ),
+            (
+                {"references": {"view": {"transform": {"insertions": ["foo"]}}}},
+                DT.CAT,
+                False,
+            ),
+        ),
+    )
+    def it_knows_if_it_has_mr_insertions(
+        self, dimension_dict, dimension_type, expected_has_mr_insertion
+    ):
+        shim = _ElementIdShim(dimension_type, dimension_dict, None)
+
+        has_mr_insertion = shim._has_mr_insertion
+
+        assert has_mr_insertion == expected_has_mr_insertion
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

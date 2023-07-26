@@ -111,56 +111,12 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.31
+- Fix `null` view in dimension dict
+
 ### 3.0.30
 - Date format representation
 - Fix payload order for insertions in weird order
-
-### 3.0.29
-- Bug fix for H&S overlaps for MR
-
-### 3.0.28
-- Bug fix hidden subvars in MR with insertions
-
-### 3.0.27
-- Implement overlaps for CAT H&S
-
-### 3.0.26
-- Fix bug when dimension's format is set to null in JSON
-
-### 3.0.25
-- Support date formatting on datetime dimension labels
-
-### 3.0.24
-- Drop support for diff subtotals in population measure
-- Enable Cat insertions across Multiple Response
-
-### 3.0.23
-- Fix payload order using bogus ids
-
-### 3.0.22
-- Expose `columns_dimension_description` for _Slice
-
-### 3.0.21
-- Shim datetimes so that element transforms and sorting can refer to items in
-  both old format (position) and new format (label).
-- Change how warnings are suppressed so that they are suppressed even when
-  multithreading.
-
-### 3.0.20
-- Shim subvariable "zz9" ids that are `fixed` in a sort-by-value transform
-
-### 3.0.19
-- Add `subtotals_with_payload_order` property in dimension
-
-### 3.0.18
-- Fix for transforms on scorecard dimensions
-- Add `repr` to various sequence classes
-
-### 3.0.17
-- Fix valid count summary range
-
-### 3.0.16
-- Fix pairwise indices for overlaps, when hiding or reordering columns
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
