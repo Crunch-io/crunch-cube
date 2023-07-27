@@ -501,7 +501,13 @@ class Elements(tuple):
                 all_xforms.get(element_id, all_xforms.get(str(element_id), {}))
             )
 
-            formatter = str
+            # This is so dumb that our type checker won't let us just
+            # write `formatter = str`.
+            def format(x) -> str:
+                return str(x)
+
+            formatter = format
+
             if dimension_type == DT.DATETIME:
                 orig_format = cls.datetime_formats.get(
                     typedef["subtype"].get("resolution")
@@ -518,9 +524,6 @@ class Elements(tuple):
                             return str(x)
 
                     formatter = format_datetime
-            else:
-                # --- TODO: Should round numeric values like the frontend does
-                formatter = str
 
             element = Element(element_dict, idx, xforms, formatter)
             elements.append(element)
