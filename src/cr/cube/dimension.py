@@ -509,7 +509,7 @@ class Elements(tuple):
                 out_format = element_data_format
                 if orig_format is not None and out_format is not None:
 
-                    def format_datetime(x):
+                    def format_datetime(x) -> str:
                         try:
                             return datetime.strptime(x, orig_format).strftime(
                                 out_format
