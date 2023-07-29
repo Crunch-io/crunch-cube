@@ -8,7 +8,6 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
 from cr.cube.dimension import Dimension, Elements
-from cr.cube.stripe.assembler import StripeAssembler
 
 from ..unitutil import class_mock, instance_mock, property_mock
 
@@ -388,33 +387,21 @@ class Describe_Strand:
 
         assert population_fraction == 0.5
 
-    def it_provides_the_population_count(
-        self,
-        cube_,
-        _assembler_prop_,
-        assembler_,
-    ):
-        assembler_.population_proportions = 0.3
-        _assembler_prop_.return_value = assembler_
+    def it_provides_the_population_count(self, cube_):
         cube_.population_fraction = 0.1
         population = 20
-        strand_ = _Strand(cube_, None, population, None, None, None)
+        with mock.patch("cr.cube.cubepart._Strand.population_proportions", new=0.3):
+            strand_ = _Strand(cube_, None, population, None, None, None)
+            assert strand_.population_counts == pytest.approx(0.6)
 
-        assert strand_.population_counts == pytest.approx(0.6)
-
-    def it_provides_the_population_counts_moe(
-        self,
-        cube_,
-        _assembler_prop_,
-        assembler_,
-    ):
-        assembler_.population_proportion_stderrs = 0.3
-        _assembler_prop_.return_value = assembler_
+    def it_provides_the_population_counts_moe(self, cube_):
         cube_.population_fraction = 0.1
         population = 20
-        strand_ = _Strand(cube_, None, population, None, None, None)
-
-        assert strand_.population_counts_moe == pytest.approx(0.6 * 1.959964)
+        with mock.patch(
+            "cr.cube.cubepart._Strand.population_proportion_stderrs", new=0.3
+        ):
+            strand_ = _Strand(cube_, None, population, None, None, None)
+            assert strand_.population_counts_moe == pytest.approx(0.6 * 1.959964)
 
     def it_knows_its_selected_categories_labels(self, _dimensions_prop_):
         _dimensions_prop_.return_value = [Dimension({"references": {}}, None, None)]
@@ -434,14 +421,6 @@ class Describe_Strand:
         assert strand.table_name is None
 
     # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def assembler_(self, request):
-        return instance_mock(request, StripeAssembler)
-
-    @pytest.fixture
-    def _assembler_prop_(self, request):
-        return property_mock(request, _Strand, "_assembler")
 
     @pytest.fixture
     def cube_(self, request):

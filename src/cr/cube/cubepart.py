@@ -32,7 +32,8 @@ from cr.cube.matrix.subtotals import SumSubtotals
 from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.scalar import MeansScalar
-from cr.cube.stripe.assembler import StripeAssembler
+from cr.cube.stripe.assembler import _BaseOrderHelper as stripe_BaseOrderHelper
+from cr.cube.stripe.measure import StripeMeasures
 from cr.cube.util import lazyproperty
 
 # ---This is the quantile of the normal Cumulative Distribution Function (CDF) at
@@ -978,8 +979,6 @@ class _Slice(CubePartition):
 
         `._population` and `_cube.population_fraction` are both scalars and so do not
         affect sort order.
-
-        The proportion used depends on the dimension types, so get from assembler.
         """
         return (
             self.population_proportions
@@ -1913,22 +1912,43 @@ class _Strand(CubePartition):
             return super(_Strand, self).__repr__()  # noqa
 
     @lazyproperty
-    def counts(self):
-        """1D np.float64 ndarray of (weighted) count for each row of strand.
+    def weighted_counts(self):
+        """1D np.float64 ndarray of weighted count for each row of strand.
 
         The values are int when the underlying cube-result has no weighting.
         """
-        return self._assembler.weighted_counts
+        return self._assemble_vector(self._measures.weighted_counts.blocks)
+
+    counts = weighted_counts
 
     @lazyproperty
     def derived_row_idxs(self):
-        """tuple of int index of each derived row-element in this strand."""
-        return self._assembler.derived_row_idxs
+        """tuple of int index of each derived row-element in this strand.
+
+        Subtotals cannot be derived
+
+        An element is derived if it's a subvariable of a multiple response dimension,
+        which has been produced by the zz9, and inserted into the response data.
+
+        All other elements, including regular MR and CA subvariables, as well as
+        categories of CAT dimensions, are not derived. Subtotals are also not derived
+        in this sense, because they're not even part of the data (elements).
+        """
+        rows_dim = self._rows_dimension
+        n_subtotals = len(rows_dim.subtotals)
+        derivs = [e.derived for e in rows_dim.valid_elements] + [False] * n_subtotals
+        return tuple(np.where(np.array(derivs)[self._row_order_signed_indexes])[0])
 
     @lazyproperty
     def diff_row_idxs(self):
-        """tuple of int index of each difference row-element in this strand."""
-        return self._assembler.diff_row_idxs
+        """tuple of int index of each difference row-element in this strand.
+
+        Valid elements are cannot be differences, only some subtotals can.
+        """
+        rows_dim = self._rows_dimension
+        n_valids = len(rows_dim.valid_elements)
+        diffs = [False] * n_valids + [e.is_difference for e in rows_dim.subtotals]
+        return tuple(np.where(np.array(diffs)[self._row_order_signed_indexes])[0])
 
     @lazyproperty
     def inserted_row_idxs(self):
@@ -1938,8 +1958,13 @@ class _Strand(CubePartition):
         Provided index values correspond to measure values as-delivered by this strand,
         after any insertion of subtotals, re-ordering, and hiding/pruning of rows
         specified in a transform has been applied.
+
+        Provided index values correspond rows after any insertion of subtotals,
+        re-ordering, and hiding/pruning.
         """
-        return self._assembler.inserted_row_idxs
+        return tuple(
+            i for i, row_idx in enumerate(self._row_order_signed_indexes) if row_idx < 0
+        )
 
     @lazyproperty
     def has_scale_means(self):
@@ -1958,7 +1983,7 @@ class _Strand(CubePartition):
         cube-measure.
         """
         try:
-            return self._assembler.means
+            return self._assemble_vector(self._measures.means.blocks)
         except ValueError:
             raise ValueError(
                 "`.means` is undefined for a cube-result without a mean measure"
@@ -1987,7 +2012,12 @@ class _Strand(CubePartition):
 
         Needed for reordering color palette in exporter.
         """
-        return tuple(self._assembler.payload_order)
+        empty_row_idxs = tuple(
+            i for i, N in enumerate(self._measures.pruning_base) if N == 0
+        )
+        return tuple(
+            PayloadOrderCollator(self._rows_dimension, empty_row_idxs).payload_order
+        )
 
     @lazyproperty
     def population_counts(self):
@@ -1998,7 +2028,7 @@ class _Strand(CubePartition):
         filters that were applied as part of the query.
         """
         return (
-            self._assembler.population_proportions
+            self.population_proportions
             * self._population
             * self._cube.population_fraction
         )
@@ -2014,10 +2044,34 @@ class _Strand(CubePartition):
         table margin is 0.
         """
         total_filtered_population = self._population * self._cube.population_fraction
-        return (
-            Z_975
-            * total_filtered_population
-            * self._assembler.population_proportion_stderrs
+        return Z_975 * total_filtered_population * self.population_proportion_stderrs
+
+    @lazyproperty
+    def population_proportions(self):
+        """1D np.float64 population-proportion for each row
+
+        Generally equal to the table_proprotions, but because we don't divide the
+        population when the row is a CAT_DATE, can also be all 1s. Used to calculate
+        the population_counts.
+        """
+        population_proportions = self._assemble_vector(
+            self._measures.population_proportions.blocks
+        )
+        # Diff subtotals not allowed in population measure
+        if self.diff_row_idxs:
+            population_proportions[self.diff_row_idxs] = np.nan
+        return population_proportions
+
+    @lazyproperty
+    def population_proportion_stderrs(self):
+        """1D np.float64 population-proportion-standard-error for each row
+
+        Generally equal to the table_proprotion_standard_error, but because we don't
+        divide the population when the row is a CAT_DATE, can also be all 0s. Used to
+        calculate the population_counts_moe.
+        """
+        return self._assemble_vector(
+            self._measures.population_proportion_stderrs.blocks
         )
 
     @lazyproperty
@@ -2026,22 +2080,28 @@ class _Strand(CubePartition):
 
         This count includes inserted rows but not rows that have been hidden/pruned.
         """
-        return self._assembler.row_count
+        return len(self._row_order_signed_indexes)
 
     @lazyproperty
     def row_aliases(self):
         """1D str ndarray of alias for each row, for use as row headings."""
-        return self._assembler.row_aliases
+        return np.array(
+            self._rows_dimension.element_aliases + self._rows_dimension.subtotal_aliases
+        )[self._row_order_signed_indexes]
 
     @lazyproperty
     def row_codes(self):
         """1D int ndarray of code for each row, for use as row headings."""
-        return self._assembler.row_codes
+        return np.array(
+            self._rows_dimension.element_ids + self._rows_dimension.insertion_ids
+        )[self._row_order_signed_indexes]
 
     @lazyproperty
     def row_labels(self):
         """1D str ndarray of name for each row, suitable for use as row headings."""
-        return self._assembler.row_labels
+        return np.array(
+            self._rows_dimension.element_labels + self._rows_dimension.subtotal_labels
+        )[self._row_order_signed_indexes]
 
     def row_order(self, format=ORDER_FORMAT.SIGNED_INDEXES):
         """1D np.int64 ndarray of idx for each assembled row of stripe.
@@ -2053,7 +2113,11 @@ class _Strand(CubePartition):
 
         Needed for reordering color palette in exporter.
         """
-        return self._assembler.row_order(format)
+        # --- specify dtype explicitly to prevent error when display-order is empty. The
+        # --- default dtype is float, which cannot be used to index an array.
+        if format == ORDER_FORMAT.BOGUS_IDS:
+            return self._row_order_bogus_ids
+        return self._row_order_signed_indexes
 
     @lazyproperty
     def rows_base(self):
@@ -2086,7 +2150,19 @@ class _Strand(CubePartition):
         when no explicit fill color is defined for that row, indicating the default fill
         color for that row should be used, probably coming from a caller-defined theme.
         """
-        return self._assembler.rows_dimension_fills
+        element_fills = tuple(e.fill for e in self._rows_dimension.valid_elements)
+        subtotal_fills = tuple(st.fill for st in self._rows_dimension.subtotals)
+        return tuple(
+            # ---Subtotals have negative sequential indexes (-1, -2, ..., -m)---
+            # ---To index them properly, we need to convert those indexes to---
+            # ---zero based positive indexes (0, 1, ... m - 1) i.e. -idx - 1---
+            (
+                element_fills[idx]
+                if idx > -1
+                else subtotal_fills[idx + len(subtotal_fills)]
+            )
+            for idx in self._row_order_signed_indexes
+        )
 
     @lazyproperty
     def rows_dimension_name(self):
@@ -2119,7 +2195,7 @@ class _Strand(CubePartition):
         scale for that row would be 400. The scale mean is the average of those scale
         values over the total count of responses.
         """
-        return self._assembler.scale_mean
+        return self._measures.scaled_counts.scale_mean
 
     @lazyproperty
     def scale_median(self):
@@ -2127,7 +2203,7 @@ class _Strand(CubePartition):
 
         This value is `None` when no rows have a numeric-value assigned.
         """
-        return self._assembler.scale_median
+        return self._measures.scaled_counts.scale_median
 
     @lazyproperty
     def scale_std_dev(self):
@@ -2135,7 +2211,9 @@ class _Strand(CubePartition):
 
         This value is `None` when no rows have a numeric-value assigned.
         """
-        return self._assembler.scale_stddev
+        return self._measures.scaled_counts.scale_stddev
+
+    scale_stddev = scale_std_dev
 
     @lazyproperty
     def scale_std_err(self):
@@ -2145,7 +2223,9 @@ class _Strand(CubePartition):
         the same units as the assigned numeric values and indicates the dispersion of
         the scaled-count distribution from its mean (scale-mean).
         """
-        return self._assembler.scale_stderr
+        return self._measures.scaled_counts.scale_stderr
+
+    scale_stderr = scale_std_err
 
     @lazyproperty
     def shape(self):
@@ -2169,7 +2249,7 @@ class _Strand(CubePartition):
         items.
         """
         try:
-            return self._assembler.share_sum
+            return self._assemble_vector(self._measures.share_sum.blocks)
         except ValueError:
             raise ValueError(
                 "`.share_sum` is undefined for a cube-result without a sum measure"
@@ -2184,7 +2264,7 @@ class _Strand(CubePartition):
         otherwise it fallbacks to unsmoothed values.
         """
         try:
-            return self._assembler.smoothed_means
+            return self._assemble_vector(self._measures.smoothed_means.blocks)
         except ValueError:
             raise ValueError(
                 "`.means` is undefined for a cube-result without a mean measure"
@@ -2198,7 +2278,7 @@ class _Strand(CubePartition):
         cube-measure.
         """
         try:
-            return self._assembler.stddev
+            return self._assemble_vector(self._measures.stddev.blocks)
         except ValueError:
             raise ValueError(
                 "`.stddev` is undefined for a cube-result without a stddev measure"
@@ -2212,7 +2292,7 @@ class _Strand(CubePartition):
         cube-measure.
         """
         try:
-            return self._assembler.sums
+            return self._assemble_vector(self._measures.sums.blocks)
         except ValueError:
             raise ValueError(
                 "`.sums` is undefined for a cube-result without a sum measure"
@@ -2246,7 +2326,7 @@ class _Strand(CubePartition):
         same value. Each row of an MR stripe has a distinct base, which is reduced to a
         range in that case.
         """
-        return self._assembler.table_base_range
+        return self._measures.unweighted_bases.table_base_range
 
     @lazyproperty
     def table_margin_range(self):
@@ -2256,7 +2336,7 @@ class _Strand(CubePartition):
         same value. Each row of an MR stripe has a distinct base, which is reduced to a
         range in that case.
         """
-        return self._assembler.table_margin_range
+        return self._measures.weighted_bases.table_margin_range
 
     @lazyproperty
     def table_name(self):
@@ -2294,12 +2374,12 @@ class _Strand(CubePartition):
     @lazyproperty
     def table_proportion_stddevs(self):
         """1D np.float64 ndarray of table-proportion std-deviation for each row."""
-        return self._assembler.table_proportion_stddevs
+        return self._assemble_vector(self._measures.table_proportion_stddevs.blocks)
 
     @lazyproperty
     def table_proportion_stderrs(self):
         """1D np.float64 ndarray of table-proportion std-error for each row."""
-        return self._assembler.table_proportion_stderrs
+        return self._assemble_vector(self._measures.table_proportion_stderrs.blocks)
 
     @lazyproperty
     def table_proportions(self):
@@ -2307,7 +2387,7 @@ class _Strand(CubePartition):
 
         The proportion is expressed as a float between 0.0 and 1.0 inclusive.
         """
-        return self._assembler.table_proportions
+        return self._assemble_vector(self._measures.table_proportions.blocks)
 
     @lazyproperty
     def title(self):
@@ -2327,12 +2407,12 @@ class _Strand(CubePartition):
         reflecting the base for that individual subvariable. In all other cases, the
         table base is repeated for each row.
         """
-        return self._assembler.unweighted_bases
+        return self._assemble_vector(self._measures.unweighted_bases.blocks)
 
     @lazyproperty
     def unweighted_counts(self):
         """1D np.float64 ndarray of unweighted count for each row of stripe."""
-        return self._assembler.unweighted_counts
+        return self._assemble_vector(self._measures.unweighted_counts.blocks)
 
     @lazyproperty
     def weighted_bases(self):
@@ -2342,20 +2422,18 @@ class _Strand(CubePartition):
         each value may be different, reflecting the fact that not all response options
         were necessarily presented to all respondents.
         """
-        return self._assembler.weighted_bases
+        return self._assemble_vector(self._measures.weighted_bases.blocks)
 
     # ---implementation (helpers)-------------------------------------
 
-    @lazyproperty
-    def _assembler(self):
-        """StripeAssembler collaborator object for this stripe.
+    def _assemble_vector(self, blocks):
+        """Return 1D ndarray of base_vector with inserted subtotals, in order.
 
-        Provides all measures, marginals, and totals, along with other items that are
-        sorted or subject to insertions, like labels.
+        `blocks` is a pair of two 1D arrays, first the base-values and then the subtotal
+        values of the stripe vector. The returned array is sequenced in the computed
+        row order including possibly removing hidden or pruned values.
         """
-        return StripeAssembler(
-            self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
-        )
+        return np.concatenate(blocks)[self._row_order_signed_indexes]
 
     @lazyproperty
     def _dimensions(self):
@@ -2371,6 +2449,32 @@ class _Strand(CubePartition):
     def _row_transforms_dict(self):
         """Transforms dict for the single (rows) dimension of this strand."""
         return self._transforms_dict.get("rows_dimension", {})
+
+    @lazyproperty
+    def _measures(self):
+        """StripeMeasures collection object for this stripe."""
+        return StripeMeasures(
+            self._cube, self._rows_dimension, self._ca_as_0th, self._slice_idx
+        )
+
+    @lazyproperty
+    def _row_order_bogus_ids(self):
+        """Row order with bogus ids."""
+        return np.array(
+            stripe_BaseOrderHelper.display_order(
+                self._rows_dimension, self._measures, format=ORDER_FORMAT.BOGUS_IDS
+            )
+        )
+
+    @lazyproperty
+    def _row_order_signed_indexes(self):
+        """Row order idx with signed idxs."""
+        return np.array(
+            stripe_BaseOrderHelper.display_order(
+                self._rows_dimension, self._measures, format=ORDER_FORMAT.SIGNED_INDEXES
+            ),
+            dtype=int,
+        )
 
 
 class _Nub(CubePartition):

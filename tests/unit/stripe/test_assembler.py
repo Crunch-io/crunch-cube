@@ -2,14 +2,15 @@
 
 """Unit test suite for `cr.cube.stripe.assembler` module."""
 
+import mock
 import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
+from cr.cube.cubepart import _Strand
 from cr.cube.dimension import Dimension, Element, _OrderSpec, _Subtotal
 from cr.cube.enums import COLLATION_METHOD as CM, ORDER_FORMAT
 from cr.cube.stripe.assembler import (
-    StripeAssembler,
     _BaseOrderHelper,
     _BaseSortByValueHelper,
     _OrderHelper,
@@ -68,34 +69,37 @@ class DescribeStripeAssembler:
             measure_prop_name,
             instance_mock(request, MeasureCls, blocks=("A", "B")),
         )
-        property_mock(request, StripeAssembler, "diff_row_idxs", return_value=())
+        property_mock(request, _Strand, "diff_row_idxs", return_value=())
         _assemble_vector_.return_value = np.array([1, 2, 3, 4, 5])
-        assembler = StripeAssembler(None, None, None, None)
+        strand = _Strand(None, None, None, None, None, None)
 
-        value = getattr(assembler, measure_prop_name)
+        value = getattr(strand, measure_prop_name)
 
-        _assemble_vector_.assert_called_once_with(assembler, ("A", "B"))
+        _assemble_vector_.assert_called_once_with(strand, ("A", "B"))
         assert value.tolist() == [1, 2, 3, 4, 5]
 
     def it_knows_the_inserted_row_idxs(self, _row_order_prop_):
         _row_order_prop_.return_value = np.array([-1, 0, 3, -2, 4, 1])
-        assembler = StripeAssembler(None, None, None, None)
+        strand = _Strand(None, None, None, None, None, None)
 
-        assert assembler.inserted_row_idxs == (0, 3)
+        assert strand.inserted_row_idxs == (0, 3)
 
     def it_knows_the_row_count(self, _row_order_prop_):
         _row_order_prop_.return_value = np.array([1, 2, 3, 4, 5])
-        assembler = StripeAssembler(None, None, None, None)
+        strand = _Strand(None, None, None, None, None, None)
 
-        assert assembler.row_count == 5
+        assert strand.row_count == 5
 
     def it_knows_the_row_labels(self, rows_dimension_, _row_order_prop_):
         rows_dimension_.element_labels = ("baz", "foo", "bar")
         rows_dimension_.subtotal_labels = ("bing", "bada")
         _row_order_prop_.return_value = np.array([1, 2, 0, -1, -2])
-        assembler = StripeAssembler(None, rows_dimension_, None, None)
+        with mock.patch(
+            "cr.cube.cubepart._Strand._rows_dimension", new=rows_dimension_
+        ):
+            strand = _Strand(None, None, None, None, None, None)
 
-        assert assembler.row_labels.tolist() == ["foo", "bar", "baz", "bada", "bing"]
+            assert strand.row_labels.tolist() == ["foo", "bar", "baz", "bada", "bing"]
 
     @pytest.mark.parametrize(
         "order, expected_fills",
@@ -118,85 +122,91 @@ class DescribeStripeAssembler:
             instance_mock(request, _Subtotal, fill=fill) for fill in subtotal_fills
         )
         _row_order_prop_.return_value = order
-        assembler = StripeAssembler(None, rows_dimension_, None, None)
+        with mock.patch(
+            "cr.cube.cubepart._Strand._rows_dimension", new=rows_dimension_
+        ):
+            strand = _Strand(None, None, None, None, None, None)
 
-        assert assembler.rows_dimension_fills == expected_fills
+            assert strand.rows_dimension_fills == expected_fills
 
     def it_knows_the_scale_mean(self, _measures_prop_, measures_, scaled_counts_):
         scaled_counts_.scale_mean = 3
         measures_.scaled_counts = scaled_counts_
         _measures_prop_.return_value = measures_
-        assembler = StripeAssembler(None, None, None, None)
+        strand = _Strand(None, None, None, None, None, None)
 
-        assert assembler.scale_mean == 3
+        assert strand.scale_mean == 3
 
     def it_knows_the_scale_median(self, _measures_prop_, measures_, scaled_counts_):
         scaled_counts_.scale_median = 4
         measures_.scaled_counts = scaled_counts_
         _measures_prop_.return_value = measures_
-        assembler = StripeAssembler(None, None, None, None)
+        strand = _Strand(None, None, None, None, None, None)
 
-        assert assembler.scale_median == 4
+        assert strand.scale_median == 4
 
     def it_knows_the_scale_stddev(self, _measures_prop_, measures_, scaled_counts_):
         scaled_counts_.scale_stddev = 5
         measures_.scaled_counts = scaled_counts_
         _measures_prop_.return_value = measures_
-        assembler = StripeAssembler(None, None, None, None)
+        strand = _Strand(None, None, None, None, None, None)
 
-        assert assembler.scale_stddev == 5
+        assert strand.scale_stddev == 5
 
     def it_knows_the_scale_stderr(self, _measures_prop_, measures_, scaled_counts_):
         scaled_counts_.scale_stderr = 6
         measures_.scaled_counts = scaled_counts_
         _measures_prop_.return_value = measures_
-        assembler = StripeAssembler(None, None, None, None)
+        strand = _Strand(None, None, None, None, None, None)
 
-        assert assembler.scale_stderr == 6
+        assert strand.scale_stderr == 6
 
     def it_knows_the_table_base_range(self, request, _measures_prop_, measures_):
         measures_.unweighted_bases = instance_mock(
             request, _UnweightedBases, table_base_range=np.array([50, 100])
         )
         _measures_prop_.return_value = measures_
-        assembler = StripeAssembler(None, None, None, None)
+        strand = _Strand(None, None, None, None, None, None)
 
-        assert assembler.table_base_range.tolist() == [50, 100]
+        assert strand.table_base_range.tolist() == [50, 100]
 
     def it_knows_the_table_margin_range(self, request, _measures_prop_, measures_):
         measures_.weighted_bases = instance_mock(
             request, _WeightedBases, table_margin_range=np.array([50.5, 100.1])
         )
         _measures_prop_.return_value = measures_
-        assembler = StripeAssembler(None, None, None, None)
+        strand = _Strand(None, None, None, None, None, None)
 
-        assert assembler.table_margin_range.tolist() == [50.5, 100.1]
+        assert strand.table_margin_range.tolist() == [50.5, 100.1]
 
     def it_can_assemble_a_vector_to_help(self, _row_order_prop_):
         base_values = np.array([1, 2, 3, 4])
         subtotal_values = (3, 5, 7)
         blocks = (base_values, subtotal_values)
         _row_order_prop_.return_value = np.array([-3, 1, 0, -2, 3, 2, -1])
-        assembler = StripeAssembler(None, None, None, None)
+        strand = _Strand(None, None, None, None, None, None)
 
-        assert assembler._assemble_vector(blocks).tolist() == [3, 2, 1, 5, 4, 3, 7]
+        assert strand._assemble_vector(blocks).tolist() == [3, 2, 1, 5, 4, 3, 7]
 
     def it_constructs_its_measures_collaborator_object_to_help(
         self, request, cube_, rows_dimension_, measures_
     ):
         StripeMeasures_ = class_mock(
             request,
-            "cr.cube.stripe.assembler.StripeMeasures",
+            "cr.cube.cubepart.StripeMeasures",
             return_value=measures_,
         )
-        assembler = StripeAssembler(
-            cube_, rows_dimension_, ca_as_0th=False, slice_idx=7
-        )
+        with mock.patch(
+            "cr.cube.cubepart._Strand._rows_dimension", new=rows_dimension_
+        ):
+            strand = _Strand(
+                cube_, None, None, ca_as_0th=False, slice_idx=7, mask_size=None
+            )
 
-        measures = assembler._measures
+            measures = strand._measures
 
-        StripeMeasures_.assert_called_once_with(cube_, rows_dimension_, False, 7)
-        assert measures is measures_
+            StripeMeasures_.assert_called_once_with(cube_, rows_dimension_, False, 7)
+            assert measures is measures_
 
     @pytest.mark.parametrize(
         "format, row_order",
@@ -210,23 +220,26 @@ class DescribeStripeAssembler:
     ):
         _measures_prop_.return_value = measures_
         _BaseOrderHelper_ = class_mock(
-            request, "cr.cube.stripe.assembler._BaseOrderHelper"
+            request, "cr.cube.cubepart.stripe_BaseOrderHelper"
         )
         _BaseOrderHelper_.display_order.return_value = row_order
-        assembler = StripeAssembler(None, rows_dimension_, None, None)
+        with mock.patch(
+            "cr.cube.cubepart._Strand._rows_dimension", new=rows_dimension_
+        ):
+            strand = _Strand(None, None, None, None, None, None)
 
-        row_order = assembler.row_order(format)
+            row_order = strand.row_order(format)
 
-        _BaseOrderHelper_.display_order.assert_called_once_with(
-            rows_dimension_, measures_, format
-        )
-        assert row_order.tolist() == list(row_order)
+            _BaseOrderHelper_.display_order.assert_called_once_with(
+                rows_dimension_, measures_, format
+            )
+            assert row_order.tolist() == list(row_order)
 
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def _assemble_vector_(self, request):
-        return method_mock(request, StripeAssembler, "_assemble_vector")
+        return method_mock(request, _Strand, "_assemble_vector")
 
     @pytest.fixture
     def cube_(self, request):
@@ -238,11 +251,11 @@ class DescribeStripeAssembler:
 
     @pytest.fixture
     def _measures_prop_(self, request):
-        return property_mock(request, StripeAssembler, "_measures")
+        return property_mock(request, _Strand, "_measures")
 
     @pytest.fixture
     def _row_order_prop_(self, request):
-        return property_mock(request, StripeAssembler, "_row_order_signed_indexes")
+        return property_mock(request, _Strand, "_row_order_signed_indexes")
 
     @pytest.fixture
     def rows_dimension_(self, request):
