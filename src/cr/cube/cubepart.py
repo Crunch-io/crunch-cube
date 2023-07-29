@@ -19,9 +19,17 @@ import math
 import numpy as np
 from tabulate import tabulate
 
-from cr.cube.enums import CUBE_MEASURE as CM, DIMENSION_TYPE as DT, ORDER_FORMAT
+from cr.cube.collator import PayloadOrderCollator
+from cr.cube.enums import (
+    CUBE_MEASURE as CM,
+    DIMENSION_TYPE as DT,
+    ORDER_FORMAT,
+    MARGINAL_ORIENTATION as MO,
+)
+from cr.cube.matrix.assembler import _BaseOrderHelper
+from cr.cube.matrix.measure import SecondOrderMeasures
+from cr.cube.matrix.subtotals import SumSubtotals
 from cr.cube.min_base_size_mask import MinBaseSizeMask
-from cr.cube.matrix import Assembler
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe.assembler import StripeAssembler
@@ -271,12 +279,14 @@ class _Slice(CubePartition):
     @lazyproperty
     def column_aliases(self):
         """1D str ndarray of alias for each column, for use as column headings."""
-        return self._assembler.column_aliases
+        dim = self._dimensions[1]
+        return np.array(dim.element_aliases + dim.subtotal_aliases)[self._column_order]
 
     @lazyproperty
     def column_codes(self):
         """1D int ndarray of code for each column, for use as column headings."""
-        return self._assembler.column_codes
+        dim = self._dimensions[1]
+        return np.array(dim.element_ids + dim.insertion_ids)[self._column_order]
 
     @lazyproperty
     def column_index(self):
@@ -286,12 +296,13 @@ class _Slice(CubePartition):
         corresponding baseline values. The baseline values are the univariate
         percentages of the rows variable.
         """
-        return self._assembler.column_index
+        return self._assemble_matrix(self._measures.column_index.blocks)
 
     @lazyproperty
     def column_labels(self):
         """1D str ndarray of name for each column, for use as column headings."""
-        return self._assembler.column_labels
+        dim = self._dimensions[1]
+        return np.array(dim.element_labels + dim.subtotal_labels)[self._column_order]
 
     @lazyproperty
     def column_percentages(self):
@@ -306,7 +317,7 @@ class _Slice(CubePartition):
         0.0 and 1.0. Note that within an inserted subtotal vector involving differences,
         the values can range between -1.0 and 1.0.
         """
-        return self._assembler.column_proportions
+        return self._assemble_matrix(self._measures.column_proportions.blocks)
 
     @lazyproperty
     def column_proportions_moe(self):
@@ -329,7 +340,7 @@ class _Slice(CubePartition):
         of column items.
         """
         try:
-            return self._assembler.column_share_sum
+            return self._assemble_matrix(self._measures.column_share_sum.blocks)
         except ValueError:
             raise ValueError(
                 "`.column_share_sum` is undefined for a cube-result without a sum "
@@ -337,12 +348,17 @@ class _Slice(CubePartition):
             )
 
     @lazyproperty
+    def column_proportion_variances(self):
+        """2D ndarray of np.float64 column-proportion variance for each matrix cell."""
+        return self._assemble_matrix(self._measures.column_proportion_variances.blocks)
+
+    @lazyproperty
     def column_std_dev(self):
         """standard deviation for column percentages
 
         `std_deviation = sqrt(variance)`
         """
-        return np.sqrt(self._assembler.column_proportion_variances)
+        return np.sqrt(self.column_proportion_variances)
 
     @lazyproperty
     def column_std_err(self):
@@ -350,17 +366,17 @@ class _Slice(CubePartition):
 
         `std_error = sqrt(variance/N)`
         """
-        return self._assembler.column_std_err
+        return self._assemble_matrix(self._measures.column_std_err.blocks)
 
     @lazyproperty
     def column_unweighted_bases(self):
         """2D np.float64 ndarray of unweighted col-proportion denominator per cell."""
-        return self._assembler.column_unweighted_bases
+        return self._assemble_matrix(self._measures.column_unweighted_bases.blocks)
 
     @lazyproperty
     def column_weighted_bases(self):
         """2D np.float64 ndarray of column-proportion denominator for each cell."""
-        return self._assembler.column_weighted_bases
+        return self._assemble_matrix(self._measures.column_weighted_bases.blocks)
 
     @lazyproperty
     def columns_base(self):
@@ -372,12 +388,21 @@ class _Slice(CubePartition):
 
         In all other cases, the array is 1D, containing one value for each column.
         """
-        return self._assembler.columns_base
+        # --- an MR_X slice produces a 2D columns-base (each cell has its own N) ---
+        # --- This is really just another way to call the columns_weighted_bases ---
+        # --- TODO: Should column_base only be defined when it's 1D? This would
+        # --- require changes to exporter to use the bases to give a
+        # --- "column_base_range"
+        if not self._measures.columns_unweighted_base.is_defined:
+            return self.column_unweighted_bases
+
+        # --- otherwise columns-base is a vector ---
+        return self._assemble_marginal(self._measures.columns_unweighted_base)
 
     @lazyproperty
     def columns_dimension_description(self):
         """str description assigned to columns-dimension."""
-        return self._columns_dimension.description
+        return self._dimensions[1].description
 
     @lazyproperty
     def columns_dimension_name(self):
@@ -385,12 +410,12 @@ class _Slice(CubePartition):
 
         Reflects the resolved dimension-name transform cascade.
         """
-        return self._columns_dimension.name
+        return self._dimensions[1].name
 
     @lazyproperty
     def columns_dimension_type(self):
         """Member of `cr.cube.enum.DIMENSION_TYPE` describing columns dimension."""
-        return self._columns_dimension.dimension_type
+        return self._dimensions[1].dimension_type
 
     @lazyproperty
     def columns_margin(self):
@@ -402,7 +427,16 @@ class _Slice(CubePartition):
 
         In all other cases, the array is 1D, containing one value for each column.
         """
-        return self._assembler.columns_margin
+        # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
+        # --- This is really just another way to call the columns_weighted_bases ---
+        # --- TODO: Should column_margin only be defined when it's 1D? This would
+        # --- require changes to exporter to use the bases to give a
+        # --- "column_margin_range"
+        if not self._measures.columns_weighted_base.is_defined:
+            return self.column_weighted_bases
+
+        # --- otherwise columns-base is a vector ---
+        return self._assemble_marginal(self._measures.columns_weighted_base)
 
     @lazyproperty
     def columns_margin_proportion(self):
@@ -414,7 +448,20 @@ class _Slice(CubePartition):
 
         In all other cases, the array is 1D, containing one value for each column.
         """
-        return self._assembler.columns_margin_proportion
+        # --- an MR_X slice produces a 2D columns-margin (each cell has its own N) ---
+        # --- TODO: Should colums_margin_proportion only be defined when it's 1D? This
+        # --- requires changes to exporter to use the bases to give a
+        # --- "columns_margin_range"
+        if not self._measures.columns_table_proportion.is_defined:
+            return self._assemble_matrix(
+                SumSubtotals.blocks(
+                    self.columns_margin / self.table_weighted_bases,
+                    self._dimensions,
+                )
+            )
+
+        # --- otherwise columns-margin-proportion is a maginal ---
+        return self._assemble_marginal(self._measures.columns_table_proportion)
 
     @lazyproperty
     def columns_scale_mean(self):
@@ -426,7 +473,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no row element has an assigned numeric value.
         """
-        return self._assembler.columns_scale_mean
+        return self._assemble_marginal(self._measures.columns_scale_mean)
 
     @lazyproperty
     def columns_scale_mean_margin(self):
@@ -498,7 +545,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no row element has been assigned a numeric value.
         """
-        return self._assembler.columns_scale_mean_stddev
+        return self._assemble_marginal(self._measures.columns_scale_mean_stddev)
 
     @lazyproperty
     def columns_scale_mean_stderr(self):
@@ -511,7 +558,7 @@ class _Slice(CubePartition):
         This value is `None` if no row element has a numeric value assigned or if
         the columns-weighted-base is `None` (eg an array variable in the row dim).
         """
-        return self._assembler.columns_scale_mean_stderr
+        return self._assemble_marginal(self._measures.columns_scale_mean_stderr)
 
     @lazyproperty
     def columns_scale_median(self):
@@ -523,7 +570,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no row element has been assigned a numeric value.
         """
-        return self._assembler.columns_scale_median
+        return self._assemble_marginal(self._measures.columns_scale_median)
 
     @lazyproperty
     def columns_scale_median_margin(self):
@@ -561,7 +608,9 @@ class _Slice(CubePartition):
     @lazyproperty
     def counts(self):
         """2D np.float64 ndarray of weighted cube counts."""
-        return self._assembler.weighted_counts
+        return self._assemble_matrix(self._measures.weighted_counts.blocks)
+
+    weighted_counts = counts
 
     @lazyproperty
     def description(self):
@@ -576,32 +625,56 @@ class _Slice(CubePartition):
     @lazyproperty
     def inserted_column_idxs(self):
         """tuple of int index of each subtotal column in slice."""
-        return self._assembler.inserted_column_idxs
+        # --- insertions have a negative idx in their order sequence ---
+        return tuple(i for i, col_idx in enumerate(self._column_order) if col_idx < 0)
 
     @lazyproperty
     def inserted_row_idxs(self):
         """tuple of int index of each subtotal row in slice."""
-        return self._assembler.inserted_row_idxs
+        # --- insertions have a negative idx in their order sequence ---
+        return tuple(
+            i for i, row_idx in enumerate(self._row_order_signed_indexes) if row_idx < 0
+        )
 
     @lazyproperty
     def derived_column_idxs(self):
-        """tuple of int index of each derived column-element in slice."""
-        return self._assembler.derived_column_idxs
+        """tuple of int index of each derived column-element in slice.
+
+        An element is derived if it's a subvariable of a multiple response dimension,
+        which has been produced by the zz9, and inserted into the response data.
+
+        All other elements, including regular MR and CA subvariables, as well as
+        categories of CAT dimensions, are not derived. Subtotals are also not derived
+        in this sense, because they're not even part of the data (elements).
+        """
+        return self._derived_element_idxs(self._dimensions[1], self._column_order)
 
     @lazyproperty
     def derived_row_idxs(self):
-        """tuple of int index of each derived row-element in slice."""
-        return self._assembler.derived_row_idxs
+        """tuple of int index of each derived row-element in slice.
+
+        An element is derived if it's a subvariable of a multiple response dimension,
+        which has been produced by the zz9, and inserted into the response data.
+
+        All other elements, including regular MR and CA subvariables, as well as
+        categories of CAT dimensions, are not derived. Subtotals are also not derived
+        in this sense, because they're not even part of the data (elements).
+        """
+        return self._derived_element_idxs(
+            self._rows_dimension, self._row_order_signed_indexes
+        )
 
     @lazyproperty
     def diff_column_idxs(self):
         """tuple of int index of each difference column-element in slice."""
-        return self._assembler.diff_column_idxs
+        return self._diff_element_idxs(self._dimensions[1], self._column_order)
 
     @lazyproperty
     def diff_row_idxs(self):
         """tuple of int index of each difference row-element in slice."""
-        return self._assembler.diff_row_idxs
+        return self._diff_element_idxs(
+            self._rows_dimension, self._row_order_signed_indexes
+        )
 
     @lazyproperty
     def is_empty(self):
@@ -617,7 +690,7 @@ class _Slice(CubePartition):
         Raises `ValueError` if the cube-result does not include a means cube-measure.
         """
         try:
-            return self._assembler.means
+            return self._assemble_matrix(self._measures.means.blocks)
         except ValueError:
             raise ValueError(
                 "`.means` is undefined for a cube-result without a mean measure"
@@ -635,6 +708,102 @@ class _Slice(CubePartition):
         """
         return self.rows_dimension_name
 
+    @staticmethod
+    def _pairwise_indices(p_vals, t_stats, alpha, only_larger):
+        """1D ndarray containing tuples of int pairwise indices of each column."""
+        with np.errstate(divide="ignore", invalid="ignore"):
+            significance = p_vals < alpha
+            if only_larger:
+                significance = np.logical_and(t_stats < 0, significance)
+            col_significance = np.empty((len(significance),), dtype=object)
+            col_significance[:] = [
+                tuple(np.where(sig_row)[0]) for sig_row in significance
+            ]
+            return col_significance
+
+    def _pairwise_means_indices(self, alpha, only_larger):
+        """2D optional ndarray of tuple of int column-idxs means pairwise-t threshold.
+
+        Raises `ValueError if the cube-result does not include `means` cube-measures.
+        """
+        return np.array(
+            [
+                self._pairwise_indices(
+                    self._pairwise_significance_means_p_vals(col),
+                    self._pairwise_significance_means_t_stats(col),
+                    alpha,
+                    only_larger,
+                )
+                for col in range(len(self._column_order))
+            ]
+        ).T
+
+    def _pairwise_significance_p_vals(self, column_idx):
+        """2D optional np.float64 ndarray of overlaps-p_vals matrices for subvar idx.
+
+        For cubes where the last dimension is categorical, column idxs represent
+        specific categories.
+
+        For cubes where the last dimension is a multiple response, each subvariable
+        pairwise significance matrix is a 2D ndarray of the p-vals for the selected
+        subvariable index (the selected column).
+
+        Raises `ValueError if the cube-result does not include `overlaps`
+        and `valid_overlaps` cube-measures.
+        """
+        base_column_idx = self._column_order[column_idx]
+        if self._cube_has_overlaps:
+            # If overlaps are defined, calculate significance based on them
+            return self._assemble_matrix(
+                self._measures.pairwise_p_vals_for_subvar(base_column_idx).blocks
+            )
+        return self._assemble_matrix(
+            self._measures.pairwise_p_vals(base_column_idx).blocks
+        )
+
+    def _pairwise_significance_t_stats(self, column_idx):
+        """2D optional np.float64 ndarray of overlaps-t_stats matrices for subvar idx.
+
+        For cubes where the last dimension is categorical, column idxs represent
+        specific categories.
+
+        For cubes where the last dimension is a multiple response, each subvariable
+        pairwise significance matrix is a 2D ndarray of the t-stats for the selected
+        subvariable index (the selected column).
+
+        Raises `ValueError if the cube-result does not include `overlaps`
+        and `valid_overlaps` cube-measures.
+        """
+        base_column_idx = self._column_order[column_idx]
+        if self._cube_has_overlaps:
+            # If overlaps are defined, calculate significance based on them
+            return self._assemble_matrix(
+                self._measures.pairwise_t_stats_for_subvar(base_column_idx).blocks
+            )
+        return self._assemble_matrix(
+            self._measures.pairwise_t_stats(base_column_idx).blocks
+        )
+
+    def _pairwise_significance_means_p_vals(self, column_idx):
+        """2D optional np.float64 ndarray of mean difference p_vals for column idx.
+
+        Raises `ValueError if the cube-result does not include `mean` cube-measures.
+        """
+        base_column_idx = self._column_order[column_idx]
+        return self._assemble_matrix(
+            self._measures.pairwise_significance_means_p_vals(base_column_idx).blocks
+        )
+
+    def _pairwise_significance_means_t_stats(self, column_idx):
+        """2D optional np.float64 ndarray of mean difference t_stats for column idx.
+
+        Raises `ValueError if the cube-result does not include `mean` cube-measures.
+        """
+        base_column_idx = self._column_order[column_idx]
+        return self._assemble_matrix(
+            self._measures.pairwise_significance_means_t_stats(base_column_idx).blocks
+        )
+
     @lazyproperty
     def pairwise_indices(self):
         """2D ndarray of tuple of int column-idxs meeting pairwise-t threshold.
@@ -651,7 +820,17 @@ class _Slice(CubePartition):
         column in the same row with a confidence interval meeting the threshold defined
         for this analysis.
         """
-        return self._assembler.pairwise_indices(self._alpha, self._only_larger)
+        return np.array(
+            [
+                self._pairwise_indices(
+                    self._pairwise_significance_p_vals(col),
+                    self._pairwise_significance_t_stats(col),
+                    self._alpha,
+                    self._only_larger,
+                )
+                for col in range(len(self._column_order))
+            ]
+        ).T
 
     @lazyproperty
     def pairwise_indices_alt(self):
@@ -663,7 +842,17 @@ class _Slice(CubePartition):
         if self._alpha_alt is None:
             return None
 
-        return self._assembler.pairwise_indices(self._alpha_alt, self._only_larger)
+        return np.array(
+            [
+                self._pairwise_indices(
+                    self._pairwise_significance_p_vals(col),
+                    self._pairwise_significance_t_stats(col),
+                    self._alpha_alt,
+                    self._only_larger,
+                )
+                for col in range(len(self._column_order))
+            ]
+        ).T
 
     @lazyproperty
     def pairwise_means_indices(self):
@@ -682,9 +871,7 @@ class _Slice(CubePartition):
         for this analysis.
         """
         try:
-            return self._assembler.pairwise_means_indices(
-                self._alpha, self._only_larger
-            )
+            return self._pairwise_means_indices(self._alpha, self._only_larger)
         except ValueError:
             raise ValueError(
                 "`.pairwise_means_indices` is undefined for a cube-result "
@@ -700,9 +887,7 @@ class _Slice(CubePartition):
         if self._alpha_alt is None:
             return None
         try:
-            return self._assembler.pairwise_means_indices(
-                self._alpha_alt, self._only_larger
-            )
+            return self._pairwise_means_indices(self._alpha_alt, self._only_larger)
         except ValueError:
             raise ValueError(
                 "`.pairwise_means_indices_alt` is undefined for a cube-result "
@@ -711,17 +896,17 @@ class _Slice(CubePartition):
 
     def pairwise_significance_p_vals(self, column_idx):
         """2D ndarray of pairwise-significance p-vals matrices for column idx."""
-        return self._assembler.pairwise_significance_p_vals(column_idx)
+        return self._pairwise_significance_p_vals(column_idx)
 
     def pairwise_significance_t_stats(self, column_idx):
         """return 2D ndarray of pairwise-significance t-stats for selected column."""
-        return self._assembler.pairwise_significance_t_stats(column_idx)
+        return self._pairwise_significance_t_stats(column_idx)
 
     def pairwise_significance_means_p_vals(self, column_idx):
         """Optional 2D ndarray of means significance p-vals matrices for column idx."""
         # Significance of means difference is available only is cube contains means.
         try:
-            return self._assembler.pairwise_significance_means_p_vals(column_idx)
+            return self._pairwise_significance_means_p_vals(column_idx)
         except ValueError:
             raise ValueError(
                 "`.pairwise_significance_means_p_vals` is undefined for a cube-result "
@@ -732,7 +917,7 @@ class _Slice(CubePartition):
         """Optional 2D ndarray of means significance t-stats matrices for column idx."""
         # Significance of means difference is available only is cube contains means.
         try:
-            return self._assembler.pairwise_significance_means_t_stats(column_idx)
+            return self._pairwise_significance_means_t_stats(column_idx)
         except ValueError:
             raise ValueError(
                 "`.pairwise_significance_means_t_stats` is undefined for a cube-result "
@@ -761,7 +946,26 @@ class _Slice(CubePartition):
 
         Needed for reordering color palette in exporter.
         """
-        return tuple(self._assembler.payload_order)
+        empty_rows_idxs = tuple(np.where(self._measures.rows_pruning_mask)[0])
+        po = PayloadOrderCollator(self._rows_dimension, empty_rows_idxs).payload_order
+        return tuple(po)
+
+    @lazyproperty
+    def population_proportions(self):
+        """2D np.float64 ndarray of proportions
+
+        The proportion used to calculate proportion counts depends on the dimension
+        types.
+        """
+        population_proportions = self._assemble_matrix(
+            self._measures.population_proportions.blocks
+        )
+        # Diff subtotals not allowed in population measure
+        if self.diff_row_idxs:
+            population_proportions[self.diff_row_idxs, :] = np.nan
+        if self.diff_column_idxs:
+            population_proportions[:, self.diff_column_idxs] = np.nan
+        return population_proportions
 
     @lazyproperty
     def population_counts(self):
@@ -778,10 +982,19 @@ class _Slice(CubePartition):
         The proportion used depends on the dimension types, so get from assembler.
         """
         return (
-            self._assembler.population_proportions
+            self.population_proportions
             * self._population
             * self._cube.population_fraction
         )
+
+    @lazyproperty
+    def population_std_err(self):
+        """2D np.float64 ndarray of standard errors
+
+        The proportion used to calculate proportion counts depends on the dimension
+        types.
+        """
+        return self._assemble_matrix(self._measures.population_std_err.blocks)
 
     @lazyproperty
     def population_counts_moe(self):
@@ -799,7 +1012,7 @@ class _Slice(CubePartition):
         applied in these specific cases (like the `row_std_err` or `column_std_err`).
         If categorical dates are not involved, the standard `table_std_err` is used.
         """
-        std_err = self._assembler.population_std_err
+        std_err = self.population_std_err
         total_filtered_population = self._population * self._cube.population_fraction
         return Z_975 * total_filtered_population * std_err
 
@@ -814,7 +1027,9 @@ class _Slice(CubePartition):
         A cell value of np.nan indicates a meaningful p-value could not be computed for
         that cell.
         """
-        return self._assembler.pvalues
+        return self._assemble_matrix(self._measures.pvalues.blocks)
+
+    pvalues = pvals
 
     @lazyproperty
     def residual_test_stats(self):
@@ -826,18 +1041,42 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def row_aliases(self):
-        """1D str ndarray of alias for each row, for use as row headings."""
-        return self._assembler.row_aliases
+        """1D str ndarray of row alias for each matrix row.
+
+        These are suitable for use as row headings; alias for subtotal rows appear in
+        the sequence and alias are ordered to correspond with their respective data
+        row.
+        """
+        dim = self._dimensions[0]
+        return np.array(dim.element_aliases + dim.subtotal_aliases)[
+            self._row_order_signed_indexes
+        ]
 
     @lazyproperty
     def row_codes(self):
-        """1D int ndarray of code for each row, for use as row headings."""
-        return self._assembler.row_codes
+        """1D int ndarray of row codes for each matrix row.
+
+        These are suitable for use as row headings; codes for subtotal rows appear in
+        the sequence and codes are ordered to correspond with their respective data
+        row.
+        """
+        dim = self._dimensions[0]
+        return np.array(dim.element_ids + dim.insertion_ids)[
+            self._row_order_signed_indexes
+        ]
 
     @lazyproperty
     def row_labels(self):
-        """1D str ndarray of name for each row, suitable for use as row headings."""
-        return self._assembler.row_labels
+        """1D str ndarray of row name for each matrix row.
+
+        These are suitable for use as row headings; labels for subtotal rows appear in
+        the sequence and labels are ordered to correspond with their respective data
+        row.
+        """
+        dim = self._dimensions[0]
+        return np.array(dim.element_labels + dim.subtotal_labels)[
+            self._row_order_signed_indexes
+        ]
 
     def row_order(self, format=ORDER_FORMAT.SIGNED_INDEXES):
         """1D np.int64 ndarray of idx for each assembled row of matrix.
@@ -850,7 +1089,11 @@ class _Slice(CubePartition):
 
         Needed for reordering color palette in exporter.
         """
-        return self._assembler.row_order(format)
+        if format == ORDER_FORMAT.BOGUS_IDS:
+            return _BaseOrderHelper.row_display_order(
+                self._dimensions, self._measures, format=ORDER_FORMAT.BOGUS_IDS
+            )
+        return self._row_order_signed_indexes
 
     @lazyproperty
     def row_percentages(self):
@@ -865,7 +1108,7 @@ class _Slice(CubePartition):
         0.0 and 1.0. Note that within an inserted subtotal vector involving differences,
         the values can range between -1.0 and 1.0.
         """
-        return self._assembler.row_proportions
+        return self._assemble_matrix(self._measures.row_proportions.blocks)
 
     @lazyproperty
     def row_proportions_moe(self):
@@ -888,31 +1131,36 @@ class _Slice(CubePartition):
         row items.
         """
         try:
-            return self._assembler.row_share_sum
+            return self._assemble_matrix(self._measures.row_share_sum.blocks)
         except ValueError:
             raise ValueError(
                 "`.row_share_sum` is undefined for a cube-result without a sum measure"
             )
 
     @lazyproperty
+    def row_proportion_variances(self):
+        """2D ndarray of np.float64 row-proportion variance for each matrix cell."""
+        return self._assemble_matrix(self._measures.row_proportion_variances.blocks)
+
+    @lazyproperty
     def row_std_dev(self):
         """2D np.float64 ndarray of standard deviation for row percentages."""
-        return np.sqrt(self._assembler.row_proportion_variances)
+        return np.sqrt(self.row_proportion_variances)
 
     @lazyproperty
     def row_std_err(self):
         """2D np.float64 ndarray of standard errors for row percentages."""
-        return self._assembler.row_std_err
+        return self._assemble_matrix(self._measures.row_std_err.blocks)
 
     @lazyproperty
     def row_unweighted_bases(self):
         """2D np.float64 ndarray of unweighted row-proportion denominator per cell."""
-        return self._assembler.row_unweighted_bases
+        return self._assemble_matrix(self._measures.row_unweighted_bases.blocks)
 
     @lazyproperty
     def row_weighted_bases(self):
         """2D np.float64 ndarray of row-proportion denominator for each table cell."""
-        return self._assembler.row_weighted_bases
+        return self._assemble_matrix(self._measures.row_weighted_bases.blocks)
 
     @lazyproperty
     def rows_base(self):
@@ -924,7 +1172,14 @@ class _Slice(CubePartition):
 
         In all other cases, the array is 1D, containing one value for each column.
         """
-        return self._assembler.rows_base
+        # --- an X_ARRAY slice produces a 2D row-base (each cell has its own N) ---
+        # --- TODO: Should rows_base only be defined when it's 1D? This would
+        # --- require changes to exporter to use the bases to give a "rows_base_range"
+        if not self._measures.rows_unweighted_base.is_defined:
+            return self.row_unweighted_bases
+
+        # --- otherwise rows-base is a vector ---
+        return self._assemble_marginal(self._measures.rows_unweighted_base)
 
     @lazyproperty
     def rows_dimension_alias(self):
@@ -948,7 +1203,15 @@ class _Slice(CubePartition):
         accounting for insertions and hidden rows. A value of `None` indicates the
         default fill, possibly determined by a theme or template.
         """
-        return self._assembler.rows_dimension_fills
+        elements = self._rows_dimension.valid_elements
+        subtotals = self._rows_dimension.subtotals
+        return tuple(
+            # ---Subtotals have negative sequential indexes (-1, -2, ..., -m)---
+            # ---To index them properly, we need to convert those indexes to---
+            # ---zero based positive indexes (0, 1, ... m - 1) i.e. -idx - 1---
+            (elements[idx].fill if idx >= 0 else subtotals[idx + len(subtotals)].fill)
+            for idx in self._row_order_signed_indexes
+        )
 
     @lazyproperty
     def rows_dimension_name(self):
@@ -973,7 +1236,15 @@ class _Slice(CubePartition):
 
         In all other cases, the array is 1D, containing one value for each column.
         """
-        return self._assembler.rows_margin
+        # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
+        # --- This is really just another way to call the row_weighted_bases ---
+        # --- TODO: Should rows_margin only be defined when it's 1D? This would
+        # --- require changes to exporter to use the bases to give a "rows_margin_range"
+        if not self._measures.rows_weighted_base.is_defined:
+            return self.row_weighted_bases
+
+        # --- otherwise rows-margin is a vector ---
+        return self._assemble_marginal(self._measures.rows_weighted_base)
 
     @lazyproperty
     def rows_margin_proportion(self):
@@ -985,7 +1256,20 @@ class _Slice(CubePartition):
 
         In all other cases, the array is 1D, containing one value for each column.
         """
-        return self._assembler.rows_margin_proportion
+        # --- an X_MR slice produces a 2D rows-margin (each cell has its own N) ---
+        # --- TODO: Should rows_margin_proportion only be defined when it's 1D? This
+        # --- would require changes to exporter to use the bases to give a
+        # --- "rows_margin_range"
+        if not self._measures.rows_table_proportion.is_defined:
+            return self._assemble_matrix(
+                SumSubtotals.blocks(
+                    self.rows_margin / self.table_weighted_bases,
+                    self._dimensions,
+                )
+            )
+
+        # --- otherwise rows-margin is a vector ---
+        return self._assemble_marginal(self._measures.rows_table_proportion)
 
     @lazyproperty
     def rows_scale_mean(self):
@@ -997,7 +1281,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no column element has an assigned numeric value.
         """
-        return self._assembler.rows_scale_mean
+        return self._assemble_marginal(self._measures.rows_scale_mean)
 
     @lazyproperty
     def rows_scale_mean_margin(self):
@@ -1038,7 +1322,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no column elements have an assigned numeric value.
         """
-        return self._assembler.rows_scale_mean_stddev
+        return self._assemble_marginal(self._measures.rows_scale_mean_stddev)
 
     @lazyproperty
     def rows_scale_mean_stderr(self):
@@ -1051,7 +1335,7 @@ class _Slice(CubePartition):
         This value is `None` if no column element has a numeric value assigned or if
         the rows-weighted-base is `None` (eg an array variable in the column dim).
         """
-        return self._assembler.rows_scale_mean_stderr
+        return self._assemble_marginal(self._measures.rows_scale_mean_stderr)
 
     @lazyproperty
     def rows_scale_median(self):
@@ -1063,7 +1347,7 @@ class _Slice(CubePartition):
 
         This value is `None` if no column element has an assigned numeric value.
         """
-        return self._assembler.rows_scale_median
+        return self._assemble_marginal(self._measures.rows_scale_median)
 
     @lazyproperty
     def rows_scale_median_margin(self):
@@ -1110,7 +1394,7 @@ class _Slice(CubePartition):
         column index smoothed according to the algorithm and the parameters
         specified, otherwise it fallbacks to unsmoothed values.
         """
-        return self._assembler.smoothed_column_index
+        return self._assemble_matrix(self._measures.smoothed_column_index.blocks)
 
     @lazyproperty
     def smoothed_column_percentages(self):
@@ -1126,11 +1410,16 @@ class _Slice(CubePartition):
     def smoothed_column_proportions(self):
         """2D np.float64 ndarray of smoothed column-proportion for each matrix cell.
 
+        This is the proportion of the weighted-count for cell to the weighted-N of the
+        column the cell appears in (aka. column-margin). Generally a number between 0.0
+        and 1.0 inclusive, but subtotal differences can be between -1.0 and 1.0
+        inclusive.
+
         If cube has smoothing specification in the transforms it will return the
         column proportions smoothed according to the algorithm and the parameters
         specified, otherwise it fallbacks to unsmoothed values.
         """
-        return self._assembler.smoothed_column_proportions
+        return self._assemble_matrix(self._measures.smoothed_column_proportions.blocks)
 
     @lazyproperty
     def smoothed_columns_scale_mean(self):
@@ -1140,7 +1429,7 @@ class _Slice(CubePartition):
         column scale mean smoothed according to the algorithm and the parameters
         specified, otherwise it fallbacks to unsmoothed values.
         """
-        return self._assembler.smoothed_columns_scale_mean
+        return self._assemble_marginal(self._measures.smoothed_columns_scale_mean)
 
     @lazyproperty
     def smoothed_means(self):
@@ -1151,7 +1440,7 @@ class _Slice(CubePartition):
         otherwise it fallbacks to unsmoothed values.
         """
         try:
-            return self._assembler.smoothed_means
+            return self._assemble_matrix(self._measures.smoothed_means.blocks)
         except ValueError:
             raise ValueError(
                 "`.means` is undefined for a cube-result without a mean measure"
@@ -1164,7 +1453,7 @@ class _Slice(CubePartition):
         Raises `ValueError` if the cube-result does not include a stddev cube-measure.
         """
         try:
-            return self._assembler.stddev
+            return self._assemble_matrix(self._measures.stddev.blocks)
         except ValueError:
             raise ValueError(
                 "`.stddev` is undefined for a cube-result without a stddev measure"
@@ -1177,7 +1466,7 @@ class _Slice(CubePartition):
         Raises `ValueError` if the cube-result does not include a sum cube-measure.
         """
         try:
-            return self._assembler.sums
+            return self._assemble_matrix(self._measures.sums.blocks)
         except ValueError:
             raise ValueError(
                 "`.sums` is undefined for a cube-result without a sum measure"
@@ -1218,8 +1507,22 @@ class _Slice(CubePartition):
 
         The caller must know the dimensionality of the slice in order to correctly
         interpret a 1D value for this property.
+
+        This value has four distinct forms, depending on the slice dimensions:
+
+            * ARR_X_ARR - 2D ndarray with a distinct table-base value per cell.
+            * ARR_X - 1D ndarray of value per *row* when only rows dimension is ARR.
+            * X_ARR - 1D ndarray of value per *column* when only col dimension is ARR
+            * CAT_X_CAT - scalar float value when slice has no MR dimension.
+
         """
-        return self._assembler.table_base
+        if self._measures.table_unweighted_base.is_defined:
+            return self._measures.table_unweighted_base.value
+        if self._measures.columns_table_unweighted_base.is_defined:
+            return self._assemble_marginal(self._measures.columns_table_unweighted_base)
+        if self._measures.rows_table_unweighted_base.is_defined:
+            return self._assemble_marginal(self._measures.rows_table_unweighted_base)
+        return self.table_unweighted_bases
 
     @lazyproperty
     def table_margin(self):
@@ -1230,8 +1533,21 @@ class _Slice(CubePartition):
 
         The caller must know the dimensionality of the slice in order to correctly
         interpret a 1D value for this property.
+
+        This value has four distinct forms, depending on the slice dimensions:
+
+            * CAT_X_CAT - scalar float value when slice has no ARRAY dimension.
+            * ARRAY_X - 1D ndarray of value per *row* when only rows dimension is ARRAY.
+            * X_ARRAY - 1D ndarray of value per *column* when only column is ARRAY.
+            * ARRAY_X_ARRAY - 2D ndarray with a distinct table-margin value per cell.
         """
-        return self._assembler.table_margin
+        if self._measures.table_weighted_base.is_defined:
+            return self._measures.table_weighted_base.value
+        if self._measures.columns_table_weighted_base.is_defined:
+            return self._assemble_marginal(self._measures.columns_table_weighted_base)
+        if self._measures.rows_table_weighted_base.is_defined:
+            return self._assemble_marginal(self._measures.rows_table_weighted_base)
+        return self.table_weighted_bases
 
     @lazyproperty
     def table_name(self):
@@ -1254,8 +1570,13 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_proportions(self):
-        """2D ndarray of np.float64 fraction of table count each cell contributes."""
-        return self._assembler.table_proportions
+        """2D ndarray of np.float64 fraction of table count each cell contributes.
+
+        This is the proportion of the weighted-count for cell to the weighted-N of the
+        row the cell appears in (aka. table-margin). Generally a number between 0.0 and
+        1.0 inclusive, but subtotal differences can be between -1.0 and 1.0 inclusive.
+        """
+        return self._assemble_matrix(self._measures.table_proportions.blocks)
 
     @lazyproperty
     def table_proportions_moe(self):
@@ -1269,9 +1590,14 @@ class _Slice(CubePartition):
         return Z_975 * self.table_std_err
 
     @lazyproperty
+    def table_proportion_variances(self):
+        """2D ndarray of np.float64 table-proportion variance for each matrix cell."""
+        return self._assemble_matrix(self._measures.table_proportion_variances.blocks)
+
+    @lazyproperty
     def table_std_dev(self):
         """2D np.float64 ndarray of std-dev of table-percent for each table cell."""
-        return np.sqrt(self._assembler.table_proportion_variances)
+        return np.sqrt(self.table_proportion_variances)
 
     @lazyproperty
     def table_std_err(self):
@@ -1279,17 +1605,17 @@ class _Slice(CubePartition):
 
         A cell value can be np.nan under certain conditions.
         """
-        return self._assembler.table_std_err
+        return self._assemble_matrix(self._measures.table_std_err.blocks)
 
     @lazyproperty
     def table_unweighted_bases(self):
         """2D np.float64 ndarray of unweighted table-proportion denominator per cell."""
-        return self._assembler.table_unweighted_bases
+        return self._assemble_matrix(self._measures.table_unweighted_bases.blocks)
 
     @lazyproperty
     def table_weighted_bases(self):
         """2D np.float64 ndarray of table-proportion denominator for each cell."""
-        return self._assembler.table_weighted_bases
+        return self._assemble_matrix(self._measures.table_weighted_bases.blocks)
 
     @lazyproperty
     def total_share_sum(self):
@@ -1300,7 +1626,7 @@ class _Slice(CubePartition):
         Total share of sum is the sum of each subvar item divided by the TOTAL of items.
         """
         try:
-            return self._assembler.total_share_sum
+            return self._assemble_matrix(self._measures.total_share_sum.blocks)
         except ValueError:
             raise ValueError(
                 "`.total_share_sum` is undefined for a cube-result without a sum "
@@ -1316,7 +1642,7 @@ class _Slice(CubePartition):
         and it is "unpruned", meaning that it is calculated before any hiding or
         removing of empty rows/columns.
         """
-        return self._assembler.table_base_range
+        return self._measures.table_unweighted_bases_range.value
 
     @lazyproperty
     def table_margin_range(self):
@@ -1327,12 +1653,12 @@ class _Slice(CubePartition):
         it is "unpruned", meaning that it is calculated before any hiding or removing
         of empty rows/columns.
         """
-        return self._assembler.table_margin_range
+        return self._measures.table_weighted_bases_range.value
 
     @lazyproperty
     def unweighted_counts(self):
         """2D np.float64 ndarray of unweighted count for each slice matrix cell."""
-        return self._assembler.unweighted_counts
+        return self._assemble_matrix(self._measures.unweighted_counts.blocks)
 
     @lazyproperty
     def zscores(self):
@@ -1342,22 +1668,78 @@ class _Slice(CubePartition):
         deviations above (positive) or below (negative) the population mean a cell's
         value is.
         """
-        return self._assembler.zscores
+        return self._assemble_matrix(self._measures.zscores.blocks)
 
     # ---implementation (helpers)-------------------------------------
 
-    @lazyproperty
-    def _assembler(self):
-        """The Assembler object for this slice.
+    def _assemble_marginal(self, marginal):
+        """Optional 1D ndarray created from a marginal.
 
-        The assembler dispatches all second-order measure calculations and insertion
-        construction, and orders the result matrix, including removing hidden vectors.
+        The assembled marginal is the shape of either a row or column (determined by
+        `marginal.orientation`), and with the ordering that's applied to those
+        dimensions.
+
+        It is None when the marginal is not defined (`marginal._is_defined`).
         """
-        return Assembler(self._cube, self._dimensions, self._slice_idx)
+        if not marginal.is_defined:
+            return None
+
+        order = (
+            self._row_order_signed_indexes
+            if marginal.orientation == MO.ROWS
+            else self._column_order
+        )
+
+        return np.hstack(marginal.blocks)[order]
+
+    def _assemble_matrix(self, blocks):
+        """Return 2D ndarray matrix assembled from `blocks`.
+
+        The assembled matrix includes inserted vectors (rows and columns), has hidden
+        vectors removed, and is ordered by whatever sort method is applied in the
+        dimension transforms.
+        """
+        # --- These are assembled into a single 2D array, and then rearranged based on
+        # --- row and column orders. All insertion, ordering, and hiding transforms are
+        # --- reflected in the row and column orders. They each include (negative)
+        # --- insertion idxs, hidden and pruned vector indices have been removed, and
+        # --- the ordering method has been applied to determine the sequence each idx
+        # --- appears in. This directly produces a final array that is exactly the
+        # --- desired output.
+        return np.block(blocks)[
+            np.ix_(self._row_order_signed_indexes, self._column_order)
+        ]
+
+    def _assemble_vector(self, base_vector, subtotals, order, diffs_nan=False):
+        """Return 1D ndarray of `base_vector` with inserted `subtotals`, in `order`.
+
+        Each subtotal value is the result of applying np.sum to the addends and
+        subtrahends extracted from `base_vector` according to the `addend_idxs`
+        and `subtrahend_idxs` property of each subtotal in `subtotals`. The returned
+        array is arranged by `order`, including possibly removing hidden or pruned
+        values.
+        """
+        # TODO: This works for "sum" and "diff" subtotals, because either we set to
+        # nan or add & subtract, but a fuller solution will probably get the subtotal
+        # values from a _BaseSubtotals subclass.
+        vector_subtotals = np.array(
+            [
+                np.nan
+                if diffs_nan and len(subtotal.subtrahend_idxs) > 0
+                else np.sum(base_vector[subtotal.addend_idxs])
+                - np.sum(base_vector[subtotal.subtrahend_idxs])
+                for subtotal in subtotals
+            ]
+        )
+        return np.hstack([base_vector, vector_subtotals])[order]
 
     @lazyproperty
-    def _columns_dimension(self):
-        return self._dimensions[1]
+    def _column_order(self):
+        """1D np.int64 ndarray of signed int idx for each assembled column.
+
+        Negative values represent inserted subtotal-column locations.
+        """
+        return _BaseOrderHelper.column_display_order(self._dimensions, self._measures)
 
     @lazyproperty
     def _columns_dimension_numeric_values(self):
@@ -1366,7 +1748,13 @@ class _Slice(CubePartition):
         A value of np.nan appears for a column element without a numeric-value. All
         subtotal rows have a value of np.nan (subtotals have no numeric value).
         """
-        return self._assembler.columns_dimension_numeric_values
+        elements = self._dimensions[1].valid_elements
+        return np.array(
+            [
+                (elements[idx].numeric_value if idx >= 0 else np.nan)
+                for idx in self._column_order
+            ]
+        )
 
     @lazyproperty
     def _columns_have_numeric_value(self):
@@ -1398,6 +1786,33 @@ class _Slice(CubePartition):
             return np.nansum(numerator, axis=0) / denominator
 
     @lazyproperty
+    def _cube_has_overlaps(self):
+        """True if overlaps are defined and the last dimension is MR, False otherwise"""
+        return (
+            self._dimensions[-1].dimension_type == DT.MR
+            and self._cube.overlaps is not None
+            and self._cube.valid_overlaps is not None
+        )
+
+    def _derived_element_idxs(self, dimension, order):
+        """Return tuple(int) of derived elements' indices for a dimension.
+
+        Subtotals cannot be derived elements. Only some elements (subvariables) can.
+        """
+        n_subtotals = len(dimension.valid_elements)
+        derivs = [e.derived for e in dimension.valid_elements] + [False] * n_subtotals
+        return tuple(np.where(np.array(derivs)[order])[0])
+
+    def _diff_element_idxs(self, dimension, order):
+        """Return tuple(int) of difference elements' indices for a dimension.
+
+        Valid elements cannot be differences. Only some subtotals can.
+        """
+        n_valids = len(dimension.valid_elements)
+        diffs = [False] * n_valids + [e.is_difference for e in dimension.subtotals]
+        return tuple(np.where(np.array(diffs)[order])[0])
+
+    @lazyproperty
     def _dimensions(self):
         """tuple of (rows_dimension, columns_dimension) Dimension objects."""
         return tuple(
@@ -1405,6 +1820,18 @@ class _Slice(CubePartition):
             for dimension, transforms in zip(
                 self._cube.dimensions[-2:], self._transform_dicts
             )
+        )
+
+    @lazyproperty
+    def _measures(self):
+        """SecondOrderMeasures collection object for this cube-result."""
+        return SecondOrderMeasures(self._cube, self._dimensions, self._slice_idx)
+
+    @lazyproperty
+    def _row_order_signed_indexes(self):
+        """Row order idx with signed idxs."""
+        return _BaseOrderHelper.row_display_order(
+            self._dimensions, self._measures, format=ORDER_FORMAT.SIGNED_INDEXES
         )
 
     @lazyproperty
@@ -1418,7 +1845,13 @@ class _Slice(CubePartition):
         A value of np.nan appears for a row element without a numeric-value. All
         subtotal rows have a value of np.nan (subtotals have no numeric value).
         """
-        return self._assembler.rows_dimension_numeric_values
+        elements = self._rows_dimension.valid_elements
+        return np.array(
+            [
+                (elements[idx].numeric_value if idx >= 0 else np.nan)
+                for idx in self._row_order_signed_indexes
+            ]
+        )
 
     @lazyproperty
     def _rows_have_numeric_value(self):

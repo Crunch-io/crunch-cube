@@ -2,12 +2,12 @@
 
 """Unit test suite for `cr.cube.cubepart` module."""
 
+import mock
 import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
 from cr.cube.dimension import Dimension, Elements
-from cr.cube.matrix import Assembler
 from cr.cube.stripe.assembler import StripeAssembler
 
 from ..unitutil import class_mock, instance_mock, property_mock
@@ -199,36 +199,6 @@ class Describe_Slice:
         assert cube_repr.startswith("<cr.cube.cubepart._Slice object at 0x")
 
     @pytest.mark.parametrize(
-        "measure_name",
-        (
-            "column_unweighted_bases",
-            "column_weighted_bases",
-            "columns_scale_mean_stderr",
-            "columns_scale_mean",
-            "columns_scale_median",
-            "row_proportions",
-            "row_unweighted_bases",
-            "row_weighted_bases",
-            "rows_margin",
-            "rows_scale_mean",
-            "rows_scale_mean_stddev",
-            "rows_scale_mean_stderr",
-            "rows_scale_median",
-            "table_proportions",
-            "table_std_err",
-            "table_unweighted_bases",
-            "table_weighted_bases",
-        ),
-    )
-    def it_knows_assembled_measures(self, _assembler_prop_, assembler_, measure_name):
-        _assembler_prop_.return_value = assembler_
-        setattr(assembler_, measure_name, [[1, 2], [3, 4]])
-
-        results = getattr(_Slice(None, None, None, None, None), measure_name)
-
-        assert results == [[1, 2], [3, 4]]
-
-    @pytest.mark.parametrize(
         ("shape", "expected_value"),
         (((4, 2), False), ((4, 0), True), ((0, 2), True), ((0, 0), True)),
     )
@@ -254,27 +224,21 @@ class Describe_Slice:
 
         assert population_fraction == 0.5
 
-    def it_provides_the_population_counts(self, _assembler_prop_, assembler_, cube_):
-        assembler_.population_proportions = 0.3
-        _assembler_prop_.return_value = assembler_
+    def it_provides_the_population_counts(self, cube_):
         cube_.population_fraction = 0.1
         population = 20
 
-        slice_ = _Slice(cube_, None, None, population, None)
+        with mock.patch("cr.cube.cubepart._Slice.population_proportions", new=0.3):
+            slice_ = _Slice(cube_, None, None, population, None)
+            assert slice_.population_counts == pytest.approx(0.6)
 
-        assert slice_.population_counts == pytest.approx(0.6)
-
-    def it_provides_the_population_count_moes(
-        self, _assembler_prop_, assembler_, cube_
-    ):
-        assembler_.population_std_err = 0.3
-        _assembler_prop_.return_value = assembler_
+    def it_provides_the_population_count_moes(self, cube_):
         cube_.population_fraction = 0.1
         population = 20
 
-        slice_ = _Slice(cube_, None, None, population, None)
-
-        assert slice_.population_counts_moe == pytest.approx(0.6 * 1.959964)
+        with mock.patch("cr.cube.cubepart._Slice.population_std_err", new=0.3):
+            slice_ = _Slice(cube_, None, None, population, None)
+            assert slice_.population_counts_moe == pytest.approx(0.6 * 1.959964)
 
     def it_provides_the_secondary_scale_mean_pairwise_indices(
         self, _alpha_alt_prop_, _only_larger_prop_, PairwiseSignificance_
@@ -341,21 +305,6 @@ class Describe_Slice:
 
         assert slice_.selected_category_labels == expected_value
 
-    def it_constructs_its_assembler_instance_to_help(
-        self, request, cube_, _dimensions_prop_, dimension_, assembler_
-    ):
-        Assembler_ = class_mock(
-            request, "cr.cube.cubepart.Assembler", return_value=assembler_
-        )
-        _dimensions_prop_.return_value = (dimension_, dimension_)
-        slice_idx = 42
-        slice_ = _Slice(cube_, slice_idx, None, None, None)
-
-        assembler = slice_._assembler
-
-        Assembler_.assert_called_once_with(cube_, (dimension_, dimension_), slice_idx)
-        assert assembler is assembler_
-
     @pytest.mark.parametrize("ndim, element_ids", ((2, (1, 2, 3)), (3, ())))
     def it_knows_when_its_table_name_is_None(
         self, request, dimension_, _dimensions_prop_, cube_, ndim, element_ids
@@ -374,14 +323,6 @@ class Describe_Slice:
     @pytest.fixture
     def _alpha_alt_prop_(self, request):
         return property_mock(request, _Slice, "_alpha_alt")
-
-    @pytest.fixture
-    def assembler_(self, request):
-        return instance_mock(request, Assembler)
-
-    @pytest.fixture
-    def _assembler_prop_(self, request):
-        return property_mock(request, _Slice, "_assembler")
 
     @pytest.fixture
     def cube_(self, request):
@@ -421,13 +362,6 @@ class Describe_Strand:
         cube_repr = cube.__repr__()
 
         assert cube_repr.startswith("<cr.cube.cubepart._Strand object at 0x")
-
-    def it_knows_which_of_its_rows_are_inserted(self, _assembler_prop_, assembler_):
-        _assembler_prop_.return_value = assembler_
-        assembler_.inserted_row_idxs = (1, 3, 5)
-        strand = _Strand(None, None, None, None, None, None)
-
-        assert strand.inserted_row_idxs == (1, 3, 5)
 
     @pytest.mark.parametrize(("shape", "expected_value"), (((1,), False), ((0,), True)))
     def it_knows_whether_it_is_empty(self, shape, expected_value, shape_prop_):

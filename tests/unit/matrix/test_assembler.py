@@ -1,11 +1,13 @@
 # encoding: utf-8
 
-"""Unit test suite for `cr.cube.matrix.assembler` module."""
+"""Unit test suite for `cr.cube.cubepart assembly` module."""
 
+import mock
 import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
+from cr.cube.cubepart import _Slice
 from cr.cube.dimension import Dimension, Element, _OrderSpec, _Subtotal, _Subtotals
 from cr.cube.enums import (
     COLLATION_METHOD as CM,
@@ -15,7 +17,6 @@ from cr.cube.enums import (
     ORDER_FORMAT,
 )
 from cr.cube.matrix.assembler import (
-    Assembler,
     _BaseOrderHelper,
     _BaseSortRowsByValueHelper,
     _ColumnOrderHelper,
@@ -29,7 +30,6 @@ from cr.cube.matrix.assembler import (
 from cr.cube.matrix.measure import (
     _BaseMarginal,
     _BaseSecondOrderMeasure,
-    _ColumnComparableCounts,
     _ColumnIndex,
     _ColumnProportions,
     _ColumnShareSum,
@@ -43,7 +43,6 @@ from cr.cube.matrix.measure import (
     _MarginTableBase,
     _ProportionVariances,
     _Pvalues,
-    _RowComparableCounts,
     _RowProportions,
     _RowStandardError,
     _RowShareSum,
@@ -80,12 +79,11 @@ from ...unitutil import (
 
 
 class DescribeAssembler:
-    """Unit test suite for `cr.cube.matrix.assembler.Assembler` object."""
+    """Unit test suite for `cr.cube.cubepart` assembly methods."""
 
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
         (
-            ("column_comparable_counts", _ColumnComparableCounts),
             ("column_index", _ColumnIndex),
             ("column_proportions", _ColumnProportions),
             ("column_proportion_variances", _ProportionVariances),
@@ -97,7 +95,6 @@ class DescribeAssembler:
             ("population_proportions", _PopulationProportions),
             ("population_std_err", _PopulationStandardError),
             ("pvalues", _Pvalues),
-            ("row_comparable_counts", _RowComparableCounts),
             ("row_proportions", _RowProportions),
             ("row_proportion_variances", _ProportionVariances),
             ("row_share_sum", _RowShareSum),
@@ -132,14 +129,14 @@ class DescribeAssembler:
             measure_prop_name,
             instance_mock(request, MeasureCls, blocks=[["A", "B"], ["C", "D"]]),
         )
-        property_mock(request, Assembler, "diff_row_idxs", return_value=())
-        property_mock(request, Assembler, "diff_column_idxs", return_value=())
+        property_mock(request, _Slice, "diff_row_idxs", return_value=())
+        property_mock(request, _Slice, "diff_column_idxs", return_value=())
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        value = getattr(assembler, measure_prop_name)
+        value = getattr(slice_, measure_prop_name)
 
-        _assemble_matrix_.assert_called_once_with(assembler, [["A", "B"], ["C", "D"]])
+        _assemble_matrix_.assert_called_once_with(slice_, [["A", "B"], ["C", "D"]])
         assert value == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
     @pytest.mark.parametrize(
@@ -168,29 +165,23 @@ class DescribeAssembler:
         _measures_prop_.return_value = second_order_measures_
         measure_ = instance_mock(request, MeasureCls)
         setattr(second_order_measures_, measure_prop_name, measure_)
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        value = getattr(assembler, measure_prop_name)
+        value = getattr(slice_, measure_prop_name)
 
-        _assemble_marginal_.assert_called_once_with(assembler, measure_)
+        _assemble_marginal_.assert_called_once_with(slice_, measure_)
         assert value == [[1, 2, 3], [4, 5, 6]]
 
-    def it_knows_the_column_labels(
-        self,
-        _columns_dimension_prop_,
-        dimension_,
-        _column_order_prop_,
-        _dimension_labels_,
-    ):
-        _columns_dimension_prop_.return_value = dimension_
-        _column_order_prop_.return_value = [0, 1, 2]
-        _dimension_labels_.return_value = np.array(["Alpha", "Baker", "Charlie"])
-        assembler = Assembler(None, None, None)
-
-        column_labels = assembler.column_labels
-
-        _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
-        assert column_labels.tolist() == ["Alpha", "Baker", "Charlie"]
+    def it_knows_the_column_labels(self, dimension_, _column_order_prop_):
+        _column_order_prop_.return_value = [0, 2, 1]
+        dimension_.element_labels = ("Alpha", "Baker")
+        dimension_.subtotal_labels = ("Charlie",)
+        with mock.patch(
+            "cr.cube.cubepart._Slice._dimensions", new=(dimension_, dimension_)
+        ):
+            slice_ = _Slice(None, None, None, None, None)
+            column_labels = slice_.column_labels
+            assert column_labels.tolist() == ["Alpha", "Charlie", "Baker"]
 
     def it_provides_a_1D_columns_base_for_an_X_CAT_cube_result(
         self,
@@ -203,11 +194,11 @@ class DescribeAssembler:
         second_order_measures_.columns_unweighted_base = margin_unweighted_base_
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        rows_base = assembler.columns_base
+        rows_base = slice_.columns_base
 
-        _assemble_marginal_.assert_called_once_with(assembler, margin_unweighted_base_)
+        _assemble_marginal_.assert_called_once_with(slice_, margin_unweighted_base_)
         assert rows_base == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_columns_base_for_an_X_MR_cube_result(
@@ -222,31 +213,33 @@ class DescribeAssembler:
         _measures_prop_.return_value = second_order_measures_
         property_mock(
             request,
-            Assembler,
+            _Slice,
             "column_unweighted_bases",
             return_value=[[1, 2, 3], [4, 5, 6], [7, 8, 9]],
         )
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        rows_base = assembler.columns_base
+        rows_base = slice_.columns_base
 
         assert rows_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
     def it_knows_the_columns_dimension_numeric_values(
-        self, request, _columns_dimension_prop_, dimension_, _column_order_prop_
+        self, request, dimension_, _column_order_prop_
     ):
-        _columns_dimension_prop_.return_value = dimension_
         dimension_.valid_elements = tuple(
             instance_mock(request, Element, numeric_value=numeric_value)
             for numeric_value in (1, 2, 3)
         )
         _column_order_prop_.return_value = [2, -1, 0, -2]
-        assembler = Assembler(None, None, None)
 
-        np.testing.assert_almost_equal(
-            assembler.columns_dimension_numeric_values,
-            [3.0, np.nan, 1.0, np.nan],
-        )
+        with mock.patch(
+            "cr.cube.cubepart._Slice._dimensions", new=(dimension_, dimension_)
+        ):
+            slice_ = _Slice(None, None, None, None, None)
+            np.testing.assert_almost_equal(
+                slice_._columns_dimension_numeric_values,
+                [3.0, np.nan, 1.0, np.nan],
+            )
 
     def it_provides_a_1D_columns_margin_for_a_CAT_X_cube_result(
         self,
@@ -262,11 +255,11 @@ class DescribeAssembler:
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
         second_order_measures_.columns_weighted_base = margin_weighted_base_
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        columns_margin = assembler.columns_margin
+        columns_margin = slice_.columns_margin
 
-        _assemble_marginal_.assert_called_once_with(assembler, margin_weighted_base_)
+        _assemble_marginal_.assert_called_once_with(slice_, margin_weighted_base_)
         assert columns_margin == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_columns_margin_for_an_MR_X_cube_result(
@@ -277,14 +270,14 @@ class DescribeAssembler:
         margin_weighted_base_,
     ):
         property_mock(
-            request, Assembler, "column_weighted_bases", return_value=[[1, 2], [3, 4]]
+            request, _Slice, "column_weighted_bases", return_value=[[1, 2], [3, 4]]
         )
         _measures_prop_.return_value = second_order_measures_
         second_order_measures_.columns_weighted_base = margin_weighted_base_
         margin_weighted_base_.is_defined = False
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        columns_margin = assembler.columns_margin
+        columns_margin = slice_.columns_margin
 
         assert columns_margin == [[1, 2], [3, 4]]
 
@@ -303,11 +296,11 @@ class DescribeAssembler:
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
         second_order_measures_.columns_table_proportion = margin_table_proportion_
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        columns_margin_proportion = assembler.columns_margin_proportion
+        columns_margin_proportion = slice_.columns_margin_proportion
 
-        _assemble_marginal_.assert_called_once_with(assembler, margin_table_proportion_)
+        _assemble_marginal_.assert_called_once_with(slice_, margin_table_proportion_)
         assert columns_margin_proportion == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_columns_margin_proportion_for_an_MR_X_cube_result(
@@ -325,68 +318,61 @@ class DescribeAssembler:
         second_order_measures_.columns_table_proportion = margin_table_proportion_
         property_mock(
             request,
-            Assembler,
+            _Slice,
             "columns_margin",
             return_value=np.array([[1, 2], [3, 4]]),
         )
         property_mock(
             request,
-            Assembler,
+            _Slice,
             "table_weighted_bases",
             return_value=np.array([4.0, 6.0]),
         )
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, dimensions_, None)
+        with mock.patch("cr.cube.cubepart._Slice._dimensions", new=dimensions_):
+            slice_ = _Slice(None, None, None, None, None)
 
-        columns_margin_proportion = assembler.columns_margin_proportion
+            columns_margin_proportion = slice_.columns_margin_proportion
 
-        SumSubtotals_.blocks.assert_called_once_with(ANY, dimensions_)
-        assert SumSubtotals_.blocks.call_args.args[0].tolist() == [
-            pytest.approx([1 / 4.0, 2 / 6.0]),
-            pytest.approx([3 / 4.0, 4 / 6.0]),
-        ]
-        _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
-        assert columns_margin_proportion == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+            SumSubtotals_.blocks.assert_called_once_with(ANY, dimensions_)
+            assert SumSubtotals_.blocks.call_args.args[0].tolist() == [
+                pytest.approx([1 / 4.0, 2 / 6.0]),
+                pytest.approx([3 / 4.0, 4 / 6.0]),
+            ]
+            _assemble_matrix_.assert_called_once_with(slice_, [[[1], [2]], [[3], [4]]])
+            assert columns_margin_proportion == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
     def it_knows_the_inserted_column_idxs(self, _column_order_prop_):
         _column_order_prop_.return_value = [2, -1, 0, -2]
-        assert Assembler(None, None, None).inserted_column_idxs == (1, 3)
+        assert _Slice(None, None, None, None, None).inserted_column_idxs == (1, 3)
 
     def it_knows_the_inserted_row_idxs(self, _row_order_prop_):
         _row_order_prop_.return_value = [0, 1, -2, 2, -1, 3]
-        assert Assembler(None, None, None).inserted_row_idxs == (2, 4)
+        assert _Slice(None, None, None, None, None).inserted_row_idxs == (2, 4)
 
     def it_knows_the_means(self, request, dimensions_):
-        property_mock(
-            request, Assembler, "means", return_value=np.array([1.2, 1.34, 3.3])
-        )
-        assembler = Assembler(None, dimensions_, None)
+        property_mock(request, _Slice, "means", return_value=np.array([1.2, 1.34, 3.3]))
+        slice_ = _Slice(None, dimensions_, None, None, None)
 
-        assert assembler.means == pytest.approx([1.2, 1.34, 3.3])
+        assert slice_.means == pytest.approx([1.2, 1.34, 3.3])
 
     def it_knows_the_sum(self, request, dimensions_):
-        property_mock(request, Assembler, "sums", return_value=np.array([4, 5, 6]))
-        assembler = Assembler(None, dimensions_, None)
+        property_mock(request, _Slice, "sums", return_value=np.array([4, 5, 6]))
+        slice_ = _Slice(None, dimensions_, None, None, None)
 
-        assert assembler.sums == pytest.approx([4, 5, 6])
+        assert slice_.sums == pytest.approx([4, 5, 6])
 
-    def it_knows_the_row_labels(
-        self,
-        _rows_dimension_prop_,
-        dimension_,
-        _row_order_prop_,
-        _dimension_labels_,
-    ):
-        _rows_dimension_prop_.return_value = dimension_
-        _row_order_prop_.return_value = [0, 1, 2]
-        _dimension_labels_.return_value = np.array(["Alpha", "Baker", "Charlie"])
-        assembler = Assembler(None, None, None)
-
-        row_labels = assembler.row_labels
-
-        _dimension_labels_.assert_called_once_with(assembler, dimension_, [0, 1, 2])
-        assert row_labels.tolist() == ["Alpha", "Baker", "Charlie"]
+    def it_knows_the_row_labels(self, dimension_, _row_order_prop_):
+        _row_order_prop_.return_value = [0, 2, 1]
+        dimension_.element_labels = ("Alpha", "Baker")
+        dimension_.subtotal_labels = ("Charlie",)
+        with mock.patch(
+            "cr.cube.cubepart._Slice._dimensions", new=(dimension_, dimension_)
+        ):
+            slice_ = _Slice(None, None, None, None, None)
+            row_labels = slice_.row_labels
+            assert row_labels.tolist() == ["Alpha", "Charlie", "Baker"]
 
     def it_provides_a_1D_rows_base_for_an_X_CAT_cube_result(
         self,
@@ -399,11 +385,11 @@ class DescribeAssembler:
         second_order_measures_.rows_unweighted_base = margin_unweighted_base_
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        rows_base = assembler.rows_base
+        rows_base = slice_.rows_base
 
-        _assemble_marginal_.assert_called_once_with(assembler, margin_unweighted_base_)
+        _assemble_marginal_.assert_called_once_with(slice_, margin_unweighted_base_)
         assert rows_base == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_rows_base_for_an_X_MR_cube_result(
@@ -418,13 +404,13 @@ class DescribeAssembler:
         _measures_prop_.return_value = second_order_measures_
         property_mock(
             request,
-            Assembler,
+            _Slice,
             "row_unweighted_bases",
             return_value=[[1, 2, 3], [4, 5, 6], [7, 8, 9]],
         )
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        rows_base = assembler.rows_base
+        rows_base = slice_.rows_base
 
         assert rows_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
@@ -456,46 +442,48 @@ class DescribeAssembler:
             instance_mock(request, _Subtotal, fill=fill) for fill in subtotal_fills
         )
         _row_order_prop_.return_value = order
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        assert assembler.rows_dimension_fills == expected_fills
+        assert slice_.rows_dimension_fills == expected_fills
 
     def it_knows_the_rows_dimension_numeric_values(
-        self, request, _rows_dimension_prop_, dimension_, _row_order_prop_
+        self, request, dimension_, _row_order_prop_
     ):
-        _rows_dimension_prop_.return_value = dimension_
         dimension_.valid_elements = tuple(
             instance_mock(request, Element, numeric_value=numeric_value)
             for numeric_value in (1, 2, 3)
         )
         _row_order_prop_.return_value = [2, -1, 0, -2]
-        assembler = Assembler(None, None, None)
 
-        np.testing.assert_almost_equal(
-            assembler.rows_dimension_numeric_values,
-            [3.0, np.nan, 1.0, np.nan],
-        )
+        with mock.patch(
+            "cr.cube.cubepart._Slice._dimensions", new=(dimension_, dimension_)
+        ):
+            slice_ = _Slice(None, None, None, None, None)
+            np.testing.assert_almost_equal(
+                slice_._rows_dimension_numeric_values,
+                [3.0, np.nan, 1.0, np.nan],
+            )
 
     def it_provides_a_1D_rows_margin_for_an_X_CAT_cube_result(
         self,
-        _columns_dimension_prop_,
         dimension_,
         _measures_prop_,
         _assemble_marginal_,
         second_order_measures_,
         margin_weighted_base_,
     ):
-        _columns_dimension_prop_.return_value = dimension_
         dimension_.dimension_type = DT.CAT
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
         second_order_measures_.rows_weighted_base = margin_weighted_base_
-        assembler = Assembler(None, None, None)
 
-        rows_margin = assembler.rows_margin
-
-        _assemble_marginal_.assert_called_once_with(assembler, margin_weighted_base_)
-        assert rows_margin == [[1, 2, 3], [4, 5, 6]]
+        with mock.patch(
+            "cr.cube.cubepart._Slice._dimensions", new=(dimension_, dimension_)
+        ):
+            slice_ = _Slice(None, None, None, None, None)
+            rows_margin = slice_.rows_margin
+            _assemble_marginal_.assert_called_once_with(slice_, margin_weighted_base_)
+            assert rows_margin == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_rows_margin_for_an_X_MR_cube_result(
         self,
@@ -505,38 +493,37 @@ class DescribeAssembler:
         margin_weighted_base_,
     ):
         property_mock(
-            request, Assembler, "row_weighted_bases", return_value=[[1, 2], [3, 4]]
+            request, _Slice, "row_weighted_bases", return_value=[[1, 2], [3, 4]]
         )
         _measures_prop_.return_value = second_order_measures_
         second_order_measures_.rows_weighted_base = margin_weighted_base_
         margin_weighted_base_.is_defined = False
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        rows_margin = assembler.rows_margin
+        rows_margin = slice_.rows_margin
 
         assert rows_margin == [[1, 2], [3, 4]]
 
     def it_provides_a_1D_rows_margin_proportion_for_an_X_CAT_cube_result(
         self,
         request,
-        _columns_dimension_prop_,
         dimension_,
         _assemble_marginal_,
         _measures_prop_,
         second_order_measures_,
     ):
-        _columns_dimension_prop_.return_value = dimension_
         dimension_.dimension_type = DT.CAT
         _assemble_marginal_.return_value = [[1, 2, 3], [4, 5, 6]]
         _measures_prop_.return_value = second_order_measures_
         measure_ = instance_mock(request, _MarginTableProportion)
         second_order_measures_.rows_table_proportion = measure_
-        assembler = Assembler(None, None, None)
-
-        rows_margin_proportion = assembler.rows_margin_proportion
-
-        _assemble_marginal_.assert_called_once_with(assembler, measure_)
-        assert rows_margin_proportion == [[1, 2, 3], [4, 5, 6]]
+        with mock.patch(
+            "cr.cube.cubepart._Slice._dimensions", new=(dimension_, dimension_)
+        ):
+            slice_ = _Slice(None, None, None, None, None)
+            rows_margin_proportion = slice_.rows_margin_proportion
+            _assemble_marginal_.assert_called_once_with(slice_, measure_)
+            assert rows_margin_proportion == [[1, 2, 3], [4, 5, 6]]
 
     def but_it_provides_a_2D_rows_margin_proportion_for_an_X_MR_cube_result(
         self,
@@ -552,27 +539,28 @@ class DescribeAssembler:
         _measures_prop_.return_value = second_order_measures_
         second_order_measures_.rows_table_proportion = margin_table_proportion_
         property_mock(
-            request, Assembler, "rows_margin", return_value=np.array([[1, 2], [3, 4]])
+            request, _Slice, "rows_margin", return_value=np.array([[1, 2], [3, 4]])
         )
         property_mock(
             request,
-            Assembler,
+            _Slice,
             "table_weighted_bases",
             return_value=np.array([4.0, 6.0]),
         )
         SumSubtotals_.blocks.return_value = [[[1], [2]], [[3], [4]]]
         _assemble_matrix_.return_value = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        assembler = Assembler(None, dimensions_, None)
+        with mock.patch("cr.cube.cubepart._Slice._dimensions", new=dimensions_):
+            slice_ = _Slice(None, None, None, None, None)
 
-        rows_margin_proportion = assembler.rows_margin_proportion
+            rows_margin_proportion = slice_.rows_margin_proportion
 
-        SumSubtotals_.blocks.assert_called_once_with(ANY, dimensions_)
-        assert SumSubtotals_.blocks.call_args.args[0].tolist() == [
-            pytest.approx([1 / 4.0, 2 / 6.0]),
-            pytest.approx([3 / 4.0, 4 / 6.0]),
-        ]
-        _assemble_matrix_.assert_called_once_with(assembler, [[[1], [2]], [[3], [4]]])
-        assert rows_margin_proportion == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+            SumSubtotals_.blocks.assert_called_once_with(ANY, dimensions_)
+            assert SumSubtotals_.blocks.call_args.args[0].tolist() == [
+                pytest.approx([1 / 4.0, 2 / 6.0]),
+                pytest.approx([3 / 4.0, 4 / 6.0]),
+            ]
+            _assemble_matrix_.assert_called_once_with(slice_, [[[1], [2]], [[3], [4]]])
+            assert rows_margin_proportion == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
     def it_knows_the_2D_table_base_of_an_ARRAY_X_ARRAY_matrix(
         self,
@@ -594,13 +582,13 @@ class DescribeAssembler:
         _measures_prop_.return_value = second_order_measures_
         property_mock(
             request,
-            Assembler,
+            _Slice,
             "table_unweighted_bases",
             return_value=[[5, 4, 6], [2, 1, 3]],
         )
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        assert assembler.table_base == [[5, 4, 6], [2, 1, 3]]
+        assert slice_.table_base == [[5, 4, 6], [2, 1, 3]]
 
     def and_it_knows_the_1D_table_base_of_an_ARRAY_X_CAT_matrix(
         self,
@@ -618,12 +606,12 @@ class DescribeAssembler:
         )
         _measures_prop_.return_value = second_order_measures_
         _assemble_marginal_.return_value = [2, 1, 3]
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        table_base = assembler.table_base
+        table_base = slice_.table_base
 
         _assemble_marginal_.assert_called_once_with(
-            assembler, columns_table_unweighted_base_
+            slice_, columns_table_unweighted_base_
         )
         assert table_base == [2, 1, 3]
 
@@ -646,13 +634,11 @@ class DescribeAssembler:
         )
         _measures_prop_.return_value = second_order_measures_
         _assemble_marginal_.return_value = [2, 1, 3]
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        table_base = assembler.table_base
+        table_base = slice_.table_base
 
-        _assemble_marginal_.assert_called_once_with(
-            assembler, rows_table_unweighted_base_
-        )
+        _assemble_marginal_.assert_called_once_with(slice_, rows_table_unweighted_base_)
         assert table_base == [2, 1, 3]
 
     def and_it_knows_the_scalar_table_base_of_a_CAT_X_CAT_matrix(
@@ -665,9 +651,9 @@ class DescribeAssembler:
         table_unweighted_base_.value = 4242
         second_order_measures_.table_unweighted_base = table_unweighted_base_
         _measures_prop_.return_value = second_order_measures_
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        assert assembler.table_base == 4242
+        assert slice_.table_base == 4242
 
     def it_knows_the_2D_table_margin_of_an_ARRAY_X_ARRAY_matrix(
         self,
@@ -689,13 +675,13 @@ class DescribeAssembler:
         _measures_prop_.return_value = second_order_measures_
         property_mock(
             request,
-            Assembler,
+            _Slice,
             "table_weighted_bases",
             return_value=[[5, 4, 6], [2, 1, 3]],
         )
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        assert assembler.table_margin == [[5, 4, 6], [2, 1, 3]]
+        assert slice_.table_margin == [[5, 4, 6], [2, 1, 3]]
 
     def and_it_knows_the_1D_table_margin_of_an_ARRAY_X_CAT_matrix(
         self,
@@ -713,12 +699,12 @@ class DescribeAssembler:
         )
         _measures_prop_.return_value = second_order_measures_
         _assemble_marginal_.return_value = [2, 1, 3]
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        table_margin = assembler.table_margin
+        table_margin = slice_.table_margin
 
         _assemble_marginal_.assert_called_once_with(
-            assembler, columns_table_weighted_base_
+            slice_, columns_table_weighted_base_
         )
         assert table_margin == [2, 1, 3]
 
@@ -741,13 +727,11 @@ class DescribeAssembler:
         )
         _measures_prop_.return_value = second_order_measures_
         _assemble_marginal_.return_value = [2, 1, 3]
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        table_margin = assembler.table_margin
+        table_margin = slice_.table_margin
 
-        _assemble_marginal_.assert_called_once_with(
-            assembler, rows_table_weighted_base_
-        )
+        _assemble_marginal_.assert_called_once_with(slice_, rows_table_weighted_base_)
         assert table_margin == [2, 1, 3]
 
     def and_it_knows_the_scalar_table_margin_of_a_CAT_X_CAT_matrix(
@@ -760,9 +744,9 @@ class DescribeAssembler:
         table_weighted_base_.value = 4242
         second_order_measures_.table_weighted_base = table_weighted_base_
         _measures_prop_.return_value = second_order_measures_
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        assert assembler.table_margin == 4242
+        assert slice_.table_margin == 4242
 
     def it_knows_the_table_base_range(
         self,
@@ -773,9 +757,9 @@ class DescribeAssembler:
         _measures_prop_.return_value = second_order_measures_
         measure_ = instance_mock(request, _TableBasesRange, value=42)
         second_order_measures_.table_unweighted_bases_range = measure_
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        assert assembler.table_base_range == 42
+        assert slice_.table_base_range == 42
 
     def it_knows_the_table_margin_range(
         self,
@@ -786,9 +770,9 @@ class DescribeAssembler:
         _measures_prop_.return_value = second_order_measures_
         measure_ = instance_mock(request, _TableBasesRange, value=42)
         second_order_measures_.table_weighted_bases_range = measure_
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        assert assembler.table_margin_range == 42
+        assert slice_.table_margin_range == 42
 
     # === implementation methods/properties ===
 
@@ -815,9 +799,9 @@ class DescribeAssembler:
     ):
         _row_order_prop_.return_value = row_order
         _column_order_prop_.return_value = col_order
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        assert assembler._assemble_matrix(blocks).tolist() == expected_value
+        assert slice_._assemble_matrix(blocks).tolist() == expected_value
 
     def it_can_assemble_a_vector(self, request):
         base_vector = np.array([1, 2, 3, 4])
@@ -835,9 +819,9 @@ class DescribeAssembler:
             )
         )
         order = np.array([-3, 1, 0, -2, 3, 2, -1])
-        assembler = Assembler(None, None, None)
+        slice_ = _Slice(None, None, None, None, None)
 
-        vector = assembler._assemble_vector(base_vector, subtotals_, order)
+        vector = slice_._assemble_vector(base_vector, subtotals_, order)
 
         assert vector.tolist() == [3, 2, 1, 5, 4, 3, 7]
 
@@ -852,51 +836,15 @@ class DescribeAssembler:
         _BaseOrderHelper_.column_display_order.return_value = np.array(
             [-1, 1, -2, 2, -3, 3]
         )
-        assembler = Assembler(None, dimensions_, None)
+        with mock.patch("cr.cube.cubepart._Slice._dimensions", new=dimensions_):
+            slice_ = _Slice(None, None, None, None, None)
 
-        column_order = assembler._column_order
+            column_order = slice_._column_order
 
-        _BaseOrderHelper_.column_display_order.assert_called_once_with(
-            dimensions_, second_order_measures_
-        )
-        assert column_order.tolist() == [-1, 1, -2, 2, -3, 3]
-
-    def it_provides_access_to_the_column_subtotals_to_help(
-        self, _columns_dimension_prop_, dimension_, subtotals_
-    ):
-        _columns_dimension_prop_.return_value = dimension_
-        dimension_.subtotals = subtotals_
-
-        assert Assembler(None, None, None)._column_subtotals is subtotals_
-
-    def it_provides_access_to_the_columns_dimension_to_help(self, dimension_):
-        assembler = Assembler(None, (None, dimension_), None)
-        assert assembler._columns_dimension is dimension_
-
-    def it_assembles_the_dimension_labels_to_help(self, dimension_):
-        dimension_.element_labels = ("Alpha", "Bravo", "Charlie", "Delta")
-        dimension_.subtotal_labels = ("Top 2", "All")
-        order = np.array([1, 3, -2, 2, -1])
-        assembler = Assembler(None, None, None)
-
-        labels = assembler._dimension_labels(dimension_, order)
-
-        assert labels.tolist() == ["Bravo", "Delta", "Top 2", "Charlie", "All"]
-
-    def it_constructs_its_measures_collaborator_object_to_help(
-        self, request, cube_, dimensions_, second_order_measures_
-    ):
-        SecondOrderMeasures_ = class_mock(
-            request,
-            "cr.cube.matrix.assembler.SecondOrderMeasures",
-            return_value=second_order_measures_,
-        )
-        assembler = Assembler(cube_, dimensions_, slice_idx=17)
-
-        measures = assembler._measures
-
-        SecondOrderMeasures_.assert_called_once_with(cube_, dimensions_, 17)
-        assert measures == second_order_measures_
+            _BaseOrderHelper_.column_display_order.assert_called_once_with(
+                dimensions_, second_order_measures_
+            )
+            assert column_order.tolist() == [-1, 1, -2, 2, -3, 3]
 
     @pytest.mark.parametrize(
         "format, row_order",
@@ -916,14 +864,15 @@ class DescribeAssembler:
     ):
         _measures_prop_.return_value = second_order_measures_
         _BaseOrderHelper_.row_display_order.return_value = np.array(row_order)
-        assembler = Assembler(None, dimensions_, None)
+        with mock.patch("cr.cube.cubepart._Slice._dimensions", new=dimensions_):
+            slice_ = _Slice(None, dimensions_, None, None, None)
 
-        row_order = assembler.row_order(format)
+            row_order = slice_.row_order(format)
 
-        _BaseOrderHelper_.row_display_order.assert_called_once_with(
-            dimensions_, second_order_measures_, format
-        )
-        assert row_order.tolist() == list(row_order)
+            _BaseOrderHelper_.row_display_order.assert_called_once_with(
+                dimensions_, second_order_measures_, format
+            )
+            assert row_order.tolist() == list(row_order)
 
     def it_knows_the_payload_order_to_help(
         self,
@@ -937,49 +886,34 @@ class DescribeAssembler:
             request, "cr.cube.matrix.assembler.PayloadOrderCollator"
         )
         _OrderHelper_.display_order.return_value = np.array([1, 2, 3])
-        assembler = Assembler(None, dimensions_, None)
+        with mock.patch("cr.cube.cubepart._Slice._dimensions", new=dimensions_):
+            slice_ = _Slice(None, None, None, None, None)
 
-        row_order = assembler.row_order()
+            row_order = slice_.row_order()
 
-        _OrderHelper_.display_order.assert_called_once_with(
-            dimensions_[0], (), ORDER_FORMAT.SIGNED_INDEXES
-        )
+            _OrderHelper_.display_order.assert_called_once_with(
+                dimensions_[0], (), ORDER_FORMAT.SIGNED_INDEXES
+            )
 
-        assert row_order.tolist() == [1, 2, 3]
-
-    def it_provides_access_to_the_row_subtotals_to_help(
-        self, _rows_dimension_prop_, dimension_, subtotals_
-    ):
-        _rows_dimension_prop_.return_value = dimension_
-        dimension_.subtotals = subtotals_
-
-        assert Assembler(None, None, None)._row_subtotals is subtotals_
-
-    def it_knows_its_rows_dimension_to_help(self, dimension_):
-        assembler = Assembler(None, (dimension_, None), None)
-        assert assembler._rows_dimension is dimension_
+            assert row_order.tolist() == [1, 2, 3]
 
     # fixture components ---------------------------------------------
 
     @pytest.fixture
     def _assemble_marginal_(self, request):
-        return method_mock(request, Assembler, "_assemble_marginal")
+        return method_mock(request, _Slice, "_assemble_marginal")
 
     @pytest.fixture
     def _assemble_matrix_(self, request):
-        return method_mock(request, Assembler, "_assemble_matrix")
+        return method_mock(request, _Slice, "_assemble_matrix")
 
     @pytest.fixture
     def _BaseOrderHelper_(self, request):
-        return class_mock(request, "cr.cube.matrix.assembler._BaseOrderHelper")
+        return class_mock(request, "cr.cube.cubepart._BaseOrderHelper")
 
     @pytest.fixture
     def _column_order_prop_(self, request):
-        return property_mock(request, Assembler, "_column_order")
-
-    @pytest.fixture
-    def _columns_dimension_prop_(self, request):
-        return property_mock(request, Assembler, "_columns_dimension")
+        return property_mock(request, _Slice, "_column_order")
 
     @pytest.fixture
     def columns_table_unweighted_base_(self, request):
@@ -996,10 +930,6 @@ class DescribeAssembler:
     @pytest.fixture
     def dimension_(self, request):
         return instance_mock(request, Dimension)
-
-    @pytest.fixture
-    def _dimension_labels_(self, request):
-        return method_mock(request, Assembler, "_dimension_labels")
 
     @pytest.fixture
     def dimensions_(self, request):
@@ -1019,15 +949,15 @@ class DescribeAssembler:
 
     @pytest.fixture
     def _measures_prop_(self, request):
-        return property_mock(request, Assembler, "_measures")
+        return property_mock(request, _Slice, "_measures")
 
     @pytest.fixture
     def _row_order_prop_(self, request):
-        return property_mock(request, Assembler, "_row_order_signed_indexes")
+        return property_mock(request, _Slice, "_row_order_signed_indexes")
 
     @pytest.fixture
     def _rows_dimension_prop_(self, request):
-        return property_mock(request, Assembler, "_rows_dimension")
+        return property_mock(request, _Slice, "_rows_dimension")
 
     @pytest.fixture
     def rows_table_unweighted_base_(self, request):
@@ -1047,7 +977,7 @@ class DescribeAssembler:
 
     @pytest.fixture
     def SumSubtotals_(self, request):
-        return class_mock(request, "cr.cube.matrix.assembler.SumSubtotals")
+        return class_mock(request, "cr.cube.cubepart.SumSubtotals")
 
     @pytest.fixture
     def table_unweighted_base_(self, request):
