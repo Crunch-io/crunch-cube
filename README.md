@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.32
+- Simply code (Cube and Dimension modules refactoring)
+
 ### 3.0.31
 - Fix `null` view in dimension dict
 
