@@ -779,18 +779,8 @@ class Describe_Slice:
             Cube(CR.MR_X_MR), slice_idx=0, transforms={}, population=None, mask_size=0
         )
 
-        assert (
-            slice_._assembler._assemble_marginal(
-                slice_._assembler._measures.rows_weighted_base
-            )
-            is None
-        )
-        assert (
-            slice_._assembler._assemble_marginal(
-                slice_._assembler._measures.columns_weighted_base
-            )
-            is None
-        )
+        assert slice_._assemble_marginal(slice_._measures.rows_weighted_base) is None
+        assert slice_._assemble_marginal(slice_._measures.columns_weighted_base) is None
         # --- Long term, we may decide that this should be None (or an error) so that
         # --- margins are only defined when they are 1D
         assert slice_.rows_margin.tolist() == [
@@ -805,36 +795,6 @@ class Describe_Slice:
             pytest.approx([20.1898744, 35.6664538, 86.9728287, 119.4044104]),
             pytest.approx([22.9672704, 45.7789165, 86.9728287, 130.6784687]),
         ]
-
-    def it_knows_comparable_counts_are_undefined_across_subvars(self):
-        mr_x_mr_slice_ = _Slice(
-            Cube(CR.MR_X_MR), slice_idx=0, transforms={}, population=None, mask_size=0
-        )
-
-        with pytest.raises(ValueError) as e:
-            mr_x_mr_slice_._assembler.row_comparable_counts
-        assert str(e.value) == "row_comparable_counts not defined across subvariables."
-        with pytest.raises(ValueError) as e:
-            mr_x_mr_slice_._assembler.column_comparable_counts
-        assert (
-            str(e.value) == "column_comparable_counts not defined across subvariables."
-        )
-
-        ca_cat_x_ca_subvar_slice_ = _Slice(
-            Cube(CR.SIMPLE_CAT_ARRAY),
-            slice_idx=0,
-            transforms={},
-            population=None,
-            mask_size=0,
-        )
-
-        with pytest.raises(ValueError) as e:
-            ca_cat_x_ca_subvar_slice_._assembler.row_comparable_counts
-        assert str(e.value) == "row_comparable_counts not defined across subvariables."
-        assert (
-            ca_cat_x_ca_subvar_slice_._assembler.column_comparable_counts.tolist()
-            == ca_cat_x_ca_subvar_slice_.counts.tolist()
-        )
 
     @pytest.mark.parametrize(
         "fixture, row_order, col_order, expectation",

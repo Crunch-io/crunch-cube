@@ -7,10 +7,10 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.dimension import (
-    AllDimensions,
-    _AllElements,
+    Dimensions,
+    Elements,
     Dimension,
-    _Element,
+    Element,
     _ElementTransforms,
     _Subtotal,
     _Subtotals,
@@ -18,11 +18,11 @@ from cr.cube.dimension import (
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR, NA  # ---mnemonic: CR = 'cube-response'---
-from ..unitutil import instance_mock, property_mock
+from ..unitutil import instance_mock
 
 
-class DescribeIntegratedAllDimensions:
-    """Integration-test suite for `cr.cube.dimension.AllDimensions` object."""
+class DescribeIntegratedDimensions:
+    """Integration-test suite for `cr.cube.dimension.Dimensions` object."""
 
     @pytest.mark.parametrize(
         "cube_response, expected_types",
@@ -37,7 +37,7 @@ class DescribeIntegratedAllDimensions:
     )
     def it_resolves_the_type_of_each_dimension(self, cube_response, expected_types):
         dimension_dicts = cube_response["result"]["dimensions"]
-        all_dimensions = AllDimensions(dimension_dicts)
+        all_dimensions = Dimensions.from_dicts(dimension_dicts)
 
         dimension_types = tuple(d.dimension_type for d in all_dimensions)
 
@@ -45,7 +45,7 @@ class DescribeIntegratedAllDimensions:
 
     def it_provides_access_to_the_apparent_dimensions(self):
         dimension_dicts = CR.CA_X_MR_WEIGHTED_HS["result"]["dimensions"]
-        all_dimensions = AllDimensions(dimension_dicts)
+        all_dimensions = Dimensions.from_dicts(dimension_dicts)
 
         apparent_dimension_types = tuple(
             d.dimension_type for d in all_dimensions.apparent_dimensions
@@ -63,14 +63,8 @@ class DescribeIntegratedAllDimensions:
         ),
     )
     def it_knows_if_its_dimensions_order(self, request, dim_types, expected_value):
-        _dimensions_ = tuple(
-            instance_mock(request, Dimension, name=f"dim-{idx}", dimension_type=dt)
-            for idx, dt in enumerate(dim_types)
-        )
-        _dimensions_prop_ = property_mock(request, AllDimensions, "_dimensions")
-        _dimensions_prop_.return_value = _dimensions_
-
-        assert AllDimensions(None).dimension_order == expected_value
+        dims = Dimensions([Dimension({}, dt) for dt in dim_types])
+        assert dims.dimension_order == expected_value
 
     @pytest.mark.parametrize(
         "cube_response, expected_str_representation",
@@ -105,7 +99,7 @@ class DescribeIntegratedAllDimensions:
         self, cube_response, expected_str_representation
     ):
         dimension_dicts = cube_response["result"]["dimensions"]
-        all_dimensions = AllDimensions(dimension_dicts)
+        all_dimensions = Dimensions.from_dicts(dimension_dicts)
 
         str_representation = str(all_dimensions)
 
@@ -120,7 +114,7 @@ class DescribeIntegratedDimension:
 
         elements = dimension.all_elements
 
-        assert isinstance(elements, _AllElements)
+        assert isinstance(elements, Elements)
 
     def it_knows_its_transformed_description(self, dimension_dict):
         dimension_transforms = {"description": "foobar"}
@@ -228,17 +222,16 @@ class DescribeIntegratedDimension:
         return CR.ECON_BLAME_WITH_HS["value"]["result"]["dimensions"][0]
 
 
-class DescribeIntegrated_AllElements:
-    """Integration-test suite for `cr.cube.dimension._AllElements` object."""
+class DescribeIntegratedElements:
+    """Integration-test suite for `cr.cube.dimension.Elements` object."""
 
     def it_constructs_its_element_objects_to_help(self):
         type_dict = Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
         dimension_transforms = {}
-        all_elements = _AllElements(type_dict, dimension_transforms, None, None)
-
-        elements = all_elements._elements
-
-        assert all(isinstance(element, _Element) for element in elements)
+        all_elements = Elements.from_typedef(
+            type_dict, dimension_transforms, None, None
+        )
+        assert all(isinstance(element, Element) for element in all_elements)
 
     def it_hides_element_objects_by_subvariable_id_to_help(self):
         transforms = {
@@ -253,20 +246,18 @@ class DescribeIntegrated_AllElements:
             .all_elements
         )
 
-        elements = all_elements._elements
-
-        assert len(elements) == 3
-        assert elements[1].is_hidden is True
+        assert len(all_elements) == 3
+        assert all_elements[1].is_hidden is True
 
     def it_knows_how_to_repr_its_elements(self):
         type_dict = Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
-        all_elements = _AllElements(type_dict, {}, None, None)
+        all_elements = Elements.from_typedef(type_dict, {}, None, None)
 
         str_representation = str(all_elements)
 
         assert str_representation == (
-            "[President Obama, Republicans in Congress, "
-            "Both, Neither, Not sure, Skipped, Not Asked, No Data]"
+            "(President Obama, Republicans in Congress, "
+            "Both, Neither, Not sure, Skipped, Not Asked, No Data)"
         )
 
 
@@ -281,7 +272,7 @@ class DescribeIntegrated_Subtotals:
             {"name": "5, bottom", "anchor": "bottom", **base_ins},
         ]
         type_dict = Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
-        all_elements = _AllElements(type_dict, {}, None, None)
+        all_elements = Elements.from_typedef(type_dict, {}, None, None)
 
         subtotals = _Subtotals(insertion_dicts, all_elements.valid_elements, True)
 
@@ -300,14 +291,11 @@ class DescribeIntegrated_Subtotals:
 
 
 class DescribeIntegrated_Element:
-    """Integration-test suite for `cr.cube.dimension._Element` object."""
+    """Integration-test suite for `cr.cube.dimension.Element` object."""
 
     def it_knows_its_transformed_label(self, element_dict, element_transforms_):
-        all_elements = _AllElements(None, None, None, None)
         element_transforms_.name = "Xfinity Lounge"
-        element = _Element(
-            element_dict, None, element_transforms_, all_elements._format_label
-        )
+        element = Element(element_dict, None, element_transforms_, str)
 
         label = element.label
 
@@ -317,7 +305,7 @@ class DescribeIntegrated_Element:
         self, element_dict, element_transforms_
     ):
         element_transforms_.name = None
-        element = _Element(element_dict, None, element_transforms_, None)
+        element = Element(element_dict, None, element_transforms_, None)
 
         label = element.label
 
@@ -325,7 +313,7 @@ class DescribeIntegrated_Element:
 
     def it_knows_when_it_is_explicitly_hidden(self, element_dict, element_transforms_):
         element_transforms_.hide = True
-        element = _Element(element_dict, None, element_transforms_, None)
+        element = Element(element_dict, None, element_transforms_, None)
 
         is_hidden = element.is_hidden
 
@@ -333,7 +321,7 @@ class DescribeIntegrated_Element:
 
     def but_it_is_not_hidden_by_default(self, element_transforms_):
         element_transforms_.hide = None
-        element = _Element(None, None, element_transforms_, None)
+        element = Element(None, None, element_transforms_, None)
 
         is_hidden = element.is_hidden
 
@@ -341,7 +329,7 @@ class DescribeIntegrated_Element:
 
     def it_knows_how_to_repr(self, element_dict, element_transforms_):
         element_transforms_.name = None
-        element = _Element(element_dict, None, element_transforms_, None)
+        element = Element(element_dict, None, element_transforms_, None)
 
         str_representation = str(element)
 

@@ -7,7 +7,7 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Slice
-from cr.cube.dimension import AllDimensions
+from cr.cube.dimension import Dimensions
 from cr.cube.enums import ORDER_FORMAT
 from cr.cube.matrix.assembler import _BaseOrderHelper
 from cr.cube.matrix.cubemeasure import _BaseCubeOverlaps
@@ -20,7 +20,7 @@ class DescribeAssembler:
 
     def it_computes_column_proportions_for_cat_x_cat(self):
         slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, None, None, 0)
-        assert np.round(slice_._assembler.column_proportions, 2) == pytest.approx(
+        assert np.round(slice_.column_proportions, 2) == pytest.approx(
             np.array(
                 [
                     [0.07, 0.12, 0.04, 0.00, 0.06],
@@ -1489,9 +1489,8 @@ class DescribeAssembler:
             }
         }
         slice_ = _Slice(Cube(fixture), 0, transforms, None, 0)
-        assembler = slice_._assembler
 
-        assert assembler.row_order().tolist() == expected_value
+        assert slice_.row_order().tolist() == expected_value
 
     def it_computes_sum_cat_x_mr(self):
         slice_ = Cube(CR.SUM_CAT_X_MR).partitions[0]
@@ -1513,7 +1512,7 @@ class DescribeCubemeasure:
         cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
-            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            dimensions=Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
             slice_idx=0,
         )
 
@@ -1535,7 +1534,7 @@ class DescribeCubemeasure:
         cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
-            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            dimensions=Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
             slice_idx=0,
         )
 
@@ -1557,7 +1556,7 @@ class DescribeCubemeasure:
         cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
-            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            dimensions=Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
             slice_idx=0,
         )
 
@@ -1584,7 +1583,7 @@ class DescribeCubemeasure:
         cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
-            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            dimensions=Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
             slice_idx=0,
         )
 
@@ -1611,7 +1610,7 @@ class DescribeCubemeasure:
         cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
-            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            dimensions=Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
             slice_idx=1,
         )
 
@@ -1638,7 +1637,7 @@ class DescribeCubemeasure:
         cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
-            dimensions=AllDimensions(dimension_dicts=cube_dict["result"]["dimensions"]),
+            dimensions=Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
             slice_idx=1,
         )
 
@@ -1684,9 +1683,9 @@ class Describe_BaseOrderHelper:
                 }
             }
         }
-        assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
+        slice_ = _Slice(Cube(fixture), 0, transforms, None, 0)
         row_display_order = _BaseOrderHelper.row_display_order(
-            assembler._dimensions, assembler._measures, ORDER_FORMAT.SIGNED_INDEXES
+            slice_._dimensions, slice_._measures, ORDER_FORMAT.SIGNED_INDEXES
         )
 
         assert row_display_order.tolist() == expected_value
@@ -1711,9 +1710,9 @@ class Describe_BaseOrderHelper:
                 }
             }
         }
-        assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
+        slice_ = _Slice(Cube(fixture), 0, transforms, None, 0)
         column_display_order = _BaseOrderHelper.column_display_order(
-            assembler._dimensions, assembler._measures
+            slice_._dimensions, slice_._measures
         )
 
         assert column_display_order.tolist() == expected_value
@@ -1785,9 +1784,9 @@ class Describe_SortRowsByColumnValueHelper:
                 }
             }
         }
-        assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
+        slice_ = _Slice(Cube(fixture), 0, transforms, None, 0)
 
-        assert assembler.row_order().tolist() == expected_value
+        assert slice_.row_order().tolist() == expected_value
 
 
 class Describe_SortRowsByInsertedColumnHelper:
@@ -1826,9 +1825,9 @@ class Describe_SortRowsByInsertedColumnHelper:
                 }
             }
         }
-        assembler = _Slice(Cube(fixture), 0, transforms, None, 0)._assembler
+        slice_ = _Slice(Cube(fixture), 0, transforms, None, 0)
 
-        assert assembler.row_order().tolist() == expected_value
+        assert slice_.row_order().tolist() == expected_value
 
     def but_it_fallback_to_payload_order_when_sort_by_value_is_not_supported(self):
         transforms = {
@@ -1841,6 +1840,6 @@ class Describe_SortRowsByInsertedColumnHelper:
                 }
             }
         }
-        assembler = _Slice(Cube(CR.CAT_HS_X_CAT_HS), 0, transforms, None, 0)._assembler
+        slice_ = _Slice(Cube(CR.CAT_HS_X_CAT_HS), 0, transforms, None, 0)
 
-        assert assembler.row_order().tolist() == [0, 1, -2, 2, 3, 4, -1]
+        assert slice_.row_order().tolist() == [0, 1, -2, 2, 3, 4, -1]

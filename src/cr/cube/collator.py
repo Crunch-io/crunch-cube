@@ -16,7 +16,7 @@ from typing import Dict, FrozenSet, Iterator, List, Tuple, Union
 
 import numpy as np
 
-from cr.cube.dimension import Dimension, _Element, _OrderSpec, _Subtotals
+from cr.cube.dimension import Dimension, Element, _OrderSpec, _Subtotals
 from cr.cube.util import lazyproperty
 from cr.cube.enums import ORDER_FORMAT
 
@@ -39,7 +39,7 @@ class _BaseCollator:
         self._format = format
 
     @lazyproperty
-    def _elements(self) -> Tuple[_Element, ...]:
+    def _elements(self) -> Tuple[Element, ...]:
         """Sequence of non-missing elements from dimension"""
         return self._dimension.valid_elements
 

@@ -7,7 +7,6 @@ import pytest
 
 from cr.cube.cube import Cube
 from cr.cube.cubepart import _Strand
-from cr.cube.stripe.assembler import StripeAssembler
 
 from ..fixtures import CR
 
@@ -17,63 +16,59 @@ class DescribeStripeAssembler:
 
     def it_provides_values_for_univariate_cat(self):
         cube = Cube(CR.UNIVARIATE_CATEGORICAL)
-        assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
+        strand = _Strand(cube, None, None, False, 0, None)
 
-        assert assembler.inserted_row_idxs == ()
-        assert assembler.row_count == 2
-        assert assembler.row_labels.tolist() == ["C", "E"]
-        assert assembler.rows_dimension_fills == (None, None)
-        assert assembler.scale_mean == pytest.approx(1.666667)
-        assert assembler.scale_median == pytest.approx(1.0)
-        assert assembler.scale_stddev == pytest.approx(0.9428090)
-        assert assembler.scale_stderr == pytest.approx(0.2434322)
-        assert assembler.table_base_range == pytest.approx([15, 15])
-        assert assembler.table_margin_range == pytest.approx([15, 15])
-        assert assembler.table_proportion_stddevs == pytest.approx(
-            [0.4714045, 0.4714045]
-        )
-        assert assembler.table_proportion_stderrs == pytest.approx(
-            [0.1217161, 0.1217161]
-        )
-        assert assembler.table_proportions == pytest.approx([0.6666667, 0.3333333])
-        assert assembler.unweighted_bases.tolist() == [15, 15]
-        assert assembler.unweighted_counts.tolist() == [10, 5]
-        assert assembler.weighted_bases.tolist() == [15, 15]
-        assert assembler.weighted_counts.tolist() == [10, 5]
+        assert strand.inserted_row_idxs == ()
+        assert strand.row_count == 2
+        assert strand.row_labels.tolist() == ["C", "E"]
+        assert strand.rows_dimension_fills == (None, None)
+        assert strand.scale_mean == pytest.approx(1.666667)
+        assert strand.scale_median == pytest.approx(1.0)
+        assert strand.scale_stddev == pytest.approx(0.9428090)
+        assert strand.scale_stderr == pytest.approx(0.2434322)
+        assert strand.table_base_range == pytest.approx([15, 15])
+        assert strand.table_margin_range == pytest.approx([15, 15])
+        assert strand.table_proportion_stddevs == pytest.approx([0.4714045, 0.4714045])
+        assert strand.table_proportion_stderrs == pytest.approx([0.1217161, 0.1217161])
+        assert strand.table_proportions == pytest.approx([0.6666667, 0.3333333])
+        assert strand.unweighted_bases.tolist() == [15, 15]
+        assert strand.unweighted_counts.tolist() == [10, 5]
+        assert strand.weighted_bases.tolist() == [15, 15]
+        assert strand.weighted_counts.tolist() == [10, 5]
 
     def it_provides_values_for_univariate_cat_means(self):
         cube = Cube(CR.CAT_MEANS_HS)
-        assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
+        strand = _Strand(cube, None, None, False, 0, None)
 
-        assert assembler.inserted_row_idxs == (3, 4)
-        assert assembler.means == pytest.approx(
+        assert strand.inserted_row_idxs == (3, 4)
+        assert strand.means == pytest.approx(
             [19.85556, 13.85417, 52.7894736842, np.nan, np.nan], nan_ok=True
         )
-        assert assembler.row_count == 5
-        assert assembler.row_labels.tolist() == [
+        assert strand.row_count == 5
+        assert strand.row_labels.tolist() == [
             "Yes",
             "No",
             "I'm not sur",
             "Seen the Ad",
             "Not Seen th",
         ]
-        assert assembler.rows_dimension_fills == (None, None, None, None, None)
-        assert assembler.scale_mean is None
-        assert assembler.scale_median is None
-        assert assembler.scale_stddev is None
-        assert assembler.scale_stderr is None
-        assert assembler.table_base_range == pytest.approx([661, 661])
+        assert strand.rows_dimension_fills == (None, None, None, None, None)
+        assert strand.scale_mean is None
+        assert strand.scale_median is None
+        assert strand.scale_stddev is None
+        assert strand.scale_stderr is None
+        assert strand.table_base_range == pytest.approx([661, 661])
         # for a cube with numeric measure like mean, table margin and table base are the
         # same because they are both calculated on the (unweighted) valid-counts.
-        assert assembler.table_margin_range == pytest.approx([661, 661])
+        assert strand.table_margin_range == pytest.approx([661, 661])
 
     def it_provides_values_for_univariate_mr(self):
         cube = Cube(CR.MR_WGTD)
-        assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
+        strand = _Strand(cube, None, None, False, 0, None)
 
-        assert assembler.inserted_row_idxs == ()
-        assert assembler.row_count == 9
-        assert assembler.row_labels.tolist() == [
+        assert strand.inserted_row_idxs == ()
+        assert strand.row_count == 9
+        assert strand.row_labels.tolist() == [
             "liver",
             "thalmus",
             "heart",
@@ -84,7 +79,7 @@ class DescribeStripeAssembler:
             "Don't know",
             "None of the",
         ]
-        assert assembler.rows_dimension_fills == (
+        assert strand.rows_dimension_fills == (
             None,
             None,
             None,
@@ -95,13 +90,13 @@ class DescribeStripeAssembler:
             None,
             None,
         )
-        assert assembler.scale_mean is None
-        assert assembler.scale_median is None
-        assert assembler.scale_stddev is None
-        assert assembler.scale_stderr is None
-        assert assembler.table_base_range == pytest.approx([43504, 43504])
-        assert assembler.table_margin_range == pytest.approx([43009.56, 43009.56])
-        assert assembler.table_proportion_stddevs == pytest.approx(
+        assert strand.scale_mean is None
+        assert strand.scale_median is None
+        assert strand.scale_stddev is None
+        assert strand.scale_stderr is None
+        assert strand.table_base_range == pytest.approx([43504, 43504])
+        assert strand.table_margin_range == pytest.approx([43009.56, 43009.56])
+        assert strand.table_proportion_stddevs == pytest.approx(
             [
                 0.4986677,
                 0.4036694,
@@ -114,7 +109,7 @@ class DescribeStripeAssembler:
                 0.2601507,
             ]
         )
-        assert assembler.table_proportion_stderrs == pytest.approx(
+        assert strand.table_proportion_stderrs == pytest.approx(
             [
                 0.0024045217,
                 0.0019464504,
@@ -127,7 +122,7 @@ class DescribeStripeAssembler:
                 0.0012544185,
             ]
         )
-        assert assembler.table_proportions == pytest.approx(
+        assert strand.table_proportions == pytest.approx(
             [
                 0.4635233,
                 0.2049559,
@@ -140,7 +135,7 @@ class DescribeStripeAssembler:
                 0.07300864,
             ]
         )
-        assert assembler.unweighted_bases.tolist() == [
+        assert strand.unweighted_bases.tolist() == [
             43504,
             43504,
             43504,
@@ -151,7 +146,7 @@ class DescribeStripeAssembler:
             43504,
             43504,
         ]
-        assert assembler.unweighted_counts.tolist() == [
+        assert strand.unweighted_counts.tolist() == [
             21545,
             9256,
             13412,
@@ -162,7 +157,7 @@ class DescribeStripeAssembler:
             1281,
             3112,
         ]
-        assert assembler.weighted_bases == pytest.approx(
+        assert strand.weighted_bases == pytest.approx(
             [
                 43009.56,
                 43009.56,
@@ -175,7 +170,7 @@ class DescribeStripeAssembler:
                 43009.56,
             ]
         )
-        assert assembler.weighted_counts == pytest.approx(
+        assert strand.weighted_counts == pytest.approx(
             [
                 19935.93,
                 8815.065,
@@ -191,9 +186,9 @@ class DescribeStripeAssembler:
 
     def it_provides_values_for_univariate_mr_means(self):
         cube = Cube(CR.MR_MEAN_FILT_WGTD)
-        assembler = StripeAssembler(cube, cube.dimensions[0], False, 0)
+        strand = _Strand(cube, None, None, False, 0, None)
 
-        assert assembler.means == pytest.approx(
+        assert strand.means == pytest.approx(
             [3.72405146, 2.57842929, 2.21859327, 1.86533494]
         )
 
@@ -237,6 +232,5 @@ class DescribeStripeAssembler:
         }
         cube = Cube(fixture, transforms=transforms)
         stripe = _Strand(cube, transforms, None, False, 0, None)
-        assembler = stripe._assembler
 
-        assert assembler.row_order().tolist() == expected_value
+        assert stripe.row_order().tolist() == expected_value

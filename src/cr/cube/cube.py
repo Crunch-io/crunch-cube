@@ -12,7 +12,7 @@ from typing import Dict, FrozenSet, Iterator, List, Optional, Tuple, Union
 import numpy as np
 
 from cr.cube.cubepart import CubePartition
-from cr.cube.dimension import AllDimensions, _ApparentDimensions
+from cr.cube.dimension import Dimensions
 from cr.cube.enums import CUBE_MEASURE, DIMENSION_TYPE as DT, NUMERIC_CUBE_MEASURES
 from cr.cube.util import lazyproperty
 
@@ -294,8 +294,8 @@ class Cube:
         return tuple(d.dimension_type for d in self.dimensions)
 
     @lazyproperty
-    def dimensions(self) -> _ApparentDimensions:
-        """_ApparentDimensions object providing access to visible dimensions.
+    def dimensions(self) -> list:
+        """List of visible dimensions.
 
         A cube involving a multiple-response (MR) variable has two dimensions
         for that variable (subvariables and categories dimensions), but is
@@ -524,16 +524,9 @@ class Cube:
         ].astype(np.float64)
 
     @lazyproperty
-    def _all_dimensions(self) -> AllDimensions:
-        """The AllDimensions object for this cube.
-
-        The AllDimensions object provides access to all the dimensions appearing in the
-        cube response, not only apparent dimensions (those that appear to a user). It
-        also provides access to an _ApparentDimensions object which contains only those
-        user-apparent dimensions (basically the categories dimension of each MR
-        dimension-pair is suppressed).
-        """
-        return AllDimensions(dimension_dicts=self._cube_dict["result"]["dimensions"])
+    def _all_dimensions(self) -> list:
+        """List of all dimensions (not just user-apparent ones) for this cube."""
+        return Dimensions.from_dicts(self._cube_dict["result"]["dimensions"])
 
     @lazyproperty
     def _available_numeric_measures(self) -> Tuple[CUBE_MEASURE, ...]:
@@ -687,7 +680,7 @@ class _Measures:
     def __init__(
         self,
         cube_dict: Dict,
-        all_dimensions: AllDimensions,
+        all_dimensions: Dimensions,
         cube_idx_arg: Optional[int] = None,
     ):
         self._cube_dict = cube_dict
@@ -861,7 +854,7 @@ class _BaseMeasure:
     def __init__(
         self,
         cube_dict: Dict,
-        all_dimensions: AllDimensions,
+        all_dimensions: Dimensions,
         cube_idx_arg: Optional[int] = None,
     ):
         self._cube_dict = cube_dict

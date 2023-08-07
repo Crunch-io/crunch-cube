@@ -16,11 +16,11 @@ from cr.cube.collator import (
 )
 from cr.cube.dimension import (
     Dimension,
-    _Element,
+    Element,
     _OrderSpec,
     _Subtotal,
     _Subtotals,
-    _ValidElements,
+    Elements,
 )
 from cr.cube.enums import ORDER_FORMAT
 
@@ -324,7 +324,7 @@ class DescribeExplicitOrderCollator:
         self, request, ids, are_derived, element_positions, expected_value
     ):
         derived_elements_ = tuple(
-            instance_mock(request, _Element, element_id=id_, derived=is_derived)
+            instance_mock(request, Element, element_id=id_, derived=is_derived)
             for id_, is_derived in zip(ids, are_derived)
         )
         property_mock(
@@ -358,11 +358,9 @@ class DescribeExplicitOrderCollator:
     def it_computes_the_derived_element_position_to_help(
         self, request, element_id, anchor, expected_value
     ):
-        element_ = instance_mock(request, _Element, anchor=anchor)
-        get_by_id_ = method_mock(
-            request, _ValidElements, "get_by_id", return_value=element_
-        )
-        valid_elements_ = _ValidElements(None, None)
+        element_ = instance_mock(request, Element, anchor=anchor)
+        get_by_id_ = method_mock(request, Elements, "get_by_id", return_value=element_)
+        valid_elements_ = Elements()
         property_mock(
             request, ExplicitOrderCollator, "_elements", return_value=valid_elements_
         )
@@ -415,7 +413,7 @@ class DescribeExplicitOrderCollator:
         self, request, element_ids, element_id_order, expected_value
     ):
         valid_elements_ = [
-            instance_mock(request, _Element, element_id=id, derived=False)
+            instance_mock(request, Element, element_id=id, derived=False)
             for id in element_ids
         ]
         dimension_ = instance_mock(request, Dimension, valid_elements=valid_elements_)
