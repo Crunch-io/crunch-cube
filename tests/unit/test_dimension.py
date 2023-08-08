@@ -747,6 +747,32 @@ class DescribeElements:
         all_elements = Elements.from_typedef(typedef, {}, dim_type, None)
         assert all_elements[0]._label_formatter(value) == expected
 
+    def it_obeys_category_order_from_typedef(self):
+        # Unordered
+        all_elements = Elements.from_typedef(
+            {
+                "class": "categorical",
+                "categories": [{"id": 1}, {"id": 2}, {"id": 3}],
+            },
+            {},
+            DT.CAT,
+            None,
+        )
+        assert all_elements.element_ids == (1, 2, 3)
+
+        # Ordered
+        all_elements = Elements.from_typedef(
+            {
+                "class": "categorical",
+                "categories": [{"id": 1}, {"id": 2}, {"id": 3}],
+                "order": [2, 3, 1],
+            },
+            {},
+            DT.CAT,
+            None,
+        )
+        assert all_elements.element_ids == (2, 3, 1)
+
 
 class Describe_ValidElements:
     """Unit-test suite for `cr.cube.dimension.Elements.valid_elements`."""
