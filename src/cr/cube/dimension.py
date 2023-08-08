@@ -485,6 +485,15 @@ class Elements(tuple):
             else typedef["elements"]
         )
 
+        order = typedef.get("order")
+        if order is not None:
+            # The data in the cube along this dimension is in the specified order.
+            # The categories or enum elements in the typedef were NOT rearranged;
+            # therefore, we do so here to make all layers that use this tuple
+            # of Element objects work transparently.
+            codemap = {edef["id"]: edef for edef in element_defs}
+            element_defs = [codemap[code] for code in order if code in codemap]
+
         all_xforms = dimension_transforms_dict.get("elements", {})
         if dimension_type == DT.MR_SUBVAR:
             hidden_xforms = cls._hidden_transforms(
