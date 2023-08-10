@@ -1027,6 +1027,26 @@ class TestOverlapsPairwiseSignificance:
             )
         )
 
+    def test_pw_overlaps_and_subtotals(self):
+        # --- cube1 has 4 categories and a subtotal named "a+b".
+        # --- cube2 has 2 categories where the "Selected" category matches exactly the
+        # --- subtotal in the other.
+        # --- We expect that the subtotal should behave exactly like the real category
+        cube1 = Cube(OL.CAT_ST_X_MR)
+        cube2 = Cube(OL.CAT_SIMPLE_X_MR)
+        target_row1 = cube1.partitions[0].row_labels.tolist().index("a+b")
+        target_row2 = cube2.partitions[0].row_labels.tolist().index("Selected")
+
+        # --- column proportions are the same
+        colprop1 = cube1.partitions[0].column_proportions[target_row1]
+        colprop2 = cube2.partitions[0].column_proportions[target_row2]
+        assert colprop1.tolist() == pytest.approx(colprop2.tolist())
+
+        # --- pairwise pvalues should also be equal
+        pval1 = cube1.partitions[0].pairwise_significance_p_vals(0)[target_row1]
+        pval2 = cube2.partitions[0].pairwise_significance_p_vals(0)[target_row2]
+        assert pval1.tolist() == pytest.approx(pval2.tolist())
+
 
 class TestMeanDifferenceSignificance:
     def test_mean_diff_significance_for_numeric_array_grouped_by_cat(self):

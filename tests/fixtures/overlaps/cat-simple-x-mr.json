@@ -1,0 +1,748 @@
+{
+    "result": {
+        "n": 1000,
+        "counts": [
+            152,
+            243,
+            107,
+            106,
+            144,
+            252,
+            211,
+            242,
+            49,
+            108,
+            42,
+            352,
+            169,
+            250,
+            79,
+            98,
+            164,
+            236,
+            196,
+            256,
+            46,
+            109,
+            66,
+            323,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "dimensions": [
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "id": 1,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true,
+                            "missing": false
+                        },
+                        {
+                            "id": 0,
+                            "name": "Other",
+                            "numeric_value": 0,
+                            "missing": false
+                        },
+                        {
+                            "id": -1,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "missing": true
+                        }
+                    ]
+                },
+                "references": {
+                    "view": {
+                        "show_numeric_values": false,
+                        "show_counts": false,
+                        "include_missing": false
+                    },
+                    "name": "cat_st_only",
+                    "alias": "cat_st_only"
+                },
+                "derived": false
+            },
+            {
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "id": "0001",
+                                "references": {
+                                    "alias": "mr1__1",
+                                    "name": "mr1"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "id": "0002",
+                                "references": {
+                                    "alias": "mr2__1",
+                                    "name": "mr2"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "id": "0003",
+                                "references": {
+                                    "alias": "mr3__1",
+                                    "name": "mr3"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "id": "0004",
+                                "references": {
+                                    "alias": "mr4__1",
+                                    "name": "mr4"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                },
+                "references": {
+                    "subreferences": [
+                        {
+                            "alias": "mr1__1",
+                            "name": "mr1"
+                        },
+                        {
+                            "alias": "mr2__1",
+                            "name": "mr2"
+                        },
+                        {
+                            "alias": "mr3__1",
+                            "name": "mr3"
+                        },
+                        {
+                            "alias": "mr4__1",
+                            "name": "mr4"
+                        }
+                    ],
+                    "view": {
+                        "show_counts": false,
+                        "include_missing": false
+                    },
+                    "name": "MR",
+                    "alias": "mr",
+                    "uniform_basis": false
+                },
+                "derived": true
+            },
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "id": 1,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true,
+                            "missing": false
+                        },
+                        {
+                            "id": 0,
+                            "name": "Other",
+                            "numeric_value": 0,
+                            "missing": false
+                        },
+                        {
+                            "id": -1,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "missing": true
+                        }
+                    ],
+                    "subvariables": [
+                        "0001",
+                        "0002",
+                        "0003",
+                        "0004"
+                    ]
+                },
+                "references": {
+                    "subreferences": [
+                        {
+                            "alias": "mr1__1",
+                            "name": "mr1"
+                        },
+                        {
+                            "alias": "mr2__1",
+                            "name": "mr2"
+                        },
+                        {
+                            "alias": "mr3__1",
+                            "name": "mr3"
+                        },
+                        {
+                            "alias": "mr4__1",
+                            "name": "mr4"
+                        }
+                    ],
+                    "view": {
+                        "show_counts": false,
+                        "include_missing": false
+                    },
+                    "name": "MR",
+                    "alias": "mr",
+                    "uniform_basis": false
+                },
+                "derived": true
+            }
+        ],
+        "measures": {
+            "count": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    },
+                    "references": {},
+                    "derived": true
+                },
+                "data": [
+                    152,
+                    243,
+                    107,
+                    106,
+                    144,
+                    252,
+                    211,
+                    242,
+                    49,
+                    108,
+                    42,
+                    352,
+                    169,
+                    250,
+                    79,
+                    98,
+                    164,
+                    236,
+                    196,
+                    256,
+                    46,
+                    109,
+                    66,
+                    323,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 7
+            },
+            "overlap": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {},
+                        "subvariables": [
+                            "0001",
+                            "0002",
+                            "0003",
+                            "0004"
+                        ]
+                    },
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "mr1__1",
+                                "name": "mr1"
+                            },
+                            {
+                                "alias": "mr2__1",
+                                "name": "mr2"
+                            },
+                            {
+                                "alias": "mr3__1",
+                                "name": "mr3"
+                            },
+                            {
+                                "alias": "mr4__1",
+                                "name": "mr4"
+                            }
+                        ],
+                        "view": {
+                            "show_counts": false,
+                            "include_missing": false
+                        },
+                        "name": "MR",
+                        "alias": "mr",
+                        "uniform_basis": false
+                    },
+                    "derived": true
+                },
+                "data": [
+                    152,
+                    31,
+                    67,
+                    36,
+                    0,
+                    54,
+                    92,
+                    56,
+                    0,
+                    21,
+                    52,
+                    16,
+                    31,
+                    106,
+                    48,
+                    26,
+                    37,
+                    0,
+                    55,
+                    36,
+                    84,
+                    0,
+                    108,
+                    46,
+                    67,
+                    48,
+                    211,
+                    47,
+                    67,
+                    49,
+                    0,
+                    53,
+                    18,
+                    9,
+                    0,
+                    8,
+                    36,
+                    26,
+                    47,
+                    108,
+                    10,
+                    7,
+                    19,
+                    0,
+                    106,
+                    73,
+                    145,
+                    0,
+                    169,
+                    25,
+                    68,
+                    29,
+                    0,
+                    58,
+                    92,
+                    63,
+                    0,
+                    15,
+                    36,
+                    17,
+                    25,
+                    98,
+                    43,
+                    23,
+                    62,
+                    0,
+                    60,
+                    38,
+                    82,
+                    0,
+                    93,
+                    48,
+                    68,
+                    43,
+                    196,
+                    38,
+                    87,
+                    46,
+                    0,
+                    60,
+                    14,
+                    9,
+                    0,
+                    11,
+                    29,
+                    23,
+                    38,
+                    109,
+                    22,
+                    17,
+                    26,
+                    0,
+                    118,
+                    58,
+                    132,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 7
+            },
+            "valid_overlap": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {},
+                        "subvariables": [
+                            "0001",
+                            "0002",
+                            "0003",
+                            "0004"
+                        ]
+                    },
+                    "references": {
+                        "subreferences": [
+                            {
+                                "alias": "mr1__1",
+                                "name": "mr1"
+                            },
+                            {
+                                "alias": "mr2__1",
+                                "name": "mr2"
+                            },
+                            {
+                                "alias": "mr3__1",
+                                "name": "mr3"
+                            },
+                            {
+                                "alias": "mr4__1",
+                                "name": "mr4"
+                            }
+                        ],
+                        "view": {
+                            "show_counts": false,
+                            "include_missing": false
+                        },
+                        "name": "MR",
+                        "alias": "mr",
+                        "uniform_basis": false
+                    },
+                    "derived": true
+                },
+                "data": [
+                    152,
+                    68,
+                    134,
+                    46,
+                    243,
+                    130,
+                    225,
+                    75,
+                    0,
+                    52,
+                    94,
+                    29,
+                    85,
+                    106,
+                    97,
+                    33,
+                    113,
+                    144,
+                    130,
+                    49,
+                    197,
+                    0,
+                    226,
+                    68,
+                    159,
+                    103,
+                    211,
+                    66,
+                    200,
+                    124,
+                    242,
+                    68,
+                    36,
+                    23,
+                    0,
+                    16,
+                    92,
+                    62,
+                    100,
+                    108,
+                    29,
+                    20,
+                    34,
+                    42,
+                    274,
+                    168,
+                    319,
+                    0,
+                    169,
+                    87,
+                    155,
+                    51,
+                    250,
+                    138,
+                    226,
+                    95,
+                    0,
+                    37,
+                    71,
+                    29,
+                    83,
+                    98,
+                    89,
+                    40,
+                    142,
+                    164,
+                    149,
+                    57,
+                    194,
+                    0,
+                    214,
+                    78,
+                    160,
+                    103,
+                    196,
+                    64,
+                    221,
+                    135,
+                    256,
+                    94,
+                    38,
+                    24,
+                    0,
+                    17,
+                    92,
+                    61,
+                    98,
+                    109,
+                    54,
+                    36,
+                    60,
+                    66,
+                    273,
+                    165,
+                    294,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 7
+            }
+        },
+        "missing": 7,
+        "filter_stats": {
+            "is_cat_date": false,
+            "filtered": {
+                "unweighted": {
+                    "selected": 1000,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 1000,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 1000,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 1000,
+                    "other": 0,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 1000,
+            "weighted_n": 1000
+        },
+        "filtered": {
+            "unweighted_n": 1000,
+            "weighted_n": 1000
+        },
+        "element": "crunch:cube"
+    },
+    "query": {
+        "dimensions": [
+            {
+                "variable": "F-3d25132886e040319b1e8776ff34c225"
+            },
+            {
+                "function": "dimension",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "variable": "F-d8ad574d66344eeabb2b0470bd5bb7af"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "subvariables"
+                    }
+                ]
+            },
+            {
+                "function": "as_selected",
+                "args": [
+                    {
+                        "variable": "F-d8ad574d66344eeabb2b0470bd5bb7af"
+                    }
+                ]
+            }
+        ],
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    }
+}
