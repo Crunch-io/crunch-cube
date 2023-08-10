@@ -384,9 +384,6 @@ class OverlapSubtotals(SumSubtotals):
 
     @lazyproperty
     def _subtotal_rows(self):
-        # --- We're using np.array here, instead of np.vstack (or np.hstack). ---
-        # --- The reason is that overlaps are not immediately observable as a ---
-        # --- table or a slice, and are only needed as bases for stats. ---
-        return np.array(
-            [self._subtotal_row(subtotal) for subtotal in self._row_subtotals]
-        )
+        # --- Need to reshape the subtotal results so that there is 1 per
+        # --- subtotal, but don't want to add them
+        return np.array([self._base_values[0, :] for _ in self._row_subtotals])
