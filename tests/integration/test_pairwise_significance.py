@@ -1001,31 +1001,51 @@ class TestOverlapsPairwiseSignificance:
         assert slice_.pairwise_significance_t_stats(0) == pytest.approx(
             np.array(
                 [
-                    [0.0, -9.73916237],  # H&S row
-                    [0.0, -9.73916237],  # H&S row
+                    [0.0, -6.88662776],  # H&S row
+                    [0.0, -6.88662776],  # H&S row
                     [0.0, -8.46453948],
                     [0.0, 1.57791173],
                     [0.0, 3.81951563],
                     [0.0, 2.01571857],
                     [0.0, 1.05139355],
-                    [0.0, 4.33755156],  # H&S row
+                    [0.0, 3.06711212],  # H&S row
                 ]
             )
         )
         assert slice_.pairwise_significance_p_vals(0) == pytest.approx(
             np.array(
                 [
-                    [0.00000000e00, 0.00000000e00],  # H&S row
-                    [0.00000000e00, 0.00000000e00],  # H&S row
+                    [0.00000000e00, 1.17523768e-11],  # H&S row
+                    [0.00000000e00, 1.17523768e-11],  # H&S row
                     [0.00000000e00, 0.00000000e00],
                     [0.00000000e00, 1.14990816e-01],
                     [0.00000000e00, 1.44321520e-04],
                     [0.00000000e00, 4.41714435e-02],
                     [0.00000000e00, 2.93403077e-01],
-                    [0.00000000e00, 1.53294414e-05],  # H&S row
+                    [0.00000000e00, 2.23595375e-03],  # H&S row
                 ]
             )
         )
+
+    def test_pw_overlaps_and_subtotals(self):
+        # --- cube1 has 4 categories and a subtotal named "a+b".
+        # --- cube2 has 2 categories where the "Selected" category matches exactly the
+        # --- subtotal in the other.
+        # --- We expect that the subtotal should behave exactly like the real category
+        cube1 = Cube(OL.CAT_ST_X_MR)
+        cube2 = Cube(OL.CAT_SIMPLE_X_MR)
+        target_row1 = cube1.partitions[0].row_labels.tolist().index("a+b")
+        target_row2 = cube2.partitions[0].row_labels.tolist().index("Selected")
+
+        # --- column proportions are the same
+        colprop1 = cube1.partitions[0].column_proportions[target_row1]
+        colprop2 = cube2.partitions[0].column_proportions[target_row2]
+        assert colprop1.tolist() == pytest.approx(colprop2.tolist())
+
+        # --- pairwise pvalues should also be equal
+        pval1 = cube1.partitions[0].pairwise_significance_p_vals(0)[target_row1]
+        pval2 = cube2.partitions[0].pairwise_significance_p_vals(0)[target_row2]
+        assert pval1.tolist() == pytest.approx(pval2.tolist())
 
 
 class TestMeanDifferenceSignificance:
