@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.34
+- Fix bug with significance testing with overlaps and subtotals
+
 ### 3.0.33
 - Honor `order` field in variable definitions
 
@@ -119,10 +122,6 @@ The detailed description can be found
 
 ### 3.0.31
 - Fix `null` view in dimension dict
-
-### 3.0.30
-- Date format representation
-- Fix payload order for insertions in weird order
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
