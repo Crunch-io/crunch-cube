@@ -1,5 +1,8 @@
 # History of Changes
 
+### 3.0.31
+- Fix `null` view in dimension dict
+
 ### 3.0.30
 - Date format representation
 - Fix payload order for insertions in weird order

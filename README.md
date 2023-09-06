@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.35
+- Fix bug where categorical dimension would sometimes be interpreted as `MR_CATS`.
+
 ### 3.0.34
 - Fix bug with significance testing with overlaps and subtotals
 
@@ -119,9 +122,6 @@ The detailed description can be found
 
 ### 3.0.32
 - Simply code (Cube and Dimension modules refactoring)
-
-### 3.0.31
-- Fix `null` view in dimension dict
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
