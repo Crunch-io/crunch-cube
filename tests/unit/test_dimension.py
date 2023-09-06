@@ -156,7 +156,10 @@ class DescribeDimensions:
         (
             ({"type": {"class": "categorical"}, "references": {}}, DT.CAT),
             (
-                {"type": {"class": "categorical"}, "references": {"subreferences": {}}},
+                {
+                    "type": {"class": "categorical"},
+                    "references": {"subreferences": {"var": 1}},
+                },
                 DT.CA_CAT,
             ),
         ),
