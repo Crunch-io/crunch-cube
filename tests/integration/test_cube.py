@@ -188,6 +188,11 @@ class DescribeIntegratedCube:
 
         assert cube.covariance is None
 
+    def it_does_not_get_fooled_into_single_mr_cats_dim(self):
+        cube = Cube(CR.NOT_MR_CATS)
+        assert cube.dimension_types == (DT.LOGICAL,)
+        assert cube.partitions[0].counts.tolist() == [200, 100]
+
 
 class DescribeIntegrated_Measures:
     """Integration-tests that exercise the `cr.cube.cube._Measures` object."""

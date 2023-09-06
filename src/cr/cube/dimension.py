@@ -74,7 +74,7 @@ class Dimensions(tuple):
             is_logical = any(cat.get("selected") for cat in cats) and [
                 cat.get("id") for cat in cats
             ] == [1, 0, -1]
-            if "subreferences" in dimension_dict.get("references", {}):
+            if dimension_dict.get("references", {}).get("subreferences"):
                 if is_logical:
                     return DT.MR_CAT
                 else:

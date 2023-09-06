@@ -1,0 +1,141 @@
+{
+    "result": {
+        "n": 330,
+        "counts": [
+            200,
+            100,
+            30
+        ],
+        "dimensions": [
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "id": 1,
+                            "name": "had problem",
+                            "numeric_value": 1,
+                            "selected": true,
+                            "missing": false
+                        },
+                        {
+                            "id": 0,
+                            "name": "none",
+                            "numeric_value": 0,
+                            "missing": false
+                        },
+                        {
+                            "id": -1,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "missing": true
+                        }
+                    ]
+                },
+                "references": {
+                    "alias": "Q120_cluster",
+                    "name": "Connect App Problem",
+                    "view": {
+                        "show_numeric_values": false,
+                        "show_counts": false,
+                        "include_missing": false,
+                        "column_width": null,
+                        "parentheses": [
+                            1
+                        ],
+                        "summary_statistic": "mean"
+                    },
+                    "private": false,
+                    "api_derivation": null,
+                    "dichotomous": true,
+                    "format": {
+                        "summary": {
+                            "digits": 0
+                        }
+                    },
+                    "notes": "",
+                    "description": "",
+                    "subreferences": []
+                },
+                "derived": false
+            }
+        ],
+        "measures": {
+            "count": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    },
+                    "references": {},
+                    "derived": true
+                },
+                "data": [
+                    200,
+                    100,
+                    30
+                ],
+                "n_missing": 25
+            }
+        },
+        "missing": 25,
+        "filter_stats": {
+            "is_cat_date": false,
+            "filtered": {
+                "unweighted": {
+                    "selected": 330,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 330,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 330,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 330,
+                    "other": 0,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 330,
+            "weighted_n": 330
+        },
+        "filtered": {
+            "unweighted_n": 330,
+            "weighted_n": 330
+        },
+        "element": "crunch:cube"
+    },
+    "query": {
+        "dimensions": [
+            {
+                "variable": "25a7bc36627144af872bcd3635d82a28/"
+            }
+        ],
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    }
+}
