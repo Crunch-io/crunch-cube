@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.36
+- Fix bug in pairwise sig values for means.
+
 ### 3.0.35
 - Fix bug where categorical dimension would sometimes be interpreted as `MR_CATS`.
 
