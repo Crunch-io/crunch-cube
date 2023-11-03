@@ -1389,13 +1389,11 @@ class _PairwiseMeansSigTStats(_BaseSecondOrderMeasure):
 
         means = self._cube_measures.cube_means.means
         variance = np.power(self._cube_measures.cube_stddev.stddev, 2)
-        col_bases = self._cube_measures.unweighted_cube_counts.column_bases
+        col_bases = self._cube_measures.unweighted_cube_counts.counts
         idx = self._selected_column_idx
-
         ref_means = np.broadcast_to(means[:, [idx]], means.shape)
         ref_variance = np.broadcast_to(variance[:, [idx]], variance.shape)
         ref_col_bases = np.broadcast_to(col_bases[:, [idx]], col_bases.shape)
-
         with np.errstate(divide="ignore", invalid="ignore"):
             return (means - ref_means) / np.sqrt(
                 (variance / col_bases) + (ref_variance / ref_col_bases)
@@ -1431,7 +1429,7 @@ class _PairwiseMeansSigPVals(_PairwiseMeansSigTStats):
         df = ( (s1/N1) + (s2/N2) )^2 / ( (s1/N1)^2/(N1-1) + (s2/N2)^2/(N2-1) )
         """
         variance = np.power(self._cube_measures.cube_stddev.stddev, 2)
-        col_bases = self._cube_measures.unweighted_cube_counts.column_bases
+        col_bases = self._cube_measures.unweighted_cube_counts.counts
         idx = self._selected_column_idx
 
         ref_variance = np.broadcast_to(variance[:, [idx]], variance.shape)
