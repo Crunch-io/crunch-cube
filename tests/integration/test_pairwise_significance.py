@@ -1234,6 +1234,74 @@ class TestMeanDifferenceSignificance:
             " without a mean measure"
         )
 
+    def test_mean_diff_significance_for_cat_x_mr(self):
+        slice_ = Cube(CR.MEANS_CAT_X_MR_2).partitions[0]
+
+        assert slice_.pairwise_significance_means_t_stats(1) == pytest.approx(
+            np.array(
+                [
+                    [-5.08502035, 0.0, 10.47916351],
+                    [-0.92536791, 0.0, 2.04661479],
+                    [0.04293266, 0.0, 1.39944002],
+                    [0.24458516, 0.0, -0.8775668],
+                    [-1.21188084, 0.0, 1.60085202],
+                    [-0.7915269, 0.0, -1.09577613],
+                    [-0.95008399, 0.0, 0.08980333],
+                    [-0.8293663, 0.0, 0.58453131],
+                    [-0.10038129, 0.0, -0.08425238],
+                    [-0.38957621, 0.0, -0.9576773],
+                    [-0.86258439, 0.0, -0.34492621],
+                    [-2.2150695, 0.0, -2.65233866],
+                    [-1.60183461, np.nan, -2.14338173],
+                    [-1.71518691, 0.0, -1.84614557],
+                    [-0.39714252, 0.0, 1.16805569],
+                    [-0.83608247, 0.0, 1.5367485],
+                ]
+            ),
+            nan_ok=True,
+        )
+        assert slice_.pairwise_significance_means_p_vals(1) == pytest.approx(
+            np.array(
+                [
+                    [3.70166878e-07, 1.0, 0.00000000e00],
+                    [3.54936608e-01, 1.0, 4.09162522e-02],
+                    [9.65840240e-01, 1.0, 1.65659571e-01],
+                    [8.07698559e-01, 1.0, 3.84616965e-01],
+                    [2.27482880e-01, 1.0, 1.13483809e-01],
+                    [4.29776148e-01, 1.0, 2.76531120e-01],
+                    [3.43055663e-01, 1.0, 9.28520777e-01],
+                    [4.09166258e-01, 1.0, 5.60270523e-01],
+                    [9.20448828e-01, 1.0, 9.33241280e-01],
+                    [6.97858264e-01, 1.0, 3.42401879e-01],
+                    [3.90426642e-01, 1.0, 7.30885456e-01],
+                    [2.80344874e-02, 1.0, 8.76989883e-03],
+                    [1.47859829e-01, np.nan, 6.44361344e-02],
+                    [8.94285264e-02, 1.0, 6.82231709e-02],
+                    [6.91784592e-01, 1.0, 2.44791804e-01],
+                    [4.03676354e-01, 1.0, 1.25298850e-01],
+                ]
+            ),
+            nan_ok=True,
+        )
+        assert slice_.pairwise_means_indices.tolist() == [
+            [(), (0,), (0, 1)],
+            [(), (), (0, 1)],
+            [(), (), ()],
+            [(), (), ()],
+            [(), (), (0,)],
+            [(), (), ()],
+            [(), (), ()],
+            [(), (), ()],
+            [(), (), ()],
+            [(), (), ()],
+            [(), (), ()],
+            [(), (0, 2), ()],
+            [(), (), ()],
+            [(), (), ()],
+            [(), (), ()],
+            [(), (), (0,)],
+        ]
+
     def test_mean_diff_significance_for_cat_x_cat(self):
         slice_ = Cube(CR.MEAN_CAT_X_CAT).partitions[0]
 
@@ -1241,8 +1309,8 @@ class TestMeanDifferenceSignificance:
             np.array(
                 [
                     [np.nan, np.nan, np.nan, np.nan],
-                    [9.35414347, 0.0, 2.1529364, np.nan],
-                    [1.26202085, 0, np.nan, np.nan],
+                    [5.0, 0.0, 1.4, np.nan],
+                    [0.94553674, 0, np.nan, np.nan],
                 ]
             ),
             nan_ok=True,
@@ -1251,15 +1319,15 @@ class TestMeanDifferenceSignificance:
             np.array(
                 [
                     [np.nan, np.nan, np.nan, np.nan],
-                    [8.46461576e-05, 1.00000000e00, 6.33217224e-02, np.nan],
-                    [2.27836998e-01, 1.00000000e00, np.nan, np.nan],
+                    [0.12566592, 1.0, 0.25628034, np.nan],
+                    [0.37638264, 1.0, np.nan, np.nan],
                 ]
             ),
             nan_ok=True,
         )
         assert slice_.pairwise_means_indices.tolist() == [
             [(), (), (), ()],
-            [(1, 2), (), (), ()],
+            [(), (), (), ()],
             [(), (), (), ()],
         ]
 
@@ -1281,13 +1349,13 @@ class TestMeanDifferenceSignificance:
         ).partitions[0]
 
         assert slice_.pairwise_means_indices.tolist() == [
-            [(), (), (1,)],
+            [(), (), ()],
             [(), (), ()],
         ]
         assert slice_.pairwise_significance_means_t_stats(1) == pytest.approx(
             np.array(
                 [
-                    [np.nan, 0, 2.1529364],
+                    [np.nan, 0, 1.40000000],
                     [np.nan, 0, np.nan],
                 ]
             ),
@@ -1296,7 +1364,7 @@ class TestMeanDifferenceSignificance:
         assert slice_.pairwise_significance_means_p_vals(1) == pytest.approx(
             np.array(
                 [
-                    [np.nan, 1, 0.06332172],
+                    [np.nan, 1, 0.2562803],
                     [np.nan, 1.0, np.nan],
                 ]
             ),
@@ -1309,12 +1377,12 @@ class TestMeanDifferenceSignificance:
 
         assert slice_.pairwise_means_indices.tolist() == [
             [(), (), (), ()],
-            [(1, 2), (), (), ()],
+            [(), (), (), ()],
             [(), (), (), ()],
         ]
         assert slice_.pairwise_means_indices_alt.tolist() == [
-            [(), (), (), (0,)],
-            [(1, 2), (), (1,), ()],
+            [(), (), (), ()],
+            [(1,), (), (), ()],
             [(), (), (), ()],
         ]
 

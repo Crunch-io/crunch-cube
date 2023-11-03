@@ -841,7 +841,7 @@ class Describe_PairwiseMeansSigPvals:
             request, _BaseCubeStdDev, stddev=np.array([[17.14873, 11.00736]])
         )
         unweighted_cube_counts_ = instance_mock(
-            request, _BaseCubeCounts, column_bases=np.array([[23, 21]])
+            request, _BaseCubeCounts, counts=np.array([[23, 21]])
         )
         cube_measures_ = instance_mock(request, CubeMeasures)
         cube_measures_.cube_stddev = cube_std_dev_
@@ -864,7 +864,7 @@ class Describe_PairwiseMeansSigTStats:
             request, _BaseCubeStdDev, stddev=np.array([[17.14873, 11.00736]])
         )
         unweighted_cube_counts_ = instance_mock(
-            request, _BaseCubeCounts, column_bases=np.array([[23, 21]])
+            request, _BaseCubeCounts, counts=np.array([[23, 21]])
         )
         cube_measures_ = instance_mock(request, CubeMeasures)
         cube_measures_.cube_means = cube_means_
