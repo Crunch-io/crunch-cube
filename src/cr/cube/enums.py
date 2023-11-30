@@ -163,6 +163,7 @@ class CUBE_MEASURE(enum.Enum):
     VALID_OVERLAP = "valid_overlap"
     UNWEIGHTED_VALID_COUNT = "valid_count_unweighted"
     WEIGHTED_VALID_COUNT = "valid_count_weighted"
+    WEIGHTED_SQUARED_COUNT = "weighted_squared_count"
 
 
 NUMERIC_CUBE_MEASURES = frozenset(
