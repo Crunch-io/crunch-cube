@@ -903,7 +903,8 @@ class Describe_PairwiseSigTstats:
         _calculate_t_stats_.assert_called_once_with(pairwise_tstat, 0.5, 1, 9, 0)
 
     def it_provides_the_bases_to_help(self, second_order_measures_):
-        second_order_measures_.column_unweighted_bases.blocks = [1, 2]
+        # second_order_measures_.column_unweighted_bases.blocks = [1, 2]
+        second_order_measures_.column_effective_bases.blocks = [1, 2]
         pairwise_tstat = _PairwiseSigTstats(None, second_order_measures_, None, None)
 
         assert pairwise_tstat._bases == [1, 2]

@@ -74,6 +74,12 @@ class SecondOrderMeasures:
         return _ColumnUnweightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def column_effective_bases(self):
+        """_ColumnEffectiveBases measure object for this cube-result."""
+        ceb = _ColumnEffectiveBases(self._dimensions, self, self._cube_measures)
+        return ceb
+
+    @lazyproperty
     def column_weighted_bases(self):
         """_ColumnWeightedBases measure object for this cube-result."""
         return _ColumnWeightedBases(self._dimensions, self, self._cube_measures)
@@ -649,6 +655,10 @@ class _BaseSecondOrderMeasure:
         """
         return self._cube_measures.weighted_cube_counts
 
+    @lazyproperty
+    def _effective_cube_counts(self):
+        return self._cube_measures.effective_cube_counts
+
 
 class _SmoothedMeasure(_BaseSecondOrderMeasure):
     """Mixin providing `._smoother` property for smoothed measures."""
@@ -1129,6 +1139,18 @@ class _ColumnWeightedBases(_BaseSecondOrderMeasure):
         return np.broadcast_to(self._base_values[0, :], subtotal_rows.shape)
 
 
+class _ColumnEffectiveBases(_ColumnWeightedBases):
+    """Provides the column-effective-bases measure for a matrix."""
+
+    @lazyproperty
+    def _base_values(self):
+        """2D np.float64 ndarray of column-proportion denominator for each cell.
+
+        This is the first "block" and has the shape of the cube-measure (no insertions).
+        """
+        return self._effective_cube_counts.column_bases
+
+
 class _Means(_BaseSecondOrderMeasure):
     """Provides the mean measure for a matrix."""
 
@@ -1488,7 +1510,8 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
     @lazyproperty
     def _bases(self):
         """2D array of 2D ndarray "blocks" for the column unweighted bases"""
-        return self._second_order_measures.column_unweighted_bases.blocks
+        # return self._second_order_measures.column_unweighted_bases.blocks
+        return self._second_order_measures.column_effective_bases.blocks
 
     def _reference_values(self, block_index):
         """Tuple of the reference proportions and bases for

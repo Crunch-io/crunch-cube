@@ -71,6 +71,21 @@ class CubeMeasures:
             counts, diff_nans, self._cube, self._dimensions, self._slice_idx
         )
 
+    @lazyproperty
+    def effective_cube_counts(self):
+        squared_counts = self._cube.weighted_squared_counts
+        if squared_counts is None:
+            return self.unweighted_cube_counts
+
+        valid_counts = self._cube.weighted_valid_counts
+        counts = valid_counts if valid_counts is not None else self._cube.counts
+        effectiveness = squared_counts.sum() / self._cube.unweighted_counts.sum() ** 2
+        effective_counts = counts * effectiveness
+
+        return _BaseCubeCounts.factory(
+            effective_counts, False, self._cube, self._dimensions, self._slice_idx
+        )
+
 
 class _BaseCubeMeasure:
     """Base class for all cube-measure objects."""
