@@ -1903,8 +1903,8 @@ class Describe_Slice:
         np.testing.assert_almost_equal(
             slice_.pairwise_significance_t_stats(1),
             [
-                [NA, 0.0, 0.0, 0.41513323, NA, NA, NA, -0.83026647, 0.41513323, NA],
-                [NA, 0.0, 0.0, -0.41513323, NA, NA, NA, 0.83026647, -0.41513323, NA],
+                [NA, 0.0, 0.0, 0.9486833, NA, NA, NA, -1.8973666, 0.9486833, NA],
+                [NA, 0.0, 0.0, -0.9486833, NA, NA, NA, 1.8973666, -0.9486833, NA],
             ],
         )
 
