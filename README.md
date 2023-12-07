@@ -111,6 +111,10 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.37
+- Add squared counts as a cube measure
+- Enable calculating pairwise stats with effective denominator
+
 ### 3.0.36
 - Fix bug in pairwise sig values for means.
 
