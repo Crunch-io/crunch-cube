@@ -401,6 +401,19 @@ class _Slice(CubePartition):
         return self._assemble_marginal(self._measures.columns_unweighted_base)
 
     @lazyproperty
+    def columns_squared_base(self):
+        """1D np.float64 ndarray of squared weights, summed for each column.
+
+        This is a measure that needs to be asked from zz9 explicitly. It is only used
+        in the calculation of the pairwise comparisons, where weights are applied, in
+        order to adjust for the "design effect" of the study (reduce the inflated Nw).
+        """
+        if not self._measures.columns_squared_base.is_defined:
+            return None
+
+        return self._assemble_marginal(self._measures.columns_squared_base)
+
+    @lazyproperty
     def columns_dimension_description(self):
         """str description assigned to columns-dimension."""
         return self._dimensions[1].description

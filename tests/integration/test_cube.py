@@ -193,6 +193,25 @@ class DescribeIntegratedCube:
         assert cube.dimension_types == (DT.LOGICAL,)
         assert cube.partitions[0].counts.tolist() == [200, 100]
 
+    def it_provides_squared_weights_counts(self):
+        cube = Cube(CR.SQUARED_WEIGHTS)
+        assert cube.weighted_squared_counts.tolist() == [
+            0.0,
+            148.0,
+            212.0,
+            292.0,
+            0.0,
+            0.0,
+            0.0,
+            64.0,
+            100.0,
+            0.0,
+        ]
+
+    def but_it_provides_None_when_no_squared_weights_counts_exist(self):
+        cube = Cube(CR.NOT_MR_CATS)
+        assert cube.weighted_squared_counts is None
+
 
 class DescribeIntegrated_Measures:
     """Integration-tests that exercise the `cr.cube.cube._Measures` object."""

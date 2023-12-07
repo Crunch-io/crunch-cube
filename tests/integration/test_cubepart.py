@@ -15,6 +15,8 @@ from cr.cube.enums import DIMENSION_TYPE as DT, ORDER_FORMAT
 from ..fixtures import CR, TR, MRI
 from ..util import load_python_expression
 
+NA = np.nan
+
 
 class Describe_Slice:
     """Integration-test suite for _Slice object."""
@@ -1894,6 +1896,17 @@ class Describe_Slice:
         assert slice_.table_weighted_bases.tolist() == column_bases
         # --- and row bases are the same as the counts
         assert slice_.row_weighted_bases.tolist() == slice_.counts.tolist()
+
+    def it_uses_squared_weights_for_effect_calculation(self):
+        cube = Cube(CR.SQUARED_WEIGHTS_CAT_X_CAT)
+        slice_ = cube.partitions[0]
+        np.testing.assert_almost_equal(
+            slice_.pairwise_significance_t_stats(1),
+            [
+                [NA, 0.0, 0.0, 0.9486833, NA, NA, NA, -1.8973666, 0.9486833, NA],
+                [NA, 0.0, 0.0, -0.9486833, NA, NA, NA, 1.8973666, -0.9486833, NA],
+            ],
+        )
 
 
 class Describe_Strand:

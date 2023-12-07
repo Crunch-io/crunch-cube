@@ -524,6 +524,15 @@ class Cube:
         ].astype(np.float64)
 
     @lazyproperty
+    def weighted_squared_counts(self) -> Optional[np.ndarray]:
+        """Optional float64 ndarray of weighted_squared_counts if the measure exists."""
+        if self._measures.weighted_squared_counts is None:
+            return None
+        return self._measures.weighted_squared_counts.raw_cube_array[
+            self._valid_idxs
+        ].astype(np.float64)
+
+    @lazyproperty
     def _all_dimensions(self) -> list:
         """List of all dimensions (not just user-apparent ones) for this cube."""
         return Dimensions.from_dicts(self._cube_dict["result"]["dimensions"])
@@ -847,6 +856,14 @@ class _Measures:
         )
         return valid_counts if valid_counts.raw_cube_array is not None else None
 
+    @lazyproperty
+    def weighted_squared_counts(self):
+        """Return object of class for representing squared weights."""
+        squared_counts = _WeightedSquaredCountsMeasure(
+            self._cube_dict, self._all_dimensions, self._cube_idx_arg
+        )
+        return squared_counts if squared_counts.raw_cube_array is not None else None
+
 
 class _BaseMeasure:
     """Base class for measure objects."""
@@ -1098,6 +1115,20 @@ class _WeightedCountMeasure(_BaseMeasure):
             return None
 
         return np.array(weighted_counts, dtype=np.float64)
+
+
+class _WeightedSquaredCountsMeasure(_BaseMeasure):
+    """Weighted squared counts for cube."""
+
+    @lazyproperty
+    def _flat_values(self) -> Optional[np.ndarray]:
+        """Optional 1D np.ndarray of np.float64 weighted squared counts."""
+        squared_counts = (
+            self._cube_dict["result"]["measures"]
+            .get("weighted_squared_count", {})
+            .get("data", [])
+        )
+        return np.array(squared_counts, dtype=np.float64) if squared_counts else None
 
 
 class _WeightedValidCountsMeasure(_BaseMeasure):

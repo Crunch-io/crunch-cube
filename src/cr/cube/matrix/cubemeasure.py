@@ -71,6 +71,17 @@ class CubeMeasures:
             counts, diff_nans, self._cube, self._dimensions, self._slice_idx
         )
 
+    @lazyproperty
+    def weighted_squared_cube_counts(self):
+        """_BaseSquaredCounts subclass obj for squared weights' counts cube-result."""
+        squared_counts = self._cube.weighted_squared_counts
+        if squared_counts is None:
+            return None
+
+        return _BaseCubeCounts.factory(
+            squared_counts, False, self._cube, self._dimensions, self._slice_idx
+        )
+
 
 class _BaseCubeMeasure:
     """Base class for all cube-measure objects."""

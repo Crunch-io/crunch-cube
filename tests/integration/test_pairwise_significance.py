@@ -438,6 +438,128 @@ class TestStandardizedResiduals:
         expected_indices = np.array([(1, 2), (0, 2), (0, 1)], dtype="i,i")
         np.testing.assert_array_equal(pairwise_indices, expected_indices)
 
+    def test_cat_x_cat_effective_weight_summary_pairwise_indices(self):
+        slice_ = Cube(
+            CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_SQUARE_WEIGHTS
+        ).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_.columns_squared_base,
+            np.array(
+                [
+                    1343.11310832,
+                    937.97855842,
+                    5983.20458638,
+                    2139.55397983,
+                    4745.44814173,
+                    781.77778492,
+                    948.64653753,
+                    2436.03936895,
+                    674.73665951,
+                    3524.14881987,
+                ]
+            ),
+        )
+        pairwise_indices = slice_.pairwise_indices
+        np.testing.assert_array_equal(
+            pairwise_indices,
+            np.array(
+                [
+                    [
+                        (3, 4, 9),
+                        (4, 9),
+                        (3, 4, 7, 9),
+                        (),
+                        (),
+                        (3, 4, 7, 9),
+                        (9,),
+                        (9,),
+                        (),
+                        (),
+                    ],
+                    [(), (), (), (0, 2, 5), (0, 2, 5), (), (), (), (), (0, 1, 2, 5)],
+                    [(), (), (), (), (), (), (), (), (), ()],
+                ],
+                dtype=tuple,
+            ),
+        )
+        summary_pairwise_indices = slice_.summary_pairwise_indices
+        np.testing.assert_array_equal(
+            summary_pairwise_indices,
+            np.array(
+                [
+                    (1, 5, 6, 8),
+                    (5, 8),
+                    (0, 1, 3, 4, 5, 6, 7, 8, 9),
+                    (0, 1, 5, 6, 8),
+                    (0, 1, 3, 5, 6, 7, 8, 9),
+                    (8,),
+                    (8,),
+                    (0, 1, 3, 5, 6, 8),
+                    (),
+                    (0, 1, 3, 5, 6, 7, 8),
+                ],
+                dtype=tuple,
+            ),
+        )
+
+    def test_cat_x_cat_plain_weight_summary_pairwise_indices(self):
+        slice_ = Cube(
+            CR.PAIRWISE_HIROTSU_ILLNESS_X_OCCUPATION_PLAIN_WEIGHTS
+        ).partitions[0]
+        pairwise_indices = slice_.pairwise_indices
+        np.testing.assert_array_equal(
+            pairwise_indices,
+            np.array(
+                [
+                    [
+                        (3, 4, 7, 9),
+                        (3, 4, 7, 9),
+                        (3, 4, 7, 8, 9),
+                        (9,),
+                        (),
+                        (3, 4, 7, 8, 9),
+                        (4, 9),
+                        (9,),
+                        (),
+                        (),
+                    ],
+                    [
+                        (),
+                        (),
+                        (),
+                        (0, 1, 2, 5, 6),
+                        (0, 1, 2, 5, 6, 7),
+                        (),
+                        (),
+                        (0, 2, 5),
+                        (0, 2, 5),
+                        (0, 1, 2, 5, 6, 7),
+                    ],
+                    [(), (), (), (), (), (), (), (3,), (), ()],
+                ],
+                dtype=tuple,
+            ),
+        )
+        summary_pairwise_indices = slice_.summary_pairwise_indices
+        np.testing.assert_array_equal(
+            summary_pairwise_indices,
+            np.array(
+                [
+                    (1, 5, 6, 8),
+                    (5, 8),
+                    (0, 1, 3, 4, 5, 6, 7, 8, 9),
+                    (0, 1, 5, 6, 8),
+                    (0, 1, 3, 5, 6, 7, 8, 9),
+                    (8,),
+                    (8,),
+                    (0, 1, 3, 5, 6, 8),
+                    (),
+                    (0, 1, 3, 5, 6, 7, 8),
+                ],
+                dtype=tuple,
+            ),
+        )
+
     def test_cat_x_cat_wgtd_pairwise_t_tests(self):
         """The weights on this cube demonstrate much higher variance (less
         extreme t values, and higher associated p-values) than if weighted_n

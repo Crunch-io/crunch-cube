@@ -115,7 +115,13 @@ class _ColumnPairwiseSignificance(object):
     def t_stats(self):
         props = self._slice.column_proportions
         diff = props - props[:, [self._col_idx]]
-        var_props = props * (1.0 - props) / self._slice.columns_base
+        squared_base = self._slice.columns_squared_base
+        if squared_base is not None:
+            weighted_base = self._slice.columns_base
+            effective_base = weighted_base**2 / squared_base
+            var_props = props * (1.0 - props) / effective_base
+        else:
+            var_props = props * (1.0 - props) / self._slice.columns_base
         se_diff = np.sqrt(var_props + var_props[:, [self._col_idx]])
         return diff / se_diff
 

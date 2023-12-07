@@ -74,6 +74,11 @@ class SecondOrderMeasures:
         return _ColumnUnweightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def column_squared_bases(self):
+        """_ColumnSquaredBases measure object for this cube-result."""
+        return _ColumnSquaredBases(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def column_weighted_bases(self):
         """_ColumnWeightedBases measure object for this cube-result."""
         return _ColumnWeightedBases(self._dimensions, self, self._cube_measures)
@@ -174,6 +179,13 @@ class SecondOrderMeasures:
     def columns_unweighted_base(self):
         """1D np.float64 ndarray of unweighted-N for each matrix column."""
         return _MarginUnweightedBase(
+            self._dimensions, self, self._cube_measures, MO.COLUMNS
+        )
+
+    @lazyproperty
+    def columns_squared_base(self):
+        """1D np.float64 ndarray of squared-weighted-N for each matrix column."""
+        return _MarginSquaredBase(
             self._dimensions, self, self._cube_measures, MO.COLUMNS
         )
 
@@ -648,6 +660,14 @@ class _BaseSecondOrderMeasure:
         weighted-counts and cell, vector, and table margins.
         """
         return self._cube_measures.weighted_cube_counts
+
+    @lazyproperty
+    def _weighted_squared_cube_counts(self):
+        """_BaseCubeCounts subclass instance for this measure.
+
+        Provides cube measures associated with weights' squared counts.
+        """
+        return self._cube_measures.weighted_squared_cube_counts
 
 
 class _SmoothedMeasure(_BaseSecondOrderMeasure):
@@ -1129,6 +1149,23 @@ class _ColumnWeightedBases(_BaseSecondOrderMeasure):
         return np.broadcast_to(self._base_values[0, :], subtotal_rows.shape)
 
 
+class _ColumnSquaredBases(_ColumnWeightedBases):
+    """Provides the column-squared-bases measure for a matrix."""
+
+    @lazyproperty
+    def _base_values(self):
+        """2D np.float64 ndarray of squared weight denominator for each column.
+
+        This is the first "block" and has the shape of the cube-measure (no insertions).
+        """
+        return self._weighted_squared_cube_counts.column_bases
+
+    @lazyproperty
+    def is_defined(self):
+        """Bool indicating whether squared weights' counts are defined."""
+        return self._weighted_squared_cube_counts is not None
+
+
 class _Means(_BaseSecondOrderMeasure):
     """Provides the mean measure for a matrix."""
 
@@ -1488,7 +1525,21 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
     @lazyproperty
     def _bases(self):
         """2D array of 2D ndarray "blocks" for the column unweighted bases"""
-        return self._second_order_measures.column_unweighted_bases.blocks
+        unweighted_blocks = self._second_order_measures.column_unweighted_bases.blocks
+        if self._second_order_measures.columns_squared_base.is_defined:
+            squared_blocks = self._second_order_measures.column_squared_bases.blocks
+            effective_blocks = [
+                [
+                    unweighted_blocks[0][0] ** 2 / squared_blocks[0][0],
+                    unweighted_blocks[0][1] ** 2 / squared_blocks[0][1],
+                ],
+                [
+                    unweighted_blocks[1][0] ** 2 / squared_blocks[1][0],
+                    unweighted_blocks[1][1] ** 2 / squared_blocks[1][1],
+                ],
+            ]
+            return effective_blocks
+        return unweighted_blocks
 
     def _reference_values(self, block_index):
         """Tuple of the reference proportions and bases for
@@ -2470,6 +2521,11 @@ class _BaseMarginal:
             return self._second_order_measures.column_comparable_counts.is_defined
         return self._second_order_measures.row_comparable_counts.is_defined
 
+    @lazyproperty
+    def _squared_weights_are_defined(self):
+        """Bool indicating whether squared weights are defined."""
+        return self._second_order_measures.column_squared_bases.is_defined
+
 
 class _BaseScaledCountMarginal(_BaseMarginal):
     """A base class for marginals that depend on the scaled counts."""
@@ -2658,6 +2714,24 @@ class _MarginUnweightedBase(_BaseMarginal):
     def is_defined(self):
         """True if counts are defined."""
         return self._counts_are_defined
+
+
+class _MarginSquaredBase(_BaseMarginal):
+    """The 'margin-squared-weight base', a 1D squared-weight base in the margin."""
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the squared-weights count margin.
+
+        These are the base-values and the subtotals.
+        """
+        bases = self._second_order_measures.column_squared_bases.blocks
+        return [bases[0][0][0, :], bases[0][1][0, :]]
+
+    @lazyproperty
+    def is_defined(self):
+        """True if squared weights' counts are defined."""
+        return self._squared_weights_are_defined
 
 
 class _MarginWeightedBase(_BaseMarginal):

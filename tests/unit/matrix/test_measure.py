@@ -904,6 +904,7 @@ class Describe_PairwiseSigTstats:
 
     def it_provides_the_bases_to_help(self, second_order_measures_):
         second_order_measures_.column_unweighted_bases.blocks = [1, 2]
+        second_order_measures_.columns_squared_base.is_defined = False
         pairwise_tstat = _PairwiseSigTstats(None, second_order_measures_, None, None)
 
         assert pairwise_tstat._bases == [1, 2]
