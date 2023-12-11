@@ -1519,7 +1519,7 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
         # --- Use "body" reference values for base values
         (ref_props, ref_bases) = self._reference_values(0)
         return self._calculate_t_stats(
-            self._proportions[0][0], self._bases[0][0], ref_props, ref_bases
+            self._proportions[0][0], self._column_bases[0][0], ref_props, ref_bases
         )
 
     @lazyproperty
