@@ -1519,12 +1519,32 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
         # --- Use "body" reference values for base values
         (ref_props, ref_bases) = self._reference_values(0)
         return self._calculate_t_stats(
-            self._proportions[0][0], self._bases[0][0], ref_props, ref_bases
+            self._proportions[0][0], self._column_bases[0][0], ref_props, ref_bases
         )
 
     @lazyproperty
-    def _bases(self):
-        """2D array of 2D ndarray "blocks" for the column unweighted bases"""
+    def _column_bases(self):
+        """
+        Calculate and return the 2D array of 2D ndarray "blocks" representing the
+        column bases for analysis. These bases are determined based on the presence
+        or absence of the 'squared weighted counts'.
+
+        The method first checks if the 'squared weighted counts' measure is defined.
+        If it is, the method calculates the 'effective' counts. These are obtained by
+        squaring the unweighted counts and then dividing each by the corresponding
+        squared count. This calculation reflects the 'effective' sample size when
+        weighting is applied.
+
+        If the 'squared weighted counts' measure does not exist, the standard
+        unweighted counts are used. These counts are represented as a simple 2D array
+        of 2D ndarray blocks without any modification, directly reflecting the raw,
+        unweighted counts.
+
+        Returns:
+            numpy.ndarray: A 2D array of 2D ndarray counts, representing the
+            calculated column bases (either 'effective' or unweighted counts) for
+            the analysis.
+        """
         unweighted_blocks = self._second_order_measures.column_unweighted_bases.blocks
         if self._second_order_measures.columns_squared_base.is_defined:
             squared_blocks = self._second_order_measures.column_squared_bases.blocks
@@ -1556,10 +1576,10 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
         col_idx = self._selected_column_idx
         if col_idx < 0:
             props = self._proportions[block_index][1]
-            bases = self._bases[block_index][1]
+            bases = self._column_bases[block_index][1]
         else:
             props = self._proportions[block_index][0]
-            bases = self._bases[block_index][0]
+            bases = self._column_bases[block_index][0]
 
         return (props[:, [col_idx]], bases[:, [col_idx]])
 
@@ -1586,7 +1606,7 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
         # --- Use "inserted" reference values for intersections
         (ref_props, ref_variance) = self._reference_values(1)
         return self._calculate_t_stats(
-            self._proportions[1][1], self._bases[1][1], ref_props, ref_variance
+            self._proportions[1][1], self._column_bases[1][1], ref_props, ref_variance
         )
 
     @lazyproperty
@@ -1600,7 +1620,7 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
         # --- Use "body" reference values for inserted columns
         (ref_props, ref_variance) = self._reference_values(0)
         return self._calculate_t_stats(
-            self._proportions[0][1], self._bases[0][1], ref_props, ref_variance
+            self._proportions[0][1], self._column_bases[0][1], ref_props, ref_variance
         )
 
     @lazyproperty
@@ -1609,7 +1629,7 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
         # --- Use "inserted" reference values for inserted rows
         (ref_props, ref_variance) = self._reference_values(1)
         return self._calculate_t_stats(
-            self._proportions[1][0], self._bases[1][0], ref_props, ref_variance
+            self._proportions[1][0], self._column_bases[1][0], ref_props, ref_variance
         )
 
 
@@ -1624,18 +1644,18 @@ class _PairwiseSigPvals(_PairwiseSigTstats):
         """2D array of the four 2D "blocks" making up this measure."""
         col_idx = self._selected_column_idx
         t_stats = self._second_order_measures.pairwise_t_stats(col_idx).blocks
-        column_bases = self._second_order_measures.column_unweighted_bases.blocks
         body_selected_base = self._selected_columns_base(0)
         ins_selected_base = self._selected_columns_base(1)
+        col_bases = self._column_bases
 
         return [
             [
-                self._p_vals(t_stats[0][0], column_bases[0][0], body_selected_base),
-                self._p_vals(t_stats[0][1], column_bases[0][1], body_selected_base),
+                self._p_vals(t_stats[0][0], col_bases[0][0], body_selected_base),
+                self._p_vals(t_stats[0][1], col_bases[0][1], body_selected_base),
             ],
             [
-                self._p_vals(t_stats[1][0], column_bases[1][0], ins_selected_base),
-                self._p_vals(t_stats[1][1], column_bases[1][1], ins_selected_base),
+                self._p_vals(t_stats[1][0], col_bases[1][0], ins_selected_base),
+                self._p_vals(t_stats[1][1], col_bases[1][1], ins_selected_base),
             ],
         ]
 
@@ -1661,11 +1681,10 @@ class _PairwiseSigPvals(_PairwiseSigTstats):
         don't have to broadcast.
         """
         col_idx = self._selected_column_idx
-        column_bases = self._second_order_measures.column_unweighted_bases.blocks
         return (
-            column_bases[table_index][1][:, [col_idx]]
+            self._column_bases[table_index][1][:, [col_idx]]
             if col_idx < 0
-            else column_bases[table_index][0][:, [col_idx]]
+            else self._column_bases[table_index][0][:, [col_idx]]
         )
 
 

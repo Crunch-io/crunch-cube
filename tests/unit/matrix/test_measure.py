@@ -907,7 +907,7 @@ class Describe_PairwiseSigTstats:
         second_order_measures_.columns_squared_base.is_defined = False
         pairwise_tstat = _PairwiseSigTstats(None, second_order_measures_, None, None)
 
-        assert pairwise_tstat._bases == [1, 2]
+        assert pairwise_tstat._column_bases == [1, 2]
 
     def it_can_calculate_the_t_stat_to_help(self):
         pairwise_tstat = _PairwiseSigTstats(None, None, None, None)
@@ -1039,7 +1039,7 @@ class Describe_PairwiseSigTstats:
 
     @pytest.fixture
     def _bases_prop_(self, request):
-        return property_mock(request, _PairwiseSigTstats, "_bases")
+        return property_mock(request, _PairwiseSigTstats, "_column_bases")
 
     @pytest.fixture
     def _calculate_t_stats_(self, request):
