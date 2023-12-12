@@ -111,6 +111,10 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.38
+- Improve calculation of DoF for pairwise comparison
+- Use effective counts as column bases for DoF
+
 ### 3.0.37
 - Add squared counts as a cube measure
 - Enable calculating pairwise stats with effective denominator
