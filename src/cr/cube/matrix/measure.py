@@ -1545,21 +1545,27 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
             calculated column bases (either 'effective' or unweighted counts) for
             the analysis.
         """
-        unweighted_blocks = self._second_order_measures.column_unweighted_bases.blocks
+        # unweighted_blocks = self._second_order_measures.column_unweighted_bases.blocks
+        weighted_blocks = self._second_order_measures.column_weighted_bases.blocks
         if self._second_order_measures.columns_squared_base.is_defined:
             squared_blocks = self._second_order_measures.column_squared_bases.blocks
             effective_blocks = [
                 [
-                    unweighted_blocks[0][0] ** 2 / squared_blocks[0][0],
-                    unweighted_blocks[0][1] ** 2 / squared_blocks[0][1],
+                    # unweighted_blocks[0][0] ** 2 / squared_blocks[0][0],
+                    # unweighted_blocks[0][1] ** 2 / squared_blocks[0][1],
+                    weighted_blocks[0][0] ** 2 / squared_blocks[0][0],
+                    weighted_blocks[0][1] ** 2 / squared_blocks[0][1],
                 ],
                 [
-                    unweighted_blocks[1][0] ** 2 / squared_blocks[1][0],
-                    unweighted_blocks[1][1] ** 2 / squared_blocks[1][1],
+                    # unweighted_blocks[1][0] ** 2 / squared_blocks[1][0],
+                    # unweighted_blocks[1][1] ** 2 / squared_blocks[1][1],
+                    weighted_blocks[1][0] ** 2 / squared_blocks[1][0],
+                    weighted_blocks[1][1] ** 2 / squared_blocks[1][1],
                 ],
             ]
             return effective_blocks
-        return unweighted_blocks
+        # return unweighted_blocks
+        return weighted_blocks
 
     def _reference_values(self, block_index):
         """Tuple of the reference proportions and bases for
