@@ -808,20 +808,19 @@ class _BaseCubeMeans(_BaseCubeMeasure):
         """
         if cube.means is None:
             raise ValueError("cube-result does not contain cube-means measure")
+
+        def get_cube_means_cls(dim_types):
+            if dim_types == (DT.MR, DT.MR):
+                return _MrXMrCubeMeans
+            if dim_types[0] == DT.MR:
+                return _MrXCatCubeMeans
+            if dim_types[1] == DT.MR:
+                return _CatXMrCubeMeans
+            return _CatXCatCubeMeans
+
         dimension_types = cube.dimension_types[-2:]
-        CubeMeansCls = (
-            _MrXMrCubeMeans
-            if dimension_types == (DT.MR, DT.MR)
-            else (
-                _MrXCatCubeMeans
-                if dimension_types[0] == DT.MR
-                else (
-                    _CatXMrCubeMeans
-                    if dimension_types[1] == DT.MR
-                    else _CatXCatCubeMeans
-                )
-            )
-        )
+        CubeMeansCls = get_cube_means_cls(dimension_types)
+
         return CubeMeansCls(
             dimensions, cube.means[cls._slice_idx_expr(cube, slice_idx)]
         )
