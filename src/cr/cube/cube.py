@@ -542,8 +542,8 @@ class Cube:
         """List of all dimensions (not just user-apparent ones) for this cube."""
         num_array_dim = self._numeric_array_dimension or None
         dims = self._cube_response["result"]["dimensions"]
-        dimensions = [num_array_dim] + dims if num_array_dim else dims
-        return Dimensions.from_dicts(dimensions)
+        dimension_dicts = [num_array_dim] + dims if num_array_dim else dims
+        return Dimensions.from_dicts(dimension_dicts)
 
     @lazyproperty
     def _available_numeric_measures(self) -> Tuple[CUBE_MEASURE, ...]:
