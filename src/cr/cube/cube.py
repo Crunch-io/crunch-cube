@@ -316,13 +316,9 @@ class Cube:
         a numeric variable arrives without a rows-dimension.
         """
         cube_dict = self._cube_response
-        num_array_dims = (
-            [self._numeric_array_dimension]
-            if self._numeric_measure_subvariables
-            else None
-        )
-        dims = self._cube_response["result"]["dimensions"]
-        dimensions = num_array_dims + dims if num_array_dims else dims
+        num_array_dim = self._numeric_array_dimension or None
+        dims = cube_dict["result"]["dimensions"]
+        dimensions = [num_array_dim] + dims if num_array_dim else dims
         default_name = "-".join([m.value for m in self._available_numeric_measures])
         # --- The default value in case of numeric variable is the combination of all
         # --- the measures expressed in the cube response.
@@ -544,13 +540,9 @@ class Cube:
     @property
     def _all_dimensions(self) -> Dimensions:
         """List of all dimensions (not just user-apparent ones) for this cube."""
-        num_array_dims = (
-            [self._numeric_array_dimension]
-            if self._numeric_measure_subvariables
-            else None
-        )
+        num_array_dim = self._numeric_array_dimension or None
         dims = self._cube_response["result"]["dimensions"]
-        dimensions = num_array_dims + dims if num_array_dims else dims
+        dimensions = [num_array_dim] + dims if num_array_dim else dims
         return Dimensions.from_dicts(dimensions)
 
     @lazyproperty
