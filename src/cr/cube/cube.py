@@ -576,15 +576,6 @@ class Cube:
             and self.dimension_types[0] == DT.CA
         )
 
-    # @lazyproperty
-    # def _cube_dimensions(self):
-    #     dims = copy.deepcopy(
-    #         self._cube_response.get("result", {}).get("dimensions", [])
-    #     )
-    #     if self._numeric_measure_subvariables:
-    #         dims.insert(0, self._numeric_array_dimension)
-    #     return dims
-
     @lazyproperty
     def _cube_response(self) -> Dict:
         """dict representing the parsed cube response arguments."""
