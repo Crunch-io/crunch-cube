@@ -537,7 +537,7 @@ class Cube:
             self._valid_idxs
         ].astype(np.float64)
 
-    @property
+    @lazyproperty
     def _all_dimensions(self) -> Dimensions:
         """List of all dimensions (not just user-apparent ones) for this cube."""
         num_array_dim = self._numeric_array_dimension or None
