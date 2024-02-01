@@ -1712,9 +1712,11 @@ class _PopulationProportions(_BaseSecondOrderMeasure):
         return (
             self._second_order_measures.row_proportions.blocks
             if self._dimensions[-2].dimension_type == DT.CAT_DATE
-            else self._second_order_measures.column_proportions.blocks
-            if self._dimensions[-1].dimension_type == DT.CAT_DATE
-            else self._second_order_measures.table_proportions.blocks
+            else (
+                self._second_order_measures.column_proportions.blocks
+                if self._dimensions[-1].dimension_type == DT.CAT_DATE
+                else self._second_order_measures.table_proportions.blocks
+            )
         )
 
 
@@ -1744,9 +1746,11 @@ class _PopulationStandardError(_BaseSecondOrderMeasure):
         return (
             self._second_order_measures.row_std_err.blocks
             if self._dimensions[-2].dimension_type == DT.CAT_DATE
-            else self._second_order_measures.column_std_err.blocks
-            if self._dimensions[-1].dimension_type == DT.CAT_DATE
-            else self._second_order_measures.table_std_err.blocks
+            else (
+                self._second_order_measures.column_std_err.blocks
+                if self._dimensions[-1].dimension_type == DT.CAT_DATE
+                else self._second_order_measures.table_std_err.blocks
+            )
         )
 
 

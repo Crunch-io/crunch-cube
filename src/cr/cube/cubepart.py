@@ -1736,10 +1736,12 @@ class _Slice(CubePartition):
         # values from a _BaseSubtotals subclass.
         vector_subtotals = np.array(
             [
-                np.nan
-                if diffs_nan and len(subtotal.subtrahend_idxs) > 0
-                else np.sum(base_vector[subtotal.addend_idxs])
-                - np.sum(base_vector[subtotal.subtrahend_idxs])
+                (
+                    np.nan
+                    if diffs_nan and len(subtotal.subtrahend_idxs) > 0
+                    else np.sum(base_vector[subtotal.addend_idxs])
+                    - np.sum(base_vector[subtotal.subtrahend_idxs])
+                )
                 for subtotal in subtotals
             ]
         )

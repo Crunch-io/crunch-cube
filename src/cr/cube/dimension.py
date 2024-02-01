@@ -842,9 +842,11 @@ class _ElementIdShim:
         if key == "subvar_id":
             # --- translate from subvariable id
             new_keys = tuple(
-                self._subvar_aliases[self._subvar_ids.index(_id)]
-                if _id in self._subvar_ids
-                else None
+                (
+                    self._subvar_aliases[self._subvar_ids.index(_id)]
+                    if _id in self._subvar_ids
+                    else None
+                )
                 for _id in old_keys
             )
         else:
