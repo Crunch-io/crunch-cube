@@ -518,11 +518,11 @@ class Elements(tuple):
             formatter = format
 
             if dimension_type == DT.DATETIME:
-                orig_format = cls.datetime_formats.get(
-                    typedef["subtype"].get("resolution")
+                orig_format: str = (
+                    cls.datetime_formats.get(typedef["subtype"].get("resolution")) or ""
                 )
                 out_format = element_data_format
-                if orig_format is not None and out_format is not None:
+                if orig_format and out_format is not None:
 
                     def format_datetime(x) -> str:
                         try:

@@ -542,7 +542,7 @@ class Cube:
         ].astype(np.float64)
 
     @property
-    def _all_dimensions(self) -> list:
+    def _all_dimensions(self) -> Dimensions:
         """List of all dimensions (not just user-apparent ones) for this cube."""
         num_array_dims = (
             [self._numeric_array_dimension]
