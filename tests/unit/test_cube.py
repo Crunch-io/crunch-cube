@@ -428,25 +428,25 @@ class DescribeCube:
         assert _ca_as_0th is expected_value
 
     @pytest.mark.parametrize(
-        ("cube_dict", "expected_value"),
+        ("cube_response", "expected_value"),
         (({"result": {}}, "Untitled"), ({"result": {"title": "Hipsters"}}, "Hipsters")),
     )
-    def it_knows_its_title(self, _cube_dict_prop_, cube_dict, expected_value):
-        _cube_dict_prop_.return_value = cube_dict
+    def it_knows_its_title(self, _cube_response_prop_, cube_response, expected_value):
+        _cube_response_prop_.return_value = cube_response
         assert Cube(None).title == expected_value
 
     @pytest.mark.parametrize(
-        ("cube_dict", "expected_value"),
+        ("cube_response", "expected_value"),
         (({"result": {}}, False), ({"result": {"is_single_col_cube": True}}, True)),
     )
     def it_knows_if_it_is_a_single_col_filter_cube(
-        self, _cube_dict_prop_, cube_dict, expected_value
+        self, _cube_response_prop_, cube_response, expected_value
     ):
-        _cube_dict_prop_.return_value = cube_dict
+        _cube_response_prop_.return_value = cube_response
         assert Cube(None)._is_single_filter_col_cube == expected_value
 
     def it_provides_access_to_the_cube_response_dict_to_help(self):
-        assert Cube({"cube": "dict"})._cube_dict == {"cube": "dict"}
+        assert Cube({"cube": "dict"})._cube_response == {"cube": "dict"}
 
     @pytest.mark.parametrize(
         ("cube_response", "expected_value"),
@@ -476,7 +476,7 @@ class DescribeCube:
         expected_value,
     ):
         with pytest.raises(TypeError) as e:
-            Cube(cube_response)._cube_dict
+            Cube(cube_response)._cube_response
 
         assert str(e.value) == expected_value
 
@@ -604,57 +604,7 @@ class DescribeCube:
 
         assert numeric_references == expected_value
 
-    @pytest.mark.parametrize(
-        "cube_response, cube_idx_arg, numeric_subvars, num_array_dim, expected_value",
-        (
-            ({}, None, [], {}, {}),
-            ({"result": {"foo": "bar"}}, None, [], {}, {"result": {"foo": "bar"}}),
-            (
-                {"result": {"foo": "bar"}},
-                None,
-                ["A", "B"],
-                {},
-                {"result": {"foo": "bar"}},
-            ),
-            (
-                {"result": {"dimensions": []}},
-                None,
-                ["A", "B"],
-                {"A": "B"},
-                {"result": {"dimensions": [{"A": "B"}]}},
-            ),
-            (
-                {"result": {"dimensions": ["A", "B"]}},
-                1,
-                ["A", "B"],
-                {"A": "B"},
-                {"result": {"dimensions": [{"A": "B"}, "A", "B"]}},
-            ),
-        ),
-    )
-    def it_knows_its_cube_dict(
-        self,
-        cube_response,
-        cube_idx_arg,
-        numeric_subvars,
-        num_array_dim,
-        expected_value,
-        _cube_response_prop_,
-        _numeric_subvariables_prop_,
-        _numeric_array_dimension_prop_,
-    ):
-        _cube_response_prop_.return_value = cube_response
-        _numeric_subvariables_prop_.return_value = numeric_subvars
-        _numeric_array_dimension_prop_.return_value = num_array_dim
-        cube = Cube(None, cube_idx=cube_idx_arg)
-
-        assert cube._cube_dict == expected_value
-
     # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def _cube_dict_prop_(self, request):
-        return property_mock(request, Cube, "_cube_dict")
 
     @pytest.fixture
     def _cube_response_prop_(self, request):

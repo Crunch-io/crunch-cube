@@ -8,7 +8,7 @@ import os
 CUBES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cubes")
 
 
-class LazyCubeResponseLoader(object):
+class LazyCubeResponseLoader:
     """Loads and caches cube-responses by name from fixture directory.
 
     Provides access to all the cube-response fixtures in a directory by

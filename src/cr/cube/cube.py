@@ -5,7 +5,6 @@
 CubeSet is the main API class for manipulating Crunch.io JSON cube responses.
 """
 
-import copy
 import json
 from typing import Dict, FrozenSet, Iterator, List, Optional, Tuple, Union
 
@@ -312,8 +311,14 @@ class Cube:
         A multi-cube (tabbook) response formed from a function (e.g. mean()) on
         a numeric variable arrives without a rows-dimension.
         """
-        cube_dict = self._cube_dict
-        dimensions = cube_dict["result"]["dimensions"]
+        cube_dict = self._cube_response
+        num_array_dims = (
+            [self._numeric_array_dimension]
+            if self._numeric_measure_subvariables
+            else None
+        )
+        dims = self._cube_response["result"]["dimensions"]
+        dimensions = num_array_dims + dims if num_array_dims else dims
         default_name = "-".join([m.value for m in self._available_numeric_measures])
         # --- The default value in case of numeric variable is the combination of all
         # --- the measures expressed in the cube response.
@@ -435,7 +440,7 @@ class Cube:
         use-case it is a stand-in for the columns-dimension name since a strand has no
         columns dimension.
         """
-        return self._cube_dict["result"].get("title", "Untitled")
+        return self._cube_response["result"].get("title", "Untitled")
 
     @lazyproperty
     def unweighted_counts(self) -> np.ndarray:
@@ -532,10 +537,17 @@ class Cube:
             self._valid_idxs
         ].astype(np.float64)
 
-    @lazyproperty
+    @property
     def _all_dimensions(self) -> list:
         """List of all dimensions (not just user-apparent ones) for this cube."""
-        return Dimensions.from_dicts(self._cube_dict["result"]["dimensions"])
+        num_array_dims = (
+            [self._numeric_array_dimension]
+            if self._numeric_measure_subvariables
+            else None
+        )
+        dims = self._cube_response["result"]["dimensions"]
+        dimensions = num_array_dims + dims if num_array_dims else dims
+        return Dimensions.from_dicts(dimensions)
 
     @lazyproperty
     def _available_numeric_measures(self) -> Tuple[CUBE_MEASURE, ...]:
@@ -560,18 +572,14 @@ class Cube:
             and self.dimension_types[0] == DT.CA
         )
 
-    @lazyproperty
-    def _cube_dict(self) -> Dict:
-        """dict containing raw cube response, parsed from JSON payload."""
-        cube_dict = copy.deepcopy(self._cube_response)
-        if self._numeric_measure_subvariables:
-            dimensions = cube_dict.get("result", {}).get("dimensions", [])
-            # ---dim inflation---
-            # ---In case of numeric arrays, we need to inflate the row dimension
-            # ---according to the mean subvariables. For each subvar the row dimension
-            # ---will have a new element related to the subvar metadata.
-            dimensions.insert(0, self._numeric_array_dimension)
-        return cube_dict
+    # @lazyproperty
+    # def _cube_dimensions(self):
+    #     dims = copy.deepcopy(
+    #         self._cube_response.get("result", {}).get("dimensions", [])
+    #     )
+    #     if self._numeric_measure_subvariables:
+    #         dims.insert(0, self._numeric_array_dimension)
+    #     return dims
 
     @lazyproperty
     def _cube_response(self) -> Dict:
@@ -593,7 +601,7 @@ class Cube:
     @lazyproperty
     def _is_single_filter_col_cube(self) -> float:
         """bool determines if it is a single column filter cube."""
-        return self._cube_dict["result"].get("is_single_col_cube", False)
+        return self._cube_response["result"].get("is_single_col_cube", False)
 
     @lazyproperty
     def _measures(self) -> "_Measures":
@@ -602,7 +610,7 @@ class Cube:
         Provides access to count based measures and numeric measures (e.g. mean, sum)
         when available.
         """
-        return _Measures(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
+        return _Measures(self._cube_response, self._all_dimensions, self._cube_idx_arg)
 
     @lazyproperty
     def _numeric_measure_references(self) -> Dict:

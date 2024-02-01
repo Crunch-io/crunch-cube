@@ -5,7 +5,7 @@
 import functools
 
 
-class lazyproperty(object):
+class lazyproperty:
     """Decorator like @property, but evaluated only on first access.
     Like @property, this can only be used to decorate methods having only
     a `self` parameter, and is accessed like an attribute on an instance,

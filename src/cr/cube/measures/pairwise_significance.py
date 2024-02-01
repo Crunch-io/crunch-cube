@@ -8,7 +8,7 @@ from scipy.stats import t
 from cr.cube.util import lazyproperty
 
 
-class PairwiseSignificance(object):
+class PairwiseSignificance:
     """Implementation of p-vals and t-tests for each column proportions comparison."""
 
     def __init__(self, slice_, alpha=0.05, only_larger=True):
@@ -57,7 +57,7 @@ class PairwiseSignificance(object):
         return tuple(sig.scale_mean_pairwise_indices for sig in self.values)
 
 
-class _ColumnPairwiseSignificance(object):
+class _ColumnPairwiseSignificance:
     """Value object providing matrix of T-score based pairwise-comparison P-values"""
 
     def __init__(self, slice_, col_idx, alpha=0.05, only_larger=True):
