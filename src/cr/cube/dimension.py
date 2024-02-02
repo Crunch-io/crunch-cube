@@ -4,8 +4,8 @@
 
 import copy
 from collections.abc import Sequence
-from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Union, Callable
+from functools import partial
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -16,6 +16,8 @@ from cr.cube.enums import (
     MEASURE,
 )
 from cr.cube.util import lazyproperty
+
+from .util import format, format_datetime
 
 DATETIME_FORMATS = {
     "Y": "%Y",
@@ -32,24 +34,19 @@ DATETIME_FORMATS = {
 }
 
 
-def _formatter(dimension_type, typedef, out_format) -> Callable:
+def _formatter(dimension_type, typedef, out_format) -> Union[Callable, partial]:
     """Returns a formatting function according to the dimension type."""
 
-    def format(x) -> str:
-        return str(x)
-
-    def format_datetime(x) -> str:
-        try:
-            return datetime.strptime(x, orig_format).strftime(out_format)
-        except ValueError:
-            return str(x)
-
     if dimension_type != DT.DATETIME:
-        formatter = format
+        formatter: Union[Callable, partial] = format
     else:
         resolution = typedef["subtype"].get("resolution")
         orig_format: str = DATETIME_FORMATS.get(resolution) or ""
-        formatter = format_datetime if orig_format and out_format else format
+        formatter = (
+            partial(format_datetime, orig_format=orig_format, out_format=out_format)
+            if orig_format and out_format
+            else format
+        )
     return formatter
 
 

@@ -2,7 +2,19 @@
 
 """Utility functions for crunch cube, as well as other modules."""
 
+from datetime import datetime
 import functools
+
+
+def format(x) -> str:
+    return str(x)
+
+
+def format_datetime(x, orig_format, out_format) -> str:
+    try:
+        return datetime.strptime(x, orig_format).strftime(out_format)
+    except ValueError:
+        return str(x)
 
 
 class lazyproperty:
