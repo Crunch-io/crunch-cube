@@ -42,9 +42,11 @@ class _BaseOrderHelper:
         HelperCls = (
             _SortByMeasureHelper
             if order_spec.collation_method == CM.UNIVARIATE_MEASURE
-            else _SortByLabelHelper
-            if order_spec.collation_method == CM.LABEL
-            else _OrderHelper
+            else (
+                _SortByLabelHelper
+                if order_spec.collation_method == CM.LABEL
+                else _OrderHelper
+            )
         )
         return HelperCls(rows_dimension, measures, format)._display_order
 

@@ -131,11 +131,11 @@ class _BaseCubeCounts(_BaseCubeMeasure):
         Chooses between unweighted and weighted counts based on `type`.
         """
         dimension_type_strings = tuple(
-            "MR"
-            if dim_type == DT.MR
-            else "ARR"
-            if dim_type in DT.ARRAY_TYPES
-            else "CAT"
+            (
+                "MR"
+                if dim_type == DT.MR
+                else "ARR" if dim_type in DT.ARRAY_TYPES else "CAT"
+            )
             for dim_type in cube.dimension_types[-2:]
         )
         CubeCountsCls = {
@@ -812,11 +812,15 @@ class _BaseCubeMeans(_BaseCubeMeasure):
         CubeMeansCls = (
             _MrXMrCubeMeans
             if dimension_types == (DT.MR, DT.MR)
-            else _MrXCatCubeMeans
-            if dimension_types[0] == DT.MR
-            else _CatXMrCubeMeans
-            if dimension_types[1] == DT.MR
-            else _CatXCatCubeMeans
+            else (
+                _MrXCatCubeMeans
+                if dimension_types[0] == DT.MR
+                else (
+                    _CatXMrCubeMeans
+                    if dimension_types[1] == DT.MR
+                    else _CatXCatCubeMeans
+                )
+            )
         )
         return CubeMeansCls(
             dimensions, cube.means[cls._slice_idx_expr(cube, slice_idx)]
@@ -1027,11 +1031,15 @@ class _BaseCubeStdDev(_BaseCubeMeasure):
         CubeSumsCls = (
             _MrXMrCubeStdDev
             if dimension_types == (DT.MR, DT.MR)
-            else _MrXCatCubeStdDev
-            if dimension_types[0] == DT.MR
-            else _CatXMrCubeStdDev
-            if dimension_types[1] == DT.MR
-            else _CatXCatCubeStdDev
+            else (
+                _MrXCatCubeStdDev
+                if dimension_types[0] == DT.MR
+                else (
+                    _CatXMrCubeStdDev
+                    if dimension_types[1] == DT.MR
+                    else _CatXCatCubeStdDev
+                )
+            )
         )
         return CubeSumsCls(
             dimensions, cube.stddev[cls._slice_idx_expr(cube, slice_idx)]
@@ -1110,11 +1118,13 @@ class _BaseCubeSums(_BaseCubeMeasure):
         CubeSumsCls = (
             _MrXMrCubeSums
             if dimension_types == (DT.MR, DT.MR)
-            else _MrXCatCubeSums
-            if dimension_types[0] == DT.MR
-            else _CatXMrCubeSums
-            if dimension_types[1] == DT.MR
-            else _CatXCatCubeSums
+            else (
+                _MrXCatCubeSums
+                if dimension_types[0] == DT.MR
+                else (
+                    _CatXMrCubeSums if dimension_types[1] == DT.MR else _CatXCatCubeSums
+                )
+            )
         )
         return CubeSumsCls(dimensions, cube.sums[cls._slice_idx_expr(cube, slice_idx)])
 
@@ -1202,11 +1212,15 @@ class _BaseUnconditionalCubeCounts(_BaseCubeMeasure):
         UnconditionalCubeCountsCls = (
             _MrXMrUnconditionalCubeCounts
             if dimension_types == (DT.MR, DT.MR)
-            else _MrXCatUnconditionalCubeCounts
-            if dimension_types[0] == DT.MR
-            else _CatXMrUnconditionalCubeCounts
-            if dimension_types[1] == DT.MR
-            else _CatXCatUnconditionalCubeCounts
+            else (
+                _MrXCatUnconditionalCubeCounts
+                if dimension_types[0] == DT.MR
+                else (
+                    _CatXMrUnconditionalCubeCounts
+                    if dimension_types[1] == DT.MR
+                    else _CatXCatUnconditionalCubeCounts
+                )
+            )
         )
         return UnconditionalCubeCountsCls(
             dimensions,

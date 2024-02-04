@@ -11,7 +11,7 @@ from ..fixtures import CR, NA
 from ..util import load_python_expression
 
 
-class TestHeadersAndSubtotals(object):
+class TestHeadersAndSubtotals:
     """Legacy unit-test suite for inserted rows and columns."""
 
     def test_headings_econ_blame_one_subtotal(self):
@@ -2761,7 +2761,7 @@ class TestHeadersAndSubtotals(object):
         assert slice_.residual_test_stats.shape == (2, 6, 7)
 
 
-class DescribeIntegrated_SubtotalDifferences(object):
+class DescribeIntegrated_SubtotalDifferences:
     """TDD driver(s) for Subtotal Difference insertions."""
 
     def it_computes_measures_for_1D_cat_with_subdiffs(self):

@@ -8,7 +8,7 @@ from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
-class Smoother(object):
+class Smoother:
     """Base object class for Smoother variants."""
 
     @classmethod
@@ -28,7 +28,7 @@ class Smoother(object):
         )
 
 
-class _SingleSidedMovingAvgSmoother(object):
+class _SingleSidedMovingAvgSmoother:
     """Create and configure smoothing function for one-sided moving average."""
 
     def __init__(self, smoothing_dict, dimension_type):

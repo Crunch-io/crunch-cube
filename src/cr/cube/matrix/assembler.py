@@ -64,15 +64,24 @@ class _BaseOrderHelper:
         HelperCls = (
             _SortRowsByBaseColumnHelper
             if collation_method == CM.OPPOSING_ELEMENT
-            else _SortRowsByDerivedColumnHelper
-            if collation_method == CM.OPPOSING_INSERTION and dim_type in DT.ARRAY_TYPES
-            else _SortRowsByInsertedColumnHelper
-            if collation_method == CM.OPPOSING_INSERTION
-            else _SortRowsByLabelHelper
-            if collation_method == CM.LABEL
-            else _SortRowsByMarginalHelper
-            if collation_method == CM.MARGINAL
-            else _RowOrderHelper
+            else (
+                _SortRowsByDerivedColumnHelper
+                if collation_method == CM.OPPOSING_INSERTION
+                and dim_type in DT.ARRAY_TYPES
+                else (
+                    _SortRowsByInsertedColumnHelper
+                    if collation_method == CM.OPPOSING_INSERTION
+                    else (
+                        _SortRowsByLabelHelper
+                        if collation_method == CM.LABEL
+                        else (
+                            _SortRowsByMarginalHelper
+                            if collation_method == CM.MARGINAL
+                            else _RowOrderHelper
+                        )
+                    )
+                )
+            )
         )
         return HelperCls(dimensions, second_order_measures, format)._display_order
 

@@ -2,10 +2,22 @@
 
 """Utility functions for crunch cube, as well as other modules."""
 
+from datetime import datetime
 import functools
 
 
-class lazyproperty(object):
+def format(x) -> str:
+    return str(x)
+
+
+def format_datetime(x, orig_format, out_format) -> str:
+    try:
+        return datetime.strptime(x, orig_format).strftime(out_format)
+    except ValueError:
+        return str(x)
+
+
+class lazyproperty:
     """Decorator like @property, but evaluated only on first access.
     Like @property, this can only be used to decorate methods having only
     a `self` parameter, and is accessed like an attribute on an instance,

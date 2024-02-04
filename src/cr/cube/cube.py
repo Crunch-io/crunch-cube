@@ -5,7 +5,6 @@
 CubeSet is the main API class for manipulating Crunch.io JSON cube responses.
 """
 
-import copy
 import json
 from typing import Dict, FrozenSet, Iterator, List, Optional, Tuple, Union
 
@@ -260,11 +259,15 @@ class Cube:
         return (
             self._measures.weighted_valid_counts.raw_cube_array
             if self._measures.weighted_valid_counts is not None
-            else self._measures.unweighted_valid_counts.raw_cube_array
-            if self._measures.unweighted_valid_counts is not None
-            else self._measures.weighted_counts.raw_cube_array
-            if self.has_weighted_counts
-            else self._measures.unweighted_counts.raw_cube_array
+            else (
+                self._measures.unweighted_valid_counts.raw_cube_array
+                if self._measures.unweighted_valid_counts is not None
+                else (
+                    self._measures.weighted_counts.raw_cube_array
+                    if self.has_weighted_counts
+                    else self._measures.unweighted_counts.raw_cube_array
+                )
+            )
         )
 
     @lazyproperty
@@ -312,8 +315,10 @@ class Cube:
         A multi-cube (tabbook) response formed from a function (e.g. mean()) on
         a numeric variable arrives without a rows-dimension.
         """
-        cube_dict = self._cube_dict
-        dimensions = cube_dict["result"]["dimensions"]
+        cube_dict = self._cube_response
+        num_array_dim = self._numeric_array_dimension or None
+        dims = cube_dict["result"]["dimensions"]
+        dimensions = [num_array_dim] + dims if num_array_dim else dims
         default_name = "-".join([m.value for m in self._available_numeric_measures])
         # --- The default value in case of numeric variable is the combination of all
         # --- the measures expressed in the cube response.
@@ -435,7 +440,7 @@ class Cube:
         use-case it is a stand-in for the columns-dimension name since a strand has no
         columns dimension.
         """
-        return self._cube_dict["result"].get("title", "Untitled")
+        return self._cube_response["result"].get("title", "Untitled")
 
     @lazyproperty
     def unweighted_counts(self) -> np.ndarray:
@@ -533,9 +538,12 @@ class Cube:
         ].astype(np.float64)
 
     @lazyproperty
-    def _all_dimensions(self) -> list:
+    def _all_dimensions(self) -> Dimensions:
         """List of all dimensions (not just user-apparent ones) for this cube."""
-        return Dimensions.from_dicts(self._cube_dict["result"]["dimensions"])
+        num_array_dim = self._numeric_array_dimension or None
+        dims = self._cube_response["result"]["dimensions"]
+        dimension_dicts = [num_array_dim] + dims if num_array_dim else dims
+        return Dimensions.from_dicts(dimension_dicts)
 
     @lazyproperty
     def _available_numeric_measures(self) -> Tuple[CUBE_MEASURE, ...]:
@@ -561,19 +569,6 @@ class Cube:
         )
 
     @lazyproperty
-    def _cube_dict(self) -> Dict:
-        """dict containing raw cube response, parsed from JSON payload."""
-        cube_dict = copy.deepcopy(self._cube_response)
-        if self._numeric_measure_subvariables:
-            dimensions = cube_dict.get("result", {}).get("dimensions", [])
-            # ---dim inflation---
-            # ---In case of numeric arrays, we need to inflate the row dimension
-            # ---according to the mean subvariables. For each subvar the row dimension
-            # ---will have a new element related to the subvar metadata.
-            dimensions.insert(0, self._numeric_array_dimension)
-        return cube_dict
-
-    @lazyproperty
     def _cube_response(self) -> Dict:
         """dict representing the parsed cube response arguments."""
         try:
@@ -593,7 +588,7 @@ class Cube:
     @lazyproperty
     def _is_single_filter_col_cube(self) -> float:
         """bool determines if it is a single column filter cube."""
-        return self._cube_dict["result"].get("is_single_col_cube", False)
+        return self._cube_response["result"].get("is_single_col_cube", False)
 
     @lazyproperty
     def _measures(self) -> "_Measures":
@@ -602,7 +597,7 @@ class Cube:
         Provides access to count based measures and numeric measures (e.g. mean, sum)
         when available.
         """
-        return _Measures(self._cube_dict, self._all_dimensions, self._cube_idx_arg)
+        return _Measures(self._cube_response, self._all_dimensions, self._cube_idx_arg)
 
     @lazyproperty
     def _numeric_measure_references(self) -> Dict:

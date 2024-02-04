@@ -39,7 +39,7 @@ class DescribeSmoother:
         assert str(e.value) == "Function foo is not available."
 
 
-class Describe_SingleSideMovingAvgSmoother(object):
+class Describe_SingleSideMovingAvgSmoother:
     def it_constructs_single_sided_moving_avg_to_help(self, request):
         _init_ = initializer_mock(request, _SingleSidedMovingAvgSmoother)
         single_sided_miving_avg = _SingleSidedMovingAvgSmoother(

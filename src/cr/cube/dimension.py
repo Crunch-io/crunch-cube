@@ -4,8 +4,8 @@
 
 import copy
 from collections.abc import Sequence
-from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Union
+from functools import partial
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -16,6 +16,38 @@ from cr.cube.enums import (
     MEASURE,
 )
 from cr.cube.util import lazyproperty
+
+from .util import format, format_datetime
+
+DATETIME_FORMATS = {
+    "Y": "%Y",
+    "Q": "%Y-%m",
+    "3M": "%Y-%m",
+    "M": "%Y-%m",
+    "W": "%Y-%m-%d",
+    "D": "%Y-%m-%d",
+    "h": "%Y-%m-%dT%H",
+    "m": "%Y-%m-%dT%H:%M",
+    "s": "%Y-%m-%dT%H:%M:%S",
+    "ms": "%Y-%m-%dT%H:%M:%S.%f",
+    "us": "%Y-%m-%dT%H:%M:%S.%f",
+}
+
+
+def _formatter(dimension_type, typedef, out_format) -> Union[Callable, partial]:
+    """Returns a formatting function according to the dimension type."""
+
+    if dimension_type != DT.DATETIME:
+        formatter: Union[Callable, partial] = format
+    else:
+        resolution = typedef["subtype"].get("resolution")
+        orig_format: str = DATETIME_FORMATS.get(resolution) or ""
+        formatter = (
+            partial(format_datetime, orig_format=orig_format, out_format=out_format)
+            if orig_format and out_format
+            else format
+        )
+    return formatter
 
 
 class Dimensions(tuple):
@@ -460,20 +492,6 @@ class Elements(tuple):
     Each element is either a category or a subvariable.
     """
 
-    datetime_formats = {
-        "Y": "%Y",
-        "Q": "%Y-%m",
-        "3M": "%Y-%m",
-        "M": "%Y-%m",
-        "W": "%Y-%m-%d",
-        "D": "%Y-%m-%d",
-        "h": "%Y-%m-%dT%H",
-        "m": "%Y-%m-%dT%H:%M",
-        "s": "%Y-%m-%dT%H:%M:%S",
-        "ms": "%Y-%m-%dT%H:%M:%S.%f",
-        "us": "%Y-%m-%dT%H:%M:%S.%f",
-    }
-
     @classmethod
     def from_typedef(
         cls, typedef, dimension_transforms_dict, dimension_type, element_data_format
@@ -509,31 +527,7 @@ class Elements(tuple):
             xforms = _ElementTransforms(
                 all_xforms.get(element_id, all_xforms.get(str(element_id), {}))
             )
-
-            # This is so dumb that our type checker won't let us just
-            # write `formatter = str`.
-            def format(x) -> str:
-                return str(x)
-
-            formatter = format
-
-            if dimension_type == DT.DATETIME:
-                orig_format = cls.datetime_formats.get(
-                    typedef["subtype"].get("resolution")
-                )
-                out_format = element_data_format
-                if orig_format is not None and out_format is not None:
-
-                    def format_datetime(x) -> str:
-                        try:
-                            return datetime.strptime(x, orig_format).strftime(
-                                out_format
-                            )
-                        except ValueError:
-                            return str(x)
-
-                    formatter = format_datetime
-
+            formatter = _formatter(dimension_type, typedef, element_data_format)
             element = Element(element_dict, idx, xforms, formatter)
             elements.append(element)
 
@@ -842,9 +836,11 @@ class _ElementIdShim:
         if key == "subvar_id":
             # --- translate from subvariable id
             new_keys = tuple(
-                self._subvar_aliases[self._subvar_ids.index(_id)]
-                if _id in self._subvar_ids
-                else None
+                (
+                    self._subvar_aliases[self._subvar_ids.index(_id)]
+                    if _id in self._subvar_ids
+                    else None
+                )
                 for _id in old_keys
             )
         else:
