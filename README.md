@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.39
+- Remove cube response deepcopy due to a performance issue
+
 ### 3.0.38
 - Improve calculation of DoF for pairwise comparison
 - Use effective counts as column bases for DoF
@@ -124,15 +127,6 @@ The detailed description can be found
 
 ### 3.0.35
 - Fix bug where categorical dimension would sometimes be interpreted as `MR_CATS`.
-
-### 3.0.34
-- Fix bug with significance testing with overlaps and subtotals
-
-### 3.0.33
-- Honor `order` field in variable definitions
-
-### 3.0.32
-- Simply code (Cube and Dimension modules refactoring)
 
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).

@@ -1,5 +1,14 @@
 # History of Changes
 
+### 3.0.34
+- Fix bug with significance testing with overlaps and subtotals
+
+### 3.0.33
+- Honor `order` field in variable definitions
+
+### 3.0.32
+- Simply code (Cube and Dimension modules refactoring)
+
 ### 3.0.31
 - Fix `null` view in dimension dict
 
