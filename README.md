@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.40
+- Fix bug with weighted vs unweighted in pairwise effect calculation
+
 ### 3.0.39
 - Remove cube response deepcopy due to a performance issue
 
