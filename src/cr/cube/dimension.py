@@ -933,7 +933,7 @@ class Element:
         return self._element_dict.get("value", {}).get("references", {}).get("anchor")
 
     @lazyproperty
-    def element_id(self) -> int:
+    def element_id(self) -> Union[int, str]:
         """int identifier for this category or subvariable."""
         return _build_element_id(self._element_dict, self._dim_type)
 
