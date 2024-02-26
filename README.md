@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.41
+- Remove `deepcopy` from dimension module due to a performance issue
+
 ### 3.0.40
 - Fix bug with weighted vs unweighted in pairwise effect calculation
 
