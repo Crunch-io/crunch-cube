@@ -804,7 +804,10 @@ class Describe_ElementIdShim:
 
         assert shim_.shimmed_dimension_dict == {
             "type": {
-                "elements": [{"id": "alias1", "element_info": 100}, {"id": "alias2"}],
+                "elements": [
+                    {"id": 1, "element_info": 100, "subvar_alias": "alias1"},
+                    {"id": 2, "subvar_alias": "alias2"},
+                ],
                 "other": "in type",
             },
             "another": "outside type",
@@ -827,9 +830,14 @@ class Describe_ElementIdShim:
         assert shim_.shimmed_dimension_dict == {
             "type": {
                 "elements": [
-                    {"id": "val1", "value": "val1", "element_info": 100},
+                    {
+                        "id": 1,
+                        "value": "val1",
+                        "element_info": 100,
+                        "datetime_value": "val1",
+                    },
                     {"id": 2, "value": {"?": -1}},
-                    {"id": "another val", "value": "another val"},
+                    {"id": 3, "value": "another val", "datetime_value": "another val"},
                 ],
                 "other": "in type",
             },
@@ -1096,7 +1104,7 @@ class Describe_Element:
 
     def it_knows_its_anchor(self):
         element_dict = {"value": {"references": {"anchor": "top"}, "derived": True}}
-        element = Element(element_dict, None, None, None)
+        element = Element(element_dict, None, None, None, None)
 
         anchor = element.anchor
 
@@ -1104,7 +1112,7 @@ class Describe_Element:
 
     def but_anchor_is_none_if_not_derived(self):
         element_dict = {"value": {"derived": False}}
-        element = Element(element_dict, None, None, None)
+        element = Element(element_dict, None, None, None, None)
 
         anchor = element.anchor
 
@@ -1112,7 +1120,7 @@ class Describe_Element:
 
     def it_knows_its_element_id(self):
         element_dict = {"id": 42}
-        element = Element(element_dict, None, None, None)
+        element = Element(element_dict, None, None, None, None)
 
         element_id = element.element_id
 
@@ -1120,14 +1128,14 @@ class Describe_Element:
 
     def it_knows_its_fill_RGB_color_str(self, element_transforms_):
         element_transforms_.fill = [255, 255, 248]
-        element = Element(None, None, element_transforms_, None)
+        element = Element(None, None, element_transforms_, None, None)
 
         rgb_color_fill = element.fill
 
         assert rgb_color_fill == [255, 255, 248]
 
     def it_knows_its_position_among_all_the_dimension_elements(self):
-        element = Element(None, 17, None, None)
+        element = Element(None, 17, None, None, None)
         index = element.index
         assert index == 17
 
@@ -1162,7 +1170,7 @@ class Describe_Element:
         fmt_calls,
     ):
         element_transforms_.name = transform_name
-        element = Element(element_dict, None, element_transforms_, str)
+        element = Element(element_dict, None, element_transforms_, str, None)
         assert element.label == expected_value
 
     @pytest.mark.parametrize(
@@ -1170,7 +1178,7 @@ class Describe_Element:
     )
     def it_knows_whether_it_is_explicitly_hidden(self, request, hide, expected_value):
         element_transforms_ = instance_mock(request, _ElementTransforms, hide=hide)
-        element = Element(None, None, element_transforms_, None)
+        element = Element(None, None, element_transforms_, None, None)
 
         is_hidden = element.is_hidden
 
@@ -1189,7 +1197,7 @@ class Describe_Element:
         ),
     )
     def it_knows_whether_its_missing_or_valid(self, element_dict, expected_value):
-        element = Element(element_dict, None, None, None)
+        element = Element(element_dict, None, None, None, None)
 
         missing = element.missing
 
@@ -1212,7 +1220,7 @@ class Describe_Element:
         ),
     )
     def it_knows_its_numeric_value(self, element_dict, expected_value):
-        element = Element(element_dict, None, None, None)
+        element = Element(element_dict, None, None, None, None)
 
         numeric_value = element.numeric_value
 
@@ -1594,11 +1602,11 @@ class Describe_Subtotal:
         addend_ids_.return_value = addend_ids
         valid_elements = Elements(
             [
-                Element({"id": 1}, None, None, None),
-                Element({"id": 2}, None, None, None),
-                Element({"id": 3}, None, None, None),
-                Element({"id": 4}, None, None, None),
-                Element({"id": 99}, None, None, None),
+                Element({"id": 1}, None, None, None, None),
+                Element({"id": 2}, None, None, None, None),
+                Element({"id": 3}, None, None, None, None),
+                Element({"id": 4}, None, None, None, None),
+                Element({"id": 99}, None, None, None, None),
             ]
         )
         subtotal = _Subtotal(subtotal_dict, valid_elements)
@@ -1699,11 +1707,11 @@ class Describe_Subtotal:
         subtrahend_ids_.return_value = subtrahend_ids
         valid_elements = Elements(
             [
-                Element({"id": 1}, None, None, None),
-                Element({"id": 2}, None, None, None),
-                Element({"id": 3}, None, None, None),
-                Element({"id": 4}, None, None, None),
-                Element({"id": 99}, None, None, None),
+                Element({"id": 1}, None, None, None, None),
+                Element({"id": 2}, None, None, None, None),
+                Element({"id": 3}, None, None, None, None),
+                Element({"id": 4}, None, None, None, None),
+                Element({"id": 99}, None, None, None, None),
             ]
         )
         subtotal = _Subtotal(subtotal_dict, valid_elements)

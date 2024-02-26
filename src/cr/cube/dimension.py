@@ -2,7 +2,6 @@
 
 """Provides the Dimension class."""
 
-import copy
 from collections.abc import Sequence
 from functools import partial
 from typing import Callable, Dict, List, Optional, Tuple, Union
@@ -48,6 +47,16 @@ def _formatter(dimension_type, typedef, out_format) -> Union[Callable, partial]:
             else format
         )
     return formatter
+
+
+def _build_element_id(element_dict, dimension_type) -> Union[int, str]:
+    "Returns the element id value according to the dimension tpye."
+    if dimension_type == DT.DATETIME and "datetime_value" in element_dict:
+        return element_dict["datetime_value"]
+    elif dimension_type in DT.ARRAY_TYPES and "subvar_alias" in element_dict:
+        return element_dict["subvar_alias"]
+    else:
+        return element_dict["id"]
 
 
 class Dimensions(tuple):
@@ -523,12 +532,12 @@ class Elements(tuple):
         elements = []
         for idx, element_dict in enumerate(element_defs):
             # --- convert to string for categorical ids
-            element_id = element_dict["id"]
+            element_id = _build_element_id(element_dict, dimension_type)
             xforms = _ElementTransforms(
                 all_xforms.get(element_id, all_xforms.get(str(element_id), {}))
             )
             formatter = _formatter(dimension_type, typedef, element_data_format)
-            element = Element(element_dict, idx, xforms, formatter)
+            element = Element(element_dict, idx, xforms, formatter, dimension_type)
             elements.append(element)
 
         return cls(elements)
@@ -553,7 +562,8 @@ class Elements(tuple):
         # --- however, the hide-transform must be identified by element-id, so we need a
         # --- mapping of insertion-name to element-id
         element_id_from_name = {
-            element["value"]["id"]: element["id"] for element in element_defs
+            element["value"]["id"]: element.get("subvar_alias") or element["id"]
+            for element in element_defs
         }
 
         return {
@@ -629,33 +639,39 @@ class _ElementIdShim:
 
     @lazyproperty
     def shimmed_dimension_dict(self) -> Dict:
-        """Copy of dimension dictionary with shimmed `element_id`s
+        """Augmented dimension dictionary with shimmed `element_id`s
 
         We want to move to a world where elements on a subvariables dimension are
         identified by their alias, but right now the "element_id" from zz9 is
         an index for subvariables.
         """
-        shim = copy.deepcopy(self._dimension_dict)
+        shim = self._dimension_dict
 
         # --- array variables are identified by thier aliases
         if self.dimension_type in DT.ARRAY_TYPES:
-            # --- Replace element ids with the alias
+            # --- Add new field to the shim for the alias to be associated to the
+            # --- existing ID. This augmentation of the dimension dict it a temporary
+            # --- hack for subvariable ref that should change in future
             for idx, alias in enumerate(self._subvar_aliases):
-                shim["type"]["elements"][idx]["id"] = alias
+                shim["type"]["elements"][idx]["subvar_alias"] = alias
 
         # --- datetimes are identified by their value
         if self.dimension_type == DT.DATETIME:
             for el in shim["type"]["elements"]:
                 # --- Missing data comes in as a dict and should be ignored
                 if not isinstance(el["value"], dict):
-                    el["id"] = el["value"]
+                    # --- Add new field to the shim for datetime value to be associated
+                    # --- to the existing ID. This augmentation of the dimension dict
+                    # --- it a temporary hack for subvariable ref that should change
+                    # --- in future
+                    el["datetime_value"] = el["value"]
 
         # --- Leave other types alone
         return shim
 
     @lazyproperty
     def shimmed_dimension_transforms_dict(self) -> Dict:
-        """Copy of dimension transforms dictionary with shimmed `element_id`s
+        """Augmented dimension transforms dictionary with shimmed `element_id`s
 
         We want to move to a world where elements on a subvariables dimension are
         identified by their alias, but right now the "element_id" from zz9 is
@@ -675,7 +691,7 @@ class _ElementIdShim:
         - "alias": Subvariables also have an alias that identifies them. It is stored
           in `dimensions[i].type.elements[j].value.references.alias`.
         """
-        shim = copy.deepcopy(self._dimension_transforms_dict)
+        shim = self._dimension_transforms_dict
 
         # --- Leave non-subvariable dimension types alone, as they don't have
         # --- subvariable aliases to use, and category ids are already the main way
@@ -896,11 +912,14 @@ class Element:
     This object resolves the transform cascade for element-level transforms.
     """
 
-    def __init__(self, element_dict, index, element_transforms, label_formatter):
+    def __init__(
+        self, element_dict, index, element_transforms, label_formatter, dim_type
+    ):
         self._element_dict = element_dict
         self._index = index
         self._element_transforms = element_transforms
         self._label_formatter = label_formatter
+        self._dim_type = dim_type
 
     def __repr__(self) -> str:
         """str of this element, which makes it easier to work in cosole."""
@@ -920,9 +939,9 @@ class Element:
         return self._element_dict.get("value", {}).get("references", {}).get("anchor")
 
     @lazyproperty
-    def element_id(self) -> int:
+    def element_id(self) -> Union[int, str]:
         """int identifier for this category or subvariable."""
-        return self._element_dict["id"]
+        return _build_element_id(self._element_dict, self._dim_type)
 
     @lazyproperty
     def derived(self) -> bool:
