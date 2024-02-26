@@ -649,7 +649,9 @@ class _ElementIdShim:
 
         # --- array variables are identified by thier aliases
         if self.dimension_type in DT.ARRAY_TYPES:
-            # --- Replace element ids with the alias
+            # --- Add new field to the shim for the alias to be associated to the
+            # --- existing ID. This augmentation of the dimension dict it a temporary
+            # --- hack for subvariable ref that should change in future
             for idx, alias in enumerate(self._subvar_aliases):
                 shim["type"]["elements"][idx]["subvar_alias"] = alias
 
@@ -658,6 +660,10 @@ class _ElementIdShim:
             for el in shim["type"]["elements"]:
                 # --- Missing data comes in as a dict and should be ignored
                 if not isinstance(el["value"], dict):
+                    # --- Add new field to the shim for datetime value to be associated
+                    # --- to the existing ID. This augmentation of the dimension dict
+                    # --- it a temporary hack for subvariable ref that should change
+                    # --- in future
                     el["datetime_value"] = el["value"]
 
         # --- Leave other types alone
