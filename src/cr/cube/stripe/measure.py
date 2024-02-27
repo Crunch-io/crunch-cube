@@ -15,7 +15,6 @@ from cr.cube.stripe.insertion import (
 )
 from cr.cube.util import lazyproperty
 
-
 # === MEASURE COLLECTION ===
 
 

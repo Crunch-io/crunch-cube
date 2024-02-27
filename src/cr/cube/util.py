@@ -2,8 +2,8 @@
 
 """Utility functions for crunch cube, as well as other modules."""
 
-from datetime import datetime
 import functools
+from datetime import datetime
 
 
 def format(x) -> str:

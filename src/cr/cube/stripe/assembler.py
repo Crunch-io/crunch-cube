@@ -18,7 +18,6 @@ from cr.cube.collator import (
 from cr.cube.enums import COLLATION_METHOD as CM, ORDER_FORMAT
 from cr.cube.util import lazyproperty
 
-
 # === ORDER HELPERS ===
 
 
