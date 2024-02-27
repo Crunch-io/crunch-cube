@@ -17,8 +17,8 @@ from typing import Dict, FrozenSet, Iterator, List, Tuple, Union
 import numpy as np
 
 from cr.cube.dimension import Dimension, Element, _OrderSpec, _Subtotals
-from cr.cube.util import lazyproperty
 from cr.cube.enums import ORDER_FORMAT
+from cr.cube.util import lazyproperty
 
 
 class _BaseCollator:

@@ -16,6 +16,7 @@ The three types of cube partition are the *slice*, *strand*, and *nub*, which ar
 """
 
 import math
+
 import numpy as np
 from tabulate import tabulate
 
@@ -23,14 +24,14 @@ from cr.cube.collator import PayloadOrderCollator
 from cr.cube.enums import (
     CUBE_MEASURE as CM,
     DIMENSION_TYPE as DT,
-    ORDER_FORMAT,
     MARGINAL_ORIENTATION as MO,
+    ORDER_FORMAT,
 )
 from cr.cube.matrix.assembler import _BaseOrderHelper
 from cr.cube.matrix.measure import SecondOrderMeasures
 from cr.cube.matrix.subtotals import SumSubtotals
-from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.measures.pairwise_significance import PairwiseSignificance
+from cr.cube.min_base_size_mask import MinBaseSizeMask
 from cr.cube.scalar import MeansScalar
 from cr.cube.stripe.assembler import _BaseOrderHelper as stripe_BaseOrderHelper
 from cr.cube.stripe.measure import StripeMeasures

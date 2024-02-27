@@ -10,9 +10,9 @@ from cr.cube.matrix.cubemeasure import CubeMeasures
 from cr.cube.matrix.subtotals import (
     NanSubtotals,
     NegativeTermSubtotals,
+    OverlapSubtotals,
     PositiveTermSubtotals,
     SumSubtotals,
-    OverlapSubtotals,
 )
 from cr.cube.smoothing import Smoother
 from cr.cube.util import lazyproperty
@@ -711,7 +711,7 @@ class _ColumnComparableCounts(_BaseSecondOrderMeasure):
 
         We cannot sum counts across subvariable dimensions.
         """
-        return not self._dimensions[1].dimension_type in DT.ARRAY_TYPES
+        return self._dimensions[1].dimension_type not in DT.ARRAY_TYPES
 
 
 class _ColumnIndex(_BaseSecondOrderMeasure):
@@ -1819,7 +1819,7 @@ class _RowComparableCounts(_BaseSecondOrderMeasure):
 
         We cannot sum counts across subvariable dimensions.
         """
-        return not self._dimensions[0].dimension_type in DT.ARRAY_TYPES
+        return self._dimensions[0].dimension_type not in DT.ARRAY_TYPES
 
 
 class _RowProportions(_BaseSecondOrderMeasure):
