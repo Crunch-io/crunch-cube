@@ -144,6 +144,39 @@ class CubeSet:
         """The valid count summary values from first cube in this set."""
         return self._cubes[0].valid_counts_summary_range
 
+    def _augment_cube_response(self, cube_response, summary_cube_resp):
+        all_elements = summary_cube_resp["result"]["dimensions"][0]["type"]["elements"]
+        values = [
+            el.get("value")
+            for el in cube_response["result"]["dimensions"][0]["type"]["elements"]
+            if isinstance(el.get("value"), (int, str))
+        ]
+        positions = [item["id"] for item in all_elements if item["value"] in values]
+        cube_response["result"]["dimensions"][0]["type"]["elements"] = all_elements
+        data = [0] * len(summary_cube_resp["result"]["counts"])
+        for pos, value in zip(positions, cube_response["result"]["counts"]):
+            data[pos] = value
+        cube_response["result"]["counts"] = data
+        cube_response["result"]["measures"]["count"]["data"] = data
+        return cube_response
+
+    def _cube_needs_reshaping(self, cube_response, idx):
+        response = (
+            cube_response.get("value") if "value" in cube_response else cube_response
+        )
+        summary_cube_response = (
+            self._cube_responses[0].get("value")
+            if "value" in self._cube_responses[0]
+            else self._cube_responses[0]
+        )
+        return (
+            response["result"].get("is_single_col_cube")
+            and self._is_multi_cube
+            and idx > 0
+            and len(response["result"]["counts"])
+            != len(summary_cube_response["result"]["counts"])
+        )
+
     @lazyproperty
     def _cubes(self) -> Tuple["Cube", ...]:
         """Sequence of Cube objects containing data for this analysis."""
@@ -155,8 +188,13 @@ class CubeSet:
             missing row dimension.
             """
             for idx, cube_response in enumerate(self._cube_responses):
+                resp = (
+                    self._augment_cube_response(cube_response, self._cube_responses[0])
+                    if self._cube_needs_reshaping(cube_response, idx)
+                    else cube_response
+                )
                 cube = Cube(
-                    cube_response,
+                    resp,
                     cube_idx=idx if self._is_multi_cube else None,
                     transforms=self._transforms_dicts[idx],
                     population=self._population,
@@ -927,7 +965,8 @@ class _CovarianceMeasure(_BaseMeasure):
             return None
         return np.array(
             tuple(
-                np.nan if type(x) is dict else x for x in self._measure_payload["data"]
+                np.nan if isinstance(x, dict) else x
+                for x in self._measure_payload["data"]
             ),
             dtype=np.float64,
         ).flatten()
@@ -969,7 +1008,9 @@ class _MeanMeasure(_BaseMeasure):
         if measure_payload is None:
             return None
         return np.array(
-            tuple(np.nan if type(x) is dict else x for x in measure_payload["data"]),
+            tuple(
+                np.nan if isinstance(x, dict) else x for x in measure_payload["data"]
+            ),
             dtype=np.float64,
         ).flatten()
 
@@ -989,7 +1030,8 @@ class _OverlapMeasure(_BaseMeasure):
             return None
         return np.array(
             tuple(
-                np.nan if type(x) is dict else x for x in self._measure_payload["data"]
+                np.nan if isinstance(x, dict) else x
+                for x in self._measure_payload["data"]
             ),
             dtype=np.float64,
         ).flatten()
@@ -1028,7 +1070,9 @@ class _StdDevMeasure(_BaseMeasure):
             return None
 
         return np.array(
-            tuple(np.nan if type(x) is dict else x for x in measure_payload["data"]),
+            tuple(
+                np.nan if isinstance(x, dict) else x for x in measure_payload["data"]
+            ),
             dtype=np.float64,
         ).flatten()
 
@@ -1049,7 +1093,9 @@ class _SumMeasure(_BaseMeasure):
             return None
 
         return np.array(
-            tuple(np.nan if type(x) is dict else x for x in measure_payload["data"]),
+            tuple(
+                np.nan if isinstance(x, dict) else x for x in measure_payload["data"]
+            ),
             dtype=np.float64,
         ).flatten()
 
