@@ -263,28 +263,15 @@ class DescribeCubeSet:
                                 "type": {
                                     "class": "enum",
                                     "elements": [
-                                        {
-                                            "id": 0,
-                                            "missing": False,
-                                            "value": "1955-11-06",
-                                        },
-                                        {
-                                            "id": 1,
-                                            "missing": False,
-                                            "value": "1955-11-07",
-                                        },
-                                        {
-                                            "id": 2,
-                                            "missing": False,
-                                            "value": "1955-11-08",
-                                        },
+                                        {"id": 0, "missing": False, "value": "A"},
+                                        {"id": 1, "missing": False, "value": "B"},
+                                        {"id": 2, "missing": False, "value": "C"},
                                         {"id": -1, "missing": True, "value": {"?": -1}},
                                     ],
                                     "subtype": {
-                                        "class": "datetime",
+                                        "class": "text",
                                         "missing_reasons": {"No Data": -1},
                                         "missing_rules": {},
-                                        "resolution": "D",
                                     },
                                 },
                             }
@@ -301,23 +288,39 @@ class DescribeCubeSet:
                                 "type": {
                                     "class": "enum",
                                     "elements": [
-                                        {
-                                            "id": 0,
-                                            "missing": False,
-                                            "value": "1955-11-06",
-                                        },
-                                        {
-                                            "id": 1,
-                                            "missing": False,
-                                            "value": "1955-11-07",
-                                        },
+                                        {"id": 0, "missing": False, "value": "A"},
+                                        {"id": 1, "missing": False, "value": "C"},
                                         {"id": -1, "missing": True, "value": {"?": -1}},
                                     ],
                                     "subtype": {
-                                        "class": "datetime",
+                                        "class": "text",
                                         "missing_reasons": {"No Data": -1},
                                         "missing_rules": {},
-                                        "resolution": "D",
+                                    },
+                                },
+                            }
+                        ],
+                    }
+                },
+                {
+                    "result": {
+                        "is_single_col_cube": True,
+                        "counts": [1, 1, 1, 0],
+                        "measures": {"count": {"data": [1, 1, 1, 0]}},
+                        "dimensions": [
+                            {
+                                "type": {
+                                    "class": "enum",
+                                    "elements": [
+                                        {"id": 0, "missing": False, "value": "A"},
+                                        {"id": 1, "missing": False, "value": "B"},
+                                        {"id": 2, "missing": False, "value": "C"},
+                                        {"id": -1, "missing": True, "value": {"?": -1}},
+                                    ],
+                                    "subtype": {
+                                        "class": "text",
+                                        "missing_reasons": {"No Data": -1},
+                                        "missing_rules": {},
                                     },
                                 },
                             }
@@ -325,26 +328,37 @@ class DescribeCubeSet:
                     }
                 },
             ],
-            transforms=[{"xfrms": 1}, {"xfrms": 2}],
+            transforms=[{"xfrms": 1}, {"xfrms": 2}, {"xfrms": 3}],
             population=1000,
             min_base=10,
         )
 
         cubes = cube_set._cubes
         summary_cube = cubes[0]
-        single_col_filter = cubes[1]
+        single_col_filter1 = cubes[1]
+        single_col_filter2 = cubes[2]
 
-        assert len(summary_cube.partitions) == len(single_col_filter.partitions)
-        assert summary_cube.dimension_types == single_col_filter.dimension_types
+        assert len(summary_cube.partitions) == len(single_col_filter1.partitions)
+        assert (
+            summary_cube.dimension_types
+            == single_col_filter1.dimension_types
+            == single_col_filter2.dimension_types
+        )
         assert summary_cube.partitions[0].counts == pytest.approx(np.array([1, 1, 1]))
-        assert single_col_filter.partitions[0].counts == pytest.approx(
-            np.array([1, 1, 0])
+        assert single_col_filter1.partitions[0].counts == pytest.approx(
+            np.array([1, 0, 1])
+        )
+        assert single_col_filter2.partitions[0].counts == pytest.approx(
+            np.array([1, 1, 1])
         )
         assert (
-            single_col_filter._cube_response["result"]["dimensions"][0]["type"][
+            single_col_filter1._cube_response["result"]["dimensions"][0]["type"][
                 "elements"
             ]
             == summary_cube._cube_response["result"]["dimensions"][0]["type"][
+                "elements"
+            ]
+            == single_col_filter2._cube_response["result"]["dimensions"][0]["type"][
                 "elements"
             ]
         )
