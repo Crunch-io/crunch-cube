@@ -144,39 +144,6 @@ class CubeSet:
         """The valid count summary values from first cube in this set."""
         return self._cubes[0].valid_counts_summary_range
 
-    def _augment_cube_response(self, cube_response, summary_cube_resp):
-        all_elements = summary_cube_resp["result"]["dimensions"][0]["type"]["elements"]
-        values = [
-            el.get("value")
-            for el in cube_response["result"]["dimensions"][0]["type"]["elements"]
-            if isinstance(el.get("value"), (int, str))
-        ]
-        positions = [item["id"] for item in all_elements if item["value"] in values]
-        cube_response["result"]["dimensions"][0]["type"]["elements"] = all_elements
-        data = [0] * len(summary_cube_resp["result"]["counts"])
-        for pos, value in zip(positions, cube_response["result"]["counts"]):
-            data[pos] = value
-        cube_response["result"]["counts"] = data
-        cube_response["result"]["measures"]["count"]["data"] = data
-        return cube_response
-
-    def _cube_needs_reshaping(self, cube_response, idx):
-        response = (
-            cube_response.get("value") if "value" in cube_response else cube_response
-        )
-        summary_cube_response = (
-            self._cube_responses[0].get("value")
-            if "value" in self._cube_responses[0]
-            else self._cube_responses[0]
-        )
-        return (
-            response["result"].get("is_single_col_cube")
-            and self._is_multi_cube
-            and idx > 0
-            and len(response["result"]["counts"])
-            != len(summary_cube_response["result"]["counts"])
-        )
-
     @lazyproperty
     def _cubes(self) -> Tuple["Cube", ...]:
         """Sequence of Cube objects containing data for this analysis."""
@@ -188,17 +155,19 @@ class CubeSet:
             missing row dimension.
             """
             for idx, cube_response in enumerate(self._cube_responses):
-                resp = (
-                    self._augment_cube_response(cube_response, self._cube_responses[0])
-                    if self._cube_needs_reshaping(cube_response, idx)
-                    else cube_response
-                )
                 cube = Cube(
-                    resp,
+                    cube_response,
                     cube_idx=idx if self._is_multi_cube else None,
                     transforms=self._transforms_dicts[idx],
                     population=self._population,
                     mask_size=self._min_base,
+                )
+                cube = (
+                    cube.augment_response(self._cube_responses[0])
+                    if self._is_multi_cube
+                    and cube._is_single_filter_col_cube
+                    and idx > 0
+                    else cube
                 )
                 # --- numeric-measures cubes require inflation to restore their
                 # --- rows-dimension, others don't
@@ -282,6 +251,34 @@ class Cube:
         """frozenset of available CUBE_MEASURE members in the cube response."""
         cube_measures = self._cube_response.get("result", {}).get("measures", {}).keys()
         return frozenset(CUBE_MEASURE(m) for m in cube_measures)
+
+    def augment_response(self, summary_cube_resp) -> "Cube":
+        cube_resp = self._cube_response
+
+        if len(cube_resp["result"]["counts"]) != len(
+            summary_cube_resp["result"]["counts"]
+        ):
+            elements = summary_cube_resp["result"]["dimensions"][0]["type"]["elements"]
+            values = [
+                el.get("value")
+                for el in cube_resp["result"]["dimensions"][0]["type"]["elements"]
+                if isinstance(el.get("value"), (int, str))
+            ]
+            positions = [item["id"] for item in elements if item["value"] in values]
+            cube_resp["result"]["dimensions"][0]["type"]["elements"] = elements
+            data = [0] * len(summary_cube_resp["result"]["counts"])
+            for pos, value in zip(positions, cube_resp["result"]["counts"]):
+                data[pos] = value
+            cube_resp["result"]["counts"] = data
+            cube_resp["result"]["measures"]["count"]["data"] = data
+            return Cube(
+                cube_resp,
+                self._cube_idx_arg,
+                self._transforms_dict,
+                self._population,
+                self._mask_size,
+            )
+        return self
 
     @lazyproperty
     def counts(self) -> np.ndarray:

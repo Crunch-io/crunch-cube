@@ -16,7 +16,7 @@ from cr.cube.cubepart import _Slice, _Strand, _Nub
 from cr.cube.enums import DIMENSION_TYPE as DT
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
-from ..unitutil import call, class_mock, instance_mock, method_mock, property_mock
+from ..unitutil import call, class_mock, instance_mock, property_mock
 
 
 class DescribeCubeSet:
@@ -170,9 +170,10 @@ class DescribeCubeSet:
         self, request, Cube_, _is_numeric_measure_prop_
     ):
         cubes_ = tuple(instance_mock(request, Cube) for _ in range(4))
+        for c in cubes_:
+            c._is_single_filter_col_cube = False
         Cube_.side_effect = iter(cubes_)
         _is_numeric_measure_prop_.return_value = False
-        method_mock(request, CubeSet, "_cube_needs_reshaping", return_value=False)
         cube_set = CubeSet(
             cube_responses=[{"cube": "resp-1"}, {"cube": "resp-2"}, {"cube": "resp-3"}],
             transforms=[{"xfrms": 1}, {"xfrms": 2}, {"xfrms": 3}],
@@ -212,9 +213,9 @@ class DescribeCubeSet:
     ):
         cubes_ = tuple(instance_mock(request, Cube) for _ in range(4))
         cube_.inflate.side_effect = iter(cubes_)
+        cube_._is_single_filter_col_cube = False
         Cube_.return_value = cube_
         _is_numeric_measure_prop_.return_value = True
-        method_mock(request, CubeSet, "_cube_needs_reshaping", return_value=False)
         cube_set = CubeSet(
             cube_responses=[{"cube": "resp-1"}, {"cube": "resp-2"}, {"cube": "resp-3"}],
             transforms=[{"xfrms": 1}, {"xfrms": 2}, {"xfrms": 3}],
@@ -251,10 +252,6 @@ class DescribeCubeSet:
         assert cubes == cubes_[:3]
 
     def it_constructs_its_sequence_of_augmented_cube_objects_to_help(self, request):
-        # cubes_ = tuple(instance_mock(request, Cube) for _ in range(2))
-        # cube_.inflate.side_effect = iter(cubes_)
-        # Cube_.return_value = cube_
-        method_mock(request, CubeSet, "_cube_needs_reshaping", return_value=True)
         cube_set = CubeSet(
             cube_responses=[
                 {
@@ -296,6 +293,7 @@ class DescribeCubeSet:
                 },
                 {
                     "result": {
+                        "is_single_col_cube": True,
                         "measures": {"count": {"data": [1, 1, 0]}},
                         "counts": [1, 1, 0],
                         "dimensions": [
