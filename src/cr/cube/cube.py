@@ -253,6 +253,41 @@ class Cube:
         return frozenset(CUBE_MEASURE(m) for m in cube_measures)
 
     def augment_response(self, summary_cube_resp) -> "Cube":
+        """Inlfate counts, data and elements dict in case of a single filter cube.
+
+        This method is called though the CubeSet while we itearate over all the cube
+        responses. If a cube is a single column filter and its idx > 0 it will be
+        augmented but only if the summary cube shape is different from its own shape.
+
+        In a multitable example we can have a text variable on the rows and a single col
+        filter (text) on the columns. From zz9 result the 2 cubes (summary cube and
+        filter cube) will have a different shape. Basically the filter cube will miss
+        the row labes that have 0 as counts.
+
+            | FCUBE | CAT
+        ----+-------+----
+         A  |   1   |  1
+         B  |   1   |  1
+         C  |   1   |  1
+         D  |       |  1
+         E  |       |  1
+         F  |       |  1
+
+        The FUCBE have D E and F missing cause its results doesn't count them. And the
+        rendering starts from the top without the correct row label association.
+        For a correct result the FCUBE cube_response needs to be augmentes with all the
+        elements of the summary cube and position the values in the corresponding
+        position of the only existing labels in the response.
+
+            | FCUBE | CAT
+        ----+-------+----
+         A  |   0   |  1
+         B  |   0   |  1
+         C  |   1   |  1
+         D  |   1   |  1
+         E  |   1   |  1
+         F  |   0   |  1
+        """
         cube_resp = self._cube_response
 
         if len(cube_resp["result"]["counts"]) != len(
