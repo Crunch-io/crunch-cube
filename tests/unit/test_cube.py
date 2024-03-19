@@ -170,6 +170,8 @@ class DescribeCubeSet:
         self, request, Cube_, _is_numeric_measure_prop_
     ):
         cubes_ = tuple(instance_mock(request, Cube) for _ in range(4))
+        for c in cubes_:
+            c.is_single_filter_col_cube = False
         Cube_.side_effect = iter(cubes_)
         _is_numeric_measure_prop_.return_value = False
         cube_set = CubeSet(
@@ -211,6 +213,7 @@ class DescribeCubeSet:
     ):
         cubes_ = tuple(instance_mock(request, Cube) for _ in range(4))
         cube_.inflate.side_effect = iter(cubes_)
+        cube_.is_single_filter_col_cube = False
         Cube_.return_value = cube_
         _is_numeric_measure_prop_.return_value = True
         cube_set = CubeSet(
@@ -247,6 +250,118 @@ class DescribeCubeSet:
         ]
         assert cube_.inflate.call_args_list == [call(), call(), call()]
         assert cubes == cubes_[:3]
+
+    def it_constructs_its_sequence_of_augmented_cube_objects_to_help(self, request):
+        cube_set = CubeSet(
+            cube_responses=[
+                {
+                    "result": {
+                        "counts": [1, 1, 1, 0],
+                        "measures": {"count": {"data": [1, 1, 1, 0]}},
+                        "dimensions": [
+                            {
+                                "type": {
+                                    "class": "enum",
+                                    "elements": [
+                                        {"id": 0, "missing": False, "value": "A"},
+                                        {"id": 1, "missing": False, "value": "B"},
+                                        {"id": 2, "missing": False, "value": "C"},
+                                        {"id": -1, "missing": True, "value": {"?": -1}},
+                                    ],
+                                    "subtype": {
+                                        "class": "text",
+                                        "missing_reasons": {"No Data": -1},
+                                        "missing_rules": {},
+                                    },
+                                },
+                            }
+                        ],
+                    }
+                },
+                {
+                    "result": {
+                        "is_single_col_cube": True,
+                        "measures": {"count": {"data": [1, 1, 0]}},
+                        "counts": [1, 1, 0],
+                        "dimensions": [
+                            {
+                                "type": {
+                                    "class": "enum",
+                                    "elements": [
+                                        {"id": 0, "missing": False, "value": "A"},
+                                        {"id": 1, "missing": False, "value": "C"},
+                                        {"id": -1, "missing": True, "value": {"?": -1}},
+                                    ],
+                                    "subtype": {
+                                        "class": "text",
+                                        "missing_reasons": {"No Data": -1},
+                                        "missing_rules": {},
+                                    },
+                                },
+                            }
+                        ],
+                    }
+                },
+                {
+                    "result": {
+                        "is_single_col_cube": True,
+                        "counts": [1, 1, 1, 0],
+                        "measures": {"count": {"data": [1, 1, 1, 0]}},
+                        "dimensions": [
+                            {
+                                "type": {
+                                    "class": "enum",
+                                    "elements": [
+                                        {"id": 0, "missing": False, "value": "A"},
+                                        {"id": 1, "missing": False, "value": "B"},
+                                        {"id": 2, "missing": False, "value": "C"},
+                                        {"id": -1, "missing": True, "value": {"?": -1}},
+                                    ],
+                                    "subtype": {
+                                        "class": "text",
+                                        "missing_reasons": {"No Data": -1},
+                                        "missing_rules": {},
+                                    },
+                                },
+                            }
+                        ],
+                    }
+                },
+            ],
+            transforms=[{"xfrms": 1}, {"xfrms": 2}, {"xfrms": 3}],
+            population=1000,
+            min_base=10,
+        )
+
+        cubes = cube_set._cubes
+        summary_cube = cubes[0]
+        single_col_filter1 = cubes[1]
+        single_col_filter2 = cubes[2]
+
+        assert len(summary_cube.partitions) == len(single_col_filter1.partitions)
+        assert (
+            summary_cube.dimension_types
+            == single_col_filter1.dimension_types
+            == single_col_filter2.dimension_types
+        )
+        assert summary_cube.partitions[0].counts == pytest.approx(np.array([1, 1, 1]))
+        assert single_col_filter1.partitions[0].counts == pytest.approx(
+            np.array([1, 0, 1])
+        )
+        assert single_col_filter2.partitions[0].counts == pytest.approx(
+            np.array([1, 1, 1])
+        )
+        assert (
+            single_col_filter1._cube_response["result"]["dimensions"][0]["type"][
+                "elements"
+            ]
+            == summary_cube._cube_response["result"]["dimensions"][0]["type"][
+                "elements"
+            ]
+            == single_col_filter2._cube_response["result"]["dimensions"][0]["type"][
+                "elements"
+            ]
+        )
 
     @pytest.mark.parametrize(
         ("is_multi_cube", "cube_0_ndim", "expected_value"),
@@ -387,7 +502,7 @@ class DescribeCube:
         assert Cube(None, cube_idx_arg).cube_index == expected_value
 
     @pytest.mark.parametrize(
-        ("dim_types", "cube_idx", "_is_single_filter_col_cube", "expected_value"),
+        ("dim_types", "cube_idx", "is_single_filter_col_cube", "expected_value"),
         (
             ((), 0, False, False),
             ((), 0, True, False),
@@ -404,15 +519,15 @@ class DescribeCube:
         request,
         dim_types,
         cube_idx,
-        _is_single_filter_col_cube,
+        is_single_filter_col_cube,
         expected_value,
         dimension_types_prop_,
     ):
         property_mock(
             request,
             Cube,
-            "_is_single_filter_col_cube",
-            return_value=_is_single_filter_col_cube,
+            "is_single_filter_col_cube",
+            return_value=is_single_filter_col_cube,
         )
         dimension_types_prop_.return_value = dim_types
         cube = Cube(
@@ -443,7 +558,7 @@ class DescribeCube:
         self, _cube_response_prop_, cube_response, expected_value
     ):
         _cube_response_prop_.return_value = cube_response
-        assert Cube(None)._is_single_filter_col_cube == expected_value
+        assert Cube(None).is_single_filter_col_cube == expected_value
 
     def it_provides_access_to_the_cube_response_dict_to_help(self):
         assert Cube({"cube": "dict"})._cube_response == {"cube": "dict"}

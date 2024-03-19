@@ -162,6 +162,13 @@ class CubeSet:
                     population=self._population,
                     mask_size=self._min_base,
                 )
+                cube = (
+                    cube.augment_response(self._cube_responses[0])
+                    if self._is_multi_cube
+                    and cube.is_single_filter_col_cube
+                    and idx > 0
+                    else cube
+                )
                 # --- numeric-measures cubes require inflation to restore their
                 # --- rows-dimension, others don't
                 yield cube.inflate() if self._is_numeric_measure else cube
@@ -244,6 +251,69 @@ class Cube:
         """frozenset of available CUBE_MEASURE members in the cube response."""
         cube_measures = self._cube_response.get("result", {}).get("measures", {}).keys()
         return frozenset(CUBE_MEASURE(m) for m in cube_measures)
+
+    def augment_response(self, summary_cube_resp) -> "Cube":
+        """Inlfate counts, data and elements dict in case of a single filter cube.
+
+        This method is called though the CubeSet while we itearate over all the cube
+        responses. If a cube is a single column filter and its idx > 0 it will be
+        augmented but only if the summary cube shape is different from its own shape.
+
+        In a multitable example we can have a text variable on the rows and a single col
+        filter (text) on the columns. From zz9 result the 2 cubes (summary cube and
+        filter cube) will have a different shape. Basically the filter cube will miss
+        the row labes that have 0 as counts.
+
+            | FCUBE | CAT
+        ----+-------+----
+         A  |   1   |  1
+         B  |   1   |  1
+         C  |   1   |  1
+         D  |       |  1
+         E  |       |  1
+         F  |       |  1
+
+        The FUCBE have D E and F missing cause its results doesn't count them. And the
+        rendering starts from the top without the correct row label association.
+        For a correct result the FCUBE cube_response needs to be augmentes with all the
+        elements of the summary cube and position the values in the corresponding
+        position of the only existing labels in the response.
+
+            | FCUBE | CAT
+        ----+-------+----
+         A  |   0   |  1
+         B  |   0   |  1
+         C  |   1   |  1
+         D  |   1   |  1
+         E  |   1   |  1
+         F  |   0   |  1
+        """
+        cube_resp = self._cube_response
+
+        if len(cube_resp["result"]["counts"]) != len(
+            summary_cube_resp["result"]["counts"]
+        ):
+            elements = summary_cube_resp["result"]["dimensions"][0]["type"]["elements"]
+            values = [
+                el.get("value")
+                for el in cube_resp["result"]["dimensions"][0]["type"]["elements"]
+                if isinstance(el.get("value"), (int, str))
+            ]
+            positions = [item["id"] for item in elements if item["value"] in values]
+            cube_resp["result"]["dimensions"][0]["type"]["elements"] = elements
+            data = [0] * len(summary_cube_resp["result"]["counts"])
+            for pos, value in zip(positions, cube_resp["result"]["counts"]):
+                data[pos] = value
+            cube_resp["result"]["counts"] = data
+            cube_resp["result"]["measures"]["count"]["data"] = data
+            return Cube(
+                cube_resp,
+                self._cube_idx_arg,
+                self._transforms_dict,
+                self._population,
+                self._mask_size,
+            )
+        return self
 
     @lazyproperty
     def counts(self) -> np.ndarray:
@@ -344,6 +414,11 @@ class Cube:
     def has_weighted_counts(self) -> bool:
         """True if cube response has weighted count data."""
         return self.weighted_counts is not None
+
+    @lazyproperty
+    def is_single_filter_col_cube(self) -> float:
+        """bool determines if it is a single column filter cube."""
+        return self._cube_response["result"].get("is_single_col_cube", False)
 
     @lazyproperty
     def means(self) -> Optional[np.ndarray]:
@@ -563,7 +638,7 @@ class Cube:
         a 2D cube-result becomes a single slice.
         """
         return (
-            (self._cube_idx_arg == 0 or self._is_single_filter_col_cube)
+            (self._cube_idx_arg == 0 or self.is_single_filter_col_cube)
             and len(self.dimension_types) > 0
             and self.dimension_types[0] == DT.CA
         )
@@ -584,11 +659,6 @@ class Cube:
                 f"Unsupported type <{type(self._cube_response_arg).__name__}> provided."
                 f" Cube response must be JSON (str) or dict."
             )
-
-    @lazyproperty
-    def _is_single_filter_col_cube(self) -> float:
-        """bool determines if it is a single column filter cube."""
-        return self._cube_response["result"].get("is_single_col_cube", False)
 
     @lazyproperty
     def _measures(self) -> "_Measures":
@@ -927,7 +997,8 @@ class _CovarianceMeasure(_BaseMeasure):
             return None
         return np.array(
             tuple(
-                np.nan if type(x) is dict else x for x in self._measure_payload["data"]
+                np.nan if isinstance(x, dict) else x
+                for x in self._measure_payload["data"]
             ),
             dtype=np.float64,
         ).flatten()
@@ -969,7 +1040,9 @@ class _MeanMeasure(_BaseMeasure):
         if measure_payload is None:
             return None
         return np.array(
-            tuple(np.nan if type(x) is dict else x for x in measure_payload["data"]),
+            tuple(
+                np.nan if isinstance(x, dict) else x for x in measure_payload["data"]
+            ),
             dtype=np.float64,
         ).flatten()
 
@@ -989,7 +1062,8 @@ class _OverlapMeasure(_BaseMeasure):
             return None
         return np.array(
             tuple(
-                np.nan if type(x) is dict else x for x in self._measure_payload["data"]
+                np.nan if isinstance(x, dict) else x
+                for x in self._measure_payload["data"]
             ),
             dtype=np.float64,
         ).flatten()
@@ -1028,7 +1102,9 @@ class _StdDevMeasure(_BaseMeasure):
             return None
 
         return np.array(
-            tuple(np.nan if type(x) is dict else x for x in measure_payload["data"]),
+            tuple(
+                np.nan if isinstance(x, dict) else x for x in measure_payload["data"]
+            ),
             dtype=np.float64,
         ).flatten()
 
@@ -1049,7 +1125,9 @@ class _SumMeasure(_BaseMeasure):
             return None
 
         return np.array(
-            tuple(np.nan if type(x) is dict else x for x in measure_payload["data"]),
+            tuple(
+                np.nan if isinstance(x, dict) else x for x in measure_payload["data"]
+            ),
             dtype=np.float64,
         ).flatten()
 
