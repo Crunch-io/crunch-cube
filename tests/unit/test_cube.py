@@ -171,7 +171,7 @@ class DescribeCubeSet:
     ):
         cubes_ = tuple(instance_mock(request, Cube) for _ in range(4))
         for c in cubes_:
-            c._is_single_filter_col_cube = False
+            c.is_single_filter_col_cube = False
         Cube_.side_effect = iter(cubes_)
         _is_numeric_measure_prop_.return_value = False
         cube_set = CubeSet(
@@ -213,7 +213,7 @@ class DescribeCubeSet:
     ):
         cubes_ = tuple(instance_mock(request, Cube) for _ in range(4))
         cube_.inflate.side_effect = iter(cubes_)
-        cube_._is_single_filter_col_cube = False
+        cube_.is_single_filter_col_cube = False
         Cube_.return_value = cube_
         _is_numeric_measure_prop_.return_value = True
         cube_set = CubeSet(
@@ -502,7 +502,7 @@ class DescribeCube:
         assert Cube(None, cube_idx_arg).cube_index == expected_value
 
     @pytest.mark.parametrize(
-        ("dim_types", "cube_idx", "_is_single_filter_col_cube", "expected_value"),
+        ("dim_types", "cube_idx", "is_single_filter_col_cube", "expected_value"),
         (
             ((), 0, False, False),
             ((), 0, True, False),
@@ -519,15 +519,15 @@ class DescribeCube:
         request,
         dim_types,
         cube_idx,
-        _is_single_filter_col_cube,
+        is_single_filter_col_cube,
         expected_value,
         dimension_types_prop_,
     ):
         property_mock(
             request,
             Cube,
-            "_is_single_filter_col_cube",
-            return_value=_is_single_filter_col_cube,
+            "is_single_filter_col_cube",
+            return_value=is_single_filter_col_cube,
         )
         dimension_types_prop_.return_value = dim_types
         cube = Cube(
@@ -558,7 +558,7 @@ class DescribeCube:
         self, _cube_response_prop_, cube_response, expected_value
     ):
         _cube_response_prop_.return_value = cube_response
-        assert Cube(None)._is_single_filter_col_cube == expected_value
+        assert Cube(None).is_single_filter_col_cube == expected_value
 
     def it_provides_access_to_the_cube_response_dict_to_help(self):
         assert Cube({"cube": "dict"})._cube_response == {"cube": "dict"}

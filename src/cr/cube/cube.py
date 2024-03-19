@@ -165,7 +165,7 @@ class CubeSet:
                 cube = (
                     cube.augment_response(self._cube_responses[0])
                     if self._is_multi_cube
-                    and cube._is_single_filter_col_cube
+                    and cube.is_single_filter_col_cube
                     and idx > 0
                     else cube
                 )
@@ -416,6 +416,11 @@ class Cube:
         return self.weighted_counts is not None
 
     @lazyproperty
+    def is_single_filter_col_cube(self) -> float:
+        """bool determines if it is a single column filter cube."""
+        return self._cube_response["result"].get("is_single_col_cube", False)
+
+    @lazyproperty
     def means(self) -> Optional[np.ndarray]:
         """Optional float64 ndarray of the cube_means if the measure exists."""
         if self._measures.means is None:
@@ -633,7 +638,7 @@ class Cube:
         a 2D cube-result becomes a single slice.
         """
         return (
-            (self._cube_idx_arg == 0 or self._is_single_filter_col_cube)
+            (self._cube_idx_arg == 0 or self.is_single_filter_col_cube)
             and len(self.dimension_types) > 0
             and self.dimension_types[0] == DT.CA
         )
@@ -654,11 +659,6 @@ class Cube:
                 f"Unsupported type <{type(self._cube_response_arg).__name__}> provided."
                 f" Cube response must be JSON (str) or dict."
             )
-
-    @lazyproperty
-    def _is_single_filter_col_cube(self) -> float:
-        """bool determines if it is a single column filter cube."""
-        return self._cube_response["result"].get("is_single_col_cube", False)
 
     @lazyproperty
     def _measures(self) -> "_Measures":
