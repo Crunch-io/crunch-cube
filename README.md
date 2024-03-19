@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.42
+- Inflate cubes that are single column filters
+
 ### 3.0.41
 - Remove `deepcopy` from dimension module due to a performance issue
 
