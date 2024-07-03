@@ -26,7 +26,7 @@ class CubeMeasures:
         return _BaseCubeMeans.factory(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
-    def cube_median(self):
+    def cube_medians(self):
         """_BaseCubeMedian subclass object for this cube-result."""
         return _BaseCubeMedians.factory(self._cube, self._dimensions, self._slice_idx)
 
@@ -139,9 +139,7 @@ class _BaseCubeCounts(_BaseCubeMeasure):
             (
                 "MR"
                 if dim_type == DT.MR
-                else "ARR"
-                if dim_type in DT.ARRAY_TYPES
-                else "CAT"
+                else "ARR" if dim_type in DT.ARRAY_TYPES else "CAT"
             )
             for dim_type in cube.dimension_types[-2:]
         )

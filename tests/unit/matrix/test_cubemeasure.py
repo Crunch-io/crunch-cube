@@ -15,6 +15,7 @@ from cr.cube.matrix.cubemeasure import (
     _BaseCubeCounts,
     _BaseCubeMeans,
     _BaseCubeMeasure,
+    _BaseCubeMedians,
     _BaseCubeOverlaps,
     _BaseCubeStdDev,
     _BaseCubeSums,
@@ -54,6 +55,7 @@ class DescribeCubeMeasures:
         "cube_measure_, CubeMeasureCls",
         (
             ("cube_means", _BaseCubeMeans),
+            ("cube_medians", _BaseCubeMedians),
             ("cube_overlaps", _BaseCubeOverlaps),
             ("cube_sum", _BaseCubeSums),
             ("cube_stddev", _BaseCubeStdDev),

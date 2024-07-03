@@ -1189,7 +1189,7 @@ class _Medians(_BaseSecondOrderMeasure):
     def blocks(self):
         """2D array of the four 2D "blocks" making up this measure."""
         return NanSubtotals.blocks(
-            self._cube_measures.cube_median.medians, self._dimensions
+            self._cube_measures.cube_medians.medians, self._dimensions
         )
 
 
