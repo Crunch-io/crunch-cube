@@ -158,7 +158,7 @@ class DescribeIntegratedCube:
                 ]
             )
         )
-        assert cube.median == pytest.approx(
+        assert cube.medians == pytest.approx(
             np.array(
                 [
                     [71.0, 42.5, 55.33333333, 1.33333333],

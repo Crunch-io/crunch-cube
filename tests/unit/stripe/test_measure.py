@@ -11,7 +11,7 @@ from cr.cube.dimension import Dimension
 from cr.cube.stripe.cubemeasure import (
     _BaseCubeMeans,
     _BaseCubeCounts,
-    _BaseCubeMedian,
+    _BaseCubeMedians,
     _CatCubeCounts,
     CubeMeasures,
 )
@@ -20,7 +20,7 @@ from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
     _Means,
     _MeansSmoothed,
-    _Median,
+    _Medians,
     _PopulationProportions,
     _PopulationProportionStderrs,
     _ScaledCounts,
@@ -45,7 +45,7 @@ class DescribeStripeMeasures:
         "measure_prop_name, MeasureCls",
         (
             ("means", _Means),
-            ("median", _Median),
+            ("medians", _Medians),
             ("population_proportions", _PopulationProportions),
             ("population_proportion_stderrs", _PopulationProportionStderrs),
             ("scaled_counts", _ScaledCounts),
@@ -202,19 +202,21 @@ class Describe_Median:
 
     def it_computes_its_base_values_to_help(self, request):
         cube_medians_ = instance_mock(
-            request, _BaseCubeMedian, median=np.array([1.1, 2.2, 3.3])
+            request, _BaseCubeMedians, medians=np.array([1.1, 2.2, 3.3])
         )
-        cube_measures_ = instance_mock(request, CubeMeasures, cube_median=cube_medians_)
-        median = _Median(None, None, cube_measures_)
+        cube_measures_ = instance_mock(
+            request, CubeMeasures, cube_medians=cube_medians_
+        )
+        medians = _Medians(None, None, cube_measures_)
 
-        assert median.base_values == pytest.approx([1.1, 2.2, 3.3])
+        assert medians.base_values == pytest.approx([1.1, 2.2, 3.3])
 
     def it_computes_its_subtotal_values_to_help(self, request):
-        property_mock(request, _Median, "base_values", return_value=[1.1, 2.2, 3.3])
+        property_mock(request, _Medians, "base_values", return_value=[1.1, 2.2, 3.3])
         rows_dimension_ = instance_mock(request, Dimension)
         NanSubtotals_ = class_mock(request, "cr.cube.stripe.measure.NanSubtotals")
         NanSubtotals_.subtotal_values.return_value = np.array([np.nan, np.nan])
-        medians = _Median(rows_dimension_, None, None)
+        medians = _Medians(rows_dimension_, None, None)
 
         subtotal_values = medians.subtotal_values
 

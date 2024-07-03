@@ -190,7 +190,7 @@ class DescribeNumericArrays:
         """Test stddev on no-dimensions measure of numeric array."""
         strand = Cube(NA.NUM_ARR_MEDIAN_NO_GROUPING).partitions[0]
 
-        assert strand.median == pytest.approx([3.5819889, 1.51188458, 0.12132034])
+        assert strand.medians == pytest.approx([3.5819889, 1.51188458, 0.12132034])
         assert strand.unweighted_counts.tolist() == [4, 3, 2]
         assert strand.unweighted_bases.tolist() == [4, 3, 2]
         assert strand.table_base_range.tolist() == [2, 4]
@@ -216,7 +216,7 @@ class DescribeNumericArrays:
     def it_provides_median_for_num_array_grouped_by_cat(self):
         slice_ = Cube(NA.NUM_ARR_MEDIAN_GROUPED_BY_CAT).partitions[0]
 
-        assert slice_.median == pytest.approx(
+        assert slice_.medians == pytest.approx(
             np.array(
                 [
                     #  --------Gender------------
