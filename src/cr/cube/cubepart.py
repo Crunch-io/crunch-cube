@@ -716,7 +716,8 @@ class _Slice(CubePartition):
         """2D optional np.float64 ndarray of median values for each table cell.
 
         Cell value is `np.nan` for each cell corresponding to an inserted subtotal
-        (medians of addend cells cannot simply be added to get the mean of the subtotal).
+        (medians of addend cells cannot simply be added to get the mean of the
+        subtotal).
 
         Raises `ValueError` if the cube-result does not include a median cube-measure.
         """

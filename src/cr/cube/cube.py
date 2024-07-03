@@ -807,7 +807,7 @@ class _Measures:
         # fixtures that don't have valid_counts.
         if self.means is not None:
             return self.means.missing_count
-        # The check on the medians measure is needed for retro-compatibility with the old
+        # The check on the median measure is needed for retro-compatibility with the old
         # fixtures that don't have valid_counts.
         if self.medians is not None:
             return self.medians.missing_count
