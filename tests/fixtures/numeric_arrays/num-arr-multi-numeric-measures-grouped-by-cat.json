@@ -42,7 +42,7 @@
         ]
       },
       "median": {
-        "function": "cube_median",
+        "function": "cube_quantile",
         "args": [
           {
             "variable": "9bf24ea26b364a0897d77471695f4c88"

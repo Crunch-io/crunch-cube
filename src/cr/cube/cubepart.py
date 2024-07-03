@@ -2006,6 +2006,20 @@ class _Strand(CubePartition):
             )
 
     @lazyproperty
+    def median(self):
+        """1D np.float64 ndarray of median for each row of strand.
+
+        Raises ValueError when accessed on a cube-result that does not contain a median
+        cube-measure.
+        """
+        try:
+            return self._assemble_vector(self._measures.median.blocks)
+        except ValueError:
+            raise ValueError(
+                "`.median` is undefined for a cube-result without a median measure"
+            )
+
+    @lazyproperty
     def min_base_size_mask(self):
         """1D bool ndarray of True for each row that fails to meet min-base spec.
 

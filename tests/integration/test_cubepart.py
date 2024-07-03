@@ -1991,6 +1991,11 @@ class Describe_Strand:
             "`.sums` is undefined for a cube-result without a sum measure"
         )
         with pytest.raises(ValueError) as e:
+            strand.median
+        assert str(e.value) == (
+            "`.median` is undefined for a cube-result without a median measure"
+        )
+        with pytest.raises(ValueError) as e:
             strand.stddev
         assert str(e.value) == (
             "`.stddev` is undefined for a cube-result without a stddev measure"
@@ -2295,6 +2300,18 @@ class Describe_Strand:
 
         assert strand.sums == pytest.approx([88.0, 77.0])
         assert strand.table_base_range.tolist() == [5, 5]
+
+    def it_provides_median_measure_for_CAT(self):
+        strand = Cube(CR.CAT_MEDIAN).partitions[0]
+
+        assert strand.median == pytest.approx([8.8, 7.445])
+        assert strand.table_base_range.tolist() == [5, 5]
+
+    def it_provides_median_measure_for_MR(self):
+        strand = Cube(CR.MR_MEDIAN).partitions[0]
+
+        assert strand.median == pytest.approx([2.22398, 0.23444, 7.23452])
+        assert strand.table_base_range.tolist() == [3, 3]
 
     def it_provides_sum_measure_for_CAT_HS(self):
         transforms = {

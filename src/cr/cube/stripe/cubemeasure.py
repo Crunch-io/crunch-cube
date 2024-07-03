@@ -27,6 +27,11 @@ class CubeMeasures:
         return _BaseCubeMeans.factory(self._cube, self._rows_dimension)
 
     @lazyproperty
+    def cube_median(self):
+        """_BaseCubeMedian subclass object for this stripe."""
+        return _BaseCubeMedian.factory(self._cube, self._rows_dimension)
+
+    @lazyproperty
     def cube_stddev(self):
         """_BaseCubeStdDev subclass object for this stripe."""
         return _BaseCubeStdDev.factory(self._cube, self._rows_dimension)
@@ -251,6 +256,55 @@ class _MrCubeMeans(_BaseCubeMeans):
     def means(self):
         """1D np.float64 ndarray of mean for each stripe row."""
         return self._means[:, 0]
+
+
+# === MEDIAN ===
+
+
+class _BaseCubeMedian(_BaseCubeMeasure):
+    """Base class for median cube-measure variants."""
+
+    def __init__(self, rows_dimension, median):
+        super(_BaseCubeMedian, self).__init__(rows_dimension)
+        self._median = median
+
+    @classmethod
+    def factory(cls, cube, rows_dimension):
+        """Return _BaseCubeMedian subclass instance appropriate to `cube`."""
+        if cube.median is None:
+            raise ValueError("cube-result does not contain cube-median measure")
+        MedianCls = (
+            _MrCubeMedian if rows_dimension.dimension_type == DT.MR else _CatCubeMedian
+        )
+        return MedianCls(rows_dimension, cube.median)
+
+    @lazyproperty
+    def median(self):
+        """1D np.float64 ndarray of median for each stripe row."""
+        raise NotImplementedError(
+            f"`{type(self).__name__}` must implement `.median`"
+        )  # pragma: no cover
+
+
+class _CatCubeMedian(_BaseCubeMedian):
+    """Median cube-measure for a non-MR stripe."""
+
+    @lazyproperty
+    def median(self):
+        """1D np.float64 ndarray of median for each stripe row."""
+        return self._median
+
+
+class _MrCubeMedian(_BaseCubeMedian):
+    """Median cube-measure for an MR stripe.
+
+    Its `.median` is a 2D ndarray with axes (rows, sel/not).
+    """
+
+    @lazyproperty
+    def median(self):
+        """1D np.float64 ndarray of median for each stripe row."""
+        return self._median[:, 0]
 
 
 # === STD DEV ===
