@@ -805,6 +805,10 @@ class _Measures:
         # fixtures that don't have valid_counts.
         if self.means is not None:
             return self.means.missing_count
+        # The check on the median measure is needed for retro-compatibility with the old
+        # fixtures that don't have valid_counts.
+        if self.median is not None:
+            return self.median.missing_count
         return self._cube_dict["result"].get("missing", 0)
 
     @lazyproperty
@@ -1068,7 +1072,7 @@ class _MedianMeasure(_BaseMeasure):
     @lazyproperty
     def missing_count(self) -> int:
         """Numeric value representing count of missing rows in response."""
-        return self._cube_dict["result"]["measures"]["mean"].get("n_missing", 0)
+        return self._cube_dict["result"]["measures"]["median"].get("n_missing", 0)
 
     @lazyproperty
     def _flat_values(self) -> Optional[np.ndarray]:

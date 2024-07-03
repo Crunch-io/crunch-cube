@@ -272,6 +272,15 @@ class DescribeIntegrated_Measures:
         missing_count = measures.missing_count
         assert missing_count == 3
 
+    def it_provides_the_median_missing_count_when_median_is_available(self):
+        cube_dict = CR.MEDIAN_CAT_X_CAT_HS
+        measures = _Measures(
+            cube_dict,
+            Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
+        )
+        missing_count = measures.missing_count
+        assert missing_count == 0
+
     def it_provides_the_means_missing_count_when_sum_are_available(self):
         cube_dict = CR.SUM_CAT_X_MR
         measures = _Measures(
