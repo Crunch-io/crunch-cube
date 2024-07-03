@@ -139,9 +139,7 @@ class _BaseCubeCounts(_BaseCubeMeasure):
             (
                 "MR"
                 if dim_type == DT.MR
-                else "ARR"
-                if dim_type in DT.ARRAY_TYPES
-                else "CAT"
+                else "ARR" if dim_type in DT.ARRAY_TYPES else "CAT"
             )
             for dim_type in cube.dimension_types[-2:]
         )
