@@ -213,6 +213,23 @@ class DescribeNumericArrays:
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 1], [1, 1]]))
 
+    def it_provides_median_for_num_array_grouped_by_cat(self):
+        slice_ = Cube(NA.NUM_ARR_MEDIAN_GROUPED_BY_CAT).partitions[0]
+
+        assert slice_.median == pytest.approx(
+            np.array(
+                [
+                    #  --------Gender------------
+                    #     M         F
+                    [3.7368949, 17.6776695],  # S1 (Ticket Sold)
+                    [1.8867513, np.nan],  # S2 (Ticket Sold)
+                    [np.nan, np.nan],  # S3 (Ticket Sold)
+                ],
+            ),
+            nan_ok=True,
+        )
+        assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 1], [1, 1]]))
+
     def it_provides_stddev_for_num_array_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_STDDEV_X_MR).partitions[0]
 
@@ -222,6 +239,25 @@ class DescribeNumericArrays:
                     # -------------------------MR----------------
                     #     S1      S2       S3
                     [1.4142136, np.nan, np.nan],  # S1 (num arr)
+                    [np.nan, np.nan, np.nan],  # S2 (num arr)
+                    [np.nan, np.nan, np.nan],  # S3 (num arr)
+                ],
+            ),
+            nan_ok=True,
+        )
+        assert slice_.columns_base == pytest.approx(
+            np.array([[2, 1, 1], [1, 0, 0], [1, 1, 1]])
+        )
+
+    def it_provides_median_for_num_array_x_mr(self):
+        slice_ = Cube(NA.NUM_ARR_MEDIAN_X_MR).partitions[0]
+
+        assert slice_.stddev == pytest.approx(
+            np.array(
+                [
+                    # -------------------------MR----------------
+                    #     S1      S2       S3
+                    [2.4142136, np.nan, np.nan],  # S1 (num arr)
                     [np.nan, np.nan, np.nan],  # S2 (num arr)
                     [np.nan, np.nan, np.nan],  # S3 (num arr)
                 ],

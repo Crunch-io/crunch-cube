@@ -58,6 +58,12 @@ class Describe_Slice:
             == "`.means` is undefined for a cube-result without a mean measure"
         )
         with pytest.raises(ValueError) as e:
+            slice_.median
+        assert (
+            str(e.value)
+            == "`.median` is undefined for a cube-result without a median measure"
+        )
+        with pytest.raises(ValueError) as e:
             slice_.pairwise_means_indices
         assert (
             str(e.value) == "`.pairwise_means_indices` is undefined for a cube-result"
@@ -437,6 +443,19 @@ class Describe_Slice:
         assert slice_.counts == pytest.approx(np.array([[189, 395, 584, 606, 310]]))
         assert slice_.means == pytest.approx(
             np.array([[24.4393575, 37.3212274, np.nan, 55.4857195, 73.0242765]]),
+            nan_ok=True,
+        )
+        assert slice_.rows_margin.tolist() == [1500.0]
+
+    def it_provides_values_for_median_cat_x_cat_hs(self):
+        slice_ = Cube(CR.MEDIAN_CAT_X_CAT_HS).partitions[0]
+
+        # This fixture has both cube_counts and cube_means measure, for this reason
+        # both measures are available at cubepart level.
+        assert slice_.columns_margin.tolist() == [189, 395, 584, 606, 310]
+        assert slice_.counts == pytest.approx(np.array([[189, 395, 584, 606, 310]]))
+        assert slice_.median == pytest.approx(
+            np.array([[14.4393575, 37.3212274, np.nan, 25.4857195, 23.0242765]]),
             nan_ok=True,
         )
         assert slice_.rows_margin.tolist() == [1500.0]
