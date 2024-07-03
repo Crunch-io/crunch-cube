@@ -158,6 +158,15 @@ class DescribeIntegratedCube:
                 ]
             )
         )
+        assert cube.median == pytest.approx(
+            np.array(
+                [
+                    [71.0, 42.5, 55.33333333, 1.33333333],
+                    [16.66666667, 25.5, 21.33333333, 43.0],
+                    [2.33333333, 25.0, 4.33333333, 25.0],
+                ]
+            )
+        )
         assert cube.covariance == pytest.approx(
             np.array(
                 [

@@ -428,6 +428,13 @@ class Cube:
         return self._measures.means.raw_cube_array[self._valid_idxs].astype(np.float64)
 
     @lazyproperty
+    def median(self) -> Optional[np.ndarray]:
+        """Optional float64 ndarray of the cube_median if the measure exists."""
+        if self._measures.median is None:
+            return None
+        return self._measures.median.raw_cube_array[self._valid_idxs].astype(np.float64)
+
+    @lazyproperty
     def missing(self) -> int:
         """Get missing count of a cube."""
         return self._measures.missing_count
@@ -782,6 +789,14 @@ class _Measures:
         return None if mean.raw_cube_array is None else mean
 
     @lazyproperty
+    def median(self) -> 'Optional["_MedianMeasure"]':
+        """Optional _MedianMeasure object providing access to means values."""
+        median = _MedianMeasure(
+            self._cube_dict, self._all_dimensions, self._cube_idx_arg
+        )
+        return None if median.raw_cube_array is None else median
+
+    @lazyproperty
     def missing_count(self) -> int:
         """numeric representing count of missing rows in cube response."""
         if self.unweighted_valid_counts is not None:
@@ -1037,6 +1052,33 @@ class _MeanMeasure(_BaseMeasure):
         returned value.
         """
         measure_payload = self._cube_dict["result"].get("measures", {}).get("mean")
+        if measure_payload is None:
+            return None
+        return np.array(
+            tuple(
+                np.nan if isinstance(x, dict) else x for x in measure_payload["data"]
+            ),
+            dtype=np.float64,
+        ).flatten()
+
+
+class _MedianMeasure(_BaseMeasure):
+    """Statistical median values from a cube-response."""
+
+    @lazyproperty
+    def missing_count(self) -> int:
+        """Numeric value representing count of missing rows in response."""
+        return self._cube_dict["result"]["measures"]["mean"].get("n_missing", 0)
+
+    @lazyproperty
+    def _flat_values(self) -> Optional[np.ndarray]:
+        """Optional 1D np.ndarray of np.float64 median values as found in cube response.
+
+        Median data may include missing items represented by a dict like
+        {'?': -1} in the cube response. These are replaced by np.nan in the
+        returned value.
+        """
+        measure_payload = self._cube_dict["result"].get("measures", {}).get("median")
         if measure_payload is None:
             return None
         return np.array(
