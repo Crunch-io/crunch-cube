@@ -1087,11 +1087,9 @@ class _MediansMeasure(_BaseMeasure):
         measure_payload = self._cube_dict["result"].get("measures", {}).get("median")
         if measure_payload is None:
             return None
+        data = np.array(measure_payload["data"]).flatten()
         return np.array(
-            tuple(
-                np.nan if isinstance(x, dict) else x for x in measure_payload["data"]
-            ),
-            dtype=np.float64,
+            tuple(np.nan if isinstance(x, dict) else x for x in data), dtype=np.float64
         ).flatten()
 
 
