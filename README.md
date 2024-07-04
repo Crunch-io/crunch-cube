@@ -111,6 +111,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.43
+- Median measure
+
 ### 3.0.42
 - Inflate cubes that are single column filters
 
