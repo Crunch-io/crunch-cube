@@ -39,6 +39,11 @@ class StripeMeasures:
         return _Means(self._rows_dimension, self, self._cube_measures)
 
     @lazyproperty
+    def medians(self):
+        """_Medians measure object for this stripe."""
+        return _Medians(self._rows_dimension, self, self._cube_measures)
+
+    @lazyproperty
     def population_proportions(self):
         """_PopulationPrortion measure object for this stripe."""
         return _PopulationProportions(self._rows_dimension, self, self._cube_measures)
@@ -226,6 +231,27 @@ class _Means(_BaseSecondOrderMeasure):
         """1D ndarray of np.nan for each row-subtotal.
 
         Mean values cannot be subtotaled and each subtotal value is unconditionally
+        np.nan.
+        """
+        return NanSubtotals.subtotal_values(self.base_values, self._rows_dimension)
+
+
+class _Medians(_BaseSecondOrderMeasure):
+    """Provides the medians measure for a stripe.
+
+    Relies on the presence of a medians cube-measure in the cube-result.
+    """
+
+    @lazyproperty
+    def base_values(self):
+        """1D np.float64 ndarray of medians for each row."""
+        return self._cube_measures.cube_medians.medians
+
+    @lazyproperty
+    def subtotal_values(self):
+        """1D ndarray of np.nan for each row-subtotal.
+
+        Medians values cannot be subtotaled and each subtotal value is unconditionally
         np.nan.
         """
         return NanSubtotals.subtotal_values(self.base_values, self._rows_dimension)

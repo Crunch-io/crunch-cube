@@ -11,6 +11,7 @@ from cr.cube.dimension import Dimension
 from cr.cube.stripe.cubemeasure import (
     _BaseCubeMeans,
     _BaseCubeCounts,
+    _BaseCubeMedians,
     _CatCubeCounts,
     CubeMeasures,
 )
@@ -19,6 +20,7 @@ from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
     _Means,
     _MeansSmoothed,
+    _Medians,
     _PopulationProportions,
     _PopulationProportionStderrs,
     _ScaledCounts,
@@ -43,6 +45,7 @@ class DescribeStripeMeasures:
         "measure_prop_name, MeasureCls",
         (
             ("means", _Means),
+            ("medians", _Medians),
             ("population_proportions", _PopulationProportions),
             ("population_proportion_stderrs", _PopulationProportionStderrs),
             ("scaled_counts", _ScaledCounts),
@@ -187,6 +190,35 @@ class Describe_Means:
         means = _Means(rows_dimension_, None, None)
 
         subtotal_values = means.subtotal_values
+
+        NanSubtotals_.subtotal_values.assert_called_once_with(
+            [1.1, 2.2, 3.3], rows_dimension_
+        )
+        assert subtotal_values == pytest.approx([np.nan, np.nan], nan_ok=True)
+
+
+class Describe_Median:
+    """Unit test suite for `cr.cube.stripe.measure._Median` object."""
+
+    def it_computes_its_base_values_to_help(self, request):
+        cube_medians_ = instance_mock(
+            request, _BaseCubeMedians, medians=np.array([1.1, 2.2, 3.3])
+        )
+        cube_measures_ = instance_mock(
+            request, CubeMeasures, cube_medians=cube_medians_
+        )
+        medians = _Medians(None, None, cube_measures_)
+
+        assert medians.base_values == pytest.approx([1.1, 2.2, 3.3])
+
+    def it_computes_its_subtotal_values_to_help(self, request):
+        property_mock(request, _Medians, "base_values", return_value=[1.1, 2.2, 3.3])
+        rows_dimension_ = instance_mock(request, Dimension)
+        NanSubtotals_ = class_mock(request, "cr.cube.stripe.measure.NanSubtotals")
+        NanSubtotals_.subtotal_values.return_value = np.array([np.nan, np.nan])
+        medians = _Medians(rows_dimension_, None, None)
+
+        subtotal_values = medians.subtotal_values
 
         NanSubtotals_.subtotal_values.assert_called_once_with(
             [1.1, 2.2, 3.3], rows_dimension_

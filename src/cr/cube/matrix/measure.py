@@ -206,6 +206,11 @@ class SecondOrderMeasures:
         """_Means measure object for this cube-result"""
         return _Means(self._dimensions, self, self._cube_measures)
 
+    @lazyproperty
+    def medians(self):
+        """_Medians measure object for this cube-result"""
+        return _Medians(self._dimensions, self, self._cube_measures)
+
     def pairwise_p_vals_for_subvar(self, subvar_idx):
         """_PairwiseSigPValsForSubvar measure object for this cube-result"""
         return _PairwiseSigPValsForSubvar(
@@ -1174,6 +1179,17 @@ class _Means(_BaseSecondOrderMeasure):
         """2D array of the four 2D "blocks" making up this measure."""
         return NanSubtotals.blocks(
             self._cube_measures.cube_means.means, self._dimensions
+        )
+
+
+class _Medians(_BaseSecondOrderMeasure):
+    """Provides the medians measure for a matrix."""
+
+    @lazyproperty
+    def blocks(self):
+        """2D array of the four 2D "blocks" making up this measure."""
+        return NanSubtotals.blocks(
+            self._cube_measures.cube_medians.medians, self._dimensions
         )
 
 

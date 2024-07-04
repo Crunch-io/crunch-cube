@@ -10,11 +10,14 @@ from cr.cube.dimension import Dimension
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.stripe.cubemeasure import (
     _BaseCubeMeans,
+    _BaseCubeMedians,
     _BaseCubeSums,
     _BaseCubeCounts,
     _CatCubeCounts,
     _CatCubeMeans,
+    _CatCubeMedians,
     _CatCubeSums,
+    _MrCubeMedians,
     CubeMeasures,
     _MrCubeCounts,
     _MrCubeMeans,
@@ -42,6 +45,21 @@ class DescribeCubeMeasures:
 
         _BaseCubeMeans_.factory.assert_called_once_with(cube_, rows_dimension_)
         assert cube_means is cube_means_
+
+    def it_provides_access_to_the_cube_median_object(
+        self, request, cube_, rows_dimension_
+    ):
+        cube_medians_ = instance_mock(request, _BaseCubeMedians)
+        _BaseCubeMedian_ = class_mock(
+            request, "cr.cube.stripe.cubemeasure._BaseCubeMedians"
+        )
+        _BaseCubeMedian_.factory.return_value = cube_medians_
+        cube_measures = CubeMeasures(cube_, rows_dimension_, None, None)
+
+        cube_medians = cube_measures.cube_medians
+
+        _BaseCubeMedian_.factory.assert_called_once_with(cube_, rows_dimension_)
+        assert cube_medians is cube_medians_
 
     def it_provides_access_to_the_cube_sum_object(
         self, request, cube_, rows_dimension_
@@ -347,6 +365,77 @@ class Describe_MrCubeMeans:
             _CatCubeMeans(None, None).factory(cube_, None)
 
         assert str(e.value) == "cube-result does not contain cube-means measure"
+
+
+# === MEDIANS ===
+
+
+class Describe_BaseCubeMedian:
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMedian`."""
+
+    @pytest.mark.parametrize(
+        "rows_dimension_type, CubeMedianCls, medians",
+        (
+            (DT.CAT, _CatCubeMedians, [1, 2, 3]),
+            (DT.MR, _MrCubeMedians, [[1, 6], [2, 5], [3, 4]]),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_cube_medians_objects(
+        self, request, rows_dimension_type, CubeMedianCls, medians
+    ):
+        cube_ = instance_mock(request, Cube, medians=medians)
+        rows_dimension_ = instance_mock(
+            request, Dimension, dimension_type=rows_dimension_type
+        )
+        cube_medians_ = instance_mock(request, CubeMedianCls)
+        CubeMedianCls_ = class_mock(
+            request,
+            "cr.cube.stripe.cubemeasure.%s" % CubeMedianCls.__name__,
+            return_value=cube_medians_,
+        )
+
+        cube_medians = _BaseCubeMedians.factory(cube_, rows_dimension_)
+
+        CubeMedianCls_.assert_called_once_with(rows_dimension_, medians)
+        assert cube_medians is cube_medians_
+
+
+class Describe_CatCubeMedians:
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeMedians`."""
+
+    def it_knows_its_medians(self):
+        cube_medians = _CatCubeMedians(None, np.array([1.1, 2.2, 3.3]))
+        assert cube_medians.medians == pytest.approx([1.1, 2.2, 3.3])
+
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_medians(
+        self, request
+    ):
+        cube_ = instance_mock(request, Cube)
+        cube_.medians = None
+        with pytest.raises(ValueError) as e:
+            _CatCubeMedians(None, None).factory(cube_, None)
+
+        assert str(e.value) == "cube-result does not contain cube-median measure"
+
+
+class Describe_MrCubeMedians:
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeMedians`."""
+
+    def it_knows_its_medians(self):
+        cube_medians = _MrCubeMedians(
+            None, np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]])
+        )
+        assert cube_medians.medians == pytest.approx([1.1, 3.3, 5.5])
+
+    def but_it_raises_value_error_when_the_cube_result_does_not_contain_medians(
+        self, request
+    ):
+        cube_ = instance_mock(request, Cube)
+        cube_.medians = None
+        with pytest.raises(ValueError) as e:
+            _CatCubeMedians(None, None).factory(cube_, None)
+
+        assert str(e.value) == "cube-result does not contain cube-median measure"
 
 
 # === SUM ===

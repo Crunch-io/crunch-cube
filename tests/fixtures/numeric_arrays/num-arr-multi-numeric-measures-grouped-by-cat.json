@@ -40,6 +40,17 @@
             "variable": "9bf24ea26b364a0897d77471695f4c88"
           }
         ]
+      },
+      "median": {
+        "function": "cube_quantile",
+        "args": [
+          {
+            "variable": "9bf24ea26b364a0897d77471695f4c88"
+          },
+          {
+            "value": 0.5
+          }
+        ]
       }
     },
     "dimensions": [
@@ -389,6 +400,68 @@
           10.3333333333,
           41.0,
           24.0,
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          },
+          {
+            "?": -8
+          }
+        ],
+        "n_missing": 0,
+        "metadata": {
+          "derived": true,
+          "references": {
+            "alias": "Movies",
+            "uniform_basis": false,
+            "name": "Movies",
+            "subreferences": [
+              {
+                "alias": "Dark Knight",
+                "name": "Dark Knight"
+              },
+              {
+                "alias": "Fight Club",
+                "name": "Fight Club"
+              },
+              {
+                "alias": "Meets the Par.",
+                "name": "Meets the Par."
+              }
+            ]
+          },
+          "type": {
+            "integer": true,
+            "subvariables": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "class": "numeric",
+            "missing_reasons": {
+              "No Data": -1,
+              "NaN": -8
+            },
+            "missing_rules": {}
+          }
+        }
+      },
+      "median": {
+        "data": [
+          71.0,
+          16.6666666667,
+          2.3333333333,
+          42.5,
+          25.5,
+          25.0,
+          55.3333333333,
+          21.3333333333,
+          4.3333333333,
+          1.3333333333,
+          43.0,
+          25.0,
           {
             "?": -8
           },

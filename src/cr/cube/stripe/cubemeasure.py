@@ -27,6 +27,11 @@ class CubeMeasures:
         return _BaseCubeMeans.factory(self._cube, self._rows_dimension)
 
     @lazyproperty
+    def cube_medians(self):
+        """_BaseCubeMedians subclass object for this stripe."""
+        return _BaseCubeMedians.factory(self._cube, self._rows_dimension)
+
+    @lazyproperty
     def cube_stddev(self):
         """_BaseCubeStdDev subclass object for this stripe."""
         return _BaseCubeStdDev.factory(self._cube, self._rows_dimension)
@@ -251,6 +256,57 @@ class _MrCubeMeans(_BaseCubeMeans):
     def means(self):
         """1D np.float64 ndarray of mean for each stripe row."""
         return self._means[:, 0]
+
+
+# === MEDIANs ===
+
+
+class _BaseCubeMedians(_BaseCubeMeasure):
+    """Base class for medians cube-measure variants."""
+
+    def __init__(self, rows_dimension, medians):
+        super(_BaseCubeMedians, self).__init__(rows_dimension)
+        self._medians = medians
+
+    @classmethod
+    def factory(cls, cube, rows_dimension):
+        """Return _BaseCubeMedian subclass instance appropriate to `cube`."""
+        if cube.medians is None:
+            raise ValueError("cube-result does not contain cube-median measure")
+        MedianCls = (
+            _MrCubeMedians
+            if rows_dimension.dimension_type == DT.MR
+            else _CatCubeMedians
+        )
+        return MedianCls(rows_dimension, cube.medians)
+
+    @lazyproperty
+    def medians(self):
+        """1D np.float64 ndarray of medians for each stripe row."""
+        raise NotImplementedError(
+            f"`{type(self).__name__}` must implement `.medians`"
+        )  # pragma: no cover
+
+
+class _CatCubeMedians(_BaseCubeMedians):
+    """Medians cube-measure for a non-MR stripe."""
+
+    @lazyproperty
+    def medians(self):
+        """1D np.float64 ndarray of medians for each stripe row."""
+        return self._medians
+
+
+class _MrCubeMedians(_BaseCubeMedians):
+    """Medians cube-measure for an MR stripe.
+
+    Its `.medians` is a 2D ndarray with axes (rows, sel/not).
+    """
+
+    @lazyproperty
+    def medians(self):
+        """1D np.float64 ndarray of medians for each stripe row."""
+        return self._medians[:, 0]
 
 
 # === STD DEV ===

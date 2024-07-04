@@ -1268,6 +1268,36 @@ class DescribeAssembler:
             ),
         )
 
+    def it_computes_median_cat_x_mr(self):
+        slice_ = Cube(CR.MEDIAN_CAT_X_MR).partitions[0]
+        np.testing.assert_almost_equal(
+            slice_.medians,
+            np.array(
+                [
+                    [19.0, 30.71428571, 18.0, 49.76923077, 37.2962963],
+                    [35.57142857, 45.0, 61.23809524, 48.0, 45.74137931],
+                    [32.0, 42.51785714, 59.42253521, 51.95217391, 41.57654723],
+                    [8.16666667, 0.46153846, 5.28205128, 4.73076923, 4.1641791],
+                    [2.6, 7.14814815, 2.38888889, 3.90526316, 5.42771084],
+                    [4.5, 9.09090909, 1.18181818, 4.19444444, 5.96039604],
+                ]
+            ),
+        )
+
+    def it_computes_median_for_mr_x_mr(self):
+        slice_ = Cube(CR.MR_X_MR_MEDIAN).partitions[0]
+
+        assert slice_.medians == pytest.approx(
+            np.array(
+                [
+                    [np.nan, np.nan, np.nan],
+                    [np.nan, 2.187795, np.nan],
+                    [np.nan, np.nan, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+
     def it_computes_means_mr_x_cat(self):
         slice_ = Cube(CR.MEANS_MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
@@ -1504,6 +1534,13 @@ class DescribeAssembler:
 
         assert slice_.sums == pytest.approx(
             np.array([[3.0, 0.0], [2.0, 0.0], [2.0, 0.0]])
+        )
+
+    def it_computes_median_mr_x_cat(self):
+        slice_ = Cube(CR.MEDIAN_MR_X_CAT).partitions[0]
+
+        assert slice_.medians == pytest.approx(
+            np.array([[3.5123, 0.1523], [2.9123, 0.1123], [2.7123, 0.6123]])
         )
 
 

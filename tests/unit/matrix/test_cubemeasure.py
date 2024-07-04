@@ -15,6 +15,7 @@ from cr.cube.matrix.cubemeasure import (
     _BaseCubeCounts,
     _BaseCubeMeans,
     _BaseCubeMeasure,
+    _BaseCubeMedians,
     _BaseCubeOverlaps,
     _BaseCubeStdDev,
     _BaseCubeSums,
@@ -22,14 +23,18 @@ from cr.cube.matrix.cubemeasure import (
     _CatXArrCubeCounts,
     _CatXCatCubeCounts,
     _CatXCatCubeMeans,
+    _CatXCatCubeMedians,
     _CatXCatCubeStdDev,
     _CatXCatCubeSums,
     _CatXCatUnconditionalCubeCounts,
     _CatXMrCubeCounts,
     _CatXMrCubeMeans,
+    _CatXMrCubeMedians,
     _CatXMrCubeStdDev,
     _CatXMrCubeSums,
     _CatXMrUnconditionalCubeCounts,
+    _MrXCatCubeMedians,
+    _MrXMrCubeMedians,
     CubeMeasures,
     _MrXArrCubeCounts,
     _MrXCatCubeCounts,
@@ -54,6 +59,7 @@ class DescribeCubeMeasures:
         "cube_measure_, CubeMeasureCls",
         (
             ("cube_means", _BaseCubeMeans),
+            ("cube_medians", _BaseCubeMedians),
             ("cube_overlaps", _BaseCubeOverlaps),
             ("cube_sum", _BaseCubeSums),
             ("cube_stddev", _BaseCubeStdDev),
@@ -1207,6 +1213,195 @@ class Describe_MrXMrCubeMeans:
 
     @pytest.fixture
     def raw_means(self):
+        """(2, 2, 2, 2) np.float64 ndarray of means as from Cube."""
+        return np.array(
+            # -- axes are (rows, sel/not, cols, sel/not) --
+            [
+                [  # -- row 0 -------------
+                    # --sel/not--
+                    [  # -- selected ------
+                        [0.1, 0.8],  # -- col 0
+                        [0.1, 0.7],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [0.2, 0.6],  # -- col 0
+                        [0.3, 0.5],  # -- col 1
+                    ],
+                ],
+                [  # -- row 1 -------------
+                    [  # -- selected ------
+                        [0.4, 0.4],  # -- col 0
+                        [0.5, 0.3],  # -- col 1
+                    ],
+                    [  # -- not selected --
+                        [0.6, 0.2],  # -- col 0
+                        [0.7, 0.1],  # -- col 1
+                    ],
+                ],
+            ]
+        )
+
+
+# === MEDIANS ===
+
+
+class Describe_BaseCubeMedians:
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMedians`."""
+
+    @pytest.mark.parametrize(
+        "dimension_types, CubeMediansCls",
+        (
+            ((DT.MR, DT.MR), _MrXMrCubeMedians),
+            ((DT.MR, DT.CAT), _MrXCatCubeMedians),
+            ((DT.CAT, DT.MR), _CatXMrCubeMedians),
+            ((DT.CAT, DT.CAT), _CatXCatCubeMedians),
+        ),
+    )
+    def it_provides_a_factory_for_constructing_cube_medians_objects(
+        self, request, dimension_types, CubeMediansCls
+    ):
+        cube_ = instance_mock(request, Cube)
+        dimensions_ = (
+            instance_mock(request, Dimension),
+            instance_mock(request, Dimension),
+        )
+        cube_medians_ = instance_mock(request, CubeMediansCls)
+        CubeMediansCls_ = class_mock(
+            request,
+            "cr.cube.matrix.cubemeasure.%s" % CubeMediansCls.__name__,
+            return_value=cube_medians_,
+        )
+        _slice_idx_expr_ = method_mock(
+            request,
+            _BaseCubeMedians,
+            "_slice_idx_expr",
+            return_value=1,
+            autospec=False,
+        )
+        cube_.dimension_types = dimension_types
+        cube_.medians = [[1, 2], [3, 4]]
+
+        cube_medians = _BaseCubeMedians.factory(cube_, dimensions_, slice_idx=7)
+
+        _slice_idx_expr_.assert_called_once_with(cube_, 7)
+        CubeMediansCls_.assert_called_once_with(dimensions_, [3, 4])
+        assert cube_medians is cube_medians_
+
+    def but_it_raises_a_value_error_when_cube_result_does_not_contain_mean_measure(
+        self, cube_
+    ):
+        cube_.means = None
+
+        with pytest.raises(ValueError) as e:
+            _BaseCubeMeans.factory(cube_, None, None)
+
+        assert str(e.value) == "cube-result does not contain cube-means measure"
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+
+class Describe_CatXCatCubeMedians:
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeMedians`."""
+
+    def it_knows_its_medians(self):
+        raw_medians = np.array(
+            [
+                [1.1, 2.3, 3.3],
+                [3.4, 1.5, 1.6],
+            ]
+        )
+        cube_medians = _CatXCatCubeMedians(None, raw_medians)
+
+        assert cube_medians.medians.tolist() == [
+            [1.1, 2.3, 3.3],
+            [3.4, 1.5, 1.6],
+        ]
+
+
+class Describe_CatXMrCubeMedians:
+    """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeMedians`."""
+
+    def it_knows_its_means(self, raw_medians):
+        cube_medians = _CatXMrCubeMedians(None, raw_medians)
+
+        assert cube_medians.medians.tolist() == [
+            [1.1, 2.2, 3.2],
+            [4.3, 5.1, 6.1],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_medians(self):
+        """(2, 3, 2) np.float64 ndarray of medians as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1.1, 6.1],  # -- col 0 --
+                    [2.2, 5.2],  # -- col 1 --
+                    [3.2, 4.2],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4.3, 3.1],  # -- col 0 --
+                    [5.1, 2.1],  # -- col 1 --
+                    [6.1, 1.1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXCatCubeMedians:
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeMedians`."""
+
+    def it_knows_its_means(self, raw_medians):
+        cube_medians = _MrXCatCubeMedians(None, raw_medians)
+
+        assert cube_medians.medians.tolist() == [
+            [1.1, 6.1],
+            [4.3, 3.1],
+        ]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_medians(self):
+        """(2, 3, 2) np.int float64 of medians as received from Cube."""
+        return np.array(
+            [  # -- axes are (rows, cols, sel/not) --
+                # --sel/not--
+                [  # -- row 0 ------------
+                    [1.1, 6.1],  # -- col 0 --
+                    [2.2, 5.2],  # -- col 1 --
+                    [3.2, 4.2],  # -- col 2 --
+                ],
+                [  # -- row 1 ------------
+                    [4.3, 3.1],  # -- col 0 --
+                    [5.1, 2.1],  # -- col 1 --
+                    [6.1, 1.1],  # -- col 2 --
+                    # --------------------
+                ],
+            ]
+        )
+
+
+class Describe_MrXMrCubeMedians:
+    """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeMedians`."""
+
+    def it_knows_its_means(self, raw_medians):
+        cube_medians = _MrXMrCubeMedians(None, raw_medians)
+
+        assert cube_medians.medians.tolist() == [[0.1, 0.1], [0.4, 0.5]]
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_medians(self):
         """(2, 2, 2, 2) np.float64 ndarray of means as from Cube."""
         return np.array(
             # -- axes are (rows, sel/not, cols, sel/not) --

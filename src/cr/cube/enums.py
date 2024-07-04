@@ -157,6 +157,7 @@ class CUBE_MEASURE(enum.Enum):
     COVARIANCE = "covariance"
     COUNT = "count"
     MEAN = "mean"
+    MEDIAN = "median"
     OVERLAP = "overlap"
     STDDEV = "stddev"
     SUM = "sum"

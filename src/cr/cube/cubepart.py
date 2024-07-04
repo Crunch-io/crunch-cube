@@ -712,6 +712,23 @@ class _Slice(CubePartition):
             )
 
     @lazyproperty
+    def medians(self):
+        """2D optional np.float64 ndarray of median values for each table cell.
+
+        Cell value is `np.nan` for each cell corresponding to an inserted subtotal
+        (medians of addend cells cannot simply be added to get the mean of the
+        subtotal).
+
+        Raises `ValueError` if the cube-result does not include a median cube-measure.
+        """
+        try:
+            return self._assemble_matrix(self._measures.medians.blocks)
+        except ValueError:
+            raise ValueError(
+                "`.medians` is undefined for a cube-result without a median measure"
+            )
+
+    @lazyproperty
     def min_base_size_mask(self):
         return MinBaseSizeMask(self, self._mask_size)
 
@@ -2003,6 +2020,20 @@ class _Strand(CubePartition):
         except ValueError:
             raise ValueError(
                 "`.means` is undefined for a cube-result without a mean measure"
+            )
+
+    @lazyproperty
+    def medians(self):
+        """1D np.float64 ndarray of medians for each row of strand.
+
+        Raises ValueError when accessed on a cube-result that does not contain a median
+        cube-measure.
+        """
+        try:
+            return self._assemble_vector(self._measures.medians.blocks)
+        except ValueError:
+            raise ValueError(
+                "`.medians` is undefined for a cube-result without a median measure"
             )
 
     @lazyproperty

@@ -58,6 +58,12 @@ class Describe_Slice:
             == "`.means` is undefined for a cube-result without a mean measure"
         )
         with pytest.raises(ValueError) as e:
+            slice_.medians
+        assert (
+            str(e.value)
+            == "`.medians` is undefined for a cube-result without a median measure"
+        )
+        with pytest.raises(ValueError) as e:
             slice_.pairwise_means_indices
         assert (
             str(e.value) == "`.pairwise_means_indices` is undefined for a cube-result"
@@ -437,6 +443,19 @@ class Describe_Slice:
         assert slice_.counts == pytest.approx(np.array([[189, 395, 584, 606, 310]]))
         assert slice_.means == pytest.approx(
             np.array([[24.4393575, 37.3212274, np.nan, 55.4857195, 73.0242765]]),
+            nan_ok=True,
+        )
+        assert slice_.rows_margin.tolist() == [1500.0]
+
+    def it_provides_values_for_median_cat_x_cat_hs(self):
+        slice_ = Cube(CR.MEDIAN_CAT_X_CAT_HS).partitions[0]
+
+        # This fixture has both cube_counts and cube_means measure, for this reason
+        # both measures are available at cubepart level.
+        assert slice_.columns_margin.tolist() == [189, 395, 584, 606, 310]
+        assert slice_.counts == pytest.approx(np.array([[189, 395, 584, 606, 310]]))
+        assert slice_.medians == pytest.approx(
+            np.array([[14.4393575, 37.3212274, np.nan, 25.4857195, 23.0242765]]),
             nan_ok=True,
         )
         assert slice_.rows_margin.tolist() == [1500.0]
@@ -1991,6 +2010,11 @@ class Describe_Strand:
             "`.sums` is undefined for a cube-result without a sum measure"
         )
         with pytest.raises(ValueError) as e:
+            strand.medians
+        assert str(e.value) == (
+            "`.medians` is undefined for a cube-result without a median measure"
+        )
+        with pytest.raises(ValueError) as e:
             strand.stddev
         assert str(e.value) == (
             "`.stddev` is undefined for a cube-result without a stddev measure"
@@ -2295,6 +2319,18 @@ class Describe_Strand:
 
         assert strand.sums == pytest.approx([88.0, 77.0])
         assert strand.table_base_range.tolist() == [5, 5]
+
+    def it_provides_median_measure_for_CAT(self):
+        strand = Cube(CR.CAT_MEDIAN).partitions[0]
+
+        assert strand.medians == pytest.approx([8.8, 7.445])
+        assert strand.table_base_range.tolist() == [5, 5]
+
+    def it_provides_median_measure_for_MR(self):
+        strand = Cube(CR.MR_MEDIAN).partitions[0]
+
+        assert strand.medians == pytest.approx([2.22398, 0.23444, 7.23452])
+        assert strand.table_base_range.tolist() == [3, 3]
 
     def it_provides_sum_measure_for_CAT_HS(self):
         transforms = {

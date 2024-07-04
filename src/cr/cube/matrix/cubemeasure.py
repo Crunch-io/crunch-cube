@@ -26,6 +26,11 @@ class CubeMeasures:
         return _BaseCubeMeans.factory(self._cube, self._dimensions, self._slice_idx)
 
     @lazyproperty
+    def cube_medians(self):
+        """_BaseCubeMedian subclass object for this cube-result."""
+        return _BaseCubeMedians.factory(self._cube, self._dimensions, self._slice_idx)
+
+    @lazyproperty
     def cube_overlaps(self):
         """_BaseCubeOverlaps subclass object for this cube-result."""
         return _BaseCubeOverlaps.factory(self._cube, self._dimensions, self._slice_idx)
@@ -875,6 +880,92 @@ class _MrXMrCubeMeans(_BaseCubeMeans):
         """2D np.float64 ndarray of means for each valid matrix cell."""
         # --- indexing is: all-rows, sel-only, all-cols, sel-only ---
         return self._means[:, 0, :, 0]
+
+
+# === MEDIANs ===
+
+
+class _BaseCubeMedians(_BaseCubeMeasure):
+    """Base class for medians cube-measure variants."""
+
+    def __init__(self, dimensions, medians):
+        super(_BaseCubeMedians, self).__init__(dimensions)
+        self._medians = medians
+
+    @classmethod
+    def factory(cls, cube, dimensions, slice_idx):
+        """Return _BaseCubeMedian subclass instance appropriate to `cube`.
+
+        Raises `ValueError` if the cube-result does not include a cube-median measure.
+        """
+        if cube.medians is None:
+            raise ValueError("cube-result does not contain cube-median measure")
+        dimension_types = cube.dimension_types[-2:]
+        CubeMedianCls = (
+            _MrXMrCubeMedians
+            if dimension_types == (DT.MR, DT.MR)
+            else (
+                _MrXCatCubeMedians
+                if dimension_types[0] == DT.MR
+                else (
+                    _CatXMrCubeMedians
+                    if dimension_types[1] == DT.MR
+                    else _CatXCatCubeMedians
+                )
+            )
+        )
+        return CubeMedianCls(
+            dimensions, cube.medians[cls._slice_idx_expr(cube, slice_idx)]
+        )
+
+    @lazyproperty
+    def medians(self):
+        """2D np.float64 ndarray of cube medians."""
+        raise NotImplementedError(  # pragma: no cover
+            f"`{type(self).__name__}` must implement `.medians`"
+        )
+
+
+class _CatXCatCubeMedians(_BaseCubeMedians):
+    """Medians cube-measure for a slice with no MR dimensions."""
+
+    @lazyproperty
+    def medians(self):
+        """2D np.float64 ndarray of medians for each valid matrix cell."""
+        return self._medians
+
+
+class _CatXMrCubeMedians(_BaseCubeMedians):
+    """Medians cube-measure for a NOT_MR_X_MR slice.
+
+    Note that the rows-dimensions need not actually be CAT.
+    """
+
+    @lazyproperty
+    def medians(self):
+        """2D np.float64 ndarray of medians for each valid matrix cell."""
+        return self._medians[:, :, 0]
+
+
+class _MrXCatCubeMedians(_BaseCubeMedians):
+    """Medians cube-measure for an MR_X_NOT_MR slice.
+
+    Note that the columns-dimension need not actually be CAT.
+    """
+
+    @lazyproperty
+    def medians(self):
+        """2D np.float64 ndarray of medians for each valid matrix cell."""
+        return self._medians[:, 0, :]
+
+
+class _MrXMrCubeMedians(_BaseCubeMedians):
+    """Medians cube-measure for an MR_X_MR slice."""
+
+    @lazyproperty
+    def medians(self):
+        """2D np.float64 ndarray of medians for each valid matrix cell."""
+        return self._medians[:, 0, :, 0]
 
 
 # === OVERLAPS ===
