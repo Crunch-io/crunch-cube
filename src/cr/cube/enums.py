@@ -121,6 +121,7 @@ class MEASURE(enum.Enum):
     COLUMN_STDDEV = "col_std_dev"
     COLUMN_STDERR = "col_std_err"
     MEAN = "mean"
+    MEDIAN = "median"
     PAIRWISE_T_TEST = "pairwise_t_test"
     POPULATION = "population"
     POPULATION_MOE = "population_moe"
@@ -170,6 +171,7 @@ class CUBE_MEASURE(enum.Enum):
 NUMERIC_CUBE_MEASURES = frozenset(
     (
         CUBE_MEASURE.MEAN,
+        CUBE_MEASURE.MEDIAN,
         CUBE_MEASURE.SUM,
         CUBE_MEASURE.STDDEV,
         CUBE_MEASURE.UNWEIGHTED_VALID_COUNT,
@@ -180,6 +182,7 @@ NUMERIC_CUBE_MEASURES = frozenset(
 NUMERIC_MEASURES = frozenset(
     (
         MEASURE.MEAN,
+        MEASURE.MEDIAN,
         MEASURE.SUM,
         MEASURE.STDDEV,
         MEASURE.WEIGHTED_VALID_COUNT,
