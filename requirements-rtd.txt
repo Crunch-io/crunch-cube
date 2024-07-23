@@ -1,2 +1,3 @@
 scipy
 tabulate
+sphinx-rtd-theme
