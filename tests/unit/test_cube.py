@@ -13,7 +13,7 @@ from cr.cube.cube import (
     _UnweightedValidCountsMeasure,
 )
 from cr.cube.cubepart import _Slice, _Strand, _Nub
-from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.enums import DIMENSION_TYPE as DT, CUBE_MEASURE as M
 
 from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 from ..unitutil import call, class_mock, instance_mock, property_mock
@@ -28,6 +28,19 @@ class DescribeCubeSet:
         cube_set = CubeSet(None, None, None, None)
 
         assert cube_set.available_measures == {"mean", "sum"}
+
+    @pytest.mark.parametrize(
+        "available_measures, expected_value",
+        (({M.MEAN, M.COUNT}, True), ({M.OVERLAP, M.COUNT}, False)),
+    )
+    def it_knows_if_it_has_numeric_measures(
+        self, request, available_measures, expected_value
+    ):
+        property_mock(
+            request, CubeSet, "available_measures", return_value=available_measures
+        )
+        cube_set = CubeSet(None, None, None, None)
+        assert cube_set.has_numeric_measures is expected_value
 
     def but_it_includes_availabe_measures_from_all_cubes_in_cube_set(
         self, request, _cubes_prop_
