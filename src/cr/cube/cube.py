@@ -12,7 +12,7 @@ import numpy as np
 
 from cr.cube.cubepart import CubePartition
 from cr.cube.dimension import Dimensions
-from cr.cube.enums import CUBE_MEASURE, DIMENSION_TYPE as DT, NUMERIC_CUBE_MEASURES
+from cr.cube.enums import CUBE_MEASURE, DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
@@ -67,6 +67,17 @@ class CubeSet:
     def description(self) -> str:
         """str description of first cube in this set."""
         return self._cubes[0].description
+
+    @lazyproperty
+    def has_numeric_measures(self) -> bool:
+        """True if cube response contains numeric measures like mean, sum, stddev.
+
+        Returns true if any of the numeric cube measure is in the cube response false
+        otherwise.
+        """
+        if self.available_measures.intersection(CUBE_MEASURE.NUMERIC_CUBE_MEASURES()):
+            return True
+        return False
 
     @lazyproperty
     def has_weighted_counts(self) -> bool:
@@ -636,7 +647,9 @@ class Cube:
         Basically the numeric measures are the intersection between all the measures
         within the cube response and the defined NUMERIC_CUBE_MEASURES.
         """
-        return tuple(self.available_measures.intersection(NUMERIC_CUBE_MEASURES))
+        return tuple(
+            self.available_measures.intersection(CUBE_MEASURE.NUMERIC_CUBE_MEASURES())
+        )
 
     @lazyproperty
     def _ca_as_0th(self) -> bool:

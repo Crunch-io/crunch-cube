@@ -167,29 +167,13 @@ class CUBE_MEASURE(enum.Enum):
     WEIGHTED_VALID_COUNT = "valid_count_weighted"
     WEIGHTED_SQUARED_COUNT = "weighted_squared_count"
 
-
-NUMERIC_CUBE_MEASURES = frozenset(
-    (
-        CUBE_MEASURE.MEAN,
-        CUBE_MEASURE.MEDIAN,
-        CUBE_MEASURE.SUM,
-        CUBE_MEASURE.STDDEV,
-        CUBE_MEASURE.UNWEIGHTED_VALID_COUNT,
-        CUBE_MEASURE.WEIGHTED_VALID_COUNT,
-    )
-)
-
-NUMERIC_MEASURES = frozenset(
-    (
-        MEASURE.MEAN,
-        MEASURE.MEDIAN,
-        MEASURE.SUM,
-        MEASURE.STDDEV,
-        MEASURE.WEIGHTED_VALID_COUNT,
-        MEASURE.UNWEIGHTED_VALID_COUNT,
-        MEASURE.SMOOTHED_MEAN,
-        MEASURE.COLUMN_SHARE_SUM,
-        MEASURE.ROW_SHARE_SUM,
-        MEASURE.TOTAL_SHARE_SUM,
-    )
-)
+    @classmethod
+    def NUMERIC_CUBE_MEASURES(cls):
+        return {
+            cls.MEAN,
+            cls.MEDIAN,
+            cls.SUM,
+            cls.STDDEV,
+            cls.UNWEIGHTED_VALID_COUNT,
+            cls.WEIGHTED_VALID_COUNT,
+        }
