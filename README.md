@@ -110,6 +110,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.0.45
+- Enumerator refactoring
+
 ### 3.0.44
 - Bug fix median measure for exporter
 
