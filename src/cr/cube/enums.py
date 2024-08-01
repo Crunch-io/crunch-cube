@@ -166,3 +166,14 @@ class CUBE_MEASURE(enum.Enum):
     UNWEIGHTED_VALID_COUNT = "valid_count_unweighted"
     WEIGHTED_VALID_COUNT = "valid_count_weighted"
     WEIGHTED_SQUARED_COUNT = "weighted_squared_count"
+
+    @classmethod
+    def NUMERIC_CUBE_MEASURES(cls):
+        return {
+            cls.MEAN,
+            cls.MEDIAN,
+            cls.SUM,
+            cls.STDDEV,
+            cls.UNWEIGHTED_VALID_COUNT,
+            cls.WEIGHTED_VALID_COUNT,
+        }

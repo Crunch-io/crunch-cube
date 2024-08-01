@@ -15,17 +15,6 @@ from cr.cube.dimension import Dimensions
 from cr.cube.enums import CUBE_MEASURE, DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
-NUMERIC_CUBE_MEASURES = frozenset(
-    (
-        CUBE_MEASURE.MEAN,
-        CUBE_MEASURE.MEDIAN,
-        CUBE_MEASURE.SUM,
-        CUBE_MEASURE.STDDEV,
-        CUBE_MEASURE.UNWEIGHTED_VALID_COUNT,
-        CUBE_MEASURE.WEIGHTED_VALID_COUNT,
-    )
-)
-
 
 class CubeSet:
     """Represents a multi-cube cube-response.
@@ -86,7 +75,7 @@ class CubeSet:
         Returns true if any of the numeric cube measure is in the cube response false
         otherwise.
         """
-        if self.available_measures.intersection(NUMERIC_CUBE_MEASURES):
+        if self.available_measures.intersection(CUBE_MEASURE.NUMERIC_CUBE_MEASURES()):
             return True
         return False
 
@@ -658,7 +647,9 @@ class Cube:
         Basically the numeric measures are the intersection between all the measures
         within the cube response and the defined NUMERIC_CUBE_MEASURES.
         """
-        return tuple(self.available_measures.intersection(NUMERIC_CUBE_MEASURES))
+        return tuple(
+            self.available_measures.intersection(CUBE_MEASURE.NUMERIC_CUBE_MEASURES())
+        )
 
     @lazyproperty
     def _ca_as_0th(self) -> bool:
