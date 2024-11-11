@@ -3263,3 +3263,58 @@ class DescribeIntegrated_SubtotalDifferences:
 
         assert slice_.diff_row_idxs == (0,)
         assert slice_.diff_column_idxs == (0,)
+
+    def it_computes_diff_for_cat_date_x_cat(self):
+        slice_ = Cube(
+            CR.CAT_DATE_X_CAT,
+            transforms={
+                "rows_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [3], "negative": [2]},
+                            "anchor": "top",
+                            "name": "NPS",
+                        }
+                    ]
+                },
+            },
+        ).partitions[0]
+        assert slice_.diff_row_idxs == (0,)
+        assert slice_.row_proportions[0] == pytest.approx(
+            np.array(
+                [
+                    0.51149425,
+                    0.24712644,
+                    0.18390805,
+                    -0.0,
+                    0.00574713,
+                    -0.01724138,
+                    0.05172414,
+                    0.01724138,
+                ]
+            )
+        )
+
+    def it_computes_diff_for_cat_x_cat_date(self):
+        slice_ = Cube(
+            CR.CAT_X_CAT_DATE,
+            transforms={
+                "columns_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [3], "negative": [2]},
+                            "anchor": "top",
+                            "name": "NPS",
+                        }
+                    ]
+                },
+            },
+        ).partitions[0]
+        assert slice_.diff_column_idxs == (0,)
+        assert slice_.column_proportions[:, 0] == pytest.approx(
+            np.array([0.25294118, 0.52941176, 0.02941176, 0.09411765, 0.09411765])
+        )
