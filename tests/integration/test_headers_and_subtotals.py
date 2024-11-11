@@ -3318,3 +3318,26 @@ class DescribeIntegrated_SubtotalDifferences:
         assert slice_.column_proportions[:, 0] == pytest.approx(
             np.array([0.25294118, 0.52941176, 0.02941176, 0.09411765, 0.09411765])
         )
+
+    def it_computes_diff_for_cat_date(self):
+        strand_ = Cube(
+            CR.CAT_DATE,
+            transforms={
+                "rows_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [3], "negative": [2]},
+                            "anchor": "top",
+                            "name": "NPS",
+                        }
+                    ]
+                },
+            },
+        ).partitions[0]
+        assert strand_.diff_row_idxs == (0,)
+        assert strand_.row_labels[0] == "NPS"  # subtotal name
+        assert strand_.table_proportions == pytest.approx(
+            np.array([0.0, 0.2, 0.2, 0.2, 0.2, 0.2])
+        )
