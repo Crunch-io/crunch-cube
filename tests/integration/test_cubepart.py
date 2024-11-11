@@ -1807,7 +1807,7 @@ class Describe_Slice:
             == (100 * slice_.column_proportions).tolist()
         )
         # ---Assert that each column of population counts sums to total population
-        base_rows_idx = ~np.in1d(np.arange(11), slice_.inserted_row_idxs)
+        base_rows_idx = ~np.isin(np.arange(11), slice_.inserted_row_idxs)
         slice_.population_counts[base_rows_idx, :].sum(axis=0).tolist() == [100] * 4
 
         # ---Assert correct population counts MOE
@@ -1919,20 +1919,21 @@ class Describe_Slice:
     def it_uses_squared_weights_for_effect_calculation(self):
         cube = Cube(CR.SQUARED_WEIGHTS_CAT_X_CAT)
         slice_ = cube.partitions[0]
-        np.testing.assert_almost_equal(
-            slice_.pairwise_significance_t_stats(1),
-            [
-                [NA, 0.0, 0.0, 0.9486833, NA, NA, NA, -1.8973666, 0.9486833, NA],
-                [NA, 0.0, 0.0, -0.9486833, NA, NA, NA, 1.8973666, -0.9486833, NA],
-            ],
-        )
-        np.testing.assert_almost_equal(
-            slice_._measures.pairwise_p_vals(1).blocks[0][0],
-            [
-                [NA, 1.0, 1.0, 0.54626095, NA, NA, NA, 0.35332203, 0.54626095, NA],
-                [NA, 1.0, 1.0, 0.54626095, NA, NA, NA, 0.35332203, 0.54626095, NA],
-            ],
-        )
+        with np.errstate(invalid="ignore"):
+            np.testing.assert_almost_equal(
+                slice_.pairwise_significance_t_stats(1),
+                [
+                    [NA, 0.0, 0.0, 0.9486833, NA, NA, NA, -1.8973666, 0.9486833, NA],
+                    [NA, 0.0, 0.0, -0.9486833, NA, NA, NA, 1.8973666, -0.9486833, NA],
+                ],
+            )
+            np.testing.assert_almost_equal(
+                slice_._measures.pairwise_p_vals(1).blocks[0][0],
+                [
+                    [NA, 1.0, 1.0, 0.54626095, NA, NA, NA, 0.35332203, 0.54626095, NA],
+                    [NA, 1.0, 1.0, 0.54626095, NA, NA, NA, 0.35332203, 0.54626095, NA],
+                ],
+            )
 
 
 class Describe_Strand:

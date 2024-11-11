@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 
 from cr.cube.dimension import Dimension, _Subtotal
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.subtotals import (
     _BaseSubtotals,
     NanSubtotals,
@@ -431,6 +432,7 @@ class DescribeSumSubtotals:
     def it_can_compute_a_subtotal_intersection_value(
         self,
         request,
+        dimensions_,
         row_add_idxs,
         row_sub_idxs,
         col_add_idxs,
@@ -452,53 +454,85 @@ class DescribeSumSubtotals:
             subtrahend_idxs=row_sub_idxs,
         )
         base_values = np.arange(12).reshape(3, 4)
-        subtotals = SumSubtotals(base_values, None, diff_cols_nan, diff_rows_nan)
+        subtotals = SumSubtotals(base_values, dimensions_, diff_cols_nan, diff_rows_nan)
 
         assert subtotals._intersection(row_subtotal_, col_subtotal_) == pytest.approx(
             expected_value, nan_ok=True
         )
 
     @pytest.mark.parametrize(
-        ("addend_idxs", "subtrahend_idxs", "diff_cols_nan", "expected_value"),
         (
-            ([1, 2], [], False, [3, 11, 19]),
-            ([1, 3], [], False, [4, 12, 20]),
-            ([0, 3], [], False, [3, 11, 19]),
-            ([], [1, 2], False, [-3, -11, -19]),
-            ([1], [3], False, [-2, -2, -2]),
-            ([1], [3], True, [np.nan, np.nan, np.nan]),
+            "addend_idxs",
+            "subtrahend_idxs",
+            "diff_cols_nan",
+            "dim_types",
+            "expected_value",
+        ),
+        (
+            ([1, 2], [], False, [DT.CAT, DT.CAT], [3, 11, 19]),
+            ([1, 3], [], False, [DT.CAT, DT.CAT], [4, 12, 20]),
+            ([0, 3], [], False, [DT.CAT, DT.CAT], [3, 11, 19]),
+            ([], [1, 2], False, [DT.CAT, DT.CAT], [-3, -11, -19]),
+            ([1], [3], False, [DT.CAT, DT.CAT], [-2, -2, -2]),
+            ([1], [3], True, [DT.CAT, DT.CAT], [np.nan, np.nan, np.nan]),
+            ([0], [2], True, [DT.CAT, DT.CAT_DATE], [-2, -2, -2]),
         ),
     )
     def it_can_compute_a_subtotal_column_to_help(
-        self, subtotal_, addend_idxs, subtrahend_idxs, diff_cols_nan, expected_value
+        self,
+        dimensions_,
+        subtotal_,
+        addend_idxs,
+        subtrahend_idxs,
+        dim_types,
+        diff_cols_nan,
+        expected_value,
     ):
+        dimensions_[0].dimension_type = dim_types[0]
+        dimensions_[1].dimension_type = dim_types[1]
         subtotal_.addend_idxs = addend_idxs
         subtotal_.subtrahend_idxs = subtrahend_idxs
         base_values = np.arange(12).reshape(3, 4)
-        subtotals = SumSubtotals(base_values, None, diff_cols_nan=diff_cols_nan)
+        subtotals = SumSubtotals(base_values, dimensions_, diff_cols_nan=diff_cols_nan)
 
         assert subtotals._subtotal_column(subtotal_).tolist() == pytest.approx(
             expected_value, nan_ok=True
         )
 
     @pytest.mark.parametrize(
-        ("addend_idxs", "subtrahend_idxs", "diff_rows_nan", "expected_value"),
         (
-            ([1, 2], [], False, [12, 14, 16, 18]),
-            ([0, 1], [], False, [4, 6, 8, 10]),
-            ([0, 2], [], False, [8, 10, 12, 14]),
-            ([], [1, 2], False, [-12, -14, -16, -18]),
-            ([0], [2], False, [-8, -8, -8, -8]),
-            ([0], [2], True, [np.nan, np.nan, np.nan, np.nan]),
+            "addend_idxs",
+            "subtrahend_idxs",
+            "diff_rows_nan",
+            "dim_types",
+            "expected_value",
+        ),
+        (
+            ([1, 2], [], False, [DT.CAT, DT.CAT], [12, 14, 16, 18]),
+            ([0, 1], [], False, [DT.CAT, DT.CAT], [4, 6, 8, 10]),
+            ([0, 2], [], False, [DT.CAT, DT.CAT], [8, 10, 12, 14]),
+            ([], [1, 2], False, [DT.CAT, DT.CAT], [-12, -14, -16, -18]),
+            ([0], [2], False, [DT.CAT, DT.CAT], [-8, -8, -8, -8]),
+            ([0], [2], True, [DT.CAT, DT.CAT], [np.nan, np.nan, np.nan, np.nan]),
+            ([0], [2], True, [DT.CAT_DATE, DT.CAT], [-8, -8, -8, -8]),
         ),
     )
     def it_can_compute_a_subtotal_row_to_help(
-        self, subtotal_, addend_idxs, subtrahend_idxs, diff_rows_nan, expected_value
+        self,
+        dimensions_,
+        subtotal_,
+        addend_idxs,
+        subtrahend_idxs,
+        diff_rows_nan,
+        dim_types,
+        expected_value,
     ):
         subtotal_.addend_idxs = addend_idxs
         subtotal_.subtrahend_idxs = subtrahend_idxs
+        dimensions_[0].dimension_type = dim_types[0]
+        dimensions_[1].dimension_type = dim_types[1]
         base_values = np.arange(12).reshape(3, 4)
-        subtotals = SumSubtotals(base_values, None, diff_rows_nan=diff_rows_nan)
+        subtotals = SumSubtotals(base_values, dimensions_, diff_rows_nan=diff_rows_nan)
 
         assert subtotals._subtotal_row(subtotal_).tolist() == pytest.approx(
             expected_value, nan_ok=True

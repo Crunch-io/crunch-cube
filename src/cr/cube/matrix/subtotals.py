@@ -355,7 +355,7 @@ class SumSubtotals(_BaseSubtotals):
         return addend_sum - subtrahend_sum
 
     def _multiple_subtrahends_or_addends(self, subtotal):
-        return subtotal.subtrahend_idxs.any() and (
+        return any(subtotal.subtrahend_idxs) and (
             len(subtotal.subtrahend_idxs) > 1 or len(subtotal.addend_idxs) > 1
         )
 
