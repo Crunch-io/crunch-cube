@@ -12,7 +12,10 @@ primarily used by measure objects as a collaborator to handle this aspect.
 
 import numpy as np
 
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
+
+OVERRIDE_DIFF_FOR = {DT.CAT_DATE}
 
 
 class _BaseSubtotals:
@@ -351,23 +354,53 @@ class SumSubtotals(_BaseSubtotals):
         )
         return addend_sum - subtrahend_sum
 
+    def _multiple_subtrahends_or_addends(self, subtotal):
+        return subtotal.subtrahend_idxs.any() and (
+            len(subtotal.subtrahend_idxs) > 1 or len(subtotal.addend_idxs) > 1
+        )
+
+    def _nan_subtotals(self, axis):
+        return np.full(self._base_values.shape[axis], np.nan)
+
     def _subtotal_column(self, subtotal):
         """Return (n_rows,) ndarray of values for `subtotal` column."""
-        if self._diff_cols_nan and len(subtotal.subtrahend_idxs) > 0:
-            return np.full(self._base_values.shape[0], np.nan)
 
-        addend_sum = np.sum(self._base_values[:, subtotal.addend_idxs], axis=1)
-        subtrahend_sum = np.sum(self._base_values[:, subtotal.subtrahend_idxs], axis=1)
-        return addend_sum - subtrahend_sum
+        def compute_subtotal():
+            addend_sum = np.sum(self._base_values[:, subtotal.addend_idxs], axis=1)
+            subtrahend_sum = np.sum(
+                self._base_values[:, subtotal.subtrahend_idxs], axis=1
+            )
+            return addend_sum - subtrahend_sum
+
+        if self._dimensions[-1].dimension_type in OVERRIDE_DIFF_FOR:
+            if self._multiple_subtrahends_or_addends(subtotal):
+                return self._nan_subtotals(axis=0)
+            return compute_subtotal()
+
+        if self._diff_cols_nan and len(subtotal.subtrahend_idxs) > 0:
+            return self._nan_subtotals(axis=0)
+
+        return compute_subtotal()
 
     def _subtotal_row(self, subtotal):
         """Return (n_cols,) ndarray of values for `subtotal` row."""
-        if self._diff_rows_nan and len(subtotal.subtrahend_idxs) > 0:
-            return np.full(self._base_values.shape[1], np.nan)
 
-        addend_sum = np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
-        subtrahend_sum = np.sum(self._base_values[subtotal.subtrahend_idxs, :], axis=0)
-        return addend_sum - subtrahend_sum
+        def compute_subtotal():
+            addend_sum = np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
+            subtrahend_sum = np.sum(
+                self._base_values[subtotal.subtrahend_idxs, :], axis=0
+            )
+            return addend_sum - subtrahend_sum
+
+        if self._dimensions[0].dimension_type in OVERRIDE_DIFF_FOR:
+            if self._multiple_subtrahends_or_addends(subtotal):
+                return self._nan_subtotals(axis=1)
+            return compute_subtotal()
+
+        if self._diff_rows_nan and len(subtotal.subtrahend_idxs) > 0:
+            return self._nan_subtotals(axis=1)
+
+        return compute_subtotal()
 
 
 class OverlapSubtotals(SumSubtotals):
