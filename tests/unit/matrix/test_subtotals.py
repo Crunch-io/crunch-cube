@@ -476,6 +476,8 @@ class DescribeSumSubtotals:
             ([1], [3], False, [DT.CAT, DT.CAT], [-2, -2, -2]),
             ([1], [3], True, [DT.CAT, DT.CAT], [np.nan, np.nan, np.nan]),
             ([0], [2], True, [DT.CAT, DT.CAT_DATE], [-2, -2, -2]),
+            ([0], [2, 1], True, [DT.CAT, DT.CAT_DATE], [np.nan, np.nan, np.nan]),
+            ([0, 1], [2], True, [DT.CAT, DT.CAT_DATE], [np.nan, np.nan, np.nan]),
         ),
     )
     def it_can_compute_a_subtotal_column_to_help(
@@ -515,6 +517,20 @@ class DescribeSumSubtotals:
             ([0], [2], False, [DT.CAT, DT.CAT], [-8, -8, -8, -8]),
             ([0], [2], True, [DT.CAT, DT.CAT], [np.nan, np.nan, np.nan, np.nan]),
             ([0], [2], True, [DT.CAT_DATE, DT.CAT], [-8, -8, -8, -8]),
+            (
+                [0],
+                [2, 1],
+                True,
+                [DT.CAT_DATE, DT.CAT],
+                [np.nan, np.nan, np.nan, np.nan],
+            ),
+            (
+                [0, 1],
+                [1],
+                True,
+                [DT.CAT_DATE, DT.CAT],
+                [np.nan, np.nan, np.nan, np.nan],
+            ),
         ),
     )
     def it_can_compute_a_subtotal_row_to_help(
