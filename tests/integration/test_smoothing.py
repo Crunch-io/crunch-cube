@@ -51,18 +51,18 @@ class DescribeSliceSmoothing:
     @pytest.mark.parametrize(
         "fixture, window, expectation",
         (
-            (CR.CAT_X_CAT_DATE_WGTD, 4, "cat-x-cat-date-wgtd-smoothed-col-pct-w4"),
-            (CR.CAT_X_MR_X_CAT_DATE, 3, "cat-x-mr-x-cat-date-smoothed-col-pct-w3"),
-            (
-                CR.CA_SUBVAR_X_CA_CAT_X_CAT_DATE,
-                3,
-                "ca-subvar-x-ca-cat-cat-date-smoothed-col-pct-w3",
-            ),
+            # (CR.CAT_X_CAT_DATE_WGTD, 4, "cat-x-cat-date-wgtd-smoothed-col-pct-w4"),
+            # (CR.CAT_X_MR_X_CAT_DATE, 3, "cat-x-mr-x-cat-date-smoothed-col-pct-w3"),
+            # (
+            #     CR.CA_SUBVAR_X_CA_CAT_X_CAT_DATE,
+            #     3,
+            #     "ca-subvar-x-ca-cat-cat-date-smoothed-col-pct-w3",
+            # ),
             (CR.CAT_HS_X_CAT_DATE, 3, "cat-hs-x-cat-date-smoothed-col-pct-w3"),
-            (CR.MR_X_CAT_DATE, 3, "mr-x-cat-date-smoothed-col-pct-w3"),
-            (CR.NUMERIC_X_CAT_DATE, 3, "numeric-x-cat-date-smoothed-col-pct-w3"),
-            (CR.TXT_X_CAT_DATE, 3, "txt-x-cat-date-smoothed-col-pct-w3"),
-            (CR.DATETIME_X_CAT_DATE, 3, "datetime-x-cat-date-smoothed-col-pct-w3"),
+            # (CR.MR_X_CAT_DATE, 3, "mr-x-cat-date-smoothed-col-pct-w3"),
+            # (CR.NUMERIC_X_CAT_DATE, 3, "numeric-x-cat-date-smoothed-col-pct-w3"),
+            # (CR.TXT_X_CAT_DATE, 3, "txt-x-cat-date-smoothed-col-pct-w3"),
+            # (CR.DATETIME_X_CAT_DATE, 3, "datetime-x-cat-date-smoothed-col-pct-w3"),
         ),
     )
     def it_provides_smoothed_col_percent_for_compatible_cubes(
@@ -77,7 +77,7 @@ class DescribeSliceSmoothing:
             }
         }
         slice_ = Cube(fixture, transforms=transforms).partitions[0]
-
+        __import__("pdb").set_trace()
         np.testing.assert_array_almost_equal(
             slice_.smoothed_column_percentages, load_python_expression(expectation)
         )

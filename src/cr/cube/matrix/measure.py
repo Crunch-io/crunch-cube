@@ -13,6 +13,7 @@ from cr.cube.matrix.subtotals import (
     OverlapSubtotals,
     PositiveTermSubtotals,
     SumSubtotals,
+    WaveDiffSubtotal,
 )
 from cr.cube.smoothing import Smoother
 from cr.cube.util import lazyproperty
@@ -769,6 +770,65 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
     contributed by the weighted count of each matrix cell.
     """
 
+    # @lazyproperty
+    # def blocks(self):
+    #     """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+    #     These are the base-values, the column-subtotals, the row-subtotals, and the
+    #     subtotal intersection-cell values. This default implementation assumes the
+    #     subclass will implement each block separately.
+    #     """
+    #     return [
+    #         [self._counts / self._base_values, self._subtotal_columns],
+    #         [self._subtotal_rows, self._intersections],
+    #     ]
+
+    # @lazyproperty
+    # def _base_values(self):
+    #     return self._weighted_cube_counts.column_bases
+
+    @lazyproperty
+    def _counts(self):
+        return self._weighted_cube_counts.counts
+
+    # @lazyproperty
+    # def _subtotal_columns(self):
+    #     """2D np.float64 ndarray of column-subtotal row-proportions denominator values.
+
+    #     This is the second "block" and has the shape (n_rows, n_col_subtotals).
+    #     """
+    #     # --- broadcast the rows_margin to the shape of the subtotal-columns matrix
+    #     # --- because rows-margin doesn't add in this direction. Note this initial
+    #     # --- subtotal-columns matrix is used only for its shape because it computes
+    #     # --- the wrong values.
+    #     return WaveDiffSubtotal.subtotal_columns(
+    #         self._base_values, self._counts, self._dimensions, diff_cols_nan=True
+    #     )
+
+    # @lazyproperty
+    # def _subtotal_rows(self):
+    #     """2D np.float64 ndarray of row-subtotal row-proportions denominator values.
+
+    #     This is the third "block" and has the shape (n_row_subtotals, n_cols).
+    #     """
+    #     # --- Summing works on rows because row-proportion denominators add along this
+    #     # --- axis. This wouldn't work on MR-rows but there can be no subtotals on an
+    #     # --- ARRAY dimension (ARRAY_X slice) so that case never arises.
+    #     return WaveDiffSubtotal.subtotal_rows(
+    #         self._base_values, self._counts, self._dimensions, diff_cols_nan=True
+    #     )
+
+    # @lazyproperty
+    # def _intersections(self):
+    #     """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
+
+    #     An intersection value arises where a row-subtotal crosses a column-subtotal.
+    #     This is the fourth and final "block" required by the assembler.
+    #     """
+    #     return WaveDiffSubtotal.intersections(
+    #         self._base_values, self._counts, self._dimensions, diff_cols_nan=True
+    #     )
+
     @lazyproperty
     def _base_values(self):
         """2D ndarray np.float64 of the base values column proportions (1st block)."""
@@ -787,6 +847,13 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
 
         An intersection value arises where a row-subtotal crosses a column-subtotal.
         """
+        if self._dimensions[-1].dimension_type == DT.CAT_DATE:
+            return WaveDiffSubtotal.intersections(
+                self._weighted_cube_counts.column_bases,
+                self._counts,
+                self._dimensions,
+                diff_cols_nan=True,
+            )
         # --- do not propagate divide-by-zero warnings to stderr ---
         with np.errstate(divide="ignore", invalid="ignore"):
             return self._count_blocks[1][1] / self._weighted_base_blocks[1][1]
@@ -798,6 +865,14 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
         This is the second "block" and has the shape (n_rows, n_col_subtotals).
         """
         # --- do not propagate divide-by-zero warnings to stderr ---
+        if self._dimensions[-1].dimension_type == DT.CAT_DATE:
+            return WaveDiffSubtotal.subtotal_columns(
+                self._weighted_cube_counts.column_bases,
+                self._counts,
+                self._dimensions,
+                diff_cols_nan=True,
+            )
+
         with np.errstate(divide="ignore", invalid="ignore"):
             return self._count_blocks[0][1] / self._weighted_base_blocks[0][1]
 
@@ -807,6 +882,15 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
 
         This is the third "block" and has the shape (n_row_subtotals, n_cols).
         """
+        __import__("pdb").set_trace()
+        if self._dimensions[-1].dimension_type == DT.CAT_DATE:
+            return WaveDiffSubtotal.subtotal_rows(
+                self._weighted_cube_counts.column_bases,
+                self._counts,
+                self._dimensions,
+                diff_cols_nan=True,
+            )
+
         # --- do not propagate divide-by-zero warnings to stderr ---
         with np.errstate(divide="ignore", invalid="ignore"):
             return self._count_blocks[1][0] / self._weighted_base_blocks[1][0]
@@ -1850,6 +1934,67 @@ class _RowProportions(_BaseSecondOrderMeasure):
         """Nested list of the four 2D ndarray "blocks" making up this measure.
 
         These are the base-values, the column-subtotals, the row-subtotals, and the
+        subtotal intersection-cell values. This default implementation assumes the
+        subclass will implement each block separately.
+        """
+        if self._dimensions[0].dimension_type == DT.CAT_DATE:
+            return [
+                [self._counts / self._base_values, self._subtotal_columns],
+                [self._subtotal_rows, self._intersections],
+            ]
+        return self._base_blocks
+
+    @lazyproperty
+    def _base_values(self):
+        return self._weighted_cube_counts.row_bases
+
+    @lazyproperty
+    def _counts(self):
+        return self._weighted_cube_counts.counts
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D np.float64 ndarray of column-subtotal row-proportions denominator values.
+
+        This is the second "block" and has the shape (n_rows, n_col_subtotals).
+        """
+        # --- broadcast the rows_margin to the shape of the subtotal-columns matrix
+        # --- because rows-margin doesn't add in this direction. Note this initial
+        # --- subtotal-columns matrix is used only for its shape because it computes
+        # --- the wrong values.
+        return WaveDiffSubtotal.subtotal_columns(
+            self._base_values, self._counts, self._dimensions, diff_rows_nan=True
+        )
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """2D np.float64 ndarray of row-subtotal row-proportions denominator values.
+
+        This is the third "block" and has the shape (n_row_subtotals, n_cols).
+        """
+        # --- Summing works on rows because row-proportion denominators add along this
+        # --- axis. This wouldn't work on MR-rows but there can be no subtotals on an
+        # --- ARRAY dimension (ARRAY_X slice) so that case never arises.
+        return WaveDiffSubtotal.subtotal_rows(
+            self._base_values, self._counts, self._dimensions, diff_rows_nan=True
+        )
+
+    @lazyproperty
+    def _intersections(self):
+        """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
+
+        An intersection value arises where a row-subtotal crosses a column-subtotal.
+        This is the fourth and final "block" required by the assembler.
+        """
+        return WaveDiffSubtotal.intersections(
+            self._base_values, self._counts, self._dimensions, diff_rows_nan=True
+        )
+
+    @lazyproperty
+    def _base_blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        These are the base-values, the column-subtotals, the row-subtotals, and the
         subtotal intersection-cell values.
 
         Row-proportions are row comparable counts divided by the row weighted bases.
@@ -1873,6 +2018,38 @@ class _RowProportions(_BaseSecondOrderMeasure):
                     count_blocks[1][1] / weighted_base_blocks[1][1],
                 ],
             ]
+
+    # @lazyproperty
+    # def _subtotal_columns(self):
+    #     """2D np.float64 ndarray of column proportions values.
+
+    #     This is the second "block" and has the shape (n_rows, n_col_subtotals).
+    #     """
+    #     pass
+
+    # @lazyproperty
+    # def blocks(self):
+    #     """2D np.float64 ndarray of column proportions values.
+
+    #     This is the third "block" and has the shape (n_row_subtotals, n_cols).
+    #     """
+    #     __import__("pdb").set_trace()
+    #     return WaveDiffSubtotal.blocks(
+    #         self._weighted_cube_counts.row_bases,
+    #         self._weighted_cube_counts.counts,
+    #         self._dimensions,
+    #         diff_rows_nan=True,
+    #         diff_cols_nan=True,
+    #     )
+    #     # if self._dimensions[0].dimension_type == DT.CAT_DATE:
+    #     #     return WaveDiffSubtotal.blocks(
+    #     #         self._weighted_cube_counts.row_bases,
+    #     #         self._weighted_cube_counts.counts,
+    #     #         self._dimensions,
+    #     #         diff_rows_nan=False,
+    #     #     )
+    #     # else:
+    #     #     return self._base_blocks
 
 
 class _RowShareSum(_BaseSecondOrderMeasure):
