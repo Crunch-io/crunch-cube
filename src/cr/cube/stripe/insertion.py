@@ -141,6 +141,9 @@ class WaveDiffSubtotals(_BaseSubtotals):
         if len(subtotals) == 0:
             return np.array([])
 
+        if self._rows_dimension.dimension_type != DT.CAT_DATE:
+            return self._default_values
+
         return np.array(
             [
                 self._subtotal_value(subtotal, default)
@@ -150,11 +153,7 @@ class WaveDiffSubtotals(_BaseSubtotals):
 
     def _subtotal_value(self, subtotal, default):
         """Return scalar value of wafe diff `subtotal` row."""
-        if (
-            self._rows_dimension.dimension_type == DT.CAT_DATE
-            and len(subtotal.subtrahend_idxs) > 0
-            and len(subtotal.addend_idxs) > 0
-        ):
+        if len(subtotal.subtrahend_idxs) > 0 and len(subtotal.addend_idxs) > 0:
             if self._multiple_subtrahends_or_addends(subtotal):
                 return np.nan
             base_values = self._base_values

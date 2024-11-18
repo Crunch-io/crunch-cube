@@ -731,6 +731,7 @@ class Describe_TableProportions:
     )
     def it_computes_its_subtotal_values_to_help(
         self,
+        _dimension,
         measures_,
         weighted_counts_,
         _weighted_cube_counts_prop_,
@@ -738,11 +739,13 @@ class Describe_TableProportions:
         weighted_table_base,
         expected_value,
     ):
+        _dimension.dimension_type = DT.CAT
+        _dimension.subtotals = ["s1", "s2"]
         weighted_counts_.subtotal_values = np.array([9.8, 7.6])
         measures_.weighted_counts = weighted_counts_
         weighted_cube_counts_.table_base = weighted_table_base
         _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
-        table_proportions = _TableProportions(None, measures_, None)
+        table_proportions = _TableProportions(_dimension, measures_, None)
 
         assert table_proportions.subtotal_values == pytest.approx(expected_value)
 
@@ -763,6 +766,10 @@ class Describe_TableProportions:
     @pytest.fixture
     def _weighted_cube_counts_prop_(self, request):
         return property_mock(request, _TableProportions, "_weighted_cube_counts")
+
+    @pytest.fixture
+    def _dimension(self, request):
+        return instance_mock(request, Dimension)
 
 
 class Describe_UnweightedBases:
