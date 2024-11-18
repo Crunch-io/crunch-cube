@@ -13,6 +13,7 @@ from cr.cube.matrix.subtotals import (
     OverlapSubtotals,
     PositiveTermSubtotals,
     SumSubtotals,
+    WaveDiffSubtotal,
 )
 from cr.cube.smoothing import Smoother
 from cr.cube.util import lazyproperty
@@ -799,7 +800,14 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
         """
         # --- do not propagate divide-by-zero warnings to stderr ---
         with np.errstate(divide="ignore", invalid="ignore"):
-            return self._count_blocks[0][1] / self._weighted_base_blocks[0][1]
+            default_value = self._count_blocks[0][1] / self._weighted_base_blocks[0][1]
+            return WaveDiffSubtotal.subtotal_columns(
+                self._weighted_cube_counts.column_bases,
+                self._weighted_cube_counts.counts,
+                default_value,
+                self._dimensions,
+                diff_rows_nan=True,
+            )
 
     @lazyproperty
     def _subtotal_rows(self):
@@ -809,7 +817,14 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
         """
         # --- do not propagate divide-by-zero warnings to stderr ---
         with np.errstate(divide="ignore", invalid="ignore"):
-            return self._count_blocks[1][0] / self._weighted_base_blocks[1][0]
+            default_value = self._count_blocks[1][0] / self._weighted_base_blocks[1][0]
+            return WaveDiffSubtotal.subtotal_rows(
+                self._weighted_cube_counts.column_bases,
+                self._weighted_cube_counts.counts,
+                default_value,
+                self._dimensions,
+                diff_cols_nan=True,
+            )
 
     @lazyproperty
     def _weighted_base_blocks(self):
@@ -1564,17 +1579,18 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
         if self._second_order_measures.columns_squared_base.is_defined:
             weighted_blocks = self._second_order_measures.column_weighted_bases.blocks
             squared_blocks = self._second_order_measures.column_squared_bases.blocks
-            effective_blocks = [
-                [
-                    weighted_blocks[0][0] ** 2 / squared_blocks[0][0],
-                    weighted_blocks[0][1] ** 2 / squared_blocks[0][1],
-                ],
-                [
-                    weighted_blocks[1][0] ** 2 / squared_blocks[1][0],
-                    weighted_blocks[1][1] ** 2 / squared_blocks[1][1],
-                ],
-            ]
-            return effective_blocks
+            with np.errstate(divide="ignore", invalid="ignore"):
+                effective_blocks = [
+                    [
+                        weighted_blocks[0][0] ** 2 / squared_blocks[0][0],
+                        weighted_blocks[0][1] ** 2 / squared_blocks[0][1],
+                    ],
+                    [
+                        weighted_blocks[1][0] ** 2 / squared_blocks[1][0],
+                        weighted_blocks[1][1] ** 2 / squared_blocks[1][1],
+                    ],
+                ]
+                return effective_blocks
 
         unweighted_blocks = self._second_order_measures.column_unweighted_bases.blocks
         return unweighted_blocks
@@ -1846,6 +1862,14 @@ class _RowProportions(_BaseSecondOrderMeasure):
     """
 
     @lazyproperty
+    def _count_blocks(self):
+        return self._second_order_measures.weighted_counts.blocks
+
+    @lazyproperty
+    def _weighted_base_blocks(self):
+        return self._second_order_measures.row_weighted_bases.blocks
+
+    @lazyproperty
     def blocks(self):
         """Nested list of the four 2D ndarray "blocks" making up this measure.
 
@@ -1854,8 +1878,8 @@ class _RowProportions(_BaseSecondOrderMeasure):
 
         Row-proportions are row comparable counts divided by the row weighted bases.
         """
-        count_blocks = self._second_order_measures.weighted_counts.blocks
-        weighted_base_blocks = self._second_order_measures.row_weighted_bases.blocks
+        count_blocks = self._count_blocks
+        weighted_base_blocks = self._weighted_base_blocks
 
         # --- do not propagate divide-by-zero warnings to stderr ---
         with np.errstate(divide="ignore", invalid="ignore"):
@@ -1864,15 +1888,37 @@ class _RowProportions(_BaseSecondOrderMeasure):
                     # --- base values ---
                     count_blocks[0][0] / weighted_base_blocks[0][0],
                     # --- inserted columns ---
-                    count_blocks[0][1] / weighted_base_blocks[0][1],
+                    self._inserted_columns,
                 ],
                 [
                     # --- inserted rows ---
-                    count_blocks[1][0] / weighted_base_blocks[1][0],
+                    self._inserted_rows,
                     # --- intersections ---
                     count_blocks[1][1] / weighted_base_blocks[1][1],
                 ],
             ]
+
+    @lazyproperty
+    def _inserted_rows(self):
+        default_value = self._count_blocks[1][0] / self._weighted_base_blocks[1][0]
+        return WaveDiffSubtotal.subtotal_rows(
+            self._weighted_cube_counts.row_bases,
+            self._weighted_cube_counts.counts,
+            default_value,
+            self._dimensions,
+            diff_cols_nan=True,
+        )
+
+    @lazyproperty
+    def _inserted_columns(self):
+        default_value = self._count_blocks[0][1] / self._weighted_base_blocks[0][1]
+        return WaveDiffSubtotal.subtotal_columns(
+            self._weighted_cube_counts.row_bases,
+            self._weighted_cube_counts.counts,
+            default_value,
+            self._dimensions,
+            diff_rows_nan=True,
+        )
 
 
 class _RowShareSum(_BaseSecondOrderMeasure):

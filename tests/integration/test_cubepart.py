@@ -1807,7 +1807,7 @@ class Describe_Slice:
             == (100 * slice_.column_proportions).tolist()
         )
         # ---Assert that each column of population counts sums to total population
-        base_rows_idx = ~np.in1d(np.arange(11), slice_.inserted_row_idxs)
+        base_rows_idx = ~np.isin(np.arange(11), slice_.inserted_row_idxs)
         slice_.population_counts[base_rows_idx, :].sum(axis=0).tolist() == [100] * 4
 
         # ---Assert correct population counts MOE
@@ -1940,7 +1940,7 @@ class Describe_Strand:
 
     def it_uses_correct_proportions_for_pop_counts_when_cat_date(self):
         strand_ = Cube(CR.CAT_DATE, population=100).partitions[0]
-        assert strand_.population_counts.tolist() == [100] * 5
+        assert strand_.population_counts.tolist() == [100] * 9
 
     def it_provides_values_for_ca_as_0th(self):
         transforms = {

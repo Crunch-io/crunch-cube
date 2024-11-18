@@ -12,6 +12,7 @@ primarily used by measure objects as a collaborator to handle this aspect.
 
 import numpy as np
 
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.util import lazyproperty
 
 
@@ -368,6 +369,172 @@ class SumSubtotals(_BaseSubtotals):
         addend_sum = np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
         subtrahend_sum = np.sum(self._base_values[subtotal.subtrahend_idxs, :], axis=0)
         return addend_sum - subtrahend_sum
+
+
+class WaveDiffSubtotal(_BaseSubtotals):
+    """Subtotal "blocks" created by adding and subtracting terms for wave differences.
+
+    This class handles a special case for wave differences when a CAT_DATE variable is
+    involved in the calculation.
+
+    A wave difference for a CAT_DATE variable is calculate subtracting at the
+    percentages level: (count1/base1) - (count2/base2).
+    """
+
+    def __init__(
+        self,
+        base_values,
+        counts,
+        default_insertions,
+        dimensions,
+        diff_cols_nan=False,
+        diff_rows_nan=False,
+    ):
+        super(WaveDiffSubtotal, self).__init__(base_values, dimensions)
+        self._counts = counts
+        self._default_insertions = default_insertions
+        self._diff_cols_nan = diff_cols_nan
+        self._diff_rows_nan = diff_rows_nan
+
+    @classmethod
+    def subtotal_rows(
+        cls,
+        base_values,
+        counts,
+        default_insertions,
+        dimensions,
+        diff_cols_nan=False,
+        diff_rows_nan=False,
+    ):
+        """Return (n_row_subtotals, n_base_cols) ndarray of subtotal rows.
+        Keyword arguments:
+        `diff_cols_nan` -- Overrides subtotal differences in the columns direction eg
+        for column bases (default False)
+        `diff_rows_nan` -- Overrides subtotal differences in the rows direction eg for
+        row bases (default False)
+        """
+        return cls(
+            base_values,
+            counts,
+            default_insertions,
+            dimensions,
+            diff_cols_nan,
+            diff_rows_nan,
+        )._subtotal_rows
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """(n_row_subtotals, n_cols) ndarray of subtotal rows."""
+        subtotals = self._row_subtotals
+
+        if len(subtotals) == 0:
+            return np.empty((0, self._ncols))
+
+        return np.vstack(
+            [
+                self._subtotal_row(subtotal, default)
+                for subtotal, default in zip(subtotals, self._default_insertions)
+            ]
+        )
+
+    @classmethod
+    def subtotal_columns(
+        cls,
+        base_values,
+        counts,
+        default_insertions,
+        dimensions,
+        diff_cols_nan=False,
+        diff_rows_nan=False,
+    ):
+        """Return (n_column_subtotals, n_base_rows) ndarray of subtotal columns."""
+        return cls(
+            base_values,
+            counts,
+            default_insertions,
+            dimensions,
+            diff_cols_nan,
+            diff_rows_nan,
+        )._subtotal_columns
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """(n_rows, n_col_subtotals) matrix of subtotal columns."""
+        subtotals = self._column_subtotals
+        if len(subtotals) == 0:
+            return np.empty((self._nrows, 0))
+        return np.hstack(
+            [
+                self._subtotal_column(subtotal, default).reshape(self._nrows, 1)
+                for subtotal, default in zip(subtotals, self._default_insertions.T)
+            ]
+        )
+
+    def _subtotal_column(self, subtotal, default):
+        """Return (n_rows,) ndarray of values for `subtotal` column."""
+        if (
+            self._dimensions[-1].dimension_type == DT.CAT_DATE
+            and len(subtotal.subtrahend_idxs) > 0
+            and len(subtotal.addend_idxs) > 0
+        ):
+            if self._multiple_subtrahends_or_addends(subtotal):
+                return self._nan_subtotals(axis=0)
+            base_addend_sum = np.sum(self._base_values[:, subtotal.addend_idxs], axis=1)
+            base_subtrahend_sum = np.sum(
+                self._base_values[:, subtotal.subtrahend_idxs], axis=1
+            )
+            counts_addend_sum = np.sum(self._counts[:, subtotal.addend_idxs], axis=1)
+            counts_subtrahend_sum = np.sum(
+                self._counts[:, subtotal.subtrahend_idxs], axis=1
+            )
+            return (counts_addend_sum / base_addend_sum) - (
+                counts_subtrahend_sum / base_subtrahend_sum
+            )
+
+        if self._diff_cols_nan and len(subtotal.subtrahend_idxs) > 0:
+            return self._nan_subtotals(axis=0)
+
+        return default
+
+    def _subtotal_row(self, subtotal, default):
+        """Return (n_cols,) ndarray of values for `subtotal` row."""
+
+        if (
+            self._dimensions[0].dimension_type == DT.CAT_DATE
+            and len(subtotal.subtrahend_idxs) > 0
+            and len(subtotal.addend_idxs) > 0
+        ):
+            if self._multiple_subtrahends_or_addends(subtotal):
+                return self._nan_subtotals(axis=1)
+            base_addend_sum = np.sum(self._base_values[subtotal.addend_idxs, :], axis=0)
+            base_subtrahend_sum = np.sum(
+                self._base_values[subtotal.subtrahend_idxs, :], axis=0
+            )
+            counts_addend_sum = np.sum(self._counts[subtotal.addend_idxs, :], axis=0)
+            counts_subtrahend_sum = np.sum(
+                self._counts[subtotal.subtrahend_idxs, :], axis=0
+            )
+            return (counts_addend_sum / base_addend_sum) - (
+                counts_subtrahend_sum / base_subtrahend_sum
+            )
+
+        if self._diff_rows_nan and len(subtotal.subtrahend_idxs) > 0:
+            return self._nan_subtotals(axis=1)
+
+        return default
+
+    def _multiple_subtrahends_or_addends(self, subtotal):
+        """Returns true if the subtotal has multiple addend or subtrahend terms."""
+        return any(subtotal.subtrahend_idxs) and (
+            len(subtotal.subtrahend_idxs) > 1 or len(subtotal.addend_idxs) > 1
+        )
+
+    def _nan_subtotals(self, axis):
+        """Generate an array filled with NaN values.
+
+        Matches the size of the specified axis of the base values.
+        """
+        return np.full(self._base_values.shape[axis], np.nan)
 
 
 class OverlapSubtotals(SumSubtotals):
