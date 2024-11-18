@@ -491,9 +491,6 @@ class WaveDiffSubtotal(_BaseSubtotals):
                 counts_subtrahend_sum / base_subtrahend_sum
             )
 
-        if self._diff_cols_nan and len(subtotal.subtrahend_idxs) > 0:
-            return self._nan_subtotals(axis=0)
-
         return default
 
     def _subtotal_row(self, subtotal, default):
@@ -517,9 +514,6 @@ class WaveDiffSubtotal(_BaseSubtotals):
             return (counts_addend_sum / base_addend_sum) - (
                 counts_subtrahend_sum / base_subtrahend_sum
             )
-
-        if self._diff_rows_nan and len(subtotal.subtrahend_idxs) > 0:
-            return self._nan_subtotals(axis=1)
 
         return default
 
