@@ -806,7 +806,6 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
                 self._weighted_cube_counts.counts,
                 default_value,
                 self._dimensions,
-                diff_rows_nan=True,
             )
 
     @lazyproperty
@@ -823,7 +822,6 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
                 self._weighted_cube_counts.counts,
                 default_value,
                 self._dimensions,
-                diff_cols_nan=True,
             )
 
     @lazyproperty
@@ -1906,7 +1904,6 @@ class _RowProportions(_BaseSecondOrderMeasure):
             self._weighted_cube_counts.counts,
             default_value,
             self._dimensions,
-            diff_cols_nan=True,
         )
 
     @lazyproperty
@@ -1917,7 +1914,6 @@ class _RowProportions(_BaseSecondOrderMeasure):
             self._weighted_cube_counts.counts,
             default_value,
             self._dimensions,
-            diff_rows_nan=True,
         )
 
 
