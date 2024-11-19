@@ -408,7 +408,7 @@ class WaveDiffSubtotal:
     @lazyproperty
     def _column_subtotals(self):
         """Sequence of _Subtotal object for each subtotal in columns-dimension."""
-        return self._dimensions[-1].subtotals
+        return self._dimensions[1].subtotals
 
     def _multiple_subtrahends_or_addends(self, subtotal):
         """Returns true if the subtotal has multiple addend or subtrahend terms."""
@@ -459,7 +459,7 @@ class WaveDiffSubtotal:
 
     def _subtotal_column(self, subtotal, default):
         """Return (n_rows,) ndarray of values for `subtotal` column."""
-        if self._dimensions[-1].dimension_type == DT.CAT_DATE and any(
+        if self._dimensions[1].dimension_type == DT.CAT_DATE and any(
             subtotal.subtrahend_idxs
         ):
             if self._multiple_subtrahends_or_addends(subtotal):

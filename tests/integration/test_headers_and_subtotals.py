@@ -2764,6 +2764,43 @@ class TestHeadersAndSubtotals:
 class DescribeIntegrated_SubtotalDifferences:
     """TDD driver(s) for Subtotal Difference insertions."""
 
+    def it_computes_diff_for_cat_date_on_a_3D_cube(self):
+        cube = Cube(
+            CR.CAT_X_MR_X_CAT_DATE,
+            transforms={
+                "columns_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [1], "negative": [2]},
+                            "anchor": "top",
+                            "name": "diff1",
+                        },
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [2, 3]},
+                            "anchor": "top",
+                            "name": "sub1",
+                        },
+                    ]
+                }
+            },
+        )
+        slice_ = cube.partitions[0]
+        assert len(cube.dimensions) == 3
+        # first 2 cols are the insertions
+        assert slice_.row_proportions[:, :2] == pytest.approx(
+            np.array(
+                [
+                    [-0.26136364, 0.77272727],
+                    [0.29411765, 0.47058824],
+                    [-0.20338983, 0.74576271],
+                ]
+            )
+        )
+
     def it_computes_diff_for_cat_date(self):
         strand = Cube(
             CR.CAT_DATE,
