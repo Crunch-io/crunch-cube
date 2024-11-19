@@ -12,6 +12,7 @@ from cr.cube.stripe.insertion import (
     NegativeTermSubtotals,
     PositiveTermSubtotals,
     SumSubtotals,
+    WaveDiffSubtotals,
 )
 from cr.cube.util import lazyproperty
 
@@ -628,7 +629,13 @@ class _TableProportions(_BaseSecondOrderMeasure):
 
         # --- do not propagate divide-by-zero warnings to stderr ---
         with np.errstate(divide="ignore", invalid="ignore"):
-            return subtotal_values / weighted_table_base
+            default_value = subtotal_values / weighted_table_base
+            return WaveDiffSubtotals.subtotal_values(
+                self._weighted_cube_counts.bases,
+                self._weighted_cube_counts.counts,
+                default_value,
+                self._rows_dimension,
+            )
 
 
 class _UnweightedBases(_BaseSecondOrderMeasure):

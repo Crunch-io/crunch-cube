@@ -418,6 +418,10 @@ class Describe_ColumnProportions:
     """Unit test suite for `cr.cube.matrix.measure._ColumnProportions` object."""
 
     def it_computes_its_blocks(self, request):
+        property_mock(
+            request, _ColumnProportions, "_subtotal_columns", return_value=2.0
+        )
+        property_mock(request, _ColumnProportions, "_subtotal_rows", return_value=3.0)
         weighted_counts_ = instance_mock(
             request, _WeightedCounts, blocks=[[5.0, 12.0], [21.0, 32.0]]
         )
@@ -1229,6 +1233,8 @@ class Describe_RowProportions:
     """Unit test suite for `cr.cube.matrix.measure._RowProportions` object."""
 
     def it_computes_its_blocks(self, request):
+        property_mock(request, _RowProportions, "_inserted_columns", return_value=2.0)
+        property_mock(request, _RowProportions, "_inserted_rows", return_value=3.0)
         weighted_counts_ = instance_mock(
             request, _WeightedCounts, blocks=[[5.0, 12.0], [21.0, 32.0]]
         )

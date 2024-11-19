@@ -2764,6 +2764,378 @@ class TestHeadersAndSubtotals:
 class DescribeIntegrated_SubtotalDifferences:
     """TDD driver(s) for Subtotal Difference insertions."""
 
+    def it_computes_diff_for_cat_date_on_a_3D_cube(self):
+        cube = Cube(
+            CR.CAT_X_MR_X_CAT_DATE,
+            transforms={
+                "columns_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [1], "negative": [2]},
+                            "anchor": "top",
+                            "name": "diff1",
+                        },
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [2, 3]},
+                            "anchor": "top",
+                            "name": "sub1",
+                        },
+                    ]
+                }
+            },
+        )
+        slice_ = cube.partitions[0]
+        assert len(cube.dimensions) == 3
+        # first 2 cols are the insertions
+        assert slice_.row_proportions[:, :2] == pytest.approx(
+            np.array(
+                [
+                    [-0.26136364, 0.77272727],
+                    [0.29411765, 0.47058824],
+                    [-0.20338983, 0.74576271],
+                ]
+            )
+        )
+
+    def it_computes_diff_for_cat_date(self):
+        strand = Cube(
+            CR.CAT_DATE,
+            transforms={
+                "rows_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [19], "negative": [20]},
+                            "anchor": "top",
+                            "name": "diff1",
+                        },
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [21, 23]},
+                            "anchor": "top",
+                            "name": "sub1",
+                        },
+                    ]
+                }
+            },
+        ).partitions[0]
+        assert strand.table_proportions == pytest.approx(
+            np.array(
+                [
+                    0.0235426,
+                    0.19412454,
+                    0.10553404,
+                    0.08199144,
+                    0.10818386,
+                    0.1603139,
+                    0.08594068,
+                    0.11908887,
+                    0.13078373,
+                    0.07781288,
+                    0.13035059,
+                ]
+            )
+        )
+
+    def it_computes_nan_diff_for_cat_date_with_multiple_addend_or_subtrahend(self):
+        strand = Cube(
+            CR.CAT_DATE,
+            transforms={
+                "rows_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [19, 20], "negative": [21]},
+                            "anchor": "top",
+                            "name": "diff1",
+                        },
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [21, 23]},
+                            "anchor": "top",
+                            "name": "sub1",
+                        },
+                    ]
+                }
+            },
+        ).partitions[0]
+        assert np.isnan(
+            strand.table_proportions[0]
+        )  # nan insertion because the diff subtotal has multiple positive terms
+
+    def it_computes_diff_for_cat_x_cat_date_with_subdiffs_on_column(self):
+        insertions = [
+            {
+                "function": "subtotal",
+                "args": [1],
+                "kwargs": {"positive": [3], "negative": [2]},
+                "anchor": "top",
+                "name": "diff1",
+            },
+            {
+                "function": "subtotal",
+                "args": [1],
+                "kwargs": {"positive": [1, 2]},
+                "anchor": "top",
+                "name": "sub1",
+            },
+        ]
+        slice_ = Cube(
+            CR.CAT_X_CAT_DATE,
+            transforms={"columns_dimension": {"insertions": insertions}},
+        ).partitions[0]
+        assert slice_.diff_column_idxs == (0,)
+        assert slice_.column_proportions == pytest.approx(
+            np.array(
+                [
+                    #    diff1       sub1   Jan 2019   Apr 2019   Jul 2019   Oct 2019
+                    [0.0237277, 0.2837022, 0.2711198, 0.2969072, 0.3206349, 0.3934426],
+                    [-0.023105, 0.4235412, 0.3634577, 0.4865979, 0.4634920, 0.4863388],
+                    [0.0431026, 0.138833, 0.1669941, 0.1092783, 0.1523809, 0.0710382],
+                    [-0.024087, 0.0513078, 0.0530451, 0.0494845, 0.0253968, 0.0054644],
+                    [-0.019636, 0.1026156, 0.1453831, 0.0577319, 0.0380952, 0.0437158],
+                ]
+            ),
+            rel=1e-4,
+        )
+        # change the insertion to test that multiple addend or subtrahend will generate
+        # a nan value
+        insertions[0]["kwargs"]["negative"].append(1)
+        slice2 = Cube(
+            CR.CAT_X_CAT_DATE,
+            transforms={"columns_dimension": {"insertions": insertions}},
+        ).partitions[0]
+        assert slice2.column_proportions[:, 0] == pytest.approx(
+            np.array([np.nan, np.nan, np.nan, np.nan, np.nan]), nan_ok=True
+        )
+
+    def it_computes_diff_for_cat_x_cat_date_with_subdiffs_on_both(self):
+        slice_ = Cube(
+            CR.CAT_X_CAT_DATE,
+            transforms={
+                "rows_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [3], "negative": [2]},
+                            "anchor": "top",
+                            "name": "diff_row1",
+                        },
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [1, 2]},
+                            "anchor": "top",
+                            "name": "subtot_row1",
+                        },
+                    ]
+                },
+                "columns_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [3], "negative": [2]},
+                            "anchor": "top",
+                            "name": "diff_col1",
+                        },
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [1, 2]},
+                            "anchor": "top",
+                            "name": "subtot_col1",
+                        },
+                    ]
+                },
+            },
+        ).partitions[0]
+        assert slice_.diff_column_idxs == (0,)
+        assert slice_.diff_row_idxs == (0,)
+        assert slice_.inserted_row_idxs == (0, 1)
+        assert slice_.inserted_column_idxs == (0, 1)
+        assert slice_.column_proportions == pytest.approx(
+            np.array(
+                [
+                    [np.nan, -0.2847082, -0.1964636, -0.3773195, -0.3111111, -0.415300],
+                    [np.nan, 0.70724346, 0.6345776, 0.78350515, 0.78412698, 0.87978142],
+                    [0.0237277, 0.2837022, 0.2711198, 0.2969072, 0.3206349, 0.3934426],
+                    [-0.023105, 0.4235412, 0.3634577, 0.4865979, 0.4634920, 0.4863388],
+                    [0.043102, 0.138833, 0.1669941, 0.1092783, 0.1523809, 0.0710382],
+                    [-0.024087, 0.0513078, 0.0530451, 0.0494845, 0.0253968, 0.0054644],
+                    [-0.019636, 0.1026156, 0.1453831, 0.0577319, 0.0380952, 0.0437158],
+                ]
+            ),
+            nan_ok=True,
+            rel=1e-4,
+        )
+
+    def it_computes_diff_for_cat_date_x_cat_with_subdiffs_on_both(self):
+        slice_ = Cube(
+            CR.CAT_DATE_X_CAT,
+            transforms={
+                "rows_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [3], "negative": [2]},
+                            "anchor": "top",
+                            "name": "diff_row1",
+                        },
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [1, 2]},
+                            "anchor": "top",
+                            "name": "subtot_row1",
+                        },
+                    ]
+                },
+                "columns_dimension": {
+                    "insertions": [
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [3], "negative": [2]},
+                            "anchor": "top",
+                            "name": "diff_col1",
+                        },
+                        {
+                            "function": "subtotal",
+                            "args": [1],
+                            "kwargs": {"positive": [1, 2]},
+                            "anchor": "top",
+                            "name": "subtot_col1",
+                        },
+                    ]
+                },
+            },
+        ).partitions[0]
+        assert slice_.diff_row_idxs == (0,)
+        assert slice_.diff_column_idxs == (0,)
+        assert slice_.inserted_row_idxs == (0, 1)
+        assert slice_.inserted_column_idxs == (0, 1)
+        assert slice_.row_proportions[1] == pytest.approx(
+            np.array(
+                [-0.014, 0.827, 0.695, 0.132, 0.118, 0.016, 0.006, 0.016, 0.014, 0.003]
+            )
+        )
+        assert slice_.row_proportions[0] == pytest.approx(
+            np.array(
+                [
+                    np.nan,
+                    np.nan,
+                    8.25650350e-02,
+                    -6.07464326e-02,
+                    -3.94610882e-02,
+                    1.45328853e-02,
+                    1.99168632e-04,
+                    2.28786935e-02,
+                    -1.38582819e-02,
+                    -6.10997963e-03,
+                ]
+            ),
+            nan_ok=True,
+        )
+        assert slice_.column_proportions[0] == pytest.approx(
+            np.array(
+                [
+                    np.nan,
+                    -0.10568455,
+                    -0.0825603,
+                    -0.25146199,
+                    -0.21052632,
+                    0.0,
+                    -0.125,
+                    0.08823529,
+                    -0.42857143,
+                    -0.75,
+                ]
+            ),
+            nan_ok=True,
+        )
+        assert slice_.column_proportions[1] == pytest.approx(
+            np.array(
+                [
+                    np.nan,
+                    0.6621297,
+                    0.64471243,
+                    0.77192982,
+                    0.77631579,
+                    0.5,
+                    0.75,
+                    0.47058824,
+                    0.66666667,
+                    0.75,
+                ]
+            ),
+            nan_ok=True,
+        )
+
+    def it_computes_diff_for_cat_date_x_cat_with_subdiffs_on_rows(self):
+        insertions = [
+            {
+                "function": "subtotal",
+                "args": [1],
+                "kwargs": {"positive": [3], "negative": [2]},
+                "anchor": "top",
+                "name": "diff_row1",
+            },
+            {
+                "function": "subtotal",
+                "args": [1],
+                "kwargs": {"positive": [1, 2]},
+                "anchor": "top",
+                "name": "subtot_row1",
+            },
+        ]
+        slice_ = Cube(
+            CR.CAT_DATE_X_CAT,
+            transforms={
+                "rows_dimension": {"insertions": insertions},
+            },
+        ).partitions[0]
+        assert slice_.diff_row_idxs == (0,)
+        assert slice_.inserted_row_idxs == (0, 1)
+        assert slice_.row_proportions[1] == pytest.approx(
+            np.array([0.695, 0.132, 0.118, 0.016, 0.006, 0.016, 0.014, 0.003])
+        )
+        assert slice_.row_proportions[0] == pytest.approx(
+            np.array(
+                [
+                    8.25650350e-02,
+                    -6.07464326e-02,
+                    -3.94610882e-02,
+                    1.45328853e-02,
+                    1.99168632e-04,
+                    2.28786935e-02,
+                    -1.38582819e-02,
+                    -6.10997963e-03,
+                ]
+            )
+        )
+        # change the insertion to test that multiple addend or subtrahend will generate
+        # a nan value
+        insertions[0]["kwargs"]["negative"].append(1)
+        slice2 = Cube(
+            CR.CAT_DATE_X_CAT,
+            transforms={"rows_dimension": {"insertions": insertions}},
+        ).partitions[0]
+        assert slice2.row_proportions[0] == pytest.approx(
+            np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]),
+            nan_ok=True,
+        )
+
     def it_computes_measures_for_1D_cat_with_subdiffs(self):
         strand = Cube(
             CR.CAT,
