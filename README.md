@@ -110,6 +110,9 @@ The detailed description can be found
 
 ## Changes
 
+### 3.1.0
+- Subtotal diff (wave difference) for categorical date dimensions
+
 ### 3.0.45
 - Enumerator refactoring
 
