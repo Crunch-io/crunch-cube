@@ -35,7 +35,7 @@ install_requires = ["scipy", "tabulate"]
 test_requires = ["pytest", "pytest-cov", "mock", "coverage"]
 
 setup(
-    name="cr.cube",
+    name="cr_cube",
     version=version,
     description="Crunch.io Cube library",
     long_description=readme,
