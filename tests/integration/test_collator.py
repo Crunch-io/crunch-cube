@@ -15,7 +15,7 @@ from cr.cube.enums import DIMENSION_TYPE as DT, ORDER_FORMAT
 from ..unitutil import instance_mock, property_mock
 
 
-class DescribeExplicitOrderCollator:
+class TestExplicitOrderCollator:
     """Partial-integration test suite for `ExplicitOrderCollator` object."""
 
     @pytest.mark.parametrize(
@@ -30,7 +30,7 @@ class DescribeExplicitOrderCollator:
             ((9, 3, 7), [7], (), (2, 0, 1)),
         ),
     )
-    def it_knows_the_display_order_for_a_dimension(
+    def test_it_knows_the_display_order_for_a_dimension(
         self, request, element_ids, order, anchors, expected_value
     ):
         subtotals_ = [instance_mock(request, _Subtotal, anchor=a) for a in anchors]
@@ -55,7 +55,7 @@ class DescribeExplicitOrderCollator:
         )
 
 
-class DescribePayloadOrderCollator:
+class TestPayloadOrderCollator:
     """Partial-integration test suite for `PayloadOrderCollator` object."""
 
     @pytest.mark.parametrize(
@@ -66,7 +66,7 @@ class DescribePayloadOrderCollator:
             ((), ("bottom", 3, 3, "top"), (-1, -4, -3, -2)),
         ),
     )
-    def it_knows_the_display_order_for_a_dimension(
+    def test_it_knows_the_display_order_for_a_dimension(
         self, request, element_ids, anchors, expected_value
     ):
         subtotals_ = [instance_mock(request, _Subtotal, anchor=a) for a in anchors]
@@ -95,7 +95,7 @@ class DescribePayloadOrderCollator:
             ((), ("bottom", 3, 3, "top"), ("ins_4", "ins_2", "ins_3")),
         ),
     )
-    def it_knows_the_payload_order_for_a_dimension(
+    def test_it_knows_the_payload_order_for_a_dimension(
         self, request, element_ids, anchors, expected_value
     ):
         subtotals_ = [
@@ -129,7 +129,7 @@ class DescribePayloadOrderCollator:
         assert payload_order == expected_value
 
 
-class DescribeSortByValueCollator:
+class TestSortByValueCollator:
     """Partial-integration test suite for `SortByValueCollator` object."""
 
     @pytest.mark.parametrize(
@@ -153,7 +153,7 @@ class DescribeSortByValueCollator:
             ("A", [4], [1], (10, 30, 20, 40), (0, 3), (2, 1, -1, -2)),
         ),
     )
-    def it_knows_the_display_order_for_a_dimension(
+    def test_it_knows_the_display_order_for_a_dimension(
         self, order, xtop, xbot, element_vals, empty_idxs, expected_value
     ):
         subtot_vals = [60, 40]
@@ -205,7 +205,7 @@ class DescribeSortByValueCollator:
             ("A", [4], [1], (10, 30, 20, 40), (0, 3), (2, 1, "ins_2", "ins_1")),
         ),
     )
-    def it_knows_the_display_order_for_a_dimension_in_bogus_id_fmt(
+    def test_it_knows_the_display_order_for_a_dimension_in_bogus_id_fmt(
         self, request, order, xtop, xbot, element_vals, empty_idxs, expected_value
     ):
         subtot_vals = [60, 40]

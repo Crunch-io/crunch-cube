@@ -22,10 +22,10 @@ from ..fixtures import (
 )
 
 
-class DescribeIntegratedCube:
+class TestIntegratedCube:
     """Integration-test suite for `cr.cube.cube.Cube` object."""
 
-    def it_provides_values_for_cat_x_cat(self):
+    def test_it_provides_values_for_cat_x_cat(self):
         cube = Cube(CR.CAT_X_CAT)
 
         assert cube.__repr__() == "Cube(name='v4', dimension_types='CAT x CAT')"
@@ -54,14 +54,16 @@ class DescribeIntegratedCube:
             (CR.LOGICAL_UNIVARIATE, (DT.LOGICAL,)),
         ),
     )
-    def it_provides_access_to_its_dimensions(self, cube_response, expected_dim_types):
+    def test_it_provides_access_to_its_dimensions(
+        self, cube_response, expected_dim_types
+    ):
         cube = Cube(cube_response)
 
         dimension_types = tuple(d.dimension_type for d in cube.dimensions)
 
         assert dimension_types == expected_dim_types
 
-    def it_provides_array_for_single_valid_cat_CAT_X_MR(self):
+    def test_it_provides_array_for_single_valid_cat_CAT_X_MR(self):
         """No pruning needs to happen, because pruning is based on unweighted counts:
         >>> cube.unweighted_counts
         array([[[0, 108],
@@ -85,7 +87,7 @@ class DescribeIntegratedCube:
         slice_ = Cube(CR.CAT_X_MR_SENTRY, transforms=transforms).partitions[0]
         np.testing.assert_array_equal(slice_.counts, np.array([[0, 0, 0]]))
 
-    def it_provides_pruned_array_for_CA_CAT_x_CA_SUBVAR(self):
+    def test_it_provides_pruned_array_for_CA_CAT_x_CA_SUBVAR(self):
         transforms = {
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
@@ -104,7 +106,7 @@ class DescribeIntegratedCube:
             ),
         )
 
-    def it_provides_valid_counts_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+    def test_it_provides_valid_counts_for_NUM_ARRAY_GROUPED_BY_CAT(self):
         cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
 
         assert cube.covariance is None
@@ -122,7 +124,7 @@ class DescribeIntegratedCube:
             (CR.DICHOTOMIZED_NUMERIC_MEAN, (9, 92)),
         ),
     )
-    def it_provides_valid_counts_summary_range_for_various_cubes(
+    def test_it_provides_valid_counts_summary_range_for_various_cubes(
         self, cube, valid_counts_summary_range
     ):
         cube = Cube(cube)
@@ -131,17 +133,19 @@ class DescribeIntegratedCube:
             cube.valid_counts_summary_range, valid_counts_summary_range
         )
 
-    def and_it_returns_empty_array_for_summary_if_valid_counts_are_not_available(self):
+    def test_and_it_returns_empty_array_for_summary_if_valid_counts_are_not_available(
+        self,
+    ):
         cube = Cube(CR.CAT_X_CAT)
 
         np.testing.assert_array_equal(cube.valid_counts_summary_range, [])
 
-    def it_provides_n_responses_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+    def test_it_provides_n_responses_for_NUM_ARRAY_GROUPED_BY_CAT(self):
         cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
 
         assert cube.n_responses == 5
 
-    def it_provides_multiple_measures_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+    def test_it_provides_multiple_measures_for_NUM_ARRAY_GROUPED_BY_CAT(self):
         cube = Cube(NA.NUM_ARR_MULTI_NUMERIC_MEASURES_GROUPED_BY_CAT)
 
         assert cube.sums.tolist() == [
@@ -197,12 +201,12 @@ class DescribeIntegratedCube:
 
         assert cube.covariance is None
 
-    def it_does_not_get_fooled_into_single_mr_cats_dim(self):
+    def test_it_does_not_get_fooled_into_single_mr_cats_dim(self):
         cube = Cube(CR.NOT_MR_CATS)
         assert cube.dimension_types == (DT.LOGICAL,)
         assert cube.partitions[0].counts.tolist() == [200, 100]
 
-    def it_provides_squared_weights_counts(self):
+    def test_it_provides_squared_weights_counts(self):
         cube = Cube(CR.SQUARED_WEIGHTS)
         assert cube.weighted_squared_counts.tolist() == [
             0.0,
@@ -217,15 +221,15 @@ class DescribeIntegratedCube:
             0.0,
         ]
 
-    def but_it_provides_None_when_no_squared_weights_counts_exist(self):
+    def test_but_it_provides_None_when_no_squared_weights_counts_exist(self):
         cube = Cube(CR.NOT_MR_CATS)
         assert cube.weighted_squared_counts is None
 
 
-class DescribeIntegrated_Measures:
+class TestIntegrated_Measures:
     """Integration-tests that exercise the `cr.cube.cube._Measures` object."""
 
-    def it_provides_access_to_the_overlaps_measure(self):
+    def test_it_provides_access_to_the_overlaps_measure(self):
         cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
         measures = _Measures(
             cube_dict,
@@ -236,7 +240,7 @@ class DescribeIntegrated_Measures:
 
         assert type(overlaps).__name__ == "_OverlapMeasure"
 
-    def but_only_when_the_cube_response_contains_overlaps(self):
+    def test_but_only_when_the_cube_response_contains_overlaps(self):
         cube_dict = CR.CAT_X_CAT
         measures = _Measures(cube_dict, None)
 
@@ -244,7 +248,7 @@ class DescribeIntegrated_Measures:
 
         assert overlaps is None
 
-    def it_provides_access_to_the_mean_measure(self):
+    def test_it_provides_access_to_the_mean_measure(self):
         cube_dict = CR.CAT_X_CAT_MEAN_WGTD
         measures = _Measures(
             cube_dict,
@@ -255,7 +259,7 @@ class DescribeIntegrated_Measures:
 
         assert type(means).__name__ == "_MeanMeasure"
 
-    def but_only_when_the_cube_response_contains_means(self):
+    def test_but_only_when_the_cube_response_contains_means(self):
         cube_dict = CR.CAT_X_CAT
         measures = _Measures(cube_dict, None)
 
@@ -263,7 +267,7 @@ class DescribeIntegrated_Measures:
 
         assert means is None
 
-    def it_provides_the_means_missing_count_when_means_are_available(self):
+    def test_it_provides_the_means_missing_count_when_means_are_available(self):
         cube_dict = CR.CAT_X_CAT_MEAN_WGTD
         measures = _Measures(
             cube_dict,
@@ -272,7 +276,7 @@ class DescribeIntegrated_Measures:
         missing_count = measures.missing_count
         assert missing_count == 3
 
-    def it_provides_the_median_missing_count_when_median_is_available(self):
+    def test_it_provides_the_median_missing_count_when_median_is_available(self):
         cube_dict = CR.MEDIAN_CAT_X_CAT_HS
         measures = _Measures(
             cube_dict,
@@ -281,7 +285,7 @@ class DescribeIntegrated_Measures:
         missing_count = measures.missing_count
         assert missing_count == 0
 
-    def it_provides_the_means_missing_count_when_sum_are_available(self):
+    def test_it_provides_the_means_missing_count_when_sum_are_available(self):
         cube_dict = CR.SUM_CAT_X_MR
         measures = _Measures(
             cube_dict,
@@ -290,7 +294,7 @@ class DescribeIntegrated_Measures:
         missing_count = measures.missing_count
         assert missing_count == 1
 
-    def but_provides_the_general_missing_count_otherwise(self):
+    def test_but_provides_the_general_missing_count_otherwise(self):
         measures = _Measures(CR.CAT_X_CAT, None)
         missing_count = measures.missing_count
         assert missing_count == 5
@@ -306,14 +310,14 @@ class DescribeIntegrated_Measures:
             (CR.CAT_X_CAT_FILT_COMPLETE, 0.5760869565217391),
         ),
     )
-    def it_knows_the_population_fraction(self, cube_dict, expected_value):
+    def test_it_knows_the_population_fraction(self, cube_dict, expected_value):
         measures = _Measures(cube_dict, None)
 
         population_fraction = measures.population_fraction
 
         assert population_fraction == expected_value
 
-    def it_provides_access_to_the_unweighted_count_measure(self):
+    def test_it_provides_access_to_the_unweighted_count_measure(self):
         measures = _Measures(None, None)
 
         unweighted_counts = measures.unweighted_counts
@@ -329,7 +333,9 @@ class DescribeIntegrated_Measures:
             (CR.CAT_X_CAT, "NoneType"),
         ),
     )
-    def it_provides_access_to_wgtd_count_measure(self, cube_dict, expected_type_name):
+    def test_it_provides_access_to_wgtd_count_measure(
+        self, cube_dict, expected_type_name
+    ):
         measures = _Measures(
             cube_dict,
             Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
@@ -340,8 +346,8 @@ class DescribeIntegrated_Measures:
         assert type(weighted_counts).__name__ == expected_type_name
 
 
-class DescribeIntegrated_MeanMeasure:
-    def it_provides_access_to_its_raw_cube_array(self):
+class TestIntegrated_MeanMeasure:
+    def test_it_provides_access_to_its_raw_cube_array(self):
         cube_dict = CR.CAT_X_CAT_MEAN_WGTD
         cube = Cube(cube_dict)
         measure = _MeanMeasure(cube_dict, cube._all_dimensions)
@@ -362,7 +368,7 @@ class DescribeIntegrated_MeanMeasure:
             ],
         )
 
-    def it_handles_cat_x_mr_with_means(self):
+    def test_it_handles_cat_x_mr_with_means(self):
         slice_ = Cube(CR.MEANS_CAT_X_MR).partitions[0]
         assert slice_.column_labels.tolist() == [
             "Denmark",
@@ -372,7 +378,7 @@ class DescribeIntegrated_MeanMeasure:
             "Sweden",
         ]
 
-    def it_handles_means_cat_hs_x_cat_hs(self):
+    def test_it_handles_means_cat_hs_x_cat_hs(self):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
 
         means = slice_.means
@@ -391,8 +397,8 @@ class DescribeIntegrated_MeanMeasure:
         )
 
 
-class DescribeIntegrated_UnweightedCountMeasure:
-    def it_provides_access_to_its_raw_cube_array(self):
+class TestIntegrated_UnweightedCountMeasure:
+    def test_it_provides_access_to_its_raw_cube_array(self):
         cube_dict = CR.CAT_X_CAT
         cube = Cube(cube_dict)
         measure = _UnweightedCountMeasure(cube_dict, cube._all_dimensions)
@@ -404,8 +410,8 @@ class DescribeIntegrated_UnweightedCountMeasure:
         )
 
 
-class DescribeIntegrated_WeightedCountMeasure:
-    def it_provides_access_to_its_raw_cube_array(self):
+class TestIntegrated_WeightedCountMeasure:
+    def test_it_provides_access_to_its_raw_cube_array(self):
         cube_dict = CR.CAT_X_CAT_WGTD
         cube = Cube(cube_dict)
         measure = _WeightedCountMeasure(cube_dict, cube._all_dimensions)

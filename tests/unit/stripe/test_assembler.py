@@ -36,7 +36,7 @@ from cr.cube.stripe.measure import (
 from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
 
-class DescribeStripeAssembler:
+class TestStripeAssembler:
     """Unit test suite for `cr.cube.stripe.assembler.StripeAssembler` object."""
 
     @pytest.mark.parametrize(
@@ -54,7 +54,7 @@ class DescribeStripeAssembler:
             ("weighted_counts", _WeightedCounts),
         ),
     )
-    def it_assembles_various_measures(
+    def test_it_assembles_various_measures(
         self,
         request,
         _measures_prop_,
@@ -78,19 +78,19 @@ class DescribeStripeAssembler:
         _assemble_vector_.assert_called_once_with(strand, ("A", "B"))
         assert value.tolist() == [1, 2, 3, 4, 5]
 
-    def it_knows_the_inserted_row_idxs(self, _row_order_prop_):
+    def test_it_knows_the_inserted_row_idxs(self, _row_order_prop_):
         _row_order_prop_.return_value = np.array([-1, 0, 3, -2, 4, 1])
         strand = _Strand(None, None, None, None, None, None)
 
         assert strand.inserted_row_idxs == (0, 3)
 
-    def it_knows_the_row_count(self, _row_order_prop_):
+    def test_it_knows_the_row_count(self, _row_order_prop_):
         _row_order_prop_.return_value = np.array([1, 2, 3, 4, 5])
         strand = _Strand(None, None, None, None, None, None)
 
         assert strand.row_count == 5
 
-    def it_knows_the_row_labels(self, rows_dimension_, _row_order_prop_):
+    def test_it_knows_the_row_labels(self, rows_dimension_, _row_order_prop_):
         rows_dimension_.element_labels = ("baz", "foo", "bar")
         rows_dimension_.subtotal_labels = ("bing", "bada")
         _row_order_prop_.return_value = np.array([1, 2, 0, -1, -2])
@@ -110,7 +110,7 @@ class DescribeStripeAssembler:
             ((-1, -2, 2, 1, 0), ("STF2", "STF1", "#f00ba5", "#111111", "#000000")),
         ),
     )
-    def it_knows_the_rows_dimension_fills(
+    def test_it_knows_the_rows_dimension_fills(
         self, request, rows_dimension_, _row_order_prop_, order, expected_fills
     ):
         element_fills = ("#000000", "#111111", "#f00ba5")
@@ -129,7 +129,7 @@ class DescribeStripeAssembler:
 
             assert strand.rows_dimension_fills == expected_fills
 
-    def it_knows_the_scale_mean(self, _measures_prop_, measures_, scaled_counts_):
+    def test_it_knows_the_scale_mean(self, _measures_prop_, measures_, scaled_counts_):
         scaled_counts_.scale_mean = 3
         measures_.scaled_counts = scaled_counts_
         _measures_prop_.return_value = measures_
@@ -137,7 +137,9 @@ class DescribeStripeAssembler:
 
         assert strand.scale_mean == 3
 
-    def it_knows_the_scale_median(self, _measures_prop_, measures_, scaled_counts_):
+    def test_it_knows_the_scale_median(
+        self, _measures_prop_, measures_, scaled_counts_
+    ):
         scaled_counts_.scale_median = 4
         measures_.scaled_counts = scaled_counts_
         _measures_prop_.return_value = measures_
@@ -145,7 +147,9 @@ class DescribeStripeAssembler:
 
         assert strand.scale_median == 4
 
-    def it_knows_the_scale_stddev(self, _measures_prop_, measures_, scaled_counts_):
+    def test_it_knows_the_scale_stddev(
+        self, _measures_prop_, measures_, scaled_counts_
+    ):
         scaled_counts_.scale_stddev = 5
         measures_.scaled_counts = scaled_counts_
         _measures_prop_.return_value = measures_
@@ -153,7 +157,9 @@ class DescribeStripeAssembler:
 
         assert strand.scale_stddev == 5
 
-    def it_knows_the_scale_stderr(self, _measures_prop_, measures_, scaled_counts_):
+    def test_it_knows_the_scale_stderr(
+        self, _measures_prop_, measures_, scaled_counts_
+    ):
         scaled_counts_.scale_stderr = 6
         measures_.scaled_counts = scaled_counts_
         _measures_prop_.return_value = measures_
@@ -161,7 +167,7 @@ class DescribeStripeAssembler:
 
         assert strand.scale_stderr == 6
 
-    def it_knows_the_table_base_range(self, request, _measures_prop_, measures_):
+    def test_it_knows_the_table_base_range(self, request, _measures_prop_, measures_):
         measures_.unweighted_bases = instance_mock(
             request, _UnweightedBases, table_base_range=np.array([50, 100])
         )
@@ -170,7 +176,7 @@ class DescribeStripeAssembler:
 
         assert strand.table_base_range.tolist() == [50, 100]
 
-    def it_knows_the_table_margin_range(self, request, _measures_prop_, measures_):
+    def test_it_knows_the_table_margin_range(self, request, _measures_prop_, measures_):
         measures_.weighted_bases = instance_mock(
             request, _WeightedBases, table_margin_range=np.array([50.5, 100.1])
         )
@@ -179,7 +185,7 @@ class DescribeStripeAssembler:
 
         assert strand.table_margin_range.tolist() == [50.5, 100.1]
 
-    def it_can_assemble_a_vector_to_help(self, _row_order_prop_):
+    def test_it_can_assemble_a_vector_to_help(self, _row_order_prop_):
         base_values = np.array([1, 2, 3, 4])
         subtotal_values = (3, 5, 7)
         blocks = (base_values, subtotal_values)
@@ -188,7 +194,7 @@ class DescribeStripeAssembler:
 
         assert strand._assemble_vector(blocks).tolist() == [3, 2, 1, 5, 4, 3, 7]
 
-    def it_constructs_its_measures_collaborator_object_to_help(
+    def test_it_constructs_its_measures_collaborator_object_to_help(
         self, request, cube_, rows_dimension_, measures_
     ):
         StripeMeasures_ = class_mock(
@@ -215,7 +221,7 @@ class DescribeStripeAssembler:
             (ORDER_FORMAT.BOGUS_IDS, ("ins_1", 1, "ins_2", 2, "ins_3", 3)),
         ),
     )
-    def it_knows_the_row_order_to_help(
+    def test_it_knows_the_row_order_to_help(
         self, request, rows_dimension_, _measures_prop_, measures_, format, row_order
     ):
         _measures_prop_.return_value = measures_
@@ -266,7 +272,7 @@ class DescribeStripeAssembler:
         return instance_mock(request, _ScaledCounts)
 
 
-class Describe_BaseOrderHelper:
+class Test_BaseOrderHelper:
     """Unit-test suite for `cr.cube.stripe.assembler._BaseOrderHelper` object."""
 
     @pytest.mark.parametrize(
@@ -278,7 +284,7 @@ class Describe_BaseOrderHelper:
             (CM.PAYLOAD_ORDER, _OrderHelper),
         ),
     )
-    def it_dispatches_to_the_right_order_helper(
+    def test_it_dispatches_to_the_right_order_helper(
         self, request, measures_, collation_method, HelperCls
     ):
         rows_dimension_ = instance_mock(
@@ -310,7 +316,7 @@ class Describe_BaseOrderHelper:
         "pruning_base, expected_value",
         (([1, 1, 1], ()), ([1, 0, 1], (1,)), ([0, 0, 0], (0, 1, 2))),
     )
-    def it_knows_the_empty_row_idxs_to_help(
+    def test_it_knows_the_empty_row_idxs_to_help(
         self, measures_, pruning_base, expected_value
     ):
         measures_.pruning_base = np.array(pruning_base)
@@ -325,7 +331,7 @@ class Describe_BaseOrderHelper:
         return instance_mock(request, StripeMeasures)
 
 
-class Describe_OrderHelper:
+class Test_OrderHelper:
     """Unit test suite for `cr.cube.stripe.assembler._OrderHelper` object."""
 
     @pytest.mark.parametrize(
@@ -335,7 +341,7 @@ class Describe_OrderHelper:
             (CM.EXPLICIT_ORDER, "ExplicitOrderCollator"),
         ),
     )
-    def it_computes_the_order_of_a_rows_dimension_to_help(
+    def test_it_computes_the_order_of_a_rows_dimension_to_help(
         self, request, collation_method, collator_class_name
     ):
         rows_dimension_ = instance_mock(
@@ -360,10 +366,10 @@ class Describe_OrderHelper:
         assert display_order == (1, -2, 3, 5, -1)
 
 
-class Describe_BaseSortByValueHelper:
+class Test_BaseSortByValueHelper:
     """Unit test suite for `cr.cube.strip.assembler._BaseSortByValueHelper`."""
 
-    def it_computes_the_display_order_to_help(
+    def test_it_computes_the_display_order_to_help(
         self,
         dimension_,
         _element_values_prop_,
@@ -386,7 +392,7 @@ class Describe_BaseSortByValueHelper:
         )
         assert order == (-1, -2, 0, 2, 1)
 
-    def but_it_falls_back_to_payload_order_on_value_error(
+    def test_but_it_falls_back_to_payload_order_on_value_error(
         self,
         request,
         dimension_,
@@ -435,16 +441,16 @@ class Describe_BaseSortByValueHelper:
         return property_mock(request, _BaseSortByValueHelper, "_subtotal_values")
 
 
-class Describe_SortByLabelHelper:
+class Test_SortByLabelHelper:
     """Unit test suite for `cr.cube.strip.assembler._SortByLabelHelper`."""
 
-    def it_extracts_the_element_values_to_help(self, dimension_):
+    def test_it_extracts_the_element_values_to_help(self, dimension_):
         dimension_.element_labels = ["b", "a", "c"]
         order_helper = _SortByLabelHelper(dimension_, None)
 
         assert order_helper._element_values.tolist() == ["b", "a", "c"]
 
-    def it_extracts_the_subtotal_values_to_help(self, dimension_):
+    def test_it_extracts_the_subtotal_values_to_help(self, dimension_):
         dimension_.subtotal_labels = ["b", "a", "c"]
         order_helper = _SortByLabelHelper(dimension_, None)
 
@@ -457,10 +463,10 @@ class Describe_SortByLabelHelper:
         return instance_mock(request, Dimension)
 
 
-class Describe_SortByMeasureHelper:
+class Test_SortByMeasureHelper:
     """Unit test suite for `cr.cube.strip.assembler._SortByMeasureHelper`."""
 
-    def it_extracts_the_element_values_to_help(self, _measure_prop_, measure_):
+    def test_it_extracts_the_element_values_to_help(self, _measure_prop_, measure_):
         _measure_prop_.return_value = measure_
         measure_.blocks = [np.arange(5), None]
         order_helper = _SortByMeasureHelper(None, None)
@@ -484,7 +490,7 @@ class Describe_SortByMeasureHelper:
             ("sum", "sums"),
         ),
     )
-    def it_retrieves_the_right_measure_object_to_help(
+    def test_it_retrieves_the_right_measure_object_to_help(
         self,
         request,
         _order_spec_prop_,
@@ -501,7 +507,7 @@ class Describe_SortByMeasureHelper:
 
         assert order_helper._measure is measure_
 
-    def but_it_raises_when_the_sort_measure_is_not_supported(
+    def test_but_it_raises_when_the_sort_measure_is_not_supported(
         self, _order_spec_prop_, order_spec_
     ):
         _order_spec_prop_.return_value = order_spec_
@@ -513,7 +519,7 @@ class Describe_SortByMeasureHelper:
 
         assert str(e.value) == "sort-by-value for measure 'foobar' is not yet supported"
 
-    def it_extracts_the_subtotal_values_to_help(self, _measure_prop_, measure_):
+    def test_it_extracts_the_subtotal_values_to_help(self, _measure_prop_, measure_):
         _measure_prop_.return_value = measure_
         measure_.blocks = [None, np.arange(3)]
         order_helper = _SortByMeasureHelper(None, None)

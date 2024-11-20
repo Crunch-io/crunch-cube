@@ -10,10 +10,10 @@ from cr.cube.cube import Cube
 from ..fixtures import NA
 
 
-class DescribeNumericArrays:
+class TestNumericArrays:
     """Test-suite for numeric-array behaviors."""
 
-    def it_provides_means_scale_measures(self):
+    def test_it_provides_means_scale_measures(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_SCALE_MEASURES).partitions[0]
 
         assert slice_.means == pytest.approx(
@@ -31,7 +31,7 @@ class DescribeNumericArrays:
         )
         assert slice_.rows_scale_median == pytest.approx([3.0, 3.0, 3.0, 3.0])
 
-    def it_provides_means_for_num_array_grouped_by_cat(self):
+    def test_it_provides_means_for_num_array_grouped_by_cat(self):
         """Test means on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT).partitions[0]
 
@@ -56,7 +56,7 @@ class DescribeNumericArrays:
             {"1": {"hide": True}},
         ),
     )
-    def it_provides_means_for_num_array_hiding_transforms_grouped_by_cat(
+    def test_it_provides_means_for_num_array_hiding_transforms_grouped_by_cat(
         self, element_transform
     ):
         transforms = {"rows_dimension": {"elements": element_transform}}
@@ -76,7 +76,7 @@ class DescribeNumericArrays:
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [1, 1]]))
 
-    def it_provides_means_for_num_array_grouped_by_date(self):
+    def test_it_provides_means_for_num_array_grouped_by_date(self):
         """Test means on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_DATE).partitions[0]
 
@@ -94,7 +94,7 @@ class DescribeNumericArrays:
             np.array([[10, 9], [8, 10], [9, 10]])
         )
 
-    def it_provides_means_for_num_array_grouped_by_cat_weighted(self):
+    def test_it_provides_means_for_num_array_grouped_by_cat_weighted(self):
         """Test means on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_WEIGHTED).partitions[0]
 
@@ -111,7 +111,7 @@ class DescribeNumericArrays:
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 1], [1, 1]]))
 
-    def it_provides_means_for_num_array_x_mr(self):
+    def test_it_provides_means_for_num_array_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_X_MR).partitions[0]
         expected_means = [
             # -------------------------MR--------------------------
@@ -127,7 +127,7 @@ class DescribeNumericArrays:
             np.array([[38, 14, 6, 18, 38], [38, 14, 6, 18, 38]])
         )
 
-    def it_provides_means_for_numeric_array_with_no_grouping(self):
+    def test_it_provides_means_for_numeric_array_with_no_grouping(self):
         """Test means on no-dimensions measure of numeric array."""
         strand = Cube(NA.NUM_ARR_MEANS_NO_GROUPING).partitions[0]
 
@@ -136,7 +136,7 @@ class DescribeNumericArrays:
         assert strand.unweighted_bases.tolist() == [6, 6]
         assert strand.table_base_range.tolist() == [6, 6]
 
-    def it_provides_sum_for_num_array_grouped_by_cat(self):
+    def test_it_provides_sum_for_num_array_grouped_by_cat(self):
         """Test sum on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
 
@@ -153,7 +153,7 @@ class DescribeNumericArrays:
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 2], [3, 2]]))
 
-    def it_provides_sum_for_num_array_grouped_by_cat_hs(self):
+    def test_it_provides_sum_for_num_array_grouped_by_cat_hs(self):
         slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT_HS).partitions[0]
 
         assert slice_.sums == pytest.approx(
@@ -177,7 +177,7 @@ class DescribeNumericArrays:
             )
         )
 
-    def it_provides_stddev_for_numeric_array_with_no_grouping(self):
+    def test_it_provides_stddev_for_numeric_array_with_no_grouping(self):
         """Test stddev on no-dimensions measure of numeric array."""
         strand = Cube(NA.NUM_ARR_STDDEV_NO_GROUPING).partitions[0]
 
@@ -186,7 +186,7 @@ class DescribeNumericArrays:
         assert strand.unweighted_bases.tolist() == [4, 3, 2]
         assert strand.table_base_range.tolist() == [2, 4]
 
-    def it_provides_median_for_numeric_array_with_no_grouping(self):
+    def test_it_provides_median_for_numeric_array_with_no_grouping(self):
         """Test stddev on no-dimensions measure of numeric array."""
         strand = Cube(NA.NUM_ARR_MEDIAN_NO_GROUPING).partitions[0]
 
@@ -195,7 +195,7 @@ class DescribeNumericArrays:
         assert strand.unweighted_bases.tolist() == [4, 3, 2]
         assert strand.table_base_range.tolist() == [2, 4]
 
-    def it_provides_stddev_for_num_array_grouped_by_cat(self):
+    def test_it_provides_stddev_for_num_array_grouped_by_cat(self):
         """Test stddev on numeric array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_STDDEV_GROUPED_BY_CAT).partitions[0]
 
@@ -213,7 +213,7 @@ class DescribeNumericArrays:
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 1], [1, 1]]))
 
-    def it_provides_median_for_num_array_grouped_by_cat(self):
+    def test_it_provides_median_for_num_array_grouped_by_cat(self):
         slice_ = Cube(NA.NUM_ARR_MEDIAN_GROUPED_BY_CAT).partitions[0]
 
         assert slice_.medians == pytest.approx(
@@ -230,7 +230,7 @@ class DescribeNumericArrays:
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 1], [1, 1]]))
 
-    def it_provides_stddev_for_num_array_x_mr(self):
+    def test_it_provides_stddev_for_num_array_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_STDDEV_X_MR).partitions[0]
 
         assert slice_.stddev == pytest.approx(
@@ -249,7 +249,7 @@ class DescribeNumericArrays:
             np.array([[2, 1, 1], [1, 0, 0], [1, 1, 1]])
         )
 
-    def it_provides_median_for_num_array_x_mr(self):
+    def test_it_provides_median_for_num_array_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_MEDIAN_X_MR).partitions[0]
 
         assert slice_.stddev == pytest.approx(
@@ -268,7 +268,7 @@ class DescribeNumericArrays:
             np.array([[2, 1, 1], [1, 0, 0], [1, 1, 1]])
         )
 
-    def it_provides_share_of_sum_for_numeric_array_with_no_grouping(self):
+    def test_it_provides_share_of_sum_for_numeric_array_with_no_grouping(self):
         strand = Cube(NA.NUM_ARR_SUM_NO_GROUPING).partitions[0]
 
         assert strand.sums == pytest.approx([25, 44])
@@ -277,7 +277,7 @@ class DescribeNumericArrays:
         assert strand.unweighted_bases.tolist() == [6, 6]
         assert strand.table_base_range.tolist() == [6, 6]
 
-    def it_provides_share_of_sum_for_num_array_grouped_by_cat(self):
+    def test_it_provides_share_of_sum_for_num_array_grouped_by_cat(self):
         """Test share of sum on num array, grouped by single categorical dimension."""
         slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
 
@@ -318,7 +318,7 @@ class DescribeNumericArrays:
         )
         assert slice_.columns_base == pytest.approx(np.array([[3, 2], [3, 2], [3, 2]]))
 
-    def it_provides_share_of_sum_for_num_array_x_mr(self):
+    def test_it_provides_share_of_sum_for_num_array_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_SUM_X_MR).partitions[0]
 
         assert slice_.sums == pytest.approx(
@@ -370,7 +370,7 @@ class DescribeNumericArrays:
             nan_ok=True,
         )
 
-    def it_provides_unweighted_valid_counts_for_num_array_grouped_by_cat(self):
+    def test_it_provides_unweighted_valid_counts_for_num_array_grouped_by_cat(self):
         slice_ = Cube(NA.NUM_ARR_SUM_GROUPED_BY_CAT).partitions[0]
 
         # unweighted valid counts
@@ -380,7 +380,7 @@ class DescribeNumericArrays:
             [3.0, 2.0],
         ]
 
-    def it_provides_valid_counts_for_num_array_grouped_by_cat_hs(self):
+    def test_it_provides_valid_counts_for_num_array_grouped_by_cat_hs(self):
         transforms = {
             "columns_dimension": {
                 "insertions": [
@@ -436,7 +436,7 @@ class DescribeNumericArrays:
             nan_ok=True,
         )
 
-    def it_provides_unweighted_valid_counts_for_num_array_x_mr(self):
+    def test_it_provides_unweighted_valid_counts_for_num_array_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_X_MR).partitions[0]
 
         # unweighted valid counts
@@ -445,7 +445,7 @@ class DescribeNumericArrays:
             [38.0, 14.0, 6.0, 18.0, 38.0],
         ]
 
-    def it_provides_weighted_and_unweighted_valid_counbts_for_num_array_x_mr(self):
+    def test_it_provides_weighted_and_unweighted_valid_counbts_for_num_array_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_WEIGHTED).partitions[0]
 
         # unweighted valid counts
@@ -461,13 +461,15 @@ class DescribeNumericArrays:
             [0.2, 0.3],
         ]
 
-    def it_provides_unweighted_valid_counts_for_numeric_array_with_no_grouping(self):
+    def test_it_provides_unweighted_valid_counts_for_numeric_array_with_no_grouping(
+        self,
+    ):
         strand = Cube(NA.NUM_ARR_MEANS_NO_GROUPING).partitions[0]
 
         # unweighted valid counts
         assert strand.unweighted_counts.tolist() == [6.0, 6.0]
 
-    def it_provides_weighted_and_unweighted_valid_counts_for_num_arr_no_grouping_wgtd(
+    def test_it_provides_weighted_and_unweighted_valid_counts_for_num_arr_no_grouping_wgtd(
         self,
     ):
         strand = Cube(NA.NUM_ARR_MEANS_NO_GROUPING_WEIGHTED).partitions[0]
@@ -477,7 +479,9 @@ class DescribeNumericArrays:
         # weighted valid counts
         assert strand.counts.tolist() == [10.33, 11.22, 18.99, 14.55]
 
-    def it_provides_weighted_and_unweighted_valid_counts_for_num_arr_x_mr_wgtd(self):
+    def test_it_provides_weighted_and_unweighted_valid_counts_for_num_arr_x_mr_wgtd(
+        self,
+    ):
         slice_ = Cube(NA.NUM_ARR_MEANS_X_MR_WEIGHTED).partitions[0]
 
         # unweighted valid counts
@@ -495,7 +499,7 @@ class DescribeNumericArrays:
             [1.898, 6.1],
         ]
 
-    def it_has_bases_that_dont_sum_across_num_array_subvars_x_cat(self):
+    def test_it_has_bases_that_dont_sum_across_num_array_subvars_x_cat(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT).partitions[0]
 
         assert slice_.row_weighted_bases.tolist() == [
@@ -507,7 +511,9 @@ class DescribeNumericArrays:
         # --- Can't sum across subvariables so column bases are the same as counts ---
         assert slice_.column_weighted_bases == pytest.approx(slice_.counts)
 
-    def it_has_bases_that_dont_sum_across_num_array_subvars_x_cat_with_insertion(self):
+    def test_it_has_bases_that_dont_sum_across_num_array_subvars_x_cat_with_insertion(
+        self,
+    ):
         slice_ = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT_HS).partitions[0]
 
         assert slice_.row_weighted_bases.tolist() == [
@@ -522,7 +528,7 @@ class DescribeNumericArrays:
         # --- Can't sum across subvariables so column bases are the same as counts ---
         assert slice_.column_weighted_bases.tolist() == slice_.counts.tolist()
 
-    def it_has_bases_that_dont_sum_across_num_array_subvars_x_mr(self):
+    def test_it_has_bases_that_dont_sum_across_num_array_subvars_x_mr(self):
         slice_ = Cube(NA.NUM_ARR_MEANS_X_MR_WEIGHTED).partitions[0]
         row_bases = np.array(
             [[4.66, 8.9992], [8.243, 9.011], [5.781, 7.523445], [6.228, 8.553]]
@@ -537,7 +543,7 @@ class DescribeNumericArrays:
             np.array([[2.33, 7.009], [4.123, 6.777], [4.67, 6.4], [1.898, 6.1]])
         )
 
-    def it_provides_share_of_sum_for_numeric_array_with_nan_values(self):
+    def test_it_provides_share_of_sum_for_numeric_array_with_nan_values(self):
         strand = Cube(NA.NUM_ARR_SUMS_WITH_NAN_VALUES).partitions[0]
 
         assert strand.share_sum == pytest.approx(

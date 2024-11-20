@@ -34,10 +34,10 @@ from ..unitutil import (
 )
 
 
-class Describe_BaseCollator:
+class Test_BaseCollator:
     """Unit-test suite for `cr.cube.collator._BaseCollator` object."""
 
-    def it_provides_access_to_the_dimension_element_ids_to_help(self, dimension_):
+    def test_it_provides_access_to_the_dimension_element_ids_to_help(self, dimension_):
         dimension_.element_ids = (42, 24, 1, 6)
         assert _BaseCollator(dimension_, None)._element_ids == (42, 24, 1, 6)
 
@@ -52,7 +52,7 @@ class Describe_BaseCollator:
             ((1, 2, 3), True, (4, 5, 6), (1, 2, 3, 4, 5, 6)),
         ),
     )
-    def it_knows_the_hidden_idxs_to_help(
+    def test_it_knows_the_hidden_idxs_to_help(
         self, dimension_, empty_idxs, prune, hidden_idxs, expected_value
     ):
         dimension_.hidden_idxs = hidden_idxs
@@ -61,15 +61,15 @@ class Describe_BaseCollator:
 
         assert collator._hidden_idxs == frozenset(expected_value)
 
-    def it_provides_access_to_the_order_spec_to_help(self, request, dimension_):
+    def test_it_provides_access_to_the_order_spec_to_help(self, request, dimension_):
         order_spec_ = instance_mock(request, _OrderSpec)
         dimension_.order_spec = order_spec_
         assert _BaseCollator(dimension_, None)._order_spec is order_spec_
 
-    def it_provides_access_to_the_dimension_subtotals_to_help(self, dimension_):
+    def test_it_provides_access_to_the_dimension_subtotals_to_help(self, dimension_):
         assert _BaseCollator(dimension_, None)._subtotals is dimension_.subtotals
 
-    def it_provides_access_to_subtotal_bogus_ids(self, request, dimension_):
+    def test_it_provides_access_to_subtotal_bogus_ids(self, request, dimension_):
         _Subtotals_ = instance_mock(request, _Subtotals)
         _Subtotals_.bogus_ids = ("i1", "i2")
         dimension_.subtotals = _Subtotals_
@@ -82,10 +82,10 @@ class Describe_BaseCollator:
         return instance_mock(request, Dimension)
 
 
-class Describe_BaseAnchoredCollator:
+class Test_BaseAnchoredCollator:
     """Unit-test suite for `cr.cube.collator._BaseAnchoredCollator` object."""
 
-    def it_provides_an_interface_classmethod(self, request, dimension_):
+    def test_it_provides_an_interface_classmethod(self, request, dimension_):
         _init_ = initializer_mock(request, _BaseAnchoredCollator)
         _display_order_ = property_mock(
             request, _BaseAnchoredCollator, "_display_order"
@@ -132,7 +132,7 @@ class Describe_BaseAnchoredCollator:
             ),
         ),
     )
-    def it_computes_the_display_order_to_help(
+    def test_it_computes_the_display_order_to_help(
         self,
         request,
         base_order,
@@ -179,7 +179,7 @@ class Describe_BaseAnchoredCollator:
             (((0, 2, 18), (1, 0, 12), (2, 1, 5)), ((0, 0, 2), (1, 0, 0), (2, 0, 1))),
         ),
     )
-    def it_computes_the_base_element_orderings_to_help(
+    def test_it_computes_the_base_element_orderings_to_help(
         self, request, element_order_descriptors, expected_value
     ):
         property_mock(
@@ -192,11 +192,11 @@ class Describe_BaseAnchoredCollator:
 
         assert collator._base_element_orderings == expected_value
 
-    def it_has_empty_derived_element_orderings(self):
+    def test_it_has_empty_derived_element_orderings(self):
         collator = _BaseAnchoredCollator(None, None)
         assert collator._derived_element_orderings == tuple()
 
-    def it_raises_on_element_order_descriptors_access(self):
+    def test_it_raises_on_element_order_descriptors_access(self):
         """Error message identifies the non-implementing subclass."""
         with pytest.raises(NotImplementedError) as e:
             _BaseAnchoredCollator(None, None)._element_order_descriptors
@@ -215,7 +215,7 @@ class Describe_BaseAnchoredCollator:
             (((0, 2, 18), (1, 0, 12), (2, 1, 5)), {18: 0, 12: 1, 5: 2}),
         ),
     )
-    def it_maps_the_element_ids_to_their_position_to_help(
+    def test_it_maps_the_element_ids_to_their_position_to_help(
         self, request, element_order_descriptors, expected_value
     ):
         property_mock(
@@ -242,7 +242,7 @@ class Describe_BaseAnchoredCollator:
             ),
         ),
     )
-    def it_computes_the_insertion_orderings_to_help(
+    def test_it_computes_the_insertion_orderings_to_help(
         self, request, insertion_positions, expected_value
     ):
         subtotals_ = tuple(
@@ -277,7 +277,7 @@ class Describe_BaseAnchoredCollator:
             (3, (2, 1)),
         ),
     )
-    def it_can_compute_the_insertion_position_for_a_subtotal_to_help(
+    def test_it_can_compute_the_insertion_position_for_a_subtotal_to_help(
         self, request, anchor, expected_value
     ):
         property_mock(
@@ -298,7 +298,7 @@ class Describe_BaseAnchoredCollator:
         return instance_mock(request, Dimension)
 
 
-class DescribeExplicitOrderCollator:
+class TestExplicitOrderCollator:
     """Unit-test suite for `cr.cube.collator.ExplicitOrderCollator` object."""
 
     @pytest.mark.parametrize(
@@ -320,7 +320,7 @@ class DescribeExplicitOrderCollator:
             ),
         ),
     )
-    def it_computes_the_derived_element_orderings_to_help(
+    def test_it_computes_the_derived_element_orderings_to_help(
         self, request, ids, are_derived, element_positions, expected_value
     ):
         derived_elements_ = tuple(
@@ -355,7 +355,7 @@ class DescribeExplicitOrderCollator:
             (2, None, (sys.maxsize, 0)),
         ),
     )
-    def it_computes_the_derived_element_position_to_help(
+    def test_it_computes_the_derived_element_position_to_help(
         self, request, element_id, anchor, expected_value
     ):
         element_ = instance_mock(request, Element, anchor=anchor)
@@ -409,7 +409,7 @@ class DescribeExplicitOrderCollator:
             ),
         ),
     )
-    def it_computes_the_element_order_descriptors_to_help(
+    def test_it_computes_the_element_order_descriptors_to_help(
         self, request, element_ids, element_id_order, expected_value
     ):
         valid_elements_ = [
@@ -429,7 +429,7 @@ class DescribeExplicitOrderCollator:
         assert collator._element_order_descriptors == expected_value
 
 
-class DescribePayloadOrderCollator:
+class TestPayloadOrderCollator:
     """Unit-test suite for `cr.cube.collator.PayloadOrderCollator` object."""
 
     @pytest.mark.parametrize(
@@ -443,7 +443,7 @@ class DescribePayloadOrderCollator:
             ((47, 103, 18), ((0, 0, 47), (1, 1, 103), (2, 2, 18))),
         ),
     )
-    def it_computes_the_element_order_descriptors_to_help(
+    def test_it_computes_the_element_order_descriptors_to_help(
         self, request, element_ids, expected_value
     ):
         property_mock(
@@ -454,7 +454,7 @@ class DescribePayloadOrderCollator:
         assert collator._element_order_descriptors == expected_value
 
 
-class DescribeSortByValueCollator:
+class TestSortByValueCollator:
     """Unit-test suite for `cr.cube.collator.SortByValueCollator` object.
 
     SortByValueCollator computes element ordering for sort-by-value order transforms. It
@@ -463,7 +463,7 @@ class DescribeSortByValueCollator:
     or a marginal.
     """
 
-    def it_provides_an_interface_classmethod(self, request):
+    def test_it_provides_an_interface_classmethod(self, request):
         dimension_ = instance_mock(request, Dimension)
         _init_ = initializer_mock(request, SortByValueCollator)
         property_mock(
@@ -494,7 +494,7 @@ class DescribeSortByValueCollator:
         )
         assert display_order == (-3, -1, -2, 1, 0, 2, 3)
 
-    def it_computes_the_display_order_to_help(
+    def test_it_computes_the_display_order_to_help(
         self, request, _top_fixed_idxs_prop_, _bottom_fixed_idxs_prop_
     ):
         property_mock(
@@ -532,7 +532,7 @@ class DescribeSortByValueCollator:
             ((), (), True, (8.0, np.nan, 2.0, np.nan), (0, 2, 1, 3)),
         ),
     )
-    def it_computes_the_sorted_body_idxs_to_help(
+    def test_it_computes_the_sorted_body_idxs_to_help(
         self,
         _top_fixed_idxs_prop_,
         _bottom_fixed_idxs_prop_,
@@ -553,7 +553,7 @@ class DescribeSortByValueCollator:
 
         assert collator._body_idxs == expected_value
 
-    def it_computes_the_bottom_exclusion_idxs_to_help(
+    def test_it_computes_the_bottom_exclusion_idxs_to_help(
         self, _iter_fixed_idxs_, _order_spec_prop_, order_spec_
     ):
         _iter_fixed_idxs_.return_value = (n for n in (4, 0, 5, 2))
@@ -575,7 +575,7 @@ class DescribeSortByValueCollator:
             (True, (-3, -1, -2), ()),
         ),
     )
-    def it_computes_the_bottom_subtotal_idxs_to_help(
+    def test_it_computes_the_bottom_subtotal_idxs_to_help(
         self,
         _descending_prop_,
         _subtotal_idxs_prop_,
@@ -593,7 +593,7 @@ class DescribeSortByValueCollator:
         "fixed_element_ids, expected_value",
         (((), ()), ((1, 3), (0, 2)), ((1, 3, 7), (0, 2)), ((4, 2), (3, 1))),
     )
-    def it_can_iterate_the_fixed_idxs_to_help(
+    def test_it_can_iterate_the_fixed_idxs_to_help(
         self, request, fixed_element_ids, expected_value
     ):
         property_mock(
@@ -610,7 +610,7 @@ class DescribeSortByValueCollator:
             (False, False),
         ),
     )
-    def it_knows_whether_the_sort_direction_is_descending_to_help(
+    def test_it_knows_whether_the_sort_direction_is_descending_to_help(
         self, _order_spec_prop_, order_spec_, descending, expected_value
     ):
         _order_spec_prop_.return_value = order_spec_
@@ -623,7 +623,7 @@ class DescribeSortByValueCollator:
         "value, expected",
         ((0, False), (1.1, False), ("a", False), (np.nan, True)),
     )
-    def it_can_compute_is_nan_to_help(self, value, expected):
+    def test_it_can_compute_is_nan_to_help(self, value, expected):
         assert SortByValueCollator._is_nan(value) == expected
 
     @pytest.mark.parametrize(
@@ -637,7 +637,7 @@ class DescribeSortByValueCollator:
             ((1, np.nan, 2, np.nan, 3), False, (-5, -3, -1, -4, -2)),
         ),
     )
-    def it_computes_the_subtotal_idxs_to_help(
+    def test_it_computes_the_subtotal_idxs_to_help(
         self, _descending_prop_, descending, subtotal_values, expected_value
     ):
         _descending_prop_.return_value = descending
@@ -645,7 +645,7 @@ class DescribeSortByValueCollator:
 
         assert collator._subtotal_idxs == expected_value
 
-    def it_computes_the_top_fixed_idxs_to_help(
+    def test_it_computes_the_top_fixed_idxs_to_help(
         self, _order_spec_prop_, order_spec_, _iter_fixed_idxs_
     ):
         _order_spec_prop_.return_value = order_spec_
@@ -662,7 +662,7 @@ class DescribeSortByValueCollator:
         "subtotal_idxs, descending, expected_value",
         (((-3, -1, -2), True, (-3, -1, -2)), ((-1, -2, -3), False, ())),
     )
-    def it_computes_the_top_subtotal_idxs_to_help(
+    def test_it_computes_the_top_subtotal_idxs_to_help(
         self,
         _subtotal_idxs_prop_,
         subtotal_idxs,

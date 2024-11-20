@@ -21,7 +21,7 @@ from ..fixtures import CR, NA  # ---mnemonic: CR = 'cube-response'---
 from ..unitutil import instance_mock
 
 
-class DescribeIntegratedDimensions:
+class TestIntegratedDimensions:
     """Integration-test suite for `cr.cube.dimension.Dimensions` object."""
 
     @pytest.mark.parametrize(
@@ -35,7 +35,9 @@ class DescribeIntegratedDimensions:
             ),
         ),
     )
-    def it_resolves_the_type_of_each_dimension(self, cube_response, expected_types):
+    def test_it_resolves_the_type_of_each_dimension(
+        self, cube_response, expected_types
+    ):
         dimension_dicts = cube_response["result"]["dimensions"]
         all_dimensions = Dimensions.from_dicts(dimension_dicts)
 
@@ -43,7 +45,7 @@ class DescribeIntegratedDimensions:
 
         assert dimension_types == expected_types
 
-    def it_provides_access_to_the_apparent_dimensions(self):
+    def test_it_provides_access_to_the_apparent_dimensions(self):
         dimension_dicts = CR.CA_X_MR_WEIGHTED_HS["result"]["dimensions"]
         all_dimensions = Dimensions.from_dicts(dimension_dicts)
 
@@ -62,7 +64,7 @@ class DescribeIntegratedDimensions:
             ((DT.NUM_ARRAY,), (0,)),
         ),
     )
-    def it_knows_if_its_dimensions_order(self, request, dim_types, expected_value):
+    def test_it_knows_if_its_dimensions_order(self, request, dim_types, expected_value):
         dims = Dimensions([Dimension({}, dt) for dt in dim_types])
         assert dims.dimension_order == expected_value
 
@@ -95,7 +97,7 @@ class DescribeIntegratedDimensions:
             ),
         ),
     )
-    def it_know_how_to_repr_all_dimensions(
+    def test_it_know_how_to_repr_all_dimensions(
         self, cube_response, expected_str_representation
     ):
         dimension_dicts = cube_response["result"]["dimensions"]
@@ -106,17 +108,17 @@ class DescribeIntegratedDimensions:
         assert str_representation == expected_str_representation.strip()
 
 
-class DescribeIntegratedDimension:
+class TestIntegratedDimension:
     """Integration-test suite for `cr.cube.dimension.Dimension` object."""
 
-    def it_provides_access_to_all_elements_in_its_collection(self, dimension_dict):
+    def test_it_provides_access_to_all_elements_in_its_collection(self, dimension_dict):
         dimension = Dimension(dimension_dict, DT.CAT)
 
         elements = dimension.all_elements
 
         assert isinstance(elements, Elements)
 
-    def it_knows_its_transformed_description(self, dimension_dict):
+    def test_it_knows_its_transformed_description(self, dimension_dict):
         dimension_transforms = {"description": "foobar"}
         dimension = Dimension(dimension_dict, None, dimension_transforms)
 
@@ -124,7 +126,7 @@ class DescribeIntegratedDimension:
 
         assert description == "foobar"
 
-    def but_it_uses_element_description_when_not_transformed(self, dimension_dict):
+    def test_but_it_uses_element_description_when_not_transformed(self, dimension_dict):
         dimension = Dimension(dimension_dict, None)
 
         description = dimension.description
@@ -136,7 +138,7 @@ class DescribeIntegratedDimension:
             "s?"
         )
 
-    def it_knows_its_transformed_name(self, dimension_dict):
+    def test_it_knows_its_transformed_name(self, dimension_dict):
         dimension_transforms = {"name": "barfoo"}
         dimension = Dimension(dimension_dict, None, dimension_transforms)
 
@@ -144,7 +146,7 @@ class DescribeIntegratedDimension:
 
         assert name == "barfoo"
 
-    def but_it_uses_the_dimension_name_when_no_transform(self, dimension_dict):
+    def test_but_it_uses_the_dimension_name_when_no_transform(self, dimension_dict):
         dimension_transforms = {}
         dimension = Dimension(dimension_dict, None, dimension_transforms)
 
@@ -152,7 +154,7 @@ class DescribeIntegratedDimension:
 
         assert name == "ShutdownBlame"
 
-    def and_it_uses_alias_when_no_name(self, dimension_dict):
+    def test_and_it_uses_alias_when_no_name(self, dimension_dict):
         dimension_dict["references"].pop("name")
         dimension_transforms = {}
         dimension = Dimension(dimension_dict, None, dimension_transforms)
@@ -161,7 +163,7 @@ class DescribeIntegratedDimension:
 
         assert name == "ShutdownBlame"
 
-    def it_knows_whether_it_should_be_pruned(self, dimension_dict):
+    def test_it_knows_whether_it_should_be_pruned(self, dimension_dict):
         dimension_transforms = {"prune": True}
         dimension = Dimension(dimension_dict, None, dimension_transforms)
 
@@ -169,7 +171,7 @@ class DescribeIntegratedDimension:
 
         assert prune is True
 
-    def it_provides_access_to_its_inserted_subtotal_specs(self, dimension_dict):
+    def test_it_provides_access_to_its_inserted_subtotal_specs(self, dimension_dict):
         dimension_transforms = {}
         dimension = Dimension(dimension_dict, None, dimension_transforms)
 
@@ -177,7 +179,7 @@ class DescribeIntegratedDimension:
 
         assert len(subtotals) == 1
 
-    def it_provides_access_to_its_inserted_subtotal_in_payload_order(
+    def test_it_provides_access_to_its_inserted_subtotal_in_payload_order(
         self, dimension_dict
     ):
         dimension_transforms = {}
@@ -187,7 +189,9 @@ class DescribeIntegratedDimension:
 
         assert len(subtotals) == 1
 
-    def but_it_uses_transforms_insertions_instead_when_present(self, dimension_dict):
+    def test_but_it_uses_transforms_insertions_instead_when_present(
+        self, dimension_dict
+    ):
         dimension_transforms = {"insertions": []}
         dimension = Dimension(dimension_dict, None, dimension_transforms)
 
@@ -195,20 +199,20 @@ class DescribeIntegratedDimension:
 
         assert len(subtotals) == 0
 
-    def it_allows_unicode_characters_in_a_subvariable_alias(self):
+    def test_it_allows_unicode_characters_in_a_subvariable_alias(self):
         slice_ = Cube(CR.CAT_X_MR_UNICODE_SV_ALIAS).partitions[0]
         sv_dimension = slice_._dimensions[1]
 
         assert sv_dimension.element_ids == ("\u2018dk\u2019", "fi", "is", "no", "se")
 
-    def it_ignores_bad_types_in_transform_dictionary(self):
+    def test_it_ignores_bad_types_in_transform_dictionary(self):
         transforms = {"columns_dimension": {"elements": {"fi": None, "is": []}}}
         slice_ = Cube(CR.CAT_X_MR, transforms=transforms).partitions[0]
         sv_dimension = slice_._dimensions[1]
 
         assert sv_dimension.hidden_idxs == tuple()
 
-    def it_knows_how_to_repr_itself(self):
+    def test_it_knows_how_to_repr_itself(self):
         dim = Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]
 
         str_representation = str(dim)
@@ -222,10 +226,10 @@ class DescribeIntegratedDimension:
         return CR.ECON_BLAME_WITH_HS["value"]["result"]["dimensions"][0]
 
 
-class DescribeIntegratedElements:
+class TestIntegratedElements:
     """Integration-test suite for `cr.cube.dimension.Elements` object."""
 
-    def it_constructs_its_element_objects_to_help(self):
+    def test_it_constructs_its_element_objects_to_help(self):
         type_dict = Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
         dimension_transforms = {}
         all_elements = Elements.from_typedef(
@@ -233,7 +237,7 @@ class DescribeIntegratedElements:
         )
         assert all(isinstance(element, Element) for element in all_elements)
 
-    def it_hides_element_objects_by_subvariable_id_to_help(self):
+    def test_it_hides_element_objects_by_subvariable_id_to_help(self):
         transforms = {
             "rows_dimension": {
                 "elements": {"S2": {"hide": True}},
@@ -249,7 +253,7 @@ class DescribeIntegratedElements:
         assert len(all_elements) == 3
         assert all_elements[1].is_hidden is True
 
-    def it_knows_how_to_repr_its_elements(self):
+    def test_it_knows_how_to_repr_its_elements(self):
         type_dict = Cube(CR.ECON_BLAME_WITH_HS).dimensions[0]._dimension_dict["type"]
         all_elements = Elements.from_typedef(type_dict, {}, None, None)
 
@@ -261,8 +265,8 @@ class DescribeIntegratedElements:
         )
 
 
-class DescribeIntegrated_Subtotals:
-    def it_can_generate_insertion_ids_from_view_when_needed(self):
+class TestIntegrated_Subtotals:
+    def test_it_can_generate_insertion_ids_from_view_when_needed(self):
         base_ins = {"function": "subtotal", "args": [1]}
         insertion_dicts = [
             {"name": "1, 1", "anchor": 1, **base_ins},
@@ -290,10 +294,10 @@ class DescribeIntegrated_Subtotals:
         assert subtotals.insertion_ids == (2, 1, 4, 3, 5)
 
 
-class DescribeIntegrated_Element:
+class TestIntegrated_Element:
     """Integration-test suite for `cr.cube.dimension.Element` object."""
 
-    def it_knows_its_transformed_label(self, element_dict, element_transforms_):
+    def test_it_knows_its_transformed_label(self, element_dict, element_transforms_):
         element_transforms_.name = "Xfinity Lounge"
         element = Element(element_dict, None, element_transforms_, str, DT.CATEGORICAL)
 
@@ -301,7 +305,7 @@ class DescribeIntegrated_Element:
 
         assert label == "Xfinity Lounge"
 
-    def but_it_uses_its_base_name_if_no_transform_is_present(
+    def test_but_it_uses_its_base_name_if_no_transform_is_present(
         self, element_dict, element_transforms_
     ):
         element_transforms_.name = None
@@ -311,7 +315,9 @@ class DescribeIntegrated_Element:
 
         assert label == "President Obama"
 
-    def it_knows_when_it_is_explicitly_hidden(self, element_dict, element_transforms_):
+    def test_it_knows_when_it_is_explicitly_hidden(
+        self, element_dict, element_transforms_
+    ):
         element_transforms_.hide = True
         element = Element(element_dict, None, element_transforms_, None, DT.CATEGORICAL)
 
@@ -319,7 +325,7 @@ class DescribeIntegrated_Element:
 
         assert is_hidden is True
 
-    def but_it_is_not_hidden_by_default(self, element_transforms_):
+    def test_but_it_is_not_hidden_by_default(self, element_transforms_):
         element_transforms_.hide = None
         element = Element(None, None, element_transforms_, None, DT.CATEGORICAL)
 
@@ -327,7 +333,7 @@ class DescribeIntegrated_Element:
 
         assert is_hidden is False
 
-    def it_knows_how_to_repr(self, element_dict, element_transforms_):
+    def test_it_knows_how_to_repr(self, element_dict, element_transforms_):
         element_transforms_.name = None
         element = Element(element_dict, None, element_transforms_, None, DT.CATEGORICAL)
 

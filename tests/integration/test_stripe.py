@@ -11,10 +11,10 @@ from cr.cube.cubepart import _Strand
 from ..fixtures import CR
 
 
-class DescribeStripeAssembler:
+class TestStripeAssembler:
     """Integration-test suite for `cr.cube.stripe.assembler.StripeAssembler` object."""
 
-    def it_provides_values_for_univariate_cat(self):
+    def test_it_provides_values_for_univariate_cat(self):
         cube = Cube(CR.UNIVARIATE_CATEGORICAL)
         strand = _Strand(cube, None, None, False, 0, None)
 
@@ -36,7 +36,7 @@ class DescribeStripeAssembler:
         assert strand.weighted_bases.tolist() == [15, 15]
         assert strand.weighted_counts.tolist() == [10, 5]
 
-    def it_provides_values_for_univariate_cat_means(self):
+    def test_it_provides_values_for_univariate_cat_means(self):
         cube = Cube(CR.CAT_MEANS_HS)
         strand = _Strand(cube, None, None, False, 0, None)
 
@@ -62,7 +62,7 @@ class DescribeStripeAssembler:
         # same because they are both calculated on the (unweighted) valid-counts.
         assert strand.table_margin_range == pytest.approx([661, 661])
 
-    def it_provides_values_for_univariate_mr(self):
+    def test_it_provides_values_for_univariate_mr(self):
         cube = Cube(CR.MR_WGTD)
         strand = _Strand(cube, None, None, False, 0, None)
 
@@ -184,7 +184,7 @@ class DescribeStripeAssembler:
             ]
         )
 
-    def it_provides_values_for_univariate_mr_means(self):
+    def test_it_provides_values_for_univariate_mr_means(self):
         cube = Cube(CR.MR_MEAN_FILT_WGTD)
         strand = _Strand(cube, None, None, False, 0, None)
 
@@ -218,7 +218,7 @@ class DescribeStripeAssembler:
             (CR.CAT_MEAN, "sum", "descending", [4, 2, 0, 3, 1]),
         ),
     )
-    def it_computes_the_sort_by_measure_value_row_order_to_help(
+    def test_it_computes_the_sort_by_measure_value_row_order_to_help(
         self, fixture, measure, direction, expected_value
     ):
         transforms = {

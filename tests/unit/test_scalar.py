@@ -5,6 +5,6 @@
 from cr.cube.scalar import MeansScalar
 
 
-class Describe_MeansScalar:
-    def it_knows_its_ndim(self):
+class Test_MeansScalar:
+    def test_it_knows_its_ndim(self):
         assert MeansScalar(None, None).ndim == 0

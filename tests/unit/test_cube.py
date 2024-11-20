@@ -19,10 +19,10 @@ from ..fixtures import CR  # ---mnemonic: CR = 'cube-response'---
 from ..unitutil import call, class_mock, instance_mock, property_mock
 
 
-class DescribeCubeSet:
+class TestCubeSet:
     """Unit-test suite for `cr.cube.cube.CubeSet` object."""
 
-    def it_knows_its_availabe_measures(self, cube_, _cubes_prop_):
+    def test_it_knows_its_availabe_measures(self, cube_, _cubes_prop_):
         cube_.available_measures = {"mean", "sum"}
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
@@ -33,7 +33,7 @@ class DescribeCubeSet:
         "available_measures, expected_value",
         (({M.MEAN, M.COUNT}, True), ({M.OVERLAP, M.COUNT}, False)),
     )
-    def it_knows_if_it_has_numeric_measures(
+    def test_it_knows_if_it_has_numeric_measures(
         self, request, available_measures, expected_value
     ):
         property_mock(
@@ -42,7 +42,7 @@ class DescribeCubeSet:
         cube_set = CubeSet(None, None, None, None)
         assert cube_set.has_numeric_measures is expected_value
 
-    def but_it_includes_availabe_measures_from_all_cubes_in_cube_set(
+    def test_but_it_includes_availabe_measures_from_all_cubes_in_cube_set(
         self, request, _cubes_prop_
     ):
         _cubes_prop_.return_value = tuple(
@@ -69,7 +69,7 @@ class DescribeCubeSet:
             (((DT.DATETIME, DT.DATETIME), (DT.DATETIME, DT.MR_CAT)), False),
         ),
     )
-    def it_knows_whether_it_can_show_pairwise(
+    def test_it_knows_whether_it_can_show_pairwise(
         self, request, cubes_dimtypes, expected_value, _cubes_prop_
     ):
         _cubes_prop_.return_value = tuple(
@@ -84,7 +84,7 @@ class DescribeCubeSet:
 
         assert can_show_pairwise is expected_value
 
-    def it_knows_its_description(self, _cubes_prop_, cube_):
+    def test_it_knows_its_description(self, _cubes_prop_, cube_):
         cube_.description = "Are you male or female?"
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
@@ -96,7 +96,7 @@ class DescribeCubeSet:
     @pytest.mark.parametrize(
         ("first_cube_has_w_counts", "expected_value"), ((True, True), (False, False))
     )
-    def it_knows_whether_it_has_weighted_counts(
+    def test_it_knows_whether_it_has_weighted_counts(
         self, first_cube_has_w_counts, expected_value, _cubes_prop_, cube_
     ):
         cube_.has_weighted_counts = first_cube_has_w_counts
@@ -108,7 +108,7 @@ class DescribeCubeSet:
         assert has_weighted_counts == expected_value
 
     @pytest.mark.parametrize(("ncubes", "expected_value"), ((2, True), (1, False)))
-    def it_knows_when_it_is_ca_as_0th(
+    def test_it_knows_when_it_is_ca_as_0th(
         self, ncubes, expected_value, _cubes_prop_, cube_
     ):
         cubes_ = (cube_,) * ncubes
@@ -123,7 +123,7 @@ class DescribeCubeSet:
     @pytest.mark.parametrize(
         ("first_cube_missing_count", "expected_value"), ((34, 34), (0, 0))
     )
-    def it_knows_its_missing_count(
+    def test_it_knows_its_missing_count(
         self, first_cube_missing_count, expected_value, _cubes_prop_, cube_
     ):
         cube_.missing = first_cube_missing_count
@@ -134,7 +134,7 @@ class DescribeCubeSet:
 
         assert missing_count == expected_value
 
-    def it_knows_its_name(self, _cubes_prop_, cube_):
+    def test_it_knows_its_name(self, _cubes_prop_, cube_):
         cube_.name = "Beverage"
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
@@ -153,7 +153,7 @@ class DescribeCubeSet:
             ((_Nub,), ((_Nub,),)),
         ),
     )
-    def it_provides_access_to_the_partition_sets(
+    def test_it_provides_access_to_the_partition_sets(
         self, cube_partitions, expected_value, _cubes_prop_, cube_
     ):
         cube_.partitions = cube_partitions
@@ -168,7 +168,7 @@ class DescribeCubeSet:
         ("population_fraction", "expected_value"),
         ((1.0, 1.0), (0.54, 0.54), (np.nan, np.nan)),
     )
-    def it_has_proper_population_fraction(
+    def test_it_has_proper_population_fraction(
         self, population_fraction, expected_value, cube_, _cubes_prop_
     ):
         cube_.population_fraction = population_fraction
@@ -179,7 +179,7 @@ class DescribeCubeSet:
 
         np.testing.assert_almost_equal(cubeset_population_fraction, expected_value)
 
-    def it_constructs_its_sequence_of_cube_objects_to_help(
+    def test_it_constructs_its_sequence_of_cube_objects_to_help(
         self, request, Cube_, _is_numeric_measure_prop_
     ):
         cubes_ = tuple(instance_mock(request, Cube) for _ in range(4))
@@ -221,7 +221,7 @@ class DescribeCubeSet:
         ]
         assert cubes == cubes_[:3]
 
-    def but_it_inflates_the_cubes_in_special_case_of_numeric_mean_payload(
+    def test_but_it_inflates_the_cubes_in_special_case_of_numeric_mean_payload(
         self, request, Cube_, cube_, _is_numeric_measure_prop_
     ):
         cubes_ = tuple(instance_mock(request, Cube) for _ in range(4))
@@ -264,7 +264,9 @@ class DescribeCubeSet:
         assert cube_.inflate.call_args_list == [call(), call(), call()]
         assert cubes == cubes_[:3]
 
-    def it_constructs_its_sequence_of_augmented_cube_objects_to_help(self, request):
+    def test_it_constructs_its_sequence_of_augmented_cube_objects_to_help(
+        self, request
+    ):
         cube_set = CubeSet(
             cube_responses=[
                 {
@@ -380,7 +382,7 @@ class DescribeCubeSet:
         ("is_multi_cube", "cube_0_ndim", "expected_value"),
         ((False, 1, False), (False, 0, False), (True, 1, False), (True, 0, True)),
     )
-    def it_knows_whether_it_is_numeric_measure_to_help(
+    def test_it_knows_whether_it_is_numeric_measure_to_help(
         self,
         _is_multi_cube_prop_,
         is_multi_cube,
@@ -399,7 +401,7 @@ class DescribeCubeSet:
         assert Cube_.call_args_list == ([call({"cube": 0})] if is_multi_cube else [])
         assert is_numeric_mean == expected_value
 
-    def it_knows_its_valid_counts_summary_range_to_help(self, _cubes_prop_, cube_):
+    def test_it_knows_its_valid_counts_summary_range_to_help(self, _cubes_prop_, cube_):
         cube_.valid_counts_summary_range = (1, 3)
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
@@ -408,7 +410,7 @@ class DescribeCubeSet:
 
         np.testing.assert_array_equal(valid_counts_summary_range, (1, 3))
 
-    def it_knows_its_n_reposnes_to_help(self, _cubes_prop_, cube_):
+    def test_it_knows_its_n_reposnes_to_help(self, _cubes_prop_, cube_):
         cube_.n_responses = 6
         _cubes_prop_.return_value = (cube_,)
         cube_set = CubeSet(None, None, None, None)
@@ -440,10 +442,10 @@ class DescribeCubeSet:
         return property_mock(request, CubeSet, "_is_numeric_measure")
 
 
-class DescribeCube:
+class TestCube:
     """Unit-test suite for `cr.cube.cube.Cube` object."""
 
-    def it_provides_the_default_repr_when_enhanced_repr_fails(
+    def test_it_provides_the_default_repr_when_enhanced_repr_fails(
         self, dimension_types_prop_
     ):
         dimension_types_prop_.return_value = [1, 2, 3]
@@ -453,7 +455,7 @@ class DescribeCube:
 
         assert cube_repr.startswith("<cr.cube.cube.Cube object at 0x")
 
-    def it_can_inflate_itself(self, request):
+    def test_it_can_inflate_itself(self, request):
         cube = Cube(
             {
                 "result": {
@@ -511,7 +513,7 @@ class DescribeCube:
     @pytest.mark.parametrize(
         ("cube_idx_arg", "expected_value"), ((None, 0), (0, 0), (1, 1), (42, 42))
     )
-    def it_knows_its_index_within_its_cube_set(self, cube_idx_arg, expected_value):
+    def test_it_knows_its_index_within_its_cube_set(self, cube_idx_arg, expected_value):
         assert Cube(None, cube_idx_arg).cube_index == expected_value
 
     @pytest.mark.parametrize(
@@ -527,7 +529,7 @@ class DescribeCube:
             ((DT.CA, DT.CAT, DT.CAT), 1, False, False),
         ),
     )
-    def it_knows_ca_as_0th(
+    def test_it_knows_ca_as_0th(
         self,
         request,
         dim_types,
@@ -559,7 +561,9 @@ class DescribeCube:
         ("cube_response", "expected_value"),
         (({"result": {}}, "Untitled"), ({"result": {"title": "Hipsters"}}, "Hipsters")),
     )
-    def it_knows_its_title(self, _cube_response_prop_, cube_response, expected_value):
+    def test_it_knows_its_title(
+        self, _cube_response_prop_, cube_response, expected_value
+    ):
         _cube_response_prop_.return_value = cube_response
         assert Cube(None).title == expected_value
 
@@ -567,20 +571,22 @@ class DescribeCube:
         ("cube_response", "expected_value"),
         (({"result": {}}, False), ({"result": {"is_single_col_cube": True}}, True)),
     )
-    def it_knows_if_it_is_a_single_col_filter_cube(
+    def test_it_knows_if_it_is_a_single_col_filter_cube(
         self, _cube_response_prop_, cube_response, expected_value
     ):
         _cube_response_prop_.return_value = cube_response
         assert Cube(None).is_single_filter_col_cube == expected_value
 
-    def it_provides_access_to_the_cube_response_dict_to_help(self):
+    def test_it_provides_access_to_the_cube_response_dict_to_help(self):
         assert Cube({"cube": "dict"})._cube_response == {"cube": "dict"}
 
     @pytest.mark.parametrize(
         ("cube_response", "expected_value"),
         ((CR.CAT_X_CAT, CR.CAT_X_CAT), ({"value": "val"}, "val")),
     )
-    def and_it_accepts_a_JSON_format_cube_response(self, cube_response, expected_value):
+    def test_and_it_accepts_a_JSON_format_cube_response(
+        self, cube_response, expected_value
+    ):
         assert Cube(cube_response)._cube_response == expected_value
 
     @pytest.mark.parametrize(
@@ -598,7 +604,7 @@ class DescribeCube:
             ),
         ),
     )
-    def but_it_raises_on_other_cube_response_types(
+    def test_but_it_raises_on_other_cube_response_types(
         self,
         cube_response,
         expected_value,
@@ -638,7 +644,7 @@ class DescribeCube:
             ),
         ),
     )
-    def it_knows_its_num_array_dimensions(
+    def test_it_knows_its_num_array_dimensions(
         self,
         _numeric_references_prop_,
         _numeric_subvariables_prop_,
@@ -654,7 +660,7 @@ class DescribeCube:
 
         assert _num_array_dimensions["type"]["elements"] == expected_value
 
-    def but_it_returns_None_when_numeric_subvars_is_empty(
+    def test_but_it_returns_None_when_numeric_subvars_is_empty(
         self, _numeric_subvariables_prop_
     ):
         _numeric_subvariables_prop_.return_value = []
@@ -681,7 +687,7 @@ class DescribeCube:
             ),
         ),
     )
-    def it_knows_its_numeric_subvariables(
+    def test_it_knows_its_numeric_subvariables(
         self, _cube_response_prop_, cube_response, expected_value
     ):
         _cube_response_prop_.return_value = cube_response
@@ -722,7 +728,7 @@ class DescribeCube:
             ),
         ),
     )
-    def it_knows_its_numeric_references(
+    def test_it_knows_its_numeric_references(
         self, _cube_response_prop_, cube_response, expected_value
     ):
         _cube_response_prop_.return_value = cube_response
@@ -755,8 +761,8 @@ class DescribeCube:
         return property_mock(request, Cube, "dimension_types")
 
 
-class DescribeMeasures:
-    def it_knows_the_population_fraction(self):
+class TestMeasures:
+    def test_it_knows_the_population_fraction(self):
         cube_dict, expected_value = (
             {
                 "result": {
@@ -772,7 +778,7 @@ class DescribeMeasures:
 
         assert population_fraction == expected_value
 
-    def but_the_fraction_is_NaN_for_unfiltered_count_zero(self):
+    def test_but_the_fraction_is_NaN_for_unfiltered_count_zero(self):
         cube_dict, expected_value = (
             {
                 "result": {
@@ -844,7 +850,7 @@ class DescribeMeasures:
             ),
         ),
     )
-    def and_it_sets_population_fraction_to_one_when_filter_is_a_single_cat_date(
+    def test_and_it_sets_population_fraction_to_one_when_filter_is_a_single_cat_date(
         self, cube_dict, expected_value
     ):
         measures = _Measures(cube_dict, None)
@@ -854,8 +860,8 @@ class DescribeMeasures:
         assert population_fraction == expected_value
 
 
-class Describe_BaseMeasure:
-    def it_returns_None_when_not_able_to_reshape(
+class Test_BaseMeasure:
+    def test_it_returns_None_when_not_able_to_reshape(
         self, _shape_prop_, _flat_values_prop_
     ):
         _shape_prop_.return_value = (4,)
@@ -877,12 +883,12 @@ class Describe_BaseMeasure:
         return property_mock(request, _BaseMeasure, "_flat_values")
 
 
-class Describe_UweightedValidCountsMeasure:
+class Test_UweightedValidCountsMeasure:
     @pytest.mark.parametrize(
         "valid_counts, expected_value",
         (({"valid_count_unweighted": {"data": [3, 2, 1]}}, [3, 2, 1]), ({}, None)),
     )
-    def it_knows_its_flat_values(self, valid_counts, expected_value):
+    def test_it_knows_its_flat_values(self, valid_counts, expected_value):
         cube_dict = {"result": {"measures": valid_counts}}
         valid_counts = _UnweightedValidCountsMeasure(cube_dict, None)
 

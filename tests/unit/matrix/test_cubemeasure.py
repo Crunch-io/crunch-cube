@@ -52,7 +52,7 @@ from cr.cube.matrix.cubemeasure import (
 from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
 
-class DescribeCubeMeasures:
+class TestCubeMeasures:
     """Unit test suite for `cr.cube.matrix.cubemeasure.CubeMeasures` object."""
 
     @pytest.mark.parametrize(
@@ -65,7 +65,7 @@ class DescribeCubeMeasures:
             ("cube_stddev", _BaseCubeStdDev),
         ),
     )
-    def it_provides_access_to_cube_measures_object(
+    def test_it_provides_access_to_cube_measures_object(
         self, request, cube_, dimensions_, cube_measure_, CubeMeasureCls
     ):
         _cube_measure_ = instance_mock(request, CubeMeasureCls)
@@ -92,7 +92,7 @@ class DescribeCubeMeasures:
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
 
 
-class Describe_BaseCubeMeasure:
+class Test_BaseCubeMeasure:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMeasure`."""
 
     @pytest.mark.parametrize(
@@ -103,7 +103,7 @@ class Describe_BaseCubeMeasure:
             (3, DT.CAT, 3),
         ),
     )
-    def it_computes_index_expression_that_selects_measure_values_from_cube_to_help(
+    def test_it_computes_index_expression_that_selects_measure_values_from_cube_to_help(
         self, request, ndim, tab_dim_type, expected_value
     ):
         cube_ = instance_mock(request, Cube, ndim=ndim, dimension_types=(tab_dim_type,))
@@ -115,7 +115,7 @@ class Describe_BaseCubeMeasure:
 # === COUNTS (UNWEIGHTED & WEIGHTED)
 
 
-class Describe_BaseCubeCounts:
+class Test_BaseCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeCounts`."""
 
     @pytest.mark.parametrize(
@@ -131,7 +131,7 @@ class Describe_BaseCubeCounts:
             ((DT.MR, DT.CA_SUBVAR), _MrXArrCubeCounts),
         ),
     )
-    def it_provides_a_factory_for_constructing_cube_count_objects(
+    def test_it_provides_a_factory_for_constructing_cube_count_objects(
         self,
         request,
         cube_,
@@ -162,7 +162,7 @@ class Describe_BaseCubeCounts:
         CubeCountsCls_.assert_called_once_with(dimensions_, [3, 4], "diff_nans")
         assert cube_counts is cube_counts_
 
-    def it_provides_columns_pruning_mask(self, request):
+    def test_it_provides_columns_pruning_mask(self, request):
         property_mock(
             request,
             _BaseCubeCounts,
@@ -173,7 +173,7 @@ class Describe_BaseCubeCounts:
 
         assert cube_counts.columns_pruning_mask.tolist() == [True, False, True, False]
 
-    def it_provides_rows_pruning_mask(self, request):
+    def test_it_provides_rows_pruning_mask(self, request):
         property_mock(
             request,
             _BaseCubeCounts,
@@ -198,62 +198,62 @@ class Describe_BaseCubeCounts:
         )
 
 
-class Describe_ArrXArrCubeCounts:
+class Test_ArrXArrCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._ArrXArrCubeCounts`."""
 
-    def it_knows_its_column_bases(self, raw_counts):
+    def test_it_knows_its_column_bases(self, raw_counts):
         cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.column_bases == pytest.approx(raw_counts)
 
-    def it_knows_its_columns_base(self, raw_counts):
+    def test_it_knows_its_columns_base(self, raw_counts):
         cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_base is None
 
-    def it_knows_its_columns_table_base(self, raw_counts):
+    def test_it_knows_its_columns_table_base(self, raw_counts):
         cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_table_base is None
 
-    def it_knows_its_counts(self, raw_counts):
+    def test_it_knows_its_counts(self, raw_counts):
         cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.counts == pytest.approx(raw_counts)
 
-    def it_knows_its_row_bases(self, raw_counts):
+    def test_it_knows_its_row_bases(self, raw_counts):
         cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.row_bases == pytest.approx(raw_counts)
 
-    def it_knows_its_rows_base(self, raw_counts):
+    def test_it_knows_its_rows_base(self, raw_counts):
         cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_base is None
 
-    def it_knows_its_rows_table_base(self, raw_counts):
+    def test_it_knows_its_rows_table_base(self, raw_counts):
         cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_table_base is None
 
-    def it_knows_its_table_base(self, raw_counts):
+    def test_it_knows_its_table_base(self, raw_counts):
         cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_base is None
 
-    def it_knows_its_table_bases(self, raw_counts):
+    def test_it_knows_its_table_bases(self, raw_counts):
         cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_bases == pytest.approx(raw_counts)
 
-    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_columns_pruning_base_to_help(self, raw_counts):
         cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts._columns_pruning_base == pytest.approx(
             np.array([4.5, 3.8, 4.9])
         )
 
-    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_rows_pruning_base_to_help(self, raw_counts):
         cube_counts = _ArrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts._rows_pruning_base == pytest.approx(np.array([6.7, 6.5]))
@@ -271,30 +271,30 @@ class Describe_ArrXArrCubeCounts:
         )
 
 
-class Describe_ArrXCatCubeCounts:
+class Test_ArrXCatCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._ArrXCatCubeCounts`."""
 
-    def it_knows_its_column_bases(self, raw_counts):
+    def test_it_knows_its_column_bases(self, raw_counts):
         cube_counts = _ArrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.column_bases == pytest.approx(raw_counts)
 
-    def it_knows_its_columns_base(self, raw_counts):
+    def test_it_knows_its_columns_base(self, raw_counts):
         cube_counts = _ArrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_base is None
 
-    def it_knows_its_columns_table_base(self, raw_counts):
+    def test_it_knows_its_columns_table_base(self, raw_counts):
         cube_counts = _ArrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_table_base is None
 
-    def it_knows_its_counts(self, raw_counts):
+    def test_it_knows_its_counts(self, raw_counts):
         cube_counts = _ArrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.counts == pytest.approx(raw_counts)
 
-    def it_knows_its_row_bases(self, raw_counts):
+    def test_it_knows_its_row_bases(self, raw_counts):
         cube_counts = _ArrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.row_bases == pytest.approx(
@@ -306,22 +306,22 @@ class Describe_ArrXCatCubeCounts:
             )
         )
 
-    def it_knows_its_rows_base(self, raw_counts):
+    def test_it_knows_its_rows_base(self, raw_counts):
         cube_counts = _ArrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_base == pytest.approx([6.7, 6.5])
 
-    def it_knows_its_rows_table_base(self, raw_counts):
+    def test_it_knows_its_rows_table_base(self, raw_counts):
         cube_counts = _ArrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_table_base == pytest.approx([6.7, 6.5])
 
-    def it_knows_its_table_base(self, raw_counts):
+    def test_it_knows_its_table_base(self, raw_counts):
         cube_counts = _ArrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_base is None
 
-    def it_knows_its_table_bases(self, raw_counts):
+    def test_it_knows_its_table_bases(self, raw_counts):
         cube_counts = _ArrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_bases == pytest.approx(
@@ -333,14 +333,14 @@ class Describe_ArrXCatCubeCounts:
             )
         )
 
-    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_columns_pruning_base_to_help(self, raw_counts):
         cube_counts = _ArrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts._columns_pruning_base == pytest.approx(
             np.array([4.5, 3.8, 4.9])
         )
 
-    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_rows_pruning_base_to_help(self, raw_counts):
         cube_counts = _ArrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts._rows_pruning_base == pytest.approx(np.array([20.1, 19.5]))
@@ -358,10 +358,10 @@ class Describe_ArrXCatCubeCounts:
         )
 
 
-class Describe_ArrXMrCubeCounts:
+class Test_ArrXMrCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._ArrXMrCubeCounts`."""
 
-    def it_knows_its_column_bases(self, raw_counts):
+    def test_it_knows_its_column_bases(self, raw_counts):
         cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.column_bases == pytest.approx(
@@ -373,17 +373,17 @@ class Describe_ArrXMrCubeCounts:
             )
         )
 
-    def it_knows_its_columns_base(self, raw_counts):
+    def test_it_knows_its_columns_base(self, raw_counts):
         cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_base is None
 
-    def it_knows_its_columns_table_base(self, raw_counts):
+    def test_it_knows_its_columns_table_base(self, raw_counts):
         cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_table_base is None
 
-    def it_knows_its_counts(self, raw_counts):
+    def test_it_knows_its_counts(self, raw_counts):
         cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.counts == pytest.approx(
@@ -395,7 +395,7 @@ class Describe_ArrXMrCubeCounts:
             )
         )
 
-    def it_knows_its_row_bases(self, raw_counts):
+    def test_it_knows_its_row_bases(self, raw_counts):
         cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.row_bases == pytest.approx(
@@ -407,22 +407,22 @@ class Describe_ArrXMrCubeCounts:
             )
         )
 
-    def it_knows_its_rows_base(self, raw_counts):
+    def test_it_knows_its_rows_base(self, raw_counts):
         cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_base is None
 
-    def it_knows_its_rows_table_base(self, raw_counts):
+    def test_it_knows_its_rows_table_base(self, raw_counts):
         cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_table_base is None
 
-    def it_knows_its_table_base(self, raw_counts):
+    def test_it_knows_its_table_base(self, raw_counts):
         cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_base is None
 
-    def it_knows_its_table_bases(self, raw_counts):
+    def test_it_knows_its_table_bases(self, raw_counts):
         cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_bases == pytest.approx(
@@ -434,7 +434,7 @@ class Describe_ArrXMrCubeCounts:
             )
         )
 
-    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_columns_pruning_base_to_help(self, raw_counts):
         cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts._columns_pruning_base == pytest.approx(
@@ -445,7 +445,7 @@ class Describe_ArrXMrCubeCounts:
             )
         )
 
-    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_rows_pruning_base_to_help(self, raw_counts):
         cube_counts = _ArrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts._rows_pruning_base == pytest.approx(np.array([20.4, 23.7]))
@@ -472,10 +472,10 @@ class Describe_ArrXMrCubeCounts:
         )
 
 
-class Describe_CatXArrCubeCounts:
+class Test_CatXArrCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXArrCubeCounts`."""
 
-    def it_knows_its_column_bases(self, raw_counts):
+    def test_it_knows_its_column_bases(self, raw_counts):
         cube_counts = _CatXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.column_bases == pytest.approx(
@@ -487,44 +487,44 @@ class Describe_CatXArrCubeCounts:
             )
         )
 
-    def it_knows_its_columns_base(self, raw_counts):
+    def test_it_knows_its_columns_base(self, raw_counts):
         cube_counts = _CatXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_base == pytest.approx(np.array([4.5, 3.8, 4.9]))
 
-    def it_knows_its_columns_table_base(self, raw_counts):
+    def test_it_knows_its_columns_table_base(self, raw_counts):
         cube_counts = _CatXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_table_base == pytest.approx(
             np.array([4.5, 3.8, 4.9])
         )
 
-    def it_knows_its_counts(self, raw_counts):
+    def test_it_knows_its_counts(self, raw_counts):
         cube_counts = _CatXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.counts == pytest.approx(raw_counts)
 
-    def it_knows_its_row_bases(self, raw_counts):
+    def test_it_knows_its_row_bases(self, raw_counts):
         cube_counts = _CatXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.row_bases == pytest.approx(raw_counts)
 
-    def it_knows_its_rows_base(self, raw_counts):
+    def test_it_knows_its_rows_base(self, raw_counts):
         cube_counts = _CatXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_base is None
 
-    def it_knows_its_rows_table_base(self, raw_counts):
+    def test_it_knows_its_rows_table_base(self, raw_counts):
         cube_counts = _CatXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_table_base is None
 
-    def it_knows_its_table_base(self, raw_counts):
+    def test_it_knows_its_table_base(self, raw_counts):
         cube_counts = _CatXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_base is None
 
-    def it_knows_its_table_bases(self, raw_counts):
+    def test_it_knows_its_table_bases(self, raw_counts):
         cube_counts = _CatXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_bases == pytest.approx(
@@ -536,14 +536,14 @@ class Describe_CatXArrCubeCounts:
             )
         )
 
-    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_columns_pruning_base_to_help(self, raw_counts):
         cube_counts = _CatXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts._columns_pruning_base == pytest.approx(
             np.array([9.0, 7.6, 9.8])
         )
 
-    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_rows_pruning_base_to_help(self, raw_counts):
         cube_counts = _CatXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts._rows_pruning_base == pytest.approx(np.array([6.7, 6.5]))
@@ -561,10 +561,10 @@ class Describe_CatXArrCubeCounts:
         )
 
 
-class Describe_CatXCatCubeCounts:
+class Test_CatXCatCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeCounts`."""
 
-    def it_knows_its_column_bases(self, raw_counts):
+    def test_it_knows_its_column_bases(self, raw_counts):
         cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.column_bases == pytest.approx(
@@ -576,24 +576,24 @@ class Describe_CatXCatCubeCounts:
             )
         )
 
-    def it_knows_its_columns_base(self, raw_counts):
+    def test_it_knows_its_columns_base(self, raw_counts):
         cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_base == pytest.approx(np.array([4.5, 3.8, 4.9]))
 
-    def it_knows_its_columns_table_base(self, raw_counts):
+    def test_it_knows_its_columns_table_base(self, raw_counts):
         cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_table_base == pytest.approx(
             np.array([13.2, 13.2, 13.2])
         )
 
-    def it_knows_its_counts(self, raw_counts):
+    def test_it_knows_its_counts(self, raw_counts):
         cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.counts == pytest.approx(raw_counts)
 
-    def it_knows_its_row_bases(self, raw_counts):
+    def test_it_knows_its_row_bases(self, raw_counts):
         cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.row_bases == pytest.approx(
@@ -605,22 +605,22 @@ class Describe_CatXCatCubeCounts:
             )
         )
 
-    def it_knows_its_rows_base(self, raw_counts):
+    def test_it_knows_its_rows_base(self, raw_counts):
         cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_base == pytest.approx(np.array([6.7, 6.5]))
 
-    def it_knows_its_rows_table_base(self, raw_counts):
+    def test_it_knows_its_rows_table_base(self, raw_counts):
         cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_table_base == pytest.approx(np.array([13.2, 13.2]))
 
-    def it_knows_its_table_base(self, raw_counts):
+    def test_it_knows_its_table_base(self, raw_counts):
         cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_base == pytest.approx(np.array([13.2, 13.2]))
 
-    def it_knows_its_table_bases(self, raw_counts):
+    def test_it_knows_its_table_bases(self, raw_counts):
         cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_bases == pytest.approx(
@@ -632,14 +632,14 @@ class Describe_CatXCatCubeCounts:
             )
         )
 
-    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_columns_pruning_base_to_help(self, raw_counts):
         cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts._columns_pruning_base == pytest.approx(
             np.array([9.0, 7.6, 9.8])
         )
 
-    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_rows_pruning_base_to_help(self, raw_counts):
         cube_counts = _CatXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts._rows_pruning_base == pytest.approx(np.array([20.1, 19.5]))
@@ -657,65 +657,65 @@ class Describe_CatXCatCubeCounts:
         )
 
 
-class Describe_CatXMrCubeCounts:
+class Test_CatXMrCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeCounts`."""
 
-    def it_knows_its_column_bases(self, raw_counts):
+    def test_it_knows_its_column_bases(self, raw_counts):
         cube_counts = _CatXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.column_bases == pytest.approx(
             np.array([[5.5, 7.7, 9.9], [5.5, 7.7, 9.9]])
         )
 
-    def it_knows_its_columns_base(self, raw_counts):
+    def test_it_knows_its_columns_base(self, raw_counts):
         cube_counts = _CatXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_base == pytest.approx(np.array([5.5, 7.7, 9.9]))
 
-    def it_knows_its_columns_table_base(self, raw_counts):
+    def test_it_knows_its_columns_table_base(self, raw_counts):
         cube_counts = _CatXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_table_base == pytest.approx(
             np.array([10.7, 14.7, 18.7])
         )
 
-    def it_knows_its_counts(self, raw_counts):
+    def test_it_knows_its_counts(self, raw_counts):
         cube_counts = _CatXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.counts == pytest.approx(
             np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]])
         )
 
-    def it_knows_its_row_bases(self, raw_counts):
+    def test_it_knows_its_row_bases(self, raw_counts):
         cube_counts = _CatXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.row_bases == pytest.approx(
             np.array([[4.8, 6.8, 8.8], [5.9, 7.9, 9.9]])
         )
 
-    def it_knows_its_rows_base(self, raw_counts):
+    def test_it_knows_its_rows_base(self, raw_counts):
         cube_counts = _CatXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_base is None
 
-    def it_knows_its_rows_table_base(self, raw_counts):
+    def test_it_knows_its_rows_table_base(self, raw_counts):
         cube_counts = _CatXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_table_base is None
 
-    def it_knows_its_table_base(self, raw_counts):
+    def test_it_knows_its_table_base(self, raw_counts):
         cube_counts = _CatXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_base is None
 
-    def it_knows_its_table_bases(self, raw_counts):
+    def test_it_knows_its_table_bases(self, raw_counts):
         cube_counts = _CatXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_bases == pytest.approx(
             np.array([[10.7, 14.7, 18.7], [10.7, 14.7, 18.7]])
         )
 
-    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_columns_pruning_base_to_help(self, raw_counts):
         cube_counts = _CatXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts._columns_pruning_base == pytest.approx(
@@ -726,7 +726,7 @@ class Describe_CatXMrCubeCounts:
             )
         )
 
-    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_rows_pruning_base_to_help(self, raw_counts):
         cube_counts = _CatXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts._rows_pruning_base == pytest.approx(np.array([20.4, 23.7]))
@@ -753,70 +753,70 @@ class Describe_CatXMrCubeCounts:
         )
 
 
-class Describe_MrXArrCubeCounts:
+class Test_MrXArrCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXArrCubeCounts`."""
 
-    def it_knows_its_column_bases(self, raw_counts):
+    def test_it_knows_its_column_bases(self, raw_counts):
         cube_counts = _MrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.column_bases == pytest.approx(
             np.array([[4.5, 6.5, 8.5], [5.9, 7.9, 9.9]])
         )
 
-    def it_knows_its_columns_base(self, raw_counts):
+    def test_it_knows_its_columns_base(self, raw_counts):
         cube_counts = _MrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_base is None
 
-    def it_knows_its_columns_table_base(self, raw_counts):
+    def test_it_knows_its_columns_table_base(self, raw_counts):
         cube_counts = _MrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_table_base is None
 
-    def it_knows_its_counts(self, raw_counts):
+    def test_it_knows_its_counts(self, raw_counts):
         cube_counts = _MrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.counts == pytest.approx(
             np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]])
         )
 
-    def it_knows_its_row_bases(self, raw_counts):
+    def test_it_knows_its_row_bases(self, raw_counts):
         cube_counts = _MrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.row_bases == pytest.approx(
             np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]])
         )
 
-    def it_knows_its_rows_base(self, raw_counts):
+    def test_it_knows_its_rows_base(self, raw_counts):
         cube_counts = _MrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_base is None
 
-    def it_knows_its_rows_table_base(self, raw_counts):
+    def test_it_knows_its_rows_table_base(self, raw_counts):
         cube_counts = _MrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_table_base is None
 
-    def it_knows_its_table_base(self, raw_counts):
+    def test_it_knows_its_table_base(self, raw_counts):
         cube_counts = _MrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_base is None
 
-    def it_knows_its_table_bases(self, raw_counts):
+    def test_it_knows_its_table_bases(self, raw_counts):
         cube_counts = _MrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_bases == pytest.approx(
             np.array([[4.5, 6.5, 8.5], [5.9, 7.9, 9.9]])
         )
 
-    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_columns_pruning_base_to_help(self, raw_counts):
         cube_counts = _MrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts._columns_pruning_base == pytest.approx(
             np.array([10.4, 14.4, 18.4])
         )
 
-    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_rows_pruning_base_to_help(self, raw_counts):
         cube_counts = _MrXArrCubeCounts(None, raw_counts, None)
 
         assert cube_counts._rows_pruning_base == pytest.approx(
@@ -844,70 +844,70 @@ class Describe_MrXArrCubeCounts:
         )
 
 
-class Describe_MrXCatCubeCounts:
+class Test_MrXCatCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeCounts`."""
 
-    def it_knows_its_column_bases(self, raw_counts):
+    def test_it_knows_its_column_bases(self, raw_counts):
         cube_counts = _MrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.column_bases == pytest.approx(
             np.array([[4.5, 6.5, 8.5], [5.9, 7.9, 9.9]])
         )
 
-    def it_knows_its_columns_base(self, raw_counts):
+    def test_it_knows_its_columns_base(self, raw_counts):
         cube_counts = _MrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_base is None
 
-    def it_knows_its_columns_table_base(self, raw_counts):
+    def test_it_knows_its_columns_table_base(self, raw_counts):
         cube_counts = _MrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_table_base is None
 
-    def it_knows_its_counts(self, raw_counts):
+    def test_it_knows_its_counts(self, raw_counts):
         cube_counts = _MrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.counts == pytest.approx(
             np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]])
         )
 
-    def it_knows_its_row_bases(self, raw_counts):
+    def test_it_knows_its_row_bases(self, raw_counts):
         cube_counts = _MrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.row_bases == pytest.approx(
             np.array([[6.6, 6.6, 6.6], [16.5, 16.5, 16.5]])
         )
 
-    def it_knows_its_rows_base(self, raw_counts):
+    def test_it_knows_its_rows_base(self, raw_counts):
         cube_counts = _MrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_base == pytest.approx(np.array([6.6, 16.5]))
 
-    def it_knows_its_rows_table_base(self, raw_counts):
+    def test_it_knows_its_rows_table_base(self, raw_counts):
         cube_counts = _MrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_table_base == pytest.approx(np.array([19.5, 23.7]))
 
-    def it_knows_its_table_base(self, raw_counts):
+    def test_it_knows_its_table_base(self, raw_counts):
         cube_counts = _MrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_base is None
 
-    def it_knows_its_table_bases(self, raw_counts):
+    def test_it_knows_its_table_bases(self, raw_counts):
         cube_counts = _MrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_bases == pytest.approx(
             np.array([[19.5, 19.5, 19.5], [23.7, 23.7, 23.7]])
         )
 
-    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_columns_pruning_base_to_help(self, raw_counts):
         cube_counts = _MrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts._columns_pruning_base == pytest.approx(
             np.array([10.4, 14.4, 18.4])
         )
 
-    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_rows_pruning_base_to_help(self, raw_counts):
         cube_counts = _MrXCatCubeCounts(None, raw_counts, None)
 
         assert cube_counts._rows_pruning_base == pytest.approx(
@@ -935,10 +935,10 @@ class Describe_MrXCatCubeCounts:
         )
 
 
-class Describe_MrXMrCubeCounts:
+class Test_MrXMrCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeCounts`."""
 
-    def it_knows_its_column_bases(self, raw_counts):
+    def test_it_knows_its_column_bases(self, raw_counts):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.column_bases == pytest.approx(
@@ -947,22 +947,22 @@ class Describe_MrXMrCubeCounts:
             np.array([[4.6, 8.0], [4.2, 12.6]])
         )
 
-    def it_knows_its_columns_base(self, raw_counts):
+    def test_it_knows_its_columns_base(self, raw_counts):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_base is None
 
-    def it_knows_its_columns_table_base(self, raw_counts):
+    def test_it_knows_its_columns_table_base(self, raw_counts):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.columns_table_base is None
 
-    def it_knows_its_counts(self, raw_counts):
+    def test_it_knows_its_counts(self, raw_counts):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.counts == pytest.approx(np.array([[1.1, 3.1], [2.8, 7.3]]))
 
-    def it_knows_its_row_bases(self, raw_counts):
+    def test_it_knows_its_row_bases(self, raw_counts):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.row_bases == pytest.approx(
@@ -971,22 +971,22 @@ class Describe_MrXMrCubeCounts:
             np.array([[3.4, 7.1], [6.3, 15.5]])
         )
 
-    def it_knows_its_rows_base(self, raw_counts):
+    def test_it_knows_its_rows_base(self, raw_counts):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_base is None
 
-    def it_knows_its_rows_table_base(self, raw_counts):
+    def test_it_knows_its_rows_table_base(self, raw_counts):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.rows_table_base is None
 
-    def it_knows_its_table_base(self, raw_counts):
+    def test_it_knows_its_table_base(self, raw_counts):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_base is None
 
-    def it_knows_its_table_bases(self, raw_counts):
+    def test_it_knows_its_table_bases(self, raw_counts):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts.table_bases == pytest.approx(
@@ -995,7 +995,7 @@ class Describe_MrXMrCubeCounts:
             np.array([[12.2, 18.8], [14.1, 30.6]])
         )
 
-    def it_provides_the_columns_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_columns_pruning_base_to_help(self, raw_counts):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts._columns_pruning_base == pytest.approx(
@@ -1004,7 +1004,7 @@ class Describe_MrXMrCubeCounts:
             np.array([8.8, 20.6])
         )
 
-    def it_provides_the_rows_pruning_base_to_help(self, raw_counts):
+    def test_it_provides_the_rows_pruning_base_to_help(self, raw_counts):
         cube_counts = _MrXMrCubeCounts(None, raw_counts, None)
 
         assert cube_counts._rows_pruning_base == pytest.approx(
@@ -1047,7 +1047,7 @@ class Describe_MrXMrCubeCounts:
 # === MEANS ===
 
 
-class Describe_BaseCubeMeans:
+class Test_BaseCubeMeans:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMeans`."""
 
     @pytest.mark.parametrize(
@@ -1059,7 +1059,7 @@ class Describe_BaseCubeMeans:
             ((DT.CAT, DT.CAT), _CatXCatCubeMeans),
         ),
     )
-    def it_provides_a_factory_for_constructing_cube_means_objects(
+    def test_it_provides_a_factory_for_constructing_cube_means_objects(
         self, request, dimension_types, CubeMeansCls
     ):
         cube_ = instance_mock(request, Cube)
@@ -1089,7 +1089,7 @@ class Describe_BaseCubeMeans:
         CubeMeanCls_.assert_called_once_with(dimensions_, [3, 4])
         assert cube_means is cube_means_
 
-    def but_it_raises_a_value_error_when_cube_result_does_not_contain_mean_measure(
+    def test_but_it_raises_a_value_error_when_cube_result_does_not_contain_mean_measure(
         self, cube_
     ):
         cube_.means = None
@@ -1106,10 +1106,10 @@ class Describe_BaseCubeMeans:
         return instance_mock(request, Cube)
 
 
-class Describe_CatXCatCubeMeans:
+class Test_CatXCatCubeMeans:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeMeans`."""
 
-    def it_knows_its_means(self, raw_means):
+    def test_it_knows_its_means(self, raw_means):
         cube_means = _CatXCatCubeMeans(None, raw_means)
 
         assert cube_means.means.tolist() == [
@@ -1130,10 +1130,10 @@ class Describe_CatXCatCubeMeans:
         )
 
 
-class Describe_CatXMrCubeMeans:
+class Test_CatXMrCubeMeans:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeMeans`."""
 
-    def it_knows_its_means(self, raw_means):
+    def test_it_knows_its_means(self, raw_means):
         cube_means = _CatXMrCubeMeans(None, raw_means)
 
         assert cube_means.means.tolist() == [
@@ -1164,10 +1164,10 @@ class Describe_CatXMrCubeMeans:
         )
 
 
-class Describe_MrXCatCubeMeans:
+class Test_MrXCatCubeMeans:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeMeans`."""
 
-    def it_knows_its_means(self, raw_means):
+    def test_it_knows_its_means(self, raw_means):
         cube_means = _MrXCatCubeMeans(None, raw_means)
 
         assert cube_means.means.tolist() == [
@@ -1198,10 +1198,10 @@ class Describe_MrXCatCubeMeans:
         )
 
 
-class Describe_MrXMrCubeMeans:
+class Test_MrXMrCubeMeans:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeMeans`."""
 
-    def it_knows_its_means(self, raw_means):
+    def test_it_knows_its_means(self, raw_means):
         cube_means = _MrXMrCubeMeans(None, raw_means)
 
         assert cube_means.means.tolist() == [
@@ -1245,7 +1245,7 @@ class Describe_MrXMrCubeMeans:
 # === MEDIANS ===
 
 
-class Describe_BaseCubeMedians:
+class Test_BaseCubeMedians:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMedians`."""
 
     @pytest.mark.parametrize(
@@ -1257,7 +1257,7 @@ class Describe_BaseCubeMedians:
             ((DT.CAT, DT.CAT), _CatXCatCubeMedians),
         ),
     )
-    def it_provides_a_factory_for_constructing_cube_medians_objects(
+    def test_it_provides_a_factory_for_constructing_cube_medians_objects(
         self, request, dimension_types, CubeMediansCls
     ):
         cube_ = instance_mock(request, Cube)
@@ -1287,7 +1287,7 @@ class Describe_BaseCubeMedians:
         CubeMediansCls_.assert_called_once_with(dimensions_, [3, 4])
         assert cube_medians is cube_medians_
 
-    def but_it_raises_a_value_error_when_cube_result_does_not_contain_mean_measure(
+    def test_but_it_raises_a_value_error_when_cube_result_does_not_contain_mean_measure(
         self, cube_
     ):
         cube_.means = None
@@ -1304,10 +1304,10 @@ class Describe_BaseCubeMedians:
         return instance_mock(request, Cube)
 
 
-class Describe_CatXCatCubeMedians:
+class Test_CatXCatCubeMedians:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeMedians`."""
 
-    def it_knows_its_medians(self):
+    def test_it_knows_its_medians(self):
         raw_medians = np.array(
             [
                 [1.1, 2.3, 3.3],
@@ -1322,10 +1322,10 @@ class Describe_CatXCatCubeMedians:
         ]
 
 
-class Describe_CatXMrCubeMedians:
+class Test_CatXMrCubeMedians:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeMedians`."""
 
-    def it_knows_its_means(self, raw_medians):
+    def test_it_knows_its_means(self, raw_medians):
         cube_medians = _CatXMrCubeMedians(None, raw_medians)
 
         assert cube_medians.medians.tolist() == [
@@ -1356,10 +1356,10 @@ class Describe_CatXMrCubeMedians:
         )
 
 
-class Describe_MrXCatCubeMedians:
+class Test_MrXCatCubeMedians:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeMedians`."""
 
-    def it_knows_its_means(self, raw_medians):
+    def test_it_knows_its_means(self, raw_medians):
         cube_medians = _MrXCatCubeMedians(None, raw_medians)
 
         assert cube_medians.medians.tolist() == [
@@ -1390,10 +1390,10 @@ class Describe_MrXCatCubeMedians:
         )
 
 
-class Describe_MrXMrCubeMedians:
+class Test_MrXMrCubeMedians:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeMedians`."""
 
-    def it_knows_its_means(self, raw_medians):
+    def test_it_knows_its_means(self, raw_medians):
         cube_medians = _MrXMrCubeMedians(None, raw_medians)
 
         assert cube_medians.medians.tolist() == [[0.1, 0.1], [0.4, 0.5]]
@@ -1434,7 +1434,7 @@ class Describe_MrXMrCubeMedians:
 # === STD DEV ===
 
 
-class Describe_BaseCubeStdDev:
+class Test_BaseCubeStdDev:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeStdDev`."""
 
     @pytest.mark.parametrize(
@@ -1446,7 +1446,7 @@ class Describe_BaseCubeStdDev:
             ((DT.CAT, DT.CAT), _CatXCatCubeStdDev),
         ),
     )
-    def it_provides_a_factory_for_constructing_cube_stddev_objects(
+    def test_it_provides_a_factory_for_constructing_cube_stddev_objects(
         self, request, dimension_types, CubeStdDevCls, cube_
     ):
         dimensions_ = (
@@ -1475,7 +1475,7 @@ class Describe_BaseCubeStdDev:
         CubeStdDevCls_.assert_called_once_with(dimensions_, [3, 4])
         assert cube_stddev is cube_stddev_
 
-    def but_it_raises_a_value_error_when_cube_result_does_not_contain_stddev_measure(
+    def test_but_it_raises_a_value_error_when_cube_result_does_not_contain_stddev_measure(
         self, cube_
     ):
         cube_.stddev = None
@@ -1492,10 +1492,10 @@ class Describe_BaseCubeStdDev:
         return instance_mock(request, Cube)
 
 
-class Describe_CatXCatCubeStdDev:
+class Test_CatXCatCubeStdDev:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeStdDev`."""
 
-    def it_knows_its_stddev(self, raw_stddev):
+    def test_it_knows_its_stddev(self, raw_stddev):
         cube_stddev = _CatXCatCubeStdDev(None, raw_stddev)
 
         assert cube_stddev.stddev.tolist() == [
@@ -1516,10 +1516,10 @@ class Describe_CatXCatCubeStdDev:
         )
 
 
-class Describe_CatXMrCubeStdDev:
+class Test_CatXMrCubeStdDev:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeStdDev`."""
 
-    def it_knows_its_stddev(self, raw_stddev):
+    def test_it_knows_its_stddev(self, raw_stddev):
         cube_stddev = _CatXMrCubeStdDev(None, raw_stddev)
 
         assert cube_stddev.stddev.tolist() == [
@@ -1550,10 +1550,10 @@ class Describe_CatXMrCubeStdDev:
         )
 
 
-class Describe_MrXCatCubeStdDev:
+class Test_MrXCatCubeStdDev:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeStdDev`."""
 
-    def it_knows_its_stddev(self, raw_stddev):
+    def test_it_knows_its_stddev(self, raw_stddev):
         cube_stddev = _MrXCatCubeStdDev(None, raw_stddev)
 
         assert cube_stddev.stddev.tolist() == [
@@ -1584,10 +1584,10 @@ class Describe_MrXCatCubeStdDev:
         )
 
 
-class Describe_MrXMrCubeStdDev:
+class Test_MrXMrCubeStdDev:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeStdDev`."""
 
-    def it_knows_its_stddev(self, raw_stddev):
+    def test_it_knows_its_stddev(self, raw_stddev):
         cube_stddev = _MrXMrCubeStdDev(None, raw_stddev)
 
         assert cube_stddev.stddev.tolist() == [
@@ -1631,7 +1631,7 @@ class Describe_MrXMrCubeStdDev:
 # === SUM ===
 
 
-class Describe_BaseCubeSum:
+class Test_BaseCubeSum:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeSum`."""
 
     @pytest.mark.parametrize(
@@ -1643,7 +1643,7 @@ class Describe_BaseCubeSum:
             ((DT.CAT, DT.CAT), _CatXCatCubeSums),
         ),
     )
-    def it_provides_a_factory_for_constructing_cube_sum_objects(
+    def test_it_provides_a_factory_for_constructing_cube_sum_objects(
         self, request, dimension_types, CubeSumCls, cube_
     ):
         dimensions_ = (
@@ -1672,7 +1672,7 @@ class Describe_BaseCubeSum:
         CubeSumCls_.assert_called_once_with(dimensions_, [3, 4])
         assert cube_sums is cube_sums_
 
-    def but_it_raises_a_value_error_when_cube_result_does_not_contain_sum_measure(
+    def test_but_it_raises_a_value_error_when_cube_result_does_not_contain_sum_measure(
         self, cube_
     ):
         cube_.sums = None
@@ -1689,10 +1689,10 @@ class Describe_BaseCubeSum:
         return instance_mock(request, Cube)
 
 
-class Describe_CatXCatCubeSums:
+class Test_CatXCatCubeSums:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXCatCubeSums`."""
 
-    def it_knows_its_sum(self, raw_sums):
+    def test_it_knows_its_sum(self, raw_sums):
         cube_sum = _CatXCatCubeSums(None, raw_sums)
 
         assert cube_sum.sums.tolist() == [
@@ -1713,10 +1713,10 @@ class Describe_CatXCatCubeSums:
         )
 
 
-class Describe_CatXMrCubeSum:
+class Test_CatXMrCubeSum:
     """Unit test suite for `cr.cube.matrix.cubemeasure._CatXMrCubeSums`."""
 
-    def it_knows_its_sum(self, raw_sums):
+    def test_it_knows_its_sum(self, raw_sums):
         cube_sum = _CatXMrCubeSums(None, raw_sums)
 
         assert cube_sum.sums.tolist() == [
@@ -1747,10 +1747,10 @@ class Describe_CatXMrCubeSum:
         )
 
 
-class Describe_MrXCatCubeSum:
+class Test_MrXCatCubeSum:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXCatCubeSums`."""
 
-    def it_knows_its_sum(self, raw_sums):
+    def test_it_knows_its_sum(self, raw_sums):
         cube_sum = _MrXCatCubeSums(None, raw_sums)
 
         assert cube_sum.sums.tolist() == [
@@ -1781,10 +1781,10 @@ class Describe_MrXCatCubeSum:
         )
 
 
-class Describe_MrXMrCubeSum:
+class Test_MrXMrCubeSum:
     """Unit test suite for `cr.cube.matrix.cubemeasure._MrXMrCubeSums`."""
 
-    def it_knows_its_sums(self, raw_sums):
+    def test_it_knows_its_sums(self, raw_sums):
         cube_sum = _MrXMrCubeSums(None, raw_sums)
 
         assert cube_sum.sums.tolist() == [
@@ -1828,7 +1828,7 @@ class Describe_MrXMrCubeSum:
 # === (WEIGHTED) UNCONDITIONAL COUNTS ===
 
 
-class Describe_BaseUnconditionalCubeCounts:
+class Test_BaseUnconditionalCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseUnconditionalCubeCounts`."""
 
     @pytest.mark.parametrize(
@@ -1865,7 +1865,7 @@ class Describe_BaseUnconditionalCubeCounts:
             ),
         ),
     )
-    def it_provides_a_factory_for_constructing_weighted_cube_count_objects(
+    def test_it_provides_a_factory_for_constructing_weighted_cube_count_objects(
         self,
         request,
         cube_,
@@ -1904,7 +1904,7 @@ class Describe_BaseUnconditionalCubeCounts:
         )
         assert weighted_cube_counts is uncond_cube_counts_
 
-    def it_provides_valid_row_idxs_to_help(self, request, dimensions_):
+    def test_it_provides_valid_row_idxs_to_help(self, request, dimensions_):
         valid_elements_ = instance_mock(request, Elements, element_idxs=(0, 2, 4))
         dimensions_[0].valid_elements = valid_elements_
         unconditional_counts = _BaseUnconditionalCubeCounts(dimensions_, None)

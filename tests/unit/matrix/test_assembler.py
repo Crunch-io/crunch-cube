@@ -78,7 +78,7 @@ from ...unitutil import (
 )
 
 
-class DescribeAssembler:
+class TestAssembler:
     """Unit test suite for `cr.cube.cubepart` assembly methods."""
 
     @pytest.mark.parametrize(
@@ -114,7 +114,7 @@ class DescribeAssembler:
             ("zscores", _Zscores),
         ),
     )
-    def it_assembles_various_measures(
+    def test_it_assembles_various_measures(
         self,
         request,
         _measures_prop_,
@@ -152,7 +152,7 @@ class DescribeAssembler:
             ("columns_scale_median", _ScaleMedian),
         ),
     )
-    def it_assembles_various_marginals(
+    def test_it_assembles_various_marginals(
         self,
         request,
         _assemble_marginal_,
@@ -172,7 +172,7 @@ class DescribeAssembler:
         _assemble_marginal_.assert_called_once_with(slice_, measure_)
         assert value == [[1, 2, 3], [4, 5, 6]]
 
-    def it_knows_the_column_labels(self, dimension_, _column_order_prop_):
+    def test_it_knows_the_column_labels(self, dimension_, _column_order_prop_):
         _column_order_prop_.return_value = [0, 2, 1]
         dimension_.element_labels = ("Alpha", "Baker")
         dimension_.subtotal_labels = ("Charlie",)
@@ -183,7 +183,7 @@ class DescribeAssembler:
             column_labels = slice_.column_labels
             assert column_labels.tolist() == ["Alpha", "Charlie", "Baker"]
 
-    def it_provides_a_1D_columns_base_for_an_X_CAT_cube_result(
+    def test_it_provides_a_1D_columns_base_for_an_X_CAT_cube_result(
         self,
         _measures_prop_,
         second_order_measures_,
@@ -201,7 +201,7 @@ class DescribeAssembler:
         _assemble_marginal_.assert_called_once_with(slice_, margin_unweighted_base_)
         assert rows_base == [[1, 2, 3], [4, 5, 6]]
 
-    def but_it_provides_a_2D_columns_base_for_an_X_MR_cube_result(
+    def test_but_it_provides_a_2D_columns_base_for_an_X_MR_cube_result(
         self,
         request,
         _measures_prop_,
@@ -223,7 +223,7 @@ class DescribeAssembler:
 
         assert rows_base == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
-    def it_knows_the_columns_dimension_numeric_values(
+    def test_it_knows_the_columns_dimension_numeric_values(
         self, request, dimension_, _column_order_prop_
     ):
         dimension_.valid_elements = tuple(
@@ -241,7 +241,7 @@ class DescribeAssembler:
                 [3.0, np.nan, 1.0, np.nan],
             )
 
-    def it_provides_a_1D_columns_margin_for_a_CAT_X_cube_result(
+    def test_it_provides_a_1D_columns_margin_for_a_CAT_X_cube_result(
         self,
         _rows_dimension_prop_,
         dimension_,
@@ -262,7 +262,7 @@ class DescribeAssembler:
         _assemble_marginal_.assert_called_once_with(slice_, margin_weighted_base_)
         assert columns_margin == [[1, 2, 3], [4, 5, 6]]
 
-    def but_it_provides_a_2D_columns_margin_for_an_MR_X_cube_result(
+    def test_but_it_provides_a_2D_columns_margin_for_an_MR_X_cube_result(
         self,
         request,
         _measures_prop_,
@@ -281,7 +281,7 @@ class DescribeAssembler:
 
         assert columns_margin == [[1, 2], [3, 4]]
 
-    def it_provides_a_1D_columns_margin_proportion_for_a_CAT_X_cube_result(
+    def test_it_provides_a_1D_columns_margin_proportion_for_a_CAT_X_cube_result(
         self,
         _rows_dimension_prop_,
         dimension_,
@@ -303,7 +303,7 @@ class DescribeAssembler:
         _assemble_marginal_.assert_called_once_with(slice_, margin_table_proportion_)
         assert columns_margin_proportion == [[1, 2, 3], [4, 5, 6]]
 
-    def but_it_provides_a_2D_columns_margin_proportion_for_an_MR_X_cube_result(
+    def test_but_it_provides_a_2D_columns_margin_proportion_for_an_MR_X_cube_result(
         self,
         request,
         dimensions_,
@@ -343,27 +343,27 @@ class DescribeAssembler:
             _assemble_matrix_.assert_called_once_with(slice_, [[[1], [2]], [[3], [4]]])
             assert columns_margin_proportion == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
-    def it_knows_the_inserted_column_idxs(self, _column_order_prop_):
+    def test_it_knows_the_inserted_column_idxs(self, _column_order_prop_):
         _column_order_prop_.return_value = [2, -1, 0, -2]
         assert _Slice(None, None, None, None, None).inserted_column_idxs == (1, 3)
 
-    def it_knows_the_inserted_row_idxs(self, _row_order_prop_):
+    def test_it_knows_the_inserted_row_idxs(self, _row_order_prop_):
         _row_order_prop_.return_value = [0, 1, -2, 2, -1, 3]
         assert _Slice(None, None, None, None, None).inserted_row_idxs == (2, 4)
 
-    def it_knows_the_means(self, request, dimensions_):
+    def test_it_knows_the_means(self, request, dimensions_):
         property_mock(request, _Slice, "means", return_value=np.array([1.2, 1.34, 3.3]))
         slice_ = _Slice(None, dimensions_, None, None, None)
 
         assert slice_.means == pytest.approx([1.2, 1.34, 3.3])
 
-    def it_knows_the_sum(self, request, dimensions_):
+    def test_it_knows_the_sum(self, request, dimensions_):
         property_mock(request, _Slice, "sums", return_value=np.array([4, 5, 6]))
         slice_ = _Slice(None, dimensions_, None, None, None)
 
         assert slice_.sums == pytest.approx([4, 5, 6])
 
-    def it_knows_the_row_labels(self, dimension_, _row_order_prop_):
+    def test_it_knows_the_row_labels(self, dimension_, _row_order_prop_):
         _row_order_prop_.return_value = [0, 2, 1]
         dimension_.element_labels = ("Alpha", "Baker")
         dimension_.subtotal_labels = ("Charlie",)
@@ -374,7 +374,7 @@ class DescribeAssembler:
             row_labels = slice_.row_labels
             assert row_labels.tolist() == ["Alpha", "Charlie", "Baker"]
 
-    def it_provides_a_1D_rows_base_for_an_X_CAT_cube_result(
+    def test_it_provides_a_1D_rows_base_for_an_X_CAT_cube_result(
         self,
         _measures_prop_,
         second_order_measures_,
@@ -392,7 +392,7 @@ class DescribeAssembler:
         _assemble_marginal_.assert_called_once_with(slice_, margin_unweighted_base_)
         assert rows_base == [[1, 2, 3], [4, 5, 6]]
 
-    def but_it_provides_a_2D_rows_base_for_an_X_MR_cube_result(
+    def test_but_it_provides_a_2D_rows_base_for_an_X_MR_cube_result(
         self,
         request,
         _measures_prop_,
@@ -423,7 +423,7 @@ class DescribeAssembler:
             ((-1, -2, 2, 1, 0), ("STF2", "STF1", "#f00ba5", "#111111", "#000000")),
         ),
     )
-    def it_knows_the_rows_dimension_fills(
+    def test_it_knows_the_rows_dimension_fills(
         self,
         request,
         _rows_dimension_prop_,
@@ -446,7 +446,7 @@ class DescribeAssembler:
 
         assert slice_.rows_dimension_fills == expected_fills
 
-    def it_knows_the_rows_dimension_numeric_values(
+    def test_it_knows_the_rows_dimension_numeric_values(
         self, request, dimension_, _row_order_prop_
     ):
         dimension_.valid_elements = tuple(
@@ -464,7 +464,7 @@ class DescribeAssembler:
                 [3.0, np.nan, 1.0, np.nan],
             )
 
-    def it_provides_a_1D_rows_margin_for_an_X_CAT_cube_result(
+    def test_it_provides_a_1D_rows_margin_for_an_X_CAT_cube_result(
         self,
         dimension_,
         _measures_prop_,
@@ -485,7 +485,7 @@ class DescribeAssembler:
             _assemble_marginal_.assert_called_once_with(slice_, margin_weighted_base_)
             assert rows_margin == [[1, 2, 3], [4, 5, 6]]
 
-    def but_it_provides_a_2D_rows_margin_for_an_X_MR_cube_result(
+    def test_but_it_provides_a_2D_rows_margin_for_an_X_MR_cube_result(
         self,
         request,
         _measures_prop_,
@@ -504,7 +504,7 @@ class DescribeAssembler:
 
         assert rows_margin == [[1, 2], [3, 4]]
 
-    def it_provides_a_1D_rows_margin_proportion_for_an_X_CAT_cube_result(
+    def test_it_provides_a_1D_rows_margin_proportion_for_an_X_CAT_cube_result(
         self,
         request,
         dimension_,
@@ -525,7 +525,7 @@ class DescribeAssembler:
             _assemble_marginal_.assert_called_once_with(slice_, measure_)
             assert rows_margin_proportion == [[1, 2, 3], [4, 5, 6]]
 
-    def but_it_provides_a_2D_rows_margin_proportion_for_an_X_MR_cube_result(
+    def test_but_it_provides_a_2D_rows_margin_proportion_for_an_X_MR_cube_result(
         self,
         request,
         dimensions_,
@@ -562,7 +562,7 @@ class DescribeAssembler:
             _assemble_matrix_.assert_called_once_with(slice_, [[[1], [2]], [[3], [4]]])
             assert rows_margin_proportion == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
-    def it_knows_the_2D_table_base_of_an_ARRAY_X_ARRAY_matrix(
+    def test_it_knows_the_2D_table_base_of_an_ARRAY_X_ARRAY_matrix(
         self,
         request,
         _measures_prop_,
@@ -590,7 +590,7 @@ class DescribeAssembler:
 
         assert slice_.table_base == [[5, 4, 6], [2, 1, 3]]
 
-    def and_it_knows_the_1D_table_base_of_an_ARRAY_X_CAT_matrix(
+    def test_and_it_knows_the_1D_table_base_of_an_ARRAY_X_CAT_matrix(
         self,
         _measures_prop_,
         second_order_measures_,
@@ -615,7 +615,7 @@ class DescribeAssembler:
         )
         assert table_base == [2, 1, 3]
 
-    def and_it_knows_the_1D_table_base_of_a_CAT_X_ARRAY_matrix(
+    def test_and_it_knows_the_1D_table_base_of_a_CAT_X_ARRAY_matrix(
         self,
         _measures_prop_,
         second_order_measures_,
@@ -641,7 +641,7 @@ class DescribeAssembler:
         _assemble_marginal_.assert_called_once_with(slice_, rows_table_unweighted_base_)
         assert table_base == [2, 1, 3]
 
-    def and_it_knows_the_scalar_table_base_of_a_CAT_X_CAT_matrix(
+    def test_and_it_knows_the_scalar_table_base_of_a_CAT_X_CAT_matrix(
         self,
         _measures_prop_,
         second_order_measures_,
@@ -655,7 +655,7 @@ class DescribeAssembler:
 
         assert slice_.table_base == 4242
 
-    def it_knows_the_2D_table_margin_of_an_ARRAY_X_ARRAY_matrix(
+    def test_it_knows_the_2D_table_margin_of_an_ARRAY_X_ARRAY_matrix(
         self,
         request,
         _measures_prop_,
@@ -683,7 +683,7 @@ class DescribeAssembler:
 
         assert slice_.table_margin == [[5, 4, 6], [2, 1, 3]]
 
-    def and_it_knows_the_1D_table_margin_of_an_ARRAY_X_CAT_matrix(
+    def test_and_it_knows_the_1D_table_margin_of_an_ARRAY_X_CAT_matrix(
         self,
         _measures_prop_,
         second_order_measures_,
@@ -708,7 +708,7 @@ class DescribeAssembler:
         )
         assert table_margin == [2, 1, 3]
 
-    def and_it_knows_the_1D_table_margin_of_a_CAT_X_ARRAY_matrix(
+    def test_and_it_knows_the_1D_table_margin_of_a_CAT_X_ARRAY_matrix(
         self,
         _measures_prop_,
         second_order_measures_,
@@ -734,7 +734,7 @@ class DescribeAssembler:
         _assemble_marginal_.assert_called_once_with(slice_, rows_table_weighted_base_)
         assert table_margin == [2, 1, 3]
 
-    def and_it_knows_the_scalar_table_margin_of_a_CAT_X_CAT_matrix(
+    def test_and_it_knows_the_scalar_table_margin_of_a_CAT_X_CAT_matrix(
         self,
         _measures_prop_,
         second_order_measures_,
@@ -748,7 +748,7 @@ class DescribeAssembler:
 
         assert slice_.table_margin == 4242
 
-    def it_knows_the_table_base_range(
+    def test_it_knows_the_table_base_range(
         self,
         request,
         _measures_prop_,
@@ -761,7 +761,7 @@ class DescribeAssembler:
 
         assert slice_.table_base_range == 42
 
-    def it_knows_the_table_margin_range(
+    def test_it_knows_the_table_margin_range(
         self,
         request,
         _measures_prop_,
@@ -788,7 +788,7 @@ class DescribeAssembler:
             ([0], [0], [[1, 2, 3], [4, 5, 6]], [[1]]),
         ),
     )
-    def it_can_assemble_a_matrix_from_blocks(
+    def test_it_can_assemble_a_matrix_from_blocks(
         self,
         _row_order_prop_,
         row_order,
@@ -803,7 +803,7 @@ class DescribeAssembler:
 
         assert slice_._assemble_matrix(blocks).tolist() == expected_value
 
-    def it_can_assemble_a_vector(self, request):
+    def test_it_can_assemble_a_vector(self, request):
         base_vector = np.array([1, 2, 3, 4])
         subtotals_ = tuple(
             instance_mock(
@@ -825,7 +825,7 @@ class DescribeAssembler:
 
         assert vector.tolist() == [3, 2, 1, 5, 4, 3, 7]
 
-    def it_knows_the_column_order_to_help(
+    def test_it_knows_the_column_order_to_help(
         self,
         _BaseOrderHelper_,
         dimensions_,
@@ -853,7 +853,7 @@ class DescribeAssembler:
             (ORDER_FORMAT.BOGUS_IDS, ("ins_1", 1, "ins_2", 2, "ins_3", 3)),
         ),
     )
-    def it_knows_the_row_order_to_help(
+    def test_it_knows_the_row_order_to_help(
         self,
         _BaseOrderHelper_,
         dimensions_,
@@ -874,7 +874,7 @@ class DescribeAssembler:
             )
             assert row_order.tolist() == list(row_order)
 
-    def it_knows_the_payload_order_to_help(
+    def test_it_knows_the_payload_order_to_help(
         self,
         request,
         dimensions_,
@@ -988,10 +988,10 @@ class DescribeAssembler:
         return instance_mock(request, _TableBase)
 
 
-class Describe_BaseOrderHelper:
+class Test_BaseOrderHelper:
     """Unit test suite for `cr.cube.matrix.assembler._BaseOrderHelper` object."""
 
-    def it_dispatches_to_the_right_column_order_helper(
+    def test_it_dispatches_to_the_right_column_order_helper(
         self, request, dimensions_, second_order_measures_
     ):
         column_order_helper_ = instance_mock(
@@ -1020,7 +1020,7 @@ class Describe_BaseOrderHelper:
             (CM.PAYLOAD_ORDER, _RowOrderHelper),
         ),
     )
-    def it_dispatches_to_the_right_row_order_helper(
+    def test_it_dispatches_to_the_right_row_order_helper(
         self, request, dimensions_, second_order_measures_, collation_method, HelperCls
     ):
         dimensions_[0].order_spec = instance_mock(
@@ -1044,7 +1044,7 @@ class Describe_BaseOrderHelper:
         )
         assert row_order.tolist() == [-1, 1, -2, 2]
 
-    def it_provides_access_to_the_columns_dimension_to_help(self, dimension_):
+    def test_it_provides_access_to_the_columns_dimension_to_help(self, dimension_):
         order_helper = _BaseOrderHelper((None, dimension_), None)
         assert order_helper._columns_dimension is dimension_
 
@@ -1056,7 +1056,7 @@ class Describe_BaseOrderHelper:
             (False, (-1, 1, -2, 2, -3, 3), [-1, 1, -2, 2, -3, 3]),
         ),
     )
-    def it_post_processes_the_display_order_to_help(
+    def test_it_post_processes_the_display_order_to_help(
         self, request, prune_subtotals, order, expected_value
     ):
         property_mock(
@@ -1077,7 +1077,7 @@ class Describe_BaseOrderHelper:
             ([True, True, True], (0, 1, 2)),
         ),
     )
-    def it_knows_its_empty_column_idxs_to_help(
+    def test_it_knows_its_empty_column_idxs_to_help(
         self, second_order_measures_, base, expected_value
     ):
         second_order_measures_.columns_pruning_mask = np.array(base)
@@ -1093,7 +1093,7 @@ class Describe_BaseOrderHelper:
             ([True, True, True], (0, 1, 2)),
         ),
     )
-    def it_knows_its_empty_row_idxs_to_help(
+    def test_it_knows_its_empty_row_idxs_to_help(
         self, second_order_measures_, base, expected_value
     ):
         second_order_measures_.rows_pruning_mask = np.array(base)
@@ -1139,7 +1139,7 @@ class Describe_BaseOrderHelper:
             ("z_score", "zscores"),
         ),
     )
-    def it_retrieves_the_measure_object_to_help(
+    def test_it_retrieves_the_measure_object_to_help(
         self, request, second_order_measures_, json_name, internal_name
     ):
         property_mock(
@@ -1154,7 +1154,7 @@ class Describe_BaseOrderHelper:
 
         assert order_helper._measure is measure_
 
-    def it_provides_access_to_the_rows_dimension_to_help(self, dimension_):
+    def test_it_provides_access_to_the_rows_dimension_to_help(self, dimension_):
         order_helper = _BaseOrderHelper((dimension_, None), None)
         assert order_helper._rows_dimension is dimension_
 
@@ -1173,7 +1173,7 @@ class Describe_BaseOrderHelper:
         return instance_mock(request, SecondOrderMeasures)
 
 
-class Describe_ColumnOrderHelper:
+class Test_ColumnOrderHelper:
     """Unit test suite for `cr.cube.matrix.assembler._ColumnOrderHelper` object."""
 
     @pytest.mark.parametrize(
@@ -1183,7 +1183,7 @@ class Describe_ColumnOrderHelper:
             (CM.EXPLICIT_ORDER, "ExplicitOrderCollator"),
         ),
     )
-    def it_computes_the_order_of_a_columns_dimension_to_help(
+    def test_it_computes_the_order_of_a_columns_dimension_to_help(
         self, request, dimension_, collation_method, collator_class_name
     ):
         property_mock(
@@ -1216,7 +1216,7 @@ class Describe_ColumnOrderHelper:
             (True, (0, 1, 2), True),
         ),
     )
-    def it_knows_whether_to_prune_the_subtotal_columns_to_help(
+    def test_it_knows_whether_to_prune_the_subtotal_columns_to_help(
         self, request, dimension_, prune, empty_row_idxs, expected_value
     ):
         property_mock(
@@ -1241,7 +1241,7 @@ class Describe_ColumnOrderHelper:
         return instance_mock(request, Dimension)
 
 
-class Describe_RowOrderHelper:
+class Test_RowOrderHelper:
     """Unit test suite for `cr.cube.matrix.assembler._RowOrderHelper` object."""
 
     @pytest.mark.parametrize(
@@ -1251,7 +1251,7 @@ class Describe_RowOrderHelper:
             (CM.EXPLICIT_ORDER, "ExplicitOrderCollator"),
         ),
     )
-    def it_computes_the_order_of_a_rows_dimension_to_help(
+    def test_it_computes_the_order_of_a_rows_dimension_to_help(
         self, request, dimension_, collation_method, collator_class_name
     ):
         property_mock(
@@ -1276,7 +1276,7 @@ class Describe_RowOrderHelper:
         )
         assert order == (1, -2, 3, 5, -1)
 
-    def it_provides_access_to_the_order_spec_to_help(self, request, dimension_):
+    def test_it_provides_access_to_the_order_spec_to_help(self, request, dimension_):
         property_mock(
             request, _RowOrderHelper, "_rows_dimension", return_value=dimension_
         )
@@ -1294,7 +1294,7 @@ class Describe_RowOrderHelper:
             (True, (0, 1, 2), True),
         ),
     )
-    def it_knows_whether_to_prune_the_subtotal_rows_to_help(
+    def test_it_knows_whether_to_prune_the_subtotal_rows_to_help(
         self, request, dimension_, prune, empty_column_idxs, expected_value
     ):
         property_mock(
@@ -1319,10 +1319,10 @@ class Describe_RowOrderHelper:
         return instance_mock(request, Dimension)
 
 
-class Describe_BaseSortRowsByValueHelper:
+class Test_BaseSortRowsByValueHelper:
     """Unit test suite for `cr.cube.matrix.assembler._BaseSortRowsByValueHelper`."""
 
-    def it_provides_the_order(
+    def test_it_provides_the_order(
         self,
         SortByValueCollator_,
         _rows_dimension_prop_,
@@ -1340,7 +1340,7 @@ class Describe_BaseSortRowsByValueHelper:
             ORDER_FORMAT.SIGNED_INDEXES,
         )
 
-    def but_it_falls_back_to_payload_order_on_value_error(
+    def test_but_it_falls_back_to_payload_order_on_value_error(
         self,
         request,
         dimensions_,
@@ -1393,10 +1393,10 @@ class Describe_BaseSortRowsByValueHelper:
         return property_mock(request, _BaseSortRowsByValueHelper, "_subtotal_values")
 
 
-class Describe_SortRowsByBaseColumnHelper:
+class Test_SortRowsByBaseColumnHelper:
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByBaseColumnHelper`."""
 
-    def it_derives_the_sort_column_idx_from_the_order_spec_to_help(
+    def test_it_derives_the_sort_column_idx_from_the_order_spec_to_help(
         self, _columns_dimension_prop_, dimension_, _order_spec_prop_, order_spec_
     ):
         _columns_dimension_prop_.return_value = dimension_
@@ -1411,7 +1411,7 @@ class Describe_SortRowsByBaseColumnHelper:
         dimension_.translate_element_id.assert_called_once_with("c")
         assert column_idx == 2
 
-    def it_extracts_the_element_values_to_help(
+    def test_it_extracts_the_element_values_to_help(
         self, _measure_prop_, measure_, _column_idx_prop_
     ):
         _measure_prop_.return_value = measure_
@@ -1421,7 +1421,7 @@ class Describe_SortRowsByBaseColumnHelper:
 
         assert order_helper._element_values.tolist() == [2, 7, 12, 17]
 
-    def but_it_raises_when_an_unsupported_sort_by_value_measure_is_requested(
+    def test_but_it_raises_when_an_unsupported_sort_by_value_measure_is_requested(
         self, _order_spec_prop_, order_spec_
     ):
         _order_spec_prop_.return_value = order_spec_
@@ -1433,7 +1433,7 @@ class Describe_SortRowsByBaseColumnHelper:
 
         assert str(e.value) == ("sort-by-value for measure 'foo' is not yet supported")
 
-    def it_extracts_the_subtotal_values_to_help(
+    def test_it_extracts_the_subtotal_values_to_help(
         self, _measure_prop_, measure_, _column_idx_prop_
     ):
         _measure_prop_.return_value = measure_
@@ -1474,10 +1474,10 @@ class Describe_SortRowsByBaseColumnHelper:
         return property_mock(request, _SortRowsByBaseColumnHelper, "_order_spec")
 
 
-class Describe_SortRowsByDerivedColumnHelper:
+class Test_SortRowsByDerivedColumnHelper:
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByDerivedColumnHelper`."""
 
-    def it_derives_the_sort_column_idx_from_the_order_spec_to_help(
+    def test_it_derives_the_sort_column_idx_from_the_order_spec_to_help(
         self, _columns_dimension_prop_, dimension_, _order_spec_prop_, order_spec_
     ):
         _columns_dimension_prop_.return_value = dimension_
@@ -1511,10 +1511,10 @@ class Describe_SortRowsByDerivedColumnHelper:
         return property_mock(request, _SortRowsByBaseColumnHelper, "_order_spec")
 
 
-class Describe_SortRowsByInsertedColumnHelper:
+class Test_SortRowsByInsertedColumnHelper:
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByInsertedColumnHelper`"""
 
-    def it_extracts_the_element_values_to_help(
+    def test_it_extracts_the_element_values_to_help(
         self, _measure_prop_, measure_, _insertion_idx_prop_
     ):
         _measure_prop_.return_value = measure_
@@ -1524,7 +1524,7 @@ class Describe_SortRowsByInsertedColumnHelper:
 
         assert order_helper._element_values.tolist() == [1, 4, 7, 10]
 
-    def it_derives_the_sort_insertion_idx_from_the_order_spec_to_help(
+    def test_it_derives_the_sort_insertion_idx_from_the_order_spec_to_help(
         self, _columns_dimension_prop_, dimension_, _order_spec_prop_, order_spec_
     ):
         _columns_dimension_prop_.return_value = dimension_
@@ -1535,7 +1535,7 @@ class Describe_SortRowsByInsertedColumnHelper:
 
         assert order_helper._insertion_idx == 1
 
-    def it_extracts_the_subtotal_values_to_help(
+    def test_it_extracts_the_subtotal_values_to_help(
         self, _measure_prop_, measure_, _insertion_idx_prop_
     ):
         _measure_prop_.return_value = measure_
@@ -1578,10 +1578,10 @@ class Describe_SortRowsByInsertedColumnHelper:
         return property_mock(request, _SortRowsByInsertedColumnHelper, "_order_spec")
 
 
-class Describe_SortRowsByLabelHelper:
+class Test_SortRowsByLabelHelper:
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByLabelHelper`."""
 
-    def it_provides_the_element_values_to_help(self, dimensions_):
+    def test_it_provides_the_element_values_to_help(self, dimensions_):
         dimensions_[0].element_labels = ("c", "a", "b")
 
         assert _SortRowsByLabelHelper(dimensions_, None)._element_values.tolist() == [
@@ -1590,7 +1590,7 @@ class Describe_SortRowsByLabelHelper:
             "b",
         ]
 
-    def it_provides_the_subtotal_values_to_help(self, dimensions_):
+    def test_it_provides_the_subtotal_values_to_help(self, dimensions_):
         dimensions_[0].subtotal_labels = ("c", "a", "b")
 
         assert _SortRowsByLabelHelper(dimensions_, None)._subtotal_values.tolist() == [
@@ -1606,10 +1606,10 @@ class Describe_SortRowsByLabelHelper:
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
 
 
-class Describe_SortRowsByMarginalHelper:
+class Test_SortRowsByMarginalHelper:
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByMarginalHelper`."""
 
-    def it_provides_the_element_values_to_help(self, _marginal_prop_, marginal_):
+    def test_it_provides_the_element_values_to_help(self, _marginal_prop_, marginal_):
         marginal_.blocks = ["a", "b"]
         _marginal_prop_.return_value = marginal_
 
@@ -1627,7 +1627,7 @@ class Describe_SortRowsByMarginalHelper:
             (MARGINAL.SCALE_MEDIAN, "rows_scale_median"),
         ),
     )
-    def it_provides_the_marginal_to_help(
+    def test_it_provides_the_marginal_to_help(
         self,
         second_order_measures_,
         marginal,
@@ -1642,7 +1642,7 @@ class Describe_SortRowsByMarginalHelper:
 
         assert order_helper._marginal == "foo"
 
-    def but_it_raises_on_unknown_marginal(
+    def test_but_it_raises_on_unknown_marginal(
         self, second_order_measures_, _order_spec_, _order_spec_prop_
     ):
         _order_spec_.marginal = "bar"
@@ -1654,7 +1654,7 @@ class Describe_SortRowsByMarginalHelper:
 
         assert str(e.value) == "sort-by-value for marginal 'bar' is not yet supported"
 
-    def it_provides_the_subtotal_values_to_help(self, _marginal_prop_, marginal_):
+    def test_it_provides_the_subtotal_values_to_help(self, _marginal_prop_, marginal_):
         marginal_.blocks = ["a", "b"]
         _marginal_prop_.return_value = marginal_
 

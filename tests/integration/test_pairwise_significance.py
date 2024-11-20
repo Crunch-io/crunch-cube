@@ -12,7 +12,7 @@ from ..fixtures import CR, OL, SM, NA
 from ..util import load_python_expression
 
 
-class Describe_Slice:
+class Test_Slice:
     """Integration-test suite for pairwise-t aspects of _Slice object."""
 
     @pytest.mark.parametrize(
@@ -36,7 +36,7 @@ class Describe_Slice:
             (CR.MR_X_MR, {}, "mr-x-mr-pw-idxs"),
         ),
     )
-    def it_provides_pairwise_indices(self, fixture, pw_indices_dict, expectation):
+    def test_it_provides_pairwise_indices(self, fixture, pw_indices_dict, expectation):
         slice_ = _Slice(
             Cube(fixture),
             slice_idx=0,
@@ -61,7 +61,9 @@ class Describe_Slice:
             (CR.MR_X_CAT, {"alpha": [0.175, 0.01]}, "mr-x-cat-pw-idxs-alt"),
         ),
     )
-    def it_provides_pairwise_indices_alt(self, fixture, pw_indices_dict, expectation):
+    def test_it_provides_pairwise_indices_alt(
+        self, fixture, pw_indices_dict, expectation
+    ):
         """Provides indicies meeting secondary sig-test threshold, when specified."""
         slice_ = _Slice(
             Cube(fixture),
@@ -87,7 +89,9 @@ class Describe_Slice:
             (CR.CAT_X_MR_2, "cat-x-mr-scale-mean-pw-idxs"),
         ),
     )
-    def it_provides_columns_scale_mean_pairwise_indices(self, fixture, expectation):
+    def test_it_provides_columns_scale_mean_pairwise_indices(
+        self, fixture, expectation
+    ):
         """Provides column-indicies meeting sig-test threshold on column scale means."""
         slice_ = _Slice(
             Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
@@ -112,7 +116,9 @@ class Describe_Slice:
             (CR.CAT_X_MR_2, "cat-x-mr-scale-mean-pw-idxs-alt"),
         ),
     )
-    def it_provides_columns_scale_mean_pairwise_indices_alt(self, fixture, expectation):
+    def test_it_provides_columns_scale_mean_pairwise_indices_alt(
+        self, fixture, expectation
+    ):
         """Provides col idxs meeting secondary sig-test threshold on scale mean."""
         slice_ = _Slice(
             Cube(fixture),
