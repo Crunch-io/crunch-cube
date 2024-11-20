@@ -93,7 +93,7 @@ html_context = {
     "display_github": True,
     "github_user": "Crunch-io",
     "github_repo": "crunch-cube",
-    "github_version": "master/docs/",
+    "github_version": "master/docs/source/",
     "author": "crunch-cube Authors",
     "date": datetime.date.today().strftime("%d/%m/%y"),
 }
