@@ -1,5 +1,10 @@
 # crunch-cube
 
+![Build Status](https://github.com/Crunch-io/crunch-cube/workflows/CI/badge.svg?branch=master)
+![Coverage Status](https://codecov.io/gh/Crunch-io/crunch-cube/branch/master/graph/badge.svg?token=C6auKOj8tZ)
+![Documentation Status](https://readthedocs.org/projects/crunch-cube/badge/?version=latest)
+---
+
 Open Source Python implementation of the API for working with CrunchCubes
 
 ## Introduction
@@ -100,11 +105,6 @@ Calculates percentages of single variable elements to the whole sample size.
 The detailed description can be found
 [here](http://crunch-cube.readthedocs.io/en/latest/cr.cube.html#cr-cube-crunch-cube-module).
 
----
-
-![Build Status](https://github.com/Crunch-io/crunch-cube/workflows/CI/badge.svg?branch=master)
-![Coverage Status](https://codecov.io/gh/Crunch-io/crunch-cube/branch/master/graph/badge.svg?token=C6auKOj8tZ)
-![Documentation Status](https://readthedocs.org/projects/crunch-cube/badge/?version=latest)
 ---
 
 ## Changes
