@@ -19,6 +19,10 @@
 import datetime
 import os
 import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path("..", "..", "src").resolve()))
 
 
 def ascii_bytes_from(path, *paths):
