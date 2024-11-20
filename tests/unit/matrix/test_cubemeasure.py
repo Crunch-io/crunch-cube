@@ -1475,7 +1475,7 @@ class Test_BaseCubeStdDev:
         CubeStdDevCls_.assert_called_once_with(dimensions_, [3, 4])
         assert cube_stddev is cube_stddev_
 
-    def test_but_it_raises_a_value_error_when_cube_result_does_not_contain_stddev_measure(
+    def test_it_raises_a_value_error_when_cube_result_does_not_contain_stddev_measure(
         self, cube_
     ):
         cube_.stddev = None

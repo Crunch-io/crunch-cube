@@ -1353,7 +1353,7 @@ class Test_RowUnweightedBases:
         )
         assert subtotal_columns.tolist() == [[7, 7], [4, 4]]
 
-    def test_but_it_returns_empty_array_of_right_shape_when_there_are_no_column_subtotals(
+    def test_it_returns_empty_array_of_right_shape_when_there_are_no_column_subtotals(
         self, _base_values_prop_, dimensions_, SumSubtotals_
     ):
         """Empty shape must be (nrows, 0) to compose properly in `np.block()` call."""
@@ -1496,7 +1496,7 @@ class Test_RowWeightedBases:
         ]
         assert subtotal_columns.tolist() == [[7.7, 7.7], [4.4, 4.4]]
 
-    def test_but_it_returns_empty_array_of_right_shape_when_there_are_no_column_subtotals(
+    def test_it_returns_empty_array_of_right_shape_when_there_are_no_column_subtotals(
         self, _base_values_prop_, dimensions_, SumSubtotals_
     ):
         """Empty shape must be (nrows, 0) to compose properly in `np.block()` call."""

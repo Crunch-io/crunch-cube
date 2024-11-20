@@ -1496,7 +1496,7 @@ class Test_Subtotals:
             ),
         ),
     )
-    def test_it_removes_invalid_when_iterating_the_valid_subtotal_insertion_dicts_to_help(
+    def test_it_removes_invalid_when_iterating_the_valid_subtotal_insertion_dicts(
         self, _element_ids_prop_, insertion_dicts, element_ids, expected_value
     ):
         _element_ids_prop_.return_value = element_ids

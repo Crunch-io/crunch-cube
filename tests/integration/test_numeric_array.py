@@ -469,7 +469,7 @@ class TestNumericArrays:
         # unweighted valid counts
         assert strand.unweighted_counts.tolist() == [6.0, 6.0]
 
-    def test_it_provides_weighted_and_unweighted_valid_counts_for_num_arr_no_grouping_wgtd(
+    def test_it_provides_wgtd_and_unwgtd_valid_counts_for_num_arr_no_grouping_wgtd(
         self,
     ):
         strand = Cube(NA.NUM_ARR_MEANS_NO_GROUPING_WEIGHTED).partitions[0]
