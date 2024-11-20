@@ -125,38 +125,4 @@ The detailed description can be found
 
 - Median measure
 
-### 3.0.42
-
-- Inflate cubes that are single column filters
-
-### 3.0.41
-
-- Remove `deepcopy` from dimension module due to a performance issue
-
-### 3.0.40
-
-- Fix bug with weighted vs unweighted in pairwise effect calculation
-
-### 3.0.39
-
-- Remove cube response deepcopy due to a performance issue
-
-### 3.0.38
-
-- Improve calculation of DoF for pairwise comparison
-- Use effective counts as column bases for DoF
-
-### 3.0.37
-
-- Add squared counts as a cube measure
-- Enable calculating pairwise stats with effective denominator
-
-### 3.0.36
-
-- Fix bug in pairwise sig values for means.
-
-### 3.0.35
-
-- Fix bug where categorical dimension would sometimes be interpreted as `MR_CATS`.
-
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
