@@ -80,30 +80,9 @@ simple as:
     np.array([[1169, 547],
               [1473, 1261]])
 
-## API
+## Complete API Doc
 
-### `as_array`
-
-Tabular, or matrix, representation of the _cube_. The detailed description can
-be found
-[here](http://crunch-cube.readthedocs.io/en/latest/cr.cube.html#cr-cube-crunch-cube-module).
-
-### `margin`
-
-Calculates margins of the _cube_. The detailed description can be found
-[here](http://crunch-cube.readthedocs.io/en/latest/cr.cube.html#cr-cube-crunch-cube-module).
-
-### `proportions`
-
-Calculates proportions of single variable elements to the whole sample size.
-The detailed description can be found
-[here](http://crunch-cube.readthedocs.io/en/latest/cr.cube.html#cr-cube-crunch-cube-module).
-
-### `percentages`
-
-Calculates percentages of single variable elements to the whole sample size.
-The detailed description can be found
-[here](http://crunch-cube.readthedocs.io/en/latest/cr.cube.html#cr-cube-crunch-cube-module).
+Please visit https://crunch-cube.readthedocs.io/en/latest for the API reference.
 
 ---
 
