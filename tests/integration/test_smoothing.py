@@ -11,7 +11,7 @@ from ..fixtures import CR, NA
 from ..util import load_python_expression
 
 
-class DescribeSliceSmoothing:
+class TestSliceSmoothing:
     """Integration-test suite for _Slice.evaluate() method."""
 
     @pytest.mark.parametrize(
@@ -31,7 +31,7 @@ class DescribeSliceSmoothing:
             (CR.DATETIME_X_CAT_DATE, 3, "datetime-x-cat-date-smoothed-col-idx-w3"),
         ),
     )
-    def it_provides_smoothed_col_index_for_compatible_cubes(
+    def test_it_provides_smoothed_col_index_for_compatible_cubes(
         self, fixture, window, expectation
     ):
         transforms = {
@@ -65,7 +65,7 @@ class DescribeSliceSmoothing:
             (CR.DATETIME_X_CAT_DATE, 3, "datetime-x-cat-date-smoothed-col-pct-w3"),
         ),
     )
-    def it_provides_smoothed_col_percent_for_compatible_cubes(
+    def test_it_provides_smoothed_col_percent_for_compatible_cubes(
         self, fixture, window, expectation
     ):
         transforms = {
@@ -93,7 +93,7 @@ class DescribeSliceSmoothing:
             ),
         ),
     )
-    def it_provides_smoothed_scale_means_for_compatible_cubes(
+    def test_it_provides_smoothed_scale_means_for_compatible_cubes(
         self, fixture, expectation
     ):
         transforms = {
@@ -110,7 +110,7 @@ class DescribeSliceSmoothing:
             slice_.smoothed_columns_scale_mean, load_python_expression(expectation)
         )
 
-    def it_provides_smoothed_means_for_numeric_array(self):
+    def test_it_provides_smoothed_means_for_numeric_array(self):
         transforms = {
             "columns_dimension": {
                 "smoother": {
@@ -132,7 +132,9 @@ class DescribeSliceSmoothing:
         "fixture",
         (CR.CAT_X_MR, CR.MR_X_MR, CR.MR_X_CA_CAT_X_CA_SUBVAR, CR.CAT_DATE_X_CAT),
     )
-    def it_warns_and_does_not_smooth_when_dimension_is_not_smoothable(self, fixture):
+    def test_it_warns_and_does_not_smooth_when_dimension_is_not_smoothable(
+        self, fixture
+    ):
         transforms = {
             "columns_dimension": {
                 "smoother": {
@@ -174,7 +176,7 @@ class DescribeSliceSmoothing:
             ),
         ),
     )
-    def it_warns_and_does_not_smooth_when_window_is_invalid(
+    def test_it_warns_and_does_not_smooth_when_window_is_invalid(
         self, fixture, smoothed_prop_name, prop_name, periods, window
     ):
         transforms = {
@@ -198,7 +200,7 @@ class DescribeSliceSmoothing:
 
         np.testing.assert_array_almost_equal(smoothed_values, base_values)
 
-    def it_uses_default_smoothing_if_smoother_is_not_specified(self):
+    def test_it_uses_default_smoothing_if_smoother_is_not_specified(self):
         slice_ = Cube(CR.CAT_X_CAT_DATE).partitions[0]
 
         assert slice_.smoothed_column_percentages == pytest.approx(
@@ -215,10 +217,10 @@ class DescribeSliceSmoothing:
         )
 
 
-class DescribeStrandMeansSmoothing:
+class TestStrandMeansSmoothing:
     """Integration-test suite for _Strand method."""
 
-    def it_provides_smoothed_means_cat_date(self):
+    def test_it_provides_smoothed_means_cat_date(self):
         transforms = {
             "rows_dimension": {
                 "smoother": {"function": "one_sided_moving_avg", "window": 3}
@@ -231,7 +233,7 @@ class DescribeStrandMeansSmoothing:
             [np.nan, np.nan, 2.65670765025029, 2.5774816240050358],
         )
 
-    def it_does_not_smooth_means_mr_mean_filt_wgtd(self):
+    def test_it_does_not_smooth_means_mr_mean_filt_wgtd(self):
         transforms = {
             "rows_dimension": {
                 "smoother": {"function": "one_sided_moving_avg", "window": 3}

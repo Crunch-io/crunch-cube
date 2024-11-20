@@ -18,10 +18,10 @@ from ..util import load_python_expression
 NA = np.nan
 
 
-class Describe_Slice:
+class Test_Slice:
     """Integration-test suite for _Slice object."""
 
-    def it_provides_values_for_cat_x_cat(self):
+    def test_it_provides_values_for_cat_x_cat(self):
         slice_ = Cube(CR.CAT_X_CAT, population=9001).partitions[0]
 
         assert slice_.column_aliases.tolist() == ["", ""]
@@ -165,7 +165,7 @@ class Describe_Slice:
             "Available measures: [<CUBE_MEASURE.COUNT: 'count'>]"
         )
 
-    def it_provides_values_for_cat_hs_mt_x_cat_hs_mt(self):
+    def test_it_provides_values_for_cat_hs_mt_x_cat_hs_mt(self):
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, population=1000).partitions[0]
 
         np.testing.assert_array_equal(
@@ -334,7 +334,7 @@ class Describe_Slice:
             ],
         )
 
-    def it_provides_values_for_cat_x_datetime(self):
+    def test_it_provides_values_for_cat_x_datetime(self):
         slice_ = Cube(CR.CAT_X_DATETIME).partitions[0]
 
         assert slice_.column_labels.tolist() == [
@@ -399,7 +399,9 @@ class Describe_Slice:
             ),
         ),
     )
-    def and_it_accepts_transforms_for_datetimes_in_both_formats(self, elements, order):
+    def test_and_it_accepts_transforms_for_datetimes_in_both_formats(
+        self, elements, order
+    ):
         transforms = {"columns_dimension": {"elements": elements, "order": order}}
         slice_ = Cube(CR.CAT_X_DATETIME, transforms=transforms).partitions[0]
         assert slice_.column_labels.tolist() == [
@@ -408,7 +410,7 @@ class Describe_Slice:
             "2000-01-01",
         ]
 
-    def it_provides_values_for_cat_hs_x_mr(self):
+    def test_it_provides_values_for_cat_hs_x_mr(self):
         slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
 
         np.testing.assert_almost_equal(
@@ -434,7 +436,7 @@ class Describe_Slice:
             slice_.pvals, load_python_expression("cat-hs-x-mr-pvals")
         )
 
-    def it_provides_values_for_mean_cat_x_cat_hs(self):
+    def test_it_provides_values_for_mean_cat_x_cat_hs(self):
         slice_ = Cube(CR.MEANS_CAT_X_CAT_HS).partitions[0]
 
         # This fixture has both cube_counts and cube_means measure, for this reason
@@ -447,7 +449,7 @@ class Describe_Slice:
         )
         assert slice_.rows_margin.tolist() == [1500.0]
 
-    def it_provides_values_for_median_cat_x_cat_hs(self):
+    def test_it_provides_values_for_median_cat_x_cat_hs(self):
         slice_ = Cube(CR.MEDIAN_CAT_X_CAT_HS).partitions[0]
 
         # This fixture has both cube_counts and cube_means measure, for this reason
@@ -460,7 +462,7 @@ class Describe_Slice:
         )
         assert slice_.rows_margin.tolist() == [1500.0]
 
-    def it_provides_values_for_mr_x_mr_means(self):
+    def test_it_provides_values_for_mr_x_mr_means(self):
         slice_ = Cube(CR.MR_X_MR_MEANS).partitions[0]
 
         assert slice_.counts == pytest.approx(
@@ -487,7 +489,7 @@ class Describe_Slice:
             "Available measures: [<CUBE_MEASURE.COUNT: 'count'>, <CUBE_MEASURE.MEAN: 'mean'>]"  # noqa
         )
 
-    def it_provides_values_for_mr_x_cat_hs(self):
+    def test_it_provides_values_for_mr_x_cat_hs(self):
         slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
 
         np.testing.assert_almost_equal(
@@ -521,7 +523,7 @@ class Describe_Slice:
             (MRI.MR_X_MR, None, (0,), (0,), (), ()),
         ),
     )
-    def it_provides_derived_indexes_for_multiple_responses_with_insertions(
+    def test_it_provides_derived_indexes_for_multiple_responses_with_insertions(
         self, fixture, dim_key, derived_rows, derived_cols, inserted_rows, inserted_cols
     ):
         transforms = (
@@ -548,7 +550,7 @@ class Describe_Slice:
         assert slice_.inserted_row_idxs == inserted_rows
         assert slice_.inserted_column_idxs == inserted_cols
 
-    def it_provides_derived_indexes_for_mr_x_cat_with_transforms(self):
+    def test_it_provides_derived_indexes_for_mr_x_cat_with_transforms(self):
         transforms = {
             "rows_dimension": {
                 "elements": {"2": {"hide": True}},
@@ -574,7 +576,7 @@ class Describe_Slice:
         assert slice_.inserted_row_idxs == ()
         assert slice_.inserted_column_idxs == (3,)
 
-    def it_provides_derived_indexes_for_cat_x_mr_with_transforms(self):
+    def test_it_provides_derived_indexes_for_cat_x_mr_with_transforms(self):
         transforms = {
             "rows_dimension": {
                 "insertions": [
@@ -600,7 +602,7 @@ class Describe_Slice:
         assert slice_.inserted_row_idxs == (3,)
         assert slice_.inserted_column_idxs == ()
 
-    def it_knows_the_row_order_and_the_payload_order(self):
+    def test_it_knows_the_row_order_and_the_payload_order(self):
         transforms = {
             "rows_dimension": {
                 "order": {"type": "explicit", "element_ids": [1, 4, 2, 3]},
@@ -611,7 +613,7 @@ class Describe_Slice:
         assert slice_.payload_order == (0, 1, 2, 3)
         assert slice_.row_order().tolist() == [0, 3, 1, 2]
 
-    def it_knows_bogus_ids_row_order(self):
+    def test_it_knows_bogus_ids_row_order(self):
         transforms = {
             "rows_dimension": {
                 "insertions": [
@@ -640,7 +642,7 @@ class Describe_Slice:
             "4",
         )
 
-    def it_provides_derived_indexes_for_mr_x_mr_with_transforms(self):
+    def test_it_provides_derived_indexes_for_mr_x_mr_with_transforms(self):
         transforms = {
             "rows_dimension": {
                 "order": {"type": "explicit", "element_ids": [2, 3]},
@@ -659,7 +661,7 @@ class Describe_Slice:
         assert slice_.inserted_row_idxs == ()
         assert slice_.inserted_column_idxs == ()
 
-    def it_provides_empty_derived_indexes_for_categorical(self):
+    def test_it_provides_empty_derived_indexes_for_categorical(self):
         transforms = {
             "rows_dimension": {
                 "insertions": [
@@ -688,7 +690,7 @@ class Describe_Slice:
         assert slice_.derived_row_idxs == ()
         assert slice_.inserted_row_idxs == (0, 2, 4)
 
-    def it_knows_the_rows_base_cat_x_hs_mr(self):
+    def test_it_knows_the_rows_base_cat_x_hs_mr(self):
         slice_ = slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
 
         rows_base = slice_.rows_base
@@ -704,14 +706,14 @@ class Describe_Slice:
             [126.0, 161.0, 192.0, 380.0, 375.0],
         ]
 
-    def it_knows_the_rows_base_mr_x_cat_hs(self):
+    def test_it_knows_the_rows_base_mr_x_cat_hs(self):
         slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
 
         rows_base = slice_.rows_base
 
         assert rows_base.tolist() == [26.0, 76.0, 118.0, 369.0, 385.0]
 
-    def it_knows_the_rows_base_mr_x_mr(self):
+    def test_it_knows_the_rows_base_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
 
         rows_base = slice_.rows_base
@@ -731,7 +733,7 @@ class Describe_Slice:
             (CR.MR_X_MR, "mr-x-mr-row-proportions"),
         ),
     )
-    def it_knows_the_row_proportions(self, fixture, expectation):
+    def test_it_knows_the_row_proportions(self, fixture, expectation):
         slice_ = _Slice(
             Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
         )
@@ -750,7 +752,7 @@ class Describe_Slice:
             (CR.MR_X_MR, "mr-x-mr-row-margin-proportions"),
         ),
     )
-    def it_knows_the_rows_margin_proportion(self, fixture, expectation):
+    def test_it_knows_the_rows_margin_proportion(self, fixture, expectation):
         slice_ = _Slice(
             Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
         )
@@ -767,7 +769,7 @@ class Describe_Slice:
             (CR.MR_X_MR, "mr-x-mr-column-proportions"),
         ),
     )
-    def it_knows_the_column_proportions(self, fixture, expectation):
+    def test_it_knows_the_column_proportions(self, fixture, expectation):
         slice_ = _Slice(
             Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
         )
@@ -786,7 +788,7 @@ class Describe_Slice:
             (CR.MR_X_MR, "mr-x-mr-columns-margin-proportions"),
         ),
     )
-    def it_knows_the_column_margin_proportions(self, fixture, expectation):
+    def test_it_knows_the_column_margin_proportions(self, fixture, expectation):
         slice_ = _Slice(
             Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
         )
@@ -795,7 +797,7 @@ class Describe_Slice:
 
         assert columns_margin_proportion.tolist() == load_python_expression(expectation)
 
-    def it_knows_the_margins_of_mr_x_mr(self):
+    def test_it_knows_the_margins_of_mr_x_mr(self):
         slice_ = _Slice(
             Cube(CR.MR_X_MR), slice_idx=0, transforms={}, population=None, mask_size=0
         )
@@ -865,7 +867,7 @@ class Describe_Slice:
             ),
         ),
     )
-    def it_respects_explicit_order_transform_for_dim_types(
+    def test_it_respects_explicit_order_transform_for_dim_types(
         self, fixture, row_order, col_order, expectation
     ):
         transforms = {
@@ -895,7 +897,7 @@ class Describe_Slice:
             ("zscores", "cat-x-cat-zscores-explicit-order"),
         ),
     )
-    def and_it_respects_explicit_order_transform_for_measures(
+    def test_and_it_respects_explicit_order_transform_for_measures(
         self, measure_propname, expectation
     ):
         transforms = {
@@ -919,7 +921,7 @@ class Describe_Slice:
         expected = load_python_expression(expectation)
         np.testing.assert_almost_equal(actual, expected)
 
-    def it_can_sort_by_column_index(self):
+    def test_it_can_sort_by_column_index(self):
         """Responds to order:opposing_element sort-by-column-index."""
         transforms = {
             "rows_dimension": {
@@ -947,7 +949,7 @@ class Describe_Slice:
         actual = np.round(slice_.column_index, 1).tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
-    def it_can_sort_by_column_percent(self):
+    def test_it_can_sort_by_column_percent(self):
         """Responds to order:opposing_element sort-by-value.
 
         So far, this is limited to column-percents (column-proportions) measure, but
@@ -979,7 +981,7 @@ class Describe_Slice:
         actual = np.round(slice_.column_percentages, 1).tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
-    def it_can_sort_by_labels(self):
+    def test_it_can_sort_by_labels(self):
         """Responds to order:label sort-by-label."""
         transforms = {
             "rows_dimension": {
@@ -997,7 +999,7 @@ class Describe_Slice:
         actual = slice_.row_labels.tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
-    def it_can_sort_by_marginal_with_nan_in_body(self):
+    def test_it_can_sort_by_marginal_with_nan_in_body(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {
@@ -1014,7 +1016,7 @@ class Describe_Slice:
             [2.45356177, 2.11838791, 2.0, 1.97, 1.74213625, np.nan], nan_ok=True
         )
 
-    def it_can_fix_order_of_subvars_identified_by_bogus_id(self):
+    def test_it_can_fix_order_of_subvars_identified_by_bogus_id(self):
         transforms = {
             "rows_dimension": {
                 "order": {
@@ -1038,7 +1040,7 @@ class Describe_Slice:
             "A_B",  # --- alias
         ),
     )
-    def it_can_sort_by_value_for_mr_derived_insertions(self, id):
+    def test_it_can_sort_by_value_for_mr_derived_insertions(self, id):
         # --- Ensure that payload order is how we expect it before sorting
         payload_order_slice_ = Cube(MRI.CAT_X_MR).partitions[0]
         assert payload_order_slice_.counts.tolist() == [
@@ -1064,7 +1066,7 @@ class Describe_Slice:
         assert slice_.derived_column_idxs == (0,)
         assert slice_.counts[:, 0].tolist() == [14.0, 19.2, 23.2, 32.0, 37.6]
 
-    def it_recalculates_anchor_for_mr_insertion_with_explicit_order(self):
+    def test_it_recalculates_anchor_for_mr_insertion_with_explicit_order(self):
         transforms = {
             "columns_dimension": {
                 "order": {
@@ -1092,7 +1094,7 @@ class Describe_Slice:
             ("population_counts_moe", "cat-x-cat-population-counts-moe"),
         ),
     )
-    def but_it_fallback_to_payload_order_when_sort_by_value_is_not_supported(
+    def test_but_it_fallback_to_payload_order_when_sort_by_value_is_not_supported(
         self, measure, expectation
     ):
         transforms = {
@@ -1115,7 +1117,7 @@ class Describe_Slice:
 
         assert measure == pytest.approx(np.array(load_python_expression(expectation)))
 
-    def it_can_recover_from_sort_by_value_failure_invalid_id(self):
+    def test_it_can_recover_from_sort_by_value_failure_invalid_id(self):
         """Falls back to payload order when opposing element id does not exist."""
         transforms = {
             "rows_dimension": {
@@ -1139,7 +1141,7 @@ class Describe_Slice:
             [17.0, 12.0, 28.0, 11.0],
         ]
 
-    def it_can_recover_from_sort_by_value_invalid_sort_type(self):
+    def test_it_can_recover_from_sort_by_value_invalid_sort_type(self):
         """Falls back to payload order when measure is unavailable."""
         transforms = {
             "rows_dimension": {
@@ -1158,7 +1160,7 @@ class Describe_Slice:
             [17.0, 12.0, 28.0, 11.0],
         ]
 
-    def it_can_sort_by_rows_scale_mean(self):
+    def test_it_can_sort_by_rows_scale_mean(self):
         """Responds to order of marginal sort-by-value."""
         transforms = {
             "rows_dimension": {
@@ -1185,7 +1187,7 @@ class Describe_Slice:
             [46.0, 21.0, 3.0, 0.0, 7.0],
         ]
 
-    def it_can_sort_by_rows_margin(self):
+    def test_it_can_sort_by_rows_margin(self):
         """Responds to order of marginal sort-by-value."""
         transforms = {
             "rows_dimension": {
@@ -1202,7 +1204,7 @@ class Describe_Slice:
         # --- scale means should be in order
         assert slice_.rows_margin.tolist() == pytest.approx([74.0, 68.0, 67.0, 57.0])
 
-    def it_can_sort_by_rows_margin_proportion(self):
+    def test_it_can_sort_by_rows_margin_proportion(self):
         """Responds to order of marginal sort-by-value."""
         transforms = {
             "rows_dimension": {
@@ -1221,7 +1223,7 @@ class Describe_Slice:
             [0.2142857, 0.2518796, 0.2556391, 0.2781954]
         )
 
-    def it_can_sort_by_rows_base(self):
+    def test_it_can_sort_by_rows_base(self):
         """Responds to order of marginal sort-by-value."""
         transforms = {
             "rows_dimension": {
@@ -1238,7 +1240,9 @@ class Describe_Slice:
         # --- base should be in order
         assert slice_.rows_base.tolist() == pytest.approx([57.0, 67.0, 68.0, 74.0])
 
-    def but_it_falls_back_to_payload_order_when_rows_scale_means_is_unavailable(self):
+    def test_but_it_falls_back_to_payload_order_when_rows_scale_means_is_unavailable(
+        self,
+    ):
         """Falls back to payload order when measure is unavailable."""
         transforms = {
             "rows_dimension": {
@@ -1262,7 +1266,7 @@ class Describe_Slice:
             [17.0, 12.0, 28.0, 11.0],
         ]
 
-    def it_fallback_to_payload_order_when_measure_is_not_a_valid_marginal(self):
+    def test_it_fallback_to_payload_order_when_measure_is_not_a_valid_marginal(self):
         transforms = {
             "rows_dimension": {
                 "order": {
@@ -1297,7 +1301,7 @@ class Describe_Slice:
             [247.0, 80.0, 19.0, 4.0, 26.0],
         ]
 
-    def it_ignores_hidden_subtotals(self):
+    def test_it_ignores_hidden_subtotals(self):
         """A subtotal with `"hide": True` does not appear.
 
         This behavior is added in the "interim", insertion-has-no-id state to allow
@@ -1343,7 +1347,7 @@ class Describe_Slice:
             [[14, 14, 13, 16], [22, 14, 19, 19], [14, 16, 19, 18], [17, 12, 28, 11]],
         )
 
-    def it_ignores_hidden_mr_insertions(self):
+    def test_it_ignores_hidden_mr_insertions(self):
         """A subtotal with `"hide": True` does not appear.
 
         This behavior is added in the "interim", insertion-has-no-id state to allow
@@ -1387,7 +1391,7 @@ class Describe_Slice:
             )
         )
 
-    def it_renders_mr_insertions_on_scorecards(self):
+    def test_it_renders_mr_insertions_on_scorecards(self):
         slice_ = _Slice(Cube(MRI.SCORECARD), 0, None, None, 0)
         assert slice_.counts == pytest.approx(
             np.array(
@@ -1403,7 +1407,7 @@ class Describe_Slice:
             )
         )
 
-    def it_does_not_break_when_hiding_mr_insertion_that_does_not_exist(self):
+    def test_it_does_not_break_when_hiding_mr_insertion_that_does_not_exist(self):
         # --- Though it doesn't actually hide anything
         transforms = {
             "rows_dimension": {
@@ -1440,7 +1444,7 @@ class Describe_Slice:
             )
         )
 
-    def it_renders_scorecard_transforms(self):
+    def test_it_renders_scorecard_transforms(self):
         transforms = {
             "rows_dimension": {
                 "elements": {
@@ -1460,7 +1464,7 @@ class Describe_Slice:
         assert slice_.row_labels.tolist() == ["CCC", "RENAMED AAA"]
         assert slice_.column_labels.tolist() == ["RENAMED Simple MR2", "Simple MR1"]
 
-    def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
+    def test_it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
         """Subtotal anchors follow re-ordered rows.
 
         The key fixture characteristic is that an ordering transform is combined with
@@ -1549,7 +1553,7 @@ class Describe_Slice:
             ],
         )
 
-    def it_provides_same_proportions_without_explicit_order(self):
+    def test_it_provides_same_proportions_without_explicit_order(self):
         transforms = TR.TEST_DASHBOARD_TRANSFORM_SINGLE_EL_VISIBLE
         slice_ = Cube(CR.TEST_DASHBOARD_FIXTURE, transforms=transforms).partitions[0]
 
@@ -1575,16 +1579,16 @@ class Describe_Slice:
             slice_.rows_base, slice_wo_explicit_order_.rows_base
         )
 
-    def it_knows_when_it_is_empty(self):
+    def test_it_knows_when_it_is_empty(self):
         assert Cube(CR.OM_SGP8334215_VN_2019_SEP_19).partitions[0].is_empty is True
 
-    def it_provides_unpruned_table_margin(self):
+    def test_it_provides_unpruned_table_margin(self):
         slice_ = _Slice(Cube(CR.MR_X_CAT_HS_MT), 0, None, None, 0)
         assert slice_.table_base_range.tolist() == [165, 476]
 
         assert slice_.table_margin_range == pytest.approx([176.3655518, 471.9317685])
 
-    def it_prunes_cat_x_cat_with_hs(self):
+    def test_it_prunes_cat_x_cat_with_hs(self):
         # Pruned - without insertions
         transforms = {
             "rows_dimension": {"insertions": {}, "prune": True},
@@ -1660,12 +1664,12 @@ class Describe_Slice:
         )
         np.testing.assert_equal(slice_.unweighted_counts, expected)
 
-    def it_accommodates_an_all_missing_element_rows_dimension(self):
+    def test_it_accommodates_an_all_missing_element_rows_dimension(self):
         slice_ = _Slice(Cube(CR.CAT_X_CAT_ALL_MISSING_ROW_ELEMENTS), 0, None, None, 0)
         row_proportions = slice_.row_proportions
         np.testing.assert_almost_equal(row_proportions, np.array([]).reshape((0, 2)))
 
-    def it_knows_means_with_subtotals_on_cat_x_cat(self):
+    def test_it_knows_means_with_subtotals_on_cat_x_cat(self):
         slice_ = _Slice(Cube(CR.CAT_X_CAT_MEAN_SUBTOT), 0, None, None, 0)
 
         means = slice_.means
@@ -1674,12 +1678,12 @@ class Describe_Slice:
             means, np.array([[38.3333333, np.nan, 65.0, 55.0, 34.0]])
         )
 
-    def it_knows_its_selected_categories(self):
+    def test_it_knows_its_selected_categories(self):
         slice_ = Cube(CR.MR_X_MR_SELECTED_CATEGORIES).partitions[0]
 
         assert slice_.selected_category_labels == ("Very Favorable",)
 
-    def it_provides_sum_measure_for_mr_x_mr(self):
+    def test_it_provides_sum_measure_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR_SUM).partitions[0]
         assert slice_.sums == pytest.approx(
             np.array(
@@ -1691,7 +1695,7 @@ class Describe_Slice:
             )
         )
 
-    def it_provides_stddev_measure_for_cat_x_mr(self):
+    def test_it_provides_stddev_measure_for_cat_x_mr(self):
         slice_ = Cube(CR.CAT_X_MR_STDDEV).partitions[0]
 
         assert slice_.stddev == pytest.approx(
@@ -1705,7 +1709,7 @@ class Describe_Slice:
         )
         assert slice_.table_base.tolist() == [3, 3, 3]
 
-    def it_provides_share_of_sum_measure_for_mr_x_mr(self):
+    def test_it_provides_share_of_sum_measure_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR_SUM).partitions[0]
 
         assert slice_.column_share_sum == pytest.approx(
@@ -1746,7 +1750,9 @@ class Describe_Slice:
             "Available measures: [<CUBE_MEASURE.COUNT: 'count'>, <CUBE_MEASURE.SUM: 'sum'>]"  # noqa
         )
 
-    def it_uses_row_proportions_for_pop_counts_and_moe_when_row_dim_is_cat_date(self):
+    def test_it_uses_row_proportions_for_pop_counts_and_moe_when_row_dim_is_cat_date(
+        self,
+    ):
         slice_ = Cube(CR.CAT_DATE_X_CAT, population=100).partitions[0]
         assert slice_.population_counts == pytest.approx(
             np.array(
@@ -1780,7 +1786,9 @@ class Describe_Slice:
             abs=10e-2,
         )
 
-    def it_uses_column_proportions_for_pop_counts_when_column_dim_is_cat_date(self):
+    def test_it_uses_column_proportions_for_pop_counts_when_column_dim_is_cat_date(
+        self,
+    ):
         slice_ = Cube(CR.CAT_HS_X_CAT_DATE, population=100).partitions[0]
         assert slice_.population_counts == pytest.approx(
             np.array(
@@ -1830,7 +1838,7 @@ class Describe_Slice:
             abs=10e-2,
         )
 
-    def it_uses_rows_proportions_for_ca_subvar_x_ca_cat_population_counts(self):
+    def test_it_uses_rows_proportions_for_ca_subvar_x_ca_cat_population_counts(self):
         slice_ = Cube(CR.SIMPLE_CAT_ARRAY, population=100).partitions[0]
         assert slice_.population_counts == pytest.approx(
             np.array(
@@ -1846,7 +1854,7 @@ class Describe_Slice:
             np.array([100, 100, 100])
         )
 
-    def it_uses_columns_proportions_for_ca_cat_x_ca_subvar_population_counts(self):
+    def test_it_uses_columns_proportions_for_ca_cat_x_ca_subvar_population_counts(self):
         slice_ = Cube(CR.MR_X_CA_CAT_X_CA_SUBVAR, population=100).partitions[0]
         assert slice_.population_counts == pytest.approx(
             np.array(
@@ -1871,7 +1879,7 @@ class Describe_Slice:
             np.array([100, 100, 100, 100, 100, 100, 100, 100, 100, 100])
         )
 
-    def it_has_bases_that_dont_sum_across_ca_subvars(self):
+    def test_it_has_bases_that_dont_sum_across_ca_subvars(self):
         slice_ = Cube(CR.CA_CAT_X_CA_SUBVAR).partitions[0]
         column_bases = [
             [1641.0, 1639.0, 0.0],
@@ -1887,7 +1895,7 @@ class Describe_Slice:
         # --- and row bases are the same as the counts
         assert slice_.row_weighted_bases.tolist() == slice_.counts.tolist()
 
-    def it_has_bases_that_dont_sum_across_ca_subvars_with_insertions(self):
+    def test_it_has_bases_that_dont_sum_across_ca_subvars_with_insertions(self):
         transforms = {
             "rows_dimension": {
                 "insertions": [
@@ -1916,7 +1924,7 @@ class Describe_Slice:
         # --- and row bases are the same as the counts
         assert slice_.row_weighted_bases.tolist() == slice_.counts.tolist()
 
-    def it_uses_squared_weights_for_effect_calculation(self):
+    def test_it_uses_squared_weights_for_effect_calculation(self):
         cube = Cube(CR.SQUARED_WEIGHTS_CAT_X_CAT)
         slice_ = cube.partitions[0]
         np.testing.assert_almost_equal(
@@ -1935,14 +1943,14 @@ class Describe_Slice:
         )
 
 
-class Describe_Strand:
+class Test_Strand:
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
 
-    def it_uses_correct_proportions_for_pop_counts_when_cat_date(self):
+    def test_it_uses_correct_proportions_for_pop_counts_when_cat_date(self):
         strand_ = Cube(CR.CAT_DATE, population=100).partitions[0]
         assert strand_.population_counts.tolist() == [100] * 9
 
-    def it_provides_values_for_ca_as_0th(self):
+    def test_it_provides_values_for_ca_as_0th(self):
         transforms = {
             "columns_dimension": {"insertions": {}},
             "rows_dimension": {"insertions": {}},
@@ -1958,7 +1966,7 @@ class Describe_Strand:
         assert strand.table_name == "Level of in: ATP Men's T"
         assert strand.weighted_bases == pytest.approx([27292.0] * 4)
 
-    def it_provides_values_for_univariate_cat(self):
+    def test_it_provides_values_for_univariate_cat(self):
         strand = Cube(CR.UNIVARIATE_CATEGORICAL, population=1000).partitions[0]
 
         assert strand.counts.tolist() == [10, 5]
@@ -2044,7 +2052,7 @@ class Describe_Strand:
             "Available measures: [<CUBE_MEASURE.COUNT: 'count'>]"
         )
 
-    def it_provides_values_for_univariate_cat_means_hs(self):
+    def test_it_provides_values_for_univariate_cat_means_hs(self):
         strand = Cube(CR.CAT_MEANS_HS).partitions[0]
 
         assert strand.is_empty is False
@@ -2054,7 +2062,7 @@ class Describe_Strand:
         assert strand.title == "Untitled"
         assert strand.unweighted_counts.tolist() == [409, 113, 139, 409, 252]
 
-    def it_provides_values_for_univariate_cat_means_and_counts(self):
+    def test_it_provides_values_for_univariate_cat_means_and_counts(self):
         """The cube_mean and cube_count measures can appear together."""
         # --- prune to avoid NaNs in results and thereby simplify assertions ---
         transforms = {"rows_dimension": {"prune": True}}
@@ -2068,7 +2076,7 @@ class Describe_Strand:
         # --- means cube that also has counts has a table-margin ---
         assert strand.table_margin_range == pytest.approx([1500.961, 1500.961])
 
-    def it_provides_values_for_univariate_datetime(self):
+    def test_it_provides_values_for_univariate_datetime(self):
         strand = Cube(CR.DATE, population=9001).partitions[0]
 
         assert strand.counts.tolist() == [1, 1, 1, 1]
@@ -2085,7 +2093,7 @@ class Describe_Strand:
         )
         assert strand.table_proportions == pytest.approx([0.25, 0.25, 0.25, 0.25])
 
-    def it_provides_values_for_univariate_mr_hs(self):
+    def test_it_provides_values_for_univariate_mr_hs(self):
         # --- subtotals shouldn't be in the MR variable, but there are cases when they
         # --- are present. H&S should be ignored for univariate MR.
         strand = Cube(CR.UNIV_MR_WITH_HS).partitions[0]
@@ -2147,7 +2155,7 @@ class Describe_Strand:
         assert strand.unweighted_bases.tolist() == [33358] * 9
         assert strand.weighted_bases == pytest.approx([33364.08] * 9)
 
-    def it_provides_values_for_univariate_numeric(self):
+    def test_it_provides_values_for_univariate_numeric(self):
         strand = Cube(CR.NUM, population=9001).partitions[0]
 
         assert strand.counts.tolist() == [885, 105, 10]
@@ -2169,13 +2177,13 @@ class Describe_Strand:
         assert strand.table_proportions == pytest.approx([0.885, 0.105, 0.010])
         assert strand.weighted_bases == pytest.approx([1000.0] * 3)
 
-    def it_provides_values_for_univariate_numeric_binned(self):
+    def test_it_provides_values_for_univariate_numeric_binned(self):
         strand = Cube(
             CR.NUM_BINNED, transforms={"rows_dimension": {"prune": True}}
         ).partitions[0]
         assert strand.counts == pytest.approx([118504.4, 155261.3, 182924.0])
 
-    def it_provides_values_for_univariate_text(self):
+    def test_it_provides_values_for_univariate_text(self):
         strand = Cube(CR.TEXT, population=9001).partitions[0]
 
         assert strand.counts.tolist() == [1, 1, 1, 1, 1, 1]
@@ -2196,7 +2204,7 @@ class Describe_Strand:
             [0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667, 0.1666667],
         )
 
-    def it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
+    def test_it_places_insertions_on_a_reordered_dimension_in_the_right_position(self):
         """Subtotal anchors follow re-ordered rows.
 
         The key fixture characteristic is that an ordering transform is combined with
@@ -2241,7 +2249,7 @@ class Describe_Strand:
         ]
         assert strand.counts.tolist() == [31506, 16275, 3480, 31506, 4262, 15231, 7742]
 
-    def it_knows_the_row_order_and_the_payload_order(self):
+    def test_it_knows_the_row_order_and_the_payload_order(self):
         transforms = {
             "rows_dimension": {
                 "insertions": [
@@ -2260,7 +2268,7 @@ class Describe_Strand:
         assert strand.payload_order == (0, 1, 2, 3, "ins_1")
         assert strand.row_order().tolist() == [1, 2, 3, 0, -1]
 
-    def it_can_sort_by_label(self):
+    def test_it_can_sort_by_label(self):
         transforms = {
             "rows_dimension": {
                 "order": {
@@ -2285,7 +2293,7 @@ class Describe_Strand:
         actual = strand_.row_labels.tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
-    def it_knows_the_bogus_id_row_order(self):
+    def test_it_knows_the_bogus_id_row_order(self):
         strand_ = Cube(CR.CAT_HS_MT).partitions[0]
 
         assert tuple(strand_.row_order(format=ORDER_FORMAT.BOGUS_IDS)) == (
@@ -2298,41 +2306,41 @@ class Describe_Strand:
             "ins_2",
         )
 
-    def it_knows_when_it_is_empty(self):
+    def test_it_knows_when_it_is_empty(self):
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]
         assert strand.is_empty is True
 
-    def it_provides_stddev_measure_for_CAT(self):
+    def test_it_provides_stddev_measure_for_CAT(self):
         strand = Cube(CR.CAT_STDDEV).partitions[0]
 
         assert strand.stddev == pytest.approx([22.898325, 7.778174])
         assert strand.table_base_range.tolist() == [5, 5]
 
-    def it_provides_stddev_measure_for_MR(self):
+    def test_it_provides_stddev_measure_for_MR(self):
         strand = Cube(CR.MR_STDDEV).partitions[0]
 
         assert strand.stddev == pytest.approx([3.22398, 1.23444, 9.23452])
         assert strand.table_base_range.tolist() == [3, 3]
 
-    def it_provides_sum_measure_for_CAT(self):
+    def test_it_provides_sum_measure_for_CAT(self):
         strand = Cube(CR.CAT_SUM).partitions[0]
 
         assert strand.sums == pytest.approx([88.0, 77.0])
         assert strand.table_base_range.tolist() == [5, 5]
 
-    def it_provides_median_measure_for_CAT(self):
+    def test_it_provides_median_measure_for_CAT(self):
         strand = Cube(CR.CAT_MEDIAN).partitions[0]
 
         assert strand.medians == pytest.approx([8.8, 7.445])
         assert strand.table_base_range.tolist() == [5, 5]
 
-    def it_provides_median_measure_for_MR(self):
+    def test_it_provides_median_measure_for_MR(self):
         strand = Cube(CR.MR_MEDIAN).partitions[0]
 
         assert strand.medians == pytest.approx([2.22398, 0.23444, 7.23452])
         assert strand.table_base_range.tolist() == [3, 3]
 
-    def it_provides_sum_measure_for_CAT_HS(self):
+    def test_it_provides_sum_measure_for_CAT_HS(self):
         transforms = {
             "rows_dimension": {
                 "insertions": [
@@ -2350,20 +2358,20 @@ class Describe_Strand:
 
         assert strand.sums == pytest.approx([88.0, 77.0, 165.0])
 
-    def it_provides_sum_measure_for_MR(self):
+    def test_it_provides_sum_measure_for_MR(self):
         strand = Cube(CR.MR_SUM).partitions[0]
 
         assert strand.sums == pytest.approx([3.0, 2.0, 2.0])
         assert strand.table_base_range.tolist() == [3, 3]
 
-    def it_provides_sum_and_mean_measure_for_CAT(self):
+    def test_it_provides_sum_and_mean_measure_for_CAT(self):
         strand = Cube(CR.NUMERIC_MEASURES_X_CAT).partitions[0]
 
         assert strand.counts == pytest.approx([3, 2])
         assert strand.means == pytest.approx([2.66666667, 3.5])
         assert strand.sums == pytest.approx([8, 7])
 
-    def it_provides_share_of_sum_measure_for_CAT(self):
+    def test_it_provides_share_of_sum_measure_for_CAT(self):
         strand = Cube(CR.CAT_SUM).partitions[0]
 
         assert strand.sums == pytest.approx([88.0, 77.0])
@@ -2372,7 +2380,7 @@ class Describe_Strand:
         assert strand.share_sum.tolist() == [0.5333333333333333, 0.4666666666666667]
         assert strand.table_base_range.tolist() == [5, 5]
 
-    def it_provides_share_of_sum_measure_for_MR(self):
+    def test_it_provides_share_of_sum_measure_for_MR(self):
         strand = Cube(CR.MR_SUM).partitions[0]
 
         assert strand.share_sum.tolist() == [
@@ -2382,12 +2390,12 @@ class Describe_Strand:
         ]
         assert strand.table_base_range.tolist() == [3, 3]
 
-    def it_provides_unweighted_valid_counts_for_mr_mean(self):
+    def test_it_provides_unweighted_valid_counts_for_mr_mean(self):
         strand = Cube(CR.MR_MEAN).partitions[0]
 
         assert strand.unweighted_counts.tolist() == [3, 5, 5]
 
-    def it_provides_unweighted_valid_counts_for_mr_mean_weighted(self):
+    def test_it_provides_unweighted_valid_counts_for_mr_mean_weighted(self):
         strand = Cube(CR.MR_MEAN_WEIGHTED).partitions[0]
 
         assert strand.counts.tolist() == [
@@ -2396,7 +2404,7 @@ class Describe_Strand:
             7.3559027778,
         ]
 
-    def it_provides_derived_indexes_for_univariate_mr_with_transforms(self):
+    def test_it_provides_derived_indexes_for_univariate_mr_with_transforms(self):
         transforms = {
             "rows_dimension": {
                 "elements": {"2": {"hide": True}},
@@ -2411,21 +2419,35 @@ class Describe_Strand:
         assert slice_.inserted_row_idxs == ()
 
 
-class Describe_Nub:
+class Test_Nub:
     """Integration-test suite for `cr.cube.cubepart._Nub` object."""
 
-    def it_is_not_empty(self):
+    def test_it_is_not_empty(self):
         cube = Cube(CR.ECON_MEAN_NO_DIMS)
         nub = cube.partitions[0]
         assert nub.is_empty is False
 
-    def it_is_empty(self):
+    def test_it_is_empty(self):
         cube = Cube(CR.ECON_NODATA_NO_DIMS)
         nub = cube.partitions[0]
         assert nub.is_empty is True
 
+    def test_mean_no_dims(self):
+        cube = Cube(CR.ECON_MEAN_NO_DIMS)
+        assert cube.description is None
+        assert cube.name is None
+        assert cube.missing == 0
 
-class Test_Slice:
+        nub = cube.partitions[0]
+
+        np.testing.assert_almost_equal(nub.means, np.array([49.095]))
+        assert nub.ndim == 0
+        np.testing.assert_almost_equal(nub.table_base, np.array([49.095]))
+        np.testing.assert_array_equal(nub.unweighted_count, 1000)
+        assert nub.table_name is None
+
+
+class Test_LegacySlice:
     """Legacy unit tests for _Slice object.
 
     In general, these need to be consolidated into Describe_Slice above, and there are
@@ -3858,21 +3880,3 @@ class Test_Slice:
             [1.89375, 2.7875, 4.68125],
             [2.8416666667, 1.915625, 4.7572916667000005],
         ]
-
-
-class Test_Nub:
-    """Legacy unit-tests for 0D cube."""
-
-    def test_mean_no_dims(self):
-        cube = Cube(CR.ECON_MEAN_NO_DIMS)
-        assert cube.description is None
-        assert cube.name is None
-        assert cube.missing == 0
-
-        nub = cube.partitions[0]
-
-        np.testing.assert_almost_equal(nub.means, np.array([49.095]))
-        assert nub.ndim == 0
-        np.testing.assert_almost_equal(nub.table_base, np.array([49.095]))
-        np.testing.assert_array_equal(nub.unweighted_count, 1000)
-        assert nub.table_name is None

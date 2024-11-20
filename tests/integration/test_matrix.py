@@ -15,10 +15,10 @@ from cr.cube.matrix.cubemeasure import _BaseCubeOverlaps
 from ..fixtures import CR, OL
 
 
-class DescribeAssembler:
+class TestAssembler:
     """Integration-test suite for `cr.cube.matrix.Assembler`."""
 
-    def it_computes_column_proportions_for_cat_x_cat(self):
+    def test_it_computes_column_proportions_for_cat_x_cat(self):
         slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, None, None, 0)
         assert np.round(slice_.column_proportions, 2) == pytest.approx(
             np.array(
@@ -31,7 +31,7 @@ class DescribeAssembler:
             )
         )
 
-    def it_computes_column_unweighted_bases_for_cat_hs_x_cat_hs(self):
+    def test_it_computes_column_unweighted_bases_for_cat_hs_x_cat_hs(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
             slice_idx=0,
@@ -61,7 +61,7 @@ class DescribeAssembler:
             [549, 328, 276, 273, 328],
         ]
 
-    def it_computes_column_unweighted_bases_for_cat_hs_x_mr(self):
+    def test_it_computes_column_unweighted_bases_for_cat_hs_x_mr(self):
         slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
         assert slice_.column_unweighted_bases == pytest.approx(
             np.array(
@@ -78,7 +78,7 @@ class DescribeAssembler:
             )
         )
 
-    def it_computes_column_unweighted_bases_for_mr_x_cat_hs(self):
+    def test_it_computes_column_unweighted_bases_for_mr_x_cat_hs(self):
         slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
         assert slice_.column_unweighted_bases.tolist() == [
             [15, 24, 39, 0, 57, 69, 0, 126],
@@ -88,7 +88,7 @@ class DescribeAssembler:
             [32, 69, 101, 0, 167, 208, 0, 375],
         ]
 
-    def it_computes_column_unweighted_bases_for_mr_x_mr(self):
+    def test_it_computes_column_unweighted_bases_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         assert slice_.column_unweighted_bases.tolist() == [
             [12, 18, 26, 44],
@@ -97,7 +97,7 @@ class DescribeAssembler:
             [12, 29, 34, 61],
         ]
 
-    def it_computes_column_weighted_bases_for_cat_hs_x_cat_hs(self):
+    def test_it_computes_column_weighted_bases_for_cat_hs_x_cat_hs(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
             slice_idx=0,
@@ -127,7 +127,7 @@ class DescribeAssembler:
             [549, 328, 276, 273, 328],
         ]
 
-    def it_computes_column_weighted_bases_for_cat_hs_x_mr(self):
+    def test_it_computes_column_weighted_bases_for_cat_hs_x_mr(self):
         slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
         assert slice_.column_weighted_bases == pytest.approx(
             np.array(
@@ -144,7 +144,7 @@ class DescribeAssembler:
             )
         )
 
-    def it_computes_column_weighted_bases_for_mr_x_cat_hs(self):
+    def test_it_computes_column_weighted_bases_for_mr_x_cat_hs(self):
         slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
         assert slice_.column_weighted_bases == pytest.approx(
             np.array(
@@ -203,7 +203,7 @@ class DescribeAssembler:
             )
         )
 
-    def it_computes_column_weighted_bases_for_mr_x_mr(self):
+    def test_it_computes_column_weighted_bases_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         assert slice_.column_weighted_bases == pytest.approx(
             np.array(
@@ -216,7 +216,7 @@ class DescribeAssembler:
             )
         )
 
-    def it_computes_row_unweighted_bases_for_cat_hs_x_cat_hs(self):
+    def test_it_computes_row_unweighted_bases_for_cat_hs_x_cat_hs(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
             slice_idx=0,
@@ -246,7 +246,7 @@ class DescribeAssembler:
             [575, 575, 575, 575, 575],
         ]
 
-    def it_computes_row_unweighted_bases_for_cat_hs_x_mr_for(self):
+    def test_it_computes_row_unweighted_bases_for_cat_hs_x_mr_for(self):
         slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
         assert slice_.row_unweighted_bases.tolist() == [
             [15, 15, 13, 20, 32],
@@ -259,7 +259,7 @@ class DescribeAssembler:
             [126, 161, 192, 380, 375],
         ]
 
-    def it_computes_row_unweighted_bases_for_mr_x_cat_hs_for(self):
+    def test_it_computes_row_unweighted_bases_for_mr_x_cat_hs_for(self):
         slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
         assert slice_.row_unweighted_bases.tolist() == [
             [26, 26, 26, 26, 26, 26, 26, 26],
@@ -269,7 +269,7 @@ class DescribeAssembler:
             [385, 385, 385, 385, 385, 385, 385, 385],
         ]
 
-    def it_computes_row_unweighted_bases_for_mr_x_mr_for(self):
+    def test_it_computes_row_unweighted_bases_for_mr_x_mr_for(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         assert slice_.row_unweighted_bases.tolist() == [
             [12, 7, 10, 12],
@@ -278,7 +278,7 @@ class DescribeAssembler:
             [44, 45, 53, 61],
         ]
 
-    def it_computes_row_weighted_bases_for_cat_hs_x_cat_hs(self):
+    def test_it_computes_row_weighted_bases_for_cat_hs_x_cat_hs(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
             slice_idx=0,
@@ -308,7 +308,7 @@ class DescribeAssembler:
             [575, 575, 575, 575, 575],
         ]
 
-    def it_computes_row_weighted_bases_for_cat_hs_x_mr(self):
+    def test_it_computes_row_weighted_bases_for_cat_hs_x_mr(self):
         slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
         assert slice_.row_weighted_bases == pytest.approx(
             np.array(
@@ -325,7 +325,7 @@ class DescribeAssembler:
             )
         )
 
-    def it_computes_row_weighted_bases_for_mr_x_cat_hs(self):
+    def test_it_computes_row_weighted_bases_for_mr_x_cat_hs(self):
         slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
         assert slice_.row_weighted_bases == pytest.approx(
             np.array(
@@ -384,7 +384,7 @@ class DescribeAssembler:
             )
         )
 
-    def it_computes_row_weighted_bases_for_mr_x_mr(self):
+    def test_it_computes_row_weighted_bases_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         assert slice_.row_weighted_bases == pytest.approx(
             np.array(
@@ -397,7 +397,7 @@ class DescribeAssembler:
             )
         )
 
-    def it_computes_table_unweighted_bases_for_cat_hs_x_cat_hs(self):
+    def test_it_computes_table_unweighted_bases_for_cat_hs_x_cat_hs(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
             slice_idx=0,
@@ -427,7 +427,7 @@ class DescribeAssembler:
             [877, 877, 877, 877, 877],
         ]
 
-    def it_computes_table_unweighted_bases_for_cat_hs_x_mr(self):
+    def test_it_computes_table_unweighted_bases_for_cat_hs_x_mr(self):
         slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
         assert slice_.table_unweighted_bases.tolist() == [
             [165, 210, 242, 450, 476],
@@ -440,7 +440,7 @@ class DescribeAssembler:
             [165, 210, 242, 450, 476],
         ]
 
-    def it_computes_table_unweighted_bases_for_mr_x_cat_hs(self):
+    def test_it_computes_table_unweighted_bases_for_mr_x_cat_hs(self):
         slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
         assert slice_.table_unweighted_bases.tolist() == [
             [165, 165, 165, 165, 165, 165, 165, 165],
@@ -450,7 +450,7 @@ class DescribeAssembler:
             [476, 476, 476, 476, 476, 476, 476, 476],
         ]
 
-    def it_computes_table_unweighted_bases_for_mr_x_mr(self):
+    def test_it_computes_table_unweighted_bases_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         assert slice_.table_unweighted_bases.tolist() == [
             [68, 43, 51, 68],
@@ -459,7 +459,7 @@ class DescribeAssembler:
             [68, 60, 72, 96],
         ]
 
-    def it_computes_table_weighted_bases_for_cat_hs_x_cat_hs(self):
+    def test_it_computes_table_weighted_bases_for_cat_hs_x_cat_hs(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
             slice_idx=0,
@@ -489,7 +489,7 @@ class DescribeAssembler:
             [877, 877, 877, 877, 877],
         ]
 
-    def it_computes_table_weighted_bases_for_cat_hs_x_mr(self):
+    def test_it_computes_table_weighted_bases_for_cat_hs_x_mr(self):
         slice_ = Cube(CR.CAT_HS_X_MR).partitions[0]
         assert slice_.table_weighted_bases == pytest.approx(
             np.array(
@@ -506,7 +506,7 @@ class DescribeAssembler:
             )
         )
 
-    def it_computes_table_weighted_bases_for_mr_x_cat_hs(self):
+    def test_it_computes_table_weighted_bases_for_mr_x_cat_hs(self):
         slice_ = Cube(CR.MR_X_CAT_HS_MT).partitions[0]
         assert slice_.table_weighted_bases == pytest.approx(
             np.array(
@@ -565,7 +565,7 @@ class DescribeAssembler:
             )
         )
 
-    def it_computes_table_weighted_bases_for_mr_x_mr(self):
+    def test_it_computes_table_weighted_bases_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         assert slice_.table_weighted_bases == pytest.approx(
             np.array(
@@ -578,7 +578,7 @@ class DescribeAssembler:
             )
         )
 
-    def it_computes_unweighted_counts_for_cat_hs_x_cat_hs_hiddens(self):
+    def test_it_computes_unweighted_counts_for_cat_hs_x_cat_hs_hiddens(self):
         """Assembler inserts, hides, prunes, and places in payload order."""
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
@@ -604,7 +604,9 @@ class DescribeAssembler:
     @pytest.mark.parametrize(
         "hidden_rows", ({"5": {"hide": True}}, {"00004": {"hide": True}})
     )
-    def it_computes_unweighted_counts_for_ca_subvar_x_ca_cat_hiddens(self, hidden_rows):
+    def test_it_computes_unweighted_counts_for_ca_subvar_x_ca_cat_hiddens(
+        self, hidden_rows
+    ):
         """Assembler hides, prunes, and places in payload order.
 
         This fixture has no insertions, and exercises the "no-insertions" case which
@@ -630,7 +632,9 @@ class DescribeAssembler:
             [347, 2577, 4467],
         ]
 
-    def it_computes_unweighted_counts_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+    def test_it_computes_unweighted_counts_for_cat_hs_x_cat_hs_hiddens_explicit_order(
+        self,
+    ):
         """Assembler inserts, hides, prunes, and places in explicit order."""
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
@@ -661,7 +665,7 @@ class DescribeAssembler:
             [341, 234, 166, 175, 234],
         ]
 
-    def it_computes_unweighted_counts_for_cat_hs_x_mr_hiddens_explicit_order(self):
+    def test_it_computes_unweighted_counts_for_cat_hs_x_mr_hiddens_explicit_order(self):
         """Assembler inserts, hides, prunes, and places in explicit order."""
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_MR),
@@ -689,7 +693,7 @@ class DescribeAssembler:
             [134, 130, 26, 39],
         ]
 
-    def it_computes_unweighted_counts_for_mr_x_cat(self):
+    def test_it_computes_unweighted_counts_for_mr_x_cat(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         assert slice_.unweighted_counts.tolist() == [
             [8, 7, 0, 6, 5, 0],
@@ -699,7 +703,7 @@ class DescribeAssembler:
             [27, 58, 0, 134, 166, 0],
         ]
 
-    def it_computes_unweighted_counts_for_mr_x_mr_slices(self):
+    def test_it_computes_unweighted_counts_for_mr_x_mr_slices(self):
         slice_ = Cube(CR.CAT_X_MR_X_MR).partitions[0]
         assert slice_.unweighted_counts.tolist() == [
             [1159, 3597],
@@ -714,13 +718,13 @@ class DescribeAssembler:
             [1142, 623],
         ]
 
-    def it_computes_ca_x_mr_hs_columns_base(self):
+    def test_it_computes_ca_x_mr_hs_columns_base(self):
         slice_ = Cube(CR.CA_X_MR_WEIGHTED_HS).partitions[0]
         np.testing.assert_array_equal(
             slice_.columns_base, np.array([504, 215, 224, 76, 8, 439])
         )
 
-    def it_computes_mr_x_mr_columns_base(self):
+    def test_it_computes_mr_x_mr_columns_base(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_array_equal(
             slice_.columns_base,
@@ -729,11 +733,13 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_cat_x_mr_columns_base(self):
+    def test_it_computes_cat_x_mr_columns_base(self):
         slice_ = Cube(CR.CAT_X_MR).partitions[0]
         np.testing.assert_array_equal(slice_.columns_base, np.array([40, 34, 38]))
 
-    def it_computes_weighted_counts_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+    def test_it_computes_weighted_counts_for_cat_hs_x_cat_hs_hiddens_explicit_order(
+        self,
+    ):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
             slice_idx=0,
@@ -763,14 +769,14 @@ class DescribeAssembler:
             [341, 234, 166, 175, 234],
         ]
 
-    def it_computes_weighted_counts_for_cat_x_mr(self):
+    def test_it_computes_weighted_counts_for_cat_x_mr(self):
         slice_ = Cube(CR.CAT_X_MR).partitions[0]
         assert slice_.counts.tolist() == [
             [12, 12, 12],
             [28, 22, 26],
         ]
 
-    def it_computes_weighted_counts_for_mr_x_cat(self):
+    def test_it_computes_weighted_counts_for_mr_x_cat(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         assert slice_.counts == pytest.approx(
             np.array(
@@ -784,7 +790,7 @@ class DescribeAssembler:
             )
         )
 
-    def it_computes_weighted_counts_for_mr_x_mr(self):
+    def test_it_computes_weighted_counts_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         assert slice_.counts == pytest.approx(
             np.array(
@@ -797,7 +803,7 @@ class DescribeAssembler:
             )
         )
 
-    def it_computes_table_margin_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+    def test_it_computes_table_margin_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
             slice_idx=0,
@@ -819,7 +825,7 @@ class DescribeAssembler:
 
         assert slice_.table_margin == 877
 
-    def it_computes_cat_x_mr_table_margin_with_explicit_ordering(self):
+    def test_it_computes_cat_x_mr_table_margin_with_explicit_ordering(self):
         transforms = {
             "columns_dimension": {
                 "order": {"type": "explicit", "element_ids": [5, 1, 6, 4, 0, 2]}
@@ -832,7 +838,7 @@ class DescribeAssembler:
             np.array([471.9317685, 176.3655518, 457.0509557, 211.4205877, 247.7407379]),
         )
 
-    def it_computes_mr_x_cat_table_margin_with_explicit_ordering(self):
+    def test_it_computes_mr_x_cat_table_margin_with_explicit_ordering(self):
         transforms = {
             "rows_dimension": {
                 "order": {"type": "explicit", "element_ids": [5, 1, 6, 4, 0, 2]}
@@ -845,7 +851,7 @@ class DescribeAssembler:
             np.array([471.9317685, 176.3655516, 457.0509557, 211.4205878, 247.740738]),
         )
 
-    def it_computes_mr_x_mr_table_margin(self):
+    def test_it_computes_mr_x_mr_table_margin(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_almost_equal(
             slice_.table_margin,
@@ -857,7 +863,7 @@ class DescribeAssembler:
             ],
         )
 
-    def it_knows_the_column_labels(self):
+    def test_it_knows_the_column_labels(self):
         transforms = {
             "columns_dimension": {
                 "order": {"type": "explicit", "element_ids": [1, 3, 0, 2]}
@@ -868,7 +874,7 @@ class DescribeAssembler:
             slice_.column_labels, ["Bravo", "Delta", "Alpha", "Charlie", "Last 2"]
         )
 
-    def it_computes_rows_base_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+    def test_it_computes_rows_base_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
             slice_idx=0,
@@ -890,7 +896,7 @@ class DescribeAssembler:
 
         assert np.array_equal(slice_.rows_base, [151, 353, 603, 52, 250, 123, 575])
 
-    def it_computes_cat_x_mr_rows_base(self):
+    def test_it_computes_cat_x_mr_rows_base(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
         np.testing.assert_almost_equal(
             slice_.rows_base,
@@ -906,13 +912,13 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_mr_x_cat_rows_base(self):
+    def test_it_computes_mr_x_cat_rows_base(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
             slice_.rows_base, np.array([26, 76, 118, 369, 385])
         )
 
-    def it_computes_mr_x_mr_rows_base(self):
+    def test_it_computes_mr_x_mr_rows_base(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_equal(
             slice_.rows_base,
@@ -924,7 +930,7 @@ class DescribeAssembler:
             ],
         )
 
-    def it_computes_table_base_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+    def test_it_computes_table_base_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
             slice_idx=0,
@@ -946,19 +952,19 @@ class DescribeAssembler:
 
         assert np.array_equal(slice_.table_base, 877)
 
-    def it_computes_cat_x_mr_table_base(self):
+    def test_it_computes_cat_x_mr_table_base(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
         np.testing.assert_almost_equal(
             slice_.table_base, np.array([165, 210, 242, 450, 476])
         )
 
-    def it_computes_mr_x_cat_table_base(self):
+    def test_it_computes_mr_x_cat_table_base(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
             slice_.table_base, np.array([165, 210, 242, 450, 476])
         )
 
-    def it_computes_mr_x_mr_table_base(self):
+    def test_it_computes_mr_x_mr_table_base(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_equal(
             slice_.table_base,
@@ -970,7 +976,9 @@ class DescribeAssembler:
             ],
         )
 
-    def it_computes_columns_margin_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+    def test_it_computes_columns_margin_for_cat_hs_x_cat_hs_hiddens_explicit_order(
+        self,
+    ):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
             slice_idx=0,
@@ -992,19 +1000,19 @@ class DescribeAssembler:
 
         assert np.array_equal(slice_.columns_margin, [549, 328, 276, 273, 328])
 
-    def it_computes_means_cat_x_cat_columns_margin(self):
+    def test_it_computes_means_cat_x_cat_columns_margin(self):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
 
         assert slice_.columns_margin.tolist() == [431, 494, 294, 1219, 433]
 
-    def it_computes_cat_x_mr_columns_margin(self):
+    def test_it_computes_cat_x_mr_columns_margin(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
 
         assert slice_.columns_margin == pytest.approx(
             [31.63152, 70.730734, 125.759113, 366.888391, 376.765640]
         )
 
-    def it_computes_mr_x_cat_columns_margin(self):
+    def test_it_computes_mr_x_cat_columns_margin(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
             slice_.columns_margin,
@@ -1019,7 +1027,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_mr_x_mr_columns_margin(self):
+    def test_it_computes_mr_x_mr_columns_margin(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_almost_equal(
             slice_.columns_margin,
@@ -1031,7 +1039,7 @@ class DescribeAssembler:
             ],
         )
 
-    def it_computes_rows_margin_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+    def test_it_computes_rows_margin_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
             slice_idx=0,
@@ -1053,12 +1061,12 @@ class DescribeAssembler:
 
         assert np.array_equal(slice_.rows_margin, [151, 353, 603, 52, 250, 123, 575])
 
-    def it_computes_means_cat_x_cat_rows_margin(self):
+    def test_it_computes_means_cat_x_cat_rows_margin(self):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
 
         assert slice_.rows_margin.tolist() == [55, 126, 613, 710, 310, 400, 148]
 
-    def it_computes_cat_x_mr_rows_margin(self):
+    def test_it_computes_cat_x_mr_rows_margin(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
         np.testing.assert_almost_equal(
             slice_.rows_margin,
@@ -1074,14 +1082,14 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_mr_x_cat_rows_margin(self):
+    def test_it_computes_mr_x_cat_rows_margin(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
             slice_.rows_margin,
             np.array([31.6315209, 70.7307341, 125.7591136, 366.8883915, 376.7656406]),
         )
 
-    def it_computes_mr_x_mr_rows_margin(self):
+    def test_it_computes_mr_x_mr_rows_margin(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_almost_equal(
             slice_.rows_margin,
@@ -1093,7 +1101,7 @@ class DescribeAssembler:
             ],
         )
 
-    def it_computes_column_index_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
+    def test_it_computes_column_index_for_cat_hs_x_cat_hs_hiddens_explicit_order(self):
         slice_ = _Slice(
             Cube(CR.CAT_HS_X_CAT_HS_EMPTIES),
             slice_idx=0,
@@ -1128,7 +1136,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_cat_x_mr_column_index(self):
+    def test_it_computes_cat_x_mr_column_index(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
         np.testing.assert_almost_equal(
             slice_.column_index,
@@ -1144,7 +1152,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_mr_x_cat_column_index(self):
+    def test_it_computes_mr_x_cat_column_index(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
             slice_.column_index,
@@ -1159,7 +1167,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_mr_x_mr_column_index(self):
+    def test_it_computes_mr_x_mr_column_index(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_almost_equal(
             slice_.column_index,
@@ -1173,7 +1181,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_cat_hs_x_cat_hs_zscore_subtotals(self):
+    def test_it_computes_cat_hs_x_cat_hs_zscore_subtotals(self):
         slice_ = Cube(CR.CAT_HS_X_CAT_HS).partitions[0]
         np.testing.assert_almost_equal(
             slice_.zscores,
@@ -1190,7 +1198,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_cat_x_mr_zscores(self):
+    def test_it_computes_cat_x_mr_zscores(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
         assert slice_.zscores == pytest.approx(
             np.array(
@@ -1206,7 +1214,7 @@ class DescribeAssembler:
             nan_ok=True,
         )
 
-    def it_computes_mr_x_cat_zscores(self):
+    def test_it_computes_mr_x_cat_zscores(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
             slice_.zscores,
@@ -1221,7 +1229,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_mr_x_mr_zscores(self):
+    def test_it_computes_mr_x_mr_zscores(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_almost_equal(
             slice_.zscores,
@@ -1235,7 +1243,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_means_cat_hs_x_cat_hs(self):
+    def test_it_computes_means_cat_hs_x_cat_hs(self):
         slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
         np.testing.assert_almost_equal(
             slice_.means,
@@ -1252,7 +1260,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_means_cat_x_mr(self):
+    def test_it_computes_means_cat_x_mr(self):
         slice_ = Cube(CR.MEANS_CAT_X_MR).partitions[0]
         np.testing.assert_almost_equal(
             slice_.means,
@@ -1268,7 +1276,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_median_cat_x_mr(self):
+    def test_it_computes_median_cat_x_mr(self):
         slice_ = Cube(CR.MEDIAN_CAT_X_MR).partitions[0]
         np.testing.assert_almost_equal(
             slice_.medians,
@@ -1284,7 +1292,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_median_for_mr_x_mr(self):
+    def test_it_computes_median_for_mr_x_mr(self):
         slice_ = Cube(CR.MR_X_MR_MEDIAN).partitions[0]
 
         assert slice_.medians == pytest.approx(
@@ -1298,7 +1306,7 @@ class DescribeAssembler:
             nan_ok=True,
         )
 
-    def it_computes_means_mr_x_cat(self):
+    def test_it_computes_means_mr_x_cat(self):
         slice_ = Cube(CR.MEANS_MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
             slice_.means,
@@ -1434,7 +1442,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_cat_hs_mt_x_cat_hs_mt_tbl_stderr(self):
+    def test_it_computes_cat_hs_mt_x_cat_hs_mt_tbl_stderr(self):
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT).partitions[0]
         np.testing.assert_almost_equal(
             slice_.table_std_err,
@@ -1451,7 +1459,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_cat_x_mr_table_stderr(self):
+    def test_it_computes_cat_x_mr_table_stderr(self):
         slice_ = Cube(CR.CAT_X_MR_2).partitions[0]
         np.testing.assert_almost_equal(
             slice_.table_std_err,
@@ -1467,7 +1475,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_mr_x_cat_table_stderr(self):
+    def test_it_computes_mr_x_cat_table_stderr(self):
         slice_ = Cube(CR.MR_X_CAT).partitions[0]
         np.testing.assert_almost_equal(
             slice_.table_std_err,
@@ -1482,7 +1490,7 @@ class DescribeAssembler:
             ),
         )
 
-    def it_computes_mr_x_mr_table_stderr(self):
+    def test_it_computes_mr_x_mr_table_stderr(self):
         slice_ = Cube(CR.MR_X_MR).partitions[0]
         np.testing.assert_almost_equal(
             slice_.table_std_err,
@@ -1505,7 +1513,7 @@ class DescribeAssembler:
             (CR.MR_X_MR, 3, True, [3, 2, 1, 0]),
         ),
     )
-    def it_computes_the_sort_by_value_row_order_to_help(
+    def test_it_computes_the_sort_by_value_row_order_to_help(
         self, fixture, element_id, descending, expected_value
     ):
         transforms = {
@@ -1522,21 +1530,21 @@ class DescribeAssembler:
 
         assert slice_.row_order().tolist() == expected_value
 
-    def it_computes_sum_cat_x_mr(self):
+    def test_it_computes_sum_cat_x_mr(self):
         slice_ = Cube(CR.SUM_CAT_X_MR).partitions[0]
 
         assert slice_.sums == pytest.approx(
             np.array([[3.0, 2.0, 2.0], [0.0, 0.0, 0.0]])
         )
 
-    def it_computes_sum_mr_x_cat(self):
+    def test_it_computes_sum_mr_x_cat(self):
         slice_ = Cube(CR.SUM_MR_X_CAT).partitions[0]
 
         assert slice_.sums == pytest.approx(
             np.array([[3.0, 0.0], [2.0, 0.0], [2.0, 0.0]])
         )
 
-    def it_computes_median_mr_x_cat(self):
+    def test_it_computes_median_mr_x_cat(self):
         slice_ = Cube(CR.MEDIAN_MR_X_CAT).partitions[0]
 
         assert slice_.medians == pytest.approx(
@@ -1544,8 +1552,8 @@ class DescribeAssembler:
         )
 
 
-class DescribeCubemeasure:
-    def it_provides_overlaps_for_cat_x_mr_sub_x_mr_sel(self):
+class TestCubemeasure:
+    def test_it_provides_overlaps_for_cat_x_mr_sub_x_mr_sel(self):
         cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
@@ -1567,7 +1575,7 @@ class DescribeCubemeasure:
             ],
         ]
 
-    def it_provides_valid_overlaps_for_cat_x_mr_sub_x_mr_sel(self):
+    def test_it_provides_valid_overlaps_for_cat_x_mr_sub_x_mr_sel(self):
         cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
             cube=Cube(cube_dict),
@@ -1588,7 +1596,7 @@ class DescribeCubemeasure:
             ],
         ]
 
-    def it_provides_overlaps_for_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_0(self):
+    def test_it_provides_overlaps_for_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_0(self):
         # Test subvar X (partitiions[0])
         cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
@@ -1615,7 +1623,9 @@ class DescribeCubemeasure:
             ],
         ]
 
-    def it_provides_valid_overlaps_for_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_0(self):
+    def test_it_provides_valid_overlaps_for_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_0(
+        self,
+    ):
         # Test subvar X (partitiions[0])
         cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
@@ -1642,7 +1652,7 @@ class DescribeCubemeasure:
             ],
         ]
 
-    def it_provides_overlaps_for_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_1(self):
+    def test_it_provides_overlaps_for_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_1(self):
         # Test subvar Y (partitions[1])
         cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
@@ -1669,7 +1679,9 @@ class DescribeCubemeasure:
             ],
         ]
 
-    def it_provides_valid_overlaps_for_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_1(self):
+    def test_it_provides_valid_overlaps_for_ca_sub_x_ca_cat_x_mr_sub_x_mr_sel_subvar_1(
+        self,
+    ):
         # Test subvar X (partitiions[1])
         cube_dict = OL.CA_SUB_X_CA_CAT_X_MR_SUB_X_MR_SEL
         overlaps_measure = _BaseCubeOverlaps.factory(
@@ -1697,7 +1709,7 @@ class DescribeCubemeasure:
         ]
 
 
-class Describe_BaseOrderHelper:
+class Test_BaseOrderHelper:
     """Integration-test suite for `cr.cube.matrix._BaseOrderHelper`."""
 
     @pytest.mark.parametrize(
@@ -1709,7 +1721,7 @@ class Describe_BaseOrderHelper:
             (CR.MR_X_MR, [2, 0, 3, 1], [1, 3, 2, 0]),
         ),
     )
-    def it_can_compute_an_explicit_row_order(
+    def test_it_can_compute_an_explicit_row_order(
         self, fixture, element_ids, expected_value
     ):
         transforms = {
@@ -1736,7 +1748,7 @@ class Describe_BaseOrderHelper:
             (CR.MR_X_MR, [2, 0, 3, 1], [1, 3, 2, 0]),
         ),
     )
-    def it_can_compute_an_explicit_column_order(
+    def test_it_can_compute_an_explicit_column_order(
         self, fixture, element_ids, expected_value
     ):
         transforms = {
@@ -1755,7 +1767,7 @@ class Describe_BaseOrderHelper:
         assert column_display_order.tolist() == expected_value
 
 
-class Describe_SortRowsByColumnValueHelper:
+class Test_SortRowsByColumnValueHelper:
     """Integration-test suite for `cr.cube.matrix._SortRowsByColumnValueHelper`."""
 
     @pytest.mark.parametrize(
@@ -1808,7 +1820,7 @@ class Describe_SortRowsByColumnValueHelper:
             (CR.MR_X_CAT, "z_score", 2, "ascending", [3, 2, 1, 0, 4]),
         ),
     )
-    def it_can_compute_a_sort_by_column_values_row_order(
+    def test_it_can_compute_a_sort_by_column_values_row_order(
         self, fixture, measure, element_id, direction, expected_value
     ):
         transforms = {
@@ -1826,7 +1838,7 @@ class Describe_SortRowsByColumnValueHelper:
         assert slice_.row_order().tolist() == expected_value
 
 
-class Describe_SortRowsByInsertedColumnHelper:
+class Test_SortRowsByInsertedColumnHelper:
     """Integration-test suite for `cr.cube.matrix._SortRowsByInsertedColumnHelper`."""
 
     @pytest.mark.parametrize(
@@ -1848,7 +1860,7 @@ class Describe_SortRowsByInsertedColumnHelper:
             ),
         ),
     )
-    def it_can_compute_a_sort_by_insertion_values_row_order(
+    def test_it_can_compute_a_sort_by_insertion_values_row_order(
         self, fixture, measure, direction, fixed, expected_value
     ):
         transforms = {
@@ -1866,7 +1878,7 @@ class Describe_SortRowsByInsertedColumnHelper:
 
         assert slice_.row_order().tolist() == expected_value
 
-    def but_it_fallback_to_payload_order_when_sort_by_value_is_not_supported(self):
+    def test_but_it_fallback_to_payload_order_when_sort_by_value_is_not_supported(self):
         transforms = {
             "rows_dimension": {
                 "order": {

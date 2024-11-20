@@ -18,10 +18,10 @@ from cr.cube.matrix.subtotals import (
 from ...unitutil import ANY, initializer_mock, instance_mock, method_mock, property_mock
 
 
-class Describe_BaseSubtotals:
+class Test_BaseSubtotals:
     """Unit test suite for `cr.cube.matrix._BaseSubtotals` object."""
 
-    def it_provides_a_blocks_interface_method(self, request, cube_counts_):
+    def test_it_provides_a_blocks_interface_method(self, request, cube_counts_):
         _init_ = initializer_mock(request, _BaseSubtotals)
         _blocks_ = property_mock(
             request, _BaseSubtotals, "_blocks", return_value=[[1, 2], [3, 4]]
@@ -33,7 +33,7 @@ class Describe_BaseSubtotals:
         _blocks_.assert_called_once()
         assert blocks == [[1, 2], [3, 4]]
 
-    def it_can_compute_its_blocks(self, request):
+    def test_it_can_compute_its_blocks(self, request):
         property_mock(request, _BaseSubtotals, "_subtotal_columns")
         property_mock(request, _BaseSubtotals, "_subtotal_rows")
         property_mock(request, _BaseSubtotals, "_intersections")
@@ -46,11 +46,11 @@ class Describe_BaseSubtotals:
             [base_subtotals._subtotal_rows, base_subtotals._intersections],
         ]
 
-    def it_provides_access_to_the_column_subtotals_to_help(self, dimension_):
+    def test_it_provides_access_to_the_column_subtotals_to_help(self, dimension_):
         subtotals = _BaseSubtotals(None, (None, dimension_))
         assert subtotals._column_subtotals is dimension_.subtotals
 
-    def it_assembles_its_intersections_to_help(
+    def test_it_assembles_its_intersections_to_help(
         self, _intersection_, _column_subtotals_prop_, _row_subtotals_prop_
     ):
         _intersection_.return_value = 10
@@ -69,15 +69,15 @@ class Describe_BaseSubtotals:
             ).tolist()
         )
 
-    def it_knows_how_many_columns_are_in_the_base_matrix_to_help(self):
+    def test_it_knows_how_many_columns_are_in_the_base_matrix_to_help(self):
         base_values = np.arange(12).reshape(3, 4)
         assert _BaseSubtotals(base_values, None)._ncols == 4
 
-    def it_knows_how_many_rows_are_in_the_base_matrix_to_help(self):
+    def test_it_knows_how_many_rows_are_in_the_base_matrix_to_help(self):
         base_values = np.arange(12).reshape(3, 4)
         assert _BaseSubtotals(base_values, None)._nrows == 3
 
-    def it_provides_access_to_the_row_subtotals_to_help(self, dimension_):
+    def test_it_provides_access_to_the_row_subtotals_to_help(self, dimension_):
         subtotals = _BaseSubtotals(None, (dimension_, None))
         assert subtotals._row_subtotals is dimension_.subtotals
 
@@ -88,7 +88,7 @@ class Describe_BaseSubtotals:
             (3, 2, np.array([[1, 1], [2, 2], [3, 3]])),
         ),
     )
-    def it_assembles_its_subtotal_columns_to_help(
+    def test_it_assembles_its_subtotal_columns_to_help(
         self,
         _column_subtotals_prop_,
         _nrows_prop_,
@@ -113,7 +113,7 @@ class Describe_BaseSubtotals:
             (3, [1, 2], (2, 3), [[1, 2, 3], [1, 2, 3]]),
         ),
     )
-    def it_assembles_its_subtotal_rows_to_help(
+    def test_it_assembles_its_subtotal_rows_to_help(
         self,
         _row_subtotals_prop_,
         _ncols_prop_,
@@ -175,13 +175,13 @@ class Describe_BaseSubtotals:
         return method_mock(request, _BaseSubtotals, "_subtotal_row")
 
 
-class DescribeNanSubtotals:
+class TestNanSubtotals:
     """Unit test suite for `cr.cube.matrix.NanSubtotals` object."""
 
-    def it_can_compute_a_intersection_cell_value_to_help(self):
+    def test_it_can_compute_a_intersection_cell_value_to_help(self):
         assert np.isnan(NanSubtotals(None, None)._intersection(None, None))
 
-    def it_can_compute_a_subtotal_column_to_help(self, request):
+    def test_it_can_compute_a_subtotal_column_to_help(self, request):
         property_mock(request, NanSubtotals, "_nrows", return_value=3)
         subtotals = NanSubtotals(None, None)
 
@@ -190,7 +190,7 @@ class DescribeNanSubtotals:
             np.array([np.nan] * 3),
         )
 
-    def it_can_compute_a_subtotal_row_to_help(self, request):
+    def test_it_can_compute_a_subtotal_row_to_help(self, request):
         property_mock(request, NanSubtotals, "_ncols", return_value=4)
         subtotals = NanSubtotals(None, None)
 
@@ -200,10 +200,10 @@ class DescribeNanSubtotals:
         )
 
 
-class DescribeNegativeTermSubtotals:
+class TestNegativeTermSubtotals:
     """Unit test suite for `cr.cube.matrix.NegativeTermSubtotals` object."""
 
-    def it_provides_blocks_to_help(self, request):
+    def test_it_provides_blocks_to_help(self, request):
         base_values = np.arange(12).reshape(3, 4)
         subtotal_cols = np.array([[12], [13], [14]])
         subtotal_rows = np.array([[15, 16, 17, 18]])
@@ -245,7 +245,7 @@ class DescribeNegativeTermSubtotals:
             ([0, 1], [2], [1, 2], [0], np.nan),
         ),
     )
-    def it_can_compute_intersection_to_help(
+    def test_it_can_compute_intersection_to_help(
         self,
         request,
         col_add_idxs,
@@ -273,14 +273,14 @@ class DescribeNegativeTermSubtotals:
             expected_value, nan_ok=True
         )
 
-    def it_can_compute_subtotal_column_to_help(self, subtotal_):
+    def test_it_can_compute_subtotal_column_to_help(self, subtotal_):
         base_values = np.arange(12).reshape(3, 4)
         subtotal_.subtrahend_idxs = [1, 2]
         subtotals = NegativeTermSubtotals(base_values, None)
 
         assert subtotals._subtotal_column(subtotal_).tolist() == [3, 11, 19]
 
-    def it_can_compute_subtotal_row_to_help(self, subtotal_):
+    def test_it_can_compute_subtotal_row_to_help(self, subtotal_):
         base_values = np.arange(12).reshape(3, 4)
         subtotal_.subtrahend_idxs = [1, 2]
         subtotals = NegativeTermSubtotals(base_values, None)
@@ -294,7 +294,7 @@ class DescribeNegativeTermSubtotals:
         return instance_mock(request, _Subtotal)
 
 
-class DescribePositiveTermSubtotals:
+class TestPositiveTermSubtotals:
     """Unit test suite for `cr.cube.matrix.PositiveTermSubtotals` object."""
 
     @pytest.mark.parametrize(
@@ -306,7 +306,7 @@ class DescribePositiveTermSubtotals:
             ([0, 1], [2], [1, 2], [0], np.nan),
         ),
     )
-    def it_can_compute_intersection_to_help(
+    def test_it_can_compute_intersection_to_help(
         self,
         request,
         col_add_idxs,
@@ -334,14 +334,14 @@ class DescribePositiveTermSubtotals:
             subtotals._intersection(row_subtotal_, col_subtotal_), expected_value
         )
 
-    def it_can_compute_subtotal_column_to_help(self, subtotal_):
+    def test_it_can_compute_subtotal_column_to_help(self, subtotal_):
         base_values = np.arange(12).reshape(3, 4)
         subtotal_.addend_idxs = [1, 2]
         subtotals = PositiveTermSubtotals(base_values, None)
 
         assert subtotals._subtotal_column(subtotal_).tolist() == [3, 11, 19]
 
-    def it_can_compute_subtotal_row_to_help(self, subtotal_):
+    def test_it_can_compute_subtotal_row_to_help(self, subtotal_):
         base_values = np.arange(12).reshape(3, 4)
         subtotal_.addend_idxs = [1, 2]
         subtotals = PositiveTermSubtotals(base_values, None)
@@ -355,10 +355,10 @@ class DescribePositiveTermSubtotals:
         return instance_mock(request, _Subtotal)
 
 
-class DescribeSumSubtotals:
+class TestSumSubtotals:
     """Unit test suite for `cr.cube.matrix.SumSubtotals` object."""
 
-    def it_provides_an_intersections_interface_method(
+    def test_it_provides_an_intersections_interface_method(
         self, request, dimensions_, _init_
     ):
         base_values = [[1, 5], [8, 0]]
@@ -374,7 +374,7 @@ class DescribeSumSubtotals:
         _init_.assert_called_once_with(ANY, [[1, 5], [8, 0]], dimensions_, False, False)
         assert intersections.tolist() == [[1, 2], [3, 4]]
 
-    def it_provides_a_subtotal_columns_interface_method(
+    def test_it_provides_a_subtotal_columns_interface_method(
         self, request, dimensions_, _init_
     ):
         base_values = [[0, 4], [7, 9]]
@@ -390,7 +390,7 @@ class DescribeSumSubtotals:
         _init_.assert_called_once_with(ANY, [[0, 4], [7, 9]], dimensions_, False, False)
         assert subtotal_columns.tolist() == [[1, 2], [3, 4]]
 
-    def it_provides_a_subtotal_rows_interface_method(
+    def test_it_provides_a_subtotal_rows_interface_method(
         self, request, dimensions_, _init_
     ):
         base_values = [[4, 1], [3, 5]]
@@ -428,7 +428,7 @@ class DescribeSumSubtotals:
             ([1, 2], [], [0, 1], [2, 3], True, False, np.nan),
         ),
     )
-    def it_can_compute_a_subtotal_intersection_value(
+    def test_it_can_compute_a_subtotal_intersection_value(
         self,
         request,
         row_add_idxs,
@@ -469,7 +469,7 @@ class DescribeSumSubtotals:
             ([1], [3], True, [np.nan, np.nan, np.nan]),
         ),
     )
-    def it_can_compute_a_subtotal_column_to_help(
+    def test_it_can_compute_a_subtotal_column_to_help(
         self, subtotal_, addend_idxs, subtrahend_idxs, diff_cols_nan, expected_value
     ):
         subtotal_.addend_idxs = addend_idxs
@@ -492,7 +492,7 @@ class DescribeSumSubtotals:
             ([0], [2], True, [np.nan, np.nan, np.nan, np.nan]),
         ),
     )
-    def it_can_compute_a_subtotal_row_to_help(
+    def test_it_can_compute_a_subtotal_row_to_help(
         self, subtotal_, addend_idxs, subtrahend_idxs, diff_rows_nan, expected_value
     ):
         subtotal_.addend_idxs = addend_idxs

@@ -32,10 +32,10 @@ from ..unitutil import (
 )
 
 
-class DescribeDimensions:
+class TestDimensions:
     """Unit-test suite for `cr.cube.dimension.Dimensions` object."""
 
-    def it_knows_its_shape(self, request):
+    def test_it_knows_its_shape(self, request):
         dims = Dimensions(
             [
                 instance_mock(
@@ -56,10 +56,10 @@ class DescribeDimensions:
             ),
         ),
     )
-    def it_parses_the_base_type(self, dimension_dict, expected_value):
+    def test_it_parses_the_base_type(self, dimension_dict, expected_value):
         assert Dimensions.dimension_type(dimension_dict) == expected_value
 
-    def but_it_raises_on_unrecognized_type_class(self):
+    def test_but_it_raises_on_unrecognized_type_class(self):
         with pytest.raises(NotImplementedError):
             Dimensions.from_dicts([{"type": {"class": "crunched"}}])
 
@@ -96,7 +96,9 @@ class DescribeDimensions:
             ),
         ),
     )
-    def and_it_knows_if_it_is_a_categorical_date(self, dimension_dict, expected_value):
+    def test_and_it_knows_if_it_is_a_categorical_date(
+        self, dimension_dict, expected_value
+    ):
         assert Dimensions.dimension_type(dimension_dict) == expected_value
 
     @pytest.mark.parametrize(
@@ -109,10 +111,10 @@ class DescribeDimensions:
             ({"class": "enum", "subtype": {"class": "text"}}, DT.TEXT),
         ),
     )
-    def it_determines_the_dimension_type(self, typedef, expected_value):
+    def test_it_determines_the_dimension_type(self, typedef, expected_value):
         assert Dimensions.dimension_type({"type": typedef}) == expected_value
 
-    def but_it_raises_on_unrecognized_base_type(self):
+    def test_but_it_raises_on_unrecognized_base_type(self):
         with pytest.raises(NotImplementedError):
             Dimensions.dimension_type({"type": {"class": "hyper.dimensional"}})
 
@@ -146,7 +148,7 @@ class DescribeDimensions:
             ),
         ),
     )
-    def it_can_tell_when_a_dimension_has_a_selected_category_to_help(
+    def test_it_can_tell_when_a_dimension_has_a_selected_category_to_help(
         self, dimension_dict, expected_value
     ):
         assert Dimensions.dimension_type(dimension_dict) == expected_value
@@ -164,7 +166,7 @@ class DescribeDimensions:
             ),
         ),
     )
-    def it_distinguishes_an_array_categorical_type_to_help(
+    def test_it_distinguishes_an_array_categorical_type_to_help(
         self, dimension_dict, expected_value
     ):
         assert Dimensions.dimension_type(dimension_dict) == expected_value
@@ -173,7 +175,7 @@ class DescribeDimensions:
         "typedef, expected_value",
         (({"class": "enum", "subtype": {"class": "variable"}}, DT.CA),),
     )
-    def it_resolves_an_array_type_to_help(self, typedef, expected_value):
+    def test_it_resolves_an_array_type_to_help(self, typedef, expected_value):
         assert Dimensions.dimension_type({"type": typedef}) == expected_value
 
     @pytest.mark.parametrize(
@@ -230,11 +232,11 @@ class DescribeDimensions:
             ),
         ),
     )
-    def it_resolves_a_categorical_type_to_help(self, dimdef, expected_value):
+    def test_it_resolves_a_categorical_type_to_help(self, dimdef, expected_value):
         assert Dimensions.dimension_type(dimdef) == expected_value
 
 
-class DescribeDimension:
+class TestDimension:
     """Unit-test suite for `cr.cube.dimension.Dimension` object."""
 
     @pytest.mark.parametrize(
@@ -244,7 +246,7 @@ class DescribeDimension:
             ({"references": {"alias": "Elias"}}, "Elias"),
         ),
     )
-    def it_knows_its_alias(self, dimension_dict, expected_value):
+    def test_it_knows_its_alias(self, dimension_dict, expected_value):
         assert Dimension(dimension_dict, None).alias == expected_value
 
     @pytest.mark.parametrize(
@@ -256,31 +258,31 @@ class DescribeDimension:
             ({"references": {"description": "Crunchiness"}}, "Crunchiness"),
         ),
     )
-    def it_knows_its_description(self, dimension_dict, expected_value):
+    def test_it_knows_its_description(self, dimension_dict, expected_value):
         assert Dimension(dimension_dict, None).description == expected_value
 
-    def it_knows_its_dimension_type(self):
+    def test_it_knows_its_dimension_type(self):
         assert Dimension(None, DT.CAT).dimension_type == DT.CAT
 
-    def it_knows_its_element_ids(self, request, valid_elements_prop_):
+    def test_it_knows_its_element_ids(self, request, valid_elements_prop_):
         valid_elements_prop_.return_value = (
             instance_mock(request, Element, element_id=(i + 1)) for i in range(6)
         )
         assert Dimension(None, None).element_ids == (1, 2, 3, 4, 5, 6)
 
-    def it_knows_its_element_labels(self, request, valid_elements_prop_):
+    def test_it_knows_its_element_labels(self, request, valid_elements_prop_):
         valid_elements_prop_.return_value = (
             instance_mock(request, Element, label="lbl %s" % (i + 1)) for i in range(3)
         )
         assert Dimension(None, None).element_labels == ("lbl 1", "lbl 2", "lbl 3")
 
-    def it_computes_its_hidden_idxs(self, request, valid_elements_prop_):
+    def test_it_computes_its_hidden_idxs(self, request, valid_elements_prop_):
         valid_elements_prop_.return_value = (
             instance_mock(request, Element, is_hidden=bool(i % 2)) for i in range(7)
         )
         assert Dimension(None, None).hidden_idxs == (1, 3, 5)
 
-    def it_knows_its_insertion_ids(self, request):
+    def test_it_knows_its_insertion_ids(self, request):
         property_mock(
             request,
             Dimension,
@@ -314,12 +316,12 @@ class DescribeDimension:
             ({}, {"name": None}, ""),
         ),
     )
-    def it_knows_its_name(self, dim_refs, dim_xforms, expected_value):
+    def test_it_knows_its_name(self, dim_refs, dim_xforms, expected_value):
         dimension_dict = {"references": dim_refs}
         dimension = Dimension(dimension_dict, None, dimension_transforms=dim_xforms)
         assert dimension.name == expected_value
 
-    def it_knows_the_numeric_values_of_its_elements(
+    def test_it_knows_the_numeric_values_of_its_elements(
         self, request, valid_elements_prop_
     ):
         valid_elements_prop_.return_value = tuple(
@@ -328,7 +330,7 @@ class DescribeDimension:
         )
         assert Dimension(None, None).numeric_values == (1, 2.2, np.nan)
 
-    def it_provides_access_to_the_order_spec(self, request):
+    def test_it_provides_access_to_the_order_spec(self, request):
         order_spec_ = instance_mock(request, _OrderSpec)
         _OrderSpec_ = class_mock(
             request, "cr.cube.dimension._OrderSpec", return_value=order_spec_
@@ -351,7 +353,7 @@ class DescribeDimension:
             ({"prune": True}, True),
         ),
     )
-    def it_knows_whether_it_should_be_pruned(self, dim_transforms, expected_value):
+    def test_it_knows_whether_it_should_be_pruned(self, dim_transforms, expected_value):
         assert Dimension(None, None, dim_transforms).prune is expected_value
 
     @pytest.mark.parametrize(
@@ -366,7 +368,9 @@ class DescribeDimension:
             ),
         ),
     )
-    def it_knows_its_selected_categories(self, selected_categories, expected_value):
+    def test_it_knows_its_selected_categories(
+        self, selected_categories, expected_value
+    ):
         dimension_dict = {"references": selected_categories}
         assert Dimension(dimension_dict, None).selected_categories == expected_value
 
@@ -380,7 +384,7 @@ class DescribeDimension:
             ({}, None, None),
         ),
     )
-    def it_provides_access_to_element_data_format_to_help(
+    def test_it_provides_access_to_element_data_format_to_help(
         self, refs, resolution, expected
     ):
         dimension = Dimension(
@@ -413,7 +417,7 @@ class DescribeDimension:
             ),
         ),
     )
-    def it_provides_access_to_its_subtotals_to_help(
+    def test_it_provides_access_to_its_subtotals_to_help(
         self,
         dimension_dict,
         insertion_dicts,
@@ -432,7 +436,7 @@ class DescribeDimension:
         _Subtotals_.assert_called_once_with(insertion_dicts, valid_elements_)
         assert subtotals is subtotals_
 
-    def it_knows_its_subtotal_labels(self, request, subtotals_prop_):
+    def test_it_knows_its_subtotal_labels(self, request, subtotals_prop_):
         subtotals_prop_.return_value = (
             instance_mock(request, _Subtotal, label="lbl %s" % (i + 1))
             for i in range(3)
@@ -440,7 +444,7 @@ class DescribeDimension:
         assert Dimension(None, None).subtotal_labels == ("lbl 1", "lbl 2", "lbl 3")
 
     @pytest.mark.parametrize("dimension_type", (DT.MR, DT.CA_SUBVAR))
-    def but_it_suppresses_any_subtotals_on_an_array_dimension(
+    def test_but_it_suppresses_any_subtotals_on_an_array_dimension(
         self,
         request,
         dimension_type,
@@ -460,7 +464,7 @@ class DescribeDimension:
         _Subtotals_.assert_called_once_with([], valid_elements_)
         assert subtotals is subtotals_
 
-    def and_it_overrides_with_subtotal_transforms_when_present(
+    def test_and_it_overrides_with_subtotal_transforms_when_present(
         self,
         valid_elements_prop_,
         valid_elements_,
@@ -532,7 +536,7 @@ class DescribeDimension:
             ),
         ),
     )
-    def it_provides_access_to_its_subtotals_in_payload_order_to_help(
+    def test_it_provides_access_to_its_subtotals_in_payload_order_to_help(
         self,
         request,
         dim_type,
@@ -589,22 +593,22 @@ class DescribeDimension:
         return property_mock(request, Dimension, "valid_elements")
 
 
-class DescribeElements:
+class TestElements:
     """Unit-test suite for `cr.cube.dimension.Elements` object."""
 
-    def it_knows_the_element_ids(self, request):
+    def test_it_knows_the_element_ids(self, request):
         elements = Elements(
             instance_mock(request, Element, element_id=n) for n in (1, 2, 5)
         )
         assert elements.element_ids == (1, 2, 5)
 
-    def it_knows_the_element_indices(self, request):
+    def test_it_knows_the_element_indices(self, request):
         elements = Elements(
             instance_mock(request, Element, index=index) for index in (1, 3, 4)
         )
         assert elements.element_idxs == (1, 3, 4)
 
-    def it_can_find_an_element_by_id(self, request, _elements_by_id_prop_):
+    def test_it_can_find_an_element_by_id(self, request, _elements_by_id_prop_):
         elements_ = tuple(
             instance_mock(request, Element, element_id=element_id)
             for element_id in (3, 7, 11)
@@ -618,7 +622,7 @@ class DescribeElements:
 
         assert element is elements_[1]
 
-    def it_maintains_a_dict_of_elements_by_id_to_help(self, request):
+    def test_it_maintains_a_dict_of_elements_by_id_to_help(self, request):
         elements = Elements(
             instance_mock(request, Element, element_id=element_id)
             for element_id in (4, 6, 7)
@@ -635,7 +639,7 @@ class DescribeElements:
     def _elements_by_id_prop_(self, request):
         return property_mock(request, Elements, "_elements_by_id")
 
-    def it_provides_access_to_valid_elements(self, request):
+    def test_it_provides_access_to_valid_elements(self, request):
         all_elements = Elements(
             instance_mock(request, Element, name="el%s" % idx, missing=idx >= 3)
             for idx in range(5)
@@ -680,7 +684,7 @@ class DescribeElements:
             ),
         ),
     )
-    def it_knows_its_mr_insertions_elements_transforms_from_transforms_dict(
+    def test_it_knows_its_mr_insertions_elements_transforms_from_transforms_dict(
         self, dim_xforms, element_dicts, dim_type, expected_value
     ):
         elements = Elements.from_typedef(
@@ -722,7 +726,7 @@ class DescribeElements:
             ("Y", "%Y", "abc", "abc"),  # ----------------- invalid x, no change
         ),
     )
-    def it_can_format_datetime_label_to_help(
+    def test_it_can_format_datetime_label_to_help(
         self, request, resolution, out_format, x, expected
     ):
         all_elements = Elements.from_typedef(
@@ -741,7 +745,9 @@ class DescribeElements:
         "dim_type, value, expected",
         ((DT.CATEGORICAL, "cat a", "cat a"), (DT.BINNED_NUMERIC, 123, "123")),
     )
-    def and_it_can_format_non_datetime_element_label(self, dim_type, value, expected):
+    def test_and_it_can_format_non_datetime_element_label(
+        self, dim_type, value, expected
+    ):
         typedef = {
             "class": "enum",
             "subtype": {"class": "numeric"},
@@ -750,7 +756,7 @@ class DescribeElements:
         all_elements = Elements.from_typedef(typedef, {}, dim_type, None)
         assert all_elements[0]._label_formatter(value) == expected
 
-    def it_obeys_category_order_from_typedef(self):
+    def test_it_obeys_category_order_from_typedef(self):
         # Unordered
         all_elements = Elements.from_typedef(
             {
@@ -777,10 +783,10 @@ class DescribeElements:
         assert all_elements.element_ids == (2, 3, 1)
 
 
-class Describe_ValidElements:
+class Test_ValidElements:
     """Unit-test suite for `cr.cube.dimension.Elements.valid_elements`."""
 
-    def it_gets_its_Element_objects_from_anElements_object(self, request):
+    def test_it_gets_its_Element_objects_from_anElements_object(self, request):
         all_elements = Elements(
             instance_mock(request, Element, name="element-%s" % idx, missing=missing)
             for idx, missing in enumerate([False, True, False])
@@ -788,10 +794,12 @@ class Describe_ValidElements:
         assert all_elements.valid_elements == (all_elements[0], all_elements[2])
 
 
-class Describe_ElementIdShim:
+class Test_ElementIdShim:
     """Unit-test suite for `cr.cube.dimension._ElementIdShim` object."""
 
-    def it_provides_the_shimmed_dimension_dict_for_subvars(self, _subvar_aliases_prop_):
+    def test_it_provides_the_shimmed_dimension_dict_for_subvars(
+        self, _subvar_aliases_prop_
+    ):
         _subvar_aliases_prop_.return_value = tuple(("alias1", "alias2"))
         dimension_dict = {
             "type": {
@@ -813,7 +821,7 @@ class Describe_ElementIdShim:
             "another": "outside type",
         }
 
-    def and_it_provides_the_shimmed_dimension_dict_for_datetime(self):
+    def test_and_it_provides_the_shimmed_dimension_dict_for_datetime(self):
         dimension_dict = {
             "type": {
                 "elements": [
@@ -844,13 +852,13 @@ class Describe_ElementIdShim:
             "another": "outside type",
         }
 
-    def but_other_types_of_dimensions_are_left_alone(self):
+    def test_but_other_types_of_dimensions_are_left_alone(self):
         dimension_dict = {"dimension": "dictionary"}
         shim_ = _ElementIdShim(DT.CAT, dimension_dict, None)
 
         assert shim_.shimmed_dimension_dict == dimension_dict
 
-    def it_provides_the_shimmed_dimension_transform_dict_for_subvars(
+    def test_it_provides_the_shimmed_dimension_transform_dict_for_subvars(
         self, _replaced_element_transforms_, _replaced_order_element_ids_
     ):
         dimension_transforms_dict = {
@@ -870,7 +878,7 @@ class Describe_ElementIdShim:
         _replaced_element_transforms_.assert_called_once_with(shim_, "all_elements")
         _replaced_order_element_ids_.assert_called_once_with(shim_, "a")
 
-    def but_it_skips_replacing_if_not_present(
+    def test_but_it_skips_replacing_if_not_present(
         self, _replaced_element_transforms_, _replaced_order_element_ids_
     ):
         dimension_transforms_dict = {
@@ -883,7 +891,7 @@ class Describe_ElementIdShim:
         _replaced_element_transforms_.assert_not_called()
         _replaced_order_element_ids_.assert_not_called()
 
-    def and_it_skips_replacing_if_not_subvars(
+    def test_and_it_skips_replacing_if_not_subvars(
         self, _replaced_element_transforms_, _replaced_order_element_ids_
     ):
         dimension_transforms_dict = {
@@ -911,7 +919,7 @@ class Describe_ElementIdShim:
             ("1", ("all", "al1", "al2"), ("001", "1", "003"), (1, 3, "all"), "al1"),
         ),
     )
-    def it_translates_element_ids_for_subvariables(
+    def test_it_translates_element_ids_for_subvariables(
         self,
         _raw_element_id_prop_,
         _subvar_aliases_prop_,
@@ -930,7 +938,7 @@ class Describe_ElementIdShim:
 
         assert shim_.translate_element_id(id) == expected
 
-    def but_it_leaves_non_array_ids_alone(self):
+    def test_but_it_leaves_non_array_ids_alone(self):
         _ElementIdShim(DT.CAT, None, None).translate_element_id(25) == 25
 
     @pytest.mark.parametrize(
@@ -942,7 +950,7 @@ class Describe_ElementIdShim:
             ("2021", "2021"),
         ),
     )
-    def and_it_translates_for_datetime(self, request, id_, expected):
+    def test_and_it_translates_for_datetime(self, request, id_, expected):
         property_mock(
             request,
             _ElementIdShim,
@@ -952,13 +960,13 @@ class Describe_ElementIdShim:
         shim = _ElementIdShim(DT.DATETIME, None, None)
         assert shim.translate_element_id(id_) == expected
 
-    def it_provides_the_raw_element_ids_to_help(self):
+    def test_it_provides_the_raw_element_ids_to_help(self):
         dimension_dict = {"type": {"elements": [{"id": 1}, {"id": "b"}]}}
         shim_ = _ElementIdShim(None, dimension_dict, None)
 
         assert shim_._raw_element_ids == tuple((1, "b"))
 
-    def it_replaces_the_element_transforms_to_help(
+    def test_it_replaces_the_element_transforms_to_help(
         self, _raw_element_id_prop_, _subvar_aliases_prop_, _subvar_ids_prop_
     ):
         element_transforms = {
@@ -975,7 +983,7 @@ class Describe_ElementIdShim:
             "alias2": {"another": "transform"}
         }
 
-    def it_replaces_the_element_transforms_to_help_with_alias_keys(self):
+    def test_it_replaces_the_element_transforms_to_help_with_alias_keys(self):
         element_transforms = {
             "alias1": {"transform": "object"},
             "alias2": {"another": "transform"},
@@ -987,7 +995,7 @@ class Describe_ElementIdShim:
             shim_._replaced_element_transforms(element_transforms) == element_transforms
         )
 
-    def it_replaces_the_element_transforms_to_help_with_subvar_id_keys(
+    def test_it_replaces_the_element_transforms_to_help_with_subvar_id_keys(
         self, _subvar_aliases_prop_, _subvar_ids_prop_
     ):
         _subvar_aliases_prop_.return_value = tuple(("alias1", "alias2", "alias3"))
@@ -1026,11 +1034,11 @@ class Describe_ElementIdShim:
             ),
         ),
     )
-    def it_provides_the_subvar_ids_to_help(self, dim_dict, expected):
+    def test_it_provides_the_subvar_ids_to_help(self, dim_dict, expected):
         shim_ = _ElementIdShim(None, dim_dict, None)
         assert shim_._subvar_ids == expected
 
-    def it_provides_the_subvar_aliases_to_help(self):
+    def test_it_provides_the_subvar_aliases_to_help(self):
         dimension_dict = {
             "type": {
                 "elements": [
@@ -1067,7 +1075,7 @@ class Describe_ElementIdShim:
             ),
         ),
     )
-    def it_knows_if_it_has_mr_insertions(
+    def test_it_knows_if_it_has_mr_insertions(
         self, dimension_dict, dimension_type, expected_has_mr_insertion
     ):
         shim = _ElementIdShim(dimension_type, dimension_dict, None)
@@ -1099,10 +1107,10 @@ class Describe_ElementIdShim:
         return property_mock(request, _ElementIdShim, "_subvar_ids")
 
 
-class Describe_Element:
+class Test_Element:
     """Unit-test suite for `cr.cube.dimension.Element` object."""
 
-    def it_knows_its_anchor(self):
+    def test_it_knows_its_anchor(self):
         element_dict = {"value": {"references": {"anchor": "top"}, "derived": True}}
         element = Element(element_dict, None, None, None, None)
 
@@ -1110,7 +1118,7 @@ class Describe_Element:
 
         assert anchor == "top"
 
-    def but_anchor_is_none_if_not_derived(self):
+    def test_but_anchor_is_none_if_not_derived(self):
         element_dict = {"value": {"derived": False}}
         element = Element(element_dict, None, None, None, None)
 
@@ -1118,7 +1126,7 @@ class Describe_Element:
 
         assert anchor is None
 
-    def it_knows_its_element_id(self):
+    def test_it_knows_its_element_id(self):
         element_dict = {"id": 42}
         element = Element(element_dict, None, None, None, None)
 
@@ -1126,7 +1134,7 @@ class Describe_Element:
 
         assert element_id == 42
 
-    def it_knows_its_fill_RGB_color_str(self, element_transforms_):
+    def test_it_knows_its_fill_RGB_color_str(self, element_transforms_):
         element_transforms_.fill = [255, 255, 248]
         element = Element(None, None, element_transforms_, None, None)
 
@@ -1134,7 +1142,7 @@ class Describe_Element:
 
         assert rgb_color_fill == [255, 255, 248]
 
-    def it_knows_its_position_among_all_the_dimension_elements(self):
+    def test_it_knows_its_position_among_all_the_dimension_elements(self):
         element = Element(None, 17, None, None, None)
         index = element.index
         assert index == 17
@@ -1160,7 +1168,7 @@ class Describe_Element:
             ({"value": {"references": {"name": "Tom"}}}, "", "", ()),
         ),
     )
-    def it_knows_its_label(
+    def test_it_knows_its_label(
         self,
         request,
         element_dict,
@@ -1176,7 +1184,9 @@ class Describe_Element:
     @pytest.mark.parametrize(
         ("hide", "expected_value"), ((True, True), (False, False), (None, False))
     )
-    def it_knows_whether_it_is_explicitly_hidden(self, request, hide, expected_value):
+    def test_it_knows_whether_it_is_explicitly_hidden(
+        self, request, hide, expected_value
+    ):
         element_transforms_ = instance_mock(request, _ElementTransforms, hide=hide)
         element = Element(None, None, element_transforms_, None, None)
 
@@ -1196,7 +1206,7 @@ class Describe_Element:
             ({"missing": 1}, True),
         ),
     )
-    def it_knows_whether_its_missing_or_valid(self, element_dict, expected_value):
+    def test_it_knows_whether_its_missing_or_valid(self, element_dict, expected_value):
         element = Element(element_dict, None, None, None, None)
 
         missing = element.missing
@@ -1219,7 +1229,7 @@ class Describe_Element:
             ({"numeric_value": {"?": 8}}, {"?": 8}),
         ),
     )
-    def it_knows_its_numeric_value(self, element_dict, expected_value):
+    def test_it_knows_its_numeric_value(self, element_dict, expected_value):
         element = Element(element_dict, None, None, None, None)
 
         numeric_value = element.numeric_value
@@ -1234,7 +1244,7 @@ class Describe_Element:
         return instance_mock(request, _ElementTransforms)
 
 
-class DescribeElementTransforms:
+class TestElementTransforms:
     """Unit-test suite for `cr.cube.dimension._ElementTransforms` object."""
 
     @pytest.mark.parametrize(
@@ -1245,7 +1255,9 @@ class DescribeElementTransforms:
             ({"name": "Zillow", "fill": [255, 255, 0]}, [255, 255, 0]),
         ),
     )
-    def it_knows_its_fill_color_value(self, element_transforms_dict, expected_value):
+    def test_it_knows_its_fill_color_value(
+        self, element_transforms_dict, expected_value
+    ):
         element_transforms = _ElementTransforms(element_transforms_dict)
 
         fill_color_value = element_transforms.fill
@@ -1261,7 +1273,7 @@ class DescribeElementTransforms:
             ({"hide": 0}, None),
         ),
     )
-    def it_knows_when_it_is_explicitly_hidden(
+    def test_it_knows_when_it_is_explicitly_hidden(
         self, element_transforms_dict, expected_value
     ):
         element_transforms = _ElementTransforms(element_transforms_dict)
@@ -1279,7 +1291,7 @@ class DescribeElementTransforms:
             ({"foo": "foo"}, None),
         ),
     )
-    def it_knows_its_name(self, element_transforms_dict, expected_value):
+    def test_it_knows_its_name(self, element_transforms_dict, expected_value):
         element_transforms = _ElementTransforms(element_transforms_dict)
 
         name = element_transforms.name
@@ -1287,7 +1299,7 @@ class DescribeElementTransforms:
         assert name == expected_value
 
 
-class Describe_OrderSpec:
+class Test_OrderSpec:
     """Unit-test suite for `cr.cube.dimension._OrderSpec` object."""
 
     @pytest.mark.parametrize(
@@ -1301,7 +1313,7 @@ class Describe_OrderSpec:
             ({"fixed": {"top": [1, 2], "bottom": [3, 4]}}, (3, 4)),
         ),
     )
-    def it_knows_its_bottom_fixed_ids(
+    def test_it_knows_its_bottom_fixed_ids(
         self, _order_dict_prop_, order_dict, expected_value
     ):
         _order_dict_prop_.return_value = order_dict
@@ -1315,7 +1327,7 @@ class Describe_OrderSpec:
             ({"type": "payload_order"}, CM.PAYLOAD_ORDER),
         ),
     )
-    def it_knows_its_collation_method(
+    def test_it_knows_its_collation_method(
         self, _order_dict_prop_, order_dict, expected_value
     ):
         _order_dict_prop_.return_value = order_dict
@@ -1330,17 +1342,17 @@ class Describe_OrderSpec:
             ({"direction": "ascending"}, False),
         ),
     )
-    def it_knows_whether_the_sort_direction_is_descending(
+    def test_it_knows_whether_the_sort_direction_is_descending(
         self, _order_dict_prop_, order_dict, expected_value
     ):
         _order_dict_prop_.return_value = order_dict
         assert _OrderSpec(None, None).descending == expected_value
 
-    def it_knows_the_sort_vector_element_id(self, _order_dict_prop_):
+    def test_it_knows_the_sort_vector_element_id(self, _order_dict_prop_):
         _order_dict_prop_.return_value = {"element_id": 42}
         assert _OrderSpec(None, None).element_id == 42
 
-    def but_it_raises_when_element_id_not_present(self, _order_dict_prop_):
+    def test_but_it_raises_when_element_id_not_present(self, _order_dict_prop_):
         _order_dict_prop_.return_value = {}
         with pytest.raises(KeyError) as e:
             _OrderSpec(None, None).element_id
@@ -1355,37 +1367,37 @@ class Describe_OrderSpec:
             ({"element_ids": [4, 2]}, (4, 2)),
         ),
     )
-    def it_knows_the_ordered_element_ids_for_an_explicit_sort(
+    def test_it_knows_the_ordered_element_ids_for_an_explicit_sort(
         self, _order_dict_prop_, order_dict, expected_value
     ):
         _order_dict_prop_.return_value = order_dict
         assert _OrderSpec(None, None).element_ids == expected_value
 
-    def it_knows_the_sort_vector_insertion_id(self, _order_dict_prop_):
+    def test_it_knows_the_sort_vector_insertion_id(self, _order_dict_prop_):
         _order_dict_prop_.return_value = {"insertion_id": 42}
         assert _OrderSpec(None, None).insertion_id == 42
 
-    def but_it_raises_when_insertion_id_not_present(self, _order_dict_prop_):
+    def test_but_it_raises_when_insertion_id_not_present(self, _order_dict_prop_):
         _order_dict_prop_.return_value = {}
         with pytest.raises(KeyError) as e:
             _OrderSpec(None, None).insertion_id
         assert str(e.value) == "'insertion_id'"
 
-    def it_knows_the_marginal_specified_as_the_sort_basis(self, _order_dict_prop_):
+    def test_it_knows_the_marginal_specified_as_the_sort_basis(self, _order_dict_prop_):
         _order_dict_prop_.return_value = {"marginal": "scale_mean"}
         assert _OrderSpec(None, None).marginal == MARGINAL.SCALE_MEAN
 
-    def it_knows_the_measure_specified_as_the_sort_basis(self, _order_dict_prop_):
+    def test_it_knows_the_measure_specified_as_the_sort_basis(self, _order_dict_prop_):
         _order_dict_prop_.return_value = {"measure": "col_percent"}
         assert _OrderSpec(None, None).measure == MEASURE.COLUMN_PERCENT
 
-    def but_it_raises_when_measure_field_is_not_present(self, _order_dict_prop_):
+    def test_but_it_raises_when_measure_field_is_not_present(self, _order_dict_prop_):
         _order_dict_prop_.return_value = {}
         with pytest.raises(KeyError) as e:
             _OrderSpec(None, None).measure
         assert str(e.value) == "'measure'"
 
-    def and_it_raises_when_the_measure_keyword_is_not_recognized(
+    def test_and_it_raises_when_the_measure_keyword_is_not_recognized(
         self, _order_dict_prop_
     ):
         _order_dict_prop_.return_value = {"measure": "foobar"}
@@ -1406,7 +1418,9 @@ class Describe_OrderSpec:
             ({"fixed": {"bottom": [1, 2], "top": [3, 4]}}, (3, 4)),
         ),
     )
-    def it_knows_its_top_fixed_ids(self, _order_dict_prop_, order_dict, expected_value):
+    def test_it_knows_its_top_fixed_ids(
+        self, _order_dict_prop_, order_dict, expected_value
+    ):
         _order_dict_prop_.return_value = order_dict
         assert _OrderSpec(None, None).top_fixed_ids == expected_value
 
@@ -1419,7 +1433,7 @@ class Describe_OrderSpec:
             ({"order": {"type": "explicit"}}, {"type": "explicit"}),
         ),
     )
-    def it_provides_access_to_the_order_dict_to_help(
+    def test_it_provides_access_to_the_order_dict_to_help(
         self, dim_transforms, expected_value
     ):
         assert _OrderSpec(None, dim_transforms)._order_dict == expected_value
@@ -1431,10 +1445,10 @@ class Describe_OrderSpec:
         return property_mock(request, _OrderSpec, "_order_dict")
 
 
-class Describe_Subtotals:
+class Test_Subtotals:
     """Unit-test suite for `cr.cube.dimension._Subtotals` object."""
 
-    def it_has_sequence_behaviors(self, request, _subtotals_prop_):
+    def test_it_has_sequence_behaviors(self, request, _subtotals_prop_):
         _subtotals_prop_.return_value = (1, 2, 3)
         subtotals = _Subtotals(None, None)
 
@@ -1443,7 +1457,9 @@ class Describe_Subtotals:
         assert len(subtotals) == 3
         assert list(n for n in subtotals) == [1, 2, 3]
 
-    def it_provides_the_element_ids_as_a_set_to_help(self, request, valid_elements_):
+    def test_it_provides_the_element_ids_as_a_set_to_help(
+        self, request, valid_elements_
+    ):
         valid_elements_.element_ids = tuple(range(3))
         subtotals = _Subtotals(None, valid_elements_)
 
@@ -1480,7 +1496,7 @@ class Describe_Subtotals:
             ),
         ),
     )
-    def it_removes_invalid_when_iterating_the_valid_subtotal_insertion_dicts_to_help(
+    def test_it_removes_invalid_when_iterating_the_valid_subtotal_insertion_dicts(
         self, _element_ids_prop_, insertion_dicts, element_ids, expected_value
     ):
         _element_ids_prop_.return_value = element_ids
@@ -1490,7 +1506,7 @@ class Describe_Subtotals:
 
         assert subtotal_dicts == expected_value
 
-    def but_it_accepts_valid_insertion_dicts(self, _element_ids_prop_):
+    def test_but_it_accepts_valid_insertion_dicts(self, _element_ids_prop_):
         _element_ids_prop_.return_value = {1, 2, 5, 8, -1}
         insertion_dicts = [
             {
@@ -1531,7 +1547,7 @@ class Describe_Subtotals:
 
         assert subtotal_dicts == tuple(insertion_dicts)
 
-    def it_constructs_its_subtotal_objects_to_help(
+    def test_it_constructs_its_subtotal_objects_to_help(
         self, request, _iter_valid_subtotal_dicts_, valid_elements_, _Subtotal_
     ):
         subtotal_dicts_ = tuple(
@@ -1577,7 +1593,7 @@ class Describe_Subtotals:
         return instance_mock(request, Elements)
 
 
-class Describe_Subtotal:
+class Test_Subtotal:
     """Unit-test suite for `cr.cube.dimension._Subtotal` object."""
 
     @pytest.mark.parametrize(
@@ -1590,7 +1606,7 @@ class Describe_Subtotal:
             ({"args": [4, 99]}, (4, 99), [3, 4]),
         ),
     )
-    def it_knows_the_addend_idxs(
+    def test_it_knows_the_addend_idxs(
         self,
         addend_ids_,
         all_elements_,
@@ -1625,7 +1641,7 @@ class Describe_Subtotal:
             ({"anchor": None}, {1, 2, 3}, "bottom"),
         ),
     )
-    def it_knows_the_insertion_anchor(
+    def test_it_knows_the_insertion_anchor(
         self, subtotal_dict, element_ids, expected_value, valid_elements_
     ):
         valid_elements_.element_ids = element_ids
@@ -1647,7 +1663,7 @@ class Describe_Subtotal:
             ({"args": [1], "kwargs": {"positive": [2]}}, {1, 2, 3}, (2,)),
         ),
     )
-    def it_provides_access_to_the_addend_element_ids(
+    def test_it_provides_access_to_the_addend_element_ids(
         self, subtotal_dict, element_ids, expected_value, valid_elements_
     ):
         valid_elements_.element_ids = element_ids
@@ -1655,14 +1671,14 @@ class Describe_Subtotal:
 
         assert subtotal.addend_ids == expected_value
 
-    def it_knows_its_insertion_id_when_it_has_been_assigned_one(self):
+    def test_it_knows_its_insertion_id_when_it_has_been_assigned_one(self):
         assert _Subtotal({"id": 42}, None).insertion_id == 42
 
     @pytest.mark.parametrize(
         "subtotal_dict, expected_value",
         (({}, ""), ({"name": None}, ""), ({"name": ""}, ""), ({"name": "Joe"}, "Joe")),
     )
-    def it_knows_the_subtotal_label(self, subtotal_dict, expected_value):
+    def test_it_knows_the_subtotal_label(self, subtotal_dict, expected_value):
         assert _Subtotal(subtotal_dict, None).label == expected_value
 
     @pytest.mark.parametrize(
@@ -1677,7 +1693,7 @@ class Describe_Subtotal:
             ({"kwargs": {"negative": [1, 2, 3]}}, {}, ()),
         ),
     )
-    def it_provides_access_to_the_subtrahend_element_ids(
+    def test_it_provides_access_to_the_subtrahend_element_ids(
         self, subtotal_dict, element_ids, expected_value, valid_elements_
     ):
         valid_elements_.element_ids = element_ids
@@ -1695,7 +1711,7 @@ class Describe_Subtotal:
             ({"kwargs": {"negative": [4, 99]}}, (4, 99), [3, 4]),
         ),
     )
-    def it_knows_the_subtrahend_idxs(
+    def test_it_knows_the_subtrahend_idxs(
         self,
         subtrahend_ids_,
         all_elements_,
@@ -1724,7 +1740,7 @@ class Describe_Subtotal:
         "subtotal_dict, expected_fill",
         (({"fill": "fake_fill"}, "fake_fill"), ({}, None)),
     )
-    def it_knows_its_fill(self, subtotal_dict, expected_fill):
+    def test_it_knows_its_fill(self, subtotal_dict, expected_fill):
         subtotal = _Subtotal(subtotal_dict, None)
 
         fill = subtotal.fill

@@ -1009,7 +1009,7 @@ class TestHeadersAndSubtotals:
             "Latino and other voters",
         ]
 
-    def it_calculate_col_residuals_for_subtotals(self):
+    def test_it_calculate_col_residuals_for_subtotals(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
         np.testing.assert_almost_equal(
             slice_.column_std_dev,
@@ -1024,7 +1024,7 @@ class TestHeadersAndSubtotals:
             load_python_expression("col-per-moe-cat-x-cat-hs-2rows-1col"),
         )
 
-    def it_computes_residuals_for_subtotals_1col_2rows(self):
+    def test_it_computes_residuals_for_subtotals_1col_2rows(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
 
         np.testing.assert_almost_equal(
@@ -1265,7 +1265,7 @@ class TestHeadersAndSubtotals:
             ],
         )
 
-    def it_calculates_residuals_for_multiple_insertions(self):
+    def test_it_calculates_residuals_for_multiple_insertions(self):
         slice_ = Cube(CR.FOOD_GROUP_X_SHAPE_PASTA_2ROWS1COL_INSERTION).partitions[0]
 
         assert slice_.inserted_column_idxs == (3,)
@@ -1832,7 +1832,7 @@ class TestHeadersAndSubtotals:
             ],
         )
 
-    def it_calculates_residuals_for_columns_insertion(self):
+    def test_it_calculates_residuals_for_columns_insertion(self):
         transforms = {
             "columns_dimension": {
                 "insertions": [
@@ -2021,7 +2021,7 @@ class TestHeadersAndSubtotals:
             ],
         )
 
-    def it_calculates_residuals_for_rows_insertion(self):
+    def test_it_calculates_residuals_for_rows_insertion(self):
         transforms = {"columns_dimension": {"insertions": {}}}
         slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
 
@@ -2385,7 +2385,7 @@ class TestHeadersAndSubtotals:
             ],
         )
 
-    def it_calculates_residuals_for_cat_x_cat_with_missing_1_col_insertion(self):
+    def test_it_calculates_residuals_for_cat_x_cat_with_missing_1_col_insertion(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_MISSING).partitions[0]
 
         assert slice_.inserted_column_idxs == (0,)
@@ -2481,7 +2481,9 @@ class TestHeadersAndSubtotals:
             ],
         )
 
-    def it_calculates_residuals_for_cat_x_num_hs_pruned_with_3_rows_insertions(self):
+    def test_it_calculates_residuals_for_cat_x_num_hs_pruned_with_3_rows_insertions(
+        self,
+    ):
         transforms = {
             "rows_dimension": {"prune": True},
             "columns_dimension": {"prune": True},
@@ -2522,7 +2524,7 @@ class TestHeadersAndSubtotals:
             ],
         )
 
-    def it_calculates_residuals_for_cat_x_items_x_cats_with_col_insertion(self):
+    def test_it_calculates_residuals_for_cat_x_items_x_cats_with_col_insertion(self):
         slice_ = Cube(CR.CAT_X_ITEMS_X_CATS_HS).partitions[2]
 
         assert slice_.zscores == pytest.approx(np.full((8, 11), np.nan), nan_ok=True)
@@ -2753,7 +2755,7 @@ class TestHeadersAndSubtotals:
             )
         )
 
-    def it_provide_residual_test_stats_including_hs(self):
+    def test_it_provide_residual_test_stats_including_hs(self):
         slice_ = Cube(CR.CAT_X_CAT_HS_2ROWS_1COL).partitions[0]
         np.testing.assert_array_equal(slice_.pvals, slice_.residual_test_stats[0])
         np.testing.assert_array_equal(slice_.zscores, slice_.residual_test_stats[1])
@@ -2761,10 +2763,10 @@ class TestHeadersAndSubtotals:
         assert slice_.residual_test_stats.shape == (2, 6, 7)
 
 
-class DescribeIntegrated_SubtotalDifferences:
+class TestIntegrated_SubtotalDifferences:
     """TDD driver(s) for Subtotal Difference insertions."""
 
-    def it_computes_diff_for_cat_date_on_a_3D_cube(self):
+    def test_it_computes_diff_for_cat_date_on_a_3D_cube(self):
         cube = Cube(
             CR.CAT_X_MR_X_CAT_DATE,
             transforms={
@@ -2801,7 +2803,7 @@ class DescribeIntegrated_SubtotalDifferences:
             )
         )
 
-    def it_computes_diff_for_cat_date(self):
+    def test_it_computes_diff_for_cat_date(self):
         strand = Cube(
             CR.CAT_DATE,
             transforms={
@@ -2843,7 +2845,7 @@ class DescribeIntegrated_SubtotalDifferences:
             )
         )
 
-    def it_computes_nan_diff_for_cat_date_with_multiple_addend_or_subtrahend(self):
+    def test_it_computes_nan_diff_for_cat_date_with_multiple_addend_or_subtrahend(self):
         strand = Cube(
             CR.CAT_DATE,
             transforms={
@@ -2871,7 +2873,7 @@ class DescribeIntegrated_SubtotalDifferences:
             strand.table_proportions[0]
         )  # nan insertion because the diff subtotal has multiple positive terms
 
-    def it_computes_diff_for_cat_x_cat_date_with_subdiffs_on_column(self):
+    def test_it_computes_diff_for_cat_x_cat_date_with_subdiffs_on_column(self):
         insertions = [
             {
                 "function": "subtotal",
@@ -2917,7 +2919,7 @@ class DescribeIntegrated_SubtotalDifferences:
             np.array([np.nan, np.nan, np.nan, np.nan, np.nan]), nan_ok=True
         )
 
-    def it_computes_diff_for_cat_x_cat_date_with_subdiffs_on_both(self):
+    def test_it_computes_diff_for_cat_x_cat_date_with_subdiffs_on_both(self):
         slice_ = Cube(
             CR.CAT_X_CAT_DATE,
             transforms={
@@ -2979,7 +2981,7 @@ class DescribeIntegrated_SubtotalDifferences:
             rel=1e-4,
         )
 
-    def it_computes_diff_for_cat_date_x_cat_with_subdiffs_on_both(self):
+    def test_it_computes_diff_for_cat_date_x_cat_with_subdiffs_on_both(self):
         slice_ = Cube(
             CR.CAT_DATE_X_CAT,
             transforms={
@@ -3082,7 +3084,7 @@ class DescribeIntegrated_SubtotalDifferences:
             nan_ok=True,
         )
 
-    def it_computes_diff_for_cat_date_x_cat_with_subdiffs_on_rows(self):
+    def test_it_computes_diff_for_cat_date_x_cat_with_subdiffs_on_rows(self):
         insertions = [
             {
                 "function": "subtotal",
@@ -3136,7 +3138,7 @@ class DescribeIntegrated_SubtotalDifferences:
             nan_ok=True,
         )
 
-    def it_computes_measures_for_1D_cat_with_subdiffs(self):
+    def test_it_computes_measures_for_1D_cat_with_subdiffs(self):
         strand = Cube(
             CR.CAT,
             transforms={
@@ -3161,7 +3163,7 @@ class DescribeIntegrated_SubtotalDifferences:
         assert strand.table_proportion_moes[0] == pytest.approx(0.05216430)
         assert strand.population_counts[0] == pytest.approx(np.nan, nan_ok=True)
 
-    def it_computes_measures_for_cat_x_cat_with_subdiffs_on_both(self):
+    def test_it_computes_measures_for_cat_x_cat_with_subdiffs_on_both(self):
         slice_ = Cube(
             CR.CAT_4_X_CAT_4,
             transforms={
@@ -3276,7 +3278,7 @@ class DescribeIntegrated_SubtotalDifferences:
             np.full(5, np.nan), nan_ok=True
         )
 
-    def it_computes_measures_for_cat_x_cat_with_subdiffs_and_subtot_on_both(self):
+    def test_it_computes_measures_for_cat_x_cat_with_subdiffs_and_subtot_on_both(self):
         slice_ = Cube(
             CR.CAT_4_X_CAT_4,
             transforms={
@@ -3358,7 +3360,7 @@ class DescribeIntegrated_SubtotalDifferences:
         assert slice_.pvals[:, 0] == pytest.approx(np.full(6, np.nan), nan_ok=True)
         assert slice_.pvals[0, :] == pytest.approx(np.full(6, np.nan), nan_ok=True)
 
-    def it_computes_measures_for_ca_with_subdiff(self):
+    def test_it_computes_measures_for_ca_with_subdiff(self):
         slice_ = Cube(
             CR.CA_CAT_X_CA_SUBVAR,
             transforms={
@@ -3393,7 +3395,7 @@ class DescribeIntegrated_SubtotalDifferences:
         assert slice_.zscores[0, :] == pytest.approx(np.full(3, np.nan), nan_ok=True)
         assert slice_.pvals[0, :] == pytest.approx(np.full(3, np.nan), nan_ok=True)
 
-    def it_computes_measures_for_mr_x_cat_subdiff(self):
+    def test_it_computes_measures_for_mr_x_cat_subdiff(self):
         slice_ = Cube(
             CR.MR_X_CAT,
             transforms={
@@ -3435,7 +3437,7 @@ class DescribeIntegrated_SubtotalDifferences:
         assert slice_.zscores[:, 0] == pytest.approx(np.full(5, np.nan), nan_ok=True)
         assert slice_.pvals[:, 0] == pytest.approx(np.full(5, np.nan), nan_ok=True)
 
-    def it_computes_scale_median_for_cat_with_subdiff_x_cat_with_subdiff(self):
+    def test_it_computes_scale_median_for_cat_with_subdiff_x_cat_with_subdiff(self):
         slice_ = Cube(
             CR.CAT_HS_MT_X_CAT_HS_MT,
             transforms={
@@ -3472,7 +3474,7 @@ class DescribeIntegrated_SubtotalDifferences:
             [np.nan, 2, 1, 2, 2, np.nan, 2], nan_ok=True
         )
 
-    def it_computes_sum_for_numarray_with_subdiffs_and_subtot_on_columns(self):
+    def test_it_computes_sum_for_numarray_with_subdiffs_and_subtot_on_columns(self):
         slice_ = Cube(
             NA.NUM_ARR_SUM_GROUPED_BY_CAT,
             transforms={
@@ -3518,7 +3520,9 @@ class DescribeIntegrated_SubtotalDifferences:
             )
         )
 
-    def it_computes_share_of_sum_for_numarray_with_subdiffs_and_subtot_on_columns(self):
+    def test_it_computes_share_of_sum_for_numarray_with_subdiffs_and_subtot_on_columns(
+        self,
+    ):
         slice_ = Cube(
             NA.NUM_ARR_SUM_GROUPED_BY_CAT,
             transforms={
@@ -3604,7 +3608,7 @@ class DescribeIntegrated_SubtotalDifferences:
             nan_ok=True,
         )
 
-    def it_computes_diff_indexes_for_cat_x_cat_with_subdiffs_on_both(self):
+    def test_it_computes_diff_indexes_for_cat_x_cat_with_subdiffs_on_both(self):
         slice_ = Cube(
             CR.CAT_4_X_CAT_4,
             transforms={

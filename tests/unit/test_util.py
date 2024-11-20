@@ -7,27 +7,27 @@ import pytest
 from cr.cube.util import lazyproperty
 
 
-class DescribeLazyPropertyDecorator:
+class TestLazyPropertyDecorator:
     """Tests @lazyproperty decorator class."""
 
-    def it_is_a_lazyproperty_object_on_class_access(self, Obj):
+    def test_it_is_a_lazyproperty_object_on_class_access(self, Obj):
         assert isinstance(Obj.fget, lazyproperty)
 
-    def but_it_adopts_the_name_of_the_decorated_method(self, Obj):
+    def test_but_it_adopts_the_name_of_the_decorated_method(self, Obj):
         assert Obj.fget.__name__ == "fget"
 
-    def and_it_adopts_the_module_of_the_decorated_method(self, Obj):
+    def test_and_it_adopts_the_module_of_the_decorated_method(self, Obj):
         # ---the module name actually, not a module object
         assert Obj.fget.__module__ == __name__
 
-    def and_it_adopts_the_docstring_of_the_decorated_method(self, Obj):
+    def test_and_it_adopts_the_docstring_of_the_decorated_method(self, Obj):
         assert Obj.fget.__doc__ == "Docstring of Obj.fget method definition."
 
-    def it_only_calculates_value_on_first_call(self, obj):
+    def test_it_only_calculates_value_on_first_call(self, obj):
         assert obj.fget == 1
         assert obj.fget == 1
 
-    def it_raises_on_attempt_to_assign(self, obj):
+    def test_it_raises_on_attempt_to_assign(self, obj):
         assert obj.fget == 1
         with pytest.raises(AttributeError):
             obj.fget = 42

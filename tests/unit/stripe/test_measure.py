@@ -38,7 +38,7 @@ from cr.cube.stripe.measure import (
 from ...unitutil import class_mock, instance_mock, method_mock, property_mock
 
 
-class DescribeStripeMeasures:
+class TestStripeMeasures:
     """Unit test suite for `cr.cube.stripe.measure.StripeMeasures` object."""
 
     @pytest.mark.parametrize(
@@ -60,7 +60,7 @@ class DescribeStripeMeasures:
             ("weighted_counts", _WeightedCounts),
         ),
     )
-    def it_provides_access_to_various_measure_objects(
+    def test_it_provides_access_to_various_measure_objects(
         self,
         request,
         _cube_measures_prop_,
@@ -83,7 +83,7 @@ class DescribeStripeMeasures:
         MeasureCls_.assert_called_once_with(rows_dimension_, measures, cube_measures_)
         assert measure is measure_
 
-    def it_provides_access_to_the_pruning_base(
+    def test_it_provides_access_to_the_pruning_base(
         self, request, _cube_measures_prop_, cube_measures_
     ):
         unweighted_cube_counts_ = instance_mock(
@@ -95,7 +95,7 @@ class DescribeStripeMeasures:
 
         assert measures.pruning_base.tolist() == [0, 2, 7]
 
-    def it_provides_access_to_the_cube_measures_to_help(
+    def test_it_provides_access_to_the_cube_measures_to_help(
         self, request, cube_, rows_dimension_, cube_measures_
     ):
         CubeMeasures_ = class_mock(
@@ -129,10 +129,10 @@ class DescribeStripeMeasures:
         return instance_mock(request, Dimension)
 
 
-class Describe_BaseSecondOrderMeasure:
+class Test_BaseSecondOrderMeasure:
     """Unit test suite for `cr.cube.stripe.measure._BaseSecondOrderMeasure` object."""
 
-    def it_gathers_the_blocks_for_the_measure(self, request):
+    def test_it_gathers_the_blocks_for_the_measure(self, request):
         property_mock(request, _BaseSecondOrderMeasure, "base_values", return_value="A")
         property_mock(
             request, _BaseSecondOrderMeasure, "subtotal_values", return_value="B"
@@ -141,7 +141,7 @@ class Describe_BaseSecondOrderMeasure:
 
         assert measure.blocks == ("A", "B")
 
-    def it_provides_access_to_the_unweighted_cube_counts_object_to_help(
+    def test_it_provides_access_to_the_unweighted_cube_counts_object_to_help(
         self, request, cube_measures_
     ):
         unweighted_cube_counts_ = instance_mock(request, _BaseCubeCounts)
@@ -150,7 +150,7 @@ class Describe_BaseSecondOrderMeasure:
 
         assert measure._unweighted_cube_counts is unweighted_cube_counts_
 
-    def it_provides_access_to_the_weighted_cube_counts_object_to_help(
+    def test_it_provides_access_to_the_weighted_cube_counts_object_to_help(
         self, request, cube_measures_
     ):
         weighted_cube_counts_ = instance_mock(request, _BaseCubeCounts)
@@ -170,10 +170,10 @@ class Describe_BaseSecondOrderMeasure:
         return instance_mock(request, Dimension)
 
 
-class Describe_Means:
+class Test_Means:
     """Unit test suite for `cr.cube.stripe.measure._Means` object."""
 
-    def it_computes_its_base_values_to_help(self, request):
+    def test_it_computes_its_base_values_to_help(self, request):
         cube_means_ = instance_mock(
             request, _BaseCubeMeans, means=np.array([1.1, 2.2, 3.3])
         )
@@ -182,7 +182,7 @@ class Describe_Means:
 
         assert means.base_values == pytest.approx([1.1, 2.2, 3.3])
 
-    def it_computes_its_subtotal_values_to_help(self, request):
+    def test_it_computes_its_subtotal_values_to_help(self, request):
         property_mock(request, _Means, "base_values", return_value=[1.1, 2.2, 3.3])
         rows_dimension_ = instance_mock(request, Dimension)
         NanSubtotals_ = class_mock(request, "cr.cube.stripe.measure.NanSubtotals")
@@ -197,10 +197,10 @@ class Describe_Means:
         assert subtotal_values == pytest.approx([np.nan, np.nan], nan_ok=True)
 
 
-class Describe_Median:
+class Test_Median:
     """Unit test suite for `cr.cube.stripe.measure._Median` object."""
 
-    def it_computes_its_base_values_to_help(self, request):
+    def test_it_computes_its_base_values_to_help(self, request):
         cube_medians_ = instance_mock(
             request, _BaseCubeMedians, medians=np.array([1.1, 2.2, 3.3])
         )
@@ -211,7 +211,7 @@ class Describe_Median:
 
         assert medians.base_values == pytest.approx([1.1, 2.2, 3.3])
 
-    def it_computes_its_subtotal_values_to_help(self, request):
+    def test_it_computes_its_subtotal_values_to_help(self, request):
         property_mock(request, _Medians, "base_values", return_value=[1.1, 2.2, 3.3])
         rows_dimension_ = instance_mock(request, Dimension)
         NanSubtotals_ = class_mock(request, "cr.cube.stripe.measure.NanSubtotals")
@@ -226,7 +226,7 @@ class Describe_Median:
         assert subtotal_values == pytest.approx([np.nan, np.nan], nan_ok=True)
 
 
-class Describe_PopulationProportions:
+class Test_PopulationProportions:
     """Unit test suite for `cr.cube.stripe.measure._PopulationProportions` object."""
 
     @pytest.mark.parametrize(
@@ -237,7 +237,7 @@ class Describe_PopulationProportions:
             (DT.CAT_DATE, [0, 1], [1, 1]),
         ),
     )
-    def it_computes_its_base_values_to_help(
+    def test_it_computes_its_base_values_to_help(
         self,
         dimension_type,
         base_values,
@@ -265,7 +265,7 @@ class Describe_PopulationProportions:
             (DT.CAT_DATE, [], []),
         ),
     )
-    def it_computes_its_subtotal_values_to_help(
+    def test_it_computes_its_subtotal_values_to_help(
         self,
         dimension_type,
         subtotal_values,
@@ -298,7 +298,7 @@ class Describe_PopulationProportions:
         return instance_mock(request, _TableProportions)
 
 
-class Describe_PopulationProportionStderrs:
+class Test_PopulationProportionStderrs:
     """Unit test suite for `cr.cube.stripe.measure._PopulationProportionStderrs`."""
 
     @pytest.mark.parametrize(
@@ -309,7 +309,7 @@ class Describe_PopulationProportionStderrs:
             (DT.CAT_DATE, [0, 1], [0, 0]),
         ),
     )
-    def it_computes_its_base_values_to_help(
+    def test_it_computes_its_base_values_to_help(
         self,
         dimension_type,
         base_values,
@@ -337,7 +337,7 @@ class Describe_PopulationProportionStderrs:
             (DT.CAT_DATE, [], []),
         ),
     )
-    def it_computes_its_subtotal_values_to_help(
+    def test_it_computes_its_subtotal_values_to_help(
         self,
         dimension_type,
         subtotal_values,
@@ -370,7 +370,7 @@ class Describe_PopulationProportionStderrs:
         return instance_mock(request, _TableProportionStderrs)
 
 
-class Describe_ScaledCounts:
+class Test_ScaledCounts:
     """Unit test suite for `cr.cube.stripe.measure._ScaledCounts` object."""
 
     @pytest.mark.parametrize(
@@ -381,7 +381,7 @@ class Describe_ScaledCounts:
             (np.array([1, 2, 3]), 100, 4),
         ),
     )
-    def it_knows_the_scale_mean(
+    def test_it_knows_the_scale_mean(
         self,
         _numeric_values_prop_,
         numeric_values,
@@ -404,7 +404,7 @@ class Describe_ScaledCounts:
             (np.array([3, 1, 2]), np.array([300, 100, 200]), 2.5),
         ),
     )
-    def it_knows_the_scale_median(
+    def test_it_knows_the_scale_median(
         self,
         _numeric_values_prop_,
         numeric_values,
@@ -427,7 +427,7 @@ class Describe_ScaledCounts:
             (np.array([1, 2, 3]), 4.0, 2.0),
         ),
     )
-    def it_knows_the_scale_stddev(
+    def test_it_knows_the_scale_stddev(
         self,
         _numeric_values_prop_,
         numeric_values,
@@ -448,7 +448,7 @@ class Describe_ScaledCounts:
             (np.array([1, 2, 3]), 4.0, 100.0, 0.2),
         ),
     )
-    def it_knows_the_scale_stderr(
+    def test_it_knows_the_scale_stderr(
         self,
         _numeric_values_prop_,
         numeric_values,
@@ -465,13 +465,15 @@ class Describe_ScaledCounts:
 
         assert scaled_counts.scale_stderr == expected_value
 
-    def it_knows_which_elements_have_a_numeric_values_to_help(self, rows_dimension_):
+    def test_it_knows_which_elements_have_a_numeric_values_to_help(
+        self, rows_dimension_
+    ):
         rows_dimension_.numeric_values = (1, np.nan, 3)
         scaled_counts = _ScaledCounts(rows_dimension_, None, None)
 
         assert scaled_counts._has_numeric_value.tolist() == [True, False, True]
 
-    def it_gathers_the_numeric_values_to_help(
+    def test_it_gathers_the_numeric_values_to_help(
         self, rows_dimension_, _has_numeric_value_prop_
     ):
         rows_dimension_.numeric_values = (1, np.nan, 3)
@@ -480,7 +482,7 @@ class Describe_ScaledCounts:
 
         assert scaled_counts._numeric_values.tolist() == [1, 3]
 
-    def it_computes_the_scale_variance_to_help(
+    def test_it_computes_the_scale_variance_to_help(
         self,
         request,
         _weighted_counts_prop_,
@@ -495,7 +497,7 @@ class Describe_ScaledCounts:
 
         assert scaled_counts._scale_variance == pytest.approx(0.5555556)
 
-    def it_computes_the_total_scaled_count_to_help(
+    def test_it_computes_the_total_scaled_count_to_help(
         self, _weighted_counts_prop_, _numeric_values_prop_
     ):
         _weighted_counts_prop_.return_value = np.array([10, 20, 30, 40])
@@ -505,13 +507,13 @@ class Describe_ScaledCounts:
         # --- 10 + 40 + 90 + 160 = 300 ---
         assert scaled_counts._total_scaled_count == 300
 
-    def it_computes_the_total_weighted_count_to_help(self, _weighted_counts_prop_):
+    def test_it_computes_the_total_weighted_count_to_help(self, _weighted_counts_prop_):
         _weighted_counts_prop_.return_value = np.array([10, 20, 30, 40])
         scaled_counts = _ScaledCounts(None, None, None)
 
         assert scaled_counts._total_weighted_count == 100
 
-    def it_retrives_the_weighted_counts_to_help(
+    def test_it_retrives_the_weighted_counts_to_help(
         self, request, _has_numeric_value_prop_
     ):
         weighted_cube_counts_ = instance_mock(
@@ -559,10 +561,10 @@ class Describe_ScaledCounts:
         return property_mock(request, _ScaledCounts, "_weighted_counts")
 
 
-class Describe_TableProportionStddevs:
+class Test_TableProportionStddevs:
     """Unit test suite for `cr.cube.stripe.measure._TableProportionStddevs` object."""
 
-    def it_computes_its_base_values_to_help(
+    def test_it_computes_its_base_values_to_help(
         self, measures_, table_proportion_variances_
     ):
         table_proportion_variances_.base_values = np.array([0.04, 0.09, 0.16])
@@ -571,7 +573,7 @@ class Describe_TableProportionStddevs:
 
         assert table_proportion_stddevs.base_values == pytest.approx([0.2, 0.3, 0.4])
 
-    def it_computes_its_subtotal_values_to_help(
+    def test_it_computes_its_subtotal_values_to_help(
         self, measures_, table_proportion_variances_
     ):
         table_proportion_variances_.subtotal_values = np.array([0.25, 0.36])
@@ -591,10 +593,10 @@ class Describe_TableProportionStddevs:
         return instance_mock(request, _TableProportionVariances)
 
 
-class Describe_TableProportionStderrs:
+class Test_TableProportionStderrs:
     """Unit test suite for `cr.cube.stripe.measure._TableProportionStderrs` object."""
 
-    def it_computes_its_base_values_to_help(
+    def test_it_computes_its_base_values_to_help(
         self, measures_, table_proportion_variances_, weighted_bases_
     ):
         table_proportion_variances_.base_values = np.array([0.4, 1.8, 4.8])
@@ -605,7 +607,7 @@ class Describe_TableProportionStderrs:
 
         assert table_proportion_stderrs.base_values == pytest.approx([0.2, 0.3, 0.4])
 
-    def it_computes_its_subtotal_values_to_help(
+    def test_it_computes_its_subtotal_values_to_help(
         self, measures_, table_proportion_variances_, weighted_bases_
     ):
         table_proportion_variances_.subtotal_values = np.array([4.8, 12.5])
@@ -631,10 +633,10 @@ class Describe_TableProportionStderrs:
         return instance_mock(request, _WeightedBases)
 
 
-class Describe_TableProportionVariances:
+class Test_TableProportionVariances:
     """Unit test suite for `cr.cube.stripe.measure._TableProportionVariances` object."""
 
-    def it_computes_its_base_values_to_help(self, measures_, table_proportions_):
+    def test_it_computes_its_base_values_to_help(self, measures_, table_proportions_):
         table_proportions_.base_values = np.array([0.2, 0.3, 0.5])
         measures_.table_proportions = table_proportions_
         table_proportion_variances = _TableProportionVariances(None, measures_, None)
@@ -643,7 +645,7 @@ class Describe_TableProportionVariances:
             [0.16, 0.21, 0.25]
         )
 
-    def it_computes_its_subtotal_values_to_help(
+    def test_it_computes_its_subtotal_values_to_help(
         self, request, measures_, table_proportions_
     ):
         rows_dimension_ = instance_mock(request, Dimension)
@@ -694,7 +696,7 @@ class Describe_TableProportionVariances:
         return instance_mock(request, _TableProportions)
 
 
-class Describe_TableProportions:
+class Test_TableProportions:
     """Unit test suite for `cr.cube.stripe.measure._TableProportions` object."""
 
     @pytest.mark.parametrize(
@@ -705,7 +707,7 @@ class Describe_TableProportions:
             (0, [np.inf, np.inf]),
         ),
     )
-    def it_computes_its_base_values_to_help(
+    def test_it_computes_its_base_values_to_help(
         self,
         measures_,
         weighted_counts_,
@@ -729,7 +731,7 @@ class Describe_TableProportions:
             (42.42, [0.2310231, 0.1791608]),
         ),
     )
-    def it_computes_its_subtotal_values_to_help(
+    def test_it_computes_its_subtotal_values_to_help(
         self,
         _dimension,
         measures_,
@@ -772,10 +774,10 @@ class Describe_TableProportions:
         return instance_mock(request, Dimension)
 
 
-class Describe_UnweightedBases:
+class Test_UnweightedBases:
     """Unit test suite for `cr.cube.stripe.measure._UnweightedBases` object."""
 
-    def it_knows_its_base_values(
+    def test_it_knows_its_base_values(
         self, _unweighted_cube_counts_prop_, unweighted_cube_counts_
     ):
         _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
@@ -788,7 +790,7 @@ class Describe_UnweightedBases:
         "subtotal_values, expected_value",
         ((np.array([]), []), (np.array([5, 3]), [42, 42])),
     )
-    def it_knows_its_subtotal_values(
+    def test_it_knows_its_subtotal_values(
         self, request, _unweighted_cube_counts_prop_, subtotal_values, expected_value
     ):
         rows_dimension_ = instance_mock(request, Dimension)
@@ -807,7 +809,7 @@ class Describe_UnweightedBases:
         )
         assert subtotal_values.tolist() == expected_value
 
-    def it_knows_its_table_base_range(
+    def test_it_knows_its_table_base_range(
         self, _unweighted_cube_counts_prop_, unweighted_cube_counts_
     ):
         _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
@@ -827,10 +829,10 @@ class Describe_UnweightedBases:
         return property_mock(request, _UnweightedBases, "_unweighted_cube_counts")
 
 
-class Describe_UnweightedCounts:
+class Test_UnweightedCounts:
     """Unit test suite for `cr.cube.stripe.measure._UnweightedCounts` object."""
 
-    def it_knows_its_base_values(
+    def test_it_knows_its_base_values(
         self, _unweighted_cube_counts_prop_, unweighted_cube_counts_
     ):
         _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
@@ -839,7 +841,7 @@ class Describe_UnweightedCounts:
 
         assert unweighted_counts.base_values.tolist() == [1, 2, 3]
 
-    def it_knows_its_subtotal_values(self, request):
+    def test_it_knows_its_subtotal_values(self, request):
         rows_dimension_ = instance_mock(request, Dimension)
         property_mock(request, _UnweightedCounts, "base_values", return_value=[1, 2, 3])
         SumSubtotals_ = class_mock(request, "cr.cube.stripe.measure.SumSubtotals")
@@ -864,10 +866,10 @@ class Describe_UnweightedCounts:
         return property_mock(request, _UnweightedCounts, "_unweighted_cube_counts")
 
 
-class Describe_WeightedBases:
+class Test_WeightedBases:
     """Unit test suite for `cr.cube.stripe.measure._WeightedBases` object."""
 
-    def it_knows_its_base_values(
+    def test_it_knows_its_base_values(
         self, _weighted_cube_counts_prop_, weighted_cube_counts_
     ):
         _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
@@ -880,7 +882,7 @@ class Describe_WeightedBases:
         "subtotal_values, expected_value",
         ((np.array([]), []), (np.array([5.5, 3.3]), [42.24, 42.24])),
     )
-    def it_knows_its_subtotal_values(
+    def test_it_knows_its_subtotal_values(
         self,
         request,
         _weighted_cube_counts_prop_,
@@ -905,7 +907,7 @@ class Describe_WeightedBases:
         )
         assert subtotal_values.tolist() == expected_value
 
-    def it_knows_its_table_margin_range(
+    def test_it_knows_its_table_margin_range(
         self, _weighted_cube_counts_prop_, weighted_cube_counts_
     ):
         _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
@@ -925,10 +927,10 @@ class Describe_WeightedBases:
         return property_mock(request, _WeightedBases, "_weighted_cube_counts")
 
 
-class Describe_WeightedCounts:
+class Test_WeightedCounts:
     """Unit test suite for `cr.cube.stripe.measure._WeightedCounts` object."""
 
-    def it_computes_its_base_values_to_help(
+    def test_it_computes_its_base_values_to_help(
         self, _weighted_cube_counts_prop_, weighted_cube_counts_
     ):
         _weighted_cube_counts_prop_.return_value = weighted_cube_counts_
@@ -937,7 +939,7 @@ class Describe_WeightedCounts:
 
         assert weighted_counts.base_values.tolist() == [1, 2, 3]
 
-    def it_computes_its_subtotal_values_to_help(self, request):
+    def test_it_computes_its_subtotal_values_to_help(self, request):
         rows_dimension_ = instance_mock(request, Dimension)
         property_mock(
             request, _WeightedCounts, "base_values", return_value=[1.1, 2.2, 3.3]

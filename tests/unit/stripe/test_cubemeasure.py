@@ -28,10 +28,10 @@ from cr.cube.stripe.cubemeasure import (
 from ...unitutil import class_mock, instance_mock, property_mock
 
 
-class DescribeCubeMeasures:
+class TestCubeMeasures:
     """Unit-test suite for `cr.cube.stripe.cubemeasure.CubeMeasures` object."""
 
-    def it_provides_access_to_the_cube_means_object(
+    def test_it_provides_access_to_the_cube_means_object(
         self, request, cube_, rows_dimension_
     ):
         cube_means_ = instance_mock(request, _BaseCubeMeans)
@@ -46,7 +46,7 @@ class DescribeCubeMeasures:
         _BaseCubeMeans_.factory.assert_called_once_with(cube_, rows_dimension_)
         assert cube_means is cube_means_
 
-    def it_provides_access_to_the_cube_median_object(
+    def test_it_provides_access_to_the_cube_median_object(
         self, request, cube_, rows_dimension_
     ):
         cube_medians_ = instance_mock(request, _BaseCubeMedians)
@@ -61,7 +61,7 @@ class DescribeCubeMeasures:
         _BaseCubeMedian_.factory.assert_called_once_with(cube_, rows_dimension_)
         assert cube_medians is cube_medians_
 
-    def it_provides_access_to_the_cube_sum_object(
+    def test_it_provides_access_to_the_cube_sum_object(
         self, request, cube_, rows_dimension_
     ):
         cube_sum_ = instance_mock(request, _BaseCubeSums)
@@ -81,7 +81,7 @@ class DescribeCubeMeasures:
             ("counts", "valid", "valid"),
         ),
     )
-    def it_provides_access_to_the_unweighted_cube_counts_object(
+    def test_it_provides_access_to_the_unweighted_cube_counts_object(
         self,
         cube_,
         cube_counts_,
@@ -110,7 +110,7 @@ class DescribeCubeMeasures:
             ("counts", "valid", "valid"),
         ),
     )
-    def it_provides_access_to_the_weighted_cube_counts_object(
+    def test_it_provides_access_to_the_weighted_cube_counts_object(
         self,
         cube_,
         cube_counts_,
@@ -154,7 +154,7 @@ class DescribeCubeMeasures:
 # === COUNTS ===
 
 
-class Describe_BaseCubeCounts:
+class Test_BaseCubeCounts:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseUnweightedCubeCounts`."""
 
     @pytest.mark.parametrize(
@@ -184,7 +184,7 @@ class Describe_BaseCubeCounts:
             ),
         ),
     )
-    def it_provides_a_factory_for_constructing_unweighted_cube_count_objects(
+    def test_it_provides_a_factory_for_constructing_unweighted_cube_count_objects(
         self,
         request,
         ca_as_0th,
@@ -211,10 +211,10 @@ class Describe_BaseCubeCounts:
         assert unweighted_cube_counts is cube_counts_
 
 
-class Describe_CatCubeCounts:
+class Test_CatCubeCounts:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeCounts`."""
 
-    def it_knows_its_bases(self, request, raw_counts):
+    def test_it_knows_its_bases(self, request, raw_counts):
         property_mock(
             request,
             _CatCubeCounts,
@@ -224,15 +224,15 @@ class Describe_CatCubeCounts:
         cube_counts = _CatCubeCounts(None, raw_counts)
         assert cube_counts.bases.tolist() == [42, 42, 42]
 
-    def it_knows_its_counts(self, raw_counts):
+    def test_it_knows_its_counts(self, raw_counts):
         cube_counts = _CatCubeCounts(None, raw_counts)
         assert cube_counts.counts.tolist() == [1, 2, 3]
 
-    def it_knows_its_pruning_base(self, raw_counts):
+    def test_it_knows_its_pruning_base(self, raw_counts):
         cube_counts = _CatCubeCounts(None, raw_counts)
         assert cube_counts.pruning_base.tolist() == [1, 2, 3]
 
-    def it_knows_its_table_base(self, raw_counts):
+    def test_it_knows_its_table_base(self, raw_counts):
         cube_counts = _CatCubeCounts(None, raw_counts)
         assert cube_counts.table_base == 6
 
@@ -244,22 +244,22 @@ class Describe_CatCubeCounts:
         return np.array([1, 2, 3])
 
 
-class Describe_MrCubeCounts:
+class Test_MrCubeCounts:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeCounts`."""
 
-    def it_knows_its_bases(self, raw_counts):
+    def test_it_knows_its_bases(self, raw_counts):
         cube_counts = _MrCubeCounts(None, raw_counts)
         assert cube_counts.bases.tolist() == [3, 7, 11]
 
-    def it_knows_its_counts(self, raw_counts):
+    def test_it_knows_its_counts(self, raw_counts):
         cube_counts = _MrCubeCounts(None, raw_counts)
         assert cube_counts.counts.tolist() == [1, 3, 5]
 
-    def it_knows_its_pruning_base(self, raw_counts):
+    def test_it_knows_its_pruning_base(self, raw_counts):
         cube_counts = _MrCubeCounts(None, raw_counts)
         assert cube_counts.pruning_base.tolist() == [3, 7, 11]
 
-    def it_knows_its_table_base_is_None(self, raw_counts):
+    def test_it_knows_its_table_base_is_None(self, raw_counts):
         cube_counts = _MrCubeCounts(None, raw_counts)
         assert cube_counts.table_base is None
 
@@ -271,22 +271,22 @@ class Describe_MrCubeCounts:
         return np.array([[1, 2], [3, 4], [5, 6]])
 
 
-class Describe_NumArrCubeCounts:
+class Test_NumArrCubeCounts:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._NumArrCubeCounts`."""
 
-    def it_knows_its_bases(self, raw_counts):
+    def test_it_knows_its_bases(self, raw_counts):
         cube_counts = _NumArrCubeCounts(None, raw_counts)
         assert cube_counts.bases.tolist() == [1, 2, 3]
 
-    def it_knows_its_counts(self, raw_counts):
+    def test_it_knows_its_counts(self, raw_counts):
         cube_counts = _NumArrCubeCounts(None, raw_counts)
         assert cube_counts.counts.tolist() == [1, 2, 3]
 
-    def it_knows_its_pruning_base(self, raw_counts):
+    def test_it_knows_its_pruning_base(self, raw_counts):
         cube_counts = _NumArrCubeCounts(None, raw_counts)
         assert cube_counts.pruning_base.tolist() == [1, 2, 3]
 
-    def it_knows_its_table_base_is_None(self, raw_counts):
+    def test_it_knows_its_table_base_is_None(self, raw_counts):
         cube_counts = _NumArrCubeCounts(None, raw_counts)
         assert cube_counts.table_base is None
 
@@ -301,7 +301,7 @@ class Describe_NumArrCubeCounts:
 # === MEANS ===
 
 
-class Describe_BaseCubeMeans:
+class Test_BaseCubeMeans:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMeans`."""
 
     @pytest.mark.parametrize(
@@ -311,7 +311,7 @@ class Describe_BaseCubeMeans:
             (DT.MR, _MrCubeMeans, [[1, 6], [2, 5], [3, 4]]),
         ),
     )
-    def it_provides_a_factory_for_constructing_cube_means_objects(
+    def test_it_provides_a_factory_for_constructing_cube_means_objects(
         self, request, rows_dimension_type, CubeMeansCls, means
     ):
         cube_ = instance_mock(request, Cube, means=means)
@@ -331,14 +331,14 @@ class Describe_BaseCubeMeans:
         assert cube_means is cube_means_
 
 
-class Describe_CatCubeMeans:
+class Test_CatCubeMeans:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeMeans`."""
 
-    def it_knows_its_means(self):
+    def test_it_knows_its_means(self):
         cube_means = _CatCubeMeans(None, np.array([1.1, 2.2, 3.3]))
         assert cube_means.means == pytest.approx([1.1, 2.2, 3.3])
 
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(
+    def test_but_it_raises_value_error_when_the_cube_result_does_not_contain_means(
         self, request
     ):
         cube_ = instance_mock(request, Cube)
@@ -349,14 +349,14 @@ class Describe_CatCubeMeans:
         assert str(e.value) == "cube-result does not contain cube-means measure"
 
 
-class Describe_MrCubeMeans:
+class Test_MrCubeMeans:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeMeans`."""
 
-    def it_knows_its_means(self):
+    def test_it_knows_its_means(self):
         cube_means = _MrCubeMeans(None, np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
         assert cube_means.means == pytest.approx([1.1, 3.3, 5.5])
 
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_means(
+    def test_but_it_raises_value_error_when_the_cube_result_does_not_contain_means(
         self, request
     ):
         cube_ = instance_mock(request, Cube)
@@ -370,7 +370,7 @@ class Describe_MrCubeMeans:
 # === MEDIANS ===
 
 
-class Describe_BaseCubeMedian:
+class Test_BaseCubeMedian:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMedian`."""
 
     @pytest.mark.parametrize(
@@ -380,7 +380,7 @@ class Describe_BaseCubeMedian:
             (DT.MR, _MrCubeMedians, [[1, 6], [2, 5], [3, 4]]),
         ),
     )
-    def it_provides_a_factory_for_constructing_cube_medians_objects(
+    def test_it_provides_a_factory_for_constructing_cube_medians_objects(
         self, request, rows_dimension_type, CubeMedianCls, medians
     ):
         cube_ = instance_mock(request, Cube, medians=medians)
@@ -400,14 +400,14 @@ class Describe_BaseCubeMedian:
         assert cube_medians is cube_medians_
 
 
-class Describe_CatCubeMedians:
+class Test_CatCubeMedians:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeMedians`."""
 
-    def it_knows_its_medians(self):
+    def test_it_knows_its_medians(self):
         cube_medians = _CatCubeMedians(None, np.array([1.1, 2.2, 3.3]))
         assert cube_medians.medians == pytest.approx([1.1, 2.2, 3.3])
 
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_medians(
+    def test_but_it_raises_value_error_when_the_cube_result_does_not_contain_medians(
         self, request
     ):
         cube_ = instance_mock(request, Cube)
@@ -418,16 +418,16 @@ class Describe_CatCubeMedians:
         assert str(e.value) == "cube-result does not contain cube-median measure"
 
 
-class Describe_MrCubeMedians:
+class Test_MrCubeMedians:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeMedians`."""
 
-    def it_knows_its_medians(self):
+    def test_it_knows_its_medians(self):
         cube_medians = _MrCubeMedians(
             None, np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]])
         )
         assert cube_medians.medians == pytest.approx([1.1, 3.3, 5.5])
 
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_medians(
+    def test_but_it_raises_value_error_when_the_cube_result_does_not_contain_medians(
         self, request
     ):
         cube_ = instance_mock(request, Cube)
@@ -441,7 +441,7 @@ class Describe_MrCubeMedians:
 # === SUM ===
 
 
-class Describe_BaseCubeSums:
+class Test_BaseCubeSums:
     """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeSums`."""
 
     @pytest.mark.parametrize(
@@ -451,7 +451,7 @@ class Describe_BaseCubeSums:
             (DT.MR, _MrCubeSums, [[1, 6], [2, 5], [3, 4]]),
         ),
     )
-    def it_provides_a_factory_for_constructing_cube_sums_objects(
+    def test_it_provides_a_factory_for_constructing_cube_sums_objects(
         self, request, rows_dimension_type, CubeSumCls, sums
     ):
         cube_ = instance_mock(request, Cube, sums=sums)
@@ -471,14 +471,14 @@ class Describe_BaseCubeSums:
         assert cube_sums is cube_sums_
 
 
-class Describe_CatCubeSums:
+class Test_CatCubeSums:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeSum`."""
 
-    def it_knows_its_sum(self):
+    def test_it_knows_its_sum(self):
         cube_sum = _CatCubeSums(None, np.array([1, 2, 3]))
         assert cube_sum.sums == pytest.approx([1, 2, 3])
 
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sums(
+    def test_but_it_raises_value_error_when_the_cube_result_does_not_contain_sums(
         self, request
     ):
         cube_ = instance_mock(request, Cube)
@@ -489,14 +489,14 @@ class Describe_CatCubeSums:
         assert str(e.value) == "cube-result does not contain cube-sum measure"
 
 
-class Describe_MrCubeSums:
+class Test_MrCubeSums:
     """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeSum`."""
 
-    def it_knows_its_sum(self):
+    def test_it_knows_its_sum(self):
         cube_sum = _MrCubeSums(None, np.array([[1, 2], [3, 4], [5, 6]]))
         assert cube_sum.sums == pytest.approx([1, 3, 5])
 
-    def but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(
+    def test_but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(
         self, request
     ):
         cube_ = instance_mock(request, Cube)

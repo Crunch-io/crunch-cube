@@ -12,8 +12,8 @@ from cr.cube.smoothing import Smoother, _SingleSidedMovingAvgSmoother
 from ..unitutil import class_mock, initializer_mock, instance_mock
 
 
-class DescribeSmoother:
-    def it_provides_a_factory_for_constructing_smoother_objects(self, request):
+class TestSmoother:
+    def test_it_provides_a_factory_for_constructing_smoother_objects(self, request):
         _SingleSidedMovingAvgSmoother_ = class_mock(
             request,
             "cr.cube.smoothing._SingleSidedMovingAvgSmoother",
@@ -29,7 +29,7 @@ class DescribeSmoother:
             {"function": "one_sided_moving_avg", "window": 3}, DT.CAT_DATE
         )
 
-    def but_it_raises_an_exception_when_function_is_not_implemented(self, request):
+    def test_but_it_raises_an_exception_when_function_is_not_implemented(self, request):
         dimension_ = instance_mock(request, Dimension)
         dimension_.smoothing_dict = {"function": "foo", "window": 3}
 
@@ -39,8 +39,8 @@ class DescribeSmoother:
         assert str(e.value) == "Function foo is not available."
 
 
-class Describe_SingleSideMovingAvgSmoother:
-    def it_constructs_single_sided_moving_avg_to_help(self, request):
+class Test_SingleSideMovingAvgSmoother:
+    def test_it_constructs_single_sided_moving_avg_to_help(self, request):
         _init_ = initializer_mock(request, _SingleSidedMovingAvgSmoother)
         single_sided_miving_avg = _SingleSidedMovingAvgSmoother(
             smoothing_dict=3, dimension_type=DT.CAT_DATE
@@ -57,7 +57,7 @@ class Describe_SingleSideMovingAvgSmoother:
             ({"window": 3}, np.array([]), DT.CAT_DATE, False),
         ),
     )
-    def it_knows_when_it_can_apply_smoothing(
+    def test_it_knows_when_it_can_apply_smoothing(
         self, smoothing_dict, base_values, dimension_type, expected_value
     ):
         smoother = _SingleSidedMovingAvgSmoother(smoothing_dict, dimension_type)
@@ -71,7 +71,9 @@ class Describe_SingleSideMovingAvgSmoother:
             (1, np.random.rand(3, 5), DT.CAT_DATE),
         ),
     )
-    def but_it_warns_when_window_is_invalid(self, window, base_values, dimension_type):
+    def test_but_it_warns_when_window_is_invalid(
+        self, window, base_values, dimension_type
+    ):
         smoother = _SingleSidedMovingAvgSmoother(
             smoothing_dict={"window": window}, dimension_type=dimension_type
         )
@@ -92,7 +94,7 @@ class Describe_SingleSideMovingAvgSmoother:
             (3, np.random.rand(3, 5), DT.CAT),
         ),
     )
-    def and_it_warns_when_dim_is_not_a_categorical_date(
+    def test_and_it_warns_when_dim_is_not_a_categorical_date(
         self, window, base_values, dimension_type
     ):
         smoother = _SingleSidedMovingAvgSmoother(
@@ -119,7 +121,9 @@ class Describe_SingleSideMovingAvgSmoother:
             (np.array([]), 3, []),
         ),
     )
-    def it_provides_complete_smoothed_values(self, base_values, window, expected_value):
+    def test_it_provides_complete_smoothed_values(
+        self, base_values, window, expected_value
+    ):
         smoother = _SingleSidedMovingAvgSmoother(
             smoothing_dict={"window": window}, dimension_type=DT.CAT_DATE
         )

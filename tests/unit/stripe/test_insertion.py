@@ -17,10 +17,12 @@ from cr.cube.stripe.insertion import (
 from ...unitutil import ANY, initializer_mock, instance_mock, property_mock
 
 
-class Describe_BaseSubtotals:
+class Test_BaseSubtotals:
     """Unit test suite for `cr.cube.stripe._BaseSubtotals` object."""
 
-    def it_provides_a_subtotal_values_interface_method(self, request, rows_dimension_):
+    def test_it_provides_a_subtotal_values_interface_method(
+        self, request, rows_dimension_
+    ):
         base_values = [1, 2, 3]
         _init_ = initializer_mock(request, _BaseSubtotals)
         property_mock(
@@ -32,7 +34,9 @@ class Describe_BaseSubtotals:
         _init_.assert_called_once_with(ANY, base_values, rows_dimension_)
         assert subtotal_values.tolist() == [3, 5]
 
-    def it_provides_access_to_the_row_subtotal_objects(self, request, rows_dimension_):
+    def test_it_provides_access_to_the_row_subtotal_objects(
+        self, request, rows_dimension_
+    ):
         row_subtotals_ = tuple(instance_mock(request, _Subtotal) for _ in range(3))
         rows_dimension_.subtotals = row_subtotals_
         subtotals = _BaseSubtotals(None, rows_dimension_)
@@ -46,10 +50,10 @@ class Describe_BaseSubtotals:
         return instance_mock(request, Dimension)
 
 
-class DescribeNanSubtotals:
+class TestNanSubtotals:
     """Unit test suite for `cr.cube.stripe.NanSubtotals` object."""
 
-    def it_computes_the_subtotal_values(self, request):
+    def test_it_computes_the_subtotal_values(self, request):
         property_mock(
             request,
             NanSubtotals,
@@ -63,7 +67,7 @@ class DescribeNanSubtotals:
         )
 
 
-class DescribeNegativeTermSubtotals:
+class TestNegativeTermSubtotals:
     """Unit test suite for `cr.cube.matrix.NegativeTermSubtotals` object."""
 
     @pytest.mark.parametrize(
@@ -74,7 +78,7 @@ class DescribeNegativeTermSubtotals:
             ([], [1], 2),
         ),
     )
-    def it_computes_the_subtotal_values(
+    def test_it_computes_the_subtotal_values(
         self, request, addend_idxs, subtrahend_idxs, expected
     ):
         property_mock(
@@ -97,7 +101,7 @@ class DescribeNegativeTermSubtotals:
         np.testing.assert_equal(subtotal_value, expected)
 
 
-class DescribePositiveTermSubtotals:
+class TestPositiveTermSubtotals:
     """Unit test suite for `cr.cube.matrix.PositiveTermSubtotals` object."""
 
     @pytest.mark.parametrize(
@@ -108,7 +112,7 @@ class DescribePositiveTermSubtotals:
             ([], [1], 0),
         ),
     )
-    def it_computes_the_subtotal_values(
+    def test_it_computes_the_subtotal_values(
         self, request, addend_idxs, subtrahend_idxs, expected
     ):
         property_mock(
@@ -131,7 +135,7 @@ class DescribePositiveTermSubtotals:
         np.testing.assert_equal(subtotal_value, expected)
 
 
-class DescribeSumSubtotals:
+class TestSumSubtotals:
     """Unit test suite for `cr.cube.matrix.SumSubtotals` object."""
 
     @pytest.mark.parametrize(
@@ -142,7 +146,7 @@ class DescribeSumSubtotals:
             ([], [1], -2),
         ),
     )
-    def it_calculates_subtotal_value_correctly(
+    def test_it_calculates_subtotal_value_correctly(
         self, request, addend_idxs, subtrahend_idxs, expected
     ):
         property_mock(
