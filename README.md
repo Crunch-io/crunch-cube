@@ -6,15 +6,15 @@ Open Source Python implementation of the API for working with CrunchCubes
 
 This package contains the implementation of the CrunchCube API. It is used to
 extract useful information from CrunchCube responses (we'll refer to them as
-_cubes_ in the subsequent text). _Cubes_ are obtained from the *Crunch.io*
+_cubes_ in the subsequent text). _Cubes_ are obtained from the _Crunch.io_
 platform, as JSON responses to the specific _queries_ created by the user.
 These queries specify which data the user wants to extract from the Crunch.io
 system. The most common usage is to obtain the following:
 
- - Cross correlation between different variable
- - Margins of the cross tab _cube_
- - Proportions of the cross tab _cube_ (e.g. proportions of each single element to the entire sample size)
- - Percentages
+- Cross correlation between different variable
+- Margins of the cross tab _cube_
+- Proportions of the cross tab _cube_ (e.g. proportions of each single element to the entire sample size)
+- Percentages
 
 When the data is obtained from the Crunch.io platform, it needs to be
 interpreted to the form that's convenient for a user. The actual shape of the
@@ -33,7 +33,6 @@ detail, uner its own section, under the API subsection of this document.
 The `cr.cube` package can be installed by using the `pip install`:
 
     pip install cr.cube
-
 
 ### For developers
 
@@ -63,7 +62,6 @@ And then tests can be run using `py.test` in the root directory:
 
 After the `cr.cube` package has been successfully installed, the usage is as
 simple as:
-
 
     >>> from cr.cube.cube import Cube
 
@@ -103,50 +101,62 @@ The detailed description can be found
 [here](http://crunch-cube.readthedocs.io/en/latest/cr.cube.html#cr-cube-crunch-cube-module).
 
 ---
-[![Build Status](https://travis-ci.org/Crunch-io/crunch-cube.png?branch=master)](https://travis-ci.org/Crunch-io/crunch-cube)
-[![Coverage Status](https://codecov.io/gh/Crunch-io/crunch-cube/branch/master/graph/badge.svg?token=C6auKOj8tZ)](https://codecov.io/gh/Crunch-io/crunch-cube)
-[![Documentation Status](https://readthedocs.org/projects/crunch-cube/badge/?version=latest)](http://crunch-cube.readthedocs.io/en/latest/?badge=latest)
+
+![Build Status](https://github.com/Crunch-io/crunch-cube/workflows/CI/badge.svg?branch=master)
+![Coverage Status](https://codecov.io/gh/Crunch-io/crunch-cube/branch/master/graph/badge.svg?token=C6auKOj8tZ)
+![Documentation Status](https://readthedocs.org/projects/crunch-cube/badge/?version=latest)
 ---
 
 ## Changes
 
 ### 3.1.0
+
 - Subtotal diff (wave difference) for categorical date dimensions
 
 ### 3.0.45
+
 - Enumerator refactoring
 
 ### 3.0.44
+
 - Bug fix median measure for exporter
 
 ### 3.0.43
+
 - Median measure
 
 ### 3.0.42
+
 - Inflate cubes that are single column filters
 
 ### 3.0.41
+
 - Remove `deepcopy` from dimension module due to a performance issue
 
 ### 3.0.40
+
 - Fix bug with weighted vs unweighted in pairwise effect calculation
 
 ### 3.0.39
+
 - Remove cube response deepcopy due to a performance issue
 
 ### 3.0.38
+
 - Improve calculation of DoF for pairwise comparison
 - Use effective counts as column bases for DoF
 
 ### 3.0.37
+
 - Add squared counts as a cube measure
 - Enable calculating pairwise stats with effective denominator
 
 ### 3.0.36
+
 - Fix bug in pairwise sig values for means.
 
 ### 3.0.35
-- Fix bug where categorical dimension would sometimes be interpreted as `MR_CATS`.
 
+- Fix bug where categorical dimension would sometimes be interpreted as `MR_CATS`.
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).

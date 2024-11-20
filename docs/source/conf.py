@@ -98,7 +98,7 @@ html_context = {
     "date": datetime.date.today().strftime("%d/%m/%y"),
 }
 html_theme_options = {
-    "display_version": True,
+    "version_selector": True,
     "prev_next_buttons_location": "bottom",
     "style_external_links": False,
     # Toc options

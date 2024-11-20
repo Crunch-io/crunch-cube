@@ -275,29 +275,29 @@ class Cube:
         filter cube) will have a different shape. Basically the filter cube will miss
         the row labes that have 0 as counts.
 
-            | FCUBE | CAT
-        ----+-------+----
-         A  |   1   |  1
-         B  |   1   |  1
-         C  |   1   |  1
-         D  |       |  1
-         E  |       |  1
-         F  |       |  1
+        |     | FCUBE | CAT  |
+        | --- | ----  | ---- |
+        |  A  |   1   |  1   |
+        |  B  |   1   |  1   |
+        |  C  |   1   |  1   |
+        |  D  |       |  1   |
+        |  E  |       |  1   |
+        |  F  |       |  1   |
 
-        The FUCBE have D E and F missing cause its results doesn't count them. And the
+        The FCUBE have D E and F missing cause its results doesn't count them. And the
         rendering starts from the top without the correct row label association.
         For a correct result the FCUBE cube_response needs to be augmentes with all the
         elements of the summary cube and position the values in the corresponding
         position of the only existing labels in the response.
 
-            | FCUBE | CAT
-        ----+-------+----
-         A  |   0   |  1
-         B  |   0   |  1
-         C  |   1   |  1
-         D  |   1   |  1
-         E  |   1   |  1
-         F  |   0   |  1
+        |     | FCUBE | CAT  |
+        | --- | ----  | ---- |
+        |  A  |   0   |  1   |
+        |  B  |   0   |  1   |
+        |  C  |   1   |  1   |
+        |  D  |   1   |  1   |
+        |  E  |   1   |  1   |
+        |  F  |   0   |  1   |
         """
         cube_resp = self._cube_response
 
