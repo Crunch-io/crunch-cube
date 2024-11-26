@@ -459,8 +459,9 @@ class WaveDiffSubtotal:
 
     def _subtotal_column(self, subtotal, default):
         """Return (n_rows,) ndarray of values for `subtotal` column."""
-        if self._dimensions[1].dimension_type == DT.CAT_DATE and any(
-            subtotal.subtrahend_idxs
+        if (
+            self._dimensions[1].dimension_type == DT.CAT_DATE
+            and len(subtotal.subtrahend_idxs) > 0
         ):
             if self._multiple_subtrahends_or_addends(subtotal):
                 return self._nan_subtotals(axis=0)
@@ -480,9 +481,9 @@ class WaveDiffSubtotal:
 
     def _subtotal_row(self, subtotal, default):
         """Return (n_cols,) ndarray of values for `subtotal` row."""
-
-        if self._dimensions[0].dimension_type == DT.CAT_DATE and any(
-            subtotal.subtrahend_idxs
+        if (
+            self._dimensions[0].dimension_type == DT.CAT_DATE
+            and len(subtotal.subtrahend_idxs) > 0
         ):
             if self._multiple_subtrahends_or_addends(subtotal):
                 return self._nan_subtotals(axis=1)

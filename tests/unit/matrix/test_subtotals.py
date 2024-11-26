@@ -7,12 +7,14 @@ import numpy as np
 import pytest
 
 from cr.cube.dimension import Dimension, _Subtotal
+from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.matrix.subtotals import (
     _BaseSubtotals,
     NanSubtotals,
     NegativeTermSubtotals,
     PositiveTermSubtotals,
     SumSubtotals,
+    WaveDiffSubtotal,
 )
 
 from ...unitutil import ANY, initializer_mock, instance_mock, method_mock, property_mock
@@ -349,6 +351,102 @@ class TestPositiveTermSubtotals:
         assert subtotals._subtotal_row(subtotal_).tolist() == [12, 14, 16, 18]
 
     # --- fixture components -----------------------------------------
+
+    @pytest.fixture
+    def subtotal_(self, request):
+        return instance_mock(request, _Subtotal)
+
+
+class TestWaveDiffSubtotals:
+    """Unit test suite for `cr.cube.matrix.WaveDiffSubtotal` object."""
+
+    def test_it_provides_a_subtotal_columns_interface_method(
+        self, request, dimensions_, _init_
+    ):
+        base_values = [[0, 4], [7, 9]]
+        counts = [[10, 20], [30, 40]]
+        default_insertions = [[0.1, 0.2], [0.3, 0.4]]
+        property_mock(
+            request,
+            WaveDiffSubtotal,
+            "_subtotal_columns",
+            return_value=np.array([[1, 2], [3, 4]]),
+        )
+
+        subtotal_columns = WaveDiffSubtotal.subtotal_columns(
+            base_values, counts, default_insertions, dimensions_
+        )
+
+        _init_.assert_called_once_with(
+            ANY, base_values, counts, default_insertions, dimensions_
+        )
+        assert subtotal_columns.tolist() == [[1, 2], [3, 4]]
+
+    def test_it_provides_a_subtotal_rows_interface_method(
+        self, request, dimensions_, _init_
+    ):
+        base_values = [[4, 1], [3, 5]]
+        counts = [[10, 20], [30, 40]]
+        default_insertions = [[0.1, 0.2], [0.3, 0.4]]
+        property_mock(
+            request,
+            WaveDiffSubtotal,
+            "_subtotal_rows",
+            return_value=np.array([[4, 3], [2, 1]]),
+        )
+
+        subtotal_rows = WaveDiffSubtotal.subtotal_rows(
+            base_values, counts, default_insertions, dimensions_
+        )
+
+        _init_.assert_called_once_with(
+            ANY, base_values, counts, default_insertions, dimensions_
+        )
+        assert subtotal_rows.tolist() == [[4, 3], [2, 1]]
+
+    def test_renders_row_wave_diff_under_specific_conditions(
+        self, dimensions_, subtotal_
+    ):
+        dimensions_[1].dimension_type = DT.CAT
+        dimensions_[0].dimension_type = DT.CAT_DATE
+        subtotal_.subtrahend_idxs = [0]
+        subtotal_.addend_idxs = [1]
+        base_values = np.array([[4, 1], [3, 5]])
+        counts = np.array([[10, 20], [30, 40]])
+        default_insertion = [0.1, 0.2]
+
+        subtotal = WaveDiffSubtotal(base_values, counts, default_insertion, dimensions_)
+
+        assert subtotal._subtotal_row(subtotal_, default_insertion) == pytest.approx(
+            np.array([7.5, -12.0])
+        )
+
+    def test_renders_col_wave_diff_under_specific_conditions(
+        self, dimensions_, subtotal_
+    ):
+        dimensions_[1].dimension_type = DT.CAT_DATE
+        dimensions_[0].dimension_type = DT.CAT
+        subtotal_.subtrahend_idxs = [0]
+        subtotal_.addend_idxs = [1]
+        base_values = np.array([[4, 1], [3, 5]])
+        counts = np.array([[10, 20], [30, 40]])
+        default_insertion = [0.1, 0.2]
+
+        subtotal = WaveDiffSubtotal(base_values, counts, default_insertion, dimensions_)
+
+        assert subtotal._subtotal_column(subtotal_, default_insertion) == pytest.approx(
+            np.array([17.5, -2.0])
+        )
+
+    # --- fixture components -----------------------------------------
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def _init_(self, request):
+        return initializer_mock(request, WaveDiffSubtotal)
 
     @pytest.fixture
     def subtotal_(self, request):
