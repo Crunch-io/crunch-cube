@@ -37,7 +37,7 @@ detail, uner its own section, under the API subsection of this document.
 
 The `cr.cube` package can be installed by using the `pip install`:
 
-    pip install cr.cube
+    pip install cr-cube
 
 ### For developers
 
