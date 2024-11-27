@@ -88,6 +88,10 @@ Please visit https://crunch-cube.readthedocs.io/en/latest for the API reference.
 
 ## Changes
 
+### 3.1.1
+
+- Bug fix for subtotal diff (wave difference) for categorical date dimensions
+
 ### 3.1.0
 
 - Subtotal diff (wave difference) for categorical date dimensions
