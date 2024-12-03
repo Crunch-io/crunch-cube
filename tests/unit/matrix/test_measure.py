@@ -2758,30 +2758,34 @@ class Test_ScaleMean:
         assert mean.is_defined == expected
 
     def test_it_gets_the_right_proportions_for_rows(self, request):
-        row_proportions_ = instance_mock(
-            request, _RowProportions, blocks=[["a", "b"], ["c", "d"]]
+        second_order_measures_ = instance_mock(request, SecondOrderMeasures)
+        counts_ = instance_mock(request, _WeightedCounts, blocks=[[1, 2], [3, 4]])
+        bases_ = instance_mock(
+            request,
+            _RowWeightedBases,
+            blocks=[[11, 12], [13, 14]],
         )
-        second_order_measures_ = instance_mock(
-            request, SecondOrderMeasures, row_proportions=row_proportions_
-        )
+        second_order_measures_.weighted_counts = counts_
+        second_order_measures_.row_weighted_bases = bases_
 
         mean = _ScaleMean(None, second_order_measures_, None, MO.ROWS)
 
-        assert mean._proportions == ["a", "c"]
+        assert mean._proportions == [0.09090909090909091, 0.23076923076923078]
 
     def test_it_gets_the_right_counts_for_columns(self, request):
-        column_proportions_ = instance_mock(
-            request, _ColumnProportions, blocks=[["a", "b"], ["c", "d"]]
-        )
-        second_order_measures_ = instance_mock(
+        second_order_measures_ = instance_mock(request, SecondOrderMeasures)
+        counts_ = instance_mock(request, _WeightedCounts, blocks=[[1, 2], [3, 4]])
+        bases_ = instance_mock(
             request,
-            SecondOrderMeasures,
-            column_proportions=column_proportions_,
+            _ColumnWeightedBases,
+            blocks=[[11, 12], [13, 14]],
         )
+        second_order_measures_.weighted_counts = counts_
+        second_order_measures_.column_weighted_bases = bases_
 
         mean = _ScaleMean(None, second_order_measures_, None, MO.COLUMNS)
 
-        assert mean._proportions == ["a", "b"]
+        assert mean._proportions == [0.09090909090909091, 0.16666666666666666]
 
     @pytest.mark.parametrize(
         "proportions, values, expected",

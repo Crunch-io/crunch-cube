@@ -2906,15 +2906,22 @@ class _ScaleMean(_BaseScaledCountMarginal):
     @lazyproperty
     def _proportions(self):
         """List of 2 ndarray matrixes of the relevant proportion blocks"""
+        count_blocks = self._second_order_measures.weighted_counts.blocks
         if self.orientation == MO.ROWS:
             # --- Use *row* proportions ---
-            props = self._second_order_measures.row_proportions.blocks
+            weighted_base_blocks = self._second_order_measures.row_weighted_bases.blocks
             # --- Get base values & *row* subtotals
-            return [props[0][0], props[1][0]]
+            with np.errstate(divide="ignore", invalid="ignore"):
+                base_values = count_blocks[0][0] / weighted_base_blocks[0][0]
+                row_subtotals = count_blocks[1][0] / weighted_base_blocks[1][0]
+                return [base_values, row_subtotals]
         # --- Use *column* proportions ---
-        props = self._second_order_measures.column_proportions.blocks
-        # --- Get base values & *column* subtotals
-        return [props[0][0], props[0][1]]
+        weighted_base_blocks = self._second_order_measures.column_weighted_bases.blocks
+        with np.errstate(divide="ignore", invalid="ignore"):
+            base_values = count_blocks[0][0] / weighted_base_blocks[0][0]
+            col_subtotals = count_blocks[0][1] / weighted_base_blocks[0][1]
+            # --- Get base values & *column* subtotals
+            return [base_values, col_subtotals]
 
     @staticmethod
     def _weighted_mean(proportions, values):
