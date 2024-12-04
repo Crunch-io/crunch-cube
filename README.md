@@ -3,8 +3,8 @@
 ![Build Status](https://github.com/Crunch-io/crunch-cube/workflows/CI/badge.svg?branch=master)
 ![Coverage Status](https://codecov.io/gh/Crunch-io/crunch-cube/branch/master/graph/badge.svg?token=C6auKOj8tZ)
 ![Documentation Status](https://readthedocs.org/projects/crunch-cube/badge/?version=latest)
----
 
+---
 Open Source Python implementation of the API for working with CrunchCubes
 
 ## Introduction
@@ -82,11 +82,15 @@ simple as:
 
 ## Complete API Doc
 
-Please visit https://crunch-cube.readthedocs.io/en/latest for the API reference.
+Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API reference.
 
 ---
 
 ## Changes
+
+### 3.1.2
+
+- Bug fix for scale mean diff rows and cols
 
 ### 3.1.1
 
