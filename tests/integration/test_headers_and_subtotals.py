@@ -2980,6 +2980,12 @@ class TestIntegrated_SubtotalDifferences:
             nan_ok=True,
             rel=1e-4,
         )
+        assert slice_.columns_scale_mean == pytest.approx(
+            np.array(
+                [np.nan, 2.26559356, 2.43811395, 2.08453608, 1.9968254, 1.81967213]
+            ),
+            nan_ok=True,
+        )
 
     def test_it_computes_diff_for_cat_date_x_cat_with_subdiffs_on_both(self):
         slice_ = Cube(
@@ -3081,6 +3087,10 @@ class TestIntegrated_SubtotalDifferences:
                     0.75,
                 ]
             ),
+            nan_ok=True,
+        )
+        assert slice_.rows_scale_mean == pytest.approx(
+            np.array([np.nan, 1.625, 1.4675835, 1.78818737, 1.68138801, 1.46994536]),
             nan_ok=True,
         )
 
