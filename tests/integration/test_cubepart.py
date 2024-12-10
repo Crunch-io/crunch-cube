@@ -2,6 +2,7 @@
 
 """Integration-test suite for `cr.cube.cubepart` module."""
 
+from textwrap import dedent
 import numpy as np
 import pytest
 
@@ -920,6 +921,47 @@ class Test_Slice:
 
         expected = load_python_expression(expectation)
         np.testing.assert_almost_equal(actual, expected)
+
+    def test_it_can_sort_by_column_by_labels(self):
+        transforms = {
+            "columns_dimension": {"order": {"type": "label", "direction": "ascending"}}
+        }
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, transforms, None, 0)
+        expected_slice_repr = """
+        _Slice(name='Support', dimension_types='CAT x CAT')
+        Showing: COUNT
+                      As married    Divorced    Married    Never    Widowed
+        ----------  ------------  ----------  ---------  -------  ---------
+        Plenty                21           3         46        7          0
+        Enough                55          13        127       29          1
+        Not enough            17          41        253       47          1
+        N/A                   80          19        247       26          4
+        Available measures: [<CUBE_MEASURE.COUNT: 'count'>]
+        """
+        assert slice_.__repr__() == dedent(expected_slice_repr).strip()
+
+        transforms = {
+            "columns_dimension": {
+                "order": {
+                    "type": "label",
+                    "direction": "ascending",
+                    "fixed": {"bottom": [1]},
+                }
+            }
+        }
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, transforms, None, 0)
+        expected_slice_repr = """
+        _Slice(name='Support', dimension_types='CAT x CAT')
+        Showing: COUNT
+                      As married    Divorced    Never    Widowed    Married
+        ----------  ------------  ----------  -------  ---------  ---------
+        Plenty                21           3        7          0         46
+        Enough                55          13       29          1        127
+        Not enough            17          41       47          1        253
+        N/A                   80          19       26          4        247
+        Available measures: [<CUBE_MEASURE.COUNT: 'count'>]
+        """
+        assert slice_.__repr__() == dedent(expected_slice_repr).strip()
 
     def test_it_can_sort_by_column_index(self):
         """Responds to order:opposing_element sort-by-column-index."""
