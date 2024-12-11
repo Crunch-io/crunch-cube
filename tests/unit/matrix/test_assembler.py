@@ -18,9 +18,11 @@ from cr.cube.enums import (
 )
 from cr.cube.matrix.assembler import (
     _BaseOrderHelper,
+    _BaseSortColumnsByValueHelper,
     _BaseSortRowsByValueHelper,
     _ColumnOrderHelper,
     _RowOrderHelper,
+    _SortColumnsByLabelHelper,
     _SortRowsByBaseColumnHelper,
     _SortRowsByDerivedColumnHelper,
     _SortRowsByInsertedColumnHelper,
@@ -1393,6 +1395,84 @@ class Test_BaseSortRowsByValueHelper:
         return property_mock(request, _BaseSortRowsByValueHelper, "_subtotal_values")
 
 
+class Test_BaseSortColumnsByValueHelper:
+    """Unit test suite for `cr.cube.matrix.assembler._BaseSortColumnsByValueHelper`."""
+
+    def test_it_provides_the_order(
+        self,
+        SortByValueCollator_,
+        _columns_dimension_prop_,
+        _element_values_prop_,
+        _subtotal_values_prop_,
+        _empty_column_idxs_prop_,
+    ):
+        _BaseSortColumnsByValueHelper(None, None)._order
+
+        SortByValueCollator_.display_order.assert_called_once_with(
+            _columns_dimension_prop_(),
+            _element_values_prop_(),
+            _subtotal_values_prop_(),
+            _empty_column_idxs_prop_(),
+            ORDER_FORMAT.SIGNED_INDEXES,
+        )
+
+    def test_but_it_falls_back_to_payload_order_on_value_error(
+        self,
+        request,
+        dimensions_,
+        _element_values_prop_,
+        _subtotal_values_prop_,
+        _empty_column_idxs_prop_,
+        SortByValueCollator_,
+    ):
+        _element_values_prop_.return_value = None
+        _subtotal_values_prop_.return_value = None
+        _empty_column_idxs_prop_.return_value = (4, 2)
+        SortByValueCollator_.display_order.side_effect = ValueError
+        PayloadOrderCollator_ = class_mock(
+            request, "cr.cube.matrix.assembler.PayloadOrderCollator"
+        )
+        PayloadOrderCollator_.display_order.return_value = (1, 2, 3, 4)
+        order_helper = _BaseSortColumnsByValueHelper(dimensions_, None)
+
+        order = order_helper._order
+
+        PayloadOrderCollator_.display_order.assert_called_once_with(
+            dimensions_[1], (4, 2), ORDER_FORMAT.SIGNED_INDEXES
+        )
+        assert order == (1, 2, 3, 4)
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+    @pytest.fixture
+    def _element_values_prop_(self, request):
+        return property_mock(request, _BaseSortColumnsByValueHelper, "_element_values")
+
+    @pytest.fixture
+    def _empty_column_idxs_prop_(self, request):
+        return property_mock(
+            request, _BaseSortColumnsByValueHelper, "_empty_column_idxs"
+        )
+
+    @pytest.fixture
+    def _columns_dimension_prop_(self, request):
+        return property_mock(
+            request, _BaseSortColumnsByValueHelper, "_columns_dimension"
+        )
+
+    @pytest.fixture
+    def SortByValueCollator_(self, request):
+        return class_mock(request, "cr.cube.matrix.assembler.SortByValueCollator")
+
+    @pytest.fixture
+    def _subtotal_values_prop_(self, request):
+        return property_mock(request, _BaseSortColumnsByValueHelper, "_subtotal_values")
+
+
 class Test_SortRowsByBaseColumnHelper:
     """Unit test suite for `cr.cube.matrix.assembler._SortRowsByBaseColumnHelper`."""
 
@@ -1594,6 +1674,38 @@ class Test_SortRowsByLabelHelper:
         dimensions_[0].subtotal_labels = ("c", "a", "b")
 
         assert _SortRowsByLabelHelper(dimensions_, None)._subtotal_values.tolist() == [
+            "c",
+            "a",
+            "b",
+        ]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def dimensions_(self, request):
+        return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+
+class Test_SortColumnsByLabelHelper:
+    """Unit test suite for `cr.cube.matrix.assembler._SortColumnsByLabelHelper`."""
+
+    def test_it_provides_the_element_values_to_help(self, dimensions_):
+        dimensions_[1].element_labels = ("c", "a", "b")
+
+        assert _SortColumnsByLabelHelper(
+            dimensions_, None
+        )._element_values.tolist() == [
+            "c",
+            "a",
+            "b",
+        ]
+
+    def test_it_provides_the_subtotal_values_to_help(self, dimensions_):
+        dimensions_[1].subtotal_labels = ("c", "a", "b")
+
+        assert _SortColumnsByLabelHelper(
+            dimensions_, None
+        )._subtotal_values.tolist() == [
             "c",
             "a",
             "b",

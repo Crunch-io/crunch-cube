@@ -49,6 +49,12 @@ class _BaseOrderHelper:
         # --- _ColumnOrderHelper, so there's not much to this yet, just keeping
         # --- form consistent with `.row_display_order()` and we'll elaborate this when
         # --- we add sort-by-value to columns.
+        collation_method = dimensions[1].order_spec.collation_method
+        if collation_method == CM.LABEL:
+            return _SortColumnsByLabelHelper(
+                dimensions, second_order_measures, format
+            )._display_order
+
         return _ColumnOrderHelper(dimensions, second_order_measures)._display_order
 
     @classmethod
@@ -347,6 +353,73 @@ class _BaseSortRowsByValueHelper(_RowOrderHelper):
         raise NotImplementedError(  # pragma: no cover
             f"{type(self).__name__} must implement `._subtotal_values`"
         )
+
+
+class _BaseSortColumnsByValueHelper(_ColumnOrderHelper):
+    """A base class that orders elements by a set of values.
+
+    This class is intended only to serve as a base for the other sort-by-value classes
+    which must all provide their own implentations of `_element_values` and
+    `_subtotal_values`.
+
+    If `_order` encouters a ValueError, it falls back to the payload order.
+    """
+
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of body values that form the basis for sort order.
+
+        Must be implemented by child classes.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            f"{type(self).__name__} must implement `._element_values`"
+        )
+
+    @lazyproperty
+    def _order(self):
+        """tuple of int element-idx specifying ordering of dimension elements."""
+        try:
+            return SortByValueCollator.display_order(
+                self._columns_dimension,
+                self._element_values,
+                self._subtotal_values,
+                self._empty_column_idxs,
+                self._format,
+            )
+        except ValueError:
+            return PayloadOrderCollator.display_order(
+                self._columns_dimension, self._empty_column_idxs, self._format
+            )
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of subtotal values that form the basis for sort order.
+
+        Must be implemented by child classes.
+        """
+        raise NotImplementedError(  # pragma: no cover
+            f"{type(self).__name__} must implement `._subtotal_values`"
+        )
+
+
+class _SortColumnsByLabelHelper(_BaseSortColumnsByValueHelper):
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of body labels that form the basis for sort order.
+
+        There is one value per column and values appear in payload (dimension) element
+        order. These are only the "base" values and do not include insertions.
+        """
+        return np.array(self._dimensions[1].element_labels)
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of col-subtotal labels that contribute to the sort basis.
+
+        There is one value per column subtotal and labels appear in payload (dimension)
+        insertion order.
+        """
+        return np.array(self._dimensions[1].subtotal_labels)
 
 
 class _SortRowsByBaseColumnHelper(_BaseSortRowsByValueHelper):
