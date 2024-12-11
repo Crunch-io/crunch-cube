@@ -1058,9 +1058,28 @@ class Test_Slice:
             [2.45356177, 2.11838791, 2.0, 1.97, 1.74213625, np.nan], nan_ok=True
         )
 
-    def test_it_can_fix_order_of_subvars_identified_by_bogus_id(self):
+    @pytest.mark.parametrize(
+        "dimension, expceted_labels",
+        (
+            ("rows_dimension", ["Finland", "Sweden", "Norway", "Denmark", "Iceland"]),
+            (
+                "columns_dimension",
+                [
+                    "Chitarra",
+                    "Quadrefiore",
+                    "Orecchiette",
+                    "Fileja",
+                    "Bucatini",
+                    "Boccoli",
+                ],
+            ),
+        ),
+    )
+    def test_it_can_fix_order_of_subvars_identified_by_bogus_id(
+        self, dimension, expceted_labels
+    ):
         transforms = {
-            "rows_dimension": {
+            dimension: {
                 "order": {
                     "type": "label",
                     "direction": "descending",
@@ -1070,10 +1089,9 @@ class Test_Slice:
             }
         }
         slice_ = _Slice(Cube(CR.MR_X_CAT), 0, transforms, None, 0)
-
-        expected = ["Finland", "Sweden", "Norway", "Denmark", "Iceland"]
-        actual = slice_.row_labels.tolist()
-        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+        prop = "row_labels" if dimension == "rows_dimension" else "column_labels"
+        actual = getattr(slice_, prop).tolist()
+        assert expceted_labels == actual, "\n%s\n\n%s" % (expceted_labels, actual)
 
     @pytest.mark.parametrize(
         "id",
