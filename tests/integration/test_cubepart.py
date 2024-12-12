@@ -1023,7 +1023,7 @@ class Test_Slice:
         actual = np.round(slice_.column_percentages, 1).tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
-    def test_it_can_sort_by_labels(self):
+    def test_it_can_sort_rows_by_labels(self):
         """Responds to order:label sort-by-label."""
         transforms = {
             "rows_dimension": {
@@ -1058,28 +1058,9 @@ class Test_Slice:
             [2.45356177, 2.11838791, 2.0, 1.97, 1.74213625, np.nan], nan_ok=True
         )
 
-    @pytest.mark.parametrize(
-        "dimension, expceted_labels",
-        (
-            ("rows_dimension", ["Finland", "Sweden", "Norway", "Denmark", "Iceland"]),
-            (
-                "columns_dimension",
-                [
-                    "Chitarra",
-                    "Quadrefiore",
-                    "Orecchiette",
-                    "Fileja",
-                    "Bucatini",
-                    "Boccoli",
-                ],
-            ),
-        ),
-    )
-    def test_it_can_fix_order_of_subvars_identified_by_bogus_id(
-        self, dimension, expceted_labels
-    ):
+    def test_it_can_fix_row_order_of_subvars_identified_by_bogus_id(self):
         transforms = {
-            dimension: {
+            "rows_dimension": {
                 "order": {
                     "type": "label",
                     "direction": "descending",
@@ -1089,9 +1070,27 @@ class Test_Slice:
             }
         }
         slice_ = _Slice(Cube(CR.MR_X_CAT), 0, transforms, None, 0)
-        prop = "row_labels" if dimension == "rows_dimension" else "column_labels"
-        actual = getattr(slice_, prop).tolist()
-        assert expceted_labels == actual, "\n%s\n\n%s" % (expceted_labels, actual)
+
+        expected = ["Finland", "Sweden", "Norway", "Denmark", "Iceland"]
+        actual = slice_.row_labels.tolist()
+        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
+
+    def test_it_can_fix_column_order_of_subvars_identified_by_bogus_id(self):
+        transforms = {
+            "columns_dimension": {
+                "order": {
+                    "type": "label",
+                    "direction": "descending",
+                    # --- Front-end uses idx to refer to MR subvariables
+                    "fixed": {"bottom": [0]},
+                }
+            }
+        }
+        slice_ = _Slice(Cube(MRI.CAT_X_MR), 0, transforms, None, 0)
+
+        expected = ["Response #3", "Response #2", "Response #1", "A&B"]
+        actual = slice_.column_labels.tolist()
+        assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
     @pytest.mark.parametrize(
         "id",
