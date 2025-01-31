@@ -88,6 +88,9 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 
 ## Changes
 
+### 3.1.3
+- Bug fix for _Strand.table_percentages
+
 ### 3.1.2
 
 - Bug fix for scale mean diff rows and cols
@@ -107,9 +110,5 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 ### 3.0.44
 
 - Bug fix median measure for exporter
-
-### 3.0.43
-
-- Median measure
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
