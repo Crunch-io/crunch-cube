@@ -407,9 +407,11 @@ class Test_Strand:
             assert strand_.population_counts_moe == pytest.approx(0.6 * 1.959964)
 
     def test_it_provides_the_table_percentage_as_numpy(self, cube_):
-        with mock.patch("cr.cube.cubepart._Strand.table_proportions", new=np.array([0.321, 0.253])):
+        with mock.patch(
+            "cr.cube.cubepart._Strand.table_proportions", new=np.array([0.321, 0.253])
+        ):
             strand_ = _Strand(cube_, None, None, None, None, None)
-            
+
             actual = strand_.table_percentages
 
             # assert type(actual) is np.ndarray
