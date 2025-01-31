@@ -2405,7 +2405,7 @@ class _Strand(CubePartition):
         Table-percentage is the fraction of the table weighted-N contributed by each
         row, expressed as a percentage (float between 0.0 and 100.0 inclusive).
         """
-        return tuple(self.table_proportions * 100)
+        return self.table_proportions * 100
 
     @lazyproperty
     def table_proportion_moes(self):

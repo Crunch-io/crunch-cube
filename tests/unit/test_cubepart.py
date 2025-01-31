@@ -3,6 +3,7 @@
 """Unit test suite for `cr.cube.cubepart` module."""
 
 import mock
+import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
@@ -404,6 +405,17 @@ class Test_Strand:
         ):
             strand_ = _Strand(cube_, None, population, None, None, None)
             assert strand_.population_counts_moe == pytest.approx(0.6 * 1.959964)
+
+    def test_it_provides_the_table_percentage_as_numpy(self, cube_):
+        with mock.patch(
+            "cr.cube.cubepart._Strand.table_proportions", new=np.array([0.321, 0.253])
+        ):
+            strand_ = _Strand(cube_, None, None, None, None, None)
+
+            actual = strand_.table_percentages
+
+            # assert type(actual) is np.ndarray
+            assert actual == pytest.approx(np.array([32.1, 25.3]))
 
     def test_it_knows_its_selected_categories_labels(self, _dimensions_prop_):
         _dimensions_prop_.return_value = [Dimension({"references": {}}, None, None)]
