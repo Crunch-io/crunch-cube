@@ -282,13 +282,17 @@ class _Slice(CubePartition):
     def column_aliases(self):
         """1D str ndarray of alias for each column, for use as column headings."""
         dim = self._dimensions[1]
-        return np.array(dim.element_aliases + dim.subtotal_aliases)[self._column_order]
+        return np.array(dim.element_aliases + dim.subtotal_aliases)[
+            self._column_order_signed_indexes
+        ]
 
     @lazyproperty
     def column_codes(self):
         """1D int ndarray of code for each column, for use as column headings."""
         dim = self._dimensions[1]
-        return np.array(dim.element_ids + dim.insertion_ids)[self._column_order]
+        return np.array(dim.element_ids + dim.insertion_ids)[
+            self._column_order_signed_indexes
+        ]
 
     @lazyproperty
     def column_index(self):
@@ -304,7 +308,26 @@ class _Slice(CubePartition):
     def column_labels(self):
         """1D str ndarray of name for each column, for use as column headings."""
         dim = self._dimensions[1]
-        return np.array(dim.element_labels + dim.subtotal_labels)[self._column_order]
+        return np.array(dim.element_labels + dim.subtotal_labels)[
+            self._column_order_signed_indexes
+        ]
+
+    def column_order(self, format=ORDER_FORMAT.SIGNED_INDEXES):
+        """1D np.int64 ndarray of idx for each assembled column of matrix.
+
+        If order format is `SIGNED_INDEXES` negative values represent inserted
+        subtotal-col locations; for `BOGUS_IDS` insertios are represented by
+        `ins_{insertion_id}` string.
+
+        Indices appear in the order columns are to appear in the final result.
+
+        Needed for reordering color palette in exporter.
+        """
+        if format == ORDER_FORMAT.BOGUS_IDS:
+            return _BaseOrderHelper.column_display_order(
+                self._dimensions, self._measures, format=ORDER_FORMAT.BOGUS_IDS
+            )
+        return self._column_order_signed_indexes
 
     @lazyproperty
     def column_percentages(self):
@@ -641,7 +664,11 @@ class _Slice(CubePartition):
     def inserted_column_idxs(self):
         """tuple of int index of each subtotal column in slice."""
         # --- insertions have a negative idx in their order sequence ---
-        return tuple(i for i, col_idx in enumerate(self._column_order) if col_idx < 0)
+        return tuple(
+            i
+            for i, col_idx in enumerate(self._column_order_signed_indexes)
+            if col_idx < 0
+        )
 
     @lazyproperty
     def inserted_row_idxs(self):
@@ -662,7 +689,9 @@ class _Slice(CubePartition):
         categories of CAT dimensions, are not derived. Subtotals are also not derived
         in this sense, because they're not even part of the data (elements).
         """
-        return self._derived_element_idxs(self._dimensions[1], self._column_order)
+        return self._derived_element_idxs(
+            self._dimensions[1], self._column_order_signed_indexes
+        )
 
     @lazyproperty
     def derived_row_idxs(self):
@@ -682,7 +711,9 @@ class _Slice(CubePartition):
     @lazyproperty
     def diff_column_idxs(self):
         """tuple of int index of each difference column-element in slice."""
-        return self._diff_element_idxs(self._dimensions[1], self._column_order)
+        return self._diff_element_idxs(
+            self._dimensions[1], self._column_order_signed_indexes
+        )
 
     @lazyproperty
     def diff_row_idxs(self):
@@ -766,7 +797,7 @@ class _Slice(CubePartition):
                     alpha,
                     only_larger,
                 )
-                for col in range(len(self._column_order))
+                for col in range(len(self._column_order_signed_indexes))
             ]
         ).T
 
@@ -783,7 +814,7 @@ class _Slice(CubePartition):
         Raises `ValueError if the cube-result does not include `overlaps`
         and `valid_overlaps` cube-measures.
         """
-        base_column_idx = self._column_order[column_idx]
+        base_column_idx = self._column_order_signed_indexes[column_idx]
         if self._cube_has_overlaps:
             # If overlaps are defined, calculate significance based on them
             return self._assemble_matrix(
@@ -806,7 +837,7 @@ class _Slice(CubePartition):
         Raises `ValueError if the cube-result does not include `overlaps`
         and `valid_overlaps` cube-measures.
         """
-        base_column_idx = self._column_order[column_idx]
+        base_column_idx = self._column_order_signed_indexes[column_idx]
         if self._cube_has_overlaps:
             # If overlaps are defined, calculate significance based on them
             return self._assemble_matrix(
@@ -821,7 +852,7 @@ class _Slice(CubePartition):
 
         Raises `ValueError if the cube-result does not include `mean` cube-measures.
         """
-        base_column_idx = self._column_order[column_idx]
+        base_column_idx = self._column_order_signed_indexes[column_idx]
         return self._assemble_matrix(
             self._measures.pairwise_significance_means_p_vals(base_column_idx).blocks
         )
@@ -831,7 +862,7 @@ class _Slice(CubePartition):
 
         Raises `ValueError if the cube-result does not include `mean` cube-measures.
         """
-        base_column_idx = self._column_order[column_idx]
+        base_column_idx = self._column_order_signed_indexes[column_idx]
         return self._assemble_matrix(
             self._measures.pairwise_significance_means_t_stats(base_column_idx).blocks
         )
@@ -860,7 +891,7 @@ class _Slice(CubePartition):
                     self._alpha,
                     self._only_larger,
                 )
-                for col in range(len(self._column_order))
+                for col in range(len(self._column_order_signed_indexes))
             ]
         ).T
 
@@ -882,7 +913,7 @@ class _Slice(CubePartition):
                     self._alpha_alt,
                     self._only_larger,
                 )
-                for col in range(len(self._column_order))
+                for col in range(len(self._column_order_signed_indexes))
             ]
         ).T
 
@@ -1717,7 +1748,7 @@ class _Slice(CubePartition):
         order = (
             self._row_order_signed_indexes
             if marginal.orientation == MO.ROWS
-            else self._column_order
+            else self._column_order_signed_indexes
         )
 
         return np.hstack(marginal.blocks)[order]
@@ -1737,7 +1768,7 @@ class _Slice(CubePartition):
         # --- appears in. This directly produces a final array that is exactly the
         # --- desired output.
         return np.block(blocks)[
-            np.ix_(self._row_order_signed_indexes, self._column_order)
+            np.ix_(self._row_order_signed_indexes, self._column_order_signed_indexes)
         ]
 
     def _assemble_vector(self, base_vector, subtotals, order, diffs_nan=False):
@@ -1766,12 +1797,14 @@ class _Slice(CubePartition):
         return np.hstack([base_vector, vector_subtotals])[order]
 
     @lazyproperty
-    def _column_order(self):
+    def _column_order_signed_indexes(self):
         """1D np.int64 ndarray of signed int idx for each assembled column.
 
         Negative values represent inserted subtotal-column locations.
         """
-        return _BaseOrderHelper.column_display_order(self._dimensions, self._measures)
+        return _BaseOrderHelper.column_display_order(
+            self._dimensions, self._measures, format=ORDER_FORMAT.SIGNED_INDEXES
+        )
 
     @lazyproperty
     def _columns_dimension_numeric_values(self):
@@ -1784,7 +1817,7 @@ class _Slice(CubePartition):
         return np.array(
             [
                 (elements[idx].numeric_value if idx >= 0 else np.nan)
-                for idx in self._column_order
+                for idx in self._column_order_signed_indexes
             ]
         )
 

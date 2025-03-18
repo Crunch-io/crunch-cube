@@ -1761,7 +1761,7 @@ class Test_BaseOrderHelper:
         }
         slice_ = _Slice(Cube(fixture), 0, transforms, None, 0)
         column_display_order = _BaseOrderHelper.column_display_order(
-            slice_._dimensions, slice_._measures
+            slice_._dimensions, slice_._measures, None
         )
 
         assert column_display_order.tolist() == expected_value
@@ -1875,7 +1875,6 @@ class Test_SortRowsByInsertedColumnHelper:
             }
         }
         slice_ = _Slice(Cube(fixture), 0, transforms, None, 0)
-
         assert slice_.row_order().tolist() == expected_value
 
     def test_but_it_fallback_to_payload_order_when_sort_by_value_is_not_supported(self):

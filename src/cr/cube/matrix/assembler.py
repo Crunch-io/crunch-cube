@@ -37,7 +37,7 @@ class _BaseOrderHelper:
         self._format = format
 
     @classmethod
-    def column_display_order(cls, dimensions, second_order_measures):
+    def column_display_order(cls, dimensions, second_order_measures, format):
         """1D np.int64 ndarray of signed int idx for each column of measure matrix.
 
         Negative values represent inserted-vector locations. Returned sequence reflects
@@ -50,12 +50,20 @@ class _BaseOrderHelper:
         # --- form consistent with `.row_display_order()` and we'll elaborate this when
         # --- we add sort-by-value to columns.
         collation_method = dimensions[1].order_spec.collation_method
-        if collation_method == CM.LABEL:
-            return _SortColumnsByLabelHelper(
-                dimensions, second_order_measures, format
-            )._display_order
-
-        return _ColumnOrderHelper(dimensions, second_order_measures)._display_order
+        HelperCls = (
+            _SortColumnsByLabelHelper
+            if collation_method == CM.LABEL
+            else (
+                _SortColumnsByBaseRowHelper
+                if collation_method == CM.OPPOSING_ELEMENT
+                else (
+                    _SortColumnsByInsertedRowHelper
+                    if collation_method == CM.OPPOSING_INSERTION
+                    else _ColumnOrderHelper
+                )
+            )
+        )
+        return HelperCls(dimensions, second_order_measures, format)._display_order
 
     @classmethod
     def row_display_order(cls, dimensions, second_order_measures, format):
@@ -420,6 +428,71 @@ class _SortColumnsByLabelHelper(_BaseSortColumnsByValueHelper):
         insertion order.
         """
         return np.array(self._dimensions[1].subtotal_labels)
+
+
+class _SortColumnsByBaseRowHelper(_BaseSortColumnsByValueHelper):
+    @lazyproperty
+    def _row_idx(self):
+        """int index of row whose values the sort is based on."""
+        row_element_ids = self._rows_dimension.element_ids
+        sort_row_id = self._order_spec.element_id
+        # --- Need to translate the element id to the shimmed element id
+        sort_row_id = self._rows_dimension.translate_element_id(sort_row_id)
+        return row_element_ids.index(sort_row_id)
+
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of body values that form the basis for sort order.
+
+        There is one value per column and values appear in payload (dimension) element
+        order. These are only the "base" values and do not include insertions.
+        """
+        measure_base_values = self._measure.blocks[0][0]
+        return measure_base_values[self._row_idx, :]
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of col-subtotal values that contribute to the sort basis.
+
+        There is one value per column subtotal and values appear in payload (dimension)
+        insertion order.
+        """
+        measure_subtotal_columns = self._measure.blocks[0][1]
+        return measure_subtotal_columns[self._row_idx, :]
+
+
+class _SortColumnsByInsertedRowHelper(_BaseSortColumnsByValueHelper):
+    """Orders columns by the values in an inserted row.
+
+    This would be like "order cols in descending order by value of 'Top 3' subtotal
+    row. An opposing-insertion ordering is only available on a matrix because only
+    a matrix dimension has an opposing dimension.
+    """
+
+    @lazyproperty
+    def _element_values(self):
+        """Sequence of insertion "body" values that form the basis for sort order.
+
+        There is one value per base row and values appear in payload order. These are
+        only the "base" insertion values and do not include intersections.
+        """
+        insertion_base_values = self._measure.blocks[1][0]
+        return insertion_base_values[self._insertion_idx, :]
+
+    @lazyproperty
+    def _insertion_idx(self):
+        """int index of insertion whose values the sort is based on."""
+        return self._rows_dimension.insertion_ids.index(self._order_spec.insertion_id)
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """Sequence of col-subtotal intersection values that contribute to sort basis.
+
+        There is one value per col subtotal and values appear in payload (dimension)
+        insertion order.
+        """
+        intersections = self._measure.blocks[1][1]
+        return intersections[self._insertion_idx, :]
 
 
 class _SortRowsByBaseColumnHelper(_BaseSortRowsByValueHelper):

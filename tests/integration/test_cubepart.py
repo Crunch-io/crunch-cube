@@ -643,6 +643,33 @@ class Test_Slice:
             "4",
         )
 
+    def test_it_knows_bogus_ids_column_order(self):
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "function": "subtotal",
+                        "name": "colors",
+                        "args": [1, 2, 3],
+                        "anchor": 3,
+                        "kwargs": {"positive": [1, 2, 3]},
+                        "id": 1,
+                    }
+                ]
+            },
+            "columns_dimension": {
+                "elements": {"2": {"hide": True}},
+                "order": {"type": "explicit", "element_ids": ["bool2", "bool3"]},
+            },
+        }
+        slice_ = Cube(CR.CAT_HS_X_CAT_HS, transforms=transforms).partitions[0]
+        assert tuple(slice_.column_order(ORDER_FORMAT.BOGUS_IDS)) == (
+            "0",
+            "1",
+            "3",
+            "ins_1",
+        )
+
     def test_it_provides_derived_indexes_for_mr_x_mr_with_transforms(self):
         transforms = {
             "rows_dimension": {
@@ -991,7 +1018,62 @@ class Test_Slice:
         actual = np.round(slice_.column_index, 1).tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
-    def test_it_can_sort_by_column_percent(self):
+    def test_it_cat_sort_columns_by_column_percent(self):
+        transforms = {
+            "columns_dimension": {
+                "order": {
+                    "type": "opposing_element",
+                    "element_id": 1,
+                    "measure": "count_unweighted",
+                    "direction": "ascending",
+                    "fixed": {"top": [5]},  # Never col will be the first one
+                }
+            }
+        }
+        slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, transforms, None, 0)
+        expected_slice_repr = """
+        _Slice(name='Support', dimension_types='CAT x CAT')
+        Showing: COUNT
+                      Never    Widowed    Divorced    As married    Married
+        ----------  -------  ---------  ----------  ------------  ---------
+        Plenty            7          0           3            21         46
+        Enough           29          1          13            55        127
+        Not enough       47          1          41            17        253
+        N/A              26          4          19            80        247
+        Available measures: [<CUBE_MEASURE.COUNT: 'count'>]
+        """
+        assert slice_.__repr__() == dedent(expected_slice_repr).strip()
+
+    def test_it_can_compute_a_column_sort_by_insertion_values(self):
+        transforms = {
+            "columns_dimension": {
+                "order": {
+                    "type": "opposing_insertion",
+                    "insertion_id": 2,
+                    "measure": "count_unweighted",
+                    "direction": "ascending",
+                }
+            }
+        }
+        slice_ = _Slice(Cube(CR.CAT_HS_X_CAT_HS), 0, transforms, None, 0)
+        expected_slice_repr = """
+        _Slice(name='Pasta Shape', dimension_types='CAT x CAT')
+        Showing: COUNT
+                    Bravo    Alpha    Delta    Charlie    Last 2
+        --------  -------  -------  -------  ---------  --------
+        Alice          45       33       21         27        48
+        Bertha        218      158      105        132       237
+        Top 2         263      191      126        159       285
+        Charlie       102       66       82         60       142
+        David          70       93      190         47       237
+        Ernie         128      143      150        312       462
+        Bottom 2      198      236      340        359       699
+        Available measures: [<CUBE_MEASURE.COUNT: 'count'>]
+        """
+        assert slice_.__repr__() == dedent(expected_slice_repr).strip()
+        assert slice_.column_order().tolist() == [1, 0, 3, 2, -1]
+
+    def test_it_can_sort_rows_by_column_percent(self):
         """Responds to order:opposing_element sort-by-value.
 
         So far, this is limited to column-percents (column-proportions) measure, but
