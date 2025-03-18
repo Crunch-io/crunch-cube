@@ -643,6 +643,33 @@ class Test_Slice:
             "4",
         )
 
+    def test_it_knows_bogus_ids_column_order(self):
+        transforms = {
+            "rows_dimension": {
+                "insertions": [
+                    {
+                        "function": "subtotal",
+                        "name": "colors",
+                        "args": [1, 2, 3],
+                        "anchor": 3,
+                        "kwargs": {"positive": [1, 2, 3]},
+                        "id": 1,
+                    }
+                ]
+            },
+            "columns_dimension": {
+                "elements": {"2": {"hide": True}},
+                "order": {"type": "explicit", "element_ids": ["bool2", "bool3"]},
+            },
+        }
+        slice_ = Cube(CR.CAT_HS_X_CAT_HS, transforms=transforms).partitions[0]
+        assert tuple(slice_.column_order(ORDER_FORMAT.BOGUS_IDS)) == (
+            "0",
+            "1",
+            "3",
+            "ins_1",
+        )
+
     def test_it_provides_derived_indexes_for_mr_x_mr_with_transforms(self):
         transforms = {
             "rows_dimension": {
