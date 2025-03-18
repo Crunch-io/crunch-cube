@@ -88,7 +88,12 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 
 ## Changes
 
+### 3.1.4
+
+- Sort column by opposing row
+
 ### 3.1.3
+
 - Bug fix for _Strand.table_percentages
 
 ### 3.1.2
