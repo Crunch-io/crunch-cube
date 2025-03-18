@@ -841,10 +841,10 @@ class TestAssembler:
         with mock.patch("cr.cube.cubepart._Slice._dimensions", new=dimensions_):
             slice_ = _Slice(None, None, None, None, None)
 
-            column_order = slice_._column_order
+            column_order = slice_._column_order_signed_indexes
 
             _BaseOrderHelper_.column_display_order.assert_called_once_with(
-                dimensions_, second_order_measures_
+                dimensions_, second_order_measures_, ORDER_FORMAT.SIGNED_INDEXES
             )
             assert column_order.tolist() == [-1, 1, -2, 2, -3, 3]
 
@@ -915,7 +915,7 @@ class TestAssembler:
 
     @pytest.fixture
     def _column_order_prop_(self, request):
-        return property_mock(request, _Slice, "_column_order")
+        return property_mock(request, _Slice, "_column_order_signed_indexes")
 
     @pytest.fixture
     def columns_table_unweighted_base_(self, request):
@@ -1006,10 +1006,12 @@ class Test_BaseOrderHelper:
         )
 
         column_order = _BaseOrderHelper.column_display_order(
-            dimensions_, second_order_measures_
+            dimensions_, second_order_measures_, ORDER_FORMAT.SIGNED_INDEXES
         )
 
-        _ColumnOrderHelper_.assert_called_once_with(dimensions_, second_order_measures_)
+        _ColumnOrderHelper_.assert_called_once_with(
+            dimensions_, second_order_measures_, ORDER_FORMAT.SIGNED_INDEXES
+        )
         assert column_order.tolist() == [-2, 1, -1, 2]
 
     @pytest.mark.parametrize(
