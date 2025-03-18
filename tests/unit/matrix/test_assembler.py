@@ -23,6 +23,7 @@ from cr.cube.matrix.assembler import (
     _ColumnOrderHelper,
     _RowOrderHelper,
     _SortColumnsByLabelHelper,
+    _SortColumnsByBaseRowHelper,
     _SortRowsByBaseColumnHelper,
     _SortRowsByDerivedColumnHelper,
     _SortRowsByInsertedColumnHelper,
@@ -1686,6 +1687,87 @@ class Test_SortRowsByLabelHelper:
     @pytest.fixture
     def dimensions_(self, request):
         return (instance_mock(request, Dimension), instance_mock(request, Dimension))
+
+
+class Test_SortColumnsByBaseRowHelper:
+    """Unit test suite for `cr.cube.matrix.assembler._SortColumnsByBaseRowHelper`."""
+
+    def test_it_derives_the_sort_column_idx_from_the_order_spec_to_help(
+        self, _rows_dimension_prop_, dimension_, _order_spec_prop_, order_spec_
+    ):
+        _rows_dimension_prop_.return_value = dimension_
+        dimension_.element_ids = (1, 2, 3, 4, 5)
+        dimension_.translate_element_id.return_value = 3
+        _order_spec_prop_.return_value = order_spec_
+        order_spec_.element_id = "c"
+        order_helper = _SortColumnsByBaseRowHelper(None, None)
+
+        row_idx = order_helper._row_idx
+
+        dimension_.translate_element_id.assert_called_once_with("c")
+        assert row_idx == 2
+
+    def test_it_extracts_the_element_values_to_help(
+        self, _measure_prop_, measure_, _row_idx_prop_
+    ):
+        _measure_prop_.return_value = measure_
+        measure_.blocks = [[np.arange(20).reshape(4, 5), None], [None, None]]
+        _row_idx_prop_.return_value = 2
+        order_helper = _SortColumnsByBaseRowHelper(None, None)
+
+        assert order_helper._element_values.tolist() == [10, 11, 12, 13, 14]
+
+    def test_but_it_raises_when_an_unsupported_sort_by_value_measure_is_requested(
+        self, _order_spec_prop_, order_spec_
+    ):
+        _order_spec_prop_.return_value = order_spec_
+        order_spec_.measure = "foo"
+        order_helper = _SortColumnsByBaseRowHelper(None, None)
+
+        with pytest.raises(NotImplementedError) as e:
+            order_helper._measure
+
+        assert str(e.value) == ("sort-by-value for measure 'foo' is not yet supported")
+
+    def test_it_extracts_the_subtotal_values_to_help222(
+        self, _measure_prop_, measure_, _row_idx_prop_
+    ):
+        _measure_prop_.return_value = measure_
+        measure_.blocks = [[None, np.arange(10, 101, 10).reshape(2, 5)], [None, None]]
+        _row_idx_prop_.return_value = 1
+        order_helper = _SortColumnsByBaseRowHelper(None, None)
+
+        assert order_helper._subtotal_values.tolist() == [60, 70, 80, 90, 100]
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _row_idx_prop_(self, request):
+        return property_mock(request, _SortColumnsByBaseRowHelper, "_row_idx")
+
+    @pytest.fixture
+    def _rows_dimension_prop_(self, request):
+        return property_mock(request, _SortColumnsByBaseRowHelper, "_rows_dimension")
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def measure_(self, request):
+        return instance_mock(request, _BaseSecondOrderMeasure)
+
+    @pytest.fixture
+    def _measure_prop_(self, request):
+        return property_mock(request, _SortColumnsByBaseRowHelper, "_measure")
+
+    @pytest.fixture
+    def order_spec_(self, request):
+        return instance_mock(request, _OrderSpec)
+
+    @pytest.fixture
+    def _order_spec_prop_(self, request):
+        return property_mock(request, _SortColumnsByBaseRowHelper, "_order_spec")
 
 
 class Test_SortColumnsByLabelHelper:
