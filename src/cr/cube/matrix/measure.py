@@ -878,8 +878,7 @@ class _AudienceRatio(_ColumnProportions):
         """
         # --- do not propagate divide-by-zero warnings to stderr ---
         with np.errstate(divide="ignore", invalid="ignore"):
-            intersections = self._count_blocks[1][1] / self._weighted_base_blocks[1][1]
-            return np.full(intersections.shape, np.nan)
+            return np.full(self._count_blocks[1][1].shape, np.nan)
 
     @lazyproperty
     def _subtotal_columns(self):
@@ -891,8 +890,7 @@ class _AudienceRatio(_ColumnProportions):
         """
         # --- do not propagate divide-by-zero warnings to stderr ---
         with np.errstate(divide="ignore", invalid="ignore"):
-            default_value = self._count_blocks[0][1] / self._weighted_base_blocks[0][1]
-            return np.empty(default_value.shape)
+            return np.empty(self._count_blocks[0][1].shape)
 
     @lazyproperty
     def _subtotal_rows(self):
