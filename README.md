@@ -88,6 +88,10 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 
 ## Changes
 
+### 3.1.5
+
+- Add audience ratio measure
+
 ### 3.1.4
 
 - Sort column by opposing row
