@@ -35,6 +35,7 @@ from cr.cube.matrix.measure import (
     _BaseSecondOrderMeasure,
     _ColumnIndex,
     _ColumnProportions,
+    _AudienceRatio,
     _ColumnShareSum,
     _ColumnStandardError,
     _ColumnUnweightedBases,
@@ -89,6 +90,7 @@ class TestAssembler:
         (
             ("column_index", _ColumnIndex),
             ("column_proportions", _ColumnProportions),
+            ("audience_ratio", _AudienceRatio),
             ("column_proportion_variances", _ProportionVariances),
             ("column_share_sum", _ColumnShareSum),
             ("column_std_err", _ColumnStandardError),

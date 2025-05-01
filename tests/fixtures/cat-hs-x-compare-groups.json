@@ -1,0 +1,486 @@
+{
+    "result": {
+        "n": 32742,
+        "counts": [
+            2034,
+            1301,
+            9630,
+            560,
+            2775,
+            9630,
+            1241,
+            965,
+            6556,
+            393,
+            1813,
+            6556,
+            591,
+            557,
+            3582,
+            157,
+            991,
+            3582,
+            343,
+            367,
+            2097,
+            107,
+            603,
+            2097,
+            431,
+            433,
+            2614,
+            136,
+            728,
+            2614,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "dimensions": [
+            {
+                "type": {
+                    "ordinal": false,
+                    "class": "categorical",
+                    "categories": [
+                        {
+                            "numeric_value": 1,
+                            "id": 1,
+                            "name": "AB",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 2,
+                            "id": 2,
+                            "name": "C1",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 3,
+                            "id": 3,
+                            "name": "C2",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 4,
+                            "id": 4,
+                            "name": "D",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": 5,
+                            "id": 5,
+                            "name": "E",
+                            "missing": false
+                        },
+                        {
+                            "numeric_value": null,
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data"
+                        }
+                    ]
+                },
+                "references": {
+                    "alias": "profile_socialgrade_ciew",
+                    "name": "Social Grade",
+                    "header_order": 2487,
+                    "description": "Social Grade",
+                    "view": {
+                        "column_width": null,
+                        "show_numeric_values": false,
+                        "show_counts": false,
+                        "include_missing": false,
+                        "transform": {
+                            "insertions": [
+                                {
+                                    "anchor": "top",
+                                    "function": "subtotal",
+                                    "name": "DIFF1",
+                                    "kwargs": {
+                                        "positive": [
+                                            1
+                                        ],
+                                        "negative": [
+                                            4
+                                        ]
+                                    },
+                                    "id": 3,
+                                    "args": [
+                                        1
+                                    ]
+                                },
+                                {
+                                    "anchor": 3,
+                                    "function": "subtotal",
+                                    "name": "Net D+E",
+                                    "kwargs": {
+                                        "positive": [
+                                            4,
+                                            5
+                                        ]
+                                    },
+                                    "id": 1,
+                                    "args": [
+                                        4,
+                                        5
+                                    ]
+                                },
+                                {
+                                    "anchor": 4,
+                                    "function": "subtotal",
+                                    "name": "Diff C2 - C1",
+                                    "kwargs": {
+                                        "positive": [
+                                            3
+                                        ],
+                                        "negative": [
+                                            2
+                                        ]
+                                    },
+                                    "id": 2,
+                                    "args": [
+                                        3
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                "derived": false
+            },
+            {
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "id": "000001",
+                                "references": {
+                                    "alias": "Target",
+                                    "name": "Target"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "id": "000002",
+                                "references": {
+                                    "alias": "Control",
+                                    "name": "Control"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                },
+                "references": {
+                    "subreferences": [
+                        {
+                            "alias": "Target",
+                            "name": "Target"
+                        },
+                        {
+                            "alias": "Control",
+                            "name": "Control"
+                        }
+                    ],
+                    "uniform_basis": false,
+                    "name": "_groups_expr",
+                    "alias": "_groups_expr"
+                },
+                "derived": true
+            },
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "id": 1,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true,
+                            "missing": false
+                        },
+                        {
+                            "id": 0,
+                            "name": "Other",
+                            "numeric_value": 0,
+                            "missing": false
+                        },
+                        {
+                            "id": -1,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "missing": true
+                        }
+                    ],
+                    "subvariables": [
+                        "000001",
+                        "000002"
+                    ]
+                },
+                "references": {
+                    "subreferences": [
+                        {
+                            "alias": "Target",
+                            "name": "Target"
+                        },
+                        {
+                            "alias": "Control",
+                            "name": "Control"
+                        }
+                    ],
+                    "uniform_basis": false,
+                    "name": "_groups_expr",
+                    "alias": "_groups_expr"
+                },
+                "derived": true
+            }
+        ],
+        "measures": {
+            "count": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    },
+                    "references": {},
+                    "derived": true
+                },
+                "data": [
+                    2034,
+                    1301,
+                    9630,
+                    560,
+                    2775,
+                    9630,
+                    1241,
+                    965,
+                    6556,
+                    393,
+                    1813,
+                    6556,
+                    591,
+                    557,
+                    3582,
+                    157,
+                    991,
+                    3582,
+                    343,
+                    367,
+                    2097,
+                    107,
+                    603,
+                    2097,
+                    431,
+                    433,
+                    2614,
+                    136,
+                    728,
+                    2614,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 24479
+            }
+        },
+        "missing": 24479,
+        "filter_stats": {
+            "is_cat_date": false,
+            "filtered": {
+                "unweighted": {
+                    "selected": 32742,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 32742,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 32742,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 32742,
+                    "other": 0,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 32742,
+            "weighted_n": 32742
+        },
+        "filtered": {
+            "unweighted_n": 32742,
+            "weighted_n": 32742
+        },
+        "element": "crunch:cube"
+    },
+    "query": {
+        "dimensions": [
+            {
+                "var": "profile_socialgrade_ciew"
+            },
+            {
+                "function": "dimension",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "function": "multiple_dichotomy_from_conditions",
+                                "args": [
+                                    [
+                                        {
+                                            "function": "==",
+                                            "args": [
+                                                {
+                                                    "var": "F3",
+                                                    "axes": [
+                                                        "f301"
+                                                    ]
+                                                },
+                                                {
+                                                    "value": 1.0
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "function": "==",
+                                            "args": [
+                                                {
+                                                    "var": "F3",
+                                                    "axes": [
+                                                        "f302"
+                                                    ]
+                                                },
+                                                {
+                                                    "value": 1.0
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                ],
+                                "references": {
+                                    "name": "_groups_expr",
+                                    "subreferences": [
+                                        {
+                                            "alias": "Target",
+                                            "name": "Target"
+                                        },
+                                        {
+                                            "alias": "Control",
+                                            "name": "Control"
+                                        }
+                                    ],
+                                    "alias": "_groups_expr"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "value": "subvariables"
+                    }
+                ]
+            },
+            {
+                "function": "dimension",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "function": "multiple_dichotomy_from_conditions",
+                                "args": [
+                                    [
+                                        {
+                                            "function": "==",
+                                            "args": [
+                                                {
+                                                    "var": "F3",
+                                                    "axes": [
+                                                        "f301"
+                                                    ]
+                                                },
+                                                {
+                                                    "value": 1.0
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "function": "==",
+                                            "args": [
+                                                {
+                                                    "var": "F3",
+                                                    "axes": [
+                                                        "f302"
+                                                    ]
+                                                },
+                                                {
+                                                    "value": 1.0
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                ],
+                                "references": {
+                                    "name": "_groups_expr",
+                                    "subreferences": [
+                                        {
+                                            "alias": "Target",
+                                            "name": "Target"
+                                        },
+                                        {
+                                            "alias": "Control",
+                                            "name": "Control"
+                                        }
+                                    ],
+                                    "alias": "_groups_expr"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "value": "categories"
+                    }
+                ]
+            }
+        ],
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    }
+}

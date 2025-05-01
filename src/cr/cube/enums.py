@@ -116,6 +116,7 @@ class MEASURE(enum.Enum):
     COLUMN_BASE_WEIGHTED = "col_base_weighted"
     COLUMN_INDEX = "col_index"
     COLUMN_PERCENT = "col_percent"
+    AUDIENCE_RATIO = "audience_ratio"
     COLUMN_PERCENT_MOE = "col_percent_moe"
     COLUMN_SHARE_SUM = "col_share_sum"
     COLUMN_STDDEV = "col_std_dev"

@@ -15,6 +15,7 @@ from cr.cube.matrix.cubemeasure import (
     _BaseCubeStdDev,
 )
 from cr.cube.matrix.measure import (
+    _AudienceRatio,
     _BaseMarginal,
     _BaseSecondOrderMeasure,
     _BaseScaledCountMarginal,
@@ -78,6 +79,7 @@ class TestSecondOrderMeasures:
         (
             ("column_index", _ColumnIndex),
             ("column_proportions", _ColumnProportions),
+            ("audience_ratio", _AudienceRatio),
             ("column_std_err", _ColumnStandardError),
             ("column_unweighted_bases", _ColumnUnweightedBases),
             ("column_weighted_bases", _ColumnWeightedBases),
@@ -441,6 +443,57 @@ class Test_ColumnProportions:
         )
 
         assert column_proportions.blocks == [[1.0, 2.0], [3.0, 4.0]]
+
+
+class Test_AudienceRatio:
+    """Unit test suite for `cr.cube.matrix.measure._AudienceRatio` object."""
+
+    def test_it_computes_its_blocks(self, request):
+        weighted_counts_ = instance_mock(
+            request,
+            _WeightedCounts,
+            blocks=[
+                [
+                    np.array([[2034.0, 560.0], [1241.0, 393.0]]),
+                    np.empty((2, 0)),
+                ],
+                [
+                    np.array([[1691.0, 453.0], [774.0, 243.0]]),
+                    np.empty((2, 0)),
+                ],
+            ],
+        )
+        column_weighted_bases_ = instance_mock(
+            request,
+            _ColumnWeightedBases,
+            blocks=[
+                [
+                    np.array([[4640, 1353], [4640, 1353]]),
+                    np.empty((2, 0)),
+                ],
+                [
+                    np.array([[4640, 1353.0], [4640, 1353]]),
+                    np.empty((2, 0)),
+                ],
+            ],
+        )
+        second_order_measures_ = instance_mock(
+            request,
+            SecondOrderMeasures,
+            weighted_counts=weighted_counts_,
+            column_weighted_bases=column_weighted_bases_,
+        )
+        cube_measures_ = class_mock(request, "cr.cube.matrix.cubemeasure.CubeMeasures")
+
+        audience_ratio = _AudienceRatio(None, second_order_measures_, cube_measures_)
+        assert audience_ratio.blocks[0][0] == pytest.approx(
+            np.array([[105.91140702, np.nan], [92.07867202, np.nan]]), nan_ok=True
+        )
+        assert audience_ratio.blocks[0][1] == pytest.approx(np.empty((2, 0)))
+        assert audience_ratio.blocks[1][0] == pytest.approx(
+            np.array([[108.84919502, np.nan], [92.87835249, np.nan]]), nan_ok=True
+        )
+        assert audience_ratio.blocks[1][1] == pytest.approx(np.empty((2, 0)))
 
 
 class Test_ProportionVariances:

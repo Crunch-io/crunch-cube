@@ -2083,6 +2083,75 @@ class Test_Slice:
             ],
         )
 
+    def test_it_provides_audience_ratio_values_for_cat_x_compare_groups(self):
+        cube = Cube(CR.CAT_HS_X_COMPARE_GROUPS)
+        slice_ = cube.partitions[0]
+        assert slice_.inserted_row_idxs == (0, 4, 6)
+        assert slice_.audience_ratio == pytest.approx(
+            np.array(
+                [
+                    [108.84919502, np.nan],
+                    [105.91140702, np.nan],
+                    [92.07867202, np.nan],
+                    [109.76595102, np.nan],
+                    [92.87835249, np.nan],
+                    [93.47385595, np.nan],
+                    [80.31213472, np.nan],
+                    [92.40983139, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+        # if audience ratio is not computable returns NaN
+        # if the cube has more than 2 columns ATM we do not compute it
+        cube = Cube(CR.CAT_X_CAT_WGTD)
+        slice_ = cube.partitions[0]
+        assert slice_.audience_ratio == pytest.approx(
+            np.array(
+                [
+                    [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                    [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+
+    def test_it_provides_audience_ratio_values_for_mr_x_compare_groups(self):
+        cube = Cube(CR.MR_X_COMPARE_GROUPS)
+        slice_ = cube.partitions[0]
+        assert slice_.audience_ratio == pytest.approx(
+            np.array(
+                [
+                    [69.5254625, np.nan],
+                    [37.73538394, np.nan],
+                    [64.62202729, np.nan],
+                    [67.31469113, np.nan],
+                    [80.47306986, np.nan],
+                    [52.04609168, np.nan],
+                    [120.91915489, np.nan],
+                    [143.93339227, np.nan],
+                    [39.80866729, np.nan],
+                    [100.25503558, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+        # if audience ratio is not computable returns NaN
+        # if the cube has more than 2 columns ATM we do not compute it
+        cube = Cube(CR.MR_X_MR)
+        slice_ = cube.partitions[0]
+        assert slice_.audience_ratio == pytest.approx(
+            np.array(
+                [
+                    [np.nan, np.nan, np.nan, np.nan],
+                    [np.nan, np.nan, np.nan, np.nan],
+                    [np.nan, np.nan, np.nan, np.nan],
+                    [np.nan, np.nan, np.nan, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
+
 
 class Test_Strand:
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""

@@ -279,6 +279,10 @@ class _Slice(CubePartition):
     # ---interface ---------------------------------------------------
 
     @lazyproperty
+    def audience_ratio(self):
+        return self._assemble_matrix(self._measures.audience_ratio.blocks)
+
+    @lazyproperty
     def column_aliases(self):
         """1D str ndarray of alias for each column, for use as column headings."""
         dim = self._dimensions[1]
