@@ -280,6 +280,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def audience_ratio(self):
+        """2D np.float64 ndarray of audience-ratio for each matrix cell."""
         return self._assemble_matrix(self._measures.audience_ratio.blocks)
 
     @lazyproperty
