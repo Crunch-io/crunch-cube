@@ -877,8 +877,7 @@ class _AudienceRatio(_ColumnProportions):
         Always nan because the audience ratio is not defined for the intersection
         """
         # --- do not propagate divide-by-zero warnings to stderr ---
-        with np.errstate(divide="ignore", invalid="ignore"):
-            return np.full(self._count_blocks[1][1].shape, np.nan)
+        return np.full(self._count_blocks[1][1].shape, np.nan)
 
     @lazyproperty
     def _subtotal_columns(self):
@@ -889,8 +888,7 @@ class _AudienceRatio(_ColumnProportions):
         Always empty because the audience ratio has no subtotal columns
         """
         # --- do not propagate divide-by-zero warnings to stderr ---
-        with np.errstate(divide="ignore", invalid="ignore"):
-            return np.empty(self._count_blocks[0][1].shape)
+        return np.empty(self._count_blocks[0][1].shape)
 
     @lazyproperty
     def _subtotal_rows(self):
