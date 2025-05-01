@@ -34,6 +34,11 @@ class SecondOrderMeasures:
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def audience_ratio(self):
+        """_AudienceRatio measure object for this cube-result."""
+        return _AudienceRatio(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
     def column_comparable_counts(self):
         """_ColumnComparableCounts measure object for this cube-result."""
         return _ColumnComparableCounts(self._dimensions, self, self._cube_measures)
@@ -828,6 +833,76 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
     def _weighted_base_blocks(self):
         """List of four 2D ndarray of column weighted bases."""
         return self._second_order_measures.column_weighted_bases.blocks
+
+
+class _AudienceRatio(_ColumnProportions):
+    """Provides the audience-ratio measure for a matrix.
+
+    This measure (also known as "Index") is a 2D np.float64 ndarray of the ratio of the
+    proportions of the first column to the proportions of the second column.
+
+    Audience ratio (Index) is a convenient way of showing the ratio of the Target % and
+    the Control % when we have a compared group analysis (aka profiles analysis).
+
+    NOTE: At the moment we only support 2 compare groups, means that we can only have 2
+    column max in the analysis. In case of ncol>2 we will return a 2D ndarray of nans as
+    if it were a non-valid audience ratio.
+    """
+
+    @lazyproperty
+    def _base_values(self):
+        """2D ndarray np.float64 of the base values of the audience ratio"""
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            if not self._can_compute_measure:
+                return np.full(self._count_blocks[0][0].shape, np.nan)
+            base_values = self._count_blocks[0][0] / self._weighted_base_blocks[0][0]
+            values = (base_values[:, 0] / base_values[:, 1]) * 100
+            return np.column_stack((values, np.full_like(values, np.nan)))
+
+    @lazyproperty
+    def _can_compute_measure(self):
+        """Bool indicating whether audience ratio is computable.
+
+        If there are more than 2 columns, we return nans as a non-valid measure values
+        """
+        return False if self._count_blocks[0][0].shape[-1] != 2 else True
+
+    @lazyproperty
+    def _intersections(self):
+        """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
+
+        An intersection value arises where a row-subtotal crosses a column-subtotal.
+
+        Always nan because the audience ratio is not defined for the intersection
+        """
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        return np.full(self._count_blocks[1][1].shape, np.nan)
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D np.float64 ndarray of audience ratio values.
+
+        This is the second "block" and has the shape (n_rows, n_col_subtotals).
+
+        Always empty because the audience ratio has no subtotal columns
+        """
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        return np.empty(self._count_blocks[0][1].shape)
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """2D np.float64 ndarray of audience ratio values.
+
+        This is the third "block" and has the shape (n_row_subtotals, n_cols).
+        """
+        # --- do not propagate divide-by-zero warnings to stderr ---
+        with np.errstate(divide="ignore", invalid="ignore"):
+            if not self._can_compute_measure:
+                return np.full(self._count_blocks[1][0].shape, np.nan)
+            base_values = self._count_blocks[1][0] / self._weighted_base_blocks[1][0]
+            subtotal_rows = (base_values[:, 0] / base_values[:, 1]) * 100
+            return np.column_stack((subtotal_rows, np.full_like(subtotal_rows, np.nan)))
 
 
 class _ColumnProportionsSmoothed(_ColumnProportions, _SmoothedMeasure):

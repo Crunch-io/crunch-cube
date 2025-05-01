@@ -1,0 +1,1143 @@
+{
+    "result": {
+        "n": 201282,
+        "counts": [
+            2187,
+            7905,
+            0,
+            1290,
+            8759,
+            43,
+            7045,
+            26754,
+            0,
+            2496,
+            31221,
+            82,
+            18332,
+            139059,
+            0,
+            52637,
+            102488,
+            2266,
+            1141,
+            6182,
+            0,
+            1240,
+            6025,
+            58,
+            8091,
+            28477,
+            0,
+            2546,
+            33955,
+            67,
+            18332,
+            139059,
+            0,
+            52637,
+            102488,
+            2266,
+            2069,
+            7783,
+            0,
+            1313,
+            8498,
+            41,
+            7163,
+            26876,
+            0,
+            2473,
+            31482,
+            84,
+            18332,
+            139059,
+            0,
+            52637,
+            102488,
+            2266,
+            2234,
+            8159,
+            0,
+            1361,
+            8983,
+            49,
+            6998,
+            26500,
+            0,
+            2425,
+            30997,
+            76,
+            18332,
+            139059,
+            0,
+            52637,
+            102488,
+            2266,
+            1978,
+            6324,
+            0,
+            1008,
+            7266,
+            28,
+            7254,
+            28335,
+            0,
+            2778,
+            32714,
+            97,
+            18332,
+            139059,
+            0,
+            52637,
+            102488,
+            2266,
+            448,
+            2955,
+            0,
+            353,
+            3038,
+            12,
+            8784,
+            31704,
+            0,
+            3433,
+            36942,
+            113,
+            18332,
+            139059,
+            0,
+            52637,
+            102488,
+            2266,
+            7280,
+            25176,
+            0,
+            2469,
+            29911,
+            76,
+            1952,
+            9483,
+            0,
+            1317,
+            10069,
+            49,
+            18332,
+            139059,
+            0,
+            52637,
+            102488,
+            2266,
+            5577,
+            15495,
+            0,
+            1589,
+            19430,
+            53,
+            3655,
+            19164,
+            0,
+            2197,
+            20550,
+            72,
+            18332,
+            139059,
+            0,
+            52637,
+            102488,
+            2266,
+            663,
+            3570,
+            0,
+            683,
+            3521,
+            29,
+            8569,
+            31089,
+            0,
+            3103,
+            36459,
+            96,
+            18332,
+            139059,
+            0,
+            52637,
+            102488,
+            2266,
+            3513,
+            8799,
+            0,
+            1437,
+            10836,
+            39,
+            5719,
+            25860,
+            0,
+            2349,
+            29144,
+            86,
+            18332,
+            139059,
+            0,
+            52637,
+            102488,
+            2266
+        ],
+        "dimensions": [
+            {
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "id": "0001",
+                                "references": {
+                                    "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_2",
+                                    "name": "Controversial or taboo subjects",
+                                    "view": {
+                                        "origin_source": "personality",
+                                        "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                        "origin_entity": "2",
+                                        "entity_name": "Controversial or taboo subjects"
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "id": "0002",
+                                "references": {
+                                    "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_9",
+                                    "name": "Cringe-worthy and embarrassing situations",
+                                    "view": {
+                                        "origin_source": "personality",
+                                        "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                        "origin_entity": "9",
+                                        "entity_name": "Cringe-worthy and embarrassing situations"
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "id": "0003",
+                                "references": {
+                                    "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_7",
+                                    "name": "Funny and surreal sketches",
+                                    "view": {
+                                        "origin_source": "personality",
+                                        "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                        "origin_entity": "7",
+                                        "entity_name": "Funny and surreal sketches"
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "id": "0004",
+                                "references": {
+                                    "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_3",
+                                    "name": "Impressions",
+                                    "view": {
+                                        "origin_source": "personality",
+                                        "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                        "origin_entity": "3",
+                                        "entity_name": "Impressions"
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 5,
+                            "value": {
+                                "id": "0005",
+                                "references": {
+                                    "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_4",
+                                    "name": "Improvisation",
+                                    "view": {
+                                        "origin_source": "personality",
+                                        "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                        "origin_entity": "4",
+                                        "entity_name": "Improvisation"
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 6,
+                            "value": {
+                                "id": "0006",
+                                "references": {
+                                    "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_10",
+                                    "name": "None of these (What makes me laugh)",
+                                    "view": {
+                                        "origin_source": "personality",
+                                        "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                        "origin_entity": "10",
+                                        "entity_name": "None of these"
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 7,
+                            "value": {
+                                "id": "0007",
+                                "references": {
+                                    "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_1",
+                                    "name": "Observations on everyday life",
+                                    "view": {
+                                        "origin_source": "personality",
+                                        "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                        "origin_entity": "1",
+                                        "entity_name": "Observations on everyday life"
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 8,
+                            "value": {
+                                "id": "0008",
+                                "references": {
+                                    "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_8",
+                                    "name": "Observations on news and current affairs",
+                                    "view": {
+                                        "origin_source": "personality",
+                                        "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                        "origin_entity": "8",
+                                        "entity_name": "Observations on news and current affairs"
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 9,
+                            "value": {
+                                "id": "0009",
+                                "references": {
+                                    "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_6",
+                                    "name": "Toilet humor",
+                                    "view": {
+                                        "origin_source": "personality",
+                                        "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                        "origin_entity": "6",
+                                        "entity_name": "Toilet humor"
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 10,
+                            "value": {
+                                "id": "0010",
+                                "references": {
+                                    "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_5",
+                                    "name": "Wordplay",
+                                    "view": {
+                                        "origin_source": "personality",
+                                        "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                        "origin_entity": "5",
+                                        "entity_name": "Wordplay"
+                                    }
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                },
+                "references": {
+                    "uniform_basis": false,
+                    "name": "What makes me laugh",
+                    "subreferences": [
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_2",
+                            "name": "Controversial or taboo subjects",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "2",
+                                "entity_name": "Controversial or taboo subjects"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_9",
+                            "name": "Cringe-worthy and embarrassing situations",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "9",
+                                "entity_name": "Cringe-worthy and embarrassing situations"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_7",
+                            "name": "Funny and surreal sketches",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "7",
+                                "entity_name": "Funny and surreal sketches"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_3",
+                            "name": "Impressions",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "3",
+                                "entity_name": "Impressions"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_4",
+                            "name": "Improvisation",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "4",
+                                "entity_name": "Improvisation"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_10",
+                            "name": "None of these (What makes me laugh)",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "10",
+                                "entity_name": "None of these"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_1",
+                            "name": "Observations on everyday life",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "1",
+                                "entity_name": "Observations on everyday life"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_8",
+                            "name": "Observations on news and current affairs",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "8",
+                                "entity_name": "Observations on news and current affairs"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_6",
+                            "name": "Toilet humor",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "6",
+                                "entity_name": "Toilet humor"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_5",
+                            "name": "Wordplay",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "5",
+                                "entity_name": "Wordplay"
+                            }
+                        }
+                    ],
+                    "description": "Thinking of the last times you found some kind of comedy really funny, what kind of jokes would you say they were?",
+                    "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa",
+                    "view": {
+                        "origin_source": "personality",
+                        "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                        "roles": [
+                            "profiles_datapoints",
+                            "group_definition"
+                        ]
+                    }
+                },
+                "derived": true
+            },
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "id": 1,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true,
+                            "missing": false
+                        },
+                        {
+                            "id": 0,
+                            "name": "Other",
+                            "numeric_value": 0,
+                            "missing": false
+                        },
+                        {
+                            "id": -1,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "missing": true
+                        }
+                    ],
+                    "subvariables": [
+                        "0001",
+                        "0002",
+                        "0003",
+                        "0004",
+                        "0005",
+                        "0006",
+                        "0007",
+                        "0008",
+                        "0009",
+                        "0010"
+                    ]
+                },
+                "references": {
+                    "uniform_basis": false,
+                    "name": "What makes me laugh",
+                    "subreferences": [
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_2",
+                            "name": "Controversial or taboo subjects",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "2",
+                                "entity_name": "Controversial or taboo subjects"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_9",
+                            "name": "Cringe-worthy and embarrassing situations",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "9",
+                                "entity_name": "Cringe-worthy and embarrassing situations"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_7",
+                            "name": "Funny and surreal sketches",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "7",
+                                "entity_name": "Funny and surreal sketches"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_3",
+                            "name": "Impressions",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "3",
+                                "entity_name": "Impressions"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_4",
+                            "name": "Improvisation",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "4",
+                                "entity_name": "Improvisation"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_10",
+                            "name": "None of these (What makes me laugh)",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "10",
+                                "entity_name": "None of these"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_1",
+                            "name": "Observations on everyday life",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "1",
+                                "entity_name": "Observations on everyday life"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_8",
+                            "name": "Observations on news and current affairs",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "8",
+                                "entity_name": "Observations on news and current affairs"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_6",
+                            "name": "Toilet humor",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "6",
+                                "entity_name": "Toilet humor"
+                            }
+                        },
+                        {
+                            "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa_5",
+                            "name": "Wordplay",
+                            "view": {
+                                "origin_source": "personality",
+                                "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                                "origin_entity": "5",
+                                "entity_name": "Wordplay"
+                            }
+                        }
+                    ],
+                    "description": "Thinking of the last times you found some kind of comedy really funny, what kind of jokes would you say they were?",
+                    "alias": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa",
+                    "view": {
+                        "origin_source": "personality",
+                        "origin_metric": "c8b55680-215d-11e4-9e09-005056a875fa",
+                        "roles": [
+                            "profiles_datapoints",
+                            "group_definition"
+                        ]
+                    }
+                },
+                "derived": true
+            },
+            {
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "id": "000001",
+                                "references": {
+                                    "alias": "target",
+                                    "name": "target"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "id": "000002",
+                                "references": {
+                                    "alias": "control",
+                                    "name": "control"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                },
+                "references": {
+                    "subreferences": [
+                        {
+                            "alias": "target",
+                            "name": "target"
+                        },
+                        {
+                            "alias": "control",
+                            "name": "control"
+                        }
+                    ],
+                    "uniform_basis": false,
+                    "name": "_groups_expr",
+                    "alias": "_groups_expr"
+                },
+                "derived": true
+            },
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "id": 1,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true,
+                            "missing": false
+                        },
+                        {
+                            "id": 0,
+                            "name": "Other",
+                            "numeric_value": 0,
+                            "missing": false
+                        },
+                        {
+                            "id": -1,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "missing": true
+                        }
+                    ],
+                    "subvariables": [
+                        "000001",
+                        "000002"
+                    ]
+                },
+                "references": {
+                    "subreferences": [
+                        {
+                            "alias": "target",
+                            "name": "target"
+                        },
+                        {
+                            "alias": "control",
+                            "name": "control"
+                        }
+                    ],
+                    "uniform_basis": false,
+                    "name": "_groups_expr",
+                    "alias": "_groups_expr"
+                },
+                "derived": true
+            }
+        ],
+        "measures": {
+            "count": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    },
+                    "references": {},
+                    "derived": true
+                },
+                "data": [
+                    2187,
+                    7905,
+                    0,
+                    1290,
+                    8759,
+                    43,
+                    7045,
+                    26754,
+                    0,
+                    2496,
+                    31221,
+                    82,
+                    18332,
+                    139059,
+                    0,
+                    52637,
+                    102488,
+                    2266,
+                    1141,
+                    6182,
+                    0,
+                    1240,
+                    6025,
+                    58,
+                    8091,
+                    28477,
+                    0,
+                    2546,
+                    33955,
+                    67,
+                    18332,
+                    139059,
+                    0,
+                    52637,
+                    102488,
+                    2266,
+                    2069,
+                    7783,
+                    0,
+                    1313,
+                    8498,
+                    41,
+                    7163,
+                    26876,
+                    0,
+                    2473,
+                    31482,
+                    84,
+                    18332,
+                    139059,
+                    0,
+                    52637,
+                    102488,
+                    2266,
+                    2234,
+                    8159,
+                    0,
+                    1361,
+                    8983,
+                    49,
+                    6998,
+                    26500,
+                    0,
+                    2425,
+                    30997,
+                    76,
+                    18332,
+                    139059,
+                    0,
+                    52637,
+                    102488,
+                    2266,
+                    1978,
+                    6324,
+                    0,
+                    1008,
+                    7266,
+                    28,
+                    7254,
+                    28335,
+                    0,
+                    2778,
+                    32714,
+                    97,
+                    18332,
+                    139059,
+                    0,
+                    52637,
+                    102488,
+                    2266,
+                    448,
+                    2955,
+                    0,
+                    353,
+                    3038,
+                    12,
+                    8784,
+                    31704,
+                    0,
+                    3433,
+                    36942,
+                    113,
+                    18332,
+                    139059,
+                    0,
+                    52637,
+                    102488,
+                    2266,
+                    7280,
+                    25176,
+                    0,
+                    2469,
+                    29911,
+                    76,
+                    1952,
+                    9483,
+                    0,
+                    1317,
+                    10069,
+                    49,
+                    18332,
+                    139059,
+                    0,
+                    52637,
+                    102488,
+                    2266,
+                    5577,
+                    15495,
+                    0,
+                    1589,
+                    19430,
+                    53,
+                    3655,
+                    19164,
+                    0,
+                    2197,
+                    20550,
+                    72,
+                    18332,
+                    139059,
+                    0,
+                    52637,
+                    102488,
+                    2266,
+                    663,
+                    3570,
+                    0,
+                    683,
+                    3521,
+                    29,
+                    8569,
+                    31089,
+                    0,
+                    3103,
+                    36459,
+                    96,
+                    18332,
+                    139059,
+                    0,
+                    52637,
+                    102488,
+                    2266,
+                    3513,
+                    8799,
+                    0,
+                    1437,
+                    10836,
+                    39,
+                    5719,
+                    25860,
+                    0,
+                    2349,
+                    29144,
+                    86,
+                    18332,
+                    139059,
+                    0,
+                    52637,
+                    102488,
+                    2266
+                ],
+                "n_missing": 157391
+            }
+        },
+        "missing": 157391,
+        "filter_stats": {
+            "is_cat_date": false,
+            "filtered": {
+                "unweighted": {
+                    "selected": 201282,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 201282,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 201282,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 201282,
+                    "other": 0,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 201282,
+            "weighted_n": 201282
+        },
+        "filtered": {
+            "unweighted_n": 201282,
+            "weighted_n": 201282
+        },
+        "element": "crunch:cube"
+    },
+    "query": {
+        "dimensions": [
+            {
+                "function": "dimension",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "var": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa"
+                            }
+                        ]
+                    },
+                    {
+                        "value": "subvariables"
+                    }
+                ]
+            },
+            {
+                "function": "as_selected",
+                "args": [
+                    {
+                        "var": "personality_multi_c8b55680_215d_11e4_9e09_005056a875fa"
+                    }
+                ]
+            },
+            {
+                "function": "dimension",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "function": "multiple_dichotomy_from_conditions",
+                                "args": [
+                                    [
+                                        {
+                                            "function": "in",
+                                            "args": [
+                                                {
+                                                    "var": "pdl_educ"
+                                                },
+                                                {
+                                                    "value": [
+                                                        6.0
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "function": "in",
+                                            "args": [
+                                                {
+                                                    "var": "pdlc_age_4way_65plus"
+                                                },
+                                                {
+                                                    "value": [
+                                                        1.0
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                ],
+                                "references": {
+                                    "name": "_groups_expr",
+                                    "subreferences": [
+                                        {
+                                            "alias": "target",
+                                            "name": "target"
+                                        },
+                                        {
+                                            "alias": "control",
+                                            "name": "control"
+                                        }
+                                    ],
+                                    "alias": "_groups_expr"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "value": "subvariables"
+                    }
+                ]
+            },
+            {
+                "function": "dimension",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "function": "multiple_dichotomy_from_conditions",
+                                "args": [
+                                    [
+                                        {
+                                            "function": "in",
+                                            "args": [
+                                                {
+                                                    "var": "pdl_educ"
+                                                },
+                                                {
+                                                    "value": [
+                                                        6.0
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "function": "in",
+                                            "args": [
+                                                {
+                                                    "var": "pdlc_age_4way_65plus"
+                                                },
+                                                {
+                                                    "value": [
+                                                        1.0
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                ],
+                                "references": {
+                                    "name": "_groups_expr",
+                                    "subreferences": [
+                                        {
+                                            "alias": "target",
+                                            "name": "target"
+                                        },
+                                        {
+                                            "alias": "control",
+                                            "name": "control"
+                                        }
+                                    ],
+                                    "alias": "_groups_expr"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "value": "categories"
+                    }
+                ]
+            }
+        ],
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    }
+}

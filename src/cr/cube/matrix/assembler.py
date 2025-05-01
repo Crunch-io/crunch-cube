@@ -50,19 +50,17 @@ class _BaseOrderHelper:
         # --- form consistent with `.row_display_order()` and we'll elaborate this when
         # --- we add sort-by-value to columns.
         collation_method = dimensions[1].order_spec.collation_method
+        # fmt: off
         HelperCls = (
             _SortColumnsByLabelHelper
             if collation_method == CM.LABEL
-            else (
-                _SortColumnsByBaseRowHelper
-                if collation_method == CM.OPPOSING_ELEMENT
-                else (
-                    _SortColumnsByInsertedRowHelper
-                    if collation_method == CM.OPPOSING_INSERTION
-                    else _ColumnOrderHelper
-                )
-            )
+            else _SortColumnsByBaseRowHelper
+            if collation_method == CM.OPPOSING_ELEMENT
+            else _SortColumnsByInsertedRowHelper
+            if collation_method == CM.OPPOSING_INSERTION
+            else _ColumnOrderHelper
         )
+        # fmt: on
         return HelperCls(dimensions, second_order_measures, format)._display_order
 
     @classmethod
@@ -75,28 +73,21 @@ class _BaseOrderHelper:
         """
         collation_method = dimensions[0].order_spec.collation_method
         dim_type = dimensions[1].dimension_type
+        # fmt: off
         HelperCls = (
             _SortRowsByBaseColumnHelper
             if collation_method == CM.OPPOSING_ELEMENT
-            else (
-                _SortRowsByDerivedColumnHelper
-                if collation_method == CM.OPPOSING_INSERTION
-                and dim_type in DT.ARRAY_TYPES
-                else (
-                    _SortRowsByInsertedColumnHelper
-                    if collation_method == CM.OPPOSING_INSERTION
-                    else (
-                        _SortRowsByLabelHelper
-                        if collation_method == CM.LABEL
-                        else (
-                            _SortRowsByMarginalHelper
-                            if collation_method == CM.MARGINAL
-                            else _RowOrderHelper
-                        )
-                    )
-                )
-            )
+            else _SortRowsByDerivedColumnHelper
+            if collation_method == CM.OPPOSING_INSERTION and dim_type in DT.ARRAY_TYPES
+            else _SortRowsByInsertedColumnHelper
+            if collation_method == CM.OPPOSING_INSERTION
+            else _SortRowsByLabelHelper
+            if collation_method == CM.LABEL
+            else _SortRowsByMarginalHelper
+            if collation_method == CM.MARGINAL
+            else _RowOrderHelper
         )
+        # fmt: on
         return HelperCls(dimensions, second_order_measures, format)._display_order
 
     @lazyproperty
@@ -155,6 +146,7 @@ class _BaseOrderHelper:
             M.COLUMN_BASE_WEIGHTED: "column_weighted_bases",
             M.COLUMN_INDEX: "column_index",
             M.COLUMN_PERCENT: "column_proportions",
+            M.AUDIENCE_RATIO: "audience_ratio",
             M.COLUMN_PERCENT_MOE: "column_std_err",  # monotonic transform
             M.COLUMN_SHARE_SUM: "column_share_sum",
             M.COLUMN_STDDEV: "column_proportion_variances",  # monotonic transform
