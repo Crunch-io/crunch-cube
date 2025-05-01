@@ -50,6 +50,7 @@ class _BaseOrderHelper:
         # --- form consistent with `.row_display_order()` and we'll elaborate this when
         # --- we add sort-by-value to columns.
         collation_method = dimensions[1].order_spec.collation_method
+        # fmt: off
         HelperCls = (
             _SortColumnsByLabelHelper
             if collation_method == CM.LABEL
@@ -59,6 +60,7 @@ class _BaseOrderHelper:
             if collation_method == CM.OPPOSING_INSERTION
             else _ColumnOrderHelper
         )
+        # fmt: on
         return HelperCls(dimensions, second_order_measures, format)._display_order
 
     @classmethod
@@ -71,6 +73,7 @@ class _BaseOrderHelper:
         """
         collation_method = dimensions[0].order_spec.collation_method
         dim_type = dimensions[1].dimension_type
+        # fmt: off
         HelperCls = (
             _SortRowsByBaseColumnHelper
             if collation_method == CM.OPPOSING_ELEMENT
@@ -84,6 +87,7 @@ class _BaseOrderHelper:
             if collation_method == CM.MARGINAL
             else _RowOrderHelper
         )
+        # fmt: on
         return HelperCls(dimensions, second_order_measures, format)._display_order
 
     @lazyproperty
