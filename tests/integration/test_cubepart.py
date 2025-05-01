@@ -2102,6 +2102,35 @@ class Test_Slice:
             ),
             nan_ok=True,
         )
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "opposing_element",
+                    "element_id": 1,
+                    "measure": "audience_ratio",
+                    "direction": "descending",
+                }
+            }
+        }
+        cube = Cube(CR.CAT_HS_X_COMPARE_GROUPS, transforms=transforms)
+        slice_ = cube.partitions[0]
+        # Note: descending order always keep the subtotal at the top, ascending order
+        # always keep the subtotal at the bottom
+        assert slice_.audience_ratio == pytest.approx(
+            np.array(
+                [
+                    [108.84919502, np.nan],  # subtotal1
+                    [92.87835249, np.nan],  # subtotal2
+                    [80.31213472, np.nan],  # subtotal3
+                    [109.76595102, np.nan],
+                    [105.91140702, np.nan],
+                    [93.47385595, np.nan],
+                    [92.40983139, np.nan],
+                    [92.07867202, np.nan],
+                ]
+            ),
+            nan_ok=True,
+        )
         # if audience ratio is not computable returns NaN
         # if the cube has more than 2 columns ATM we do not compute it
         cube = Cube(CR.CAT_X_CAT_WGTD)
