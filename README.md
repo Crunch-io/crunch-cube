@@ -1,6 +1,6 @@
 # crunch-cube
 
-![Build Status](https://github.com/Crunch-io/crunch-cube/workflows/CI/badge.svg?branch=master)
+![Build Status](https://github.com/Crunch-io/crunch-cube/workflows/CI/badge.svg)
 ![Coverage Status](https://codecov.io/gh/Crunch-io/crunch-cube/branch/master/graph/badge.svg?token=C6auKOj8tZ)
 ![Documentation Status](https://readthedocs.org/projects/crunch-cube/badge/?version=latest)
 
