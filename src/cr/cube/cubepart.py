@@ -1631,6 +1631,16 @@ class _Slice(CubePartition):
         return None
 
     @lazyproperty
+    def table_code(self):
+        """Optional table code for this Slice"""
+        if self._cube.ndim < 3:
+            return None
+        valid_elements = self._cube.dimensions[0].valid_elements
+        if valid_elements.element_ids:
+            return valid_elements[self._slice_idx].element_id
+        return None
+
+    @lazyproperty
     def table_percentages(self):
         return self.table_proportions * 100
 
@@ -2437,6 +2447,17 @@ class _Strand(CubePartition):
         return None
 
     @lazyproperty
+    def table_code(self):
+        """Optional table code for this strand
+        
+        Only for CA-as-0th case, provides differentiated codes for stacked tables.
+        """
+        valid_elements = self._cube.dimensions[0].valid_elements
+        if valid_elements.element_ids:
+            return valid_elements[self._slice_idx].element_id
+        return None
+
+    @lazyproperty
     def table_percentages(self):
         """1D np.float64 ndarray of table-percentage for each row.
 
@@ -2584,6 +2605,10 @@ class _Nub(CubePartition):
 
     @lazyproperty
     def table_name(self):
+        return None
+
+    @lazyproperty
+    def table_code(self):
         return None
 
     @lazyproperty

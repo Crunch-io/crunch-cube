@@ -308,7 +308,7 @@ class Test_Slice:
         assert slice_.selected_category_labels == expected_value
 
     @pytest.mark.parametrize("ndim, element_ids", ((2, (1, 2, 3)), (3, ())))
-    def test_it_knows_when_its_table_name_is_None(
+    def test_it_knows_when_its_table_name_and_code_are_None(
         self, request, dimension_, _dimensions_prop_, cube_, ndim, element_ids
     ):
         valid_elements_ = instance_mock(request, Elements)
@@ -319,6 +319,7 @@ class Test_Slice:
         slice_ = _Slice(cube_, 0, None, None, None)
 
         assert slice_.table_name is None
+        assert slice_.table_code is None
 
     # fixture components ---------------------------------------------
 
@@ -423,7 +424,7 @@ class Test_Strand:
 
         assert strand_.selected_category_labels == ()
 
-    def test_it_knows_when_its_table_name_is_None(
+    def test_it_knows_when_its_table_name_and_code_are_None(
         self, request, dimension_, _dimensions_prop_, cube_
     ):
         valid_elements_ = instance_mock(request, Elements)
@@ -433,6 +434,7 @@ class Test_Strand:
         strand = _Strand(cube_, 0, None, None, None, None)
 
         assert strand.table_name is None
+        assert strand.table_code is None
 
     # fixture components ---------------------------------------------
 

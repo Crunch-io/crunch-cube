@@ -139,6 +139,7 @@ class Test_Slice:
         assert slice_.tab_alias == ""
         assert slice_.table_margin == 15
         assert slice_.table_name is None
+        assert slice_.table_code is None
         assert pytest.approx(slice_.table_percentages) == [
             [33.33333, 13.33333],
             [33.33333, 20.00000],
@@ -270,6 +271,7 @@ class Test_Slice:
         )
         assert slice_.table_base == 91
         assert slice_.table_name is None
+        assert slice_.table_code is None
         np.testing.assert_almost_equal(
             slice_.table_std_dev,
             [
@@ -2203,6 +2205,7 @@ class Test_Strand:
         assert strand.tab_alias == "Q1_1"
         assert strand.tab_label == "ATP Men's T"
         assert strand.table_name == "Level of in: ATP Men's T"
+        assert strand.table_code == "Q1_1"
         assert strand.weighted_bases == pytest.approx([27292.0] * 4)
 
     def test_it_provides_values_for_univariate_cat(self):
@@ -2271,6 +2274,7 @@ class Test_Strand:
         assert strand.table_base_range.tolist() == [15, 15]
         assert strand.table_margin_range.tolist() == [15, 15]
         assert strand.table_name == "v7: C"
+        assert strand.table_code == 1
         assert strand.table_percentages == pytest.approx([66.66667, 33.33333])
         assert strand.table_proportion_moes == pytest.approx([0.2385592, 0.2385592])
         assert strand.table_proportion_stddevs == pytest.approx([0.4714045, 0.4714045])
@@ -2365,6 +2369,7 @@ class Test_Strand:
         assert strand.rows_dimension_type == DT.MR
         assert strand.scale_mean is None
         assert strand.table_name == "Paid for ne: A newspaper"
+        assert strand.table_code == "Q17_1"
         assert strand.table_proportion_stddevs == pytest.approx(
             [
                 0.4642672,
@@ -2684,6 +2689,7 @@ class Test_Nub:
         np.testing.assert_almost_equal(nub.table_base, np.array([49.095]))
         np.testing.assert_array_equal(nub.unweighted_count, 1000)
         assert nub.table_name is None
+        assert nub.table_code is None
 
 
 class Test_LegacySlice:
@@ -3910,6 +3916,7 @@ class Test_LegacySlice:
             slice_.columns_base, np.array([504, 215, 224, 76, 8, 439])
         )
         assert slice_.table_name == "q1. Aftensmad: K\xf8d (svin/lam/okse)"
+        assert slice_.table_code == "q1_1"
 
     def test_mr_x_cat_x_mr_pruning(self):
         # No pruning
