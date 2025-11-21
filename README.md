@@ -85,6 +85,12 @@ simple as:
 Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API reference.
 
 ---
+## Changes
+
+### 3.2.0
+
+- Add table code and label
+- Cleanup repo
 
 ## Changes
 
