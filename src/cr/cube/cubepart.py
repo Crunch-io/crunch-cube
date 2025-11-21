@@ -2470,7 +2470,7 @@ class _Strand(CubePartition):
     @lazyproperty
     def table_code(self):
         """Optional table code for this strand
-        
+
         Only for CA-as-0th case, provides differentiated codes for stacked tables.
         """
         valid_elements = self._cube.dimensions[0].valid_elements
