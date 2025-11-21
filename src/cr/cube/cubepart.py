@@ -1632,7 +1632,7 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_label(self):
-        """Optional table code for this Slice"""
+        """Optional table label for this Slice"""
         if self._cube.ndim < 3:
             return None
         valid_elements = self._cube.dimensions[0].valid_elements
