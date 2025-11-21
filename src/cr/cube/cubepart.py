@@ -1631,6 +1631,16 @@ class _Slice(CubePartition):
         return None
 
     @lazyproperty
+    def table_label(self):
+        """Optional table code for this Slice"""
+        if self._cube.ndim < 3:
+            return None
+        valid_elements = self._cube.dimensions[0].valid_elements
+        if valid_elements.element_ids:
+            return valid_elements[self._slice_idx].label
+        return None
+
+    @lazyproperty
     def table_code(self):
         """Optional table code for this Slice"""
         if self._cube.ndim < 3:
@@ -2447,6 +2457,17 @@ class _Strand(CubePartition):
         return None
 
     @lazyproperty
+    def table_label(self):
+        """Optional table label for this strand
+
+        Only for CA-as-0th case, provides differentiated labels for stacked tables.
+        """
+        valid_elements = self._cube.dimensions[0].valid_elements
+        if valid_elements.element_ids:
+            return valid_elements[self._slice_idx].label
+        return None
+
+    @lazyproperty
     def table_code(self):
         """Optional table code for this strand
         
@@ -2605,6 +2626,10 @@ class _Nub(CubePartition):
 
     @lazyproperty
     def table_name(self):
+        return None
+
+    @lazyproperty
+    def table_label(self):
         return None
 
     @lazyproperty
