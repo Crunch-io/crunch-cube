@@ -23,7 +23,7 @@ class Test_Slice:
     """Integration-test suite for _Slice object."""
 
     def test_it_provides_values_for_cat_x_mr_x_mr_with_odd_order(self):
-        transf = {
+        transforms = {
             "columns_dimension": {
                 "elements": {
                     "2": {"hide": True},
@@ -38,7 +38,7 @@ class Test_Slice:
                 },
             },
         }
-        parts = Cube(CR.CAT_X_MR_X_MR, transforms=transf, population=9001).partitions
+        parts = Cube(CR.CAT_X_MR_X_MR, transforms=transforms).partitions
         assert len(parts) == 2
         assert parts[0].column_proportions == pytest.approx(
             np.array([[0.60553814], [0.10292581], [0.10031348]])
