@@ -22,6 +22,31 @@ NA = np.nan
 class Test_Slice:
     """Integration-test suite for _Slice object."""
 
+    def test_it_provides_values_for_cat_x_mr_x_mr_with_odd_order(self):
+        transf = {
+            "columns_dimension": {
+                "elements": {
+                    "2": {"hide": True},
+                    "3": {"hide": True},
+                    "4": {"hide": True},
+                    "foo": {"hide": True},
+                    "bar": {"hide": True},
+                },
+                "order": {
+                    "element_ids": [1, 2, 3, 4, 6, "foo", "bar"],
+                    "type": "explicit",
+                },
+            },
+        }
+        parts = Cube(CR.CAT_X_MR_X_MR, transforms=transf, population=9001).partitions
+        assert len(parts) == 2
+        assert parts[0].column_proportions == pytest.approx(
+            np.array([[0.60553814], [0.10292581], [0.10031348]])
+        )
+        assert parts[1].column_proportions == pytest.approx(
+            np.array([[0.08141321], [0.60522273], [0.5847414]])
+        )
+
     def test_it_provides_values_for_cat_x_cat(self):
         slice_ = Cube(CR.CAT_X_CAT, population=9001).partitions[0]
 

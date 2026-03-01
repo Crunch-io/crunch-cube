@@ -63,7 +63,7 @@ class Dimensions(tuple):
     """Collection containing every dimension defined in cube response."""
 
     def __repr__(self) -> str:
-        "str representation of this dimension sequence." ""
+        """str representation of this dimension sequence."""
         dim_lines = "\n".join(str(d) for d in self)
         return f"Dimensions:\n{dim_lines}"
 
@@ -875,7 +875,12 @@ class _ElementIdShim:
         The explicit order transform includes a list of ids that can be specified in
         many different ways, this translate them to the subvariable aliases.
         """
-        return [self.translate_element_id(_id) for _id in element_ids]
+        return list(
+            filter(
+                lambda v: v is not None,
+                [self.translate_element_id(_id) for _id in element_ids],
+            )
+        )
 
     @lazyproperty
     def _subvar_aliases(self) -> Tuple[str, ...]:
