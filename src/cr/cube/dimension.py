@@ -875,12 +875,11 @@ class _ElementIdShim:
         The explicit order transform includes a list of ids that can be specified in
         many different ways, this translate them to the subvariable aliases.
         """
-        return list(
-            filter(
-                lambda v: v is not None,
-                [self.translate_element_id(_id) for _id in element_ids],
-            )
-        )
+        return [
+            el
+            for _id in element_ids
+            if (el := self.translate_element_id(_id)) is not None
+        ]
 
     @lazyproperty
     def _subvar_aliases(self) -> Tuple[str, ...]:
