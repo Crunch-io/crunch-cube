@@ -239,7 +239,7 @@ def test_cat_x_cat_pruning_and_hs():
     np.testing.assert_almost_equal(
         slice_.columns_scale_mean,
         [1.57933884, 1.8308135, 2.10618401, 2.30460074, np.nan, 2.34680135],
-    ),
+    )
     np.testing.assert_almost_equal(
         slice_.rows_scale_mean,
         [1.74213625, 2.2364515, 1.97, 2.45356177, 2.11838791, np.nan, 2.0],
@@ -268,7 +268,7 @@ def test_cat_x_cat_pruning_and_hs():
     slice_ = Cube(CR.CAT_HS_MT_X_CAT_HS_MT, transforms=transforms).partitions[0]
     np.testing.assert_almost_equal(
         slice_.columns_scale_mean, [1.57933884, 2.106184, 2.3046007, 2.34680135]
-    ),
+    )
     np.testing.assert_almost_equal(
         slice_.rows_scale_mean, [1.74213625, 1.97, 2.45356177, 2.11838791, 2.0]
     )

@@ -1621,7 +1621,7 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
         in this example (2,3).
         """
         # --- Use "body" reference values for base values
-        (ref_props, ref_bases) = self._reference_values(0)
+        ref_props, ref_bases = self._reference_values(0)
         return self._calculate_t_stats(
             self._proportions[0][0], self._column_bases[0][0], ref_props, ref_bases
         )
@@ -1709,9 +1709,9 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def _intersections(self):
-        "2D ndarray np.float64 of the t-stats for the intersections (4th block)" ""
+        """2D ndarray np.float64 of the t-stats for the intersections (4th block)"""
         # --- Use "inserted" reference values for intersections
-        (ref_props, ref_variance) = self._reference_values(1)
+        ref_props, ref_variance = self._reference_values(1)
         return self._calculate_t_stats(
             self._proportions[1][1], self._column_bases[1][1], ref_props, ref_variance
         )
@@ -1725,7 +1725,7 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
     def _subtotal_columns(self):
         """2D ndarray np.float64 of the values for the subtotal columns (2nd block)"""
         # --- Use "body" reference values for inserted columns
-        (ref_props, ref_variance) = self._reference_values(0)
+        ref_props, ref_variance = self._reference_values(0)
         return self._calculate_t_stats(
             self._proportions[0][1], self._column_bases[0][1], ref_props, ref_variance
         )
@@ -1734,7 +1734,7 @@ class _PairwiseSigTstats(_BaseSecondOrderMeasure):
     def _subtotal_rows(self):
         """2D ndarray np.float64 of the t-stats for the subtotal rows (3rd block)"""
         # --- Use "inserted" reference values for inserted rows
-        (ref_props, ref_variance) = self._reference_values(1)
+        ref_props, ref_variance = self._reference_values(1)
         return self._calculate_t_stats(
             self._proportions[1][0], self._column_bases[1][0], ref_props, ref_variance
         )
