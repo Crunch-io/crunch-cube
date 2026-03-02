@@ -85,14 +85,17 @@ simple as:
 Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API reference.
 
 ---
+
 ## Changes
+
+### 3.2.1
+
+- Fix translate_element_id when is is None
 
 ### 3.2.0
 
 - Add table code and label
 - Cleanup repo
-
-## Changes
 
 ### 3.1.5
 
