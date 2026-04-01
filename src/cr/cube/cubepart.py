@@ -322,7 +322,7 @@ class _Slice(CubePartition):
         """List of ranges or none for each column."""
         dim = self._dimensions[1]
         numeric_ranges = dim.numeric_ranges + len(dim.subtotals) * (None,)
-        return [numeric_ranges[i] for i in self._row_order_signed_indexes]
+        return [numeric_ranges[i] for i in self._column_order_signed_indexes]
 
     def column_order(self, format=ORDER_FORMAT.SIGNED_INDEXES):
         """1D np.int64 ndarray of idx for each assembled column of matrix.
