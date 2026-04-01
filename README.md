@@ -88,6 +88,11 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 
 ## Changes
 
+### 3.3.0
+
+- Add numeric ranges
+
+
 ### 3.2.1
 
 - Fix translate_element_id when is is None
