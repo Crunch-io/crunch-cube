@@ -88,10 +88,13 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 
 ## Changes
 
-### 3.3.0
+### 3.3.2
+
+- Bug fix column numeric ranges for _Slice
+
+### 3.3.1
 
 - Add numeric ranges
-
 
 ### 3.2.1
 
