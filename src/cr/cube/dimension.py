@@ -335,6 +335,18 @@ class Dimension:
         return tuple(element.numeric_value for element in self.valid_elements)
 
     @lazyproperty
+    def numeric_ranges(
+        self,
+    ) -> Tuple[Optional[Tuple[Union[int, float], Union[int, float]]], ...]:
+        """tuple of numeric ranges for valid elements of this dimension.
+
+        The numeric ranges appear in the same order as the elements of this
+        dimension. Each element is represented a tuple of two numbers, but an
+        element with no numeric range appears as `None` in the returned list.
+        """
+        return tuple(element.numeric_range for element in self.valid_elements)
+
+    @lazyproperty
     def order_spec(self) -> "_OrderSpec":
         """_OrderSpec proxy object for dimension.transforms.order dict from payload."""
         return _OrderSpec(self, self._dimension_transforms_dict)
@@ -1009,6 +1021,12 @@ class Element:
         """Numeric value assigned to element by user, np.nan if absent."""
         numeric_value = self._element_dict.get("numeric_value")
         return np.nan if numeric_value is None else numeric_value
+
+    @lazyproperty
+    def numeric_range(self) -> Optional[Tuple[Union[int, float], Union[int, float]]]:
+        """Numeric range assigned to element or None if absent."""
+        numeric_range = self._element_dict.get("numeric_range")
+        return None if numeric_range is None else tuple(numeric_range)
 
     def _str_representation_for(self, key: str) -> str:
         """return str representation for this element of a given key (`alias` or `name`)

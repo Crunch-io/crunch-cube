@@ -330,6 +330,15 @@ class TestDimension:
         )
         assert Dimension(None, None).numeric_values == (1, 2.2, np.nan)
 
+    def test_it_knows_the_numeric_ranges_of_its_elements(
+        self, request, valid_elements_prop_
+    ):
+        valid_elements_prop_.return_value = tuple(
+            instance_mock(request, Element, numeric_range=numeric_range)
+            for numeric_range in ((1, 7), (7, 11), None)
+        )
+        assert Dimension(None, None).numeric_ranges == ((1, 7), (7, 11), None)
+
     def test_it_provides_access_to_the_order_spec(self, request):
         order_spec_ = instance_mock(request, _OrderSpec)
         _OrderSpec_ = class_mock(

@@ -429,3 +429,20 @@ class TestDimension:
         numeric_values = dimension.numeric_values
 
         assert numeric_values == (1, 2, np.nan, np.nan)
+
+    def test_numeric_ranges(self):
+        dimension_dict = {
+            "type": {
+                "categories": [
+                    {"id": 42, "missing": False, "numeric_range": [0, 10]},
+                    {"id": 43, "missing": False, "numeric_range": [10, 20]},
+                    {"id": 44, "missing": True, "numeric_range": [20, 30]},
+                    {"id": 46, "missing": False},
+                ],
+                "class": "categorical",
+            }
+        }
+        dimension = Dimension(dimension_dict, DT.CAT)
+
+        numeric_ranges = dimension.numeric_ranges
+        assert numeric_ranges == ((0, 10), (10, 20), None)

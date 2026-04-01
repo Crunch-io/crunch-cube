@@ -1,0 +1,171 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "args": [
+                    {
+                        "var": "Age"
+                    }
+                ],
+                "function": "bin"
+            }
+        ],
+        "measures": {
+            "count": {
+                "args": [],
+                "function": "cube_count"
+            }
+        }
+    },
+    "result": {
+        "counts": [
+            10,
+            0,
+            0,
+            0,
+            7,
+            3,
+            0
+        ],
+        "dimensions": [
+            {
+                "derived": true,
+                "references": {
+                    "alias": "Age",
+                    "name": "Age"
+                },
+                "type": {
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "10-20",
+                            "numeric_range": [
+                                10.0,
+                                20.0
+                            ],
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "20-30",
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "name": "30-40",
+                            "numeric_range": [
+                                30.0,
+                                40.0
+                            ],
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 4,
+                            "missing": false,
+                            "name": "40-50",
+                            "numeric_range": [
+                                40.0,
+                                50.0
+                            ],
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 5,
+                            "missing": false,
+                            "name": "50-60",
+                            "numeric_range": [
+                                50.0,
+                                60.0
+                            ],
+                            "numeric_value": null
+                        },
+                        {
+                            "id": 6,
+                            "missing": false,
+                            "name": "60-70",
+                            "numeric_range": [
+                                60.0,
+                                70.0
+                            ],
+                            "numeric_value": null
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "class": "categorical",
+                    "ordinal": false
+                }
+            }
+        ],
+        "filter_stats": {
+            "filtered": {
+                "unweighted": {
+                    "missing": 0,
+                    "other": 0,
+                    "selected": 20
+                },
+                "weighted": {
+                    "missing": 0,
+                    "other": 0,
+                    "selected": 20
+                }
+            },
+            "filtered_complete": {
+                "unweighted": {
+                    "missing": 0,
+                    "other": 0,
+                    "selected": 20
+                },
+                "weighted": {
+                    "missing": 0,
+                    "other": 0,
+                    "selected": 20
+                }
+            },
+            "is_cat_date": false
+        },
+        "filtered": {
+            "unweighted_n": 20,
+            "weighted_n": 20
+        },
+        "measures": {
+            "count": {
+                "data": [
+                    10,
+                    0,
+                    0,
+                    0,
+                    7,
+                    3,
+                    0
+                ],
+                "metadata": {
+                    "derived": true,
+                    "references": {},
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    }
+                },
+                "n_missing": 0
+            }
+        },
+        "missing": 0,
+        "n": 20,
+        "unfiltered": {
+            "unweighted_n": 20,
+            "weighted_n": 20
+        }
+    }
+}

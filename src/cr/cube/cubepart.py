@@ -317,6 +317,13 @@ class _Slice(CubePartition):
             self._column_order_signed_indexes
         ]
 
+    @lazyproperty
+    def column_numeric_ranges(self):
+        """List of ranges or none for each column."""
+        dim = self._dimensions[1]
+        numeric_ranges = dim.numeric_ranges + len(dim.subtotals) * (None,)
+        return [numeric_ranges[i] for i in self._row_order_signed_indexes]
+
     def column_order(self, format=ORDER_FORMAT.SIGNED_INDEXES):
         """1D np.int64 ndarray of idx for each assembled column of matrix.
 
@@ -1143,6 +1150,13 @@ class _Slice(CubePartition):
         return np.array(dim.element_labels + dim.subtotal_labels)[
             self._row_order_signed_indexes
         ]
+
+    @lazyproperty
+    def row_numeric_ranges(self):
+        """List of numeric ranges or None for each row."""
+        dim = self._dimensions[0]
+        numeric_ranges = dim.numeric_ranges + len(dim.subtotals) * (None,)
+        return [numeric_ranges[i] for i in self._row_order_signed_indexes]
 
     def row_order(self, format=ORDER_FORMAT.SIGNED_INDEXES):
         """1D np.int64 ndarray of idx for each assembled row of matrix.
@@ -2207,6 +2221,14 @@ class _Strand(CubePartition):
         return np.array(
             self._rows_dimension.element_labels + self._rows_dimension.subtotal_labels
         )[self._row_order_signed_indexes]
+
+    @lazyproperty
+    def row_numeric_ranges(self):
+        """List of numeric ranges or None for each row."""
+        numeric_ranges = self._rows_dimension.numeric_ranges + len(
+            self._rows_dimension.subtotals
+        ) * (None,)
+        return [numeric_ranges[i] for i in self._row_order_signed_indexes]
 
     def row_order(self, format=ORDER_FORMAT.SIGNED_INDEXES):
         """1D np.int64 ndarray of idx for each assembled row of stripe.
