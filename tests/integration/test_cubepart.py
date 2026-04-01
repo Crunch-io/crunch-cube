@@ -2210,6 +2210,11 @@ class Test_Slice:
             nan_ok=True,
         )
 
+    def test_it_provides_numeric_ranges(self):
+        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
+        assert slice_.row_numeric_ranges == [None, (1.5, 2.5)]
+        assert slice_.column_numeric_ranges == [None, None]
+
 
 class Test_Strand:
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
@@ -2691,6 +2696,15 @@ class Test_Strand:
         assert slice_.derived_row_idxs == (0,)
         # ---There can be no insertions on MR dimensions
         assert slice_.inserted_row_idxs == ()
+
+    def test_it_provides_no_numeric_ranges(self):
+        strand = Cube(CR.MR_MEAN_WEIGHTED).partitions[0]
+        assert strand.row_numeric_ranges == 3 * [None]
+
+    def test_it_provides_numeric_ranges(self):
+        strand = Cube(CR.NUM_RANGES).partitions[0]
+        expected = [(10, 20), None, (30, 40), (40, 50), (50, 60), (60, 70)]
+        assert strand.row_numeric_ranges == pytest.approx(expected)
 
 
 class Test_Nub:
