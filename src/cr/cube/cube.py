@@ -549,12 +549,20 @@ class Cube:
         In case of presence of valid counts in the cube response the counts are replaced
         with the valid counts measure.
         """
-        unweighted_counts = (
-            self._measures.unweighted_valid_counts
+        return self.unweighted_counts_with_missings[self._valid_idxs]
+
+    @lazyproperty
+    def unweighted_counts_with_missings(self) -> np.ndarray:
+        """ndarray of unweighted or valid counts including missing values.
+
+        The difference from .unweighted_counts is that this property includes values
+        for missing categories.
+        """
+        return (
+            self._measures.unweighted_valid_counts.raw_cube_array
             if self._measures.unweighted_valid_counts is not None
-            else self._measures.unweighted_counts
+            else self._measures.unweighted_counts.raw_cube_array
         )
-        return unweighted_counts.raw_cube_array[self._valid_idxs]
 
     @lazyproperty
     def unweighted_valid_counts(self) -> Optional[np.ndarray]:

@@ -52,6 +52,7 @@ class DIMENSION_TYPE:
 
     # ---subsets---
     ARRAY_TYPES = frozenset((CA_SUBVAR, MR_SUBVAR, NUM_ARRAY))
+    CAT_TYPES = frozenset((CAT, CA_CAT, CAT_DATE))
 
     # ---allowed types for pairwise comparison---
     ALLOWED_PAIRWISE_TYPES = frozenset(

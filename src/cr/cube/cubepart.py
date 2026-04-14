@@ -2056,6 +2056,28 @@ class _Strand(CubePartition):
         return tuple(np.where(np.array(diffs)[self._row_order_signed_indexes])[0])
 
     @lazyproperty
+    def disaggregated_missing_labels(self):
+        """Optional tuple of labels for missing categories
+
+        The disaggregated missings are only available on strands with CAT dimensions.
+        The tuple's shape is not related to the shape of actual categories, it depends 
+        on how many missing categories are defined (generally there's a system missing 
+        and possibly a handful of missing categories like "Refused").
+        """
+        return self._measures.disaggregated_missings.labels
+
+    @lazyproperty
+    def disaggregated_missing_unweighted_counts(self):
+        """Optional tuple of unweighted counts for missing categories
+
+        The disaggregated missings are only available on strands with CAT dimensions.
+        The tuple's shape is not related to the shape of actual categories, it depends 
+        on how many missing categories are defined (generally there's a system missing 
+        and possibly a handful of missing categories like "Refused").
+        """
+        return self._measures.disaggregated_missings.unweighted_counts
+
+    @lazyproperty
     def inserted_row_idxs(self):
         """tuple of int index of each inserted row in this strand.
 

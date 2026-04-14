@@ -35,6 +35,11 @@ class StripeMeasures:
         self._slice_idx = slice_idx
 
     @lazyproperty
+    def disaggregated_missings(self):
+        """_DisaggregatedMissings measure object for this stripe."""
+        return _DisaggregatedMissings(self._rows_dimension, self, self._cube_measures)
+
+    @lazyproperty
     def means(self):
         """_Means measure object for this stripe."""
         return _Means(self._rows_dimension, self, self._cube_measures)
@@ -214,6 +219,47 @@ class _SmoothedMeasure(_BaseSecondOrderMeasure):
     def _smoother(self):
         """BaseSmoother subtype object providing smoothing as specified in spec."""
         return Smoother.factory(self._rows_dimension)
+
+
+class _DisaggregatedMissings(_BaseSecondOrderMeasure):
+    """Provides the dissaggregated missing values for a stripe
+
+    Disaggregated missing values are the missing values from a categorical
+    dimension that show the counts per missing category (whether it be
+    system missing or user defined ones like "Refused"). 
+
+    The dimensionality of this is weird. It can be thought of as a marginal,
+    which on a stripe would generally mean that it's 0D. However, because there
+    can be more than one type of missing, we gain back a dimension. The shape
+    is therefore not necesarilly the same as the shape of measures. For this
+    reason, rather than return np.ndarrays values here are tuples.
+    """
+
+    @lazyproperty
+    def labels(self):
+        """Optional tuple with the labels of the missing categories"""
+        if not self._is_valid:
+            return None
+
+        return tuple(el.label for el in self._rows_dimension.all_elements if el.missing)
+
+    @lazyproperty
+    def unweighted_counts(self):
+        """Optional tuple with the unweighted counts of the missing categories"""
+        if not self._is_valid:
+            return None
+
+        missing_mask = [
+            idx for idx, el 
+            in enumerate(self._rows_dimension.all_elements) 
+            if el.missing
+        ]
+        return tuple(self._cube_measures.unweighted_unconditional_cube_counts.counts[missing_mask])
+
+    @lazyproperty
+    def _is_valid(self):
+        """True if dimension is categorical and so disaggregated missing values are possible"""
+        return self._rows_dimension.dimension_type in DT.CAT_TYPES
 
 
 class _Means(_BaseSecondOrderMeasure):

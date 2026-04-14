@@ -2589,6 +2589,18 @@ class Test_Strand:
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]
         assert strand.is_empty is True
 
+    def test_it_provides_disaggregated_missings_for_CAT(self):
+        strand = Cube(CR.CAT_USER_MISSING).partitions[0]
+
+        assert strand.disaggregated_missing_labels== ("Skipped", "No Data")
+        assert strand.disaggregated_missing_unweighted_counts == (20, 15)
+
+    def test_it_provides_empty_disaggregated_missings_for_MR(self):
+        strand = Cube(CR.MR_WGTD).partitions[0]
+
+        assert strand.disaggregated_missing_labels is None
+        assert strand.disaggregated_missing_unweighted_counts is None
+
     def test_it_provides_stddev_measure_for_CAT(self):
         strand = Cube(CR.CAT_STDDEV).partitions[0]
 
