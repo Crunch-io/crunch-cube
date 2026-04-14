@@ -876,6 +876,18 @@ class Test_Slice:
             pytest.approx([22.9672704, 45.7789165, 86.9728287, 130.6784687]),
         ]
 
+    def test_it_knows_the_disaggregated_missing_values_for_CA(self):
+        slice = Cube(CR.CA_CAT_X_CA_SUBVAR_USER_MISSING).partitions[0]
+
+        assert slice.rows_disaggregated_missing_labels == ("Don't know", "No Data")
+        assert slice.rows_disaggregated_missing_unweighted_counts.tolist() == [
+            (10, 30),
+            (80, 10),
+            (10, 5),
+        ]
+        assert slice.columns_disaggregated_missing_labels is None
+        assert slice.columns_disaggregated_missing_unweighted_counts is None
+
     @pytest.mark.parametrize(
         "fixture, row_order, col_order, expectation",
         (

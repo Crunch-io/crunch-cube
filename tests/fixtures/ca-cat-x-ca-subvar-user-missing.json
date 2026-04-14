@@ -1,0 +1,256 @@
+{
+    "query": {
+        "dimensions": [
+            {
+                "function": "dimension",
+                "args": [
+                    {"variable": "8b7404"},
+                    {"value": "subvariables"}
+                ]
+            },
+            {"variable": "8b7404"}
+        ],
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    },
+    "result": {
+        "n": 130,
+        "counts": [
+            40,
+            50,
+            10,
+            30,
+            20,
+            20,
+            80,
+            10,
+            100,
+            15,
+            10,
+            5
+        ],
+        "dimensions": [
+            {
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "id": "0001",
+                                "references": {
+                                    "notes": "",
+                                    "description": "",
+                                    "name": "Friends",
+                                    "alias": "fav_tv_1"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "id": "0002",
+                                "references": {
+                                    "notes": "",
+                                    "description": "",
+                                    "name": "Seinfeld",
+                                    "alias": "fav_tv_2"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "id": "0003",
+                                "references": {
+                                    "notes": "",
+                                    "description": "",
+                                    "name": "Family Guy",
+                                    "alias": "fav_tv_3"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                },
+                "references": {
+                    "subreferences": [
+                        {
+                            "notes": "",
+                            "description": "",
+                            "name": "Friends",
+                            "alias": "fav_tv_1"
+                        },
+                        {
+                            "notes": "",
+                            "description": "",
+                            "name": "Seinfeld",
+                            "alias": "fav_tv_2"
+                        },
+                        {
+                            "notes": "",
+                            "description": "",
+                            "name": "Family Guy",
+                            "alias": "fav_tv_3"
+                        }
+                    ],
+                    "uniform_basis": false,
+                    "name": "Enjoy TV Shows (Cat Array)",
+                    "alias": "tv_cat_array"
+                },
+                "derived": true
+            },
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Yes",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "No",
+                            "numeric_value": 2
+                        },
+                        {
+                            "id": 3,
+                            "missing": true,
+                            "name": "Don't know",
+                            "numeric_value": 3
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ],
+                    "subvariables": [
+                        "0001",
+                        "0002",
+                        "0003"
+                    ]
+                },
+                "references": {
+                    "subreferences": [
+                        {
+                            "notes": "",
+                            "description": "",
+                            "name": "Friends",
+                            "alias": "fav_tv_1"
+                        },
+                        {
+                            "notes": "",
+                            "description": "",
+                            "name": "Seinfeld",
+                            "alias": "fav_tv_2"
+                        },
+                        {
+                            "notes": "",
+                            "description": "",
+                            "name": "Family Guy",
+                            "alias": "fav_tv_3"
+                        }
+                    ],
+                    "uniform_basis": false,
+                    "name": "Enjoy TV Shows (Cat Array)",
+                    "alias": "tv_cat_array"
+                },
+                "derived": true
+            }
+        ],
+        "measures": {
+            "count": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {
+
+                        }
+                    },
+                    "references": {
+
+                    },
+                    "derived": true
+                },
+                "data": [
+                    40,
+                    50,
+                    10,
+                    30,
+                    20,
+                    20,
+                    80,
+                    10,
+                    100,
+                    15,
+                    10,
+                    5
+                ],
+                "n_missing": 15
+            }
+        },
+        "missing": 15,
+        "filter_stats": {
+            "is_cat_date": false,
+            "filtered": {
+                "unweighted": {
+                    "selected": 130,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 130,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 130,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 130,
+                    "other": 0,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 130,
+            "weighted_n": 130
+        },
+        "filtered": {
+            "unweighted_n": 130,
+            "weighted_n": 130
+        },
+        "element": "crunch:cube"
+    }
+}

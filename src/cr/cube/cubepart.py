@@ -463,6 +463,28 @@ class _Slice(CubePartition):
         return self._dimensions[1].name
 
     @lazyproperty
+    def columns_disaggregated_missing_labels(self):
+        """Optional tuple of labels of disaggregated missing elements
+
+        The disaggregated missings are only available on strands with CAT dimensions.
+        The tuple's shape is not related to the shape of actual categories, it depends 
+        on how many missing categories are defined (generally there's a system missing 
+        and possibly a handful of missing categories like "Refused").
+        """
+        return self._measures.columns_disaggregated_missing_unweighted_counts.labels
+
+    @lazyproperty
+    def columns_disaggregated_missing_unweighted_counts(self):
+        """Optional 1D ndarray of tuples of missing values by type
+
+        The disaggregated missings are only available on strands with CAT dimensions.
+        The tuple's shape is not related to the shape of actual categories, it depends 
+        on how many missing categories are defined (generally there's a system missing 
+        and possibly a handful of missing categories like "Refused").
+        """
+        return self._assemble_marginal(self._measures.columns_disaggregated_missing_unweighted_counts)
+
+    @lazyproperty
     def columns_dimension_type(self):
         """Member of `cr.cube.enum.DIMENSION_TYPE` describing columns dimension."""
         return self._dimensions[1].dimension_type
@@ -1305,6 +1327,28 @@ class _Slice(CubePartition):
     def rows_dimension_type(self):
         """Member of `cr.cube.enum.DIMENSION_TYPE` specifying type of rows dimension."""
         return self._rows_dimension.dimension_type
+
+    @lazyproperty
+    def rows_disaggregated_missing_labels(self):
+        """Optional tuple of labels of disaggregated missing elements
+
+        The disaggregated missings are only available on strands with CAT dimensions.
+        The tuple's shape is not related to the shape of actual categories, it depends 
+        on how many missing categories are defined (generally there's a system missing 
+        and possibly a handful of missing categories like "Refused").
+        """
+        return self._measures.rows_disaggregated_missing_unweighted_counts.labels
+
+    @lazyproperty
+    def rows_disaggregated_missing_counts(self):
+        """Optional 1D ndarray of tuples of missing values by type
+
+        The disaggregated missings are only available on strands with CAT dimensions.
+        The tuple's shape is not related to the shape of actual categories, it depends 
+        on how many missing categories are defined (generally there's a system missing 
+        and possibly a handful of missing categories like "Refused").
+        """
+        return self._assemble_marginal(self._measures.rows_disaggregated_missing_unweighted_counts)
 
     @lazyproperty
     def rows_margin(self):
