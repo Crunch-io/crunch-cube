@@ -888,6 +888,66 @@ class Test_Slice:
         assert slice.columns_disaggregated_missing_labels is None
         assert slice.columns_disaggregated_missing_unweighted_counts is None
 
+    def test_it_knows_the_rows_missing_and_columns_missing_for_CAT_X_CAT(self):
+        slice = Cube(CR.CAT_X_CAT).partitions[0]
+        assert slice.rows_missing.tolist() == [13.0, 12.0]
+        assert slice.columns_missing.tolist() == [10.0, 15.0]
+
+    def test_it_knows_the_rows_missing_and_columns_missing_for_MR_X_MR(self):
+        slice = Cube(CR.MR_X_MR).partitions[0]
+        assert slice.rows_missing.tolist() == [
+            [
+                88.0,
+                93.0,
+                90.0,
+                88.0,
+            ],
+            [
+                82.0,
+                71.0,
+                78.0,
+                71.0,
+            ],
+            [
+                74.0,
+                80.0,
+                66.0,
+                66.0,
+            ],
+            [
+                56.0,
+                55.0,
+                47.0,
+                39.0,
+            ],
+        ]
+        assert slice.columns_missing.tolist() == [
+            [
+                88.0,
+                82.0,
+                74.0,
+                56.0,
+            ],
+            [
+                93.0,
+                71.0,
+                80.0,
+                55.0,
+            ],
+            [
+                90.0,
+                78.0,
+                66.0,
+                47.0,
+            ],
+            [
+                88.0,
+                71.0,
+                66.0,
+                39.0,
+            ],
+        ]
+
     @pytest.mark.parametrize(
         "fixture, row_order, col_order, expectation",
         (
@@ -2612,6 +2672,24 @@ class Test_Strand:
 
         assert strand.disaggregated_missing_labels is None
         assert strand.disaggregated_missing_unweighted_counts is None
+
+    def test_it_provides_table_missing_for_CAT(self):
+        strand = Cube(CR.CAT_USER_MISSING).partitions[0]
+        assert strand.table_missing == pytest.approx(35)
+
+    def test_it_provides_table_missing_for_MR(self):
+        strand = Cube(CR.MR_WGTD).partitions[0]
+        assert strand.table_missing.tolist() == [
+            258720.0,
+            271009.0,
+            266853.0,
+            271703.0,
+            252885.0,
+            275224.0,
+            279589.0,
+            278984.0,
+            277153.0,
+        ]
 
     def test_it_provides_stddev_measure_for_CAT(self):
         strand = Cube(CR.CAT_STDDEV).partitions[0]

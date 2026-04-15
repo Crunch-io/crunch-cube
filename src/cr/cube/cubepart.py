@@ -474,6 +474,11 @@ class _Slice(CubePartition):
         return self._measures.columns_disaggregated_missing_unweighted_counts.labels
 
     @lazyproperty
+    def columns_missing(self):
+        """TKTKTKTK"""
+        return self._cube.n_responses - self.columns_base
+
+    @lazyproperty
     def columns_disaggregated_missing_unweighted_counts(self):
         """Optional 1D ndarray of tuples of missing values by type
 
@@ -1394,6 +1399,11 @@ class _Slice(CubePartition):
 
         # --- otherwise rows-margin is a vector ---
         return self._assemble_marginal(self._measures.rows_table_proportion)
+
+    @lazyproperty
+    def rows_missing(self):
+        """TKTKTKTK"""
+        return self._cube.n_responses - self.rows_base
 
     @lazyproperty
     def rows_scale_mean(self):
@@ -2512,6 +2522,22 @@ class _Strand(CubePartition):
         )
 
     @lazyproperty
+    def table_base(self):
+        """scalar/1D np.float64 ndarray of unweighted-N for the table/each cell of strand.
+
+        This array is 1D (a distinct base for each cell) when the rows dimension is MR,
+        because each MR-subvariable has its own unweighted N. This is because not every
+        possible response is necessarily offered to every respondent.
+
+        In all other cases, it is a scalar, containing one value for the whole table.
+        """
+        if self._measures.unweighted_bases.table_base_scalar:
+            return self._measures.unweighted_bases.table_base_scalar
+
+        # --- otherwise it's the same as the rows base ---
+        return self.rows_base
+
+    @lazyproperty
     def table_base_range(self):
         """[min, max] np.float64 ndarray range of unweighted-N for this stripe.
 
@@ -2530,6 +2556,11 @@ class _Strand(CubePartition):
         range in that case.
         """
         return self._measures.weighted_bases.table_margin_range
+
+    @lazyproperty
+    def table_missing(self):
+        """TKTKTKTK"""
+        return self._cube.n_responses - self.table_base
 
     @lazyproperty
     def table_name(self):

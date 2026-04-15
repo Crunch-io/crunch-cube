@@ -734,6 +734,12 @@ class _UnweightedBases(_BaseSecondOrderMeasure):
         bases = self._unweighted_cube_counts.bases
         return np.array([np.min(bases), np.max(bases)])
 
+    @lazyproperty
+    def table_base_scalar(self):
+        """"TKTKTK"""
+        if self._rows_dimension.dimension_type in DT.ARRAY_TYPES:
+            return None
+        return self._unweighted_cube_counts.bases[0]
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a stripe."""
