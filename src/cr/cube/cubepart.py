@@ -1345,7 +1345,7 @@ class _Slice(CubePartition):
         return self._measures.rows_disaggregated_missing_unweighted_counts.labels
 
     @lazyproperty
-    def rows_disaggregated_missing_counts(self):
+    def rows_disaggregated_missing_unweighted_counts(self):
         """Optional 1D ndarray of tuples of missing values by type
 
         The disaggregated missings are only available on strands with CAT dimensions.
