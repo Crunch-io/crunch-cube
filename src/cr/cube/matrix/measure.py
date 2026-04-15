@@ -2696,7 +2696,7 @@ class _BaseMarginal:
     @lazyproperty
     def _opposing_dimension(self):
         """opposing dimension for this marginal's orientation"""
-        if self._orientation == MO.ROWS:
+        if self.orientation == MO.ROWS:
             return self._dimensions[1]
         return self._dimensions[0]
 
@@ -2727,7 +2727,7 @@ class _BaseScaledCountMarginal(_BaseMarginal):
 
 
 class _DisaggregatedMissingValues(_BaseMarginal):
-    """Provides the dissaggregated missing values for a slice
+    """Provides the disaggregated missing values for a slice
 
     Disaggregated missing values are the missing values from a categorical
     dimension that show the counts per missing category (whether it be
@@ -2736,7 +2736,7 @@ class _DisaggregatedMissingValues(_BaseMarginal):
     The dimensionality of this is weird. It can be thought of as a marginal,
     which on a slice would generally mean that it's 1D. However, because there
     can be more than one type of missing, we gain back a dimension. The shape
-    is therefore not necesarilly the same as the shape of measures. For this
+    is therefore not necessarily the same as the shape of measures. For this
     reason, rather than have 2D ndarrays, it is 1D ndarray storing tuples.
     """
 
@@ -2757,12 +2757,12 @@ class _DisaggregatedMissingValues(_BaseMarginal):
             for idx, el in enumerate(self._opposing_dimension.all_elements)
             if el.missing
         ]
-        dtype = ",".join(["f"] * len(missing_mask))
+        dtype = ",".join(["d"] * len(missing_mask))
 
         # --- Since we're collapsing to 1D anyways, it's easiest to just transpose the counts on columns
         # --- orientation so the code is more similar between orientations
         counts = self._cube_measures.unweighted_unconditional_cube_counts.counts
-        if self._orientation == MO.COLUMNS:
+        if self.orientation == MO.COLUMNS:
             counts = counts.transpose()
         counts = counts[:, missing_mask]
         base_values = np.array([tuple(row) for row in counts], dtype=dtype)

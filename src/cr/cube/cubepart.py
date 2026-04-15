@@ -466,7 +466,7 @@ class _Slice(CubePartition):
     def columns_disaggregated_missing_labels(self):
         """Optional tuple of labels of disaggregated missing elements
 
-        The disaggregated missings are only available on strands with CAT dimensions.
+        The disaggregated missings are only available on slices with CAT dimensions.
         The tuple's shape is not related to the shape of actual categories, it depends
         on how many missing categories are defined (generally there's a system missing
         and possibly a handful of missing categories like "Refused").
@@ -475,14 +475,17 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def columns_missing(self):
-        """TKTKTKTK"""
+        """1D/2D np.float64 ndarray of unweighted counts of missing for each cell/column
+
+        This is the complement to `.columns_base`.
+        """
         return self._cube.n_responses - self.columns_base
 
     @lazyproperty
     def columns_disaggregated_missing_unweighted_counts(self):
         """Optional 1D ndarray of tuples of missing values by type
 
-        The disaggregated missings are only available on strands with CAT dimensions.
+        The disaggregated missings are only available on slices with CAT dimensions.
         The tuple's shape is not related to the shape of actual categories, it depends
         on how many missing categories are defined (generally there's a system missing
         and possibly a handful of missing categories like "Refused").
@@ -1339,7 +1342,7 @@ class _Slice(CubePartition):
     def rows_disaggregated_missing_labels(self):
         """Optional tuple of labels of disaggregated missing elements
 
-        The disaggregated missings are only available on strands with CAT dimensions.
+        The disaggregated missings are only available on slices with CAT dimensions.
         The tuple's shape is not related to the shape of actual categories, it depends
         on how many missing categories are defined (generally there's a system missing
         and possibly a handful of missing categories like "Refused").
@@ -1350,7 +1353,7 @@ class _Slice(CubePartition):
     def rows_disaggregated_missing_unweighted_counts(self):
         """Optional 1D ndarray of tuples of missing values by type
 
-        The disaggregated missings are only available on strands with CAT dimensions.
+        The disaggregated missings are only available on slices with CAT dimensions.
         The tuple's shape is not related to the shape of actual categories, it depends
         on how many missing categories are defined (generally there's a system missing
         and possibly a handful of missing categories like "Refused").
@@ -1406,7 +1409,10 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def rows_missing(self):
-        """TKTKTKTK"""
+        """1D/2D np.float64 ndarray of unweighted counts of missing for each cell/row
+
+        This is the complement to `.rows_base`.
+        """
         return self._cube.n_responses - self.rows_base
 
     @lazyproperty
@@ -2535,7 +2541,7 @@ class _Strand(CubePartition):
 
         In all other cases, it is a scalar, containing one value for the whole table.
         """
-        if self._measures.unweighted_bases.table_base_scalar:
+        if self._measures.unweighted_bases.table_base_scalar is not None:
             return self._measures.unweighted_bases.table_base_scalar
 
         # --- otherwise it's the same as the rows base ---
@@ -2563,7 +2569,10 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def table_missing(self):
-        """TKTKTKTK"""
+        """scalar/1D np.float64 ndarray of unweighted-N for the table/each cell of strand.
+
+        This is the complement to `.table_base`
+        """
         return self._cube.n_responses - self.table_base
 
     @lazyproperty

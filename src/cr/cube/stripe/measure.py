@@ -222,7 +222,7 @@ class _SmoothedMeasure(_BaseSecondOrderMeasure):
 
 
 class _DisaggregatedMissings(_BaseSecondOrderMeasure):
-    """Provides the dissaggregated missing values for a stripe
+    """Provides the disaggregated missing values for a stripe
 
     Disaggregated missing values are the missing values from a categorical
     dimension that show the counts per missing category (whether it be
@@ -231,7 +231,7 @@ class _DisaggregatedMissings(_BaseSecondOrderMeasure):
     The dimensionality of this is weird. It can be thought of as a marginal,
     which on a stripe would generally mean that it's 0D. However, because there
     can be more than one type of missing, we gain back a dimension. The shape
-    is therefore not necesarilly the same as the shape of measures. For this
+    is therefore not necessarily the same as the shape of measures. For this
     reason, rather than return np.ndarrays values here are tuples.
     """
 
@@ -740,7 +740,7 @@ class _UnweightedBases(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def table_base_scalar(self):
-        """ "TKTKTK"""
+        """Optional np.float64 of the base (available across non-array dimensions)"""
         if self._rows_dimension.dimension_type in DT.ARRAY_TYPES:
             return None
         return self._unweighted_cube_counts.bases[0]
