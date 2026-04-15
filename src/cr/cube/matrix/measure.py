@@ -2764,7 +2764,7 @@ class _DisaggregatedMissingValues(_BaseMarginal):
         if self._orientation == MO.COLUMNS:
             counts = counts.transpose()
         counts = counts[:, missing_mask]
-        base_values = np.array(list(tuple(row) for row in counts), dtype=dtype)
+        base_values = np.array([tuple(row) for row in counts], dtype=dtype)
 
         # --- For now, don't bother reimplementing the subtotal logic for 
         # --- disaggregated misings. We aren't currently using them in a place
