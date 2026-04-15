@@ -2771,7 +2771,8 @@ class _DisaggregatedMissingValues(_BaseMarginal):
         # --- where subtotals are possible, so wait until there is a product need
         # --- for them
         # --- Instead, just send NaNs if encountered
-        subtotal_values = np.repeat(np.array((np.nan, ) * len(missing_mask), dtype=dtype), self._subtotal_shape)
+      nan_tuple = (np.nan,) * len(missing_mask)                                                                                                                                                                 
+      subtotal_values = np.array([nan_tuple] * self._subtotal_shape, dtype=dtype) 
 
         return [base_values, subtotal_values]
     
