@@ -57,10 +57,10 @@ class CubeMeasures:
     def unweighted_unconditional_cube_counts(self):
         """_BaseCubeCounts for unweighted counts with missing for stripe."""
         return _BaseCubeCounts.factory(
-            self._cube.unweighted_counts_with_missings, 
-            self._rows_dimension, 
-            self._ca_as_0th, 
-            self._slice_idx
+            self._cube.unweighted_counts_with_missings,
+            self._rows_dimension,
+            self._ca_as_0th,
+            self._slice_idx,
         )
 
     @lazyproperty

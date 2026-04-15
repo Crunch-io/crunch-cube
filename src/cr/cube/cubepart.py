@@ -467,8 +467,8 @@ class _Slice(CubePartition):
         """Optional tuple of labels of disaggregated missing elements
 
         The disaggregated missings are only available on strands with CAT dimensions.
-        The tuple's shape is not related to the shape of actual categories, it depends 
-        on how many missing categories are defined (generally there's a system missing 
+        The tuple's shape is not related to the shape of actual categories, it depends
+        on how many missing categories are defined (generally there's a system missing
         and possibly a handful of missing categories like "Refused").
         """
         return self._measures.columns_disaggregated_missing_unweighted_counts.labels
@@ -483,11 +483,13 @@ class _Slice(CubePartition):
         """Optional 1D ndarray of tuples of missing values by type
 
         The disaggregated missings are only available on strands with CAT dimensions.
-        The tuple's shape is not related to the shape of actual categories, it depends 
-        on how many missing categories are defined (generally there's a system missing 
+        The tuple's shape is not related to the shape of actual categories, it depends
+        on how many missing categories are defined (generally there's a system missing
         and possibly a handful of missing categories like "Refused").
         """
-        return self._assemble_marginal(self._measures.columns_disaggregated_missing_unweighted_counts)
+        return self._assemble_marginal(
+            self._measures.columns_disaggregated_missing_unweighted_counts
+        )
 
     @lazyproperty
     def columns_dimension_type(self):
@@ -1338,8 +1340,8 @@ class _Slice(CubePartition):
         """Optional tuple of labels of disaggregated missing elements
 
         The disaggregated missings are only available on strands with CAT dimensions.
-        The tuple's shape is not related to the shape of actual categories, it depends 
-        on how many missing categories are defined (generally there's a system missing 
+        The tuple's shape is not related to the shape of actual categories, it depends
+        on how many missing categories are defined (generally there's a system missing
         and possibly a handful of missing categories like "Refused").
         """
         return self._measures.rows_disaggregated_missing_unweighted_counts.labels
@@ -1349,11 +1351,13 @@ class _Slice(CubePartition):
         """Optional 1D ndarray of tuples of missing values by type
 
         The disaggregated missings are only available on strands with CAT dimensions.
-        The tuple's shape is not related to the shape of actual categories, it depends 
-        on how many missing categories are defined (generally there's a system missing 
+        The tuple's shape is not related to the shape of actual categories, it depends
+        on how many missing categories are defined (generally there's a system missing
         and possibly a handful of missing categories like "Refused").
         """
-        return self._assemble_marginal(self._measures.rows_disaggregated_missing_unweighted_counts)
+        return self._assemble_marginal(
+            self._measures.rows_disaggregated_missing_unweighted_counts
+        )
 
     @lazyproperty
     def rows_margin(self):
@@ -2114,8 +2118,8 @@ class _Strand(CubePartition):
         """Optional tuple of labels for missing categories
 
         The disaggregated missings are only available on strands with CAT dimensions.
-        The tuple's shape is not related to the shape of actual categories, it depends 
-        on how many missing categories are defined (generally there's a system missing 
+        The tuple's shape is not related to the shape of actual categories, it depends
+        on how many missing categories are defined (generally there's a system missing
         and possibly a handful of missing categories like "Refused").
         """
         return self._measures.disaggregated_missings.labels
@@ -2125,8 +2129,8 @@ class _Strand(CubePartition):
         """Optional tuple of unweighted counts for missing categories
 
         The disaggregated missings are only available on strands with CAT dimensions.
-        The tuple's shape is not related to the shape of actual categories, it depends 
-        on how many missing categories are defined (generally there's a system missing 
+        The tuple's shape is not related to the shape of actual categories, it depends
+        on how many missing categories are defined (generally there's a system missing
         and possibly a handful of missing categories like "Refused").
         """
         return self._measures.disaggregated_missings.unweighted_counts

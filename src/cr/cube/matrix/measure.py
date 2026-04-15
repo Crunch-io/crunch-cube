@@ -2697,7 +2697,7 @@ class _BaseMarginal:
     def _opposing_dimension(self):
         """opposing dimension for this marginal's orientation"""
         if self._orientation == MO.ROWS:
-            return self._dimensions[1] 
+            return self._dimensions[1]
         return self._dimensions[0]
 
     @lazyproperty
@@ -2731,7 +2731,7 @@ class _DisaggregatedMissingValues(_BaseMarginal):
 
     Disaggregated missing values are the missing values from a categorical
     dimension that show the counts per missing category (whether it be
-    system missing or user defined ones like "Refused"). 
+    system missing or user defined ones like "Refused").
 
     The dimensionality of this is weird. It can be thought of as a marginal,
     which on a slice would generally mean that it's 1D. However, because there
@@ -2739,6 +2739,7 @@ class _DisaggregatedMissingValues(_BaseMarginal):
     is therefore not necesarilly the same as the shape of measures. For this
     reason, rather than have 2D ndarrays, it is 1D ndarray storing tuples.
     """
+
     @lazyproperty
     def blocks(self):
         """List of the 2 1D ndarray "blocks" of the disaggregated missing values.
@@ -2752,8 +2753,8 @@ class _DisaggregatedMissingValues(_BaseMarginal):
                 "only across categorical dimensions."
             )
         missing_mask = [
-            idx for idx, el 
-            in enumerate(self._opposing_dimension.all_elements) 
+            idx
+            for idx, el in enumerate(self._opposing_dimension.all_elements)
             if el.missing
         ]
         dtype = ",".join(["f"] * len(missing_mask))
@@ -2766,16 +2767,16 @@ class _DisaggregatedMissingValues(_BaseMarginal):
         counts = counts[:, missing_mask]
         base_values = np.array([tuple(row) for row in counts], dtype=dtype)
 
-        # --- For now, don't bother reimplementing the subtotal logic for 
+        # --- For now, don't bother reimplementing the subtotal logic for
         # --- disaggregated misings. We aren't currently using them in a place
         # --- where subtotals are possible, so wait until there is a product need
         # --- for them
         # --- Instead, just send NaNs if encountered
-      nan_tuple = (np.nan,) * len(missing_mask)                                                                                                                                                                 
-      subtotal_values = np.array([nan_tuple] * self._subtotal_shape, dtype=dtype) 
+        nan_tuple = (np.nan,) * len(missing_mask)
+        subtotal_values = np.array([nan_tuple] * self._subtotal_shape, dtype=dtype)
 
         return [base_values, subtotal_values]
-    
+
     @lazyproperty
     def is_defined(self):
         """True if opposing dimension is categorical"""
@@ -2786,7 +2787,9 @@ class _DisaggregatedMissingValues(_BaseMarginal):
         """optional tuple of str labels for the missing values"""
         if not self.is_defined:
             return None
-        return tuple(el.label for el in self._opposing_dimension.all_elements if el.missing)
+        return tuple(
+            el.label for el in self._opposing_dimension.all_elements if el.missing
+        )
 
 
 class _MarginTableProportion(_BaseMarginal):

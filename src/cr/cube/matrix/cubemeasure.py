@@ -69,11 +69,11 @@ class CubeMeasures:
     def unweighted_unconditional_cube_counts(self):
         """_BaseCubeCounts subclass object for this cube-result with missing."""
         return _BaseCubeCounts.factory(
-            self._cube.unweighted_counts_with_missings, 
-            False, 
-            self._cube, 
-            self._dimensions, 
-            self._slice_idx
+            self._cube.unweighted_counts_with_missings,
+            False,
+            self._cube,
+            self._dimensions,
+            self._slice_idx,
         )
 
     @lazyproperty
@@ -150,7 +150,9 @@ class _BaseCubeCounts(_BaseCubeMeasure):
             (
                 "MR"
                 if dim_type == DT.MR
-                else "ARR" if dim_type in DT.ARRAY_TYPES else "CAT"
+                else "ARR"
+                if dim_type in DT.ARRAY_TYPES
+                else "CAT"
             )
             for dim_type in cube.dimension_types[-2:]
         )

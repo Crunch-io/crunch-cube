@@ -226,7 +226,7 @@ class _DisaggregatedMissings(_BaseSecondOrderMeasure):
 
     Disaggregated missing values are the missing values from a categorical
     dimension that show the counts per missing category (whether it be
-    system missing or user defined ones like "Refused"). 
+    system missing or user defined ones like "Refused").
 
     The dimensionality of this is weird. It can be thought of as a marginal,
     which on a stripe would generally mean that it's 0D. However, because there
@@ -250,11 +250,15 @@ class _DisaggregatedMissings(_BaseSecondOrderMeasure):
             return None
 
         missing_mask = [
-            idx for idx, el 
-            in enumerate(self._rows_dimension.all_elements) 
+            idx
+            for idx, el in enumerate(self._rows_dimension.all_elements)
             if el.missing
         ]
-        return tuple(self._cube_measures.unweighted_unconditional_cube_counts.counts[missing_mask])
+        return tuple(
+            self._cube_measures.unweighted_unconditional_cube_counts.counts[
+                missing_mask
+            ]
+        )
 
     @lazyproperty
     def _is_valid(self):
@@ -736,10 +740,11 @@ class _UnweightedBases(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def table_base_scalar(self):
-        """"TKTKTK"""
+        """ "TKTKTK"""
         if self._rows_dimension.dimension_type in DT.ARRAY_TYPES:
             return None
         return self._unweighted_cube_counts.bases[0]
+
 
 class _UnweightedCounts(_BaseSecondOrderMeasure):
     """Provides the unweighted-counts measure for a stripe."""

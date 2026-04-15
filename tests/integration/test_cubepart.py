@@ -2664,7 +2664,7 @@ class Test_Strand:
     def test_it_provides_disaggregated_missings_for_CAT(self):
         strand = Cube(CR.CAT_USER_MISSING).partitions[0]
 
-        assert strand.disaggregated_missing_labels== ("Skipped", "No Data")
+        assert strand.disaggregated_missing_labels == ("Skipped", "No Data")
         assert strand.disaggregated_missing_unweighted_counts == (20, 15)
 
     def test_it_provides_empty_disaggregated_missings_for_MR(self):
