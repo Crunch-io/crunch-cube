@@ -2380,7 +2380,7 @@ class Test_DisaggregatedMissings:
 
         assert (
             str(e.value)
-            == "rows-disaggreagted-missings is defined only across categorical dimensions."
+            == "rows-disaggregated-missings only defined across categorical dimensions."
         )
 
     @pytest.mark.parametrize(
