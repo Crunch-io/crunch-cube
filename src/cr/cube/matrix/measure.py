@@ -91,8 +91,8 @@ class SecondOrderMeasures:
 
     @lazyproperty
     def columns_disaggregated_missing_unweighted_counts(self):
-        """_DisaggregatedMissingValues object for the columns of this cube-result"""
-        return _DisaggregatedMissingValues(
+        """_DisaggregatedMissings object for the columns of this cube-result"""
+        return _DisaggregatedMissings(
             self._dimensions, self, self._cube_measures, MO.COLUMNS
         )
 
@@ -335,8 +335,8 @@ class SecondOrderMeasures:
 
     @lazyproperty
     def rows_disaggregated_missing_unweighted_counts(self):
-        """_DisaggregatedMissingValues object for the rows of this cube-result"""
-        return _DisaggregatedMissingValues(
+        """_DisaggregatedMissings object for the rows of this cube-result"""
+        return _DisaggregatedMissings(
             self._dimensions, self, self._cube_measures, MO.ROWS
         )
 
@@ -2726,7 +2726,7 @@ class _BaseScaledCountMarginal(_BaseMarginal):
         )
 
 
-class _DisaggregatedMissingValues(_BaseMarginal):
+class _DisaggregatedMissings(_BaseMarginal):
     """Provides the disaggregated missing values for a slice
 
     Disaggregated missing values are the missing values from a categorical
