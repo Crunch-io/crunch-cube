@@ -2749,7 +2749,7 @@ class _DisaggregatedMissings(_BaseMarginal):
         """
         if not self.is_defined:
             raise ValueError(
-                f"{self.orientation.value}-disaggreagted-values is defined "
+                f"{self.orientation.value}-disaggreagted-missings is defined "
                 "only across categorical dimensions."
             )
 

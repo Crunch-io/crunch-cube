@@ -2372,6 +2372,17 @@ class Test_DisaggregatedMissings:
 
         assert dv.blocks == ["bv", "sv"]
 
+    def test_but_blocks_raises_when_is_not_defined(self, is_defined_):
+        is_defined_.return_value = False
+
+        with pytest.raises(ValueError) as e:
+            _DisaggregatedMissings(None, None, None, MO.ROWS).blocks
+
+        assert (
+            str(e.value)
+            == "rows-disaggreagted-missings is defined only across categorical dimensions."
+        )
+
     @pytest.mark.parametrize(
         "dim_type, expected",
         (
