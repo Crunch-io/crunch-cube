@@ -329,16 +329,28 @@ class Test_Slice:
         (
             # --- No subtotals
             (
-                np.array([(1, 3), (10, 12)], dtype="d,d"),
-                np.array([], dtype="d,d"),
+                np.array(
+                    [(1, 3), (10, 12)],
+                    dtype=np.dtype([(f"f{i}", np.float64) for i in range(2)]),
+                ),
+                np.array([], dtype=np.dtype([(f"f{i}", np.float64) for i in range(2)])),
                 np.array([1, 0]),
-                np.array([(10, 12), (1, 3)], dtype="d,d"),
+                np.array(
+                    [(10, 12), (1, 3)],
+                    dtype=np.dtype([(f"f{i}", np.float64) for i in range(2)]),
+                ),
             ),
             (
-                np.array([(1,), (2,), (3,)], dtype="d,"),
-                np.array([], dtype="d,"),
+                np.array(
+                    [(1,), (2,), (3,)],
+                    dtype=np.dtype([(f"f{i}", np.float64) for i in range(1)]),
+                ),
+                np.array([], dtype=np.dtype([(f"f{i}", np.float64) for i in range(1)])),
                 np.array([2, 0, 1]),
-                np.array([(3,), (1,), (2,)], dtype="d,"),
+                np.array(
+                    [(3,), (1,), (2,)],
+                    dtype=np.dtype([(f"f{i}", np.float64) for i in range(1)]),
+                ),
             ),
             (
                 np.array([tuple(), tuple()], dtype=np.dtype([])),
@@ -348,16 +360,34 @@ class Test_Slice:
             ),
             # --- With subtotals
             (
-                np.array([(1, 3), (10, 12)], dtype="d,d"),
-                np.array([(np.nan, np.nan)], dtype="d,d"),
+                np.array(
+                    [(1, 3), (10, 12)],
+                    dtype=np.dtype([(f"f{i}", np.float64) for i in range(2)]),
+                ),
+                np.array(
+                    [(np.nan, np.nan)],
+                    dtype=np.dtype([(f"f{i}", np.float64) for i in range(2)]),
+                ),
                 np.array([-1, 1, 0]),
-                np.array([(np.nan, np.nan), (10, 12), (1, 3)], dtype="d,d"),
+                np.array(
+                    [(np.nan, np.nan), (10, 12), (1, 3)],
+                    dtype=np.dtype([(f"f{i}", np.float64) for i in range(2)]),
+                ),
             ),
             (
-                np.array([(1,), (2,), (3,)], dtype="d,"),
-                np.array([(np.nan,), (np.nan,)], dtype="d,"),
+                np.array(
+                    [(1,), (2,), (3,)],
+                    dtype=np.dtype([(f"f{i}", np.float64) for i in range(1)]),
+                ),
+                np.array(
+                    [(np.nan,), (np.nan,)],
+                    dtype=np.dtype([(f"f{i}", np.float64) for i in range(1)]),
+                ),
                 np.array([1, -2, 0, -1, 2]),
-                np.array([(2,), (np.nan,), (1,), (np.nan,), (3,)], dtype="d,"),
+                np.array(
+                    [(2,), (np.nan,), (1,), (np.nan,), (3,)],
+                    dtype=np.dtype([(f"f{i}", np.float64) for i in range(1)]),
+                ),
             ),
             (
                 np.array([tuple(), tuple()], dtype=np.dtype([])),
