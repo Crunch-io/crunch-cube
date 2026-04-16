@@ -244,6 +244,16 @@ class _DisaggregatedMissings(_BaseSecondOrderMeasure):
         return tuple(el.label for el in self._rows_dimension.all_elements if el.missing)
 
     @lazyproperty
+    def element_ids(self):
+        """optional tuple of element_ids for the missing values"""
+        if not self._is_valid:
+            return None
+
+        return tuple(
+            el.element_id for el in self._rows_dimension.all_elements if el.missing
+        )
+
+    @lazyproperty
     def unweighted_counts(self):
         """Optional tuple with the unweighted counts of the missing categories"""
         if not self._is_valid:

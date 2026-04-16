@@ -2407,6 +2407,22 @@ class Test_DisaggregatedMissingValues:
         dv = _DisaggregatedMissingValues(None, None, None, None)
         assert dv.labels is None
 
+    def test_it_knows_element_ids_if_defined(
+        self, request, _opposing_dimension_, is_defined_
+    ):
+        el1_ = instance_mock(request, Element, element_id=1, missing=False)
+        el2_ = instance_mock(request, Element, element_id=-1, missing=True)
+        dim_ = instance_mock(request, Dimension, all_elements=(el1_, el2_))
+        _opposing_dimension_.return_value = dim_
+        is_defined_.return_value = True
+        dv = _DisaggregatedMissingValues(None, None, None, None)
+        assert dv.element_ids == (-1,)
+
+    def test_but_element_ids_is_none_if_not_defined(self, is_defined_):
+        is_defined_.return_value = False
+        dv = _DisaggregatedMissingValues(None, None, None, None)
+        assert dv.element_ids is None
+
     @pytest.mark.parametrize(
         "missing_mask, orientation, expected",
         (

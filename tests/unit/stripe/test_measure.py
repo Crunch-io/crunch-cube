@@ -175,6 +175,23 @@ class Test_BaseSecondOrderMeasure:
 class Test_DisaggregatedMissings:
     """Unit test suite for `cr.cube.stripe.measure._DisaggregatedMissings` object."""
 
+    def test_it_computes_element_ids_when_valid(
+        self, request, _is_valid_, rows_dimension_
+    ):
+        _is_valid_.return_value = True
+        dim_element1_ = instance_mock(request, Element, element_id=1, missing=False)
+        dim_element2_ = instance_mock(request, Element, element_id=-1, missing=True)
+        rows_dimension_.all_elements = (dim_element1_, dim_element2_)
+        dm = _DisaggregatedMissings(rows_dimension_, None, None)
+
+        assert dm.element_ids == (-1,)
+
+    def test_but_no_element_ids_when_invalid(self, _is_valid_):
+        _is_valid_.return_value = False
+        dm = _DisaggregatedMissings(None, None, None)
+
+        assert dm.element_ids is None
+
     def test_it_computes_labels_to_help_when_valid(
         self, request, _is_valid_, rows_dimension_
     ):

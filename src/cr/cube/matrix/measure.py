@@ -2756,6 +2756,15 @@ class _DisaggregatedMissingValues(_BaseMarginal):
         return [self._base_values, self._subtotal_values]
 
     @lazyproperty
+    def element_ids(self):
+        """optional tuple of element_ids for the missing values"""
+        if not self.is_defined:
+            return None
+        return tuple(
+            el.element_id for el in self._opposing_dimension.all_elements if el.missing
+        )
+
+    @lazyproperty
     def is_defined(self):
         """True if opposing dimension is categorical"""
         return self._opposing_dimension.dimension_type in DT.CAT_TYPES
