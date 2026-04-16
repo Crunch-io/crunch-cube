@@ -2752,30 +2752,8 @@ class _DisaggregatedMissingValues(_BaseMarginal):
                 f"{self.orientation.value}-disaggreagted-values is defined "
                 "only across categorical dimensions."
             )
-        missing_mask = [
-            idx
-            for idx, el in enumerate(self._opposing_dimension.all_elements)
-            if el.missing
-        ]
-        dtype = ",".join(["d"] * len(missing_mask))
 
-        # --- Since we're collapsing to 1D anyways, it's easiest to just transpose the counts on columns
-        # --- orientation so the code is more similar between orientations
-        counts = self._cube_measures.unweighted_unconditional_cube_counts.counts
-        if self.orientation == MO.COLUMNS:
-            counts = counts.transpose()
-        counts = counts[:, missing_mask]
-        base_values = np.array([tuple(row) for row in counts], dtype=dtype)
-
-        # --- For now, don't bother reimplementing the subtotal logic for
-        # --- disaggregated misings. We aren't currently using them in a place
-        # --- where subtotals are possible, so wait until there is a product need
-        # --- for them
-        # --- Instead, just send NaNs if encountered
-        nan_tuple = (np.nan,) * len(missing_mask)
-        subtotal_values = np.array([nan_tuple] * self._subtotal_shape, dtype=dtype)
-
-        return [base_values, subtotal_values]
+        return [self._base_values, self._subtotal_values]
 
     @lazyproperty
     def is_defined(self):
@@ -2790,6 +2768,50 @@ class _DisaggregatedMissingValues(_BaseMarginal):
         return tuple(
             el.label for el in self._opposing_dimension.all_elements if el.missing
         )
+
+    @lazyproperty
+    def _base_values(self):
+        """np.array of tuples of `._inner_dtype` values for the disaggregated missings for base values"""
+        counts = self._cube_measures.unweighted_unconditional_cube_counts.counts
+        # --- Since we're collapsing to 1D anyways, it's easiest to just transpose the counts on columns
+        # --- orientation so the code is more similar between orientations
+        if self.orientation == MO.COLUMNS:
+            counts = counts.transpose()
+        counts = counts[:, self._missing_mask]
+        return np.array([tuple(row) for row in counts], dtype=self._inner_dtype)
+
+    @lazyproperty
+    def _inner_dtype(self):
+        """str used as the dtype for items in the tuples in blocks"""
+        if self._inner_size == 0:
+            return np.dtype([])
+        if self._inner_size == 1:
+            return "d,"  # --- Make sure we get tuples even if size is 1
+        return ",".join(["d"] * self._inner_size)
+
+    @lazyproperty
+    def _inner_size(self):
+        """int size of the tuples contained in the blocks"""
+        return len(self._missing_mask)
+
+    @lazyproperty
+    def _missing_mask(self):
+        """list of logicals indicating which rows/columns are missing values"""
+        return [
+            idx
+            for idx, el in enumerate(self._opposing_dimension.all_elements)
+            if el.missing
+        ]
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """np.array of tuples of `._inner_dtype` values for the disaggregated missings for subtotals"""
+        # --- For now, don't bother reimplementing the subtotal logic for disaggregated
+        # --- misings. We aren't currently using them in a place where subtotals
+        # --- are possible, so wait until there is a product need for them
+        # --- Instead, just send NaNs if encountered
+        nan_tuple = (np.nan,) * self._inner_size
+        return np.array([nan_tuple] * self._subtotal_shape, dtype=self._inner_dtype)
 
 
 class _MarginTableProportion(_BaseMarginal):

@@ -13,7 +13,8 @@ from cr.cube.enums import DIMENSION_TYPE as DT, ORDER_FORMAT
 # ---mnemonic: CR = 'cube-response'---
 # ---mnemonic: TR = 'transforms'---
 # ---mnemonic: MRI = 'multiple-response insertions'---
-from ..fixtures import CR, TR, MRI
+# ---mnemonic: NA = 'numeric-arrays'---
+from ..fixtures import CR, TR, MRI, NA as NUMA
 from ..util import load_python_expression
 
 NA = np.nan
@@ -2690,6 +2691,10 @@ class Test_Strand:
             278984.0,
             277153.0,
         ]
+
+    def test_it_provides_table_missing_for_NUMA(self):
+        strand = Cube(NUMA.NUM_ARR_MEANS_NO_GROUPING_WEIGHTED).partitions[0]
+        assert strand.table_missing.tolist() == [1.0, 4.0, 3.0, 0.0]
 
     def test_it_provides_stddev_measure_for_CAT(self):
         strand = Cube(CR.CAT_STDDEV).partitions[0]

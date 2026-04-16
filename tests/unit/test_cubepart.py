@@ -9,6 +9,8 @@ import pytest
 from cr.cube.cube import Cube
 from cr.cube.cubepart import CubePartition, _Slice, _Strand, _Nub
 from cr.cube.dimension import Dimension, Elements
+from cr.cube.enums import MARGINAL_ORIENTATION as MO
+from cr.cube.matrix.measure import _BaseMarginal
 
 from ..unitutil import class_mock, instance_mock, property_mock
 
@@ -321,6 +323,70 @@ class Test_Slice:
         assert slice_.table_name is None
         assert slice_.table_code is None
         assert slice_.table_label is None
+
+    @pytest.mark.parametrize(
+        "base_values, subtotal_values, order, expected",
+        (
+            # --- No subtotals
+            (
+                np.array([(1, 3), (10, 12)], dtype="d,d"),
+                np.array([], dtype="d,d"),
+                np.array([1, 0]),
+                np.array([(10, 12), (1, 3)], dtype="d,d"),
+            ),
+            (
+                np.array([(1,), (2,), (3,)], dtype="d,"),
+                np.array([], dtype="d,"),
+                np.array([2, 0, 1]),
+                np.array([(3,), (1,), (2,)], dtype="d,"),
+            ),
+            (
+                np.array([tuple(), tuple()], dtype=np.dtype([])),
+                np.array([], dtype=np.dtype([])),
+                np.array([1, 0]),
+                np.array([tuple(), tuple()], dtype=np.dtype([])),
+            ),
+            # --- With subtotals
+            (
+                np.array([(1, 3), (10, 12)], dtype="d,d"),
+                np.array([(np.nan, np.nan)], dtype="d,d"),
+                np.array([-1, 1, 0]),
+                np.array([(np.nan, np.nan), (10, 12), (1, 3)], dtype="d,d"),
+            ),
+            (
+                np.array([(1,), (2,), (3,)], dtype="d,"),
+                np.array([(np.nan,), (np.nan,)], dtype="d,"),
+                np.array([1, -2, 0, -1, 2]),
+                np.array([(2,), (np.nan,), (1,), (np.nan,), (3,)], dtype="d,"),
+            ),
+            (
+                np.array([tuple(), tuple()], dtype=np.dtype([])),
+                np.array([tuple()], dtype=np.dtype([])),
+                np.array([-1, 1, 0]),
+                np.array([tuple(), tuple(), tuple()], dtype=np.dtype([])),
+            ),
+        ),
+    )
+    def test_it_can_assemble_tuple_based_marginals(
+        self, request, base_values, subtotal_values, order, expected
+    ):
+        # --- Ensure that marginals built from arrays of tuples (like
+        # --- _DisaggregatedMissingCounts) can be assembled
+        marginal = instance_mock(
+            request,
+            _BaseMarginal,
+            is_defined=True,
+            orientation=MO.ROWS,
+            blocks=[base_values, subtotal_values],
+        )
+        property_mock(request, _Slice, "_row_order_signed_indexes", return_value=order)
+        slice_ = _Slice(None, None, None, None, None)
+
+        actual = slice_._assemble_marginal(marginal)
+
+        assert expected.dtype == actual.dtype
+        for field in expected.dtype.names or [None]:
+            np.testing.assert_array_equal(actual[field], expected[field])
 
     # fixture components ---------------------------------------------
 
