@@ -2792,12 +2792,8 @@ class _DisaggregatedMissings(_BaseMarginal):
 
     @lazyproperty
     def _inner_dtype(self):
-        """str used as the dtype for items in the tuples in blocks"""
-        if self._inner_size == 0:
-            return np.dtype([])
-        if self._inner_size == 1:
-            return "d,"  # --- Make sure we get tuples even if size is 1
-        return ",".join(["d"] * self._inner_size)
+        """list used as the dtype for items in the tuples in blocks"""
+        return np.dtype([(f"f{i}", np.float64) for i in range(self._inner_size)])
 
     @lazyproperty
     def _inner_size(self):
