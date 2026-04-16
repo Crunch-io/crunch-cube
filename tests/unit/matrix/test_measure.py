@@ -2507,11 +2507,26 @@ class Test_DisaggregatedMissings:
     @pytest.mark.parametrize(
         "missing_mask, subtotal_shape, expected",
         (
-            ([0, 1], 0, np.array([], dtype="d,d")),
-            ([0], 0, np.array([], dtype="d,")),
+            (
+                [0, 1],
+                0,
+                np.array([], dtype=np.dtype([("f0", np.float64), ("f1", np.float64)])),
+            ),
+            ([0], 0, np.array([], dtype=np.dtype([("f0", np.float64)]))),
             ([], 0, np.array([], dtype=np.dtype([]))),
-            ([0, 1], 1, np.array([(np.nan, np.nan)], dtype="d,d")),
-            ([0], 2, np.array([(np.nan,), (np.nan,)], dtype="d,")),
+            (
+                [0, 1],
+                1,
+                np.array(
+                    [(np.nan, np.nan)],
+                    dtype=np.dtype([("f0", np.float64), ("f1", np.float64)]),
+                ),
+            ),
+            (
+                [0],
+                2,
+                np.array([(np.nan,), (np.nan,)], dtype=np.dtype([("f0", np.float64)])),
+            ),
             ([], 1, np.array([tuple()], dtype=np.dtype([]))),
         ),
     )

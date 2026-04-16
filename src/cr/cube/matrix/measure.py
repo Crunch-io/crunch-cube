@@ -2793,6 +2793,8 @@ class _DisaggregatedMissings(_BaseMarginal):
     @lazyproperty
     def _inner_dtype(self):
         """list used as the dtype for items in the tuples in blocks"""
+        # --- Note that the string notation for a tuple of length 1 ("d,")
+        # --- does not work on all versions of numpy we support (python 3.8 testrunners)
         return np.dtype([(f"f{i}", np.float64) for i in range(self._inner_size)])
 
     @lazyproperty
