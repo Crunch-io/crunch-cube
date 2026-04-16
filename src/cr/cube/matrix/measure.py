@@ -2783,7 +2783,7 @@ class _DisaggregatedMissings(_BaseMarginal):
         """np.array of tuples for the disaggregated missings for base values"""
         counts = self._cube_measures.unweighted_unconditional_cube_counts.counts
         # --- Since we're collapsing to 1D anyways, it's easiest to just transpose
-        # --- the counts on columns orientation so the code is more similar between 
+        # --- the counts on columns orientation so the code is more similar between
         # --- orientations
         if self.orientation == MO.COLUMNS:
             counts = counts.transpose()
