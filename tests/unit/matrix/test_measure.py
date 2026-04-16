@@ -2426,8 +2426,19 @@ class Test_DisaggregatedMissings:
     @pytest.mark.parametrize(
         "missing_mask, orientation, expected",
         (
-            ([0, 2], MO.ROWS, np.array([(1, 3), (10, 12)], dtype="d,d")),
-            ([0], MO.COLUMNS, np.array([(1,), (2,), (3,)], dtype="d,")),
+            (
+                [0, 2],
+                MO.ROWS,
+                np.array(
+                    [(1, 3), (10, 12)],
+                    dtype=np.dtype([("f0", np.float64), ("f1", np.float64)]),
+                ),
+            ),
+            (
+                [0],
+                MO.COLUMNS,
+                np.array([(1,), (2,), (3,)], dtype=np.dtype([("f0", np.float64)])),
+            ),
             ([], MO.ROWS, np.array([tuple(), tuple()], dtype=np.dtype([]))),
         ),
     )
@@ -2451,7 +2462,15 @@ class Test_DisaggregatedMissings:
         assert dv._base_values == pytest.approx(expected)
 
     @pytest.mark.parametrize(
-        "inner_size, expected", ((3, "d,d,d"), (1, "d,"), (0, np.dtype([])))
+        "inner_size, expected",
+        (
+            (
+                3,
+                np.dtype([("f0", np.float64), ("f1", np.float64), ("f2", np.float64)]),
+            ),
+            (1, np.dtype([("f0", np.float64)])),
+            (0, np.dtype([])),
+        ),
     )
     def test_it_provides_its_inner_dtype_to_help(self, request, inner_size, expected):
         property_mock(
