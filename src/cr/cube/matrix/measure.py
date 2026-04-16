@@ -2780,10 +2780,11 @@ class _DisaggregatedMissings(_BaseMarginal):
 
     @lazyproperty
     def _base_values(self):
-        """np.array of tuples of `._inner_dtype` values for the disaggregated missings for base values"""
+        """np.array of tuples for the disaggregated missings for base values"""
         counts = self._cube_measures.unweighted_unconditional_cube_counts.counts
-        # --- Since we're collapsing to 1D anyways, it's easiest to just transpose the counts on columns
-        # --- orientation so the code is more similar between orientations
+        # --- Since we're collapsing to 1D anyways, it's easiest to just transpose
+        # --- the counts on columns orientation so the code is more similar between 
+        # --- orientations
         if self.orientation == MO.COLUMNS:
             counts = counts.transpose()
         counts = counts[:, self._missing_mask]
@@ -2814,7 +2815,7 @@ class _DisaggregatedMissings(_BaseMarginal):
 
     @lazyproperty
     def _subtotal_values(self):
-        """np.array of tuples of `._inner_dtype` values for the disaggregated missings for subtotals"""
+        """np.array of tuples for the disaggregated missings for subtotals"""
         # --- For now, don't bother reimplementing the subtotal logic for disaggregated
         # --- misings. We aren't currently using them in a place where subtotals
         # --- are possible, so wait until there is a product need for them

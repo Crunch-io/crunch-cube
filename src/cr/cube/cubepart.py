@@ -2533,7 +2533,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def table_base(self):
-        """scalar/1D np.float64 ndarray of unweighted-N for the table/each cell of strand.
+        """scalar/1D np.float64 ndarray of unweighted-N for table/each cell of strand.
 
         This array is 1D (a distinct base for each cell) when the rows dimension is MR,
         because each MR-subvariable has its own unweighted N. This is because not every
@@ -2569,7 +2569,7 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def table_missing(self):
-        """scalar/1D np.float64 ndarray of unweighted-N for the table/each cell of strand.
+        """scalar/1D np.float64 ndarray of unweighted-N for table/each cell of strand.
 
         This is the complement to `.table_base`
         """

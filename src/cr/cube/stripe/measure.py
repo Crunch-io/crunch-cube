@@ -272,7 +272,7 @@ class _DisaggregatedMissings(_BaseSecondOrderMeasure):
 
     @lazyproperty
     def _is_valid(self):
-        """True if dimension is categorical and so disaggregated missing values are possible"""
+        """True if dim is cat and so disaggregated missing values are possible"""
         return self._rows_dimension.dimension_type in DT.CAT_TYPES
 
 

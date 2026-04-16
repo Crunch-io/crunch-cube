@@ -2358,7 +2358,7 @@ class Test_BaseScaledCountMarginal:
 
 
 class Test_DisaggregatedMissings:
-    """Unit test suite for `cr.cube.matrix.measure.DisaggregatedMissingValues` object."""
+    """Unit test suite for `cr.cube.matrix.measure.DisaggregatedMissingValues`"""
 
     def test_it_provides_the_value_blocks_if_defined(self, request, is_defined_):
         is_defined_.return_value = True
