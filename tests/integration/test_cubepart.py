@@ -2838,6 +2838,7 @@ class Test_Nub:
         np.testing.assert_almost_equal(nub.means, np.array([49.095]))
         assert nub.ndim == 0
         np.testing.assert_almost_equal(nub.table_base, np.array([49.095]))
+        np.testing.assert_almost_equal(nub.table_missing, np.array([950.905]))
         np.testing.assert_array_equal(nub.unweighted_count, 1000)
         assert nub.table_name is None
         assert nub.table_code is None

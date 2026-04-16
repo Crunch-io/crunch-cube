@@ -2757,6 +2757,11 @@ class _Nub(CubePartition):
         return self._scalar.table_base
 
     @lazyproperty
+    def table_missing(self):
+        """Int scalar of the unweighted count of missing of the table."""
+        return self._cube.n_responses - self.table_base
+
+    @lazyproperty
     def table_name(self):
         return None
 
