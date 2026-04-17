@@ -2311,7 +2311,7 @@ class Test_BaseMarginal:
         assert marginal._opposing_dimension == expected
 
     @pytest.mark.parametrize("orientation, expected", ((MO.ROWS, 2), (MO.COLUMNS, 3)))
-    def test_it_knows_the_subtotal_shape_of_the_marginal_to_help(
+    def test_it_knows_the_subtotal_length_of_the_marginal_to_help(
         self, request, orientation, expected
     ):
         rows_dimension_ = instance_mock(request, Dimension, subtotals=("a", "b"))
@@ -2322,7 +2322,7 @@ class Test_BaseMarginal:
             (rows_dimension_, columns_dimension_), None, None, orientation
         )
 
-        assert marginal._subtotal_shape == expected
+        assert marginal._subtotal_length == expected
 
     # fixture components ---------------------------------------------
 
@@ -2465,7 +2465,7 @@ class Test_DisaggregatedMissings:
         property_mock(
             request,
             _DisaggregatedMissings,
-            "_missing_mask",
+            "_missing_idxs",
             return_value=missing_mask,
         )
         dv = _DisaggregatedMissings(None, None, cube_measures_, orientation)
@@ -2495,7 +2495,7 @@ class Test_DisaggregatedMissings:
         property_mock(
             request,
             _DisaggregatedMissings,
-            "_missing_mask",
+            "_missing_idxs",
             return_value=missing_mask,
         )
         dv = _DisaggregatedMissings(None, None, None, None)
@@ -2505,7 +2505,7 @@ class Test_DisaggregatedMissings:
         "m1, m2, expected",
         ((True, True, [0, 1]), (False, True, [1]), (False, False, [])),
     )
-    def test_it_provides_missing_mask_to_help(
+    def test_it_provides_missing_idxs_to_help(
         self, request, _opposing_dimension_, m1, m2, expected
     ):
         el1_ = instance_mock(request, Element, missing=m1)
@@ -2513,7 +2513,7 @@ class Test_DisaggregatedMissings:
         dim_ = instance_mock(request, Dimension, all_elements=(el1_, el2_))
         _opposing_dimension_.return_value = dim_
         dv = _DisaggregatedMissings(None, None, None, None)
-        assert dv._missing_mask == expected
+        assert dv._missing_idxs == expected
 
     @pytest.mark.parametrize(
         "missing_mask, subtotal_shape, expected",
@@ -2547,13 +2547,13 @@ class Test_DisaggregatedMissings:
         property_mock(
             request,
             _DisaggregatedMissings,
-            "_missing_mask",
+            "_missing_idxs",
             return_value=missing_mask,
         )
         property_mock(
             request,
             _DisaggregatedMissings,
-            "_subtotal_shape",
+            "_subtotal_length",
             return_value=subtotal_shape,
         )
         dv = _DisaggregatedMissings(None, None, None, None)
@@ -2586,7 +2586,7 @@ class Test_MarginTableBase:
     ):
         is_defined_prop_.return_value = True
         _base_values_prop_.return_value = np.array([1.0, 1.0])
-        property_mock(request, _MarginTableBase, "_subtotal_shape", return_value=3)
+        property_mock(request, _MarginTableBase, "_subtotal_length", return_value=3)
         table_weighted_base = _MarginTableBase(None, None, None, None, None)
 
         results = table_weighted_base.blocks
@@ -2633,13 +2633,15 @@ class Test_MarginTableBase:
 
         assert table_weighted_base._base_values == [1, 2]
 
-    def test_it_provides_subtotal_shape_for_rows_orientation_to_help(self, dimensions_):
+    def test_it_provides_subtotal_length_for_rows_orientation_to_help(
+        self, dimensions_
+    ):
         dimensions_[0].subtotals = (1, 2, 3)
         table_weighted_base = _MarginTableBase(dimensions_, None, None, MO.ROWS, None)
 
-        assert table_weighted_base._subtotal_shape == 3
+        assert table_weighted_base._subtotal_length == 3
 
-    def test_it_provides_subtotal_shape_for_columns_orientation_to_help(
+    def test_it_provides_subtotal_length_for_columns_orientation_to_help(
         self, dimensions_
     ):
         dimensions_[1].subtotals = (1,)
@@ -2647,7 +2649,7 @@ class Test_MarginTableBase:
             dimensions_, None, None, MO.COLUMNS, None
         )
 
-        assert table_weighted_base._subtotal_shape == 1
+        assert table_weighted_base._subtotal_length == 1
 
     # fixture components ---------------------------------------------
 

@@ -2706,7 +2706,7 @@ class _BaseMarginal:
         return self._second_order_measures.column_squared_bases.is_defined
 
     @lazyproperty
-    def _subtotal_shape(self):
+    def _subtotal_length(self):
         """Int indicating the number of subtotals given the orientation"""
         if self.orientation == MO.ROWS:
             return len(self._dimensions[0].subtotals)
@@ -2787,7 +2787,7 @@ class _DisaggregatedMissings(_BaseMarginal):
         # --- orientations
         if self.orientation == MO.COLUMNS:
             counts = counts.transpose()
-        counts = counts[:, self._missing_mask]
+        counts = counts[:, self._missing_idxs]
         return np.array([tuple(row) for row in counts], dtype=self._inner_dtype)
 
     @lazyproperty
@@ -2800,11 +2800,11 @@ class _DisaggregatedMissings(_BaseMarginal):
     @lazyproperty
     def _inner_size(self):
         """int size of the tuples contained in the blocks"""
-        return len(self._missing_mask)
+        return len(self._missing_idxs)
 
     @lazyproperty
-    def _missing_mask(self):
-        """list of logicals indicating which rows/columns are missing values"""
+    def _missing_idxs(self):
+        """list of indexes indicating which rows/columns are missing values"""
         return [
             idx
             for idx, el in enumerate(self._opposing_dimension.all_elements)
@@ -2819,7 +2819,7 @@ class _DisaggregatedMissings(_BaseMarginal):
         # --- are possible, so wait until there is a product need for them
         # --- Instead, just send NaNs if encountered
         nan_tuple = (np.nan,) * self._inner_size
-        return np.array([nan_tuple] * self._subtotal_shape, dtype=self._inner_dtype)
+        return np.array([nan_tuple] * self._subtotal_length, dtype=self._inner_dtype)
 
 
 class _MarginTableProportion(_BaseMarginal):
@@ -2934,7 +2934,7 @@ class _MarginTableBase(_BaseMarginal):
         # --- Therefore we can just repeat the first value to the shape.
         return [
             self._base_values,
-            np.repeat([self._base_values[0]], self._subtotal_shape),
+            np.repeat([self._base_values[0]], self._subtotal_length),
         ]
 
     @lazyproperty

@@ -2569,9 +2569,9 @@ class _Strand(CubePartition):
 
     @lazyproperty
     def table_missing(self):
-        """scalar/1D np.float64 ndarray of unweighted-N for table/each cell of strand.
+        """scalar/1D np.float64 ndarray of unwtd-N of missings for table/each cell.
 
-        This is the complement to `.table_base`
+        This is the complement to `.table_base`.
         """
         return self._cube.n_responses - self.table_base
 
