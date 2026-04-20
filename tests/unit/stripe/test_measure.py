@@ -7,7 +7,7 @@ import pytest
 
 from cr.cube.enums import DIMENSION_TYPE as DT
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension
+from cr.cube.dimension import Dimension, Element
 from cr.cube.stripe.cubemeasure import (
     _BaseCubeMeans,
     _BaseCubeCounts,
@@ -18,6 +18,7 @@ from cr.cube.stripe.cubemeasure import (
 from cr.cube.stripe.insertion import NegativeTermSubtotals, PositiveTermSubtotals
 from cr.cube.stripe.measure import (
     _BaseSecondOrderMeasure,
+    _DisaggregatedMissings,
     _Means,
     _MeansSmoothed,
     _Medians,
@@ -44,6 +45,7 @@ class TestStripeMeasures:
     @pytest.mark.parametrize(
         "measure_prop_name, MeasureCls",
         (
+            ("disaggregated_missings", _DisaggregatedMissings),
             ("means", _Means),
             ("medians", _Medians),
             ("population_proportions", _PopulationProportions),
@@ -164,6 +166,94 @@ class Test_BaseSecondOrderMeasure:
     @pytest.fixture
     def cube_measures_(self, request):
         return instance_mock(request, CubeMeasures)
+
+    @pytest.fixture
+    def rows_dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+
+class Test_DisaggregatedMissings:
+    """Unit test suite for `cr.cube.stripe.measure._DisaggregatedMissings` object."""
+
+    def test_it_computes_element_ids_when_valid(
+        self, request, _is_valid_, rows_dimension_
+    ):
+        _is_valid_.return_value = True
+        dim_element1_ = instance_mock(request, Element, element_id=1, missing=False)
+        dim_element2_ = instance_mock(request, Element, element_id=-1, missing=True)
+        rows_dimension_.all_elements = (dim_element1_, dim_element2_)
+        dm = _DisaggregatedMissings(rows_dimension_, None, None)
+
+        assert dm.element_ids == (-1,)
+
+    def test_but_no_element_ids_when_invalid(self, _is_valid_):
+        _is_valid_.return_value = False
+        dm = _DisaggregatedMissings(None, None, None)
+
+        assert dm.element_ids is None
+
+    def test_it_computes_labels_to_help_when_valid(
+        self, request, _is_valid_, rows_dimension_
+    ):
+        _is_valid_.return_value = True
+        dim_element1_ = instance_mock(request, Element, label="a", missing=False)
+        dim_element2_ = instance_mock(request, Element, label="b", missing=True)
+        rows_dimension_.all_elements = (dim_element1_, dim_element2_)
+        dm = _DisaggregatedMissings(rows_dimension_, None, None)
+
+        assert dm.labels == ("b",)
+
+    def test_but_no_labels_when_invalid(self, _is_valid_):
+        _is_valid_.return_value = False
+        dm = _DisaggregatedMissings(None, None, None)
+
+        assert dm.labels is None
+
+    def test_it_computes_unweighted_counts_when_valid(
+        self, request, _is_valid_, rows_dimension_
+    ):
+        _is_valid_.return_value = True
+        dim_element1_ = instance_mock(request, Element, label="a", missing=False)
+        dim_element2_ = instance_mock(request, Element, label="b", missing=True)
+        rows_dimension_.all_elements = (dim_element1_, dim_element2_)
+        cube_counts_ = instance_mock(request, _BaseCubeCounts, counts=np.array([0, 1]))
+        cube_measures_ = instance_mock(
+            request, CubeMeasures, unweighted_unconditional_cube_counts=cube_counts_
+        )
+        dm = _DisaggregatedMissings(rows_dimension_, None, cube_measures_)
+
+        assert dm.unweighted_counts == (1,)
+
+    def test_but_no_unweighted_counts_when_invalid(self, _is_valid_):
+        _is_valid_.return_value = False
+        dm = _DisaggregatedMissings(None, None, None)
+
+        assert dm.unweighted_counts is None
+
+    @pytest.mark.parametrize(
+        "dimension_type, expected_value",
+        (
+            (DT.CAT, True),
+            (DT.CAT_DATE, True),
+            (DT.CA_CAT, True),
+            (DT.MR, False),
+            (DT.DATETIME, False),
+            (DT.CAT_ARRAY, False),
+            (DT.NUM_ARRAY, False),
+        ),
+    )
+    def test_it_provides_is_valid_to_help(
+        self, rows_dimension_, dimension_type, expected_value
+    ):
+        rows_dimension_.dimension_type = dimension_type
+        dm = _DisaggregatedMissings(rows_dimension_, None, None)
+        assert dm._is_valid == expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _is_valid_(self, request):
+        return property_mock(request, _DisaggregatedMissings, "_is_valid")
 
     @pytest.fixture
     def rows_dimension_(self, request):

@@ -13,7 +13,8 @@ from cr.cube.enums import DIMENSION_TYPE as DT, ORDER_FORMAT
 # ---mnemonic: CR = 'cube-response'---
 # ---mnemonic: TR = 'transforms'---
 # ---mnemonic: MRI = 'multiple-response insertions'---
-from ..fixtures import CR, TR, MRI
+# ---mnemonic: NA = 'numeric-arrays'---
+from ..fixtures import CR, TR, MRI, NA as NUMA
 from ..util import load_python_expression
 
 NA = np.nan
@@ -874,6 +875,80 @@ class Test_Slice:
             pytest.approx([13.2946141, 45.7789165, 53.0615517, 95.8683881]),
             pytest.approx([20.1898744, 35.6664538, 86.9728287, 119.4044104]),
             pytest.approx([22.9672704, 45.7789165, 86.9728287, 130.6784687]),
+        ]
+
+    def test_it_knows_the_disaggregated_missing_values_for_CA(self):
+        slice = Cube(CR.CA_CAT_X_CA_SUBVAR_USER_MISSING).partitions[0]
+
+        assert slice.rows_disaggregated_missing_labels == ("Don't know", "No Data")
+        assert slice.rows_disaggregated_missing_element_ids == (3, -1)
+        assert slice.rows_disaggregated_missing_unweighted_counts.tolist() == [
+            (10, 30),
+            (80, 10),
+            (10, 5),
+        ]
+        assert slice.columns_disaggregated_missing_labels is None
+        assert slice.columns_disaggregated_missing_element_ids is None
+        assert slice.columns_disaggregated_missing_unweighted_counts is None
+
+    def test_it_knows_the_rows_missing_and_columns_missing_for_CAT_X_CAT(self):
+        slice = Cube(CR.CAT_X_CAT).partitions[0]
+        assert slice.rows_missing.tolist() == [13.0, 12.0]
+        assert slice.columns_missing.tolist() == [10.0, 15.0]
+
+    def test_it_knows_the_rows_missing_and_columns_missing_for_MR_X_MR(self):
+        slice = Cube(CR.MR_X_MR).partitions[0]
+        assert slice.rows_missing.tolist() == [
+            [
+                88.0,
+                93.0,
+                90.0,
+                88.0,
+            ],
+            [
+                82.0,
+                71.0,
+                78.0,
+                71.0,
+            ],
+            [
+                74.0,
+                80.0,
+                66.0,
+                66.0,
+            ],
+            [
+                56.0,
+                55.0,
+                47.0,
+                39.0,
+            ],
+        ]
+        assert slice.columns_missing.tolist() == [
+            [
+                88.0,
+                82.0,
+                74.0,
+                56.0,
+            ],
+            [
+                93.0,
+                71.0,
+                80.0,
+                55.0,
+            ],
+            [
+                90.0,
+                78.0,
+                66.0,
+                47.0,
+            ],
+            [
+                88.0,
+                71.0,
+                66.0,
+                39.0,
+            ],
         ]
 
     @pytest.mark.parametrize(
@@ -2589,6 +2664,41 @@ class Test_Strand:
         strand = Cube(CR.OM_SGP8334215_VN_2019_SEP_19_STRAND).partitions[0]
         assert strand.is_empty is True
 
+    def test_it_provides_disaggregated_missings_for_CAT(self):
+        strand = Cube(CR.CAT_USER_MISSING).partitions[0]
+
+        assert strand.disaggregated_missing_labels == ("Skipped", "No Data")
+        assert strand.disaggregated_missing_element_ids == (4, -1)
+        assert strand.disaggregated_missing_unweighted_counts == (20, 15)
+
+    def test_it_provides_empty_disaggregated_missings_for_MR(self):
+        strand = Cube(CR.MR_WGTD).partitions[0]
+
+        assert strand.disaggregated_missing_labels is None
+        assert strand.disaggregated_missing_unweighted_counts is None
+
+    def test_it_provides_table_missing_for_CAT(self):
+        strand = Cube(CR.CAT_USER_MISSING).partitions[0]
+        assert strand.table_missing == pytest.approx(35)
+
+    def test_it_provides_table_missing_for_MR(self):
+        strand = Cube(CR.MR_WGTD).partitions[0]
+        assert strand.table_missing.tolist() == [
+            258720.0,
+            271009.0,
+            266853.0,
+            271703.0,
+            252885.0,
+            275224.0,
+            279589.0,
+            278984.0,
+            277153.0,
+        ]
+
+    def test_it_provides_table_missing_for_NUMA(self):
+        strand = Cube(NUMA.NUM_ARR_MEANS_NO_GROUPING_WEIGHTED).partitions[0]
+        assert strand.table_missing.tolist() == [1.0, 4.0, 3.0, 0.0]
+
     def test_it_provides_stddev_measure_for_CAT(self):
         strand = Cube(CR.CAT_STDDEV).partitions[0]
 
@@ -2731,6 +2841,7 @@ class Test_Nub:
         np.testing.assert_almost_equal(nub.means, np.array([49.095]))
         assert nub.ndim == 0
         np.testing.assert_almost_equal(nub.table_base, np.array([49.095]))
+        np.testing.assert_almost_equal(nub.table_missing, np.array([950.905]))
         np.testing.assert_array_equal(nub.unweighted_count, 1000)
         assert nub.table_name is None
         assert nub.table_code is None

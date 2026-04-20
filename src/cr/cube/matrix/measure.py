@@ -90,6 +90,13 @@ class SecondOrderMeasures:
         return _ColumnWeightedBases(self._dimensions, self, self._cube_measures)
 
     @lazyproperty
+    def columns_disaggregated_missing_unweighted_counts(self):
+        """_DisaggregatedMissings object for the columns of this cube-result"""
+        return _DisaggregatedMissings(
+            self._dimensions, self, self._cube_measures, MO.COLUMNS
+        )
+
+    @lazyproperty
     def columns_table_proportion(self):
         """_MarginTableProportion for measure object for columns of this cube-result.
 
@@ -325,6 +332,13 @@ class SecondOrderMeasures:
     def row_weighted_bases(self):
         """_RowWeightedBases measure object for this cube-result."""
         return _RowWeightedBases(self._dimensions, self, self._cube_measures)
+
+    @lazyproperty
+    def rows_disaggregated_missing_unweighted_counts(self):
+        """_DisaggregatedMissings object for the rows of this cube-result"""
+        return _DisaggregatedMissings(
+            self._dimensions, self, self._cube_measures, MO.ROWS
+        )
 
     @lazyproperty
     def rows_pruning_mask(self):
@@ -2680,9 +2694,23 @@ class _BaseMarginal:
         return self._second_order_measures.row_comparable_counts.is_defined
 
     @lazyproperty
+    def _opposing_dimension(self):
+        """opposing dimension for this marginal's orientation"""
+        if self.orientation == MO.ROWS:
+            return self._dimensions[1]
+        return self._dimensions[0]
+
+    @lazyproperty
     def _squared_weights_are_defined(self):
         """Bool indicating whether squared weights are defined."""
         return self._second_order_measures.column_squared_bases.is_defined
+
+    @lazyproperty
+    def _subtotal_length(self):
+        """Int indicating the number of subtotals given the orientation"""
+        if self.orientation == MO.ROWS:
+            return len(self._dimensions[0].subtotals)
+        return len(self._dimensions[1].subtotals)
 
 
 class _BaseScaledCountMarginal(_BaseMarginal):
@@ -2696,6 +2724,102 @@ class _BaseScaledCountMarginal(_BaseMarginal):
             if self.orientation == MO.ROWS
             else np.array(self._dimensions[0].numeric_values, dtype=np.float64)
         )
+
+
+class _DisaggregatedMissings(_BaseMarginal):
+    """Provides the disaggregated missing values for a slice
+
+    Disaggregated missing values are the missing values from a categorical
+    dimension that show the counts per missing category (whether it be
+    system missing or user defined ones like "Refused").
+
+    The dimensionality of this is weird. It can be thought of as a marginal,
+    which on a slice would generally mean that it's 1D. However, because there
+    can be more than one type of missing, we gain back a dimension. The shape
+    is therefore not necessarily the same as the shape of measures. For this
+    reason, rather than have 2D ndarrays, it is 1D ndarray storing tuples.
+    """
+
+    @lazyproperty
+    def blocks(self):
+        """List of the 2 1D ndarray "blocks" of the disaggregated missing values.
+
+        Because there can be more than 1 type of missing, the ndarrays store tuples
+        of values.
+        """
+        if not self.is_defined:
+            raise ValueError(
+                f"{self.orientation.value}-disaggregated-missings only defined "
+                "across categorical dimensions."
+            )
+
+        return [self._base_values, self._subtotal_values]
+
+    @lazyproperty
+    def element_ids(self):
+        """optional tuple of element_ids for the missing values"""
+        if not self.is_defined:
+            return None
+        return tuple(
+            el.element_id for el in self._opposing_dimension.all_elements if el.missing
+        )
+
+    @lazyproperty
+    def is_defined(self):
+        """True if opposing dimension is categorical"""
+        return self._opposing_dimension.dimension_type in DT.CAT_TYPES
+
+    @lazyproperty
+    def labels(self):
+        """optional tuple of str labels for the missing values"""
+        if not self.is_defined:
+            return None
+        return tuple(
+            el.label for el in self._opposing_dimension.all_elements if el.missing
+        )
+
+    @lazyproperty
+    def _base_values(self):
+        """np.array of tuples for the disaggregated missings for base values"""
+        counts = self._cube_measures.unweighted_unconditional_cube_counts.counts
+        # --- Since we're collapsing to 1D anyways, it's easiest to just transpose
+        # --- the counts on columns orientation so the code is more similar between
+        # --- orientations
+        if self.orientation == MO.COLUMNS:
+            counts = counts.transpose()
+        counts = counts[:, self._missing_idxs]
+        return np.array([tuple(row) for row in counts], dtype=self._inner_dtype)
+
+    @lazyproperty
+    def _inner_dtype(self):
+        """numpy.dtype used for items in the arrays of tuples in blocks"""
+        # --- Note that the string notation for a tuple of length 1 ("d,")
+        # --- does not work on all versions of numpy we support (python 3.8 testrunners)
+        return np.dtype([(f"f{i}", np.float64) for i in range(self._inner_size)])
+
+    @lazyproperty
+    def _inner_size(self):
+        """int size of the tuples contained in the blocks"""
+        return len(self._missing_idxs)
+
+    @lazyproperty
+    def _missing_idxs(self):
+        """list of indexes indicating which rows/columns are missing values"""
+        return [
+            idx
+            for idx, el in enumerate(self._opposing_dimension.all_elements)
+            if el.missing
+        ]
+
+    @lazyproperty
+    def _subtotal_values(self):
+        """np.array of tuples for the disaggregated missings for subtotals"""
+        # --- For now, don't bother reimplementing the subtotal logic for disaggregated
+        # --- misings. We aren't currently using them in a place where subtotals
+        # --- are possible, so wait until there is a product need for them
+        # --- Instead, just send NaNs if encountered
+        nan_tuple = (np.nan,) * self._inner_size
+        return np.array([nan_tuple] * self._subtotal_length, dtype=self._inner_dtype)
 
 
 class _MarginTableProportion(_BaseMarginal):
@@ -2810,7 +2934,7 @@ class _MarginTableBase(_BaseMarginal):
         # --- Therefore we can just repeat the first value to the shape.
         return [
             self._base_values,
-            np.repeat([self._base_values[0]], self._subtotal_shape),
+            np.repeat([self._base_values[0]], self._subtotal_length),
         ]
 
     @lazyproperty
@@ -2830,13 +2954,6 @@ class _MarginTableBase(_BaseMarginal):
             if self.orientation == MO.ROWS
             else self._cube_counts.columns_table_base
         )
-
-    @lazyproperty
-    def _subtotal_shape(self):
-        """Int indicating the number of subtotals given the orientation"""
-        if self.orientation == MO.ROWS:
-            return len(self._dimensions[0].subtotals)
-        return len(self._dimensions[1].subtotals)
 
 
 class _MarginUnweightedBase(_BaseMarginal):

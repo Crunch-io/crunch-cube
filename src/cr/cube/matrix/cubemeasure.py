@@ -66,6 +66,17 @@ class CubeMeasures:
         )
 
     @lazyproperty
+    def unweighted_unconditional_cube_counts(self):
+        """_BaseCubeCounts subclass object for this cube-result with missing."""
+        return _BaseCubeCounts.factory(
+            self._cube.unweighted_counts_with_missings,
+            False,
+            self._cube,
+            self._dimensions,
+            self._slice_idx,
+        )
+
+    @lazyproperty
     def weighted_cube_counts(self):
         """_BaseWeightedCounts subclass object for this cube-result."""
         valid_counts = self._cube.weighted_valid_counts

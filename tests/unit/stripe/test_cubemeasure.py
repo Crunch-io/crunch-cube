@@ -103,6 +103,24 @@ class TestCubeMeasures:
         )
         assert unweighted_cube_counts is cube_counts_
 
+    def test_it_provides_access_to_the_unweighted_unconditional_cube_counts_object(
+        self,
+        cube_,
+        cube_counts_,
+        _BaseCubeCounts_,
+        rows_dimension_,
+    ):
+        cube_.unweighted_counts_with_missings = "u_with_missing"
+        _BaseCubeCounts_.factory.return_value = cube_counts_
+        cube_measures = CubeMeasures(cube_, rows_dimension_, False, slice_idx=7)
+
+        unweighted_cube_counts = cube_measures.unweighted_unconditional_cube_counts
+
+        _BaseCubeCounts_.factory.assert_called_once_with(
+            "u_with_missing", rows_dimension_, False, 7
+        )
+        assert unweighted_cube_counts is cube_counts_
+
     @pytest.mark.parametrize(
         "weighted_counts, weighted_valid_counts, counts_used",
         (

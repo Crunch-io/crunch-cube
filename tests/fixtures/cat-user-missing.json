@@ -1,0 +1,152 @@
+{
+    "query": {
+        "dimensions": [
+            {"variable": "000005"}
+        ],
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "weight": null
+    },
+    "result": {
+        "n": 130,
+        "counts": [
+            30,
+            40,
+            25,
+            20,
+            15
+        ],
+        "dimensions": [
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "id": 1,
+                            "missing": false,
+                            "name": "Happy",
+                            "numeric_value": 1
+                        },
+                        {
+                            "id": 2,
+                            "missing": false,
+                            "name": "Confused",
+                            "numeric_value": 2
+                        },
+                        {
+                            "id": 3,
+                            "missing": false,
+                            "name": "Angry",
+                            "numeric_value": 3
+                        },
+                        {
+                            "id": 4,
+                            "missing": true,
+                            "name": "Skipped",
+                            "numeric_value": 4
+                        },
+                        {
+                            "id": -1,
+                            "missing": true,
+                            "name": "No Data",
+                            "numeric_value": null
+                        }
+                    ]
+                },
+                "references": {
+                    "notes": "",
+                    "description": "",
+                    "format": {
+                        "summary": {
+                            "digits": 0
+                        }
+                    },
+                    "view": {
+                        "column_width": null,
+                        "show_numeric_values": false,
+                        "show_counts": false,
+                        "include_missing": false
+                    },
+                    "name": "mood",
+                    "alias": "mood"
+                },
+                "derived": false
+            }
+        ],
+        "measures": {
+            "count": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {
+
+                        }
+                    },
+                    "references": {
+
+                    },
+                    "derived": true
+                },
+                "data": [
+                    30,
+                    40,
+                    25,
+                    20,
+                    15
+                ],
+                "n_missing": 35
+            }
+        },
+        "missing": 35,
+        "filter_stats": {
+            "is_cat_date": false,
+            "filtered": {
+                "unweighted": {
+                    "selected": 130,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 130,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 130,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 130,
+                    "other": 0,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 130,
+            "weighted_n": 130
+        },
+        "filtered": {
+            "unweighted_n": 130,
+            "weighted_n": 130
+        },
+        "element": "crunch:cube"
+    },
+    "query_environment": {
+        "filter": [
+
+        ]
+    }
+}

@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from cr.cube.cube import Cube
-from cr.cube.dimension import Dimension
+from cr.cube.dimension import Dimension, Element
 from cr.cube.enums import DIMENSION_TYPE as DT, MARGINAL_ORIENTATION as MO
 from cr.cube.matrix.cubemeasure import (
     CubeMeasures,
@@ -28,6 +28,7 @@ from cr.cube.matrix.measure import (
     _ColumnStandardError,
     _ColumnUnweightedBases,
     _ColumnWeightedBases,
+    _DisaggregatedMissings,
     _Medians,
     _PairwiseSigPvals,
     _PairwiseSigTstats,
@@ -216,6 +217,16 @@ class TestSecondOrderMeasures:
             ("columns", "columns_scale_mean_stddev", _ScaleMeanStddev),
             ("rows", "rows_scale_mean_stderr", _ScaleMeanStderr),
             ("columns", "columns_scale_mean_stderr", _ScaleMeanStderr),
+            (
+                "rows",
+                "rows_disaggregated_missing_unweighted_counts",
+                _DisaggregatedMissings,
+            ),
+            (
+                "columns",
+                "columns_disaggregated_missing_unweighted_counts",
+                _DisaggregatedMissings,
+            ),
         ),
     )
     def test_it_provides_access_to_the_marginals(
@@ -2289,6 +2300,30 @@ class Test_BaseMarginal:
 
         assert actual == second_order_measures_.column_comparable_counts.is_defined
 
+    @pytest.mark.parametrize(
+        "orientation, expected", ((MO.ROWS, "c"), (MO.COLUMNS, "r"))
+    )
+    def test_it_knows_the_opposing_dimension_of_the_marginal_to_help(
+        self, orientation, expected
+    ):
+        marginal = _BaseMarginal(("r", "c"), None, None, orientation)
+
+        assert marginal._opposing_dimension == expected
+
+    @pytest.mark.parametrize("orientation, expected", ((MO.ROWS, 2), (MO.COLUMNS, 3)))
+    def test_it_knows_the_subtotal_length_of_the_marginal_to_help(
+        self, request, orientation, expected
+    ):
+        rows_dimension_ = instance_mock(request, Dimension, subtotals=("a", "b"))
+        columns_dimension_ = instance_mock(
+            request, Dimension, subtotals=("c", "d", "e")
+        )
+        marginal = _BaseMarginal(
+            (rows_dimension_, columns_dimension_), None, None, orientation
+        )
+
+        assert marginal._subtotal_length == expected
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture
@@ -2322,6 +2357,224 @@ class Test_BaseScaledCountMarginal:
         assert marginal._opposing_numeric_values == expected
 
 
+class Test_DisaggregatedMissings:
+    """Unit test suite for `cr.cube.matrix.measure.DisaggregatedMissingValues`"""
+
+    def test_it_provides_the_value_blocks_if_defined(self, request, is_defined_):
+        is_defined_.return_value = True
+        property_mock(
+            request, _DisaggregatedMissings, "_base_values", return_value="bv"
+        )
+        property_mock(
+            request, _DisaggregatedMissings, "_subtotal_values", return_value="sv"
+        )
+        dv = _DisaggregatedMissings(None, None, None, None)
+
+        assert dv.blocks == ["bv", "sv"]
+
+    def test_but_blocks_raises_when_is_not_defined(self, is_defined_):
+        is_defined_.return_value = False
+
+        with pytest.raises(ValueError) as e:
+            _DisaggregatedMissings(None, None, None, MO.ROWS).blocks
+
+        assert (
+            str(e.value)
+            == "rows-disaggregated-missings only defined across categorical dimensions."
+        )
+
+    @pytest.mark.parametrize(
+        "dim_type, expected",
+        (
+            (DT.CAT, True),
+            (DT.CA_CAT, True),
+            (DT.CAT_DATE, True),
+            (DT.MR, False),
+            (DT.DATETIME, False),
+            (DT.NUM_ARRAY, False),
+        ),
+    )
+    def test_it_knows_if_it_is_defined(
+        self, request, _opposing_dimension_, dim_type, expected
+    ):
+        dim_ = instance_mock(request, Dimension, dimension_type=dim_type)
+        _opposing_dimension_.return_value = dim_
+        dv = _DisaggregatedMissings(None, None, None, None)
+        assert dv.is_defined == expected
+
+    def test_it_knows_labels_if_defined(
+        self, request, _opposing_dimension_, is_defined_
+    ):
+        el1_ = instance_mock(request, Element, label="a", missing=False)
+        el2_ = instance_mock(request, Element, label="b", missing=True)
+        dim_ = instance_mock(request, Dimension, all_elements=(el1_, el2_))
+        _opposing_dimension_.return_value = dim_
+        is_defined_.return_value = True
+        dv = _DisaggregatedMissings(None, None, None, None)
+        assert dv.labels == ("b",)
+
+    def test_but_labels_is_none_if_not_defined(self, is_defined_):
+        is_defined_.return_value = False
+        dv = _DisaggregatedMissings(None, None, None, None)
+        assert dv.labels is None
+
+    def test_it_knows_element_ids_if_defined(
+        self, request, _opposing_dimension_, is_defined_
+    ):
+        el1_ = instance_mock(request, Element, element_id=1, missing=False)
+        el2_ = instance_mock(request, Element, element_id=-1, missing=True)
+        dim_ = instance_mock(request, Dimension, all_elements=(el1_, el2_))
+        _opposing_dimension_.return_value = dim_
+        is_defined_.return_value = True
+        dv = _DisaggregatedMissings(None, None, None, None)
+        assert dv.element_ids == (-1,)
+
+    def test_but_element_ids_is_none_if_not_defined(self, is_defined_):
+        is_defined_.return_value = False
+        dv = _DisaggregatedMissings(None, None, None, None)
+        assert dv.element_ids is None
+
+    @pytest.mark.parametrize(
+        "missing_mask, orientation, expected",
+        (
+            (
+                [0, 2],
+                MO.ROWS,
+                np.array(
+                    [(1, 3), (10, 12)],
+                    dtype=np.dtype([("f0", np.float64), ("f1", np.float64)]),
+                ),
+            ),
+            (
+                [0],
+                MO.COLUMNS,
+                np.array([(1,), (2,), (3,)], dtype=np.dtype([("f0", np.float64)])),
+            ),
+            ([], MO.ROWS, np.array([tuple(), tuple()], dtype=np.dtype([]))),
+        ),
+    )
+    def test_it_provides_base_values_to_help(
+        self, request, missing_mask, orientation, expected
+    ):
+        counts_ = instance_mock(
+            request, _BaseCubeCounts, counts=np.array([[1, 2, 3], [10, 11, 12]])
+        )
+        cube_measures_ = instance_mock(
+            request, CubeMeasures, unweighted_unconditional_cube_counts=counts_
+        )
+        property_mock(
+            request,
+            _DisaggregatedMissings,
+            "_missing_idxs",
+            return_value=missing_mask,
+        )
+        dv = _DisaggregatedMissings(None, None, cube_measures_, orientation)
+
+        assert dv._base_values == pytest.approx(expected)
+
+    @pytest.mark.parametrize(
+        "inner_size, expected",
+        (
+            (
+                3,
+                np.dtype([("f0", np.float64), ("f1", np.float64), ("f2", np.float64)]),
+            ),
+            (1, np.dtype([("f0", np.float64)])),
+            (0, np.dtype([])),
+        ),
+    )
+    def test_it_provides_its_inner_dtype_to_help(self, request, inner_size, expected):
+        property_mock(
+            request, _DisaggregatedMissings, "_inner_size", return_value=inner_size
+        )
+        dv = _DisaggregatedMissings(None, None, None, None)
+        assert dv._inner_dtype == expected
+
+    @pytest.mark.parametrize("missing_mask, expected", (([0, 1], 2), ([0], 1), ([], 0)))
+    def test_it_provides_its_inner_size_to_help(self, request, missing_mask, expected):
+        property_mock(
+            request,
+            _DisaggregatedMissings,
+            "_missing_idxs",
+            return_value=missing_mask,
+        )
+        dv = _DisaggregatedMissings(None, None, None, None)
+        assert dv._inner_size == expected
+
+    @pytest.mark.parametrize(
+        "m1, m2, expected",
+        ((True, True, [0, 1]), (False, True, [1]), (False, False, [])),
+    )
+    def test_it_provides_missing_idxs_to_help(
+        self, request, _opposing_dimension_, m1, m2, expected
+    ):
+        el1_ = instance_mock(request, Element, missing=m1)
+        el2_ = instance_mock(request, Element, missing=m2)
+        dim_ = instance_mock(request, Dimension, all_elements=(el1_, el2_))
+        _opposing_dimension_.return_value = dim_
+        dv = _DisaggregatedMissings(None, None, None, None)
+        assert dv._missing_idxs == expected
+
+    @pytest.mark.parametrize(
+        "missing_mask, subtotal_shape, expected",
+        (
+            (
+                [0, 1],
+                0,
+                np.array([], dtype=np.dtype([("f0", np.float64), ("f1", np.float64)])),
+            ),
+            ([0], 0, np.array([], dtype=np.dtype([("f0", np.float64)]))),
+            ([], 0, np.array([], dtype=np.dtype([]))),
+            (
+                [0, 1],
+                1,
+                np.array(
+                    [(np.nan, np.nan)],
+                    dtype=np.dtype([("f0", np.float64), ("f1", np.float64)]),
+                ),
+            ),
+            (
+                [0],
+                2,
+                np.array([(np.nan,), (np.nan,)], dtype=np.dtype([("f0", np.float64)])),
+            ),
+            ([], 1, np.array([tuple()], dtype=np.dtype([]))),
+        ),
+    )
+    def test_it_provides_its_subtotal_values_to_help(
+        self, request, missing_mask, subtotal_shape, expected
+    ):
+        property_mock(
+            request,
+            _DisaggregatedMissings,
+            "_missing_idxs",
+            return_value=missing_mask,
+        )
+        property_mock(
+            request,
+            _DisaggregatedMissings,
+            "_subtotal_length",
+            return_value=subtotal_shape,
+        )
+        dv = _DisaggregatedMissings(None, None, None, None)
+
+        actual = dv._subtotal_values
+
+        assert expected.dtype == actual.dtype
+        for field in expected.dtype.names or [None]:
+            np.testing.assert_array_equal(actual[field], expected[field])
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def is_defined_(self, request):
+        return property_mock(request, _DisaggregatedMissings, "is_defined")
+
+    @pytest.fixture
+    def _opposing_dimension_(self, request):
+        return property_mock(request, _DisaggregatedMissings, "_opposing_dimension")
+
+
 class Test_MarginTableBase:
     """Unit test suite for `cr.cube.matrix.measure._MarginTableBase` object."""
 
@@ -2333,7 +2586,7 @@ class Test_MarginTableBase:
     ):
         is_defined_prop_.return_value = True
         _base_values_prop_.return_value = np.array([1.0, 1.0])
-        property_mock(request, _MarginTableBase, "_subtotal_shape", return_value=3)
+        property_mock(request, _MarginTableBase, "_subtotal_length", return_value=3)
         table_weighted_base = _MarginTableBase(None, None, None, None, None)
 
         results = table_weighted_base.blocks
@@ -2380,13 +2633,15 @@ class Test_MarginTableBase:
 
         assert table_weighted_base._base_values == [1, 2]
 
-    def test_it_provides_subtotal_shape_for_rows_orientation_to_help(self, dimensions_):
+    def test_it_provides_subtotal_length_for_rows_orientation_to_help(
+        self, dimensions_
+    ):
         dimensions_[0].subtotals = (1, 2, 3)
         table_weighted_base = _MarginTableBase(dimensions_, None, None, MO.ROWS, None)
 
-        assert table_weighted_base._subtotal_shape == 3
+        assert table_weighted_base._subtotal_length == 3
 
-    def test_it_provides_subtotal_shape_for_columns_orientation_to_help(
+    def test_it_provides_subtotal_length_for_columns_orientation_to_help(
         self, dimensions_
     ):
         dimensions_[1].subtotals = (1,)
@@ -2394,7 +2649,7 @@ class Test_MarginTableBase:
             dimensions_, None, None, MO.COLUMNS, None
         )
 
-        assert table_weighted_base._subtotal_shape == 1
+        assert table_weighted_base._subtotal_length == 1
 
     # fixture components ---------------------------------------------
 
