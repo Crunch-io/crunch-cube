@@ -881,12 +881,14 @@ class Test_Slice:
         slice = Cube(CR.CA_CAT_X_CA_SUBVAR_USER_MISSING).partitions[0]
 
         assert slice.rows_disaggregated_missing_labels == ("Don't know", "No Data")
+        assert slice.rows_disaggregated_missing_element_ids == (3, -1)
         assert slice.rows_disaggregated_missing_unweighted_counts.tolist() == [
             (10, 30),
             (80, 10),
             (10, 5),
         ]
         assert slice.columns_disaggregated_missing_labels is None
+        assert slice.columns_disaggregated_missing_element_ids is None
         assert slice.columns_disaggregated_missing_unweighted_counts is None
 
     def test_it_knows_the_rows_missing_and_columns_missing_for_CAT_X_CAT(self):
@@ -2666,6 +2668,7 @@ class Test_Strand:
         strand = Cube(CR.CAT_USER_MISSING).partitions[0]
 
         assert strand.disaggregated_missing_labels == ("Skipped", "No Data")
+        assert strand.disaggregated_missing_element_ids == (4, -1)
         assert strand.disaggregated_missing_unweighted_counts == (20, 15)
 
     def test_it_provides_empty_disaggregated_missings_for_MR(self):

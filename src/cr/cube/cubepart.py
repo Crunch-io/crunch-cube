@@ -463,6 +463,19 @@ class _Slice(CubePartition):
         return self._dimensions[1].name
 
     @lazyproperty
+    def columns_disaggregated_missing_element_ids(self):
+        """Optional tuple of element ids of disaggregated missing elements
+
+        The disaggregated missings are only available on slices with CAT dimensions.
+        The tuple's shape is not related to the shape of actual categories, it depends
+        on how many missing categories are defined (generally there's a system missing
+        and possibly a handful of missing categories like "Refused").
+        """
+        return (
+            self._measures.columns_disaggregated_missing_unweighted_counts.element_ids
+        )
+
+    @lazyproperty
     def columns_disaggregated_missing_labels(self):
         """Optional tuple of labels of disaggregated missing elements
 
@@ -1339,6 +1352,17 @@ class _Slice(CubePartition):
         return self._rows_dimension.dimension_type
 
     @lazyproperty
+    def rows_disaggregated_missing_element_ids(self):
+        """Optional tuple of element ids of disaggregated missing elements
+
+        The disaggregated missings are only available on slices with CAT dimensions.
+        The tuple's shape is not related to the shape of actual categories, it depends
+        on how many missing categories are defined (generally there's a system missing
+        and possibly a handful of missing categories like "Refused").
+        """
+        return self._measures.rows_disaggregated_missing_unweighted_counts.element_ids
+
+    @lazyproperty
     def rows_disaggregated_missing_labels(self):
         """Optional tuple of labels of disaggregated missing elements
 
@@ -2118,6 +2142,17 @@ class _Strand(CubePartition):
         n_valids = len(rows_dim.valid_elements)
         diffs = [False] * n_valids + [e.is_difference for e in rows_dim.subtotals]
         return tuple(np.where(np.array(diffs)[self._row_order_signed_indexes])[0])
+
+    @lazyproperty
+    def disaggregated_missing_element_ids(self):
+        """Optional tuple of element_ids for missing categories
+
+        The disaggregated missings are only available on strands with CAT dimensions.
+        The tuple's shape is not related to the shape of actual categories, it depends
+        on how many missing categories are defined (generally there's a system missing
+        and possibly a handful of missing categories like "Refused").
+        """
+        return self._measures.disaggregated_missings.element_ids
 
     @lazyproperty
     def disaggregated_missing_labels(self):
