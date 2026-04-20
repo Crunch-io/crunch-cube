@@ -1,5 +1,33 @@
 # History of Changes
 
+### 3.1.4
+
+- Sort column by opposing row
+
+### 3.1.3
+
+- Bug fix for _Strand.table_percentages
+
+### 3.1.2
+
+- Bug fix for scale mean diff rows and cols
+
+### 3.1.1
+
+- Bug fix for subtotal diff (wave difference) for categorical date dimensions
+
+### 3.1.0
+
+- Subtotal diff (wave difference) for categorical date dimensions
+
+### 3.0.45
+
+- Enumerator refactoring
+
+### 3.0.44
+
+- Bug fix median measure for exporter
+
 ### 3.0.43
 
 - Median measure

@@ -88,6 +88,17 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 
 ## Changes
 
+### 3.3.3
+- Add information about missing values to partitions:
+    - `_Nub`: `.table_missing`
+    - `_Strand`: `.table_missing`, `.disaggregated_missing_unweighted_counts`,
+      `.disaggregated_missing_labels`, & `.disaggregated_missing_element_ids`
+    - `_Slice`: `.rows_disaggregated_missing_unweighted_counts`,
+      `.rows_disaggregated_missing_labels`, `.rows_disaggregated_missing_element_ids`
+      `.columns_disaggregated_missing_unweighted_counts`,
+      `.columns_disaggregated_missing_labels`, &
+      `.columns_disaggregated_missing_element_ids`
+
 ### 3.3.2
 
 - Bug fix column numeric ranges for _Slice
@@ -108,33 +119,5 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 ### 3.1.5
 
 - Add audience ratio measure
-
-### 3.1.4
-
-- Sort column by opposing row
-
-### 3.1.3
-
-- Bug fix for _Strand.table_percentages
-
-### 3.1.2
-
-- Bug fix for scale mean diff rows and cols
-
-### 3.1.1
-
-- Bug fix for subtotal diff (wave difference) for categorical date dimensions
-
-### 3.1.0
-
-- Subtotal diff (wave difference) for categorical date dimensions
-
-### 3.0.45
-
-- Enumerator refactoring
-
-### 3.0.44
-
-- Bug fix median measure for exporter
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
