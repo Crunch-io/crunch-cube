@@ -790,7 +790,7 @@ class Cube:
             *tuple(d.all_elements.element_idxs for d in self._all_dimensions)
         )
         # The dimension order can change in case of numeric array variable on
-        # the row, and so valid indices needs to be returned in an ordered way.
+        # the row, and so the indices needs to be returned in an ordered way.
         return tuple(all_idxs[i] for i in self._all_dimensions.dimension_order)
 
 
