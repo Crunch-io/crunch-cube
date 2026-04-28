@@ -549,7 +549,11 @@ class Cube:
         In case of presence of valid counts in the cube response the counts are replaced
         with the valid counts measure.
         """
-        return self.unweighted_counts_with_missings[self._valid_idxs]
+        return (
+            self._measures.unweighted_valid_counts.raw_cube_array[self._valid_idxs]
+            if self._measures.unweighted_valid_counts is not None
+            else self._measures.unweighted_counts.raw_cube_array[self._valid_idxs]
+        )
 
     @lazyproperty
     def unweighted_counts_with_missings(self) -> np.ndarray:
@@ -558,10 +562,12 @@ class Cube:
         The difference from .unweighted_counts is that this property includes values
         for missing categories.
         """
+        # --- Use subsetting by `.all_idxs` to rearrange dimensions when numeric
+        # --- array requires it
         return (
-            self._measures.unweighted_valid_counts.raw_cube_array
+            self._measures.unweighted_valid_counts.raw_cube_array[self._all_idxs]
             if self._measures.unweighted_valid_counts is not None
-            else self._measures.unweighted_counts.raw_cube_array
+            else self._measures.unweighted_counts.raw_cube_array[self._all_idxs]
         )
 
     @lazyproperty
@@ -776,6 +782,16 @@ class Cube:
         # The dimension dimension order can change in case of numeric array variable on
         # the row, and so valid indices needs to be returned in an ordered way.
         return tuple(valid_idxs[i] for i in self._all_dimensions.dimension_order)
+
+    @lazyproperty
+    def _all_idxs(self) -> Tuple[np.ndarray, ...]:
+        """Tuple of int64 ndarrays of all elements idx for each dimension."""
+        all_idxs = np.ix_(
+            *tuple(d.all_elements.element_idxs for d in self._all_dimensions)
+        )
+        # The dimension order can change in case of numeric array variable on
+        # the row, and so the indices needs to be returned in an ordered way.
+        return tuple(all_idxs[i] for i in self._all_dimensions.dimension_order)
 
 
 class _Measures:

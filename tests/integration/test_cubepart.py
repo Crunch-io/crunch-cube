@@ -951,6 +951,21 @@ class Test_Slice:
             ],
         ]
 
+    def test_it_knows_the_disaggregated_missing_values_for_NUMA_x_CAT(self):
+        slice = Cube(NUMA.NUM_ARR_MEANS_GROUPED_BY_CAT_DATE).partitions[0]
+
+        assert slice.rows_disaggregated_missing_labels == ("No Data",)
+        assert slice.rows_disaggregated_missing_element_ids == (-1,)
+        assert slice.rows_disaggregated_missing_unweighted_counts.tolist() == [
+            (0.0,),
+            (0.0,),
+            (0.0,),
+            (0.0,),
+        ]
+        assert slice.columns_disaggregated_missing_labels is None
+        assert slice.columns_disaggregated_missing_element_ids is None
+        assert slice.columns_disaggregated_missing_unweighted_counts is None
+
     @pytest.mark.parametrize(
         "fixture, row_order, col_order, expectation",
         (

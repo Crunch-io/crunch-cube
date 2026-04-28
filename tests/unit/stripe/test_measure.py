@@ -908,6 +908,26 @@ class Test_UnweightedBases:
 
         assert unweighted_bases.table_base_range.tolist() == [5, 25]
 
+    def test_it_knows_its_table_base_scalar_when_no_valid_categories(
+        self, request, _unweighted_cube_counts_prop_, unweighted_cube_counts_
+    ):
+        rows_dimension_ = instance_mock(request, Dimension)
+        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
+        unweighted_cube_counts_.bases = np.array([])
+        unweighted_bases = _UnweightedBases(rows_dimension_, None, None)
+
+        assert unweighted_bases.table_base_scalar == 0.0
+
+    def test_it_knows_its_table_base_range_when_no_valid_categories(
+        self, request, _unweighted_cube_counts_prop_, unweighted_cube_counts_
+    ):
+        rows_dimension_ = instance_mock(request, Dimension)
+        _unweighted_cube_counts_prop_.return_value = unweighted_cube_counts_
+        unweighted_cube_counts_.bases = np.array([])
+        unweighted_bases = _UnweightedBases(rows_dimension_, None, None)
+
+        assert unweighted_bases.table_base_range == pytest.approx([0.0, 0.0])
+
     # fixture components ---------------------------------------------
 
     @pytest.fixture

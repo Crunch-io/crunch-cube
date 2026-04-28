@@ -746,6 +746,8 @@ class _UnweightedBases(_BaseSecondOrderMeasure):
         the MR case.
         """
         bases = self._unweighted_cube_counts.bases
+        if self._unweighted_cube_counts.bases.shape == (0,):
+            return np.array([0.0, 0.0])  # --- No valid categories
         return np.array([np.min(bases), np.max(bases)])
 
     @lazyproperty
@@ -753,6 +755,8 @@ class _UnweightedBases(_BaseSecondOrderMeasure):
         """Optional np.float64 of the base (available across non-array dimensions)"""
         if self._rows_dimension.dimension_type in DT.ARRAY_TYPES:
             return None
+        if self._unweighted_cube_counts.bases.shape == (0,):
+            return 0.0  # --- No valid categories
         return self._unweighted_cube_counts.bases[0]
 
 
