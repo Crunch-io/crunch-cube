@@ -88,6 +88,10 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 
 ## Changes
 
+### 3.3.6
+
+- Rebuild
+
 ### 3.3.5
 
 - Fix bug in `_Strand.table_base` and `_Strand.table_missing` for MRs.
