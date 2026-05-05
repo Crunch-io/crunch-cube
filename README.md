@@ -88,6 +88,11 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 
 ## Changes
 
+### 3.3.7
+
+- Rebuild
+
+
 ### 3.3.6
 
 - Rebuild
