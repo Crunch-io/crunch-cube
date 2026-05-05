@@ -1,5 +1,10 @@
 # History of Changes
 
+### 3.2.0
+
+- Add table code and label
+- Cleanup repo
+
 ### 3.1.5
 
 - Add audience ratio measure

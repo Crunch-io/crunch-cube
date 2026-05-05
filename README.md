@@ -88,6 +88,10 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 
 ## Changes
 
+### 3.3.5
+
+- Fix bug in `_Strand.table_base` and `_Strand.table_missing` for MRs.
+
 ### 3.3.4
 
 - Fix bug in `_Slice.rows_disaggregated_missing_unweighted_counts` for Numeric Array
@@ -119,9 +123,5 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 
 - Fix translate_element_id when is is None
 
-### 3.2.0
-
-- Add table code and label
-- Cleanup repo
 
 For a complete list of changes see [history](https://github.com/Crunch-io/crunch-cube/blob/master/HISTORY.md).
