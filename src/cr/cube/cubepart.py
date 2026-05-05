@@ -2579,8 +2579,8 @@ class _Strand(CubePartition):
         if self._measures.unweighted_bases.table_base_scalar is not None:
             return self._measures.unweighted_bases.table_base_scalar
 
-        # --- otherwise it's the same as the rows base ---
-        return self.rows_base
+        # --- otherwise it's the same as the unweighted bases ---
+        return self.unweighted_bases
 
     @lazyproperty
     def table_base_range(self):
