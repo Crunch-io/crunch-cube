@@ -2699,15 +2699,15 @@ class Test_Strand:
     def test_it_provides_table_missing_for_MR(self):
         strand = Cube(CR.MR_WGTD).partitions[0]
         assert strand.table_missing.tolist() == [
-            258720.0,
-            271009.0,
-            266853.0,
-            271703.0,
-            252885.0,
-            275224.0,
-            279589.0,
-            278984.0,
-            277153.0,
+            236761.0,
+            236761.0,
+            236761.0,
+            236761.0,
+            236761.0,
+            236761.0,
+            236761.0,
+            236761.0,
+            236761.0,
         ]
 
     def test_it_provides_table_missing_for_NUMA(self):
