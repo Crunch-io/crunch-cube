@@ -88,6 +88,10 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 
 ## Changes
 
+### 3.3.8
+
+- Use native namespace packages for cr instead of deprecated pkg_resources / pkgutil
+
 ### 3.3.7
 
 - Rebuild

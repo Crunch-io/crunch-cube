@@ -4,7 +4,7 @@
 import os
 import re
 
-from setuptools import find_packages, setup
+from setuptools import setup
 
 
 def ascii_bytes_from(path, *paths):
@@ -49,12 +49,9 @@ setup(
     author_email="dev@crunch.io",
     license="MIT License",
     install_requires=install_requires,
-    tests_require=test_requires,
     extras_require={"testing": test_requires},
-    packages=find_packages("src", exclude=["tests"]),
     package_dir={"": "src"},
     include_package_data=True,
     entry_points={},
-    namespace_packages=["cr"],
     zip_safe=True,
 )
