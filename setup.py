@@ -49,7 +49,6 @@ setup(
     author_email="dev@crunch.io",
     license="MIT License",
     install_requires=install_requires,
-    tests_require=test_requires,
     extras_require={"testing": test_requires},
     package_dir={"": "src"},
     include_package_data=True,
