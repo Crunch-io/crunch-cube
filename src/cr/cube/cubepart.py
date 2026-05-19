@@ -559,6 +559,18 @@ class _Slice(CubePartition):
         return self._assemble_marginal(self._measures.columns_table_proportion)
 
     @lazyproperty
+    def columns_margin_percentage(self):
+        """1D or 2D np.float64 ndarray of weighted-percentage for each column of slice
+
+        This array is 2D (a distinct margin value for each cell) when the rows
+        dimension is MR, because each MR-subvariable has its own weighted N. This is
+        because not every possible response is necessarily offered to every respondent.
+
+        In all other cases, the array is 1D, containing one value for each column.
+        """
+        return self.columns_margin_proportion * 100
+
+    @lazyproperty
     def columns_scale_mean(self):
         """Optional 1D np.float64 ndarray of scale mean for each column.
 
@@ -1432,6 +1444,18 @@ class _Slice(CubePartition):
         return self._assemble_marginal(self._measures.rows_table_proportion)
 
     @lazyproperty
+    def rows_margin_percentage(self):
+        """1D or 2D np.float64 ndarray of weighted-percentage for each column of slice
+
+        This array is 2D (a distinct margin value for each cell) when the columns
+        dimension is MR, because each MR-subvariable has its own weighted N. This is
+        because not every possible response is necessarily offered to every respondent.
+
+        In all other cases, the array is 1D, containing one value for each column.
+        """
+        return self.rows_margin_proportion * 100
+
+    @lazyproperty
     def rows_missing(self):
         """1D/2D np.float64 ndarray of unweighted counts of missing for each cell/row
 
@@ -1754,6 +1778,11 @@ class _Slice(CubePartition):
 
     @lazyproperty
     def table_percentages(self):
+        """2D np.float64 ndarray of table-percentage.
+
+        Table-percentage is the fraction of the table weighted-N contributed by each
+        cell, expressed as a percentage (float between 0.0 and 100.0 inclusive).
+        """
         return self.table_proportions * 100
 
     @lazyproperty

@@ -822,6 +822,23 @@ class Test_Slice:
     @pytest.mark.parametrize(
         "fixture, expectation",
         (
+            (CR.CAT_HS_X_MR, "cat-hs-x-mr-row-margin-percentages"),
+            (CR.MR_X_CAT_HS_MT, "mr-x-cat-hs-row-margin-percentages"),
+            (CR.MR_X_MR, "mr-x-mr-row-margin-percentages"),
+        ),
+    )
+    def test_it_knows_the_rows_margin_percentage(self, fixture, expectation):
+        slice_ = _Slice(
+            Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
+        )
+
+        rows_margin_percentages = slice_.rows_margin_percentage
+
+        assert rows_margin_percentages.tolist() == load_python_expression(expectation)
+
+    @pytest.mark.parametrize(
+        "fixture, expectation",
+        (
             (CR.CAT_HS_X_MR, "cat-hs-x-mr-column-proportions"),
             (CR.MR_X_CAT_HS_MT, "mr-x-cat-hs-column-proportions"),
             (CR.MR_X_MR, "mr-x-mr-column-proportions"),
@@ -854,6 +871,23 @@ class Test_Slice:
         columns_margin_proportion = slice_.columns_margin_proportion
 
         assert columns_margin_proportion.tolist() == load_python_expression(expectation)
+
+    @pytest.mark.parametrize(
+        "fixture, expectation",
+        (
+            (CR.CAT_HS_X_MR, "cat-hs-x-mr-columns-margin-percentages"),
+            (CR.MR_X_CAT_HS_MT, "mr-x-cat-hs-columns-margin-percentages"),
+            (CR.MR_X_MR, "mr-x-mr-columns-margin-percentages"),
+        ),
+    )
+    def test_it_knows_the_column_margin_percentages(self, fixture, expectation):
+        slice_ = _Slice(
+            Cube(fixture), slice_idx=0, transforms={}, population=None, mask_size=0
+        )
+
+        columns_margin_percentage = slice_.columns_margin_percentage
+
+        assert columns_margin_percentage.tolist() == load_python_expression(expectation)
 
     def test_it_knows_the_margins_of_mr_x_mr(self):
         slice_ = _Slice(

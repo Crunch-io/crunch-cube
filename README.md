@@ -88,6 +88,14 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 
 ## Changes
 
+### 3.4.0
+
+- Add rows_margin_percentage and columns_margin_percentage to _Slice
+
+### 3.3.8
+
+- Use native namespace packages for cr instead of deprecated pkg_resources / pkgutil
+
 ### 3.3.7
 
 - Rebuild

@@ -3212,7 +3212,9 @@ class TestIntegrated_SubtotalDifferences:
         assert slice_.columns_margin[0] == pytest.approx(np.nan, nan_ok=True)
         assert slice_.rows_margin[0] == pytest.approx(np.nan, nan_ok=True)
         assert slice_.columns_margin_proportion[0] == pytest.approx(11 / 266)
+        assert slice_.columns_margin_percentage[0] == pytest.approx(11 / 266 * 100)
         assert slice_.rows_margin_proportion[0] == pytest.approx(-17 / 266)
+        assert slice_.rows_margin_percentage[0] == pytest.approx(-17 / 266 * 100)
         assert slice_.columns_base[0] == pytest.approx(np.nan, nan_ok=True)
         assert slice_.rows_base[0] == pytest.approx(np.nan, nan_ok=True)
         assert slice_.column_weighted_bases[:, 0] == pytest.approx(

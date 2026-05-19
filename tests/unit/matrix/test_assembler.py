@@ -348,6 +348,72 @@ class TestAssembler:
             _assemble_matrix_.assert_called_once_with(slice_, [[[1], [2]], [[3], [4]]])
             assert columns_margin_proportion == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
+    def test_it_provides_a_1D_columns_margin_percentage_for_a_CAT_X_cube_result(
+        self,
+        _rows_dimension_prop_,
+        dimension_,
+        _assemble_marginal_,
+        _measures_prop_,
+        margin_table_proportion_,
+        second_order_measures_,
+    ):
+        margin_table_proportion_.is_defined = True
+        _rows_dimension_prop_.return_value = dimension_
+        dimension_.dimension_type = DT.CAT
+        _assemble_marginal_.return_value = np.array([[1, 2, 3], [4, 5, 6]])
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.columns_table_proportion = margin_table_proportion_
+        slice_ = _Slice(None, None, None, None, None)
+
+        columns_margin_percentage = slice_.columns_margin_percentage
+
+        _assemble_marginal_.assert_called_once_with(slice_, margin_table_proportion_)
+        assert np.array_equal(
+            columns_margin_percentage, [[100, 200, 300], [400, 500, 600]]
+        )
+
+    def test_but_it_provides_a_2D_columns_margin_percentage_for_an_MR_X_cube_result(
+        self,
+        request,
+        dimensions_,
+        _measures_prop_,
+        second_order_measures_,
+        margin_table_proportion_,
+        SumSubtotals_,
+        _assemble_matrix_,
+    ):
+        margin_table_proportion_.is_defined = False
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.columns_table_proportion = margin_table_proportion_
+        property_mock(
+            request,
+            _Slice,
+            "columns_margin",
+            return_value=np.array([[1, 2], [3, 4]]),
+        )
+        property_mock(
+            request,
+            _Slice,
+            "table_weighted_bases",
+            return_value=np.array([4.0, 6.0]),
+        )
+        SumSubtotals_.blocks.return_value = np.array([[[1], [2]], [[3], [4]]])
+        _assemble_matrix_.return_value = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        with mock.patch("cr.cube.cubepart._Slice._dimensions", new=dimensions_):
+            slice_ = _Slice(None, None, None, None, None)
+
+            columns_margin_percentage = slice_.columns_margin_percentage
+
+            SumSubtotals_.blocks.assert_called_once_with(ANY, dimensions_)
+            assert SumSubtotals_.blocks.call_args.args[0].tolist() == [
+                pytest.approx([1 / 4.0, 2 / 6.0]),
+                pytest.approx([3 / 4.0, 4 / 6.0]),
+            ]
+            assert np.array_equal(
+                columns_margin_percentage,
+                [[100, 200, 300], [400, 500, 600], [700, 800, 900]],
+            )
+
     def test_it_knows_the_inserted_column_idxs(self, _column_order_prop_):
         _column_order_prop_.return_value = [2, -1, 0, -2]
         assert _Slice(None, None, None, None, None).inserted_column_idxs == (1, 3)
@@ -566,6 +632,68 @@ class TestAssembler:
             ]
             _assemble_matrix_.assert_called_once_with(slice_, [[[1], [2]], [[3], [4]]])
             assert rows_margin_proportion == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+    def test_it_provides_a_1D_rows_margin_percentage_for_an_X_CAT_cube_result(
+        self,
+        request,
+        dimension_,
+        _assemble_marginal_,
+        _measures_prop_,
+        second_order_measures_,
+    ):
+        dimension_.dimension_type = DT.CAT
+        _assemble_marginal_.return_value = np.array([[1, 2, 3], [4, 5, 6]])
+        _measures_prop_.return_value = second_order_measures_
+        measure_ = instance_mock(request, _MarginTableProportion)
+        second_order_measures_.rows_table_proportion = measure_
+        with mock.patch(
+            "cr.cube.cubepart._Slice._dimensions", new=(dimension_, dimension_)
+        ):
+            slice_ = _Slice(None, None, None, None, None)
+            rows_margin_percentage = slice_.rows_margin_percentage
+            _assemble_marginal_.assert_called_once_with(slice_, measure_)
+            assert np.array_equal(
+                rows_margin_percentage, [[100, 200, 300], [400, 500, 600]]
+            )
+
+    def test_but_it_provides_a_2D_rows_margin_percentage_for_an_X_MR_cube_result(
+        self,
+        request,
+        dimensions_,
+        _measures_prop_,
+        second_order_measures_,
+        margin_table_proportion_,
+        SumSubtotals_,
+        _assemble_matrix_,
+    ):
+        margin_table_proportion_.is_defined = False
+        _measures_prop_.return_value = second_order_measures_
+        second_order_measures_.rows_table_proportion = margin_table_proportion_
+        property_mock(
+            request, _Slice, "rows_margin", return_value=np.array([[1, 2], [3, 4]])
+        )
+        property_mock(
+            request,
+            _Slice,
+            "table_weighted_bases",
+            return_value=np.array([4.0, 6.0]),
+        )
+        SumSubtotals_.blocks.return_value = np.array([[[1], [2]], [[3], [4]]])
+        _assemble_matrix_.return_value = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        with mock.patch("cr.cube.cubepart._Slice._dimensions", new=dimensions_):
+            slice_ = _Slice(None, None, None, None, None)
+
+            rows_margin_percentage = slice_.rows_margin_percentage
+
+            SumSubtotals_.blocks.assert_called_once_with(ANY, dimensions_)
+            assert SumSubtotals_.blocks.call_args.args[0].tolist() == [
+                pytest.approx([1 / 4.0, 2 / 6.0]),
+                pytest.approx([3 / 4.0, 4 / 6.0]),
+            ]
+            assert np.array_equal(
+                rows_margin_percentage,
+                [[100, 200, 300], [400, 500, 600], [700, 800, 900]],
+            )
 
     def test_it_knows_the_2D_table_base_of_an_ARRAY_X_ARRAY_matrix(
         self,
