@@ -16,13 +16,13 @@ from cr.cube.dimension import (
     _OrderSpec,
     _Subtotal,
     _Subtotals,
-    )
+)
 from cr.cube.enums import (
     COLLATION_METHOD as CM,
     DIMENSION_TYPE as DT,
     MARGINAL,
     MEASURE,
-    )
+)
 
 from ..unitutil import call, class_mock, instance_mock, method_mock, property_mock
 

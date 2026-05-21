@@ -13,7 +13,7 @@ from cr.cube.enums import (
     DIMENSION_TYPE as DT,
     MARGINAL,
     MEASURE,
-    )
+)
 from cr.cube.util import common_prefix, common_suffix, lazyproperty
 
 from .util import format, format_datetime
