@@ -13,8 +13,8 @@ from cr.cube.enums import (
     DIMENSION_TYPE as DT,
     MARGINAL,
     MEASURE,
-)
-from cr.cube.util import lazyproperty
+    )
+from cr.cube.util import common_prefix, common_suffix, lazyproperty
 
 from .util import format, format_datetime
 
@@ -33,7 +33,67 @@ DATETIME_FORMATS = {
 }
 
 
-def _formatter(dimension_type, typedef, out_format) -> Union[Callable, partial]:
+class LabelTransformFuncs:
+    def __init__(self, label_transforms: list[dict], all_labels: list[str]):
+        """
+        Used to apply the label function transformations on elements of a
+        dimension
+
+        :param label_transforms: list of dictionary functions. See
+        Dashboard-models for the list of options and arguments
+        :param all_labels: list of all the original labels of the dimension. It
+        is necessary to have them all so we can do the prefix/suffix trimming.
+        """
+        self.label_transforms = label_transforms
+        self.all_labels = all_labels
+
+    def apply(self, formatter: Union[Callable, partial]) -> Callable[[str], str]:
+        """
+        Receives the formatter and will wrap any other transformation
+        on top of its output.
+        :param formatter: Callable that receives a sting and outputs a string
+        :return: A callable with the same signature as the formatter
+        """
+        if not self.label_transforms:
+            return formatter
+
+        def __inner(value: str) -> str:
+            for func_transform in self.label_transforms:
+                # Invalid function raises AttributeError, this should break
+                # because it's an incomplete implementation. The functions
+                # should be specified in the Lark syntax and Dashboard models
+                # to match the list of allowed operations here. Requires
+                # 3 repos to be updated.
+                func = getattr(self, func_transform["function"])
+                args = func_transform["args"]
+                value = func(value, args)
+
+            value = formatter(value)
+            return value
+
+        return __inner
+
+    @staticmethod
+    def replace(value: str, args) -> str:
+        return value.replace(*args)
+
+    def remove_common_suffix(self, value: str, args) -> str:
+        suffix_pos = common_suffix(self.all_labels)
+        return value[:suffix_pos] if suffix_pos else value
+
+    def remove_common_prefix(self, value: str, args) -> str:
+        prefix_pos = common_prefix(self.all_labels)
+        return value[prefix_pos:] if prefix_pos else prefix_pos
+
+    def trim_common(self, value: str, args) -> str:
+        no_suffix = self.remove_common_suffix(value, [])
+        no_prefix_either = self.remove_common_prefix(no_suffix, [])
+        return no_prefix_either
+
+
+def _formatter(
+    dimension_type, typedef, out_format, label_transforms, all_labels
+) -> Union[Callable, partial]:
     """Returns a formatting function according to the dimension type."""
 
     if dimension_type != DT.DATETIME:
@@ -46,6 +106,10 @@ def _formatter(dimension_type, typedef, out_format) -> Union[Callable, partial]:
             if orig_format and out_format
             else format
         )
+
+    if label_transforms:  # Apply label transforms on the output
+        formatter = LabelTransformFuncs(label_transforms, all_labels).apply(formatter)
+
     return formatter
 
 
@@ -534,6 +598,7 @@ class Elements(tuple):
             element_defs = [codemap[code] for code in order if code in codemap]
 
         all_xforms = dimension_transforms_dict.get("elements", {})
+        label_transforms = dimension_transforms_dict.get("label_transforms")
         if dimension_type == DT.MR_SUBVAR:
             hidden_xforms = cls._hidden_transforms(
                 element_defs,
@@ -542,13 +607,20 @@ class Elements(tuple):
             all_xforms = {**hidden_xforms, **all_xforms}
 
         elements = []
+        all_labels = [elt["name"] for elt in element_defs if "name" in elt]
         for idx, element_dict in enumerate(element_defs):
             # --- convert to string for categorical ids
             element_id = _build_element_id(element_dict, dimension_type)
             xforms = _ElementTransforms(
                 all_xforms.get(element_id, all_xforms.get(str(element_id), {}))
             )
-            formatter = _formatter(dimension_type, typedef, element_data_format)
+            formatter = _formatter(
+                dimension_type,
+                typedef,
+                element_data_format,
+                label_transforms,
+                all_labels,
+            )
             element = Element(element_dict, idx, xforms, formatter, dimension_type)
             elements.append(element)
 
@@ -1037,7 +1109,8 @@ class Element:
         # ---first authority is transform in element transforms---
         value = getattr(self._element_transforms, key) if key == "name" else None
         if value is not None:
-            return value if value else ""
+            value = value if value else ""
+            return self._label_formatter(value)
 
         # ---otherwise base-name/alias from element-dict is used according to the key---
         element_dict = self._element_dict
@@ -1045,7 +1118,8 @@ class Element:
         # ---category elements have a name/alias item according to the key---
         if key in element_dict:
             value = element_dict[key]
-            return value if value else ""
+            value = value if value else ""
+            return self._label_formatter(value)
 
         # ---other types are more complicated---
         value = element_dict.get("value")
@@ -1062,7 +1136,8 @@ class Element:
             return self._label_formatter(value)
 
         # ---For CA and MR subvar dimensions---
-        return value.get("references", {}).get(key) or ""
+        value = value.get("references", {}).get(key) or ""
+        return self._label_formatter(value)
 
 
 class _ElementTransforms:
