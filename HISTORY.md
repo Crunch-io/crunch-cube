@@ -1,5 +1,8 @@
 # History of Changes
 
+### 3.3.9
+
+- Build released version with Python 3.11
 
 ### 3.3.8
 
