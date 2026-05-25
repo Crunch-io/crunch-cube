@@ -1,5 +1,41 @@
 # History of Changes
 
+
+### 3.3.8
+
+- Use native namespace packages for cr instead of deprecated pkg_resources / pkgutil
+
+### 3.3.7
+
+### 3.3.6
+
+### 3.3.5
+
+- Fix bug in `_Strand.table_base` and `_Strand.table_missing` for MRs.
+
+### 3.3.4
+
+- Fix bug in `_Slice.rows_disaggregated_missing_unweighted_counts` for Numeric Array
+  grouped by categorical
+- Fix bug in `_Strand.table_base_scalar` and `_Strand.table_base_range` when a variable
+  is entirely missing.
+
+### 3.3.3
+
+- Add information about missing values to partitions
+
+### 3.3.2
+
+- Bug fix column numeric ranges for _Slice
+
+### 3.3.1
+
+- Add numeric ranges
+
+### 3.2.1
+
+- Fix translate_element_id when it is None
+
 ### 3.2.0
 
 - Add table code and label
