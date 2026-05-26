@@ -34,6 +34,8 @@ DATETIME_FORMATS = {
 
 
 class LabelTransformFuncs:
+    # This is the system missing. We shouldn't consider it for the labels
+    # when looking for common prefix. This isn't a user-set value.
     SYSTEM_LABELS = {"No Data"}
 
     def __init__(self, label_transforms: list[dict], all_labels: list[str]):
