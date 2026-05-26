@@ -34,6 +34,8 @@ DATETIME_FORMATS = {
 
 
 class LabelTransformFuncs:
+    SYSTEM_LABELS = {"No Data"}
+
     def __init__(self, label_transforms: list[dict], all_labels: list[str]):
         """
         Used to apply the label function transformations on elements of a
@@ -45,7 +47,7 @@ class LabelTransformFuncs:
         is necessary to have them all so we can do the prefix/suffix trimming.
         """
         self.label_transforms = label_transforms
-        self.all_labels = all_labels
+        self.all_labels = [l for l in all_labels if l not in self.SYSTEM_LABELS]
 
     def apply(self, formatter: Union[Callable, partial]) -> Callable[[str], str]:
         """
@@ -1006,7 +1008,7 @@ class Element:
         self._element_dict = element_dict
         self._index = index
         self._element_transforms = element_transforms
-        self._label_formatter = label_formatter
+        self._label_formatter: Callable = label_formatter
         self._dim_type = dim_type
 
     def __repr__(self) -> str:
@@ -1077,7 +1079,10 @@ class Element:
         This value is the empty string when no value has been specified or display of
         the name has been suppressed.
         """
-        return self._str_representation_for("name")
+        _label = self._str_representation_for("name")
+        if self._label_formatter is not None:
+            _label = self._label_formatter(_label)
+        return _label
 
     @lazyproperty
     def missing(self) -> bool:
@@ -1109,8 +1114,7 @@ class Element:
         # ---first authority is transform in element transforms---
         value = getattr(self._element_transforms, key) if key == "name" else None
         if value is not None:
-            value = value if value else ""
-            return self._label_formatter(value)
+            return value if value else ""
 
         # ---otherwise base-name/alias from element-dict is used according to the key---
         element_dict = self._element_dict
@@ -1118,8 +1122,7 @@ class Element:
         # ---category elements have a name/alias item according to the key---
         if key in element_dict:
             value = element_dict[key]
-            value = value if value else ""
-            return self._label_formatter(value)
+            return value if value else ""
 
         # ---other types are more complicated---
         value = element_dict.get("value")
@@ -1136,8 +1139,7 @@ class Element:
             return self._label_formatter(value)
 
         # ---For CA and MR subvar dimensions---
-        value = value.get("references", {}).get(key) or ""
-        return self._label_formatter(value)
+        return value.get("references", {}).get(key) or ""
 
 
 class _ElementTransforms:
