@@ -1235,7 +1235,7 @@ class Test_Slice:
         slice_ = _Slice(Cube(CR.CAT_4_X_CAT_5), 0, transforms, None, 0)
 
         # Note the labels have been replaced from "Enough" to "eXXX"
-        expected = ['Plenty', 'EXXX', 'Not eXXX', 'N/A']
+        expected = ["Plenty", "EXXX", "Not eXXX", "N/A"]
         actual = slice_.row_labels.tolist()
         assert expected == actual, "\n%s\n\n%s" % (expected, actual)
 
