@@ -49,7 +49,7 @@ class LabelTransformFuncs:
         is necessary to have them all so we can do the prefix/suffix trimming.
         """
         self.label_transforms = label_transforms
-        self.all_labels = [l for l in all_labels if l not in self.SYSTEM_LABELS]
+        self.all_labels = [_l for _l in all_labels if _l not in self.SYSTEM_LABELS]
 
     def apply(self, formatter: Union[Callable, partial]) -> Callable[[str], str]:
         """
