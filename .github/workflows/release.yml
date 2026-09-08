@@ -60,7 +60,7 @@ jobs:
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: |
           pip wheel . numpy==1.23.5
-          PYPI_NEXUS=https://ui.nexus.crint.net/repository/unstable/
+          PYPI_NEXUS=https://nexus.dev.crint.net/repository/unstable/
           for whl in *.whl; do
             if [ -f $whl ]; then
               echo "Twine uploading: $whl"
