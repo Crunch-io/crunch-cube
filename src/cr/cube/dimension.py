@@ -14,7 +14,7 @@ from cr.cube.enums import (
     MARGINAL,
     MEASURE,
 )
-from cr.cube.util import lazyproperty
+from cr.cube.util import common_prefix, common_suffix, lazyproperty
 
 from .util import format, format_datetime
 
@@ -33,7 +33,71 @@ DATETIME_FORMATS = {
 }
 
 
-def _formatter(dimension_type, typedef, out_format) -> Union[Callable, partial]:
+class LabelTransformFuncs:
+    # This is the system missing. We shouldn't consider it for the labels
+    # when looking for common prefix. This isn't a user-set value.
+    SYSTEM_LABELS = {"No Data"}
+
+    def __init__(self, label_transforms: list[dict], all_labels: list[str]):
+        """
+        Used to apply the label function transformations on elements of a
+        dimension
+
+        :param label_transforms: list of dictionary functions. See
+        Dashboard-models for the list of options and arguments
+        :param all_labels: list of all the original labels of the dimension. It
+        is necessary to have them all so we can do the prefix/suffix trimming.
+        """
+        self.label_transforms = label_transforms
+        self.all_labels = [_l for _l in all_labels if _l not in self.SYSTEM_LABELS]
+
+    def apply(self, formatter: Union[Callable, partial]) -> Callable[[str], str]:
+        """
+        Receives the formatter and will wrap any other transformation
+        on top of its output.
+        :param formatter: Callable that receives a sting and outputs a string
+        :return: A callable with the same signature as the formatter
+        """
+        if not self.label_transforms:
+            return formatter
+
+        def __inner(value: str) -> str:
+            for func_transform in self.label_transforms:
+                # Invalid function raises AttributeError, this should break
+                # because it's an incomplete implementation. The functions
+                # should be specified in the Lark syntax and Dashboard models
+                # to match the list of allowed operations here. Requires
+                # 3 repos to be updated.
+                func = getattr(self, func_transform["function"])
+                args = func_transform["args"]
+                value = func(value, args)
+
+            value = formatter(value)
+            return value
+
+        return __inner
+
+    @staticmethod
+    def replace(value: str, args) -> str:
+        return value.replace(*args)
+
+    def remove_common_suffix(self, value: str, args) -> str:
+        suffix_pos = common_suffix(self.all_labels)
+        return value[:suffix_pos] if suffix_pos else value
+
+    def remove_common_prefix(self, value: str, args) -> str:
+        prefix_pos = common_prefix(self.all_labels)
+        return value[prefix_pos:] if prefix_pos else prefix_pos
+
+    def trim_common(self, value: str, args) -> str:
+        no_suffix = self.remove_common_suffix(value, [])
+        no_prefix_either = self.remove_common_prefix(no_suffix, [])
+        return no_prefix_either
+
+
+def _formatter(
+    dimension_type, typedef, out_format, label_transforms, all_labels
+) -> Union[Callable, partial]:
     """Returns a formatting function according to the dimension type."""
 
     if dimension_type != DT.DATETIME:
@@ -46,6 +110,10 @@ def _formatter(dimension_type, typedef, out_format) -> Union[Callable, partial]:
             if orig_format and out_format
             else format
         )
+
+    if label_transforms:  # Apply label transforms on the output
+        formatter = LabelTransformFuncs(label_transforms, all_labels).apply(formatter)
+
     return formatter
 
 
@@ -534,6 +602,7 @@ class Elements(tuple):
             element_defs = [codemap[code] for code in order if code in codemap]
 
         all_xforms = dimension_transforms_dict.get("elements", {})
+        label_transforms = dimension_transforms_dict.get("label_transforms")
         if dimension_type == DT.MR_SUBVAR:
             hidden_xforms = cls._hidden_transforms(
                 element_defs,
@@ -542,13 +611,20 @@ class Elements(tuple):
             all_xforms = {**hidden_xforms, **all_xforms}
 
         elements = []
+        all_labels = [elt["name"] for elt in element_defs if "name" in elt]
         for idx, element_dict in enumerate(element_defs):
             # --- convert to string for categorical ids
             element_id = _build_element_id(element_dict, dimension_type)
             xforms = _ElementTransforms(
                 all_xforms.get(element_id, all_xforms.get(str(element_id), {}))
             )
-            formatter = _formatter(dimension_type, typedef, element_data_format)
+            formatter = _formatter(
+                dimension_type,
+                typedef,
+                element_data_format,
+                label_transforms,
+                all_labels,
+            )
             element = Element(element_dict, idx, xforms, formatter, dimension_type)
             elements.append(element)
 
@@ -934,7 +1010,7 @@ class Element:
         self._element_dict = element_dict
         self._index = index
         self._element_transforms = element_transforms
-        self._label_formatter = label_formatter
+        self._label_formatter: Callable = label_formatter
         self._dim_type = dim_type
 
     def __repr__(self) -> str:
@@ -1005,7 +1081,10 @@ class Element:
         This value is the empty string when no value has been specified or display of
         the name has been suppressed.
         """
-        return self._str_representation_for("name")
+        _label = self._str_representation_for("name")
+        if self._label_formatter is not None:
+            _label = self._label_formatter(_label)
+        return _label
 
     @lazyproperty
     def missing(self) -> bool:
