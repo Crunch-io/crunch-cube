@@ -4298,3 +4298,46 @@ class Test_LegacySlice:
             [1.89375, 2.7875, 4.68125],
             [2.8416666667, 1.915625, 4.7572916667000005],
         ]
+
+
+    def test_it_provides_column_proportions_diff_for_paired_filter(self):
+        """Test column_proportions_diff for paired filter analysis."""
+        slice_ = Cube(CR.CAT_X_CAT_PAIRED_FILTER).partitions[0]
+
+        # For this fixture, column_proportions should be:
+        # Each row has count [1, 1] for both groups, so proportions are [0.5, 0.5]
+        # for each row (when there are counts in both columns)
+        # The diff should be 0 for each row
+        diff = slice_.column_proportions_diff
+
+        # Verify shape is 1D with number of rows
+        assert diff.ndim == 1
+        assert len(diff) == slice_.shape[0]
+
+        # Verify the diff is column_proportions[:, 0] - column_proportions[:, 1]
+        expected_diff = slice_.column_proportions[:, 0] - slice_.column_proportions[:, 1]
+        np.testing.assert_array_almost_equal(diff, expected_diff)
+
+    def test_column_proportions_diff_raises_for_non_paired_filter(self):
+        """Test that column_proportions_diff raises for non-paired filter analysis."""
+        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
+
+        with pytest.raises(ValueError) as e:
+            slice_.column_proportions_diff
+
+        assert "_groups_expr" in str(e.value)
+
+    def test_column_proportions_diff_with_compare_groups_fixture(self):
+        """Test column_proportions_diff with existing compare groups fixture."""
+        slice_ = Cube(CR.CAT_HS_X_COMPARE_GROUPS).partitions[0]
+
+        diff = slice_.column_proportions_diff
+
+        # Verify shape - should be 1D with number of rows (including insertions)
+        assert diff.ndim == 1
+        assert len(diff) == slice_.shape[0]
+
+        # Verify the diff calculation
+        col_props = slice_.column_proportions
+        expected_diff = col_props[:, 0] - col_props[:, 1]
+        np.testing.assert_array_almost_equal(diff, expected_diff)

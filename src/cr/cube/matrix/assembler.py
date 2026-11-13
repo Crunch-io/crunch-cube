@@ -146,6 +146,7 @@ class _BaseOrderHelper:
             M.COLUMN_BASE_WEIGHTED: "column_weighted_bases",
             M.COLUMN_INDEX: "column_index",
             M.COLUMN_PERCENT: "column_proportions",
+            M.COLUMN_PERCENT_DIFF: "column_proportions_diff",
             M.AUDIENCE_RATIO: "audience_ratio",
             M.COLUMN_PERCENT_MOE: "column_std_err",  # monotonic transform
             M.COLUMN_SHARE_SUM: "column_share_sum",
