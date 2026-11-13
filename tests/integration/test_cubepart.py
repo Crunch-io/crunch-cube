@@ -2829,7 +2829,7 @@ class Test_Strand:
     def test_it_provides_numeric_ranges(self):
         strand = Cube(CR.NUM_RANGES).partitions[0]
         expected = [(10, 20), None, (30, 40), (40, 50), (50, 60), (60, 70)]
-        assert strand.row_numeric_ranges == pytest.approx(expected)
+        assert strand.row_numeric_ranges == expected
 
 
 class Test_Nub:
