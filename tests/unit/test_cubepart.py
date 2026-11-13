@@ -453,6 +453,86 @@ class Test_Slice:
         return property_mock(request, _Slice, "shape")
 
 
+class Test_Slice_column_proportions_diff:
+    """Unit test suite for `_Slice.column_proportions_diff` property."""
+
+    def test_it_computes_diff_for_paired_filter_analysis(
+        self, _has_paired_columns_prop_, column_proportions_prop_
+    ):
+        """Returns column0 - column1 for paired filter analysis."""
+        _has_paired_columns_prop_.return_value = True
+        column_proportions_prop_.return_value = np.array(
+            [[0.5, 0.3], [0.3, 0.4], [0.2, 0.3]]
+        )
+        slice_ = _Slice(None, None, None, None, None)
+
+        diff = slice_.column_proportions_diff
+
+        np.testing.assert_array_almost_equal(diff, [0.2, -0.1, -0.1])
+
+    def test_it_raises_when_not_paired_filter_analysis(self, _has_paired_columns_prop_):
+        """Raises ValueError when slice doesn't have paired columns."""
+        _has_paired_columns_prop_.return_value = False
+        slice_ = _Slice(None, None, None, None, None)
+
+        with pytest.raises(ValueError) as e:
+            slice_.column_proportions_diff
+
+        assert (
+            "`.column_proportions_diff` is only available for paired filter analyses"
+            in str(e.value)
+        )
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _has_paired_columns_prop_(self, request):
+        return property_mock(request, _Slice, "_has_paired_columns")
+
+    @pytest.fixture
+    def column_proportions_prop_(self, request):
+        return property_mock(request, _Slice, "column_proportions")
+
+
+class Test_Slice_has_paired_columns:
+    """Unit test suite for `_Slice._has_paired_columns` property."""
+
+    @pytest.mark.parametrize(
+        ("alias", "shape", "expected_value"),
+        (
+            ("_groups_expr", (3, 2), True),  # paired filter with 2 columns
+            ("_groups_expr", (3, 3), False),  # paired filter but 3 columns
+            ("some_var", (3, 2), False),  # 2 columns but not paired filter
+            ("some_var", (3, 3), False),  # neither paired filter nor 2 columns
+        ),
+    )
+    def test_it_identifies_paired_columns_correctly(
+        self, _dimensions_prop_, shape_prop_, dimension_, alias, shape, expected_value
+    ):
+        dimension_.alias = alias
+        _dimensions_prop_.return_value = (None, dimension_)
+        shape_prop_.return_value = shape
+        slice_ = _Slice(None, None, None, None, None)
+
+        has_paired = slice_._has_paired_columns
+
+        assert has_paired is expected_value
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _dimensions_prop_(self, request):
+        return property_mock(request, _Slice, "_dimensions")
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def shape_prop_(self, request):
+        return property_mock(request, _Slice, "shape")
+
+
 class Test_Strand:
     """Unit test suite for `cr.cube.cubepart._Strand` object."""
 
