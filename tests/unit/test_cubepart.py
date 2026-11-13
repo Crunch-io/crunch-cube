@@ -470,9 +470,7 @@ class Test_Slice_column_proportions_diff:
 
         np.testing.assert_array_almost_equal(diff, [0.2, -0.1, -0.1])
 
-    def test_it_raises_when_not_paired_filter_analysis(
-        self, _has_paired_columns_prop_
-    ):
+    def test_it_raises_when_not_paired_filter_analysis(self, _has_paired_columns_prop_):
         """Raises ValueError when slice doesn't have paired columns."""
         _has_paired_columns_prop_.return_value = False
         slice_ = _Slice(None, None, None, None, None)

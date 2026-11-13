@@ -4299,7 +4299,6 @@ class Test_LegacySlice:
             [2.8416666667, 1.915625, 4.7572916667000005],
         ]
 
-
     def test_it_provides_column_proportions_diff_for_paired_filter(self):
         """Test column_proportions_diff for paired filter analysis."""
         slice_ = Cube(CR.CAT_X_CAT_PAIRED_FILTER).partitions[0]
@@ -4315,7 +4314,9 @@ class Test_LegacySlice:
         assert len(diff) == slice_.shape[0]
 
         # Verify the diff is column_proportions[:, 0] - column_proportions[:, 1]
-        expected_diff = slice_.column_proportions[:, 0] - slice_.column_proportions[:, 1]
+        expected_diff = (
+            slice_.column_proportions[:, 0] - slice_.column_proportions[:, 1]
+        )
         np.testing.assert_array_almost_equal(diff, expected_diff)
 
     def test_column_proportions_diff_raises_for_non_paired_filter(self):
