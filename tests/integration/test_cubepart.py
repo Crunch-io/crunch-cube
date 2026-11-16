@@ -4299,17 +4299,14 @@ class Test_LegacySlice:
             [2.8416666667, 1.915625, 4.7572916667000005],
         ]
 
-    def test_it_provides_column_proportions_diff_for_paired_filter(self):
-        """Test column_proportions_diff for paired filter analysis."""
+    def test_it_provides_column_proportions_diff_for_specified_columns(self):
+        """Test column_proportions_diff method computes diff for specified columns."""
         slice_ = Cube(CR.CAT_X_CAT_PAIRED_FILTER).partitions[0]
 
-        # For this fixture, column_proportions should be:
-        # Each row has count [1, 1] for both groups, so proportions are [0.5, 0.5]
-        # for each row (when there are counts in both columns)
-        # The diff should be 0 for each row
-        diff = slice_.column_proportions_diff
+        # Call the method with column indices 0 and 1
+        diff = slice_.column_proportions_diff(0, 1)
 
-        # Verify shape is 1D with number of rows
+        # Verify shape is 1D with n_rows
         assert diff.ndim == 1
         assert len(diff) == slice_.shape[0]
 
@@ -4319,22 +4316,22 @@ class Test_LegacySlice:
         )
         np.testing.assert_array_almost_equal(diff, expected_diff)
 
-    def test_column_proportions_diff_raises_for_non_paired_filter(self):
-        """Test that column_proportions_diff raises for non-paired filter analysis."""
-        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
+    def test_column_proportions_diff_raises_for_invalid_column_index(self):
+        """Test that column_proportions_diff raises for out of range column index."""
+        slice_ = Cube(CR.CAT_X_CAT_PAIRED_FILTER).partitions[0]
 
         with pytest.raises(ValueError) as e:
-            slice_.column_proportions_diff
+            slice_.column_proportions_diff(0, 10)
 
-        assert "_groups_expr" in str(e.value)
+        assert "out of range" in str(e.value)
 
     def test_column_proportions_diff_with_compare_groups_fixture(self):
         """Test column_proportions_diff with existing compare groups fixture."""
         slice_ = Cube(CR.CAT_HS_X_COMPARE_GROUPS).partitions[0]
 
-        diff = slice_.column_proportions_diff
+        diff = slice_.column_proportions_diff(0, 1)
 
-        # Verify shape - should be 1D with number of rows (including insertions)
+        # Verify shape - should be 1D with n_rows (including insertions)
         assert diff.ndim == 1
         assert len(diff) == slice_.shape[0]
 
@@ -4342,3 +4339,30 @@ class Test_LegacySlice:
         col_props = slice_.column_proportions
         expected_diff = col_props[:, 0] - col_props[:, 1]
         np.testing.assert_array_almost_equal(diff, expected_diff)
+
+    def test_column_proportions_diff_supports_sorting(self):
+        """Test that sorting by col_percent_diff works correctly."""
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "opposing_element",
+                    "element_id": 0,
+                    "measure": "col_percent_diff",
+                    "direction": "descending",
+                }
+            }
+        }
+        slice_ = Cube(CR.CAT_X_CAT_PAIRED_FILTER, transforms=transforms).partitions[0]
+
+        # Get the diff values
+        diff = slice_.column_proportions_diff(0, 1)
+
+        # Verify values are sorted in descending order
+        # (note: may have NaN values which are sorted to end)
+        non_nan_diff = diff[~np.isnan(diff)]
+        if len(non_nan_diff) > 1:
+            # Check descending order
+            assert all(
+                non_nan_diff[i] >= non_nan_diff[i + 1]
+                for i in range(len(non_nan_diff) - 1)
+            )

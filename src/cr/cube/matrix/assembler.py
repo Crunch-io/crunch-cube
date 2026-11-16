@@ -146,7 +146,6 @@ class _BaseOrderHelper:
             M.COLUMN_BASE_WEIGHTED: "column_weighted_bases",
             M.COLUMN_INDEX: "column_index",
             M.COLUMN_PERCENT: "column_proportions",
-            M.COLUMN_PERCENT_DIFF: "column_proportions_diff",
             M.AUDIENCE_RATIO: "audience_ratio",
             M.COLUMN_PERCENT_MOE: "column_std_err",  # monotonic transform
             M.COLUMN_SHARE_SUM: "column_share_sum",
@@ -180,6 +179,12 @@ class _BaseOrderHelper:
             M.Z_SCORE: "zscores",
         }
         measure = self._order_spec.measure
+
+        # --- column_proportions_diff is a method that takes column indices ---
+        # --- Default to columns 0 and 1 for sorting ---
+        if measure == M.COLUMN_PERCENT_DIFF:
+            return self._second_order_measures.column_proportions_diff(0, 1)
+
         measure_propname = propname_by_measure.get(measure)
 
         if measure_propname is None:
