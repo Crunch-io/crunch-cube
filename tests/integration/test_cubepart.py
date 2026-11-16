@@ -4325,6 +4325,15 @@ class Test_LegacySlice:
 
         assert "out of range" in str(e.value)
 
+    def test_column_proportions_diff_raises_for_negative_column_index(self):
+        """Test that column_proportions_diff raises for negative column index."""
+        slice_ = Cube(CR.CAT_X_CAT_PAIRED_FILTER).partitions[0]
+
+        with pytest.raises(ValueError) as e:
+            slice_.column_proportions_diff(-1, 0)
+
+        assert "non-negative" in str(e.value)
+
     def test_column_proportions_diff_with_compare_groups_fixture(self):
         """Test column_proportions_diff with existing compare groups fixture."""
         slice_ = Cube(CR.CAT_HS_X_COMPARE_GROUPS).partitions[0]
