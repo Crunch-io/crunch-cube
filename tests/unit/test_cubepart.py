@@ -16,7 +16,7 @@ from cr.cube.matrix.measure import (
     _ColumnProportionsDiff,
 )
 
-from ..unitutil import class_mock, instance_mock, method_mock, property_mock
+from ..unitutil import class_mock, instance_mock, property_mock
 
 
 class TestCubePartition:
