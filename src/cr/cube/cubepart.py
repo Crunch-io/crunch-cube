@@ -367,17 +367,17 @@ class _Slice(CubePartition):
         """
         return Z_975 * self.column_std_err
 
-    def column_proportions_diff(self, column_0, column_1):
+    def column_proportions_diff(self, minuend, subtrahend):
         """1D np.float64 ndarray of column-proportion differences.
 
         Computes the difference between column proportions of two specified columns
-        (column_0 - column_1). Returns a 1D array with shape (n_rows,).
+        (minuend - subtrahend). Returns a 1D array with shape (n_rows,).
 
         This measure supports sorting by the diff values.
 
         Args:
-            column_0: Index of the first column (minuend)
-            column_1: Index of the second column (subtrahend)
+            minuend: Index of the column to subtract from
+            subtrahend: Index of the column to subtract
 
         Returns:
             1D np.float64 ndarray containing the difference of column proportions
@@ -386,12 +386,13 @@ class _Slice(CubePartition):
         Raises:
             ValueError: If column indices are out of range or negative.
         """
-        measure = self._measures.column_proportions_diff(column_0, column_1)
-        # --- Extract base values and subtotal rows, assemble with row ordering ---
+        measure = self._measures.column_proportions_diff(minuend, subtrahend)
+        # --- blocks[0][0] is base values, blocks[1][0] is subtotal rows ---
         base_values = measure.blocks[0][0].flatten()
-        subtotal_rows = measure.blocks[1][0].flatten()
-        combined = np.hstack([base_values, subtotal_rows])
-        return combined[self._row_order_signed_indexes]
+        subtotal_values = measure.blocks[1][0].flatten()
+        return np.concatenate([base_values, subtotal_values])[
+            self._row_order_signed_indexes
+        ]
 
     @lazyproperty
     def column_share_sum(self):

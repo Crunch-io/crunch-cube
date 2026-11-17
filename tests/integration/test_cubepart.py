@@ -2305,6 +2305,44 @@ class Test_Slice:
         assert slice_.row_numeric_ranges == [None, (1.5, 2.5)]
         assert slice_.column_numeric_ranges == [None, None]
 
+    def test_it_provides_column_proportions_diff_for_cat_x_cat(self):
+        """column_proportions_diff computes difference with non-zero values."""
+        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
+        # Column proportions: [[0.5, 0.4], [0.5, 0.6]]
+        # Diff (col 0 - col 1): [0.1, -0.1]
+        diff = slice_.column_proportions_diff(minuend=0, subtrahend=1)
+        assert diff == pytest.approx([0.1, -0.1])
+
+    def test_it_provides_column_proportions_diff_with_row_subtotals(self):
+        """column_proportions_diff includes row subtotals in result."""
+        slice_ = Cube(CR.CAT_HS_X_CAT_HS).partitions[0]
+        # Shape is (7, 5) with row subtotals at indices 2 ("Top 2") and 6 ("Bottom 2")
+        assert slice_.inserted_row_idxs == (2, 6)
+        assert slice_.row_labels.tolist() == [
+            "Alice",
+            "Bertha",
+            "Top 2",
+            "Charlie",
+            "David",
+            "Ernie",
+            "Bottom 2",
+        ]
+
+        diff = slice_.column_proportions_diff(minuend=0, subtrahend=1)
+
+        # Verify the diff is computed correctly including row subtotals
+        assert diff == pytest.approx(
+            [
+                -0.01299183,  # Alice: 0.0669 - 0.0799
+                -0.06672455,  # Bertha: 0.3205 - 0.3872
+                -0.07971638,  # Top 2 (subtotal): 0.3874 - 0.4671
+                -0.04729805,  # Charlie: 0.1339 - 0.1812
+                0.06430705,  # David: 0.1886 - 0.1243
+                0.06270739,  # Ernie: 0.2901 - 0.2274
+                0.12701444,  # Bottom 2 (subtotal): 0.4787 - 0.3517
+            ]
+        )
+
 
 class Test_Strand:
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""

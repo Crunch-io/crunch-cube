@@ -456,14 +456,12 @@ class Test_Slice:
     def shape_prop_(self, request):
         return property_mock(request, _Slice, "shape")
 
+    # --- column_proportions_diff tests ---
 
-class Test_Slice_column_proportions_diff:
-    """Unit test suite for `_Slice.column_proportions_diff` method."""
-
-    def test_it_computes_diff_for_specified_columns(
+    def test_column_proportions_diff_computes_diff_for_specified_columns(
         self, _measures_prop_, _row_order_signed_indexes_prop_, measures_, measure_
     ):
-        """Returns column_0 - column_1 for specified columns as 1D array."""
+        """Returns minuend - subtrahend for specified columns as 1D array."""
         _measures_prop_.return_value = measures_
         measures_.column_proportions_diff.return_value = measure_
         measure_.blocks = [
@@ -478,7 +476,7 @@ class Test_Slice_column_proportions_diff:
         measures_.column_proportions_diff.assert_called_once_with(0, 1)
         np.testing.assert_array_almost_equal(diff, [0.2, -0.1, -0.1])
 
-    def test_it_passes_column_indices_to_measure(
+    def test_column_proportions_diff_passes_column_indices_to_measure(
         self, _measures_prop_, _row_order_signed_indexes_prop_, measures_, measure_
     ):
         """Passes correct column indices to the measure."""
@@ -495,8 +493,6 @@ class Test_Slice_column_proportions_diff:
 
         measures_.column_proportions_diff.assert_called_once_with(2, 3)
 
-    # fixture components ---------------------------------------------
-
     @pytest.fixture
     def _measures_prop_(self, request):
         return property_mock(request, _Slice, "_measures")
@@ -512,10 +508,6 @@ class Test_Slice_column_proportions_diff:
     @pytest.fixture
     def measure_(self, request):
         return instance_mock(request, _ColumnProportionsDiff)
-
-    @pytest.fixture
-    def shape_prop_(self, request):
-        return property_mock(request, _Slice, "shape")
 
 
 class Test_Strand:

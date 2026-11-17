@@ -53,18 +53,18 @@ class SecondOrderMeasures:
         """_ColumnProportions measure object for this cube-result."""
         return _ColumnProportions(self._dimensions, self, self._cube_measures)
 
-    def column_proportions_diff(self, column_0, column_1):
+    def column_proportions_diff(self, minuend, subtrahend):
         """_ColumnProportionsDiff measure object for specified columns.
 
         Args:
-            column_0: Index of the first column (minuend)
-            column_1: Index of the second column (subtrahend)
+            minuend: Index of the first column (the value to subtract from)
+            subtrahend: Index of the second column (the value to subtract)
 
         Returns:
-            _ColumnProportionsDiff measure computing column_0 - column_1
+            _ColumnProportionsDiff measure computing minuend - subtrahend
         """
         return _ColumnProportionsDiff(
-            self._dimensions, self, self._cube_measures, column_0, column_1
+            self._dimensions, self, self._cube_measures, minuend, subtrahend
         )
 
     @lazyproperty
@@ -867,18 +867,18 @@ class _ColumnProportionsDiff(_BaseSecondOrderMeasure):
     """Provides the column-proportions difference measure for a matrix.
 
     Column-proportions-diff is a 2D np.float64 ndarray containing the difference
-    between column proportions of two specified columns (column_0 - column_1).
+    between column proportions of two specified columns (minuend - subtrahend).
 
     The result has the same number of rows as the input but with a single column
     containing the difference values. This measure supports sorting by the diff values.
     """
 
     def __init__(
-        self, dimensions, second_order_measures, cube_measures, column_0, column_1
+        self, dimensions, second_order_measures, cube_measures, minuend, subtrahend
     ):
         super().__init__(dimensions, second_order_measures, cube_measures)
-        self._column_0 = column_0
-        self._column_1 = column_1
+        self._minuend = minuend
+        self._subtrahend = subtrahend
 
     @lazyproperty
     def blocks(self):
@@ -895,21 +895,21 @@ class _ColumnProportionsDiff(_BaseSecondOrderMeasure):
     def _base_values(self):
         """2D ndarray np.float64 of column proportions diff (n_rows, 1).
 
-        Returns the difference between column_0 and column_1 proportions.
+        Returns the difference between minuend and subtrahend proportions.
         """
         col_props = self._second_order_measures.column_proportions.blocks[0][0]
         n_cols = col_props.shape[1]
-        if self._column_0 >= n_cols or self._column_1 >= n_cols:
+        if self._minuend >= n_cols or self._subtrahend >= n_cols:
             raise ValueError(
-                f"Column indices ({self._column_0}, {self._column_1}) out of range "
+                f"Column indices ({self._minuend}, {self._subtrahend}) out of range "
                 f"for matrix with {n_cols} columns"
             )
-        if self._column_0 < 0 or self._column_1 < 0:
+        if self._minuend < 0 or self._subtrahend < 0:
             raise ValueError(
                 f"Column indices must be non-negative, got "
-                f"({self._column_0}, {self._column_1})"
+                f"({self._minuend}, {self._subtrahend})"
             )
-        diff = col_props[:, self._column_0] - col_props[:, self._column_1]
+        diff = col_props[:, self._minuend] - col_props[:, self._subtrahend]
         return diff.reshape(-1, 1)
 
     @lazyproperty
@@ -938,16 +938,16 @@ class _ColumnProportionsDiff(_BaseSecondOrderMeasure):
     def _subtotal_rows(self):
         """2D np.float64 ndarray of subtotal rows diff (n_row_subtotals, 1).
 
-        Returns the difference between column_0 and column_1 for row subtotals.
+        Returns the difference between minuend and subtrahend for row subtotals.
         """
         subtotal_rows = self._second_order_measures.column_proportions.blocks[1][0]
         if subtotal_rows.size == 0:
             return np.empty((0, 1))
         n_cols = subtotal_rows.shape[1]
-        if self._column_0 >= n_cols or self._column_1 >= n_cols:  # pragma: no cover
+        if self._minuend >= n_cols or self._subtrahend >= n_cols:  # pragma: no cover
             # Return nans if columns don't exist in subtotals
             return np.full((subtotal_rows.shape[0], 1), np.nan)
-        diff = subtotal_rows[:, self._column_0] - subtotal_rows[:, self._column_1]
+        diff = subtotal_rows[:, self._minuend] - subtotal_rows[:, self._subtrahend]
         return diff.reshape(-1, 1)
 
 
