@@ -1925,31 +1925,6 @@ class _Slice(CubePartition):
             np.ix_(self._row_order_signed_indexes, self._column_order_signed_indexes)
         ]
 
-    def _assemble_vector(self, base_vector, subtotals, order, diffs_nan=False):
-        """Return 1D ndarray of `base_vector` with inserted `subtotals`, in `order`.
-
-        Each subtotal value is the result of applying np.sum to the addends and
-        subtrahends extracted from `base_vector` according to the `addend_idxs`
-        and `subtrahend_idxs` property of each subtotal in `subtotals`. The returned
-        array is arranged by `order`, including possibly removing hidden or pruned
-        values.
-        """
-        # TODO: This works for "sum" and "diff" subtotals, because either we set to
-        # nan or add & subtract, but a fuller solution will probably get the subtotal
-        # values from a _BaseSubtotals subclass.
-        vector_subtotals = np.array(
-            [
-                (
-                    np.nan
-                    if diffs_nan and len(subtotal.subtrahend_idxs) > 0
-                    else np.sum(base_vector[subtotal.addend_idxs])
-                    - np.sum(base_vector[subtotal.subtrahend_idxs])
-                )
-                for subtotal in subtotals
-            ]
-        )
-        return np.hstack([base_vector, vector_subtotals])[order]
-
     @lazyproperty
     def _column_order_signed_indexes(self):
         """1D np.int64 ndarray of signed int idx for each assembled column.

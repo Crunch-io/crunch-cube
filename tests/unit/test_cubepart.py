@@ -422,42 +422,6 @@ class Test_Slice:
         for field in expected.dtype.names or [None]:
             np.testing.assert_array_equal(actual[field], expected[field])
 
-    # fixture components ---------------------------------------------
-
-    @pytest.fixture
-    def _alpha_alt_prop_(self, request):
-        return property_mock(request, _Slice, "_alpha_alt")
-
-    @pytest.fixture
-    def cube_(self, request):
-        return instance_mock(request, Cube)
-
-    @pytest.fixture
-    def dimension_(self, request):
-        return instance_mock(request, Dimension)
-
-    @pytest.fixture
-    def _dimensions_prop_(self, request):
-        return property_mock(request, _Slice, "_dimensions")
-
-    @pytest.fixture
-    def dimension_types_prop_(self, request):
-        return property_mock(request, _Slice, "dimension_types")
-
-    @pytest.fixture
-    def _only_larger_prop_(self, request):
-        return property_mock(request, _Slice, "_only_larger")
-
-    @pytest.fixture
-    def PairwiseSignificance_(self, request):
-        return class_mock(request, "cr.cube.cubepart.PairwiseSignificance")
-
-    @pytest.fixture
-    def shape_prop_(self, request):
-        return property_mock(request, _Slice, "shape")
-
-    # --- column_proportions_diff tests ---
-
     def test_column_proportions_diff_computes_diff_for_specified_columns(
         self, _measures_prop_, _row_order_signed_indexes_prop_, measures_, measure_
     ):
@@ -493,21 +457,55 @@ class Test_Slice:
 
         measures_.column_proportions_diff.assert_called_once_with(2, 3)
 
-    @pytest.fixture
-    def _measures_prop_(self, request):
-        return property_mock(request, _Slice, "_measures")
+    # fixture components ---------------------------------------------
 
     @pytest.fixture
-    def _row_order_signed_indexes_prop_(self, request):
-        return property_mock(request, _Slice, "_row_order_signed_indexes")
+    def _alpha_alt_prop_(self, request):
+        return property_mock(request, _Slice, "_alpha_alt")
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+    @pytest.fixture
+    def _dimensions_prop_(self, request):
+        return property_mock(request, _Slice, "_dimensions")
+
+    @pytest.fixture
+    def dimension_types_prop_(self, request):
+        return property_mock(request, _Slice, "dimension_types")
+
+    @pytest.fixture
+    def measure_(self, request):
+        return instance_mock(request, _ColumnProportionsDiff)
 
     @pytest.fixture
     def measures_(self, request):
         return instance_mock(request, SecondOrderMeasures)
 
     @pytest.fixture
-    def measure_(self, request):
-        return instance_mock(request, _ColumnProportionsDiff)
+    def _measures_prop_(self, request):
+        return property_mock(request, _Slice, "_measures")
+
+    @pytest.fixture
+    def _only_larger_prop_(self, request):
+        return property_mock(request, _Slice, "_only_larger")
+
+    @pytest.fixture
+    def PairwiseSignificance_(self, request):
+        return class_mock(request, "cr.cube.cubepart.PairwiseSignificance")
+
+    @pytest.fixture
+    def _row_order_signed_indexes_prop_(self, request):
+        return property_mock(request, _Slice, "_row_order_signed_indexes")
+
+    @pytest.fixture
+    def shape_prop_(self, request):
+        return property_mock(request, _Slice, "shape")
 
 
 class Test_Strand:
