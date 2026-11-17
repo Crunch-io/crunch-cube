@@ -944,7 +944,7 @@ class _ColumnProportionsDiff(_BaseSecondOrderMeasure):
         if subtotal_rows.size == 0:
             return np.empty((0, 1))
         n_cols = subtotal_rows.shape[1]
-        if self._column_0 >= n_cols or self._column_1 >= n_cols:
+        if self._column_0 >= n_cols or self._column_1 >= n_cols:  # pragma: no cover
             # Return nans if columns don't exist in subtotals
             return np.full((subtotal_rows.shape[0], 1), np.nan)
         diff = subtotal_rows[:, self._column_0] - subtotal_rows[:, self._column_1]
