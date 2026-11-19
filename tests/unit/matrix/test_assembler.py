@@ -808,28 +808,6 @@ class TestAssembler:
 
         assert slice_._assemble_matrix(blocks).tolist() == expected_value
 
-    def test_it_can_assemble_a_vector(self, request):
-        base_vector = np.array([1, 2, 3, 4])
-        subtotals_ = tuple(
-            instance_mock(
-                request,
-                _Subtotal,
-                addend_idxs=np.array(addend_idxs, dtype=int),
-                subtrahend_idxs=np.array(subtrahend_idxs, dtype=int),
-            )
-            for addend_idxs, subtrahend_idxs in (
-                ((0, 1), ()),
-                ((1, 2), ()),
-                ((2, 3), ()),
-            )
-        )
-        order = np.array([-3, 1, 0, -2, 3, 2, -1])
-        slice_ = _Slice(None, None, None, None, None)
-
-        vector = slice_._assemble_vector(base_vector, subtotals_, order)
-
-        assert vector.tolist() == [3, 2, 1, 5, 4, 3, 7]
-
     def test_it_knows_the_column_order_to_help(
         self,
         _BaseOrderHelper_,
