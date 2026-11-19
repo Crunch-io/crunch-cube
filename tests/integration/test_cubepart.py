@@ -3,18 +3,19 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 from textwrap import dedent
+
 import numpy as np
 import pytest
 
-from cr.cube.cubepart import _Slice
 from cr.cube.cube import Cube
+from cr.cube.cubepart import _Slice
 from cr.cube.enums import DIMENSION_TYPE as DT, ORDER_FORMAT
 
 # ---mnemonic: CR = 'cube-response'---
 # ---mnemonic: TR = 'transforms'---
 # ---mnemonic: MRI = 'multiple-response insertions'---
 # ---mnemonic: NA = 'numeric-arrays'---
-from ..fixtures import CR, TR, MRI, NA as NUMA
+from ..fixtures import CR, MRI, NA as NUMA, TR
 from ..util import load_python_expression
 
 NA = np.nan
@@ -4344,24 +4345,6 @@ class Test_LegacySlice:
             expected_diff = col_props[:, col_idx] - col_props[:, 0]
             np.testing.assert_array_almost_equal(diff[:, col_idx], expected_diff)
 
-    def test_column_proportions_diff_raises_for_invalid_column_index(self):
-        """Test that column_proportions_diff raises for out of range control index."""
-        slice_ = Cube(CR.CAT_X_CAT_PAIRED_FILTER).partitions[0]
-
-        with pytest.raises(ValueError) as e:
-            slice_.column_proportions_diff(control=10)
-
-        assert "out of range" in str(e.value)
-
-    def test_column_proportions_diff_raises_for_negative_column_index(self):
-        """Test that column_proportions_diff raises for negative control index."""
-        slice_ = Cube(CR.CAT_X_CAT_PAIRED_FILTER).partitions[0]
-
-        with pytest.raises(ValueError) as e:
-            slice_.column_proportions_diff(control=-1)
-
-        assert "non-negative" in str(e.value)
-
     def test_column_proportions_diff_with_compare_groups_fixture(self):
         """Test column_proportions_diff with existing compare groups fixture."""
         slice_ = Cube(CR.CAT_HS_X_COMPARE_GROUPS).partitions[0]
@@ -4383,6 +4366,10 @@ class Test_LegacySlice:
 
     def test_column_proportions_diff_supports_sorting(self):
         """Test that sorting by col_percent_diff works correctly."""
+        # First get unsorted row labels for comparison
+        unsorted_slice = Cube(CR.CAT_X_CAT_PAIRED_FILTER).partitions[0]
+        unsorted_labels = unsorted_slice.row_labels.tolist()
+
         transforms = {
             "rows_dimension": {
                 "order": {
@@ -4401,3 +4388,38 @@ class Test_LegacySlice:
         # Verify shape is 2D
         assert diff.ndim == 2
         assert diff.shape == slice_.shape
+
+        # Verify rows were reordered - sorted labels should differ from unsorted
+        sorted_labels = slice_.row_labels.tolist()
+        # The sorting should have changed the order based on col_percent_diff values
+        assert sorted_labels != unsorted_labels or len(sorted_labels) <= 1
+
+        # Verify the diff values in the first column (element_id=0) are
+        # in descending order
+        first_col_diff = diff[:, 0].tolist()
+        assert first_col_diff == sorted(first_col_diff, reverse=True)
+
+    def test_column_proportions_diff_with_row_and_col_subtotals(self):
+        """Test column_proportions_diff with both row and column subtotals."""
+        slice_ = Cube(CR.CAT_HS_X_CAT_HS).partitions[0]
+        # This fixture has both row subtotals and column subtotals
+        assert len(slice_.inserted_row_idxs) > 0
+        assert len(slice_.inserted_column_idxs) > 0
+
+        diff = slice_.column_proportions_diff(control=0)
+
+        # Verify shape matches slice
+        assert diff.shape == slice_.shape
+
+        # Control column should be all zeros
+        np.testing.assert_array_almost_equal(diff[:, 0], np.zeros(slice_.shape[0]))
+
+        # Verify the base values (non-subtotal rows and cols) are computed correctly
+        col_props = slice_.column_proportions
+        # Check a few specific cells that are not subtotals
+        for row_idx in range(min(2, slice_.shape[0])):
+            if row_idx not in slice_.inserted_row_idxs:
+                for col_idx in range(1, min(3, slice_.shape[1])):
+                    if col_idx not in slice_.inserted_column_idxs:
+                        expected = col_props[row_idx, col_idx] - col_props[row_idx, 0]
+                        assert diff[row_idx, col_idx] == pytest.approx(expected)

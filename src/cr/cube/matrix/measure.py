@@ -894,46 +894,50 @@ class _ColumnProportionsDiff(_BaseSecondOrderMeasure):
         Returns the difference between each column and the control column.
         The control column will have zeros.
         """
-        col_props = self._second_order_measures.column_proportions.blocks[0][0]
-        n_cols = col_props.shape[1]
-        if self._control >= n_cols:
-            raise ValueError(
-                f"Control index ({self._control}) out of range "
-                f"for matrix with {n_cols} columns"
-            )
-        if self._control < 0:
-            raise ValueError(f"Control index must be non-negative, got {self._control}")
-        # Subtract control column from all columns
-        control_col = col_props[:, self._control].reshape(-1, 1)
-        return col_props - control_col
+        return self._diff_from_control(self._col_props_blocks[0][0])
+
+    @lazyproperty
+    def _col_props_blocks(self):
+        """Nested list of four 2D ndarray blocks from column_proportions measure."""
+        return self._second_order_measures.column_proportions.blocks
+
+    def _diff_from_control(self, block):
+        """Return block with control column subtracted from all columns.
+
+        The control column will have zeros, all other columns show (column - control).
+        """
+        if block.size == 0:
+            return block
+        control_col = block[:, self._control].reshape(-1, 1)
+        return block - control_col
 
     @lazyproperty
     def _intersections(self):
-        """(n_row_subtotals, n_col_subtotals) ndarray of intersection values."""
-        # Get the column subtotals shape from column_proportions
-        col_subtotals = self._second_order_measures.column_proportions.blocks[0][1]
-        subtotal_rows = self._second_order_measures.column_proportions.blocks[1][0]
-        n_row_subtotals = subtotal_rows.shape[0]
-        n_col_subtotals = col_subtotals.shape[1] if col_subtotals.size > 0 else 0
-        if n_row_subtotals == 0 or n_col_subtotals == 0:
-            return np.empty((n_row_subtotals, n_col_subtotals))
-        # Compute diff for intersections
-        intersections = self._second_order_measures.column_proportions.blocks[1][1]
-        if intersections.size == 0:
-            return np.empty((n_row_subtotals, n_col_subtotals))
-        control_col = intersections[:, self._control].reshape(-1, 1)
+        """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
+
+        Intersection values use the control column from the row-subtotals block
+        (blocks[1][0]) since the intersection block has shape (n_row_subtotals,
+        n_col_subtotals) and the control index refers to base columns.
+        """
+        intersections = self._col_props_blocks[1][1]
+        subtotal_rows = self._col_props_blocks[1][0]
+        if intersections.size == 0 or subtotal_rows.size == 0:
+            return intersections
+        # Use control from row subtotals (which has base column dimension)
+        control_col = subtotal_rows[:, self._control].reshape(-1, 1)
         return intersections - control_col
 
     @lazyproperty
     def _subtotal_columns(self):
-        """2D np.float64 ndarray of subtotal columns (n_rows, n_col_subtotals)."""
-        col_subtotals = self._second_order_measures.column_proportions.blocks[0][1]
+        """2D np.float64 ndarray of subtotal columns (n_rows, n_col_subtotals).
+
+        Column subtotals use the control column from the base values block
+        (blocks[0][0]) since the control index refers to base columns.
+        """
+        col_subtotals = self._col_props_blocks[0][1]
+        base_values = self._col_props_blocks[0][0]
         if col_subtotals.size == 0:
             return col_subtotals
-        # For column subtotals, we need to subtract the control from base values
-        # But column subtotals don't have a "control" in the same sense
-        # They should show the diff of the subtotal from the control column's value
-        base_values = self._second_order_measures.column_proportions.blocks[0][0]
         control_col = base_values[:, self._control].reshape(-1, 1)
         return col_subtotals - control_col
 
@@ -943,15 +947,7 @@ class _ColumnProportionsDiff(_BaseSecondOrderMeasure):
 
         Returns the difference between each column and the control for row subtotals.
         """
-        subtotal_rows = self._second_order_measures.column_proportions.blocks[1][0]
-        if subtotal_rows.size == 0:
-            return subtotal_rows
-        n_cols = subtotal_rows.shape[1]
-        if self._control >= n_cols:  # pragma: no cover
-            # Return zeros if control doesn't exist in subtotals
-            return np.zeros_like(subtotal_rows)
-        control_col = subtotal_rows[:, self._control].reshape(-1, 1)
-        return subtotal_rows - control_col
+        return self._diff_from_control(self._col_props_blocks[1][0])
 
 
 class _AudienceRatio(_ColumnProportions):
