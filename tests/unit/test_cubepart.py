@@ -422,40 +422,48 @@ class Test_Slice:
         for field in expected.dtype.names or [None]:
             np.testing.assert_array_equal(actual[field], expected[field])
 
-    def test_column_proportions_diff_computes_diff_for_specified_columns(
-        self, _measures_prop_, _row_order_signed_indexes_prop_, measures_, measure_
+    def test_column_proportions_diff_computes_diff_from_control_column(
+        self, _measures_prop_, measures_, measure_
     ):
-        """Returns minuend - subtrahend for specified columns as 1D array."""
+        """Returns 2D array with each column's diff from control column."""
+        _measures_prop_.return_value = measures_
+        measures_.column_proportions_diff.return_value = measure_
+        # Mock blocks: 2 rows, 3 columns - control is column 0
+        # col_props: [[0.5, 0.6, 0.4], [0.5, 0.4, 0.6]]
+        # diff from control (col 0): [[0, 0.1, -0.1], [0, -0.1, 0.1]]
+        measure_.blocks = [
+            [np.array([[0.0, 0.1, -0.1], [0.0, -0.1, 0.1]]), np.empty((2, 0))],
+            [np.empty((0, 3)), np.empty((0, 0))],
+        ]
+        slice_ = _Slice(None, None, None, None, None)
+
+        with mock.patch.object(
+            _Slice,
+            "_assemble_matrix",
+            return_value=np.array([[0, 0.1, -0.1], [0, -0.1, 0.1]]),
+        ) as assemble_mock:
+            diff = slice_.column_proportions_diff(control=0)
+
+        measures_.column_proportions_diff.assert_called_once_with(0)
+        assemble_mock.assert_called_once_with(measure_.blocks)
+        np.testing.assert_array_almost_equal(diff, [[0, 0.1, -0.1], [0, -0.1, 0.1]])
+
+    def test_column_proportions_diff_passes_control_index_to_measure(
+        self, _measures_prop_, measures_, measure_
+    ):
+        """Passes correct control index to the measure."""
         _measures_prop_.return_value = measures_
         measures_.column_proportions_diff.return_value = measure_
         measure_.blocks = [
-            [np.array([[0.2], [-0.1], [-0.1]]), np.empty((3, 0))],
+            [np.array([[0.0]]), np.empty((1, 0))],
             [np.empty((0, 1)), np.empty((0, 0))],
         ]
-        _row_order_signed_indexes_prop_.return_value = np.array([0, 1, 2])
         slice_ = _Slice(None, None, None, None, None)
 
-        diff = slice_.column_proportions_diff(0, 1)
+        with mock.patch.object(_Slice, "_assemble_matrix"):
+            slice_.column_proportions_diff(control=2)
 
-        measures_.column_proportions_diff.assert_called_once_with(0, 1)
-        np.testing.assert_array_almost_equal(diff, [0.2, -0.1, -0.1])
-
-    def test_column_proportions_diff_passes_column_indices_to_measure(
-        self, _measures_prop_, _row_order_signed_indexes_prop_, measures_, measure_
-    ):
-        """Passes correct column indices to the measure."""
-        _measures_prop_.return_value = measures_
-        measures_.column_proportions_diff.return_value = measure_
-        measure_.blocks = [
-            [np.array([[0.1]]), np.empty((1, 0))],
-            [np.empty((0, 1)), np.empty((0, 0))],
-        ]
-        _row_order_signed_indexes_prop_.return_value = np.array([0])
-        slice_ = _Slice(None, None, None, None, None)
-
-        slice_.column_proportions_diff(2, 3)
-
-        measures_.column_proportions_diff.assert_called_once_with(2, 3)
+        measures_.column_proportions_diff.assert_called_once_with(2)
 
     # fixture components ---------------------------------------------
 
@@ -498,10 +506,6 @@ class Test_Slice:
     @pytest.fixture
     def PairwiseSignificance_(self, request):
         return class_mock(request, "cr.cube.cubepart.PairwiseSignificance")
-
-    @pytest.fixture
-    def _row_order_signed_indexes_prop_(self, request):
-        return property_mock(request, _Slice, "_row_order_signed_indexes")
 
     @pytest.fixture
     def shape_prop_(self, request):

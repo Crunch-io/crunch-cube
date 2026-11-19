@@ -180,10 +180,10 @@ class _BaseOrderHelper:
         }
         measure = self._order_spec.measure
 
-        # --- column_proportions_diff is a method that takes column indices ---
-        # --- Default to columns 0 and 1 for sorting ---
+        # --- column_proportions_diff is a method that takes a control column index ---
+        # --- Default to control=0 for sorting ---
         if measure == M.COLUMN_PERCENT_DIFF:
-            return self._second_order_measures.column_proportions_diff(0, 1)
+            return self._second_order_measures.column_proportions_diff(control=0)
 
         measure_propname = propname_by_measure.get(measure)
 

@@ -367,32 +367,30 @@ class _Slice(CubePartition):
         """
         return Z_975 * self.column_std_err
 
-    def column_proportions_diff(self, minuend, subtrahend):
-        """1D np.float64 ndarray of column-proportion differences.
+    def column_proportions_diff(self, control):
+        """2D np.float64 ndarray of column-proportion differences from a control column.
 
-        Computes the difference between column proportions of two specified columns
-        (minuend - subtrahend). Returns a 1D array with shape (n_rows,).
+        Computes the difference between each column's proportions and the control
+        column's proportions. Returns a 2D array with the same shape as other measures
+        (n_rows × n_cols).
+
+        The control column will have zeros (control - control = 0), and all other
+        columns will show their difference from the control (column - control).
 
         This measure supports sorting by the diff values.
 
         Args:
-            minuend: Index of the column to subtract from
-            subtrahend: Index of the column to subtract
+            control: Index of the control column (the column to compare against)
 
         Returns:
-            1D np.float64 ndarray containing the difference of column proportions
-            between the two specified columns, ordered according to row transforms.
+            2D np.float64 ndarray containing the difference of column proportions
+            from the control column, ordered according to row and column transforms.
 
         Raises:
-            ValueError: If column indices are out of range or negative.
+            ValueError: If control index is out of range or negative.
         """
-        measure = self._measures.column_proportions_diff(minuend, subtrahend)
-        # --- blocks[0][0] is base values, blocks[1][0] is subtotal rows ---
-        base_values = measure.blocks[0][0].flatten()
-        subtotal_values = measure.blocks[1][0].flatten()
-        return np.concatenate([base_values, subtotal_values])[
-            self._row_order_signed_indexes
-        ]
+        measure = self._measures.column_proportions_diff(control)
+        return self._assemble_matrix(measure.blocks)
 
     @lazyproperty
     def column_share_sum(self):
