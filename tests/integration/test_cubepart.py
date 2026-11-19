@@ -2318,18 +2318,56 @@ class Test_Slice:
     def test_it_provides_column_proportions_diff_with_row_subtotals(self):
         """column_proportions_diff includes row subtotals in result."""
         slice_ = Cube(CR.CAT_HS_X_CAT_HS).partitions[0]
-        # Shape is (7, 5) with row subtotals at indices 2 ("Top 2") and 6 ("Bottom 2")
+        # Shape is (7, 5) with:
+        # - Row subtotals at indices 2 ("Top 2") and 6 ("Bottom 2")
+        # - Column subtotal at index 4 ("Last 2")
+        # - Intersection cells at (2, 4) and (6, 4)
         assert slice_.inserted_row_idxs == (2, 6)
+        assert slice_.inserted_column_idxs == (4,)
 
         diff = slice_.column_proportions_diff(control=0)
 
         # Verify the shape matches the slice shape
         assert diff.shape == slice_.shape
-        # Control column (0) should be all zeros
-        np.testing.assert_array_almost_equal(diff[:, 0], np.zeros(7))
-        # Other columns should show their diff from control
-        # Column 1 - Column 0 for first row (Alice): 0.0799 - 0.0669 = 0.0130
-        assert diff[0, 1] == pytest.approx(0.01299183)
+        #
+        # Full expected diff table (column_proportions - column_proportions[:, 0]):
+        #
+        #              Alpha   Bravo    Charlie   Delta    Last 2
+        #              (ctrl)                              (col subtotal)
+        # Alice        0.0     0.0130   -0.0202   -0.0286  -0.0243
+        # Bertha       0.0     0.0667   -0.0921   -0.1289  -0.1100
+        # Top 2        0.0     0.0797   -0.1123   -0.1575  -0.1343  <- row subtotal
+        # Charlie      0.0     0.0473   -0.0301    0.0158  -0.0078
+        # David        0.0    -0.0643   -0.1073    0.1581   0.0218
+        # Ernie        0.0    -0.0627    0.2497   -0.0163   0.1202
+        # Bottom 2     0.0    -0.1270    0.1424    0.1417   0.1421  <- row subtotal
+        #                                                    ^
+        #                                           intersection cells
+        #
+        expected = np.array(
+            [
+                [0.0, 0.012992, -0.020224, -0.028616, -0.024308],  # Alice (base)
+                [0.0, 0.066725, -0.092113, -0.128881, -0.110007],  # Bertha (base)
+                [
+                    0.0,
+                    0.079716,
+                    -0.112337,
+                    -0.157497,
+                    -0.134316,
+                ],  # Top 2 (row subtotal)
+                [0.0, 0.047298, -0.030068, 0.015761, -0.007764],  # Charlie (base)
+                [0.0, -0.064307, -0.107326, 0.158074, 0.021839],  # David (base)
+                [0.0, -0.062707, 0.249732, -0.016338, 0.120241],  # Ernie (base)
+                [
+                    0.0,
+                    -0.127014,
+                    0.142405,
+                    0.141736,
+                    0.142080,
+                ],  # Bottom 2 (row subtotal)
+            ]
+        )
+        np.testing.assert_array_almost_equal(diff, expected)
 
 
 class Test_Strand:
