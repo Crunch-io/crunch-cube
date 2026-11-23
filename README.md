@@ -88,6 +88,10 @@ Please visit <https://crunch-cube.readthedocs.io/en/latest> for the API referenc
 
 ## Changes
 
+### 3.3.10
+
+- Add a new Column Proportions Diff Measure
+
 ### 3.3.9
 
 - Build released version with Python 3.11
