@@ -179,6 +179,12 @@ class _BaseOrderHelper:
             M.Z_SCORE: "zscores",
         }
         measure = self._order_spec.measure
+
+        # --- column_proportions_diff is a method that takes a control column index ---
+        # --- Default to control=0 for sorting ---
+        if measure == M.COLUMN_PERCENT_DIFF:
+            return self._second_order_measures.column_proportions_diff(control=0)
+
         measure_propname = propname_by_measure.get(measure)
 
         if measure_propname is None:

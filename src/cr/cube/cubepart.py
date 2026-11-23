@@ -367,6 +367,31 @@ class _Slice(CubePartition):
         """
         return Z_975 * self.column_std_err
 
+    def column_proportions_diff(self, control):
+        """2D np.float64 ndarray of column-proportion differences from a control column.
+
+        Computes the difference between each column's proportions and the control
+        column's proportions. Returns a 2D array with the same shape as other measures
+        (n_rows × n_cols).
+
+        The control column will have zeros (control - control = 0), and all other
+        columns will show their difference from the control (column - control).
+
+        This measure supports sorting by the diff values.
+
+        Args:
+            control: Index of the control column (the column to compare against)
+
+        Returns:
+            2D np.float64 ndarray containing the difference of column proportions
+            from the control column, ordered according to row and column transforms.
+
+        Raises:
+            ValueError: If control index is out of range or negative.
+        """
+        measure = self._measures.column_proportions_diff(control)
+        return self._assemble_matrix(measure.blocks)
+
     @lazyproperty
     def column_share_sum(self):
         """2D optional np.float64 ndarray of column share sum value for each table cell.
@@ -1897,31 +1922,6 @@ class _Slice(CubePartition):
         return np.block(blocks)[
             np.ix_(self._row_order_signed_indexes, self._column_order_signed_indexes)
         ]
-
-    def _assemble_vector(self, base_vector, subtotals, order, diffs_nan=False):
-        """Return 1D ndarray of `base_vector` with inserted `subtotals`, in `order`.
-
-        Each subtotal value is the result of applying np.sum to the addends and
-        subtrahends extracted from `base_vector` according to the `addend_idxs`
-        and `subtrahend_idxs` property of each subtotal in `subtotals`. The returned
-        array is arranged by `order`, including possibly removing hidden or pruned
-        values.
-        """
-        # TODO: This works for "sum" and "diff" subtotals, because either we set to
-        # nan or add & subtract, but a fuller solution will probably get the subtotal
-        # values from a _BaseSubtotals subclass.
-        vector_subtotals = np.array(
-            [
-                (
-                    np.nan
-                    if diffs_nan and len(subtotal.subtrahend_idxs) > 0
-                    else np.sum(base_vector[subtotal.addend_idxs])
-                    - np.sum(base_vector[subtotal.subtrahend_idxs])
-                )
-                for subtotal in subtotals
-            ]
-        )
-        return np.hstack([base_vector, vector_subtotals])[order]
 
     @lazyproperty
     def _column_order_signed_indexes(self):

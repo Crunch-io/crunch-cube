@@ -53,6 +53,19 @@ class SecondOrderMeasures:
         """_ColumnProportions measure object for this cube-result."""
         return _ColumnProportions(self._dimensions, self, self._cube_measures)
 
+    def column_proportions_diff(self, control):
+        """_ColumnProportionsDiff measure object for this cube-result.
+
+        Args:
+            control: Index of the control column (the column to compare against)
+
+        Returns:
+            _ColumnProportionsDiff measure computing (each column - control column)
+        """
+        return _ColumnProportionsDiff(
+            self._dimensions, self, self._cube_measures, control
+        )
+
     @lazyproperty
     def column_proportion_variances(self):
         """_ProportionVariances measure object for this cube-result."""
@@ -847,6 +860,94 @@ class _ColumnProportions(_BaseSecondOrderMeasure):
     def _weighted_base_blocks(self):
         """List of four 2D ndarray of column weighted bases."""
         return self._second_order_measures.column_weighted_bases.blocks
+
+
+class _ColumnProportionsDiff(_BaseSecondOrderMeasure):
+    """Provides the column-proportions difference measure for a matrix.
+
+    Column-proportions-diff is a 2D np.float64 ndarray containing the difference
+    between each column's proportions and a control column's proportions.
+
+    The result has the same shape as other measures (n_rows × n_cols). The control
+    column will have zeros, and all other columns show (column - control).
+    """
+
+    def __init__(self, dimensions, second_order_measures, cube_measures, control):
+        super().__init__(dimensions, second_order_measures, cube_measures)
+        self._control = control
+
+    @lazyproperty
+    def blocks(self):
+        """Nested list of the four 2D ndarray "blocks" making up this measure.
+
+        The blocks structure matches other measures with shape (n_rows × n_cols).
+        """
+        return [
+            [self._base_values, self._subtotal_columns],
+            [self._subtotal_rows, self._intersections],
+        ]
+
+    @lazyproperty
+    def _base_values(self):
+        """2D ndarray np.float64 of column proportions diff (n_rows, n_cols).
+
+        Returns the difference between each column and the control column.
+        The control column will have zeros.
+        """
+        return self._diff_from_control(self._col_props_blocks[0][0])
+
+    @lazyproperty
+    def _col_props_blocks(self):
+        """Nested list of four 2D ndarray blocks from column_proportions measure."""
+        return self._second_order_measures.column_proportions.blocks
+
+    def _diff_from_control(self, block):
+        """Return block with control column subtracted from all columns.
+
+        The control column will have zeros, all other columns show (column - control).
+        """
+        if block.size == 0:
+            return block
+        control_col = block[:, self._control].reshape(-1, 1)
+        return block - control_col
+
+    @lazyproperty
+    def _intersections(self):
+        """(n_row_subtotals, n_col_subtotals) ndarray of intersection values.
+
+        Intersection values use the control column from the row-subtotals block
+        (blocks[1][0]) since the intersection block has shape (n_row_subtotals,
+        n_col_subtotals) and the control index refers to base columns.
+        """
+        intersections = self._col_props_blocks[1][1]
+        subtotal_rows = self._col_props_blocks[1][0]
+        if intersections.size == 0 or subtotal_rows.size == 0:
+            return intersections
+        # Use control from row subtotals (which has base column dimension)
+        control_col = subtotal_rows[:, self._control].reshape(-1, 1)
+        return intersections - control_col
+
+    @lazyproperty
+    def _subtotal_columns(self):
+        """2D np.float64 ndarray of subtotal columns (n_rows, n_col_subtotals).
+
+        Column subtotals use the control column from the base values block
+        (blocks[0][0]) since the control index refers to base columns.
+        """
+        col_subtotals = self._col_props_blocks[0][1]
+        base_values = self._col_props_blocks[0][0]
+        if col_subtotals.size == 0:
+            return col_subtotals
+        control_col = base_values[:, self._control].reshape(-1, 1)
+        return col_subtotals - control_col
+
+    @lazyproperty
+    def _subtotal_rows(self):
+        """2D np.float64 ndarray of subtotal rows diff (n_row_subtotals, n_cols).
+
+        Returns the difference between each column and the control for row subtotals.
+        """
+        return self._diff_from_control(self._col_props_blocks[1][0])
 
 
 class _AudienceRatio(_ColumnProportions):

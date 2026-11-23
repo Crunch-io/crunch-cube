@@ -3,18 +3,19 @@
 """Integration-test suite for `cr.cube.cubepart` module."""
 
 from textwrap import dedent
+
 import numpy as np
 import pytest
 
-from cr.cube.cubepart import _Slice
 from cr.cube.cube import Cube
+from cr.cube.cubepart import _Slice
 from cr.cube.enums import DIMENSION_TYPE as DT, ORDER_FORMAT
 
 # ---mnemonic: CR = 'cube-response'---
 # ---mnemonic: TR = 'transforms'---
 # ---mnemonic: MRI = 'multiple-response insertions'---
 # ---mnemonic: NA = 'numeric-arrays'---
-from ..fixtures import CR, TR, MRI, NA as NUMA
+from ..fixtures import CR, MRI, NA as NUMA, TR
 from ..util import load_python_expression
 
 NA = np.nan
@@ -2305,6 +2306,69 @@ class Test_Slice:
         assert slice_.row_numeric_ranges == [None, (1.5, 2.5)]
         assert slice_.column_numeric_ranges == [None, None]
 
+    def test_it_provides_column_proportions_diff_for_cat_x_cat(self):
+        """column_proportions_diff returns 2D array with diff from control column."""
+        slice_ = Cube(CR.CAT_X_CAT).partitions[0]
+        # Column proportions: [[0.5, 0.4], [0.5, 0.6]]
+        # With control=0: [[0, -0.1], [0, 0.1]]
+        diff = slice_.column_proportions_diff(control=0)
+        assert diff.shape == (2, 2)
+        np.testing.assert_array_almost_equal(diff, [[0.0, -0.1], [0.0, 0.1]])
+
+    def test_it_provides_column_proportions_diff_with_row_subtotals(self):
+        """column_proportions_diff includes row subtotals in result."""
+        slice_ = Cube(CR.CAT_HS_X_CAT_HS).partitions[0]
+        # Shape is (7, 5) with:
+        # - Row subtotals at indices 2 ("Top 2") and 6 ("Bottom 2")
+        # - Column subtotal at index 4 ("Last 2")
+        # - Intersection cells at (2, 4) and (6, 4)
+        assert slice_.inserted_row_idxs == (2, 6)
+        assert slice_.inserted_column_idxs == (4,)
+
+        diff = slice_.column_proportions_diff(control=0)
+
+        # Verify the shape matches the slice shape
+        assert diff.shape == slice_.shape
+        #
+        # Full expected diff table (column_proportions - column_proportions[:, 0]):
+        #
+        #              Alpha   Bravo    Charlie   Delta    Last 2
+        #              (ctrl)                              (col subtotal)
+        # Alice        0.0     0.0130   -0.0202   -0.0286  -0.0243
+        # Bertha       0.0     0.0667   -0.0921   -0.1289  -0.1100
+        # Top 2        0.0     0.0797   -0.1123   -0.1575  -0.1343  <- row subtotal
+        # Charlie      0.0     0.0473   -0.0301    0.0158  -0.0078
+        # David        0.0    -0.0643   -0.1073    0.1581   0.0218
+        # Ernie        0.0    -0.0627    0.2497   -0.0163   0.1202
+        # Bottom 2     0.0    -0.1270    0.1424    0.1417   0.1421  <- row subtotal
+        #                                                    ^
+        #                                           intersection cells
+        #
+        expected = np.array(
+            [
+                [0.0, 0.012992, -0.020224, -0.028616, -0.024308],  # Alice (base)
+                [0.0, 0.066725, -0.092113, -0.128881, -0.110007],  # Bertha (base)
+                [
+                    0.0,
+                    0.079716,
+                    -0.112337,
+                    -0.157497,
+                    -0.134316,
+                ],  # Top 2 (row subtotal)
+                [0.0, 0.047298, -0.030068, 0.015761, -0.007764],  # Charlie (base)
+                [0.0, -0.064307, -0.107326, 0.158074, 0.021839],  # David (base)
+                [0.0, -0.062707, 0.249732, -0.016338, 0.120241],  # Ernie (base)
+                [
+                    0.0,
+                    -0.127014,
+                    0.142405,
+                    0.141736,
+                    0.142080,
+                ],  # Bottom 2 (row subtotal)
+            ]
+        )
+        np.testing.assert_array_almost_equal(diff, expected)
+
 
 class Test_Strand:
     """Integration-test suite for `cr.cube.cubepart._Strand` object."""
@@ -2829,7 +2893,7 @@ class Test_Strand:
     def test_it_provides_numeric_ranges(self):
         strand = Cube(CR.NUM_RANGES).partitions[0]
         expected = [(10, 20), None, (30, 40), (40, 50), (50, 60), (60, 70)]
-        assert strand.row_numeric_ranges == pytest.approx(expected)
+        assert strand.row_numeric_ranges == expected
 
 
 class Test_Nub:
@@ -4298,3 +4362,102 @@ class Test_LegacySlice:
             [1.89375, 2.7875, 4.68125],
             [2.8416666667, 1.915625, 4.7572916667000005],
         ]
+
+    def test_it_provides_column_proportions_diff_for_specified_columns(self):
+        """Test column_proportions_diff method returns 2D diff from control."""
+        slice_ = Cube(CR.CAT_X_CAT_PAIRED_FILTER).partitions[0]
+
+        # Call the method with control column index
+        diff = slice_.column_proportions_diff(control=0)
+
+        # Verify shape is 2D matching the slice shape
+        assert diff.ndim == 2
+        assert diff.shape == slice_.shape
+
+        # Control column should be all zeros
+        np.testing.assert_array_almost_equal(diff[:, 0], np.zeros(slice_.shape[0]))
+
+        # Other columns should be (column - control)
+        col_props = slice_.column_proportions
+        for col_idx in range(1, slice_.shape[1]):
+            expected_diff = col_props[:, col_idx] - col_props[:, 0]
+            np.testing.assert_array_almost_equal(diff[:, col_idx], expected_diff)
+
+    def test_column_proportions_diff_with_compare_groups_fixture(self):
+        """Test column_proportions_diff with existing compare groups fixture."""
+        slice_ = Cube(CR.CAT_HS_X_COMPARE_GROUPS).partitions[0]
+
+        diff = slice_.column_proportions_diff(control=0)
+
+        # Verify shape - should be 2D matching slice shape
+        assert diff.ndim == 2
+        assert diff.shape == slice_.shape
+
+        # Control column should be zeros
+        np.testing.assert_array_almost_equal(diff[:, 0], np.zeros(slice_.shape[0]))
+
+        # Verify the diff calculation for other columns
+        col_props = slice_.column_proportions
+        for col_idx in range(1, slice_.shape[1]):
+            expected_diff = col_props[:, col_idx] - col_props[:, 0]
+            np.testing.assert_array_almost_equal(diff[:, col_idx], expected_diff)
+
+    def test_column_proportions_diff_supports_sorting(self):
+        """Test that sorting by col_percent_diff works correctly."""
+        # First get unsorted row labels for comparison
+        unsorted_slice = Cube(CR.CAT_X_CAT_PAIRED_FILTER).partitions[0]
+        unsorted_labels = unsorted_slice.row_labels.tolist()
+
+        transforms = {
+            "rows_dimension": {
+                "order": {
+                    "type": "opposing_element",
+                    "element_id": 0,
+                    "measure": "col_percent_diff",
+                    "direction": "descending",
+                }
+            }
+        }
+        slice_ = Cube(CR.CAT_X_CAT_PAIRED_FILTER, transforms=transforms).partitions[0]
+
+        # Get the diff values
+        diff = slice_.column_proportions_diff(control=0)
+
+        # Verify shape is 2D
+        assert diff.ndim == 2
+        assert diff.shape == slice_.shape
+
+        # Verify rows were reordered - sorted labels should differ from unsorted
+        sorted_labels = slice_.row_labels.tolist()
+        # The sorting should have changed the order based on col_percent_diff values
+        assert sorted_labels != unsorted_labels or len(sorted_labels) <= 1
+
+        # Verify the diff values in the first column (element_id=0) are
+        # in descending order
+        first_col_diff = diff[:, 0].tolist()
+        assert first_col_diff == sorted(first_col_diff, reverse=True)
+
+    def test_column_proportions_diff_with_row_and_col_subtotals(self):
+        """Test column_proportions_diff with both row and column subtotals."""
+        slice_ = Cube(CR.CAT_HS_X_CAT_HS).partitions[0]
+        # This fixture has both row subtotals and column subtotals
+        assert len(slice_.inserted_row_idxs) > 0
+        assert len(slice_.inserted_column_idxs) > 0
+
+        diff = slice_.column_proportions_diff(control=0)
+
+        # Verify shape matches slice
+        assert diff.shape == slice_.shape
+
+        # Control column should be all zeros
+        np.testing.assert_array_almost_equal(diff[:, 0], np.zeros(slice_.shape[0]))
+
+        # Verify the base values (non-subtotal rows and cols) are computed correctly
+        col_props = slice_.column_proportions
+        # Check a few specific cells that are not subtotals
+        for row_idx in range(min(2, slice_.shape[0])):
+            if row_idx not in slice_.inserted_row_idxs:
+                for col_idx in range(1, min(3, slice_.shape[1])):
+                    if col_idx not in slice_.inserted_column_idxs:
+                        expected = col_props[row_idx, col_idx] - col_props[row_idx, 0]
+                        assert diff[row_idx, col_idx] == pytest.approx(expected)

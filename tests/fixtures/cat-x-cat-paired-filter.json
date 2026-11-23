@@ -1,0 +1,388 @@
+{
+    "result": {
+        "n": 3,
+        "counts": [
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "dimensions": [
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "missing": false,
+                            "numeric_value": 15,
+                            "id": 1,
+                            "name": "W1"
+                        },
+                        {
+                            "missing": false,
+                            "numeric_value": 25,
+                            "id": 2,
+                            "name": "W2"
+                        },
+                        {
+                            "missing": false,
+                            "numeric_value": 30,
+                            "id": 3,
+                            "name": "W3"
+                        },
+                        {
+                            "id": -1,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "missing": true
+                        }
+                    ]
+                },
+                "references": {
+                    "name": "wave",
+                    "alias": "wave"
+                },
+                "derived": false
+            },
+            {
+                "type": {
+                    "class": "enum",
+                    "elements": [
+                        {
+                            "id": 1,
+                            "value": {
+                                "id": "000001",
+                                "references": {
+                                    "alias": "g1",
+                                    "name": "g1"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "id": "000002",
+                                "references": {
+                                    "alias": "g2",
+                                    "name": "g2"
+                                },
+                                "derived": false
+                            },
+                            "missing": false
+                        }
+                    ],
+                    "subtype": {
+                        "class": "variable"
+                    }
+                },
+                "references": {
+                    "subreferences": [
+                        {
+                            "alias": "g1",
+                            "name": "g1"
+                        },
+                        {
+                            "alias": "g2",
+                            "name": "g2"
+                        }
+                    ],
+                    "uniform_basis": false,
+                    "name": "_groups_expr",
+                    "alias": "_groups_expr"
+                },
+                "derived": true
+            },
+            {
+                "type": {
+                    "class": "categorical",
+                    "ordinal": false,
+                    "categories": [
+                        {
+                            "id": 1,
+                            "name": "Selected",
+                            "numeric_value": 1,
+                            "selected": true,
+                            "missing": false
+                        },
+                        {
+                            "id": 0,
+                            "name": "Other",
+                            "numeric_value": 0,
+                            "missing": false
+                        },
+                        {
+                            "id": -1,
+                            "name": "No Data",
+                            "numeric_value": null,
+                            "missing": true
+                        }
+                    ],
+                    "subvariables": [
+                        "000001",
+                        "000002"
+                    ]
+                },
+                "references": {
+                    "subreferences": [
+                        {
+                            "alias": "g1",
+                            "name": "g1"
+                        },
+                        {
+                            "alias": "g2",
+                            "name": "g2"
+                        }
+                    ],
+                    "uniform_basis": false,
+                    "name": "_groups_expr",
+                    "alias": "_groups_expr"
+                },
+                "derived": true
+            }
+        ],
+        "measures": {
+            "count": {
+                "metadata": {
+                    "type": {
+                        "class": "numeric",
+                        "integer": true,
+                        "missing_reasons": {
+                            "No Data": -1
+                        },
+                        "missing_rules": {}
+                    },
+                    "references": {},
+                    "derived": true
+                },
+                "data": [
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "n_missing": 0
+            }
+        },
+        "missing": 0,
+        "filter_stats": {
+            "is_cat_date": false,
+            "filtered": {
+                "unweighted": {
+                    "selected": 3,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 3,
+                    "other": 0,
+                    "missing": 0
+                }
+            },
+            "filtered_complete": {
+                "unweighted": {
+                    "selected": 3,
+                    "other": 0,
+                    "missing": 0
+                },
+                "weighted": {
+                    "selected": 3,
+                    "other": 0,
+                    "missing": 0
+                }
+            }
+        },
+        "unfiltered": {
+            "unweighted_n": 3,
+            "weighted_n": 3
+        },
+        "filtered": {
+            "unweighted_n": 3,
+            "weighted_n": 3
+        },
+        "element": "crunch:cube"
+    },
+    "query": {
+        "dimensions": [
+            {
+                "var": "wave"
+            },
+            {
+                "function": "dimension",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "function": "multiple_dichotomy_from_conditions",
+                                "args": [
+                                    [
+                                        {
+                                            "function": "==",
+                                            "args": [
+                                                {
+                                                    "var": "MR",
+                                                    "axes": [
+                                                        "wave"
+                                                    ]
+                                                },
+                                                {
+                                                    "value": 1.0
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "function": "==",
+                                            "args": [
+                                                {
+                                                    "var": "MR",
+                                                    "axes": [
+                                                        "wave2"
+                                                    ]
+                                                },
+                                                {
+                                                    "value": 1.0
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                ],
+                                "references": {
+                                    "name": "_groups_expr",
+                                    "subreferences": [
+                                        {
+                                            "alias": "g1",
+                                            "name": "g1"
+                                        },
+                                        {
+                                            "alias": "g2",
+                                            "name": "g2"
+                                        }
+                                    ],
+                                    "alias": "_groups_expr"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "value": "subvariables"
+                    }
+                ]
+            },
+            {
+                "function": "dimension",
+                "args": [
+                    {
+                        "function": "as_selected",
+                        "args": [
+                            {
+                                "function": "multiple_dichotomy_from_conditions",
+                                "args": [
+                                    [
+                                        {
+                                            "function": "==",
+                                            "args": [
+                                                {
+                                                    "var": "MR",
+                                                    "axes": [
+                                                        "wave"
+                                                    ]
+                                                },
+                                                {
+                                                    "value": 1.0
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "function": "==",
+                                            "args": [
+                                                {
+                                                    "var": "MR",
+                                                    "axes": [
+                                                        "wave2"
+                                                    ]
+                                                },
+                                                {
+                                                    "value": 1.0
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                ],
+                                "references": {
+                                    "name": "_groups_expr",
+                                    "subreferences": [
+                                        {
+                                            "alias": "g1",
+                                            "name": "g1"
+                                        },
+                                        {
+                                            "alias": "g2",
+                                            "name": "g2"
+                                        }
+                                    ],
+                                    "alias": "_groups_expr"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "value": "categories"
+                    }
+                ]
+            }
+        ],
+        "measures": {
+            "count": {
+                "function": "cube_count",
+                "args": []
+            }
+        },
+        "weight": null
+    },
+    "query_environment": {
+        "filter": []
+    }
+}
