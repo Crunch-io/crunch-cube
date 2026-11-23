@@ -110,3 +110,22 @@ class lazyproperty:
         quite snappy and probably not a rich target for optimization efforts.
         """
         raise AttributeError("can't set attribute")
+
+
+def common_prefix(str_list):
+    prefix_pos = 0
+    for pos, char in enumerate(str_list[0]):
+        try:
+            if {s[pos] for s in str_list[1:]} != {char}:
+                break
+            prefix_pos += 1
+        except IndexError:
+            # This means the pivot is now beyond the shortest word, this
+            # means that word is the common prefix
+            return prefix_pos
+    return prefix_pos
+
+
+def common_suffix(str_list):
+    str_list = [list(reversed(s)) for s in str_list]
+    return -1 * common_prefix(str_list)  # ;)

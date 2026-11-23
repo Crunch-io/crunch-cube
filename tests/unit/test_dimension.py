@@ -6,10 +6,11 @@ import numpy as np
 import pytest
 
 from cr.cube.dimension import (
-    Element,
-    Elements,
     Dimension,
     Dimensions,
+    Element,
+    Elements,
+    LabelTransformFuncs,
     _ElementIdShim,
     _ElementTransforms,
     _OrderSpec,
@@ -23,13 +24,7 @@ from cr.cube.enums import (
     MEASURE,
 )
 
-from ..unitutil import (
-    call,
-    class_mock,
-    instance_mock,
-    method_mock,
-    property_mock,
-)
+from ..unitutil import call, class_mock, instance_mock, method_mock, property_mock
 
 
 class TestDimensions:
@@ -1190,6 +1185,25 @@ class Test_Element:
         element = Element(element_dict, None, element_transforms_, str, None)
         assert element.label == expected_value
 
+    def test_label_function(self):
+        typedef = {
+            "class": "categorical",
+            "categories": [
+                {"id": 1, "name": "xx 1. REPLaced"},
+                {"id": 2, "name": "xx 2. REPLace me"},
+            ],
+        }
+        transforms_dict = {
+            "label_transforms": [
+                {"function": "replace", "args": ["REPL", "repl"]},
+                {"function": "trim_common", "args": []},
+                {"function": "replace", "args": ["me", "you"]},
+            ],
+        }
+        elements = Elements.from_typedef(typedef, transforms_dict, DT.CAT, None)
+        assert elements[0].label == "1. replaced"
+        assert elements[1].label == "2. replace you"
+
     @pytest.mark.parametrize(
         ("hide", "expected_value"), ((True, True), (False, False), (None, False))
     )
@@ -1773,3 +1787,36 @@ class Test_Subtotal:
     @pytest.fixture
     def valid_elements_(self, request):
         return instance_mock(request, Elements)
+
+
+class TestLabelTransformFuncs:
+    def test_prefix(self):
+        all_labels = ["a1", "a2", "a3"]
+        transformer = LabelTransformFuncs([], all_labels)
+        assert transformer.remove_common_prefix("a2", []) == "2"
+
+    def test_suffix(self):
+        all_labels = ["a1b", "a2b", "a3b"]
+        transformer = LabelTransformFuncs([], all_labels)
+        assert transformer.remove_common_suffix("a2b", []) == "a2"
+
+    def test_trim_common(self):
+        all_labels = ["a1b", "a2b", "a3b"]
+        transformer = LabelTransformFuncs([], all_labels)
+        assert transformer.trim_common("a2b", []) == "2"
+
+    def test_replace(self):
+        all_labels = ["a1b", "a2b", "a3b"]
+        transformer = LabelTransformFuncs([], all_labels)
+        assert transformer.replace("a2b", ["a", "AA"]) == "AA2b"
+
+    def test_application(self):
+        all_labels = ["a1b", "a2b", "a3b"]
+        transforms = [
+            {"function": "trim_common", "args": []},
+            {"function": "replace", "args": ["1", "one"]},
+            {"function": "replace", "args": ["2", "two"]},
+        ]
+        transformer = LabelTransformFuncs(transforms, all_labels)
+        formatter = transformer.apply(lambda x: x.upper())
+        assert formatter("a2b") == "TWO"
